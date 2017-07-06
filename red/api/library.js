@@ -20,6 +20,7 @@ var when = require('when');
 var redApp = null;
 var storage;
 var log;
+var redNodes;
 var needsPermission = require("./auth").needsPermission;
 
 function createLibrary(type) {
@@ -72,80 +73,22 @@ function createLibrary(type) {
     }
 }
 
-var exampleRoots = {};
-var exampleFlows = {d:{}};
-var exampleCount = 0;
-
-function getFlowsFromPath(path) {
-    return when.promise(function(resolve,reject) {
-        var result = {};
-        fs.readdir(path,function(err,files) {
-            var promises = [];
-            var validFiles = [];
-            files.forEach(function(file) {
-                var fullPath = fspath.join(path,file);
-                var stats = fs.lstatSync(fullPath);
-                if (stats.isDirectory()) {
-                    validFiles.push(file);
-                    promises.push(getFlowsFromPath(fullPath));
-                } else if (/\.json$/.test(file)){
-                    validFiles.push(file);
-                    exampleCount++;
-                    promises.push(when.resolve(file.split(".")[0]))
-                }
-            })
-            var i=0;
-            when.all(promises).then(function(results) {
-                results.forEach(function(r) {
-                    if (typeof r === 'string') {
-                        result.f = result.f||[];
-                        result.f.push(r);
-                    } else {
-                        result.d = result.d||{};
-                        result.d[validFiles[i]] = r;
-                    }
-                    i++;
-                })
-
-                resolve(result);
-            })
-        });
-    })
-}
-
-function addNodeExamplesDir(module) {
-    exampleRoots[module.name] = module.path;
-    getFlowsFromPath(module.path).then(function(result) {
-        exampleFlows.d[module.name] = result;
-    });
-}
-function removeNodeExamplesDir(module) {
-    delete exampleRoots[module];
-    delete exampleFlows.d[module];
-}
-
 module.exports = {
     init: function(app,runtime) {
         redApp = app;
         log = runtime.log;
         storage = runtime.storage;
-        // TODO: this allows init to be called multiple times without
-        //       registering multiple instances of the listener.
-        //       It isn't.... ideal.
-        runtime.events.removeListener("node-examples-dir",addNodeExamplesDir);
-        runtime.events.on("node-examples-dir",addNodeExamplesDir);
-        runtime.events.removeListener("node-module-uninstalled",removeNodeExamplesDir);
-        runtime.events.on("node-module-uninstalled",removeNodeExamplesDir);
-
+        redNodes = runtime.nodes;
     },
     register: createLibrary,
 
     getAll: function(req,res) {
         storage.getAllFlows().then(function(flows) {
             log.audit({event: "library.get.all",type:"flow"},req);
-            if (exampleCount > 0) {
+            var examples = redNodes.getNodeExampleFlows();
+            if (examples) {
                 flows.d = flows.d||{};
-                flows.d._examples_ = exampleFlows;
+                flows.d._examples_ = redNodes.getNodeExampleFlows();
             }
             res.json(flows);
         });
@@ -155,9 +98,9 @@ module.exports = {
             var m = /^_examples_\/([^\/]+)\/(.*)$/.exec(req.params[0]);
             if (m) {
                 var module = m[1];
-                var path = m[2]+".json";
-                if (exampleRoots[module]) {
-                    var fullPath = fspath.join(exampleRoots[module],path);
+                var path = m[2];
+                var fullPath = redNodes.getNodeExampleFlowPath(module,path);
+                if (fullPath) {
                     try {
                         fs.statSync(fullPath);
                         log.audit({event: "library.get",type:"flow",path:req.params[0]},req);

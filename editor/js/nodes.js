@@ -42,6 +42,10 @@ RED.nodes = (function() {
         var nodeDefinitions = {};
 
         var exports = {
+            setModulePendingUpdated: function(module,version) {
+                moduleList[module].pending_version = version;
+                RED.events.emit("registry:module-updated",{module:module,version:version});
+            },
             getModule: function(module) {
                 return moduleList[module];
             },
@@ -78,6 +82,9 @@ RED.nodes = (function() {
                     local:ns.local,
                     sets:{}
                 };
+                if (ns.pending_version) {
+                    moduleList[ns.module].pending_version = ns.pending_version;
+                }
                 moduleList[ns.module].sets[ns.name] = ns;
                 RED.events.emit("registry:node-set-added",ns);
             },
@@ -115,6 +122,7 @@ RED.nodes = (function() {
             },
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
+                def.type = nt;
                 if (def.category != "subflows") {
                     def.set = nodeSets[typeToId[nt]];
                     nodeSets[typeToId[nt]].added = true;
@@ -128,10 +136,15 @@ RED.nodes = (function() {
                     }
                     def["_"] = function() {
                         var args = Array.prototype.slice.call(arguments, 0);
+                        var original = args[0];
                         if (args[0].indexOf(":") === -1) {
                             args[0] = ns+":"+args[0];
                         }
-                        return RED._.apply(null,args);
+                        var result = RED._.apply(null,args);
+                        if (result === args[0]) {
+                            result = original;
+                        }
+                        return result;
                     }
 
                     // TODO: too tightly coupled into palette UI
@@ -160,6 +173,8 @@ RED.nodes = (function() {
     function addNode(n) {
         if (n.type.indexOf("subflow") !== 0) {
             n["_"] = n._def._;
+        } else {
+            n["_"] = RED._;
         }
         if (n._def.category == "config") {
             configNodes[n.id] = n;
@@ -261,7 +276,9 @@ RED.nodes = (function() {
         workspaces[ws.id] = ws;
         ws._def = {
             defaults: {
-                label: {value:""}
+                label: {value:""},
+                disabled: {value: false},
+                info: {value: ""}
             }
         };
 
@@ -316,14 +333,6 @@ RED.nodes = (function() {
             });
             sf.name = subflowName;
         }
-        sf._def = {
-            defaults:{},
-            icon:"subflow.png",
-            category: "subflows",
-            color: "#da9",
-            inputs: sf.in.length,
-            outputs: sf.out.length
-        }
         subflows[sf.id] = sf;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
@@ -336,12 +345,13 @@ RED.nodes = (function() {
             label: function() { return this.name||RED.nodes.subflow(sf.id).name },
             labelStyle: function() { return this.name?"node_label_italic":""; },
             paletteLabel: function() { return RED.nodes.subflow(sf.id).name },
+            inputLabels: function(i) { return sf.inputLabels?sf.inputLabels[i]:null },
+            outputLabels: function(i) { return sf.outputLabels?sf.outputLabels[i]:null },
             set:{
                 module: "node-red"
             }
         });
-
-
+        sf._def = RED.nodes.getType("subflow:"+sf.id);
     }
     function getSubflow(id) {
         return subflows[id];
@@ -418,6 +428,7 @@ RED.nodes = (function() {
         node.id = n.id;
         node.type = n.type;
         node.z = n.z;
+
         if (node.type == "unknown") {
             for (var p in n._orig) {
                 if (n._orig.hasOwnProperty(p)) {
@@ -465,6 +476,13 @@ RED.nodes = (function() {
                     node.wires[w.sourcePort].push(w.target.id);
                 }
             }
+
+            if (n.inputs > 0 && n.inputLabels && !/^\s*$/.test(n.inputLabels.join("")))  {
+                node.inputLabels = n.inputLabels.slice();
+            }
+            if (n.outputs > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
+                node.outputLabels = n.outputLabels.slice();
+            }
         }
         return node;
     }
@@ -502,16 +520,23 @@ RED.nodes = (function() {
             node.out.push(nOut);
         });
 
+        if (node.in.length > 0 && n.inputLabels && !/^\s*$/.test(n.inputLabels.join("")))  {
+            node.inputLabels = n.inputLabels.slice();
+        }
+        if (node.out.length > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
+            node.outputLabels = n.outputLabels.slice();
+        }
+
 
         return node;
     }
     /**
      * Converts the current node selection to an exportable JSON Object
      **/
-    function createExportableNodeSet(set) {
+    function createExportableNodeSet(set, exportedSubflows, exportedConfigNodes) {
         var nns = [];
-        var exportedConfigNodes = {};
-        var exportedSubflows = {};
+        exportedConfigNodes = exportedConfigNodes || {};
+        exportedSubflows = exportedSubflows || {};
         for (var n=0;n<set.length;n++) {
             var node = set[n];
             if (node.type.substring(0,8) == "subflow:") {
@@ -525,7 +550,7 @@ RED.nodes = (function() {
                             subflowSet.push(n);
                         }
                     });
-                    var exportableSubflow = createExportableNodeSet(subflowSet);
+                    var exportableSubflow = createExportableNodeSet(subflowSet, exportedSubflows, exportedConfigNodes);
                     nns = exportableSubflow.concat(nns);
                 }
             }
@@ -880,7 +905,17 @@ RED.nodes = (function() {
             if (n.type !== "workspace" && n.type !== "tab" && n.type !== "subflow") {
                 def = registry.getNodeType(n.type);
                 if (!def || def.category != "config") {
-                    var node = {x:n.x,y:n.y,z:n.z,type:0,wires:n.wires,changed:false,_config:{}};
+                    var node = {
+                        x:n.x,
+                        y:n.y,
+                        z:n.z,
+                        type:0,
+                        wires:n.wires,
+                        inputLabels: n.inputLabels,
+                        outputLabels: n.outputLabels,
+                        changed:false,
+                        _config:{}
+                    };
                     if (createNewIds) {
                         if (subflow_blacklist[n.z]) {
                             continue;

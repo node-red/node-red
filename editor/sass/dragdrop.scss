@@ -23,6 +23,7 @@
     width: 100%;
     height: 100%;
     display: none;
+    z-index:100;
 }
 #dropTarget div {
     display: table-cell;
@@ -34,4 +35,3 @@
 #dropTarget div i {
     font-size: 80px;
 }
-

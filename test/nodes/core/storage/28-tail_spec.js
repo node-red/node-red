@@ -16,6 +16,7 @@
 
 var should = require("should");
 var path = require('path');
+var os = require('os');
 var fs = require('fs-extra');
 var sinon = require('sinon');
 var tailNode = require("../../../../nodes/core/storage/28-tail.js");
@@ -39,98 +40,100 @@ describe('tail Node', function() {
         });
     });
 
-    it('should be loaded', function(done) {
-        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail}];
-        helper.load(tailNode, flow, function() {
-            var tailNode1 = helper.getNode("tailNode1");
-            tailNode1.should.have.property('name', 'tailNode');
-            done();
+    if (os.type() !== "Windows_NT") {
+        it('should be loaded', function(done) {
+            var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail}];
+            helper.load(tailNode, flow, function() {
+                var tailNode1 = helper.getNode("tailNode1");
+                tailNode1.should.have.property('name', 'tailNode');
+                done();
+            });
         });
-    });
 
-    it('should tail a file', function(done) {
-        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
-        helper.load(tailNode, flow, function() {
-            var tailNode1 = helper.getNode("tailNode1");
-            var helperNode1 = helper.getNode("helperNode1");
-            var inputCounter = 0;
-            helperNode1.on("input", function(msg) {
-                //console.log(msg);
-                msg.should.have.property('topic', fileToTail);
-                msg.payload.should.equal("Tail message line " + (++inputCounter + 2));
-                if (inputCounter === 2) {
+        it('should tail a file', function(done) {
+            var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(tailNode, flow, function() {
+                var tailNode1 = helper.getNode("tailNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                var inputCounter = 0;
+                helperNode1.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('topic', fileToTail);
+                    msg.payload.should.equal("Tail message line " + (++inputCounter + 2));
+                    if (inputCounter === 2) {
+                        done();
+                    }
+                });
+                setTimeout( function() {
+                    fs.appendFileSync(fileToTail, "Tail message line 3\n");
+                    fs.appendFileSync(fileToTail, "Tail message line 4\n");
+                },wait);
+            });
+        });
+
+        it('should work in non-split mode', function(done) {
+            var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":false, "filename":fileToTail, "wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(tailNode, flow, function() {
+                var tailNode1 = helper.getNode("tailNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('topic', fileToTail);
+                    msg.payload.should.equal("Tail message line 5\nTail message line 6\n");
                     done();
-                }
+                });
+                setTimeout( function() {
+                    fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
+                },wait);
             });
-            setTimeout( function() {
-                fs.appendFileSync(fileToTail, "Tail message line 3\n");
-                fs.appendFileSync(fileToTail, "Tail message line 4\n");
-            },wait);
         });
-    });
 
-    it('should work in non-split mode', function(done) {
-        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":false, "filename":fileToTail, "wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
-        helper.load(tailNode, flow, function() {
-            var tailNode1 = helper.getNode("tailNode1");
-            var helperNode1 = helper.getNode("helperNode1");
-            helperNode1.on("input", function(msg) {
-                //console.log(msg);
-                msg.should.have.property('topic', fileToTail);
-                msg.payload.should.equal("Tail message line 5\nTail message line 6\n");
-                done();
+        it('should work in binary mode', function(done) {
+            var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "filetype":"binary", "filename":fileToTail, "wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(tailNode, flow, function() {
+                var tailNode1 = helper.getNode("tailNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('topic', fileToTail);
+                    msg.payload.toString().should.equal("Tail message line 7\nTail message line 8\n");
+                    done();
+                });
+                setTimeout( function() {
+                    fs.appendFileSync(fileToTail, "Tail message line 7\nTail message line 8\n");
+                },wait);
             });
-            setTimeout( function() {
-                fs.appendFileSync(fileToTail, "Tail message line 5\nTail message line 6\n");
-            },wait);
         });
-    });
 
-    it('should work in binary mode', function(done) {
-        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "filetype":"binary", "filename":fileToTail, "wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
-        helper.load(tailNode, flow, function() {
-            var tailNode1 = helper.getNode("tailNode1");
-            var helperNode1 = helper.getNode("helperNode1");
-            helperNode1.on("input", function(msg) {
-                //console.log(msg);
-                msg.should.have.property('topic', fileToTail);
-                msg.payload.toString().should.equal("Tail message line 7\nTail message line 8\n");
-                done();
+        it('should handle a non-existent file', function(done) {
+            fs.writeFileSync(fileToTail, "Tail message line.\n");
+            var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(tailNode, flow, function() {
+                var tailNode1 = helper.getNode("tailNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    msg.should.have.property('topic', fileToTail);
+                    msg.payload.should.equal("Tail message line");
+                    done();
+                });
+                setTimeout(function() {
+                    fs.unlinkSync(fileToTail);
+                },500);
+                setTimeout( function() {
+                    fs.writeFile(fileToTail, "Tail message line\n");
+                },1000);
             });
-            setTimeout( function() {
-                fs.appendFileSync(fileToTail, "Tail message line 7\nTail message line 8\n");
-            },wait);
         });
-    });
-
-    it('should handle a non-existent file', function(done) {
-        fs.writeFileSync(fileToTail, "Tail message line.\n");
-        var flow = [{id:"tailNode1", type:"tail", name: "tailNode", "split":true, "filename":fileToTail, "wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
-        helper.load(tailNode, flow, function() {
-            var tailNode1 = helper.getNode("tailNode1");
-            var helperNode1 = helper.getNode("helperNode1");
-            helperNode1.on("input", function(msg) {
-                msg.should.have.property('topic', fileToTail);
-                msg.payload.should.equal("Tail message line");
-                done();
-            });
-            setTimeout(function(){
-                fs.unlinkSync(fileToTail);
-            },500);
-            setTimeout( function() {
-                fs.writeFile(fileToTail, "Tail message line\n");
-            },1000);
-        });
-    });
+    }
 
     it('should throw an error if run on Windows', function(done) {
         // Stub os platform so we can make it look like windows
         var os = require('os');
-        var spy = sinon.stub(os, 'platform', function(arg){ return("windows"); });
+        var spy = sinon.stub(os, 'platform', function(arg) { return("windows"); });
 
         /*jshint immed: false */
         (function() { tailNode("1234"); }).should.throw();

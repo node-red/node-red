@@ -50,9 +50,19 @@
             this.uiContainer = this.element
                 .wrap( "<div>" )
                 .parent();
-            this.topContainer = this.uiContainer.wrap("<div>").parent();
 
+            if (this.options.header) {
+                this.options.header.addClass("red-ui-editableList-header");
+                this.borderContainer = this.uiContainer.wrap("<div>").parent();
+                this.borderContainer.prepend(this.options.header);
+                this.topContainer = this.borderContainer.wrap("<div>").parent();
+            } else {
+                this.topContainer = this.uiContainer.wrap("<div>").parent();
+            }
             this.topContainer.addClass('red-ui-editableList');
+            if (this.options.class) {
+                this.topContainer.addClass(this.options.class);
+            }
 
             if (this.options.addButton !== false) {
                 var addLabel;
@@ -85,6 +95,11 @@
                 this.topContainer.css("position","absolute");
                 this.uiContainer.css("position","absolute");
 
+            }
+            if (this.options.header) {
+                this.borderContainer.addClass("red-ui-editableList-border");
+            } else {
+                this.uiContainer.addClass("red-ui-editableList-border");
             }
             this.uiContainer.addClass("red-ui-editableList-container");
 
@@ -170,7 +185,7 @@
             var that = this;
             var count = 0;
             if (!this.activeFilter) {
-                this.element.children().show();
+                return this.element.children().show();
             }
             var items = this.items();
             items.each(function (i,el) {
@@ -271,6 +286,11 @@
                         },0);
                     }
                 },0);
+            }
+        },
+        addItems: function(items) {
+            for (var i=0; i<items.length;i++) {
+                this.addItem(items[i]);
             }
         },
         removeItem: function(data) {

@@ -17,6 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var bodyParser = require("body-parser");
+    var multer = require("multer");
     var cookieParser = require("cookie-parser");
     var getBody = require('raw-body');
     var cors = require('cors');
@@ -25,6 +26,7 @@ module.exports = function(RED) {
     var onHeaders = require('on-headers');
     var typer = require('media-typer');
     var isUtf8 = require('is-utf8');
+    var hashSum = require("hash-sum");
 
     function rawBodyParser(req, res, next) {
         if (req.skipRawBodyParser) { next(); } // don't parse this if told to skip
@@ -176,7 +178,11 @@ module.exports = function(RED) {
                 return;
             }
             this.url = n.url;
+            if (this.url[0] !== '/') {
+                this.url = '/'+this.url;
+            }
             this.method = n.method;
+            this.upload = n.upload;
             this.swaggerDoc = n.swaggerDoc;
 
             var node = this;
@@ -225,10 +231,21 @@ module.exports = function(RED) {
                 };
             }
 
+            var multipartParser = function(req,res,next) { next(); }
+            if (this.upload) {
+                var mp = multer({ storage: multer.memoryStorage() }).any();
+                multipartParser = function(req,res,next) {
+                    mp(req,res,function(err) {
+                        req._body = true;
+                        next(err);
+                    })
+                };
+            }
+
             if (this.method == "get") {
                 RED.httpNode.get(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,this.callback,this.errorHandler);
             } else if (this.method == "post") {
-                RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
+                RED.httpNode.post(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,multipartParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "put") {
                 RED.httpNode.put(this.url,cookieParser(),httpMiddleware,corsHandler,metricsHandler,jsonParser,urlencParser,rawBodyParser,this.callback,this.errorHandler);
             } else if (this.method == "patch") {
@@ -255,10 +272,30 @@ module.exports = function(RED) {
     function HTTPOut(n) {
         RED.nodes.createNode(this,n);
         var node = this;
+        this.headers = n.headers||{};
+        this.statusCode = n.statusCode;
         this.on("input",function(msg) {
             if (msg.res) {
+                var headers = RED.util.cloneMessage(node.headers);
                 if (msg.headers) {
-                    msg.res._res.set(msg.headers);
+                    if (msg.headers.hasOwnProperty('x-node-red-request-node')) {
+                        var headerHash = msg.headers['x-node-red-request-node'];
+                        delete msg.headers['x-node-red-request-node'];
+                        var hash = hashSum(msg.headers);
+                        if (hash === headerHash) {
+                            delete msg.headers;
+                        }
+                    }
+                    if (msg.headers) {
+                        for (var h in msg.headers) {
+                            if (msg.headers.hasOwnProperty(h) && !headers.hasOwnProperty(h)) {
+                                headers[h] = msg.headers[h];
+                            }
+                        }
+                    }
+                }
+                if (Object.keys(headers).length > 0) {
+                    msg.res._res.set(headers);
                 }
                 if (msg.cookies) {
                     for (var name in msg.cookies) {
@@ -277,7 +314,7 @@ module.exports = function(RED) {
                         }
                     }
                 }
-                var statusCode = msg.statusCode || 200;
+                var statusCode = node.statusCode || msg.statusCode || 200;
                 if (typeof msg.payload == "object" && !Buffer.isBuffer(msg.payload)) {
                     msg.res._res.status(statusCode).jsonp(msg.payload);
                 } else {

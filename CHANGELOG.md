@@ -1,3 +1,288 @@
+#### 0.17.3: Maintenance Release
+
+ - Fix flow library in menu to support period characters as flow name (#1320)
+ - editorTheme not setting custom css/scripts properly
+ - Fix missing icons for some nodes (#1321)
+ - Add reformat button to JSONata test data editor
+ - Update delay node status without spawning unnecessary intervals
+ - Avoid stringify ServerResponse and Socket in Debug node Fixes #1311
+ - Fix creating userDir other than system drive on Windows (#1317)
+ - Trigger node not handling a duration of 0 as block mode Fixes #1316
+ - Unable to config GPIO Pin 13 Fixes #1314
+
+#### 0.17.2: Maintenance Release
+
+ - Fix GPIO node labels
+
+#### 0.17.1: Maintenance Release
+
+ - Fix PI gpio to use BCM
+ - Prevent event thread contention when sending to Debug node Closes #1311
+ - Fix Bug: Can not display node icon when npm package has scope (#1305) (#1309)
+ - Clear moved flag when nodes are deployed
+
+#### 0.17: Milestone Release
+
+Runtime
+
+ - Return flow rev on reload api when api v2 enabled Closes #1273
+ - Provide single endpoint to load all node message catalogs
+ - Add .trace and .debug to Node prototype
+ - Rename oauth auth scheme to strategy as it works for openid
+ - Allow oauth schemes provide a custom verify function
+ - Add support for oauth adminAuth configs
+ - Cache auth details to save needlessly recalculating hashes
+ - Add context.keys function to list top-level keys
+ - Strip BOM character from JSON files if present Fixes #1239
+ - Version check no meta (#1243)
+ - Ensure all nodes have access to global context Fixes #1230
+ - Don't process subscription for unauthenticated comms link Fixes #851
+ - Clone credentials when passing to node Fixes #1198
+ - Resolve dir argument of getLocalNodeFiles function (#1216)
+ - Add wait for writing a library entry into a file. (#1186)
+ - Use correct Buffer.from method rather than constructor
+ - update core nodes to use newer Buffer syntax
+ - Treat missing msg properties as undefined rather than throw error Fixes #1167
+ - Allows flows to be enabled/disabled in the runtime
+ - add off option to logging settings comment
+ - Log error stack traces if verbose flag is set
+ - Extract line number if available from node load errors
+ - Add node 8 to travis (with allow failure)
+ - Shuffle promises for creating default package.json
+ - Create a package.json file in userDir if one doesn't exist
+ - autoInstallModules option must honour version/pending_version
+ - Refuse to update a non-local node module
+ - Finalise nodeSettings and update tlsConfigDisableLocalFiles
+ - Allow a node to declare what settings should be made available to the editor. (#1185)
+ - Add node whitelist function (#1184)
+ - Allow a node to declare settings that should be exported
+ - Add test coverage for deleting a flow
+ - Update tests for oauth -> strategy rename
+ - Fix the test cases which sometimes fails due to timing. (#1228)
+ - Extend timeout for the test case of installing non-existant path. (#1191)
+ - Fix loader test to expect line numbers in load errors
+ - Update ui_spec for icon module path
+ - let node installer try to save with ~ version prefix to allow minor updates
+ - Log error when non-msg-object is returned from a Function
+ - Timeout a node that fails to close - default 15s timeout
+ - Pass a 'removed' parameter to node close handler
+ - Remove event passing for icons/examples from the api layer
+ - Update general dependencies
+
+Nodes
+
+ - Do not log node errors if handled by a Catch node
+ - Fix wrong number of double quotes in CSV parsing
+ - let csv node handle ip addresses without trying to parse
+ - Update debug node to register the settings it uses
+ - Handle IncomingMessage/ServerResponse object types in debug Fixes #1202
+ - Toggling debug node enabled/disabled state should set state dirty Fixes #1203
+ - redo delay node status messages to be interval based
+ - Update delay node ui
+ - Add new msg.delay option to delay node
+ - stop delay node spamming web socket (when in fast rate limit mode)
+ - Delay/Range node help tidy up
+ - Bug fix in exec node. White spaces in arguments now works (#1285)
+ - Make exec node explicitly call SIGTERM for default
+ - Fix exec node error tests on Windows (#1234)
+ - update messages for updated exec node
+ - Make exec node spawn and exec outputs more consistent
+ - Exec node for windows environment (#1200)
+ - remove requirement for cmd in exec node config + new style info
+ - retry exec node tests
+ - let exec node take msg.kill SIG... param and pid param
+ - Third output from Exec node must be consistent for success/failure conditions
+ - exec node returns 0 on the third output if command ended without error. (#1160)
+ - exec node can be killed on demand
+ - add "split/stream" ability to file in node
+ - add port label to file node and update info
+ - Allow nodes to have translations not in core (#1183)
+ - fix tcp node new Buffer alloc size 0
+ - change pin selection table for pi gpis nodes
+ - stop using sudo for Pi gpio access
+ - adding frequency configuration to pwm output (#1206)
+ - Fix Pi GPIO debounce
+ - let Hypriot on Pi detect gpio correctly
+ - More core node info help tidy up
+ - Tidy up more core node help text
+ - Tidy up parser node edit dialogs and help text
+ - yet more core node info updates
+ - more core node info updates to newer style
+ - Update some core nodes info
+ - First pass of new node-info style
+ - MQTT new style info
+ - Fix empty extra node help content issue
+ - Handle HTTP In url that is missing its leading / Fixes #1218
+ - Add file upload support to HTTP In node
+ - HTTP Request node: add info on how to do form encoding
+ - Prevent unmodified msg.headers from breaking HTTP Request flows Closed #1015
+ - Add cookie handling to HTTP Request node
+ - Add guard against the http-request buffer fix being reverted
+ - Multipart streaming
+ - Add http-request node unit tests
+ - http request node add transport validity check and warn.
+ - Update follow_redirects to fix http_proxy handling Fixes #1172
+ - Allow statusCode/headers to be set directly within HTTP Response node
+ - let inject "between time" also fire at start - Plus new info
+ - remove repeat symbol from inject if repeat is 0
+ - Add port labels to inject node (to show types)
+ - Add buffer joiner mode to Join node
+ - Let join node auto re-assemble buffers
+ - let join also accumulate strings (and not fail)
+ - Add Pretty print option to JSON node and
+ - Fix selection of link nodes
+ - Add link label value as portLabels
+ - Add sentence about clearing retained topic on mqtt
+ - make sure MQTT client closes if redeploy during reconnect
+ - make sure MQTT client closes if redeploy during reconnect
+ - slight filed size adjust for mqtt broker port field - allow 5 digits
+ - Add help info for split node
+ - split node - in object mode allow msg.complete on its own
+ - let split of objects use key to set another property (e.g. topic)
+ - adding streaming modes into split node
+ - let split node reassemble based on a final packet. (as well as the first)
+ - Add buffer support to split node
+ - updated split/join node (split still needs work before release)
+ - Added a name icon and a description label on edit subflow window.
+ - Don't display port labels for subflow pseudo-port nodes
+ - Added a name icon and a description label on edit subflow window.
+ - tcp request - remove confusing timeout wording from info
+ - Final TCP node nits - let 0 do it's thing as per every other timeout
+ - fix tcp port not waiting as per info/previous behaviour
+ - TCP In: Fix error in timout callback (#1249)
+ - Make tcp send msg more consistent
+ - Update 31-tcpin.js (#1235)
+ - really close tcp node connection right away (if told to)
+ - clone message before send in stay connected mode
+ - Better template node help example
+ - Add option to parse Template result as JSON before sending
+ - nail trigger test for windows AND linux
+ - give up on SIGQUIT for widows test
+ - better tests for windows nodes
+ - comment out 2nd exec node kill tests
+ - fixes for grunt files tests on Windows
+ - Add events to test helper
+ - Change default value of tlsConfigDisableLocalFiles to false
+ - Add the node setting tlsConfigDisableLocalFiles for tls node. (#1190)
+ - UI to upload certificates and keys for TLS node
+ - Update trigger help
+ - let trigger node set repeated outputs
+ - Move udp sock error listener to only be instantiated once.
+ - Let watch node recurse into subdirectories
+ - Misconfigured WebSocket nodes should not register msg handlers
+ - Add websocketVerifyClient option to enable custom websocket auth Fixes #1127
+
+Editor
+
+ - Bump ACE editor to v1.2.7
+ - Add RED.utils.getNodeLabel utility function
+ - Include module name in requests for node icons
+ - Change debug message menu icon
+ - Handle empty array/objects in debug view
+ - Add per-node filter option to Debug pane
+ - Ensure debug node marked changed when button pressed
+ - Fix pop-out debug window for all the recent updates
+ - Add debug message menu
+ - Don't include msg. in debug message copied paths
+ - Format Buffer numbers as hex by default
+ - Remember formatting choices for dbg msg elements
+ - Allow debug msg elements to be pinned
+ - Only show debug tools under the debug tab
+ - Fix test for valid js identifiers in debug path construction
+ - Remove unused modified flag on debug messages
+ - Add copy path/value buttons to debug messages
+ - dont match only part of the node type (#1242)
+ - Add editorTheme.logout.redirect to allow redirect on logout Closes #1213
+ - Handle logging out and already logged-out editor Fixes #1288
+ - Fix bug: Export Subflows (#1282)
+ - destroy editor to ensure fully removed on close (function, template, comment)
+ - Don't try to nls status text starting with '.' Fixes #1258
+ - Add note of removed flows in diffConfig (#1253)
+ - Add description to flow same as subflow
+ - Allow tabs to be enabled/disabled in the editor
+ - Make H3 sections in node help collapsible
+ - Add JSON Expression editor
+ - Expression editor - clear legacy flag for blank expressions
+ - Ensure node labels are reordered properly to match outputs
+ - Add 'none' placeholder for empty port label form
+ - Don't mark a node changed when going from none to blank labels
+ - Leave a node to nls its own port labels
+ - Allow a node to override default labels
+ - Add placeholder text on label inputs and clear buttons
+ - Add port labels to Subflow nodes
+ - Keep port label form in sync with output reordering
+ - Basic node label editor
+ - Port label editor starting point
+ - Allow port labels be i18n identifiers
+ - Add inputLabels and outputLabels to node defn + Update Change node
+ - Resize port labels based on content
+ - Initial port label behaviour
+ - Allow a node to decide for itself if its button should be enabled or not
+ - Provide feedback when enable/disable node fails
+ - Add node module update api and expose in palette editor
+ - Reset palette-manager tabs when settings dialog reopened
+ - Move palette editor to settings panel
+ - Move palette editor to userSettings dialog
+ - Move view and keyboard into user settings dialog
+ - Add basic user settings panel
+ - Node status should be on by default
+ - Make theme able to load custom javascript (#1211)
+ - Allow tips to be hidden and cycled through
+ - Add info tips back to the sidebar
+ - Add buffer mode to typedInput
+ - Add typedInput binary mode icon
+ - Ensure all ace editors are destroyed in the expression editors
+ - Refresh sidebar info when tab is changed
+ - better spacing for library widget
+ - Fix gridSize for node width calculation to avoid odd resizing
+ - Redraw grid properly if gridSize changes
+ - Scroll sidebar info tab to top when changing content
+ - Ensure info tab sections are collapsible when set from palette
+ - Only show tab info if there is an active tab
+ - Only check for reordered outputs if outputMap defiend
+ - Avoid circular references when stingifying node objects
+ - Fix padding of config node edit dialog
+ - Add force-deploy option when conflict detected
+ - Hide tip box on startup if disabled
+ - Track node moves separately to node config changes
+ - Ensure ace editor instances are freed if edit cancelled
+ - Clip overly long notification messages
+ - Use queryCommandSupported not queryCommandEnabled to check for copy support
+ - Add tip to tab description editor
+ - Make tab info edit box resizable
+ - Shrink config node appearance in info table
+ - Display config nodes in Info sidebar table
+ - Ensure flow info box updates after editing flow
+ - Hide Node info section when displaying changelog
+ - Restructure info tab
+ - Provide notification when new flows deployed in the background
+ - Stop some ui elements from clearing url anchor when clicked
+ - clipboard export text stay highlighted even when button deselected
+ - ensure export clipboard keeps text selected and formatted
+ - Defer resizing tray components until they have finished building
+ - Use pre-calculated values for connection path
+ - Use textContent to avoid manual escaping
+ - Add RED.stack as a common ui component
+ - Numeric validator that accepts blank should accept undefined
+ - Add visual cue as to whether the workspace is focused
+ - Allow RED.validators.number to allow blank values as valid
+ - Support dropping json files into the editor
+ - NLS Expression/JSON editor and fix their height calculation
+ - Update JSONata to 1.2.4 Closes #1275
+ - Remember test expression data on a per-node basis
+ - NLS jsonata test messages
+ - Add JSONata expr tester and improved feedback
+ - Add $context/$flow/$global functions to jsonata
+ - Update jsonata
+
+Other
+
+ - add allow es6 to .jshintrc
+ - travis - don't allow node 8 fails, (and re-add 7)
+ - ask istanbul for more reports as default
+ - Add istanbul to Gruntfile.js (#1189)
+
+
 #### 0.16.2: Maintenance Release
 
  - Ensure custom mustache context parent set in Template node fixes #1126
@@ -23,6 +308,7 @@
 #### 0.16.0: Milestone Release
 
 Runtime
+
  - Drop support for node 0.10 and 0.12
 
 Nodes

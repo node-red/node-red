@@ -22,6 +22,7 @@
     <div class="form-row">
         <label data-i18n="switch.label.property"></label>
         <input type="text" id="node-input-property" style="width: 70%"/>
+        <input type="hidden" id="node-input-outputs"/>
     </div>
     <div class="form-row node-input-rule-container-row">
         <ol id="node-input-rule-container"></ol>
@@ -35,14 +36,49 @@
 </script>
 
 <script type="text/x-red" data-help-name="switch">
-    <p>A node to route messages based on property values.</p>
-    <p>When a message arrives, the selected property is evaluated against each
-    of the defined rules. The message is then sent to the output of <i>all</i>
-    rules that pass.</p>
-    <p><b>Note</b>: the <i>otherwise</i> rule applies as a "not any of" the rules preceding it.</p>
+    <p>Route messages based on their property values.</p>
+    <h3>Details</h3>
+    <p>When a message arrives, the node will evaluate each of the defined rules
+    and forward the message to the corresponding outputs of any matching rules.</p>
+    <p>Optionally, the node can be set to stop evaluating rules once it finds one
+    that matches.</p>
+    <p>The rules can be evaluated against an individual message property, a flow or global
+    context property or the result of a JSONata expression.</p>
 </script>
 
 <script type="text/javascript">
+(function() {
+    var operators = [
+        {v:"eq",t:"=="},
+        {v:"neq",t:"!="},
+        {v:"lt",t:"<"},
+        {v:"lte",t:"<="},
+        {v:"gt",t:">"},
+        {v:"gte",t:">="},
+        {v:"btwn",t:"switch.rules.btwn"},
+        {v:"cont",t:"switch.rules.cont"},
+        {v:"regex",t:"switch.rules.regex"},
+        {v:"true",t:"switch.rules.true"},
+        {v:"false",t:"switch.rules.false"},
+        {v:"null",t:"switch.rules.null"},
+        {v:"nnull",t:"switch.rules.nnull"},
+        {v:"else",t:"switch.rules.else"}
+    ];
+
+    function clipValueLength(v) {
+        if (v.length > 15) {
+            return v.substring(0,15)+"...";
+        }
+        return v;
+    }
+    function getValueLabel(t,v) {
+        if (t === 'str') {
+            return '"'+clipValueLength(v)+'"';
+        } else if (t === 'msg' || t==='flow' || t==='global') {
+            return t+"."+clipValueLength(v);
+        }
+        return clipValueLength(v);
+    }
     RED.nodes.registerType('switch', {
         color: "#E2D96E",
         category: 'function',
@@ -50,12 +86,30 @@
             name: {value:""},
             property: {value:"payload", required:true, validate: RED.validators.typedInput("propertyType")},
             propertyType: { value:"msg" },
-            rules: {value:[{t:"eq", v:""}]},
+            rules: {value:[{t:"eq", v:"", vt:"str"}]},
             checkall: {value:"true", required:true},
             outputs: {value:1}
         },
         inputs: 1,
         outputs: 1,
+        outputLabels: function(index) {
+            var rule = this.rules[index];
+            var label = "";
+            if (rule) {
+                for (var i=0;i<operators.length;i++) {
+                    if (operators[i].v === rule.t) {
+                        label = /^switch/.test(operators[i].t)?this._(operators[i].t):operators[i].t;
+                        break;
+                    }
+                }
+                if (rule.t === 'btwn') {
+                    label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
+                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
+                    label += " "+getValueLabel(rule.vt,rule.v);
+                }
+                return label;
+            }
+        },
         icon: "switch.png",
         label: function() {
             return this.name||"switch";
@@ -65,22 +119,7 @@
             var previousValueType = {value:"prev",label:this._("inject.previous"),hasValue:false};
 
             $("#node-input-property").typedInput({default:this.propertyType||'msg',types:['msg','flow','global','jsonata']});
-            var operators = [
-                {v:"eq",t:"=="},
-                {v:"neq",t:"!="},
-                {v:"lt",t:"<"},
-                {v:"lte",t:"<="},
-                {v:"gt",t:">"},
-                {v:"gte",t:">="},
-                {v:"btwn",t:this._("switch.rules.btwn")},
-                {v:"cont",t:this._("switch.rules.cont")},
-                {v:"regex",t:this._("switch.rules.regex")},
-                {v:"true",t:this._("switch.rules.true")},
-                {v:"false",t:this._("switch.rules.false")},
-                {v:"null",t:this._("switch.rules.null")},
-                {v:"nnull",t:this._("switch.rules.nnull")},
-                {v:"else",t:this._("switch.rules.else")}
-            ];
+            var outputCount = $("#node-input-outputs").val("{}");
 
             var andLabel = this._("switch.and");
             var caseLabel = this._("switch.ignorecase");
@@ -122,12 +161,15 @@
                     if (!rule.hasOwnProperty('t')) {
                         rule.t = 'eq';
                     }
+                    if (!opt.hasOwnProperty('i')) {
+                        opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString(16);
+                    }
                     var row = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
                     var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
                     var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
                     for (var d in operators) {
-                        selectField.append($("<option></option>").val(operators[d].v).text(operators[d].t));
+                        selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
                     }
                     var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
@@ -154,7 +196,7 @@
                         if (type === "regex") {
                             row2.show();
                             row3.hide();
-                        } else if (type === "btwn"){
+                        } else if (type === "btwn") {
                             row2.hide();
                             row3.show();
                         } else {
@@ -178,21 +220,36 @@
                         caseSensitive.prop('checked',false);
                     }
                     selectField.change();
+
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
+                    currentOutputs[opt.hasOwnProperty('i')?opt.i:opt._i] = i;
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 removeItem: function(opt) {
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
                     if (opt.hasOwnProperty('i')) {
-                        var removedList = $("#node-input-rule-container").data('removedList')||[];
-                        removedList.push(opt.i);
-                        $("#node-input-rule-container").data('removedList',removedList);
+                        currentOutputs[opt.i] = -1;
+                    } else {
+                        delete currentOutputs[opt._i];
                     }
-
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                        var data = $(this).data('data');
+                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                    });
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 resizeItem: resizeRule,
                 sortItems: function(rules) {
+                    var currentOutputs = JSON.parse(outputCount.val()||"{}");
                     var rules = $("#node-input-rule-container").editableList('items');
-                    rules.each(function(i) { $(this).find(".node-input-rule-index").html(i+1); });
+                    rules.each(function(i) {
+                        $(this).find(".node-input-rule-index").html(i+1);
+                        var data = $(this).data('data');
+                        currentOutputs[data.hasOwnProperty('i')?data.i:data._i] = i;
+                    });
+                    outputCount.val(JSON.stringify(currentOutputs));
                 },
                 sortable: true,
                 removable: true
@@ -208,11 +265,6 @@
             var ruleset;
             var node = this;
             node.rules = [];
-            var changedOutputs = {};
-            var removedList = $("#node-input-rule-container").data('removedList')||[];
-            removedList.forEach(function(i) {
-                changedOutputs[i] = -1;
-            });
             rules.each(function(i) {
                 var ruleData = $(this).data('data');
                 var rule = $(this);
@@ -232,15 +284,8 @@
                         r.case = rule.find(".node-input-rule-case").prop("checked");
                     }
                 }
-                if (ruleData.hasOwnProperty('i')) {
-                    if (ruleData.i !== i) {
-                        changedOutputs[ruleData.i] = i;
-                    }
-                }
                 node.rules.push(r);
             });
-            this._outputs = changedOutputs;
-            this.outputs = node.rules.length;
             this.propertyType = $("#node-input-property").typedInput('type');
         },
         oneditresize: function(size) {
@@ -254,4 +299,5 @@
             $("#node-input-rule-container").editableList('height',height);
         }
     });
+})();
 </script>

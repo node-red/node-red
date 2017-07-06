@@ -19,31 +19,88 @@
     padding-top: 10px;
 
 }
+
+#user-settings-tab-keyboard .red-ui-editableList-container {
+    border-radius: 0;
+    border: none;
+    padding: 0;
+}
+
+
 .keyboard-shortcut-entry.keyboard-shortcut-list-header {
-    padding:0 30px 0 5px;
+    padding:0 5px 0 5px;
     div {
         color: #666 !important;
     }
+    .red-ui-searchBox-container {
+        width: calc(100% - 20px);
+    }
+    .keyboard-shortcut-entry-scope {
+        text-align: center;
+    }
 }
-#keyboard-shortcut-list {
+
+.keyboard-shortcut-list-header {
+    border-bottom: 1px solid $primary-border-color;
+
+}
+.keyboard-shortcut-list {
     position: absolute;
     top:30px;
     left:10px;
     right:10px;
     bottom:10px;
+    li {
+        padding: 0;
+        .red-ui-editableList-item-content {
+            padding: 8px;
+            cursor: pointer;
+        }
+    }
+    li:hover {
+        background: #f6f6f6;
+    }
 }
 .keyboard-shortcut-entry {
-    padding: 0px 20px 0 10px;
     div {
         display: inline-block;
     }
+    // white-space: nowrap;
+
+    select {
+        margin: 0;
+        width: calc(100% - 30px);
+        font-size: 0.9em;
+        margin-right: 5px;
+    }
 }
 .keyboard-shortcut-entry-key {
-    width:150px;
+    width:160px;
+    vertical-align: middle;
+    input {
+        margin:0;
+        width: calc(100% - 5px);
+    }
+}
+.keyboard-shortcut-entry-text {
+    vertical-align: middle;
+    width: calc(100% - 160px - 100px - 10px);
+    overflow: hidden;
+    i {
+        color: #ccc;
+        margin-right: 5px;
+    }
 }
 .keyboard-shortcut-entry-scope {
-    float: right;
+    width:100px;
     color: #999;
+    vertical-align: middle;
+    text-align: right;
+}
+.keyboard-shortcut-entry:not(.keyboard-shortcut-list-header) {
+    .keyboard-shortcut-entry-scope {
+        font-size: 0.8em;
+    }
 }
 .keyboard-shortcut-entry-unassigned {
     color: #999;
@@ -51,7 +108,21 @@
         font-style: italic;
     }
 }
-
+.keyboard-shortcut-entry-expanded {
+    .keyboard-shortcut-entry-key {
+        width: 150px;
+    }
+    .keyboard-shortcut-entry-text {
+    }
+    .keyboard-shortcut-entry-scope {
+        width: 110px;
+    }
+    span {
+        display: none;
+    }
+}
+.keyboard-shortcut-edit  {
+}
 .help-key {
     border: 1px solid #ddd;
     padding: 4px;

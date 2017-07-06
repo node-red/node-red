@@ -26,19 +26,24 @@ module.exports = function(RED) {
             msgs = [msgs];
         }
         var msgCount = 0;
-        for (var m=0;m<msgs.length;m++) {
+        for (var m=0; m<msgs.length; m++) {
             if (msgs[m]) {
-                if (util.isArray(msgs[m])) {
-                    for (var n=0; n < msgs[m].length; n++) {
-                        if (msgs[m][n] !== null && msgs[m][n] !== undefined) {
-                            msgs[m][n]._msgid = _msgid;
+                if (!util.isArray(msgs[m])) {
+                    msgs[m] = [msgs[m]];
+                }
+                for (var n=0; n < msgs[m].length; n++) {
+                    var msg = msgs[m][n];
+                    if (msg !== null && msg !== undefined) {
+                        if (typeof msg === 'object' && !Buffer.isBuffer(msg) && !util.isArray(msg)) {
+                            msg._msgid = _msgid;
                             msgCount++;
+                        } else {
+                            var type = typeof msg;
+                            if (type === 'object') {
+                                type = Buffer.isBuffer(msg)?'Buffer':(util.isArray(msg)?'Array':'Date');
+                            }
+                            node.error(RED._("function.error.non-message-returned",{ type: type }))
                         }
-                    }
-                } else {
-                    if (msgs[m] !== null && msgs[m] !== undefined) {
-                        msgs[m]._msgid = _msgid;
-                        msgCount++;
                     }
                 }
             }
@@ -106,6 +111,9 @@ module.exports = function(RED) {
                 get: function() {
                     return node.context().get.apply(node,arguments);
                 },
+                keys: function() {
+                    return node.context().keys.apply(node,arguments);
+                },
                 get global() {
                     return node.context().global;
                 },
@@ -119,6 +127,9 @@ module.exports = function(RED) {
                 },
                 get: function() {
                     return node.context().flow.get.apply(node,arguments);
+                },
+                keys: function() {
+                    return node.context().flow.keys.apply(node,arguments);
                 }
             },
             global: {
@@ -127,6 +138,9 @@ module.exports = function(RED) {
                 },
                 get: function() {
                     return node.context().global.get.apply(node,arguments);
+                },
+                keys: function() {
+                    return node.context().global.keys.apply(node,arguments);
                 }
             },
             setTimeout: function () {

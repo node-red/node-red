@@ -1,30 +1,35 @@
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <script type="text/x-red" data-template-name="json">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="json.label.o2j"></span></label>
+    </div>
+    <div class="form-row" style="padding-left: 20px;">
+        <input style="width:20px; vertical-align:top; margin-right: 5px;" type="checkbox" id="node-input-pretty"><label style="width: auto;" for="node-input-pretty" data-i18n="json.label.pretty"></span>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="json">
-    <p>A function that parses the <code>msg.payload</code> to convert a JSON string to/from a javascript object. Places the result back into the payload.</p>
-    <p>If the input is a JSON string it tries to parse it to a javascript object.</p>
-    <p>If the input is a javascript object it creates a JSON string.</p>
+    <p>Converts between a JSON string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or JSON string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a JSON string it tries to parse it to a JavaScript object.</li>
+                <li>If the input is a JavaScript object it creates a JSON string. The string can optionally be well-formatted.</li>
+            </ul>
+        </dd>
+    </dl>
 </script>
 
 <script type="text/javascript">
@@ -32,7 +37,8 @@
         category: 'function',
         color:"#DEBD5C",
         defaults: {
-            name: {value:""}
+            name: {value:""},
+            pretty: {value:false}
         },
         inputs:1,
         outputs:1,

@@ -15,6 +15,7 @@
  **/
 var when = require("when");
 var should = require("should");
+var paff = require('path');
 var storage = require("../../../../red/runtime/storage/index");
 
 describe("red/storage/index", function() {
@@ -27,17 +28,17 @@ describe("red/storage/index", function() {
             }
         };
 
-       storage.init(wrongModule).then( function() {
-           var one = 1;
-           var zero = 0;
-           try {
-               zero.should.equal(one, "The initialization promise should never get resolved");
-           } catch(err) {
-               done(err);
-           }
-       }).catch(function(e) {
-           done(); //successfully rejected promise
-       });
+        storage.init(wrongModule).then( function() {
+            var one = 1;
+            var zero = 0;
+            try {
+                zero.should.equal(one, "The initialization promise should never get resolved");
+            } catch(err) {
+                done(err);
+            }
+        }).catch(function(e) {
+            done(); //successfully rejected promise
+        });
     });
 
     it('non-string storage module', function(done) {
@@ -169,11 +170,11 @@ describe("red/storage/index", function() {
                 },
                 getLibraryEntry : function(type, path) {
                     if (type === "flows") {
-                        if (path == "/") {
+                        if (path === "/" || path === "\\") {
                             return when.resolve(["a",{fn:"test.json"}]);
-                        } else if (path == "/a") {
+                        } else if (path == "/a" || path == "\\a") {
                             return when.resolve([{fn:"test2.json"}]);
-                        } else if (path == "/a/test2.json") {
+                        } else if (path == paff.join("","a","test2.json")) {
                             return when.resolve("test content");
                         }
                     }
@@ -207,7 +208,7 @@ describe("red/storage/index", function() {
         });
 
         it('getFlow',function(done) {
-            storage.getFlow("/a/test2.json").then(function(res) {
+            storage.getFlow(paff.join("a","test2.json")).then(function(res) {
                 try {
                     res.should.eql("test content");
                     done();
@@ -218,9 +219,9 @@ describe("red/storage/index", function() {
         });
 
         it ('saveFlow', function (done) {
-            storage.saveFlow("/a/test2.json","new content").then(function(res) {
+            storage.saveFlow(paff.join("a","test2.json"),"new content").then(function(res) {
                 try {
-                    savePath.should.eql("/a/test2.json");
+                    savePath.should.eql(paff.join("a","test2.json"));
                     saveContent.should.eql("new content");
                     saveMeta.should.eql({});
                     saveType.should.eql("flows");

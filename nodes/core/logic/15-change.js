@@ -16,10 +16,10 @@
 
 module.exports = function(RED) {
     "use strict";
-    var jsonata = require("jsonata");
 
     function ChangeNode(n) {
         RED.nodes.createNode(this, n);
+        var node = this;
 
         this.rules = n.rules;
         var rule;
@@ -76,7 +76,7 @@ module.exports = function(RED) {
             }
             if (rule.tot === 'num') {
                 rule.to = Number(rule.to);
-            } else if (rule.tot === 'json') {
+            } else if (rule.tot === 'json' || rule.tot === 'bin') {
                 try {
                     // check this is parsable JSON
                     JSON.parse(rule.to);
@@ -88,10 +88,10 @@ module.exports = function(RED) {
                 rule.to = /^true$/i.test(rule.to);
             } else if (rule.tot === 'jsonata') {
                 try {
-                    rule.to = jsonata(rule.to);
+                    rule.to = RED.util.prepareJSONataExpression(rule.to,this);
                 } catch(e) {
                     valid = false;
-                    this.error(RED._("change.errors.invalid-from",{error:e.message}));
+                    this.error(RED._("change.errors.invalid-expr",{error:e.message}));
                 }
             }
         }
@@ -102,6 +102,8 @@ module.exports = function(RED) {
                 var value = rule.to;
                 if (rule.tot === 'json') {
                     value = JSON.parse(rule.to);
+                } else if (rule.tot === 'bin') {
+                    value = Buffer.from(JSON.parse(rule.to))
                 }
                 var current;
                 var fromValue;
@@ -116,7 +118,12 @@ module.exports = function(RED) {
                 } else if (rule.tot === 'date') {
                     value = Date.now();
                 } else if (rule.tot === 'jsonata') {
-                    value = rule.to.evaluate({msg:msg});
+                    try{
+                        value = RED.util.evaluateJSONataExpression(rule.to,msg);
+                    } catch(err) {
+                        node.error(RED._("change.errors.invalid-expr",{error:err.message}));
+                        return;
+                    }
                 }
                 if (rule.t === 'change') {
                     if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
@@ -220,7 +227,6 @@ module.exports = function(RED) {
             return msg;
         }
         if (valid) {
-            var node = this;
             this.on('input', function(msg) {
                 for (var i=0; i<this.rules.length; i++) {
                     if (this.rules[i].t === "move") {

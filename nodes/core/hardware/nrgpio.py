@@ -35,7 +35,7 @@ if len(sys.argv) > 2:
 
     if cmd == "pwm":
         #print "Initialised pin "+str(pin)+" to PWM"
-        try: 
+        try:
             freq = int(sys.argv[3])
         except:
             freq = 100

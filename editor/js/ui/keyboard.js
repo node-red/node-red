@@ -48,6 +48,7 @@ RED.keyboard = (function() {
         93: true
     }
     var actionToKeyMap = {}
+    var defaultKeyMap = {};
 
     // FF generates some different keycodes because reasons.
     var firefoxKeyCodeMap = {
@@ -57,20 +58,56 @@ RED.keyboard = (function() {
     }
 
     function init() {
+        var userKeymap = RED.settings.get('keymap') || {};
         $.getJSON("red/keymap.json",function(data) {
             for (var scope in data) {
                 if (data.hasOwnProperty(scope)) {
                     var keys = data[scope];
                     for (var key in keys) {
                         if (keys.hasOwnProperty(key)) {
-                            addHandler(scope,key,keys[key]);
+                            if (!userKeymap.hasOwnProperty(keys[key])) {
+                                addHandler(scope,key,keys[key],false);
+                                defaultKeyMap[keys[key]] = {
+                                    scope:scope,
+                                    key:key,
+                                    user:false
+                                };
+                            }
                         }
                     }
                 }
             }
-        })
-        RED.actions.add("core:show-help", showKeyboardHelp);
+            for (var action in userKeymap) {
+                if (userKeymap.hasOwnProperty(action)) {
+                    var obj = userKeymap[action];
+                    if (obj.hasOwnProperty('key')) {
+                        addHandler(obj.scope, obj.key, action, true);
+                    }
+                }
+            }
+        });
 
+        RED.userSettings.add({
+            id:'keyboard',
+            title: 'Keyboard',
+            get: getSettingsPane,
+            focus: function() {
+                setTimeout(function() {
+                    $("#user-settings-tab-keyboard-filter").focus();
+                },200);
+            }
+        })
+    }
+
+    function revertToDefault(action) {
+        var currentAction = actionToKeyMap[action];
+        if (currentAction) {
+            removeHandler(currentAction.key);
+        }
+        if (defaultKeyMap.hasOwnProperty(action)) {
+            var obj = defaultKeyMap[action];
+            addHandler(obj.scope, obj.key, action, false);
+        }
     }
     function parseKeySpecifier(key) {
         var parts = key.toLowerCase().split("-");
@@ -126,9 +163,11 @@ RED.keyboard = (function() {
                 if (partialState) {
                     partialState = null;
                     return resolveKeyEvent(evt);
-                } else {
+                } else if (Object.keys(handler).length > 0) {
                     partialState = handler;
                     evt.preventDefault();
+                    return null;
+                } else {
                     return null;
                 }
             } else if (handler.scope && handler.scope !== "*") {
@@ -174,6 +213,9 @@ RED.keyboard = (function() {
         if (typeof key === 'string') {
             if (typeof cbdown === 'string') {
                 actionToKeyMap[cbdown] = {scope:scope,key:key};
+                if (typeof ondown === 'boolean') {
+                    actionToKeyMap[cbdown].user = ondown;
+                }
             }
             var parts = key.split(" ");
             for (i=0;i<parts.length;i++) {
@@ -181,7 +223,6 @@ RED.keyboard = (function() {
                 if (parsedKey) {
                     keys.push(parsedKey);
                 } else {
-                    console.log("Unrecognised key specifier:",key)
                     return;
                 }
             }
@@ -217,7 +258,7 @@ RED.keyboard = (function() {
         var keys = [];
         var i=0;
         if (typeof key === 'string') {
-            delete actionToKeyMap[key];
+
             var parts = key.split(" ");
             for (i=0;i<parts.length;i++) {
                 var parsedKey = parseKeySpecifier(parts[i]);
@@ -249,78 +290,19 @@ RED.keyboard = (function() {
             }
             slot = slot[key];
         }
+        if (typeof slot.ondown === "string") {
+            if (typeof modifiers === 'boolean' && modifiers) {
+                actionToKeyMap[slot.ondown] = {user: modifiers}
+            } else {
+                delete actionToKeyMap[slot.ondown];
+            }
+        }
         delete slot.scope;
         delete slot.ondown;
     }
 
-    var shortcutDialog = null;
-
     var cmdCtrlKey = '<span class="help-key">'+(isMac?'&#8984;':'Ctrl')+'</span>';
 
-    function showKeyboardHelp() {
-        if (!RED.settings.theme("menu.menu-item-keyboard-shortcuts",true)) {
-            return;
-        }
-        if (!shortcutDialog) {
-            shortcutDialog = $('<div id="keyboard-help-dialog" class="hide">'+
-                '<div class="keyboard-shortcut-entry keyboard-shortcut-list-header">'+
-                    '<div class="keyboard-shortcut-entry-key">shortcut</div>'+
-                    '<div class="keyboard-shortcut-entry-key">action</div>'+
-                    '<div class="keyboard-shortcut-entry-scope">scope</div>'+
-                '</div>'+
-                '<ol id="keyboard-shortcut-list"></ol>'+
-                '</div>')
-            .appendTo("body");
-
-            var shortcutList = $('#keyboard-shortcut-list').editableList({
-                addButton: false,
-                scrollOnAdd: false,
-                addItem: function(container,i,object) {
-                    var item = $('<div class="keyboard-shortcut-entry">').appendTo(container);
-
-                    var key = $('<div class="keyboard-shortcut-entry-key">').appendTo(item);
-                    if (object.key) {
-                        key.append(formatKey(object.key));
-                    } else {
-                        item.addClass("keyboard-shortcut-entry-unassigned");
-                        key.html(RED._('keyboard.unassigned'));
-                    }
-
-                    var text = object.id.replace(/(^.+:([a-z]))|(-([a-z]))/g,function() {
-                        if (arguments[5] === 0) {
-                            return arguments[2].toUpperCase();
-                        } else {
-                            return " "+arguments[4].toUpperCase();
-                        }
-                    });
-                    var label = $('<div>').html(text).appendTo(item);
-                    if (object.scope) {
-                        $('<div class="keyboard-shortcut-entry-scope">').html(object.scope).appendTo(item);
-                    }
-
-
-                },
-            });
-            var shortcuts = RED.actions.list();
-            shortcuts.sort(function(A,B) {
-                return A.id.localeCompare(B.id);
-            });
-            shortcuts.forEach(function(s) {
-                shortcutList.editableList('addItem',s);
-            })
-
-            shortcutDialog.dialog({
-                modal: true,
-                autoOpen: false,
-                width: "800",
-                height: "400",
-                title:RED._("keyboard.title"),
-                resizable: false
-            });
-        }
-
-        shortcutDialog.dialog("open");
-    }
     function formatKey(key) {
         var formattedKey = isMac?key.replace(/ctrl-?/,"&#8984;"):key;
         formattedKey = isMac?formattedKey.replace(/alt-?/,"&#8997;"):key;
@@ -332,6 +314,206 @@ RED.keyboard = (function() {
         return '<span class="help-key-block"><span class="help-key">'+formattedKey.split(" ").join('</span> <span class="help-key">')+'</span></span>';
     }
 
+    function validateKey(key) {
+        key = key.trim();
+        var parts = key.split(" ");
+        for (i=0;i<parts.length;i++) {
+            var parsedKey = parseKeySpecifier(parts[i]);
+            if (!parsedKey) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function editShortcut(e) {
+        e.preventDefault();
+        var container = $(this);
+        var object = container.data('data');
+
+
+        if (!container.hasClass('keyboard-shortcut-entry-expanded')) {
+            endEditShortcut();
+
+            var key = container.find(".keyboard-shortcut-entry-key");
+            var scope = container.find(".keyboard-shortcut-entry-scope");
+            container.addClass('keyboard-shortcut-entry-expanded');
+
+            var keyInput = $('<input type="text">').attr('placeholder',RED._('keyboard.unassigned')).val(object.key||"").appendTo(key);
+            keyInput.on("keyup",function(e) {
+                if (e.keyCode === 13) {
+                    return endEditShortcut();
+                }
+                var currentVal = $(this).val();
+                currentVal = currentVal.trim();
+                var valid = (currentVal === "" || RED.keyboard.validateKey(currentVal));
+                $(this).toggleClass("input-error",!valid);
+            })
+
+            var scopeSelect = $('<select><option value="*">global</option><option value="workspace">workspace</option></select>').appendTo(scope);
+            scopeSelect.val(object.scope||'*');
+
+            var div = $('<div class="keyboard-shortcut-edit button-group-vertical"></div>').appendTo(scope);
+            var okButton = $('<button class="editor-button editor-button-small"><i class="fa fa-check"></i></button>').appendTo(div);
+            var revertButton = $('<button class="editor-button editor-button-small"><i class="fa fa-reply"></i></button>').appendTo(div);
+
+            okButton.click(function(e) {
+                e.stopPropagation();
+                endEditShortcut();
+            });
+            revertButton.click(function(e) {
+                e.stopPropagation();
+                RED.keyboard.revertToDefault(object.id);
+                container.empty();
+                container.removeClass('keyboard-shortcut-entry-expanded');
+                var shortcut = RED.keyboard.getShortcut(object.id);
+                var userKeymap = RED.settings.get('keymap') || {};
+                delete userKeymap[object.id];
+                RED.settings.set('keymap',userKeymap);
+
+                var obj = {
+                    id:object.id,
+                    scope:shortcut?shortcut.scope:undefined,
+                    key:shortcut?shortcut.key:undefined,
+                    user:shortcut?shortcut.user:undefined
+                }
+                buildShortcutRow(container,obj);
+            })
+
+            keyInput.focus();
+        }
+    }
+
+    function endEditShortcut(cancel) {
+        var container = $('.keyboard-shortcut-entry-expanded');
+        if (container.length === 1) {
+            var object = container.data('data');
+            var keyInput = container.find(".keyboard-shortcut-entry-key input");
+            var scopeSelect = container.find(".keyboard-shortcut-entry-scope select");
+            if (!cancel) {
+                var key = keyInput.val().trim();
+                var scope = scopeSelect.val();
+                var valid = (key === "" || RED.keyboard.validateKey(key));
+                if (valid) {
+                    var current = RED.keyboard.getShortcut(object.id);
+                    if ((!current && key) || (current && (current.scope !== scope || current.key !== key))) {
+                        var keyDiv = container.find(".keyboard-shortcut-entry-key");
+                        var scopeDiv = container.find(".keyboard-shortcut-entry-scope");
+                        keyDiv.empty();
+                        scopeDiv.empty();
+                        if (object.key) {
+                            RED.keyboard.remove(object.key,true);
+                        }
+                        container.find(".keyboard-shortcut-entry-text i").css("opacity",1);
+                        if (key === "") {
+                            keyDiv.parent().addClass("keyboard-shortcut-entry-unassigned");
+                            keyDiv.append($('<span>').text(RED._('keyboard.unassigned'))  );
+                            delete object.key;
+                            delete object.scope;
+                        } else {
+                            keyDiv.parent().removeClass("keyboard-shortcut-entry-unassigned");
+                            keyDiv.append(RED.keyboard.formatKey(key))
+                            $("<span>").text(scope).appendTo(scopeDiv);
+                            object.key = key;
+                            object.scope = scope;
+                            RED.keyboard.add(object.scope,object.key,object.id,true);
+                        }
+                        var userKeymap = RED.settings.get('keymap') || {};
+                        userKeymap[object.id] = RED.keyboard.getShortcut(object.id);
+                        RED.settings.set('keymap',userKeymap);
+                    }
+                }
+            }
+            keyInput.remove();
+            scopeSelect.remove();
+            $('.keyboard-shortcut-edit').remove();
+            container.removeClass('keyboard-shortcut-entry-expanded');
+        }
+    }
+
+    function buildShortcutRow(container,object) {
+        var item = $('<div class="keyboard-shortcut-entry">').appendTo(container);
+        container.data('data',object);
+
+        var text = object.id.replace(/(^.+:([a-z]))|(-([a-z]))/g,function() {
+            if (arguments[5] === 0) {
+                return arguments[2].toUpperCase();
+            } else {
+                return " "+arguments[4].toUpperCase();
+            }
+        });
+        var label = $('<div>').addClass("keyboard-shortcut-entry-text").text(text).appendTo(item);
+
+        var user = $('<i class="fa fa-user"></i>').prependTo(label);
+
+        if (!object.user) {
+            user.css("opacity",0);
+        }
+
+        var key = $('<div class="keyboard-shortcut-entry-key">').appendTo(item);
+        if (object.key) {
+            key.append(RED.keyboard.formatKey(object.key));
+        } else {
+            item.addClass("keyboard-shortcut-entry-unassigned");
+            key.append($('<span>').text(RED._('keyboard.unassigned'))  );
+        }
+
+        var scope = $('<div class="keyboard-shortcut-entry-scope">').appendTo(item);
+
+        $("<span>").text(object.scope === '*'?'global':object.scope||"").appendTo(scope);
+        container.click(editShortcut);
+    }
+
+    function getSettingsPane() {
+        var pane = $('<div id="user-settings-tab-keyboard"></div>');
+
+        $('<div class="keyboard-shortcut-entry keyboard-shortcut-list-header">'+
+        '<div class="keyboard-shortcut-entry-key keyboard-shortcut-entry-text"><input id="user-settings-tab-keyboard-filter" type="text" placeholder="filter actions"></div>'+
+        '<div class="keyboard-shortcut-entry-key">shortcut</div>'+
+        '<div class="keyboard-shortcut-entry-scope">scope</div>'+
+        '</div>').appendTo(pane);
+
+        pane.find("input").searchBox({
+            delay: 100,
+            change: function() {
+                var filterValue = $(this).val().trim();
+                if (filterValue === "") {
+                    shortcutList.editableList('filter', null);
+                } else {
+                    filterValue = filterValue.replace(/\s/g,"");
+                    shortcutList.editableList('filter', function(data) {
+                        return data.id.toLowerCase().replace(/^.*:/,"").replace("-","").indexOf(filterValue) > -1;
+                    })
+                }
+            }
+        });
+
+        var shortcutList = $('<ol class="keyboard-shortcut-list"></ol>').css({
+            position: "absolute",
+            top: "32px",
+            bottom: "0",
+            left: "0",
+            right: "0"
+        }).appendTo(pane).editableList({
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(container,i,object) {
+                buildShortcutRow(container,object);
+            },
+
+        });
+        var shortcuts = RED.actions.list();
+        shortcuts.sort(function(A,B) {
+            var Aid = A.id.replace(/^.*:/,"").replace(/[ -]/g,"").toLowerCase();
+            var Bid = B.id.replace(/^.*:/,"").replace(/[ -]/g,"").toLowerCase();
+            return Aid.localeCompare(Bid);
+        });
+        shortcuts.forEach(function(s) {
+            shortcutList.editableList('addItem',s);
+        });
+        return pane;
+    }
+
     return {
         init: init,
         add: addHandler,
@@ -339,7 +521,9 @@ RED.keyboard = (function() {
         getShortcut: function(actionName) {
             return actionToKeyMap[actionName];
         },
-        formatKey: formatKey
+        revertToDefault: revertToDefault,
+        formatKey: formatKey,
+        validateKey: validateKey
     }
 
 })();

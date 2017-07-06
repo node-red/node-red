@@ -1,45 +1,55 @@
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <script type="text/x-red" data-template-name="xml">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-row" id="advanced">
+    <hr align="middle"/>
+    <div class="form-row">
+        <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="xml.label.x2o"></span></label>
     </div>
-    <div id="advanced-options">
-        <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.represent"></span> <input type="text" id="node-input-attr" style="text-align:center; width:40px" placeholder="$">
-        </div>
-        <div class="form-row">
-            <i class="fa fa-key"></i> <span data-i18n="xml.label.prefix"></span> <input type="text" id="node-input-chr" style="text-align:center; width:40px" placeholder="_">
-        </div>
-        <div class="form-tips"><span data-i18n="xml.tip"></span></div>
+    <div class="form-row" style="padding-left: 20px;">
+        <label style="width:250px;" for="node-input-attr" data-i18n="xml.label.represent"></label> <input type="text" id="node-input-attr" style="text-align:center; width:40px" placeholder="$">
+    </div>
+    <div class="form-row" style="padding-left: 20px;">
+        <label style="width:250px;" for="node-input-chr" data-i18n="xml.label.prefix"></label> <input type="text" id="node-input-chr" style="text-align:center; width:40px" placeholder="_">
     </div>
 </script>
 
 <script type="text/x-red" data-help-name="xml">
-    <p>A function that parses the <code>msg.payload</code> to convert xml to/from a javascript object. Places the result in the payload.</p>
-    <p>If the input is a string it tries to parse it as XML and creates a javascript object.</p>
-    <p>If the input is a javascript object it tries to build an XML string.</p>
-    <p>You can also pass in a <code>msg.options</code> object to override all the multitude of parameters. See
-    <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">the xml2js docs</a>
-     for more information.</p>
-     <p>If set, options in the edit dialogue override those passed in on the msg.options object.</p>
+    <p>Converts between an XML string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or XML string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a string it tries to parse it as XML and creates a JavaScript object.</li>
+                <li>If the input is a JavaScript object it tries to build an XML string.</li>
+            </ul>
+        </dd>
+        <dt class="optional">options <span class="property-type">object</span></dt>
+        <dd>This optional property can be used to pass in any of the options supported by the underlying
+            library used to convert to and from XML. See <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">the xml2js docs</a>
+            for more information.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>When converting between XML and an object, any XML attributes are added as a property named <code>$</code> by default.
+    Any text content is added as a property named <code>_</code>. These property names can be specified in the node configuration.</p>
+    <p>For example, the following XML will be converted as shown:</p>
+    <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
 </script>
 
 <script type="text/javascript">
@@ -59,23 +69,6 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
-        },
-        oneditprepare: function() {
-            var showadvanced = showadvanced || true;
-            var advanced = this._("xml.label.advanced");
-            var showall = function() {
-                showadvanced = !showadvanced;
-                if (showadvanced) {
-                    $("#advanced-options").show();
-                    $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-minus-square"></i> '+advanced+'</label>');
-                }
-                else {
-                    $("#advanced-options").hide();
-                    $("#advanced").html('<label for="node-advanced" style="width:200px !important"><i class="fa fa-plus-square"></i> '+advanced+' ...</label>');
-                }
-            };
-            showall();
-            $("#advanced").click( function() { showall(); });
         }
     });
 </script>

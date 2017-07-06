@@ -30,6 +30,8 @@ RED.deploy = (function() {
 
     var deploymentType = "full";
 
+    var deployInflight = false;
+
     var currentDiff = null;
 
     function changeDeploymentType(type) {
@@ -88,7 +90,10 @@ RED.deploy = (function() {
               '</span></li>').prependTo(".header-toolbar");
         }
 
-        $('#btn-deploy').click(function() { save(); });
+        $('#btn-deploy').click(function(event) {
+            event.preventDefault();
+            save();
+        });
 
         RED.actions.add("core:deploy-flows",save);
 
@@ -135,7 +140,16 @@ RED.deploy = (function() {
                             if (ignoreChecked) {
                                 ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
                             }
-                            save(true,$( "#node-dialog-confirm-deploy-type" ).val() === "conflict");
+                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "node-dialog-confirm-deploy-overwrite",
+                        text: RED._("deploy.confirm.button.overwrite"),
+                        class: "primary",
+                        click: function() {
+                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
                             $( this ).dialog( "close" );
                         }
                     }
@@ -149,10 +163,13 @@ RED.deploy = (function() {
                                    '</div>');
                 },
                 open: function() {
-                    if ($( "#node-dialog-confirm-deploy-type" ).val() === "conflict") {
+                    var deployType = $("#node-dialog-confirm-deploy-type" ).val();
+                    if (/conflict/.test(deployType)) {
+                        $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.review'));
                         $("#node-dialog-confirm-deploy-deploy").hide();
                         $("#node-dialog-confirm-deploy-review").addClass('disabled').show();
                         $("#node-dialog-confirm-deploy-merge").addClass('disabled').show();
+                        $("#node-dialog-confirm-deploy-overwrite").toggle(deployType === "deploy-conflict");
                         currentDiff = null;
                         $("#node-dialog-confirm-deploy-conflict-checking").show();
                         $("#node-dialog-confirm-deploy-conflict-auto-merge").hide();
@@ -178,7 +195,9 @@ RED.deploy = (function() {
 
                         $("#node-dialog-confirm-deploy-hide").parent().hide();
                     } else {
+                        $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.confirm'));
                         $("#node-dialog-confirm-deploy-deploy").show();
+                        $("#node-dialog-confirm-deploy-overwrite").hide();
                         $("#node-dialog-confirm-deploy-review").hide();
                         $("#node-dialog-confirm-deploy-merge").hide();
                         $("#node-dialog-confirm-deploy-hide").parent().show();
@@ -198,7 +217,33 @@ RED.deploy = (function() {
             }
         });
 
-
+        var activeNotifyMessage;
+        RED.comms.subscribe("notification/runtime-deploy",function(topic,msg) {
+            if (!activeNotifyMessage) {
+                var currentRev = RED.nodes.version();
+                if (currentRev === null || deployInflight || currentRev === msg.revision) {
+                    return;
+                }
+                var message = $('<div>'+RED._('deploy.confirm.backgroundUpdate')+
+                    '<br><br><div class="ui-dialog-buttonset">'+
+                    '<button>'+RED._('deploy.confirm.button.ignore')+'</button>'+
+                    '<button class="primary">'+RED._('deploy.confirm.button.review')+'</button>'+
+                    '</div></div>');
+                $(message.find('button')[0]).click(function(evt) {
+                    evt.preventDefault();
+                    activeNotifyMessage.close();
+                    activeNotifyMessage = null;
+                })
+                $(message.find('button')[1]).click(function(evt) {
+                    evt.preventDefault();
+                    activeNotifyMessage.close();
+                    var nns = RED.nodes.createCompleteNodeSet();
+                    resolveConflict(nns,false);
+                    activeNotifyMessage = null;
+                })
+                activeNotifyMessage = RED.notify(message,null,true);
+            }
+        });
     }
 
     function getNodeInfo(node) {
@@ -212,18 +257,7 @@ RED.deploy = (function() {
                 tabLabel = tab.label;
             }
         }
-        var label = "";
-        if (typeof node._def.label == "function") {
-            try {
-                label = node._def.label.call(node);
-            } catch(err) {
-                console.log("Definition error: "+node_def.type+".label",err);
-                label = node_def.type;
-            }
-        } else {
-            label = node._def.label;
-        }
-        label = label || node.id;
+        var label = RED.utils.getNodeLabel(node,node.id);
         return {tab:tabLabel,type:node.type,label:label};
     }
     function sortNodeInfo(A,B) {
@@ -236,12 +270,12 @@ RED.deploy = (function() {
         return 0;
     }
 
-    function resolveConflict(currentNodes) {
+    function resolveConflict(currentNodes, activeDeploy) {
         $( "#node-dialog-confirm-deploy-config" ).hide();
         $( "#node-dialog-confirm-deploy-unknown" ).hide();
         $( "#node-dialog-confirm-deploy-unused" ).hide();
         $( "#node-dialog-confirm-deploy-conflict" ).show();
-        $( "#node-dialog-confirm-deploy-type" ).val("conflict");
+        $( "#node-dialog-confirm-deploy-type" ).val(activeDeploy?"deploy-conflict":"background-conflict");
         $( "#node-dialog-confirm-deploy" ).dialog( "open" );
     }
 
@@ -326,6 +360,7 @@ RED.deploy = (function() {
                 data.rev = RED.nodes.version();
             }
 
+            deployInflight = true;
             $.ajax({
                 url:"flows",
                 type: "POST",
@@ -350,6 +385,10 @@ RED.deploy = (function() {
                         node.dirty = true;
                         node.changed = false;
                     }
+                    if (node.moved) {
+                        node.dirty = true;
+                        node.moved = false;
+                    }
                     if(node.credentials) {
                         delete node.credentials;
                     }
@@ -373,13 +412,14 @@ RED.deploy = (function() {
                 if (xhr.status === 401) {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("user.notAuthorized")}),"error");
                 } else if (xhr.status === 409) {
-                    resolveConflict(nns);
+                    resolveConflict(nns, true);
                 } else if (xhr.responseText) {
                     RED.notify(RED._("deploy.deployFailed",{message:xhr.responseText}),"error");
                 } else {
                     RED.notify(RED._("deploy.deployFailed",{message:RED._("deploy.errors.noResponse")}),"error");
                 }
             }).always(function() {
+                deployInflight = false;
                 var delta = Math.max(0,300-(Date.now()-startTime));
                 setTimeout(function() {
                     $(".deploy-button-content").css('opacity',1);

@@ -51,3 +51,32 @@
 #workspace-footer {
     @include component-footer;
 }
+
+#workspace-tabs:not(.workspace-focussed) {
+    opacity:0.8;
+    li.red-ui-tab.active a {
+        color:#666;
+    }
+}
+.workspace-disabled-icon {
+    display: none;
+}
+.workspace-disabled {
+    &.red-ui-tab {
+        border-top-style: dashed;
+        border-left-style: dashed;
+        border-right-style: dashed;
+
+        a {
+            font-style: italic;
+            color: #aaa !important;
+        }
+        &.active a {
+            font-weight: normal;
+            color: #999 !important;
+        }
+        .workspace-disabled-icon {
+            display: inline;
+        }
+    }
+}

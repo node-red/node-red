@@ -47,6 +47,10 @@ module.exports = {
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 
+    // To disable the option for using local files for storing keys and certificates in the TLS configuration
+    //  node, set this to true
+    //tlsConfigDisableLocalFiles: true,
+
     // Colourise the console output of the debug node
     //debugUseColors: true,
 
@@ -167,6 +171,25 @@ module.exports = {
     //    next();
     //},
 
+    // The following property can be used to verify websocket connection attempts.
+    // This allows, for example, the HTTP request headers to be checked to ensure
+    // they include valid authentication information.
+    //webSocketVerifyClient: function(info) {
+    //    // 'info' has three properties:
+    //    //   - origin : the value in the Origin header
+    //    //   - req : the HTTP request
+    //    //   - secure : true if req.connection.authorized or req.connection.encrypted is set
+    //    //
+    //    // The function should return true if the connection should be accepted, false otherwise.
+    //    //
+    //    // Alternatively, if this function is defined to accept a second argument, callback,
+    //    // it can be used to verify the client asynchronously.
+    //    // The callback takes three arguments:
+    //    //   - result : boolean, whether to accept the connection or not
+    //    //   - code : if result is false, the HTTP error status to return
+    //    //   - reason: if result is false, the HTTP reason string to return
+    //},
+
     // Anything in this hash is globally available to all functions.
     // It is accessed as context.global.
     // eg:
@@ -198,6 +221,7 @@ module.exports = {
             // info - record information about the general running of the application + warn + error + fatal errors
             // debug - record information which is more verbose than info + info + warn + error + fatal errors
             // trace - record very detailed logging + debug + info + warn + error + fatal errors
+            // off - turn off all logging (doesn't affect metrics or audit)
             level: "info",
             // Whether or not to include metric events in the log output
             metrics: false,

@@ -37,6 +37,7 @@
 @import "library";
 @import "search";
 
+@import "panels";
 @import "tabs";
 @import "tab-config";
 @import "tab-info";
@@ -45,10 +46,14 @@
 @import "palette-editor";
 @import "diff";
 
+@import "userSettings";
+
 
 @import "ui/common/editableList";
 @import "ui/common/searchBox";
 @import "ui/common/typedInput";
+@import "ui/common/nodeList";
+@import "ui/common/checkboxSet";
 
 @import "dragdrop";
 

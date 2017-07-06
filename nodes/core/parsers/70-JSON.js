@@ -19,6 +19,7 @@ module.exports = function(RED) {
 
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
+        this.indent = n.pretty ? 4 : 0;
         var node = this;
         this.on("input", function(msg) {
             if (msg.hasOwnProperty("payload")) {
@@ -32,7 +33,7 @@ module.exports = function(RED) {
                 else if (typeof msg.payload === "object") {
                     if (!Buffer.isBuffer(msg.payload)) {
                         try {
-                            msg.payload = JSON.stringify(msg.payload);
+                            msg.payload = JSON.stringify(msg.payload,null,node.indent);
                             node.send(msg);
                         }
                         catch(e) { node.error(RED._("json.errors.dropped-error")); }

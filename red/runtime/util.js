@@ -314,6 +314,9 @@ function evaluateNodeProperty(value, type, node, msg) {
         return new RegExp(value);
     } else if (type === 'date') {
         return Date.now();
+    } else if (type === 'bin') {
+        var data = JSON.parse(value);
+        return Buffer.from(data);
     } else if (type === 'msg' && msg) {
         return getMessageProperty(msg,value);
     } else if (type === 'flow' && node) {
@@ -323,11 +326,45 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'bool') {
         return /^true$/i.test(value);
     } else if (type === 'jsonata') {
-        return jsonata(value).evaluate({msg:msg});
+        var expr = prepareJSONataExpression(value,node);
+        return evaluateJSONataExpression(expr,msg);
     }
     return value;
 }
 
+function prepareJSONataExpression(value,node) {
+    var expr = jsonata(value);
+    expr.assign('flowContext',function(val) {
+        return node.context().flow.get(val);
+    });
+    expr.assign('globalContext',function(val) {
+        return node.context().global(val);
+    });
+    expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
+    return expr;
+}
+
+function evaluateJSONataExpression(expr,msg) {
+    var context = msg;
+    if (expr._legacyMode) {
+        context = {msg:msg};
+    }
+    return expr.evaluate(context);
+}
+
+
+function normaliseNodeTypeName(name) {
+    var result = name.replace(/[^a-zA-Z0-9]/g, " ");
+    result = result.trim();
+    result = result.replace(/ +/g, " ");
+    result = result.replace(/ ./g,
+        function(s) {
+            return s.charAt(1).toUpperCase();
+        }
+    );
+    result = result.charAt(0).toLowerCase() + result.slice(1);
+    return result;
+}
 
 module.exports = {
     ensureString: ensureString,
@@ -338,5 +375,8 @@ module.exports = {
     getMessageProperty: getMessageProperty,
     setMessageProperty: setMessageProperty,
     evaluateNodeProperty: evaluateNodeProperty,
-    normalisePropertyExpression: normalisePropertyExpression
+    normalisePropertyExpression: normalisePropertyExpression,
+    normaliseNodeTypeName: normaliseNodeTypeName,
+    prepareJSONataExpression: prepareJSONataExpression,
+    evaluateJSONataExpression: evaluateJSONataExpression
 };

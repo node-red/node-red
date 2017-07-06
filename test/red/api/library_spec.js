@@ -27,7 +27,7 @@ var auth = require("../../../red/api/auth");
 
 describe("library api", function() {
 
-    function initLibrary(_flows,_libraryEntries) {
+    function initLibrary(_flows,_libraryEntries,_examples) {
         var flows = _flows;
         var libraryEntries = _libraryEntries;
         library.init(app,{
@@ -84,6 +84,11 @@ describe("library api", function() {
             events: {
                 on: function(){},
                 removeListener: function(){}
+            },
+            nodes: {
+                getNodeExampleFlows: function() {
+                    return _examples;
+                }
             }
         });
     }
@@ -178,6 +183,22 @@ describe("library api", function() {
                 .post('/library/flows/../../../../../package')
                 .expect(403)
                 .end(done);
+        });
+        it('includes examples flows if set', function(done) {
+            var examples = {"d":{"node-module":{"f":["example-one"]}}};
+            initLibrary({},{},examples);
+            request(app)
+                .get('/library/flows')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.have.property('d');
+                    res.body.d.should.have.property('_examples_');
+                    should.deepEqual(res.body.d._examples_,examples);
+                    done();
+                });
         });
     });
 

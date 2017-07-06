@@ -47,13 +47,20 @@ module.exports = function(RED) {
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
         this.reset = n.reset || '';
-        this.duration = n.duration || 250;
-        if (this.duration <= 0) { this.duration = 0; }
-        else {
-            if (this.units == "s") { this.duration = this.duration * 1000; }
-            if (this.units == "min") { this.duration = this.duration * 1000 * 60; }
-            if (this.units == "hr") { this.duration = this.duration * 1000 *60 * 60; }
+        this.duration = parseInt(n.duration);
+        if (isNaN(this.duration)) {
+            this.duration = 250;
         }
+        if (this.duration < 0) {
+            this.loop = true;
+            this.duration = this.duration * -1;
+            this.extend = false;
+        }
+
+        if (this.units == "s") { this.duration = this.duration * 1000; }
+        if (this.units == "min") { this.duration = this.duration * 1000 * 60; }
+        if (this.units == "hr") { this.duration = this.duration * 1000 *60 * 60; }
+
         this.op1Templated = (this.op1type === 'str' && this.op1.indexOf("{{") != -1);
         this.op2Templated = (this.op2type === 'str' && this.op2.indexOf("{{") != -1);
         if ((this.op1type === "num") && (!isNaN(this.op1))) { this.op1 = Number(this.op1); }
@@ -69,13 +76,14 @@ module.exports = function(RED) {
         var tout = null;
         var m2;
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("reset") || ((node.reset !== '')&&(msg.payload == node.reset)) ) {
-                clearTimeout(tout);
+            if (msg.hasOwnProperty("reset") || ((node.reset !== '') && (msg.payload == node.reset)) ) {
+                if (node.loop === true) { clearInterval(tout); }
+                else { clearTimeout(tout); }
                 tout = null;
                 node.status({});
             }
             else {
-                if ((!tout) && (tout !== 0)) {
+                if (((!tout) && (tout !== 0)) || (node.loop === true)) {
                     if (node.op2type === "pay" || node.op2type === "payl") { m2 = msg.payload; }
                     else if (node.op2Templated) { m2 = mustache.render(node.op2,msg); }
                     else if (node.op2type !== "nul") {
@@ -91,6 +99,13 @@ module.exports = function(RED) {
                     if (node.op1type !== "nul") { node.send(msg); }
 
                     if (node.duration === 0) { tout = 0; }
+                    else if (node.loop === true) {
+                        if (tout) { clearInterval(tout); }
+                        if (node.op1type !== "nul") {
+                            var msg2 = RED.util.cloneMessage(msg);
+                            tout = setInterval(function() { node.send(msg2); },node.duration);
+                        }
+                    }
                     else {
                         tout = setTimeout(function() {
                             if (node.op2type !== "nul") {
@@ -108,7 +123,7 @@ module.exports = function(RED) {
                     node.status({fill:"blue",shape:"dot",text:" "});
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
-                    clearTimeout(tout);
+                    if (tout) { clearTimeout(tout); }
                     if (node.op2type === "payl") { m2 = msg.payload; }
                     tout = setTimeout(function() {
                         if (node.op2type !== "nul") {
@@ -122,14 +137,17 @@ module.exports = function(RED) {
                         tout = null;
                         node.status({});
                     },node.duration);
-                } else {
+                }
+                else {
                     if (node.op2type === "payl") { m2 = msg.payload; }
                 }
             }
         });
         this.on("close", function() {
             if (tout) {
-                clearTimeout(tout);
+                if (node.loop === true) { clearInterval(tout); }
+                else { clearTimeout(tout); }
+                tout = null;
             }
             node.status({});
         });

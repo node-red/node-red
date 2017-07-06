@@ -175,7 +175,7 @@ RED.history = (function() {
                     n.n.x = n.ox;
                     n.n.y = n.oy;
                     n.n.dirty = true;
-                    n.n.changed = n.changed;
+                    n.n.moved = n.moved;
                 }
                 // A move could have caused a link splice
                 if (ev.links) {
@@ -191,7 +191,7 @@ RED.history = (function() {
             } else if (ev.t == "edit") {
                 for (i in ev.changes) {
                     if (ev.changes.hasOwnProperty(i)) {
-                        if (ev.node._def.defaults[i].type) {
+                        if (ev.node._def.defaults[i] && ev.node._def.defaults[i].type) {
                             // This is a config node property
                             var currentConfigNode = RED.nodes.node(ev.node[i]);
                             if (currentConfigNode) {
@@ -239,7 +239,7 @@ RED.history = (function() {
                     if (ev.outputMap) {
                         outputMap = {};
                         for (var port in ev.outputMap) {
-                            if (ev.outputMap.hasOwnProperty(port) && ev.outputMap[port] !== -1) {
+                            if (ev.outputMap.hasOwnProperty(port) && ev.outputMap[port] !== "-1") {
                                 outputMap[ev.outputMap[port]] = port;
                             }
                         }

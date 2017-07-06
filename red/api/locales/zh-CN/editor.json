@@ -1,0 +1,423 @@
+{
+    "common": {
+        "label": {
+            "name": "姓名",
+            "ok": "Ok",
+            "done": "完成",
+            "cancel": "取消",
+            "delete": "删除",
+            "close": "关闭",
+            "load": "读取",
+            "save": "保存",
+            "import": "导入",
+            "export": "导出"
+        }
+    },
+    "workspace": {
+        "defaultName": "流程__number__",
+        "editFlow": "编辑流程: __name__",
+        "confirmDelete": "确认删除",
+        "delete": "你确定想删除 '__label__'?",
+        "dropFlowHere": "把流程放到这里",
+        "status": "状态",
+        "enabled": "有效",
+        "disabled": "无效",
+        "info": "详细描述",
+        "tip": "详细描述支持Markdown轻量级标记语言，并将出现在信息标签中。"
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "表示",
+                "showGrid": "表示网格",
+                "snapGrid": "对齐网格",
+                "gridSize": "网格尺寸",
+                "textDir": "文本方向",
+                "defaultDir": "默认",
+                "ltr": "从左到右",
+                "rtl": "从右到左",
+                "auto": "上下文"
+            },
+            "sidebar": {
+                "show": "显示侧边栏"
+            },
+            "userSettings": "设定",
+            "displayStatus": "表示节点状态",
+            "displayConfig": "配置节点设定",
+            "import": "导入",
+            "export": "导出",
+            "search": "查询",
+            "clipboard": "剪贴板",
+            "library": "库",
+            "examples": "例子",
+            "subflows": "子流程",
+            "createSubflow": "新建子流程",
+            "selectionToSubflow": "将选择部分更改为子流程",
+            "flows": "流程",
+            "add": "增加",
+            "rename": "重命名",
+            "delete": "删除",
+            "keyboardShortcuts": "键盘快捷方式",
+            "login": "登陆",
+            "logout": "退出",
+            "editPalette": "编辑调面板",
+            "showTips": "显示小提示"
+        }
+    },
+    "user": {
+        "loggedInAs": "作为__name__登陆",
+        "login": "登陆",
+        "loginFailed": "登陆失败",
+        "notAuthorized": "未授权"
+    },
+    "notification": {
+        "warning": "<strong>警告</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "节点中存在未部署的更改",
+            "nodeActionDisabled": "节点动作在子流程中被禁用",
+            "missing-types": "流程由于缺少节点类型而停止。请检查日志的详细信息",
+            "restartRequired": "Node-RED必须重新启动，以启用升级的模块"
+        },
+        "error": "<strong>Error</strong>: __message__",
+        "errors": {
+            "lostConnection": "丢失与服务器的连接，重新连接...",
+            "lostConnectionReconnect": "丢失与服务器的连接，__time__秒后重新连接",
+            "lostConnectionTry": "现在尝试",
+            "cannotAddSubflowToItself": "无法向其自身添加子流程",
+            "cannotAddCircularReference": "无法添加子流程 - 循环引用",
+            "unsupportedVersion": "您正在使用不受支持的Node.js版本<br/>请升级到最新版本的Node.js LTS"
+        }
+    },
+    "clipboard": {
+        "nodes": "节点",
+        "selectNodes": "选择上面的文本并复制到剪贴板",
+        "pasteNodes": "在这里粘贴节点",
+        "importNodes": "导入节点",
+        "exportNodes": "导出节点至剪贴板",
+        "importUnrecognised": "导入了无法识别的类型:",
+        "importUnrecognised_plural": "导入了无法识别的类型:",
+        "nodesExported": "节点导出到了剪贴板",
+        "nodeCopied": "已复制__count__个节点",
+        "nodeCopied_plural": "已复制__count__个节点",
+        "invalidFlow": "无效的流程: __message__",
+        "export": {
+            "selected": "已选择的节点",
+            "current": "现在的节点",
+            "all": "所有流程",
+            "compact": "紧凑",
+            "formatted": "已格式化",
+            "copy": "导出到剪贴板"
+        },
+        "import": {
+            "import": "导入到",
+            "newFlow": "新流程"
+        },
+        "copyMessagePath": "已复制路径",
+        "copyMessageValue": "已复制数值",
+        "copyMessageValue_truncated": "已复制舍弃的数值"
+    },
+    "deploy": {
+        "deploy": "部署",
+        "full": "全面",
+        "fullDesc": "在工作区中部署所有内容",
+        "modifiedFlows": "已修改的流程",
+        "modifiedFlowsDesc": "只部署包含已更改节点的流",
+        "modifiedNodes": "已更改的节点",
+        "modifiedNodesDesc": "只部署已经更改的节点",
+        "successfulDeploy": "部署成功",
+        "deployFailed": "部署失败: __message__",
+        "unusedConfigNodes": "您有一些未使用的配置节点",
+        "unusedConfigNodesLink": "点击此处查看它们",
+        "errors": {
+            "noResponse": "服务器没有响应"
+        },
+        "confirm": {
+            "button": {
+                "ignore": "忽略",
+                "confirm": "确认部署",
+                "review": "查看更改",
+                "cancel": "取消",
+                "merge": "合并",
+                "overwrite": "忽略 & 部署"
+            },
+            "undeployedChanges": "您有未部署的更改。\n\n离开此页面将丢失这些更改。",
+            "improperlyConfigured": "工作区包含一些未正确配置的节点:",
+            "unknown": "工作区包含一些未知的节点类型:",
+            "confirm": "你确定要部署吗?",
+            "conflict": "服务器正在运行较新的一组流程。",
+            "backgroundUpdate": "服务器上的流程已更新。",
+            "conflictChecking": "检查是否可以自动合并更改",
+            "conflictAutoMerge": "此更改不包括冲突，可以自动合并",
+            "conflictManualMerge": "这些更改包括了在部署之前必须解决的冲突。"
+        }
+    },
+    "diff": {
+        "unresolvedCount": "__count__个未解决的冲突",
+        "unresolvedCount_plural": "__count__个未解决的冲突",
+        "type": {
+            "added": "已添加",
+            "changed": "已更改",
+            "unchanged": "未更改",
+            "deleted": "已删除",
+            "flowDeleted": "已删除流程",
+            "flowAdded": "已添加流程",
+            "movedTo": "移动至__id__",
+            "movedFrom": "从__id__移动"
+        },
+        "nodeCount": "__count__个节点",
+        "nodeCount_plural": "__count__个节点",
+        "local": "本地",
+        "remote": "远程"
+    },
+    "subflow": {
+        "editSubflow": "编辑流程模板: __name__",
+        "edit": "编辑流程模板",
+        "subflowInstances": "这个子流程模板有__count__个实例",
+        "subflowInstances_plural": "这个子流程模板有__count__个实例",
+        "editSubflowProperties": "编辑属性",
+        "input": "输入:",
+        "output": "输出:",
+        "deleteSubflow": "删除子流程",
+        "info": "详细描述",
+        "format": "标记格式",
+        "errors": {
+            "noNodesSelected": "<strong>无法创建子流程</strong>: 未选择节点",
+            "multipleInputsToSelection": "<strong>无法创建子流程</strong>: 多个输入到了选择"
+        }
+    },
+    "editor": {
+        "configEdit": "编辑",
+        "configAdd": "添加",
+        "configUpdate": "更新",
+        "configDelete": "删除",
+        "nodesUse": "__count__个节点使用此配置",
+        "nodesUse_plural": "__count__个节点使用此配置",
+        "addNewConfig": "添加新的__type__配置节点",
+        "editNode": "编辑__type__节点",
+        "editConfig": "编辑__type__配置节点",
+        "addNewType": "添加新节点__type__...",
+        "nodeProperties": "节点属性",
+        "portLabels": "端口标签",
+        "labelInputs": "输入",
+        "labelOutputs": "输出",
+        "noDefaultLabel": "无",
+        "defaultLabel": "使用默认标签",
+        "errors": {
+            "scopeChange": "更改范围将使其他流中的节点无法使用"
+        }
+    },
+    "keyboard": {
+        "title": "键盘快捷键",
+        "unassigned": "未分配",
+        "selectAll": "选择所有节点",
+        "selectAllConnected": "选择所有连接的节点",
+        "addRemoveNode": "从选择中添加/删除节点",
+        "editSelected": "编辑选定节点",
+        "deleteSelected": "删除选定节点或链接",
+        "importNode": "导入节点",
+        "exportNode": "导出节点",
+        "nudgeNode": "移动所选节点(1px)",
+        "moveNode": "移动所选节点(20px)",
+        "toggleSidebar": "切换侧边栏",
+        "copyNode": "复制所选节点",
+        "cutNode": "剪切所选节点",
+        "pasteNode": "粘贴节点",
+        "undoChange": "撤消上次执行的更改",
+        "searchBox": "打开搜索框",
+        "managePalette": "管理面板"
+    },
+    "library": {
+        "openLibrary": "“打开库...",
+        "saveToLibrary": "保存到库...",
+        "typeLibrary": "__type__类型库",
+        "unnamedType": "无名__type__",
+        "exportToLibrary": "将节点导出到库",
+        "dialogSaveOverwrite": "一个叫做__libraryName__的__libraryType__已经存在，您需要覆盖么？",
+        "invalidFilename": "无效的文件名",
+        "savedNodes": "保存的节点",
+        "savedType": "已保存__type__",
+        "saveFailed": "保存失败: __message__",
+        "filename": "文件名",
+        "folder": "文件夹",
+        "filenamePlaceholder": "文件",
+        "fullFilenamePlaceholder": "a/b/文件",
+        "folderPlaceholder": "a/b",
+        "breadcrumb": "库"
+    },
+    "palette": {
+        "noInfo": "无可用信息",
+        "filter": "过滤节点",
+        "search": "搜索模块",
+        "label": {
+            "subflows": "子流程",
+            "input": "输入",
+            "output": "输出",
+            "function": "功能",
+            "social": "社交",
+            "storage": "存储",
+            "analysis": "分析",
+            "advanced": "高级的"
+        },
+        "event": {
+            "nodeAdded": "添加到面板中的节点:",
+            "nodeAdded_plural": "添加到面板中的多个节点",
+            "nodeRemoved": "从面板中删除的节点:",
+            "nodeRemoved_plural": "从面板中删除的多个节点:",
+            "nodeEnabled": "启用节点:",
+            "nodeEnabled_plural": "启用多个节点:",
+            "nodeDisabled": "禁用节点:",
+            "nodeDisabled_plural": "禁用多个节点:",
+            "nodeUpgraded": "节点模块__module__升级到__version__版本"
+        },
+        "editor": {
+            "title": "面板管理",
+            "times": {
+                "seconds": "秒前",
+                "minutes": "分前",
+                "minutesV": "__count__分前",
+                "hoursV": "__count__小时前",
+                "hoursV_plural": "__count__小时前",
+                "daysV": "__count__天前",
+                "daysV_plural": "__count__天前",
+                "weeksV": "__count__周前",
+                "weeksV_plural": "__count__周前",
+                "monthsV": "__count__月前",
+                "monthsV_plural": "__count__月前",
+                "yearsV": "__count__年前",
+                "yearsV_plural": "__count__年前",
+                "yearMonthsV": "__y__年, __count__月前",
+                "yearMonthsV_plural": "__y__年, __count__月前",
+                "yearsMonthsV": "__y__年, __count__月前",
+                "yearsMonthsV_plural": "__y__年, __count__月前"
+            },
+            "nodeCount": "__label__个节点",
+            "nodeCount_plural": "__label__个节点",
+            "moduleCount": "__count__个可用模块",
+            "moduleCount_plural": "__count__个可用模块",
+            "inuse": "使用中",
+            "enableall": "全部启用",
+            "disableall": "全部禁用",
+            "enable": "启用",
+            "disable": "禁用",
+            "remove": "移除",
+            "update": "更新至__version__版本",
+            "updated": "已更新",
+            "install": "安装",
+            "installed": "已安装",
+            "loading": "加载目录...",
+            "tab-nodes": "节点",
+            "tab-install": "安装",
+            "sort": "排序:",
+            "sortAZ": "a-z顺序",
+            "sortRecent": "日期顺序",
+            "more": "增加__count__个",
+            "errors": {
+                "catalogLoadFailed": "无法加载节点目录。<br>查看浏览器控制台了解更多信息",
+                "installFailed": "无法安装: __module__<br>__message__<br>查看日志了解更多信息",
+                "removeFailed": "无法删除: __module__<br>__message__<br>查看日志了解更多信息",
+                "updateFailed": "无法更新: __module__<br>__message__<br>查看日志了解更多信息",
+                "enableFailed": "无法启用: __module__<br>__message__<br>查看日志了解更多信息",
+                "disableFailed": "无法禁用: __module__<br>__message__<br>查看日志了解更多信息"
+            },
+            "confirm": {
+                "install": {
+                    "body": "在安装之前，请阅读节点的文档，某些节点的依赖关系不能自动解决，可能需要重新启动Node-RED。",
+                    "title": "安装节点"
+                },
+                "remove": {
+                    "body": "删除节点将从Node-RED卸载它。节点可能会继续使用资源，直到重新启动Node-RED。",
+                    "title": "删除节点"
+                },
+                "update": {
+                    "body": "更新节点将需要重新启动Node-RED来完成更新，该过程必须由手动完成。",
+                    "title": "更新节点"
+                },
+                "cannotUpdate": {
+                    "body": "此节点的更新可用，但不会安装在面板管理器可以更新的位置。<br/><br/>请参阅有关如何更新此节点的文档。"
+                },
+                "button": {
+                    "review": "打开节点信息",
+                    "install": "安装",
+                    "remove": "删除",
+                    "update": "更新"
+                }
+            }
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "节点信息",
+            "label": "信息",
+            "node": "节点",
+            "type": "类型",
+            "id": "ID",
+            "subflow": "子流程",
+            "instances": "实例",
+            "properties": "属性",
+            "info": "信息",
+            "blank": "空白",
+            "null": "空",
+            "arrayItems": "__count__个项目",
+            "showTips": "您可以从设置面板打开提示"
+        },
+        "config": {
+            "name": "配置节点",
+            "label": "配置",
+            "global": "所有流程",
+            "none": "无",
+            "subflows": "子流程",
+            "flows": "流程",
+            "filterUnused": "未使用",
+            "filterAll": "所有",
+            "filtered": "__count__个隐藏"
+        },
+        "palette": {
+            "name": "面板管理",
+            "label": "面板"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "文字列",
+            "num": "数字",
+            "re": "正则表达式",
+            "bool": "真伪判断",
+            "json": "JSON",
+            "date": "时间戳"
+        }
+    },
+    "editableList": {
+        "add": "添加"
+    },
+    "search": {
+        "empty": "找不到匹配",
+        "addNode": "添加一个节点..."
+    },
+    "expressionEditor": {
+        "functions": "功能",
+        "insert": "插入",
+        "title": "JSONata表达式编辑器",
+        "data": "示例消息",
+        "result": "结果",
+        "format": "格式表达方法",
+        "compatMode": "兼容模式启用",
+        "compatModeDesc": "<h3>JSONata的兼容模式</h3><p> 目前的表达式仍然参考<code>msg</code>，所以将以兼容性模式进行评估。请更新表达式，使其不使用<code>msg</code>，因为此模式将在将来删除。</p><p> 当JSONata支持首次添加到Node-RED时，它需要表达式引用<code>msg</code>对象。例如<code>msg.payload</code>将用于访问有效负载。</p><p> 这样便不再需要表达式直接针对消息进行评估。要访问有效负载，表达式应该只是<code>payload</code>.</p>",
+        "noMatch": "无匹配结果",
+        "errors": {
+            "invalid-expr": "无效的JSONata表达式:\n  __message__",
+            "invalid-msg": "无效的示例JSON消息:\n  __message__",
+            "context-unsupported": "无法测试上下文函数\n $flowContext 或 $globalContext",
+            "eval": "评估表达式错误:\n  __message__"
+        }
+    },
+    "jsonEditor": {
+        "title": "JSON编辑器",
+        "format": "格式化JSON"
+    },
+    "bufferEditor": {
+        "title": "缓冲区编辑器",
+        "modeString": "作为UTF-8字符串处理",
+        "modeArray": "作为JSON数组处理",
+        "modeDesc": "<h3>缓冲区编辑器</h3><p>缓冲区类型被存储为字节值的JSON数组。编辑器将尝试将输入的数值解析为JSON数组。如果它不是有效的JSON，它将被视为UTF-8字符串，并被转换为单个字符代码点的数组。</p><p>例如，<code>Hello World</code>的值会被转换为JSON数组：<pre>[72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]</pre></p>"
+    }
+}

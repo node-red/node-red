@@ -1,18 +1,3 @@
-<!--
-  Copyright JS Foundation and other contributors, http://js.foundation
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
--->
 
 <script type="text/x-red" data-template-name="html">
     <div class="form-row">
@@ -40,16 +25,27 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" style="width:70%" data-i18n="[placeholder]common.label.name">
     </div>
-    <div class="form-tips"><span data-i18n="[html]html.tip"></span></div>
 </script>
 
 <script type="text/x-red" data-help-name="html">
-    <p>Extracts elements from an html document held in <code>msg.payload</code> using a selector.</p>
-    <p>If left blank the selector may be set dynamically by passing in <code>msg.select</code> along with the <code>msg.payload</code>.
-    <p>The selector uses <a href="https://github.com/cheeriojs/cheerio/blob/master/Readme.md" target="_blank">Cheerio</a>
-     which uses the <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">CSS selector</a> syntax.</p>
-    <p>The result can be either a single message with a payload containing an array of the matched elements, or multiple
-       messages that each contain a matched element.</p>
+    <p>Extracts elements from an html document held in <code>msg.payload</code> using a CSS selector.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+    <dt>payload <span class="property-type">string</span></dt>
+    <dd>the html string from which to extract elements.</dd>
+    <dt class="optional">select <span class="property-type">string</span></dt>
+    <dd>if not configured in the edit panel the selector can be set as a property of msg.</dd>
+</dl>
+    <h3>Output</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">array | string</span></dt>
+        <dd>the result can be either a single message with a payload containing an array of the matched elements, or multiple
+           messages that each contain a matched element.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>This node supports a combination of CSS and jQuery selectors. See the
+    <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">css-select documentation</a> for more information
+    on the supported syntax.</p>
 </script>
 
 <script type="text/javascript">

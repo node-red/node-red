@@ -17,6 +17,7 @@
 var should = require("should");
 var when = require("when");
 var sinon = require("sinon");
+var path = require("path");
 
 var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
 
@@ -480,6 +481,27 @@ describe("red/nodes/registry/registry",function() {
             typeRegistry.registerNodeConstructor('node-set','node-type2',TestNodeConstructor);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
             TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+        });
+    });
+
+    describe('#getNodeIconPath', function() {
+        it('returns the default icon when getting an unknown icon', function() {
+            var defaultIcon = path.resolve(__dirname+'/../../../../../public/icons/arrow-in.png');
+            var iconPath = typeRegistry.getNodeIconPath('random-module','youwonthaveme.png');
+            iconPath.should.eql(defaultIcon);
+        });
+
+        it('returns a registered icon' , function() {
+            var testIcon = path.resolve(__dirname+'/../../../../resources/icons/test_icon.png');
+            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../../../resources/icons')});
+            var iconPath = typeRegistry.getNodeIconPath('test-module','test_icon.png');
+            iconPath.should.eql(testIcon);
+        });
+
+        it('returns the debug icon when getting an unknown module', function() {
+            var debugIcon = path.resolve(__dirname+'/../../../../../public/icons/debug.png');
+            var iconPath = typeRegistry.getNodeIconPath('unknown-module', 'debug.png');
+            iconPath.should.eql(debugIcon);
         });
     });
 

@@ -191,7 +191,7 @@ RED.editor = (function() {
             if (outputMap) {
                 RED.nodes.eachLink(function(l) {
                     if (l.source === node && outputMap.hasOwnProperty(l.sourcePort)) {
-                        if (outputMap[l.sourcePort] === -1) {
+                        if (outputMap[l.sourcePort] === "-1") {
                             removedLinks.push(l);
                         } else {
                             l.sourcePort = outputMap[l.sourcePort];
@@ -265,17 +265,8 @@ RED.editor = (function() {
         var configNode = RED.nodes.node(node[property]);
         var node_def = RED.nodes.getType(type);
 
-        if (configNode && node_def.label) {
-            if (typeof node_def.label == "function") {
-                try {
-                    label = node_def.label.call(configNode);
-                } catch(err) {
-                    console.log("Definition error: "+node_def.type+".label",err);
-                    label = node_def.type;
-                }
-            } else {
-                label = node_def.label;
-            }
+        if (configNode) {
+            label = RED.utils.getNodeLabel(configNode,configNode.id);
         }
         input.val(label);
     }
@@ -502,7 +493,11 @@ RED.editor = (function() {
             var node = editStack[i];
             var label = node.type;
             if (node.type === '_expression') {
-                label = "Expression editor";
+                label = RED._("expressionEditor.title");
+            } else if (node.type === '_json') {
+                label = RED._("jsonEditor.title");
+            } else if (node.type === '_buffer') {
+                label = RED._("bufferEditor.title");
             } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
@@ -530,9 +525,8 @@ RED.editor = (function() {
         return title;
     }
 
-    function buildEditForm(tray,formId,type,ns) {
-        var trayBody = tray.find('.editor-tray-body');
-        var dialogForm = $('<form id="'+formId+'" class="form-horizontal" autocomplete="off"></form>').appendTo(trayBody);
+    function buildEditForm(container,formId,type,ns) {
+        var dialogForm = $('<form id="'+formId+'" class="form-horizontal" autocomplete="off"></form>').appendTo(container);
         dialogForm.html($("script[data-template-name='"+type+"']").html());
         ns = ns||"node-red";
         dialogForm.find('[data-i18n]').each(function() {
@@ -559,6 +553,163 @@ RED.editor = (function() {
         $('<input type="text" style="display: none;" />').prependTo(dialogForm);
         dialogForm.submit(function(e) { e.preventDefault();});
         return dialogForm;
+    }
+
+    function refreshLabelForm(container,node) {
+
+        var inputPlaceholder = node._def.inputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+        var outputPlaceholder = node._def.outputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+
+        var inputsDiv = $("#node-label-form-inputs");
+        var outputsDiv = $("#node-label-form-outputs");
+
+        var inputCount = node.inputs || node._def.inputs || 0;
+        var children = inputsDiv.children();
+        var childCount = children.length;
+        if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+            childCount--;
+        }
+
+        if (childCount < inputCount) {
+            if (childCount === 0) {
+                // remove the 'none' placeholder
+                $(children[0]).remove();
+            }
+            for (i = childCount;i<inputCount;i++) {
+                buildLabelRow("input",i,"",inputPlaceholder).appendTo(inputsDiv);
+            }
+        } else if (childCount > inputCount) {
+            for (i=inputCount;i<childCount;i++) {
+                $(children[i]).remove();
+            }
+            if (outputCount === 0) {
+                buildLabelRow().appendTo(inputsDiv);
+            }
+        }
+
+        var outputCount;
+        var i;
+        var formOutputs = $("#node-input-outputs").val();
+
+        if (formOutputs === undefined) {
+            outputCount = node.outputs || node._def.outputs || 0;
+        } else if (isNaN(formOutputs)) {
+            var outputMap = JSON.parse(formOutputs);
+            var keys = Object.keys(outputMap);
+            children = outputsDiv.children();
+            childCount = children.length;
+            if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+                childCount--;
+            }
+
+            outputCount = 0;
+            var rows = [];
+            keys.forEach(function(p) {
+                var row = $("#node-label-form-output-"+p).parent();
+                if (row.length === 0 && outputMap[p] !== -1) {
+                    if (childCount === 0) {
+                        $(children[0]).remove();
+                        childCount = -1;
+                    }
+                    row = buildLabelRow("output",p,"",outputPlaceholder);
+                } else {
+                    row.detach();
+                }
+                if (outputMap[p] !== -1) {
+                    outputCount++;
+                    rows.push({i:parseInt(outputMap[p]),r:row});
+                }
+            });
+            rows.sort(function(A,B) {
+                return A.i-B.i;
+            })
+            rows.forEach(function(r,i) {
+                r.r.find("label").html((i+1)+".");
+                r.r.appendTo(outputsDiv);
+            })
+            if (rows.length === 0) {
+                buildLabelRow("output",i,"").appendTo(outputsDiv);
+            } else {
+
+            }
+        } else {
+            outputCount = Math.max(0,parseInt(formOutputs));
+        }
+        children = outputsDiv.children();
+        childCount = children.length;
+        if (childCount === 1 && $(children[0]).hasClass('node-label-form-none')) {
+            childCount--;
+        }
+        if (childCount < outputCount) {
+            if (childCount === 0) {
+                // remove the 'none' placeholder
+                $(children[0]).remove();
+            }
+            for (i = childCount;i<outputCount;i++) {
+                buildLabelRow("output",i,"").appendTo(outputsDiv);
+            }
+        } else if (childCount > outputCount) {
+            for (i=outputCount;i<childCount;i++) {
+                $(children[i]).remove();
+            }
+            if (outputCount === 0) {
+                buildLabelRow().appendTo(outputsDiv);
+            }
+        }
+    }
+    function buildLabelRow(type, index, value, placeHolder) {
+        var result = $('<div>',{class:"node-label-form-row"});
+        if (type === undefined) {
+            $('<span>').html("none").appendTo(result);
+            result.addClass("node-label-form-none");
+        } else {
+            result.addClass("");
+            var id = "node-label-form-"+type+"-"+index;
+            $('<label>',{for:id}).html((index+1)+".").appendTo(result);
+            var input = $('<input>',{type:"text",id:id, placeholder: placeHolder}).val(value).appendTo(result);
+            var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(result);
+            clear.click(function(evt) {
+                evt.preventDefault();
+                input.val("");
+            })
+        }
+        return result;
+    }
+    function buildLabelForm(container,node) {
+        var dialogForm = $('<form class="dialog-form form-horizontal" autocomplete="off"></form>').appendTo(container);
+
+        var inputCount = node.inputs || node._def.inputs || 0;
+        var outputCount = node.outputs || node._def.outputs || 0;
+        if (node.type === 'subflow') {
+            inputCount = node.in.length;
+            outputCount = node.out.length;
+        }
+
+        var inputLabels = node.inputLabels || [];
+        var outputLabels = node.outputLabels || [];
+
+        var inputPlaceholder = node._def.inputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+        var outputPlaceholder = node._def.outputLabels?RED._("editor.defaultLabel"):RED._("editor.noDefaultLabel");
+
+        var i,row;
+        $('<div class="form-row"><span data-i18n="editor.labelInputs"></span><div id="node-label-form-inputs"></div></div>').appendTo(dialogForm);
+        var inputsDiv = $("#node-label-form-inputs");
+        if (inputCount > 0) {
+            for (i=0;i<inputCount;i++) {
+                buildLabelRow("input",i,inputLabels[i],inputPlaceholder).appendTo(inputsDiv);
+            }
+        } else {
+            buildLabelRow().appendTo(inputsDiv);
+        }
+        $('<div class="form-row"><span data-i18n="editor.labelOutputs"></span><div id="node-label-form-outputs"></div></div>').appendTo(dialogForm);
+        var outputsDiv = $("#node-label-form-outputs");
+        if (outputCount > 0) {
+            for (i=0;i<outputCount;i++) {
+                buildLabelRow("output",i,outputLabels[i],outputPlaceholder).appendTo(outputsDiv);
+            }
+        } else {
+            buildLabelRow().appendTo(outputsDiv);
+        }
     }
 
     function showEditDialog(node) {
@@ -683,11 +834,11 @@ RED.editor = (function() {
                             }
                         }
 
+                        var newValue;
                         if (editing_node._def.defaults) {
                             for (d in editing_node._def.defaults) {
                                 if (editing_node._def.defaults.hasOwnProperty(d)) {
                                     var input = $("#node-input-"+d);
-                                    var newValue;
                                     if (input.attr('type') === "checkbox") {
                                         newValue = input.prop('checked');
                                     } else if ("format" in editing_node._def.defaults[d] && editing_node._def.defaults[d].format !== "" && input[0].nodeName === "DIV") {
@@ -696,8 +847,42 @@ RED.editor = (function() {
                                         newValue = input.val();
                                     }
                                     if (newValue != null) {
-                                        if (d === "outputs" && (newValue.trim() === "" || isNaN(newValue))) {
-                                            continue;
+                                        if (d === "outputs") {
+                                            if  (newValue.trim() === "") {
+                                                continue;
+                                            }
+                                            if (isNaN(newValue)) {
+                                                outputMap = JSON.parse(newValue);
+                                                var outputCount = 0;
+                                                var outputsChanged = false;
+                                                var keys = Object.keys(outputMap);
+                                                keys.forEach(function(p) {
+                                                    if (isNaN(p)) {
+                                                        // New output;
+                                                        outputCount ++;
+                                                        delete outputMap[p];
+                                                    } else {
+                                                        outputMap[p] = outputMap[p]+"";
+                                                        if (outputMap[p] !== "-1") {
+                                                            outputCount++;
+                                                            if (outputMap[p] !== p) {
+                                                                // Output moved
+                                                                outputsChanged = true;
+                                                            } else {
+                                                                delete outputMap[p];
+                                                            }
+                                                        } else {
+                                                            // Output removed
+                                                            outputsChanged = true;
+                                                        }
+                                                    }
+                                                });
+
+                                                newValue = outputCount;
+                                                if (outputsChanged) {
+                                                    changed = true;
+                                                }
+                                            }
                                         }
                                         if (editing_node[d] != newValue) {
                                             if (editing_node._def.defaults[d].type) {
@@ -729,14 +914,52 @@ RED.editor = (function() {
                             var credsChanged = updateNodeCredentials(editing_node,credDefinition,prefix);
                             changed = changed || credsChanged;
                         }
-                        if (editing_node.hasOwnProperty("_outputs")) {
-                            outputMap = editing_node._outputs;
-                            delete editing_node._outputs;
-                            if (Object.keys(outputMap).length > 0) {
-                                changed = true;
-                            }
-                        }
+                        // if (editing_node.hasOwnProperty("_outputs")) {
+                        //     outputMap = editing_node._outputs;
+                        //     delete editing_node._outputs;
+                        //     if (Object.keys(outputMap).length > 0) {
+                        //         changed = true;
+                        //     }
+                        // }
                         var removedLinks = updateNodeProperties(editing_node,outputMap);
+
+                        var inputLabels = $("#node-label-form-inputs").children().find("input");
+                        var outputLabels = $("#node-label-form-outputs").children().find("input");
+
+                        var hasNonBlankLabel = false;
+                        newValue = inputLabels.map(function() {
+                            var v = $(this).val();
+                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+                            return v;
+                        }).toArray().slice(0,editing_node.inputs);
+                        if ((editing_node.inputLabels === undefined && hasNonBlankLabel) ||
+                            (editing_node.inputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels))) {
+                            changes.inputLabels = editing_node.inputLabels;
+                            editing_node.inputLabels = newValue;
+                            changed = true;
+                        }
+                        hasNonBlankLabel = false;
+                        newValue = new Array(editing_node.outputs);
+                        outputLabels.each(function() {
+                            var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
+                            if (outputMap && outputMap.hasOwnProperty(index)) {
+                                index = parseInt(outputMap[index]);
+                                if (index === -1) {
+                                    return;
+                                }
+                            }
+                            var v = $(this).val();
+                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+                            newValue[index] = v;
+                        })
+
+                        if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
+                            (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
+                            changes.outputLabels = editing_node.outputLabels;
+                            editing_node.outputLabels = newValue;
+                            changed = true;
+                        }
+
                         if (changed) {
                             var wasChanged = editing_node.changed;
                             editing_node.changed = true;
@@ -785,8 +1008,9 @@ RED.editor = (function() {
             ],
             resize: function(dimensions) {
                 editTrayWidthCache[type] = dimensions.width;
+                $(".editor-tray-content").height(dimensions.height - 78);
+                var form = $(".editor-tray-content form").height(dimensions.height - 78 - 40);
                 if (editing_node && editing_node._def.oneditresize) {
-                    var form = $("#dialog-form");
                     try {
                         editing_node._def.oneditresize.call(editing_node,{width:form.width(),height:form.height()});
                     } catch(err) {
@@ -794,7 +1018,30 @@ RED.editor = (function() {
                     }
                 }
             },
-            open: function(tray,done) {
+            open: function(tray, done) {
+                var trayFooter = tray.find(".editor-tray-footer");
+                var trayBody = tray.find('.editor-tray-body');
+                trayBody.parent().css('overflow','hidden');
+
+                var stack = RED.stack.create({
+                    container: trayBody,
+                    singleExpanded: true
+                });
+                var nodeProperties = stack.add({
+                    title: RED._("editor.nodeProperties"),
+                    expanded: true
+                });
+                nodeProperties.content.addClass("editor-tray-content");
+
+                var portLabels = stack.add({
+                    title: RED._("editor.portLabels"),
+                    onexpand: function() {
+                        refreshLabelForm(this.content,node);
+                    }
+                });
+                portLabels.content.addClass("editor-tray-content");
+
+
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
@@ -804,12 +1051,13 @@ RED.editor = (function() {
                 } else {
                     ns = node._def.set.id;
                 }
-                var dialogForm = buildEditForm(tray,"dialog-form",type,ns);
+                buildEditForm(nodeProperties.content,"dialog-form",type,ns);
+                buildLabelForm(portLabels.content,node);
+
                 prepareEditDialog(node,node._def,"node-input", function() {
-                    dialogForm.i18n();
+                    trayBody.i18n();
                     done();
                 });
-
             },
             close: function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
@@ -907,7 +1155,7 @@ RED.editor = (function() {
                 }
                 trayFooter.append('<span id="node-config-dialog-scope-container"><span id="node-config-dialog-scope-warning" data-i18n="[title]editor.errors.scopeChange"><i class="fa fa-warning"></i></span><select id="node-config-dialog-scope"></select></span>');
 
-                var dialogForm = buildEditForm(tray,"node-config-dialog-edit-form",type,ns);
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),"node-config-dialog-edit-form",type,ns);
 
                 prepareEditDialog(editing_config_node,node_def,"node-config-input", function() {
                     if (editing_config_node._def.exclusive) {
@@ -1215,17 +1463,7 @@ RED.editor = (function() {
 
                 RED.nodes.eachConfig(function(config) {
                     if (config.type == type && (!config.z || config.z === activeWorkspace.id)) {
-                        var label = "";
-                        if (typeof node_def.label == "function") {
-                            try {
-                                label = node_def.label.call(config);
-                            } catch(err) {
-                                console.log("Definition error: "+node_def.type+".label",err);
-                                label = node_def.type;
-                            }
-                        } else {
-                            label = node_def.label;
-                        }
+                        var label = RED.utils.getNodeLabel(config,config.id);
                         config.__label__ = label;
                         configNodes.push(config);
                     }
@@ -1292,6 +1530,21 @@ RED.editor = (function() {
                             editing_node.info = newDescription;
                             changed = true;
                         }
+                        var inputLabels = $("#node-label-form-inputs").children().find("input");
+                        var outputLabels = $("#node-label-form-outputs").children().find("input");
+
+                        var newValue = inputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.inputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels)) {
+                            changes.inputLabels = editing_node.inputLabels;
+                            editing_node.inputLabels = newValue;
+                            changed = true;
+                        }
+                        newValue = outputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.outputs);
+                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels)) {
+                            changes.outputLabels = editing_node.outputLabels;
+                            editing_node.outputLabels = newValue;
+                            changed = true;
+                        }
 
                         RED.palette.refresh();
 
@@ -1329,7 +1582,10 @@ RED.editor = (function() {
                     }
                 }
             ],
-            resize: function() {
+            resize: function(dimensions) {
+                $(".editor-tray-content").height(dimensions.height - 78);
+                var form = $(".editor-tray-content form").height(dimensions.height - 78 - 40);
+
                 var rows = $("#dialog-form>div:not(.node-text-editor-row)");
                 var editorRow = $("#dialog-form>div.node-text-editor-row");
                 var height = $("#dialog-form").height();
@@ -1341,10 +1597,30 @@ RED.editor = (function() {
                 subflowEditor.resize();
             },
             open: function(tray) {
+                var trayFooter = tray.find(".editor-tray-footer");
+                var trayBody = tray.find('.editor-tray-body');
+                trayBody.parent().css('overflow','hidden');
+
+                var stack = RED.stack.create({
+                    container: trayBody,
+                    singleExpanded: true
+                });
+                var nodeProperties = stack.add({
+                    title: RED._("editor.nodeProperties"),
+                    expanded: true
+                });
+                nodeProperties.content.addClass("editor-tray-content");
+                var portLabels = stack.add({
+                    title: RED._("editor.portLabels")
+                });
+                portLabels.content.addClass("editor-tray-content");
+
+
+
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
-                var dialogForm = buildEditForm(tray,"dialog-form","subflow-template");
+                var dialogForm = buildEditForm(nodeProperties.content,"dialog-form","subflow-template");
                 subflowEditor = RED.editor.createEditor({
                     id: 'subflow-input-info-editor',
                     mode: 'ace/mode/markdown',
@@ -1363,7 +1639,9 @@ RED.editor = (function() {
                     }
                 });
                 $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
-                dialogForm.i18n();
+
+                buildLabelForm(portLabels.content,subflow);
+                trayBody.i18n();
             },
             close: function() {
                 if (RED.view.state() != RED.state.IMPORT_DRAGGING) {
@@ -1371,6 +1649,7 @@ RED.editor = (function() {
                 }
                 RED.sidebar.info.refresh(editing_node);
                 RED.workspaces.refresh();
+                subflowEditor.destroy();
                 editStack.pop();
                 editing_node = null;
             },
@@ -1381,13 +1660,23 @@ RED.editor = (function() {
     }
 
 
+    var expressionTestCache = {};
+
     function editExpression(options) {
+        var expressionTestCacheId = "_";
+        if (editStack.length > 0) {
+            expressionTestCacheId = editStack[editStack.length-1].id;
+        }
+
         var value = options.value;
         var onComplete = options.complete;
         var type = "_expression"
         editStack.push({type:type});
         RED.view.state(RED.state.EDITING);
         var expressionEditor;
+        var testDataEditor;
+        var testResultEditor
+        var panels;
 
         var trayOptions = {
             title: getEditStackTitle(),
@@ -1411,21 +1700,19 @@ RED.editor = (function() {
                 }
             ],
             resize: function(dimensions) {
-                editTrayWidthCache[type] = dimensions.width;
-
-                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                var editorRow = $("#dialog-form>div.node-text-editor-row");
-                var height = $("#dialog-form").height();
-                for (var i=0;i<rows.size();i++) {
-                    height -= $(rows[i]).outerHeight(true);
+                if (dimensions) {
+                    editTrayWidthCache[type] = dimensions.width;
                 }
-                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
-                $(".node-text-editor").css("height",height+"px");
-                expressionEditor.resize();
+                var height = $("#dialog-form").height();
+                if (panels) {
+                    panels.resize(height);
+                }
+
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var dialogForm = buildEditForm(tray,'dialog-form','_expression','editor');
+                trayBody.addClass("node-input-expression-editor")
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form','_expression','editor');
                 var funcSelect = $("#node-input-expression-func");
                 Object.keys(jsonata.functions).forEach(function(f) {
                     funcSelect.append($("<option></option>").val(f).text(f));
@@ -1528,10 +1815,413 @@ RED.editor = (function() {
                     var snippet = jsonata.getFunctionSnippet(f);
                     expressionEditor.insertSnippet(snippet);
                     expressionEditor.focus();
+                });
+                $("#node-input-expression-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = expressionEditor.getValue()||"";
+                    try {
+                        v = jsonata.format(v);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    expressionEditor.getSession().setValue(v||"",-1);
+                });
+
+                var tabs = RED.tabs.create({
+                    element: $("#node-input-expression-tabs"),
+                    onchange:function(tab) {
+                        $(".node-input-expression-tab-content").hide();
+                        tab.content.show();
+                        trayOptions.resize();
+                    }
                 })
+
+                tabs.addTab({
+                    id: 'expression-help',
+                    label: 'Function reference',
+                    content: $("#node-input-expression-tab-help")
+                });
+                tabs.addTab({
+                    id: 'expression-tests',
+                    label: 'Test',
+                    content: $("#node-input-expression-tab-test")
+                });
+                testDataEditor = RED.editor.createEditor({
+                    id: 'node-input-expression-test-data',
+                    value: expressionTestCache[expressionTestCacheId] || '{\n    "payload": "hello world"\n}',
+                    mode:"ace/mode/json",
+                    lineNumbers: false
+                });
+                var changeTimer;
+                $(".node-input-expression-legacy").click(function(e) {
+                    e.preventDefault();
+                    RED.sidebar.info.set(RED._("expressionEditor.compatModeDesc"));
+                    RED.sidebar.info.show();
+                })
+                var testExpression = function() {
+                    var value = testDataEditor.getValue();
+                    var parsedData;
+                    var currentExpression = expressionEditor.getValue();
+                    var expr;
+                    var usesContext = false;
+                    var legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(currentExpression);
+                    $(".node-input-expression-legacy").toggle(legacyMode);
+                    try {
+                        expr = jsonata(currentExpression);
+                        expr.assign('flowContext',function(val) {
+                            usesContext = true;
+                            return null;
+                        });
+                        expr.assign('globalContext',function(val) {
+                            usesContext = true;
+                            return null;
+                        });
+                    } catch(err) {
+                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-expr",{message:err.message}),-1);
+                        return;
+                    }
+                    try {
+                        parsedData = JSON.parse(value);
+                    } catch(err) {
+                        testResultEditor.setValue(RED._("expressionEditor.errors.invalid-msg",{message:err.toString()}))
+                        return;
+                    }
+
+                    try {
+                        var result = expr.evaluate(legacyMode?{msg:parsedData}:parsedData);
+                        if (usesContext) {
+                            testResultEditor.setValue(RED._("expressionEditor.errors.context-unsupported"),-1);
+                            return;
+                        }
+
+                        var formattedResult;
+                        if (result !== undefined) {
+                            formattedResult = JSON.stringify(result,null,4);
+                        } else {
+                            formattedResult = RED._("expressionEditor.noMatch");
+                        }
+                        testResultEditor.setValue(formattedResult,-1);
+                    } catch(err) {
+                        testResultEditor.setValue(RED._("expressionEditor.errors.eval",{message:err.message}),-1);
+                    }
+                }
+
+                testDataEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(testExpression,200);
+                    expressionTestCache[expressionTestCacheId] = testDataEditor.getValue();
+                });
+                expressionEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(testExpression,200);
+                });
+
+                testResultEditor = RED.editor.createEditor({
+                    id: 'node-input-expression-test-result',
+                    value: "",
+                    mode:"ace/mode/json",
+                    lineNumbers: false,
+                    readOnly: true
+                });
+                panels = RED.panels.create({
+                    id:"node-input-expression-panels",
+                    resize: function(p1Height,p2Height) {
+                        var p1 = $("#node-input-expression-panel-expr");
+                        p1Height -= $(p1.children()[0]).outerHeight(true);
+                        var editorRow = $(p1.children()[1]);
+                        p1Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-expression").css("height",(p1Height-5)+"px");
+                        expressionEditor.resize();
+
+                        var p2 = $("#node-input-expression-panel-info > .form-row > div:first-child");
+                        p2Height -= p2.outerHeight(true) + 20;
+                        $(".node-input-expression-tab-content").height(p2Height);
+                        $("#node-input-expression-test-data").css("height",(p2Height-5)+"px");
+                        testDataEditor.resize();
+                        $("#node-input-expression-test-result").css("height",(p2Height-5)+"px");
+                        testResultEditor.resize();
+                    }
+                });
+
+                $("#node-input-example-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = testDataEditor.getValue()||"";
+                    try {
+                        v = JSON.stringify(JSON.parse(v),null,4);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    testDataEditor.getSession().setValue(v||"",-1);
+                });
+
+                testExpression();
             },
             close: function() {
                 editStack.pop();
+                expressionEditor.destroy();
+                testDataEditor.destroy();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
+
+    function editJSON(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_json"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var expressionEditor;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        onComplete(expressionEditor.getValue());
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
+
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                expressionEditor.resize();
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
+                expressionEditor = RED.editor.createEditor({
+                    id: 'node-input-json',
+                    value: "",
+                    mode:"ace/mode/json"
+                });
+                expressionEditor.getSession().setValue(value||"",-1);
+                $("#node-input-json-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = expressionEditor.getValue()||"";
+                    try {
+                        v = JSON.stringify(JSON.parse(v),null,4);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    expressionEditor.getSession().setValue(v||"",-1);
+                });
+                dialogForm.i18n();
+            },
+            close: function() {
+                editStack.pop();
+                expressionEditor.destroy();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function stringToUTF8Array(str) {
+        var data = [];
+        var i=0, l = str.length;
+        for (i=0; i<l; i++) {
+            var char = str.charCodeAt(i);
+            if (char < 0x80) {
+                data.push(char);
+            } else if (char < 0x800) {
+                data.push(0xc0 | (char >> 6));
+                data.push(0x80 | (char & 0x3f));
+            } else if (char < 0xd800 || char >= 0xe000) {
+                data.push(0xe0 | (char >> 12));
+                data.push(0x80 | ((char>>6) & 0x3f));
+                data.push(0x80 | (char & 0x3f));
+            } else {
+                i++;
+                char = 0x10000 + (((char & 0x3ff)<<10) | (str.charAt(i) & 0x3ff));
+                data.push(0xf0 | (char >>18));
+                data.push(0x80 | ((char>>12) & 0x3f));
+                data.push(0x80 | ((char>>6) & 0x3f));
+                data.push(0x80 | (char & 0x3f));
+            }
+        }
+        return data;
+    }
+
+    function editBuffer(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_buffer"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var bufferStringEditor = [];
+        var bufferBinValue;
+
+        var panels;
+
+        var trayOptions = {
+            title: getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        onComplete(JSON.stringify(bufferBinValue));
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                if (dimensions) {
+                    editTrayWidthCache[type] = dimensions.width;
+                }
+                var height = $("#dialog-form").height();
+                if (panels) {
+                    panels.resize(height);
+                }
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
+
+                bufferStringEditor = RED.editor.createEditor({
+                    id: 'node-input-buffer-str',
+                    value: "",
+                    mode:"ace/mode/text"
+                });
+                bufferStringEditor.getSession().setValue(value||"",-1);
+
+                bufferBinEditor = RED.editor.createEditor({
+                    id: 'node-input-buffer-bin',
+                    value: "",
+                    mode:"ace/mode/text",
+                    readOnly: true
+                });
+
+                var changeTimer;
+                var buildBuffer = function(data) {
+                    var valid = true;
+                    var isString = typeof data === 'string';
+                    var binBuffer = [];
+                    if (isString) {
+                        bufferBinValue = stringToUTF8Array(data);
+                    } else {
+                        bufferBinValue = data;
+                    }
+                    var i=0,l=bufferBinValue.length;
+                    var c = 0;
+                    for(i=0;i<l;i++) {
+                        var d = parseInt(bufferBinValue[i]);
+                        if (!isString && (isNaN(d) || d < 0 || d > 255)) {
+                            valid = false;
+                            break;
+                        }
+                        if (i>0) {
+                            if (i%8 === 0) {
+                                if (i%16 === 0) {
+                                    binBuffer.push("\n");
+                                } else {
+                                    binBuffer.push("  ");
+                                }
+                            } else {
+                                binBuffer.push(" ");
+                            }
+                        }
+                        binBuffer.push((d<16?"0":"")+d.toString(16).toUpperCase());
+                    }
+                    if (valid) {
+                        $("#node-input-buffer-type-string").toggle(isString);
+                        $("#node-input-buffer-type-array").toggle(!isString);
+                        bufferBinEditor.setValue(binBuffer.join(""),1);
+                    }
+                    return valid;
+                }
+                var bufferStringUpdate = function() {
+                    var value = bufferStringEditor.getValue();
+                    var isValidArray = false;
+                    if (/^[\s]*\[[\s\S]*\][\s]*$/.test(value)) {
+                        isValidArray = true;
+                        try {
+                            var data = JSON.parse(value);
+                            isValidArray = buildBuffer(data);
+                        } catch(err) {
+                            isValidArray = false;
+                        }
+                    }
+                    if (!isValidArray) {
+                        buildBuffer(value);
+                    }
+
+                }
+                bufferStringEditor.getSession().on('change', function() {
+                    clearTimeout(changeTimer);
+                    changeTimer = setTimeout(bufferStringUpdate,200);
+                });
+
+                bufferStringUpdate();
+
+                dialogForm.i18n();
+
+                panels = RED.panels.create({
+                    id:"node-input-buffer-panels",
+                    resize: function(p1Height,p2Height) {
+                        var p1 = $("#node-input-buffer-panel-str");
+                        p1Height -= $(p1.children()[0]).outerHeight(true);
+                        var editorRow = $(p1.children()[1]);
+                        p1Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-buffer-str").css("height",(p1Height-5)+"px");
+                        bufferStringEditor.resize();
+
+                        var p2 = $("#node-input-buffer-panel-bin");
+                        editorRow = $(p2.children()[0]);
+                        p2Height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+                        $("#node-input-buffer-bin").css("height",(p2Height-5)+"px");
+                        bufferBinEditor.resize();
+                    }
+                });
+
+                $(".node-input-buffer-type").click(function(e) {
+                    e.preventDefault();
+                    RED.sidebar.info.set(RED._("bufferEditor.modeDesc"));
+                    RED.sidebar.info.show();
+                })
+
+
+            },
+            close: function() {
+                editStack.pop();
+                bufferStringEditor.destroy();
+                bufferBinEditor.destroy();
             },
             show: function() {}
         }
@@ -1557,8 +2247,11 @@ RED.editor = (function() {
         editConfig: showEditConfigNodeDialog,
         editSubflow: showEditSubflowDialog,
         editExpression: editExpression,
+        editJSON: editJSON,
+        editBuffer: editBuffer,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
+
 
         createEditor: function(options) {
             var editor = ace.edit(options.id);
@@ -1579,6 +2272,13 @@ RED.editor = (function() {
                     enableBasicAutocompletion:true,
                     enableSnippets:true
                 });
+            }
+            if (options.readOnly) {
+                editor.setOption('readOnly',options.readOnly);
+                editor.container.classList.add("ace_read-only");
+            }
+            if (options.hasOwnProperty('lineNumbers')) {
+                editor.renderer.setOption('showGutter',options.lineNumbers);
             }
             editor.$blockScrolling = Infinity;
             if (options.value) {

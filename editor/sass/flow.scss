@@ -272,3 +272,25 @@ g.link_unknown path.link_line {
     stroke-width: 2;
     stroke-dasharray: 10, 4;
 }
+
+@keyframes port_tooltip_fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.port_tooltip {
+    opacity:0;
+    animation: 0.1s ease-in 0s 1 normal forwards port_tooltip_fadeIn;
+    pointer-events: none;
+
+    path {
+        fill: white;
+        stroke: #999;
+        stroke-width: 1;
+    }
+}
+.port_tooltip_label {
+    stroke-width: 0;
+    fill: #666;
+    font-size: 12px;
+    pointer-events: none;
+    -webkit-touch-callout: none;
+    @include disable-selection;
+}

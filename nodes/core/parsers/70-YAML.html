@@ -7,9 +7,22 @@
 </script>
 
 <script type="text/x-red" data-help-name="yaml">
-    <p>A function that parses the <code>msg.payload</code> to convert a YAML string to/from a javascript object. Places the result back into the payload.</p>
-    <p>If the input is a YAML string it tries to parse it to a javascript object.</p>
-    <p>If the input is a javascript object it creates a YAML string.</p>
+    <p>Converts between a YAML formatted string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or YAML string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a YAML string it tries to parse it to a JavaScript object.</li>
+                <li>If the input is a JavaScript object it creates a YAML string.</li>
+            </ul>
+        </dd>
+    </dl>
 </script>
 
 <script type="text/javascript">

@@ -18,9 +18,12 @@ var when = require("when");
 var clone = require("clone");
 var assert = require("assert");
 var log = require("./log");
+var util = require("./util");
 
 var userSettings = null;
 var globalSettings = null;
+var nodeSettings = null;
+var disableNodeSettings = null;
 var storage = null;
 
 var persistentSettings = {
@@ -38,6 +41,8 @@ var persistentSettings = {
             }
         }
         globalSettings = null;
+        nodeSettings = {};
+        disableNodeSettings = {};
     },
     load: function(_storage) {
         storage = _storage;
@@ -99,6 +104,50 @@ var persistentSettings = {
         userSettings = null;
         globalSettings = null;
         storage = null;
+    },
+    registerNodeSettings: function(type, opts) {
+        var normalisedType = util.normaliseNodeTypeName(type);
+        for (var property in opts) {
+            if (opts.hasOwnProperty(property)) {
+                if (!property.startsWith(normalisedType)) {
+                    throw new Error("Registered invalid property name '"+property+"'. Properties for this node must start with '"+normalisedType+"'");
+                }
+            }
+        }
+        nodeSettings[type] = opts;
+    },
+    exportNodeSettings: function(safeSettings) {
+        for (var type in nodeSettings) {
+            if (nodeSettings.hasOwnProperty(type) && !disableNodeSettings[type]) {
+                var nodeTypeSettings = nodeSettings[type];
+                for (var property in nodeTypeSettings) {
+                    if (nodeTypeSettings.hasOwnProperty(property)) {
+                        var setting = nodeTypeSettings[property];
+                        if (setting.exportable) {
+                            if (safeSettings.hasOwnProperty(property)) {
+                                // Cannot overwrite existing setting
+                            } else if (userSettings.hasOwnProperty(property)) {
+                                safeSettings[property] = userSettings[property];
+                            } else if (setting.hasOwnProperty('value')) {
+                                safeSettings[property] = setting.value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return safeSettings;
+    },
+    enableNodeSettings: function(types) {
+        types.forEach(function(type) {
+            disableNodeSettings[type] = false;
+        });
+    },
+    disableNodeSettings: function(types) {
+        types.forEach(function(type) {
+            disableNodeSettings[type] = true;
+        });
     }
 }
 

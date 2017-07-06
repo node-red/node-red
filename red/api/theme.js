@@ -42,6 +42,8 @@ var themeContext = clone(defaultContext);
 var themeSettings = null;
 var runtime = null;
 
+var themeApp;
+
 function serveFile(app,baseUrl,file) {
     try {
         var stats = fs.statSync(file);
@@ -57,6 +59,24 @@ function serveFile(app,baseUrl,file) {
     }
 }
 
+function serveFilesFromTheme(themeValue, themeApp, directory) {
+    var result = [];
+    if (themeValue) {
+        var array = themeValue;
+        if (!util.isArray(array)) {
+            array = [array];
+        }
+
+        for (var i=0;i<array.length;i++) {
+            var url = serveFile(themeApp,directory,array[i]);
+            if (url) {
+                result.push(url);
+            }
+        }
+    }
+    return result
+}
+
 module.exports = {
     init: function(runtime) {
         var settings = runtime.settings;
@@ -65,7 +85,7 @@ module.exports = {
             themeContext.version = runtime.version();
         }
         themeSettings = null;
-        theme = settings.editorTheme;
+        theme = settings.editorTheme || {};
     },
 
     app: function() {
@@ -73,23 +93,18 @@ module.exports = {
         var url;
         themeSettings = {};
 
-        var themeApp = express();
+        themeApp = express();
 
         if (theme.page) {
-            if (theme.page.css) {
-                var styles = theme.page.css;
-                if (!util.isArray(styles)) {
-                    styles = [styles];
-                }
-                themeContext.page.css = [];
 
-                for (i=0;i<styles.length;i++) {
-                    url = serveFile(themeApp,"/css/",styles[i]);
-                    if (url) {
-                        themeContext.page.css.push(url);
-                    }
-                }
-            }
+            themeContext.page.css = serveFilesFromTheme(
+                theme.page.css,
+                themeApp,
+                "/css/")
+            themeContext.page.scripts = serveFilesFromTheme(
+                theme.page.scripts,
+                themeApp,
+                "/scripts/")
 
             if (theme.page.favicon) {
                 url = serveFile(themeApp,"/favicon/",theme.page.favicon)
@@ -174,5 +189,8 @@ module.exports = {
     },
     settings: function() {
         return themeSettings;
+    },
+    serveFile: function(baseUrl,file) {
+        return serveFile(themeApp,baseUrl,file);
     }
 }

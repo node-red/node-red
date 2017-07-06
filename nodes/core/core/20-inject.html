@@ -150,22 +150,26 @@
     }
 </style>
 <script type="text/x-red" data-help-name="inject">
-    <p>Pressing the button on the left side of the node allows a message on a topic
-       to be injected into the flow.</p>
-    <p>The payload defaults to the current time in millisecs since 1970, but can
-       also be set to various other javascript types.</p>
-    <p>The repeat function allows the payload to be sent on the required schedule.</p>
-    <p>The <i>Inject once at start</i> option actually waits a short interval before firing
-       to give other nodes a chance to instantiate properly.</p>
-    <p>The <i>Flow</i> and <i>Global</i> options allow one to inject a flow or global
-        context value.
-    </p>
-    <p><b>Note: </b>"Interval between times" and "at a specific time" uses cron.
-       This means that 20 minutes will be at the next hour, 20 minutes past and
-       40 minutes past - not in 20 minutes time. If you want every 20 minutes
-       from now - use the "interval" option.</p>
-    <p><b>Note: </b>all string input is escaped. To add a carriage return to a string
-    you should use a following function.</p>
+<p>Injects a message into a flow either manually or at regular intervals. The message
+payload can be a variety of types, including strings, JavaScript objects or the current time.</p>
+<h3>Outputs</h3>
+<dl class="message-properties">
+    <dt>payload<span class="property-type">various</span></dt>
+    <dd>The configured payload of the message.</dd>
+    <dt class="optional">topic <span class="property-type">string</span></dt>
+    <dd>An optional property that can be configured in the node.</dd>
+</dl>
+<h3>Details</h3>
+<p>The Inject node can initiate a flow with a specific payload value.
+The default payload is a timestamp of the current time in millisecs since January 1st, 1970.</p>
+<p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
+<p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
+inject at regular intervals or according to a schedule.</p>
+<p>It can also be configured to inject once each time the flows are started.</p>
+<p><b>Note</b>: The <i>"Interval between times"</i> and <i>"at a specific time"</i> options use the standard cron system.
+This means that 20 minutes will be at the next hour, 20 minutes past and 40 minutes past - not in 20 minutes time.
+If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
+<p><b>Note</b>: To include a newline in a string you must use a Function node to create the payload.</p>
 </script>
 
 <script type="text/javascript">
@@ -181,9 +185,21 @@
             crontab: {value:""},
             once: {value:false}
         },
+        icon: "inject.png",
         inputs:0,
         outputs:1,
-        icon: "inject.png",
+        outputLabels: function(index) {
+            var labels = { str:"string", num:"number", bool:"boolean", json:"object", flow:"flow context", global:"global context" };
+            var lab = labels[this.payloadType] || this.payloadType;
+            if (lab === "object") {
+                try {
+                    lab = typeof JSON.parse(this.payload);
+                    if (lab === "object") {
+                        if (Array.isArray(JSON.parse(this.payload))) { lab = "Array"; }
+                    }
+                } catch(e) { lab = "Invalid JSON Object"; }
+            }
+            return lab; },
         label: function() {
             var suffix = "";
             // if fire once then add small indication
@@ -191,7 +207,7 @@
                 suffix = " ¹";
             }
             // but replace with repeat one if set to repeat
-            if (this.repeat || this.crontab) {
+            if ((this.repeat && this.repeat != 0) || this.crontab) {
                 suffix = " ↻";
             }
             if (this.name) {
@@ -240,7 +256,7 @@
             $("#node-input-payload").typedInput({
                 default: 'str',
                 typeField: $("#node-input-payloadType"),
-                types:['flow','global','str','num','bool','json','date']
+                types:['flow','global','str','num','bool','json','bin','date']
             });
 
             $("#inject-time-type-select").change(function() {
@@ -248,7 +264,7 @@
                 var id = $("#inject-time-type-select").val();
                 $(".inject-time-row").hide();
                 $("#inject-time-row-"+id).show();
-                if ((id == "none") || (id == "interval")) {
+                if ((id == "none") || (id == "interval") || (id == "interval-time")) {
                     $("#node-once").show();
                 }
                 else {
@@ -258,7 +274,7 @@
             });
 
             $(".inject-time-times").each(function() {
-                for (var i=0;i<24;i++) {
+                for (var i=0; i<24; i++) {
                     var l = (i<10?"0":"")+i+":00";
                     $(this).append($("<option></option>").val(i).text(l));
                 }
@@ -268,7 +284,7 @@
                 var start = Number($("#inject-time-interval-time-start").val());
                 var end = Number($("#inject-time-interval-time-end").val());
                 $("#inject-time-interval-time-end option").remove();
-                for (var i=start+1;i<25;i++) {
+                for (var i=start+1; i<25; i++) {
                     var l = (i<10?"0":"")+i+":00";
                     if (i==24) {
                         l = "00:00";
@@ -492,8 +508,19 @@
             $("#node-input-crontab").val(crontab);
         },
         button: {
+            enabled: function() {
+                return !this.changed
+            },
             onclick: function() {
-                var label = (this.name||this.payload).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                }
+                var label = (this.name||this.payload);
+                if (label.length > 30) {
+                    label = label.substring(0,50)+"...";
+                }
+                label = label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
                 if (this.payloadType === "date") { label = this._("inject.timestamp"); }
                 if (this.payloadType === "none") { label = this._("inject.blank"); }
                 var node = this;

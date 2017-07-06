@@ -27,19 +27,11 @@ RED.search = (function() {
     var results = [];
 
     function indexNode(n) {
-        var l = "";
-        if (n._def && n._def.label) {
-            l = n._def.label;
-            try {
-                l = (typeof l === "function" ? l.call(n) : l);
-                if (l) {
-                    l = (""+l).toLowerCase();
-                    index[l] = index[l] || {};
-                    index[l][n.id] = {node:n,label:l}
-                }
-            } catch(err) {
-                console.log("Definition error: "+n.type+".label",err);
-            }
+        var l = RED.utils.getNodeLabel(n);
+        if (l) {
+            l = (""+l).toLowerCase();
+            index[l] = index[l] || {};
+            index[l][n.id] = {node:n,label:l}
         }
         l = l||n.label||n.name||n.id||"";
 
@@ -189,25 +181,14 @@ RED.search = (function() {
 
                     var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
                     var colour = def.color;
-                    var icon_url = "arrow-in.png";
+                    var icon_url = RED.utils.getNodeIcon(def,node);
                     if (node.type === 'tab') {
                         colour = "#C0DEED";
-                        icon_url = "subflow.png";
-                    } else if (def.category === 'config') {
-                        icon_url = "cog.png";
-                    } else if (node.type === 'unknown') {
-                        icon_url = "alert.png";
-                    } else {
-                        try {
-                            icon_url = (typeof def.icon === "function" ? def.icon.call({}) : def.icon);
-                        } catch(err) {
-                            console.log("Definition error: "+nt+".icon",err);
-                        }
                     }
                     nodeDiv.css('backgroundColor',colour);
 
                     var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
-                    $('<div/>',{class:"palette_icon",style:"background-image: url(icons/"+icon_url+")"}).appendTo(iconContainer);
+                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
 
                     var contentDiv = $('<div>',{class:"red-ui-search-result-description"}).appendTo(div);
                     if (node.z) {
@@ -284,8 +265,6 @@ RED.search = (function() {
 
         RED.events.on("editor:open",function() { disabled = true; });
         RED.events.on("editor:close",function() { disabled = false; });
-        RED.events.on("palette-editor:open",function() { disabled = true; });
-        RED.events.on("palette-editor:close",function() { disabled = false; });
         RED.events.on("type-search:open",function() { disabled = true; });
         RED.events.on("type-search:close",function() { disabled = false; });
 

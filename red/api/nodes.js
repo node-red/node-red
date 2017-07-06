@@ -48,34 +48,47 @@ module.exports = {
         }
         var node = req.body;
         var promise;
+        var isUpgrade = false;
         if (node.module) {
             var module = redNodes.getModuleInfo(node.module);
             if (module) {
-                log.audit({event: "nodes.install",module:node.module,error:"module_already_loaded"},req);
-                res.status(400).json({error:"module_already_loaded", message:"Module already loaded"});
-                return;
+                if (!node.version || module.version === node.version) {
+                    log.audit({event: "nodes.install",module:node.module, version:node.version, error:"module_already_loaded"},req);
+                    res.status(400).json({error:"module_already_loaded", message:"Module already loaded"});
+                    return;
+                }
+                if (!module.local) {
+                    log.audit({event: "nodes.install",module:node.module, version:node.version, error:"module_not_local"},req);
+                    res.status(400).json({error:"module_not_local", message:"Module not locally installed"});
+                    return;
+                }
+                isUpgrade = true;
             }
-            promise = redNodes.installModule(node.module);
+            promise = redNodes.installModule(node.module,node.version);
         } else {
             log.audit({event: "nodes.install",module:node.module,error:"invalid_request"},req);
             res.status(400).json({error:"invalid_request", message:"Invalid request"});
             return;
         }
         promise.then(function(info) {
-            comms.publish("node/added",info.nodes,false);
+            if (isUpgrade) {
+                comms.publish("node/upgraded",{module:node.module,version:node.version},false);
+            } else {
+                comms.publish("node/added",info.nodes,false);
+            }
             if (node.module) {
-                log.audit({event: "nodes.install",module:node.module},req);
+                log.audit({event: "nodes.install",module:node.module,version:node.version},req);
                 res.json(info);
             }
         }).otherwise(function(err) {
             if (err.code === 404) {
-                log.audit({event: "nodes.install",module:node.module,error:"not_found"},req);
+                log.audit({event: "nodes.install",module:node.module,version:node.version,error:"not_found"},req);
                 res.status(404).end();
             } else if (err.code) {
-                log.audit({event: "nodes.install",module:node.module,error:err.code},req);
+                log.audit({event: "nodes.install",module:node.module,version:node.version,error:err.code},req);
                 res.status(400).json({error:err.code, message:err.message});
             } else {
-                log.audit({event: "nodes.install",module:node.module,error:err.code||"unexpected_error",message:err.toString()},req);
+                log.audit({event: "nodes.install",module:node.module,version:node.version,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             }
         });

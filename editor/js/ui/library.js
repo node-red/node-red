@@ -110,7 +110,7 @@ RED.library = (function() {
         function buildFileList(root,data) {
             var ul = document.createElement("ul");
             var li;
-            for (var i=0;i<data.length;i++) {
+            for (var i=0; i<data.length; i++) {
                 var v = data[i];
                 if (typeof v === "string") {
                     // directory
@@ -157,7 +157,7 @@ RED.library = (function() {
             return ul;
         }
 
-        $('#node-input-name').css("width","60%").after(
+        $('#node-input-name').css("width","66%").after(
             '<div class="btn-group" style="margin-left: 5px;">'+
             '<a id="node-input-'+options.type+'-lookup" class="editor-button" data-toggle="dropdown"><i class="fa fa-book"></i> <i class="fa fa-caret-down"></i></a>'+
             '<ul class="dropdown-menu pull-right" role="menu">'+
@@ -165,8 +165,6 @@ RED.library = (function() {
             '<li><a id="node-input-'+options.type+'-menu-save-library" tabindex="-1" href="#">'+RED._("library.saveToLibrary")+'</a></li>'+
             '</ul></div>'
         );
-
-
 
         $('#node-input-'+options.type+'-menu-open-library').click(function(e) {
             $("#node-select-library").children().remove();
@@ -264,7 +262,7 @@ RED.library = (function() {
                     class: "primary",
                     click: function() {
                         if (selectedLibraryItem) {
-                            for (var i=0;i<options.fields.length;i++) {
+                            for (var i=0; i<options.fields.length; i++) {
                                 var field = options.fields[i];
                                 $("#node-input-"+field).val(selectedLibraryItem[field]);
                             }
@@ -327,7 +325,7 @@ RED.library = (function() {
             }
             var queryArgs = [];
             var data = {};
-            for (var i=0;i<options.fields.length;i++) {
+            for (var i=0; i<options.fields.length; i++) {
                 var field = options.fields[i];
                 if (field == "name") {
                     data.name = name;

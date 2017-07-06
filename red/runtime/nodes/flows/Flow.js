@@ -21,6 +21,8 @@ var Log = require("../../log");
 var redUtil = require("../../util");
 var flowUtil = require("./util");
 
+var nodeCloseTimeout = 15000;
+
 function Flow(global,flow) {
     if (typeof flow === 'undefined') {
         flow = global;
@@ -121,7 +123,7 @@ function Flow(global,flow) {
         }
     }
 
-    this.stop = function(stopList) {
+    this.stop = function(stopList, removedList) {
         return when.promise(function(resolve) {
             var i;
             if (stopList) {
@@ -135,6 +137,13 @@ function Flow(global,flow) {
             } else {
                 stopList = Object.keys(activeNodes);
             }
+            // Convert the list to a map to avoid multiple scans of the list
+            var removedMap = {};
+            removedList = removedList || [];
+            removedList.forEach(function(id) {
+                removedMap[id] = true;
+            });
+
             var promises = [];
             for (i=0;i<stopList.length;i++) {
                 var node = activeNodes[stopList[i]];
@@ -144,16 +153,35 @@ function Flow(global,flow) {
                         delete subflowInstanceNodes[stopList[i]];
                     }
                     try {
-                        var p = node.close();
-                        if (p) {
-                            promises.push(p);
-                        }
+                        var removed = removedMap[stopList[i]];
+                        promises.push(
+                            when.promise(function(resolve, reject) {
+                                var start;
+                                var nt = node.type;
+                                var nid = node.id;
+                                var n = node;
+                                when.promise(function(resolve) {
+                                    Log.trace("Stopping node "+nt+":"+nid+(removed?" removed":""));
+                                    start = Date.now();
+                                    resolve(n.close(removed));
+                                }).timeout(nodeCloseTimeout).then(function(){
+                                    var delta = Date.now() - start;
+                                    Log.trace("Stopped node "+nt+":"+nid+" ("+delta+"ms)" );
+                                    resolve(delta);
+                                },function(err) {
+                                    var delta = Date.now() - start;
+                                    n.error(Log._("nodes.flows.stopping-error",{message:err}));
+                                    Log.debug(err.stack);
+                                    reject(err);
+                                });
+                            })
+                        );
                     } catch(err) {
                         node.error(err);
                     }
                 }
             }
-            when.settle(promises).then(function() {
+            when.settle(promises).then(function(results) {
                 resolve();
             });
         });
@@ -214,7 +242,7 @@ function Flow(global,flow) {
                     count = msg.error.source.count+1;
                     if (count === 10) {
                         node.warn(Log._("nodes.flow.error-loop"));
-                        return;
+                        return false;
                     }
                 }
             }
@@ -258,6 +286,7 @@ function Flow(global,flow) {
                 throwingNode = activeNodes[throwingNode.z];
             }
         }
+        return handled;
     }
 }
 
@@ -464,7 +493,11 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
     return nodes;
 }
 
+
 module.exports = {
+    init: function(settings) {
+        nodeCloseTimeout = settings.nodeCloseTimeout || 15000;
+    },
     create: function(global,conf) {
         return new Flow(global,conf);
     }

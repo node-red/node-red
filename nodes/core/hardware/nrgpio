@@ -14,4 +14,4 @@
 #
 
 BASEDIR=$(dirname $0)
-sudo python -u $BASEDIR/nrgpio.py $@
+python -u $BASEDIR/nrgpio.py $@

@@ -16,31 +16,20 @@
 var express = require('express');
 var fs = require("fs");
 var path = require("path");
+var Mustache = require("mustache");
 
 var theme = require("./theme");
 
-var Mustache = require("mustache");
+var redNodes;
 
-var icon_paths = [path.resolve(__dirname + '/../../public/icons')];
-var iconCache = {};
-//TODO: create a default icon
-var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
 var templateDir = path.resolve(__dirname+"/../../editor/templates");
 var editorTemplate;
 
-function nodeIconDir(dir) {
-    icon_paths.push(path.resolve(dir));
-}
-
 module.exports = {
     init: function(runtime) {
+        redNodes = runtime.nodes;
         editorTemplate = fs.readFileSync(path.join(templateDir,"index.mst"),"utf8");
         Mustache.parse(editorTemplate);
-        // TODO: this allows init to be called multiple times without
-        //       registering multiple instances of the listener.
-        //       It isn't.... ideal.
-        runtime.events.removeListener("node-icon-dir",nodeIconDir);
-        runtime.events.on("node-icon-dir",nodeIconDir);
     },
 
     ensureSlash: function(req,res,next) {
@@ -54,22 +43,11 @@ module.exports = {
         }
     },
     icon: function(req,res) {
-        if (iconCache[req.params.icon]) {
-            res.sendFile(iconCache[req.params.icon]); // if not found, express prints this to the console and serves 404
-        } else {
-            for (var p=0;p<icon_paths.length;p++) {
-                var iconPath = path.join(icon_paths[p],req.params.icon);
-                try {
-                    fs.statSync(iconPath);
-                    res.sendFile(iconPath);
-                    iconCache[req.params.icon] = iconPath;
-                    return;
-                } catch(err) {
-                    // iconPath doesn't exist
-                }
-            }
-            res.sendFile(defaultIcon);
-        }
+        var icon = req.params.icon;
+        var scope = req.params.scope;
+        var module = scope ? scope + '/' +  req.params.module : req.params.module;
+        var iconPath = redNodes.getNodeIconPath(module,icon);
+        res.sendFile(iconPath);
     },
     editor: function(req,res) {
         res.send(Mustache.render(editorTemplate,theme.context()));

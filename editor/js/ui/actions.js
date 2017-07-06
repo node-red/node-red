@@ -21,7 +21,7 @@ RED.actions = (function() {
         var result = [];
         Object.keys(actions).forEach(function(action) {
             var shortcut = RED.keyboard.getShortcut(action);
-            result.push({id:action,scope:shortcut?shortcut.scope:undefined,key:shortcut?shortcut.key:undefined})
+            result.push({id:action,scope:shortcut?shortcut.scope:undefined,key:shortcut?shortcut.key:undefined,user:shortcut?shortcut.user:undefined})
         })
         return result;
     }
