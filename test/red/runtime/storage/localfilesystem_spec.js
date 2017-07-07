@@ -587,9 +587,13 @@ describe('LocalFileSystem', function() {
         fs.mkdirSync(path.join(objLib,"A"));
         fs.mkdirSync(path.join(objLib,"B"));
         fs.mkdirSync(path.join(objLib,"B","C"));
-        fs.writeFileSync(path.join(objLib,"file1.js"),"// abc: def\n// not a metaline \n\n Hi",'utf8');
-        fs.writeFileSync(path.join(objLib,"B","file2.js"),"// ghi: jkl\n// not a metaline \n\n Hi",'utf8');
-        fs.writeFileSync(path.join(objLib,"B","flow.json"),"Hi",'utf8');
+        if (type === "functions" || type === "object") {
+            fs.writeFileSync(path.join(objLib,"file1.js"),"// abc: def\n// not a metaline \n\n Hi",'utf8');
+            fs.writeFileSync(path.join(objLib,"B","file2.js"),"// ghi: jkl\n// not a metaline \n\n Hi",'utf8');
+        }
+        if (type === "flows" || type === "object") {
+            fs.writeFileSync(path.join(objLib,"B","flow.json"),"Hi",'utf8');
+        }
     }
 
     it('should return a directory listing of library objects',function(done) {
@@ -644,18 +648,49 @@ describe('LocalFileSystem', function() {
         });
     });
 
-    it('should return a newly saved library object',function(done) {
+    it('should return a newly saved library function',function(done) {
         localfilesystem.init({userDir:userDir}).then(function() {
-            createObjectLibrary();
-            localfilesystem.getLibraryEntry('object','B').then(function(flows) {
-                flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, {fn:'flow.json'} ]);
+            createObjectLibrary("functions");
+            localfilesystem.getLibraryEntry('functions','B').then(function(flows) {
+                flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' } ]);
                 var ft = path.join("B","D","file3.js");
-                localfilesystem.saveLibraryEntry('object',ft,{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
+                localfilesystem.saveLibraryEntry('functions',ft,{mno:'pqr'},"// another non meta line\n\n Hi There").then(function() {
                     setTimeout(function() {
-                        localfilesystem.getLibraryEntry('object',path.join("B","D")).then(function(flows) {
+                        localfilesystem.getLibraryEntry('functions',path.join("B","D")).then(function(flows) {
                             flows.should.eql([ { mno: 'pqr', fn: 'file3.js' } ]);
-                            localfilesystem.getLibraryEntry('object',ft).then(function(body) {
+                            localfilesystem.getLibraryEntry('functions',ft).then(function(body) {
                                 body.should.eql("// another non meta line\n\n Hi There");
+                                done();
+                            }).otherwise(function(err) {
+                                done(err);
+                            });
+                        }).otherwise(function(err) {
+                            done(err);
+                        })}
+                        , 50);
+                }).otherwise(function(err) {
+                    done(err);
+                });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should return a newly saved library flow',function(done) {
+        localfilesystem.init({userDir:userDir}).then(function() {
+            createObjectLibrary("flows");
+            localfilesystem.getLibraryEntry('flows','B').then(function(flows) {
+                flows.should.eql([ 'C', {fn:'flow.json'} ]);
+                var ft = path.join("B","D","file3");
+                localfilesystem.saveLibraryEntry('flows',ft,{mno:'pqr'},"Hi").then(function() {
+                    setTimeout(function() {
+                        localfilesystem.getLibraryEntry('flows',path.join("B","D")).then(function(flows) {
+                            flows.should.eql([ { mno: 'pqr', fn: 'file3.json' } ]);
+                            localfilesystem.getLibraryEntry('flows',ft+".json").then(function(body) {
+                                body.should.eql("Hi");
                                 done();
                             }).otherwise(function(err) {
                                 done(err);
