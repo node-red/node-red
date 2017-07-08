@@ -1217,6 +1217,50 @@ RED.nodes = (function() {
     }
 
     return {
+        init: function() {
+            RED.events.on("registry:node-type-added",function(type) {
+                var def = registry.getNodeType(type);
+                var replaced = false;
+                var replaceNodes = [];
+                RED.nodes.eachNode(function(n) {
+                    if (n.type === "unknown" && n.name === type) {
+                        replaceNodes.push(n);
+                    }
+                });
+                RED.nodes.eachConfig(function(n) {
+                    if (n.type === "unknown" && n.name === type) {
+                        replaceNodes.push(n);
+                    }
+                });
+
+                if (replaceNodes.length > 0) {
+                    var reimportList = [];
+                    replaceNodes.forEach(function(n) {
+                        if (configNodes.hasOwnProperty(n.id)) {
+                            delete configNodes[n.id];
+                        } else {
+                            nodes.splice(nodes.indexOf(n),1);
+                        }
+                        reimportList.push(convertNode(n));
+                    });
+                    RED.view.redraw(true);
+                    var result = importNodes(reimportList,false);
+                    var newNodeMap = {};
+                    result[0].forEach(function(n) {
+                        newNodeMap[n.id] = n;
+                    });
+                    RED.nodes.eachLink(function(l) {
+                        if (newNodeMap.hasOwnProperty(l.source.id)) {
+                            l.source = newNodeMap[l.source.id];
+                        }
+                        if (newNodeMap.hasOwnProperty(l.target.id)) {
+                            l.target = newNodeMap[l.target.id];
+                        }
+                    });
+                    RED.view.redraw(true);
+                }
+            });
+        },
         registry:registry,
         setNodeList: registry.setNodeList,
 

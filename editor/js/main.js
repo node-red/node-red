@@ -253,12 +253,11 @@
         RED.deploy.init(RED.settings.theme("deployButton",null));
 
         RED.actions.add("core:show-about", showAbout);
-
+        RED.nodes.init();
         RED.comms.connect();
 
         $("#main-container").show();
         $(".header-toolbar").show();
-
 
         loadNodeList();
     }
