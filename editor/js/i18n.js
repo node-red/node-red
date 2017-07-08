@@ -37,7 +37,25 @@ RED.i18n = (function() {
 
         },
         loadCatalog: function(namespace,done) {
-            i18n.loadNamespace(namespace,done);
+            var languageList = i18n.functions.toLanguages(i18n.detectLanguage());
+            var toLoad = languageList.length;
+            languageList.forEach(function(lang) {
+                $.ajax({
+                    headers: {
+                        "Accept":"application/json"
+                    },
+                    cache: false,
+                    url: 'locales/'+namespace+'?lng='+lang,
+                    success: function(data) {
+                        i18n.addResourceBundle(lang,namespace,data);
+                        toLoad--;
+                        if (toLoad === 0) {
+                            done();
+                        }
+                    }
+                });
+            })
+
         },
 
         loadNodeCatalogs: function(done) {

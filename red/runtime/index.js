@@ -106,7 +106,7 @@ function start() {
                 log.error("*****************************************************************");
                 log.error("* "+log._("runtime.unsupported_version",{component:"Node.js",version:process.version,requires: ">=4"})+" *");
                 log.error("*****************************************************************");
-                events.emit("runtime-event",{id:"runtime-unsupported-version",type:"error",text:"notification.errors.unsupportedVersion"});
+                events.emit("runtime-event",{id:"runtime-unsupported-version",payload:{type:"error",text:"notification.errors.unsupportedVersion"},retain:true});
             }
             log.info(os.type()+" "+os.release()+" "+os.arch()+" "+os.endianness());
             return redNodes.load().then(function() {
@@ -133,21 +133,23 @@ function start() {
                         }
                         missingModules[missing.module].types = missingModules[missing.module].types.concat(missing.types);
                     }
+                    var moduleList = [];
                     var promises = [];
+                    var installingModules = [];
                     for (i in missingModules) {
                         if (missingModules.hasOwnProperty(i)) {
                             log.warn(" - "+i+" ("+missingModules[i].version+"): "+missingModules[i].types.join(", "));
                             if (settings.autoInstallModules && i != "node-red") {
-                                redNodes.installModule(i,missingModules[i].version).otherwise(function(err) {
-                                    // Error already reported. Need the otherwise handler
-                                    // to stop the error propagating any further
-                                });
+                                installingModules.push({id:i,version:missingModules[i].version});
                             }
                         }
                     }
                     if (!settings.autoInstallModules) {
                         log.info(log._("server.removing-modules"));
                         redNodes.cleanModuleList();
+                    } else if (installingModules.length > 0) {
+                        reinstallAttempts = 0;
+                        reinstallModules(installingModules);
                     }
                 }
                 if (settings.settingsFile) {
@@ -159,6 +161,36 @@ function start() {
                 console.log(err);
             });
         });
+}
+
+var reinstallAttempts;
+var reinstallTimeout;
+function reinstallModules(moduleList) {
+    var promises = [];
+    var failedModules = [];
+    for (var i=0;i<moduleList.length;i++) {
+        if (settings.autoInstallModules && i != "node-red") {
+            promises.push(redNodes.installModule(moduleList[i].id,moduleList[i].version));
+        }
+    }
+    when.settle(promises).then(function(results) {
+        var reinstallList = [];
+        for (var i=0;i<results.length;i++) {
+            if (results[i].state === 'rejected') {
+                reinstallList.push(moduleList[i]);
+            } else {
+                events.emit("runtime-event",{id:"node/added",retain:false,payload:results[i].value.nodes});
+            }
+        }
+        if (reinstallList.length > 0) {
+            reinstallAttempts++;
+            // First 5 at 1x timeout, next 5 at 2x, next 5 at 4x, then 8x
+            var timeout = (settings.autoInstallModulesRetry||30000) * Math.pow(2,Math.min(Math.floor(reinstallAttempts/5),3));
+            reinstallTimeout = setTimeout(function() {
+                reinstallModules(reinstallList);
+            },timeout);
+        }
+    });
 }
 
 function reportMetrics() {
@@ -185,6 +217,9 @@ function stop() {
     if (runtimeMetricInterval) {
         clearInterval(runtimeMetricInterval);
         runtimeMetricInterval = null;
+    }
+    if (reinstallTimeout) {
+        clearTimeout(reinstallTimeout);
     }
     started = false;
     return redNodes.stopFlows();
