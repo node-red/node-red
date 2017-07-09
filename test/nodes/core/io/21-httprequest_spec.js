@@ -328,6 +328,30 @@ describe('HTTP Request Node', function() {
         });
     });
 
+    it('send a payload of 0 as the body of a POST as text/plain', function(done) {
+        var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
+                    {id:"n2", type:"helper"}];
+        helper.load(httpRequestNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('payload');
+                    msg.payload.body.should.eql('0');
+                    msg.payload.headers.should.have.property('content-length','1');
+                    msg.payload.headers.should.have.property('content-type').which.startWith('text/plain');
+
+                    msg.should.have.property('statusCode',200);
+                    msg.should.have.property('headers');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.receive({payload:0, headers: { 'content-type': 'text/plain'}});
+        });
+    });
+
     it('send an Object payload as the body of a POST', function(done) {
         var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                     {id:"n2", type:"helper"}];
