@@ -419,6 +419,9 @@ var localfilesystem = {
         if (settings.readOnly) {
             return when.resolve();
         }
+        if (type === "flows" && !path.endsWith(".json")) {
+            path += ".json";
+        }
         var fn = fspath.join(libDir, type, path);
         var headers = "";
         for (var i in meta) {
