@@ -1,3 +1,24 @@
+#### 0.17.4: Maintenance Release
+
+ - Add request node test case for POSTing 0
+ - Allow false and 0 in payload for httprequest (#1334)
+ - Add file extension into flow name of library automatically (#1331)
+ - Fix accessing global context from jsonata expressions Fixes #1335
+ - Disable editor whilst a deploy is inflight Fixes #1332
+ - Replace Unknown nodes with their real versions when node loaded
+ - Retry auto-install of modules that fail
+ - Fix column name in link nodes to refer language file (#1330)
+ - Use namespaces with link node title attributes i18n name Fixes #1329
+ - Tidy up GPIO pin table presentation Fixes #1328
+ - Join: count of 0 should not send on every msg
+ - Handle importing only one end of a link node pair
+ - Make sending to Debug synchronous again Fixes #1323
+ - Make send-error behaviour optional in file node
+ - Restore File In node behaviour of sending msg on error
+ - Expose context.keys within Function node
+ - JSON parser default should be not formatting output
+
+
 #### 0.17.3: Maintenance Release
 
  - Fix flow library in menu to support period characters as flow name (#1320)
