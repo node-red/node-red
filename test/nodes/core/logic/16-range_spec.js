@@ -90,10 +90,6 @@ describe('range Node', function() {
         genericRangeTest("roll", 0, 10, 0, 360, true, 12.5, 90, done); // 1/4 around wrap => "one and a quarter turns"
     });
 
-    it('wraps numbers around say for degree/rotation reading 1/4', function(done) {
-        genericRangeTest("roll", 0, 10, 0, 360, true, 12.5, 90, done); // 1/4 around wrap => "one and a quarter turns"
-    });
-
     it('wraps numbers down say for degree/rotation reading 1/4', function(done) {
         genericRangeTest("roll", 0, 10, 0, 360, true, -12.5, 270, done); // 1/4 backwards wrap => "one and a quarter turns backwards"
     });
