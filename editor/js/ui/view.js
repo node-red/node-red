@@ -1873,7 +1873,7 @@ RED.view = (function() {
             node.exit().remove();
 
             var nodeEnter = node.enter().insert("svg:g")
-                .attr("class", "node nodegroup")
+                .attr("class", function(d) { return "node nodegroup " + (d._def && d._def.class ? d._def.class : "")})
                 .classed("node_subflow",function(d) { return activeSubflow != null; })
                 .classed("node_link",function(d) { return d.type === "link in" || d.type === "link out" });
 
