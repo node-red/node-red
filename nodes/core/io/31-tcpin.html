@@ -212,11 +212,12 @@
     <div class="form-row">
         <label for="node-input-server"><i class="fa fa-globe"></i> <span data-i18n="tcpin.label.server"></span></label>
         <input type="text" id="node-input-server" placeholder="ip.address" style="width:45%">
-        &nbsp;port <input type="text" id="node-input-port" style="width:60px">
+        <span data-i18n="tcpin.label.port"></span>
+        <input type="text" id="node-input-port" style="width:60px">
     </div>
     <div class="form-row">
         <label for="node-input-out"><i class="fa fa-sign-out"></i> <span data-i18n="tcpin.label.return"></span></label>
-        <select type="text" id="node-input-out" style="width:56%;">
+        <select type="text" id="node-input-out" style="width:54%;">
             <option value="time" data-i18n="tcpin.return.timeout"></option>
             <option value="char" data-i18n="tcpin.return.character"></option>
             <option value="count" data-i18n="tcpin.return.number"></option>
@@ -272,7 +273,7 @@
                 }
                 else if ($("#node-input-out").val() == "time") {
                     if (previous != "time") { $("#node-input-splitc").val("0"); }
-                    $("#node-units").text("ms");
+                    $("#node-units").text(RED._("node-red:tcpin.label.ms"));
                 }
                 else if ($("#node-input-out").val() == "immed") {
                     if (previous != "immed") { $("#node-input-splitc").val(" "); }
@@ -280,7 +281,7 @@
                 }
                 else if ($("#node-input-out").val() == "count") {
                     if (previous != "count") { $("#node-input-splitc").val("12"); }
-                    $("#node-units").text("chars");
+                    $("#node-units").text(RED._("node-red:tcpin.label.chars"));
                 }
                 else {
                     if (previous != "sit") { $("#node-input-splitc").val(" "); }
