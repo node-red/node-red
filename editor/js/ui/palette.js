@@ -147,7 +147,10 @@ RED.palette = (function() {
 
             d.className="palette_node";
 
-
+            if (def.class) {
+                d.className += " " + def.class;
+            }
+            
             if (def.icon) {
                 var icon_url = RED.utils.getNodeIcon(def);
                 var iconContainer = $('<div/>',{class:"palette_icon_container"+(def.align=="right"?" palette_icon_container_right":"")}).appendTo(d);
