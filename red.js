@@ -14,6 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+var dash;
+if (process.env.APPMETRICS) {
+    dash = require('appmetrics-dash');
+    dash.attach();
+}
 var http = require('http');
 var https = require('https');
 var util = require("util");
