@@ -26,6 +26,7 @@
         "editor", "messaging", "iot", "flow"
     ],
     "dependencies": {
+        "appmetrics-dash": "^3.2.1",
         "basic-auth": "1.1.0",
         "bcryptjs": "2.4.3",
         "body-parser": "1.17.2",
