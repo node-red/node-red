@@ -114,7 +114,10 @@
             "name": "Debug messages",
             "filterAll": "all nodes",
             "filterSelected": "selected nodes",
-            "filterCurrent": "current flow"
+            "filterCurrent": "current flow",
+            "debugNodes": "Debug nodes",
+            "clearLog": "clear log",
+            "openWindow": "open in new window"
         },
         "messageMenu": {
             "collapseAll": "Collapse all paths",
@@ -159,7 +162,8 @@
             "append": "Append",
             "timeout": "Timeout",
             "timeoutplace": "optional",
-            "return": "Output"
+            "return": "Output",
+            "seconds": "seconds"
         },
         "placeholder": {
             "extraparams": "extra input parameters"
@@ -190,7 +194,8 @@
             "output": "Output as",
             "mustache": "Mustache template",
             "plain": "Plain text",
-            "json": "Parsed JSON"
+            "json": "Parsed JSON",
+            "none": "none"
         },
         "templatevalue": "This is the payload: {{payload}} !"
     },
@@ -216,6 +221,7 @@
         "days": "Days",
         "day": "Day",
         "between": "Between",
+        "and": "&",
         "rate": "Rate",
         "msgper": "msg(s) per",
         "dropmsg": "drop intermediate messages",
@@ -297,6 +303,7 @@
     "mqtt": {
         "label": {
             "broker": "Server",
+            "example": "e.g. localhost",
             "qos": "QoS",
             "clientid": "Client ID",
             "port": "Port",
@@ -343,7 +350,8 @@
             "return": "Return",
             "upload": "Accept file uploads?",
             "status": "Status code",
-            "headers": "Headers"
+            "headers": "Headers",
+            "other": "other"
         },
         "setby": "- set by msg.method -",
         "basicauth": "Use basic authentication",
@@ -414,7 +422,9 @@
             "close-connection": "Close connection after each message is sent?",
             "decode-base64": "Decode Base64 message?",
             "server": "Server",
-            "return": "Return"
+            "return": "Return",
+            "ms": "ms",
+            "chars": "chars"
         },
         "type": {
             "listen": "Listen on",
