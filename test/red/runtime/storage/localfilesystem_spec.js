@@ -121,7 +121,7 @@ describe('LocalFileSystem', function() {
 
     it('should set userDir to USERPROFILE/.node-red',function(done) {
         var oldNRH = process.env.NODE_RED_HOME;
-        process.env.NODE_RED_HOME = "";
+        process.env.NODE_RED_HOME = path.join(userDir,"NRH");
         var oldHOME = process.env.HOME;
         process.env.HOME = "";
         var oldHOMEPATH = process.env.HOMEPATH;
