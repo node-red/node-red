@@ -351,6 +351,7 @@ function stop(type,diff,muteLog) {
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
             var flowStateChanged = diff && (diff.added.indexOf(id) !== -1 || diff.removed.indexOf(id) !== -1);
+            log.debug("red/nodes/flows.stop : stopping flow : "+id);
             promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList,removedList));
             if (type === "full" || flowStateChanged || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];
