@@ -422,7 +422,8 @@ describe('websocket Node', function() {
             helper.load(websocketNode, flow, function() {
                 getSocket('server').on('connection', function(sock) {
                     sock.on('message', function(msg) {
-                        msg.should.have.length(5).and.be.a.buffer;
+                        Buffer.isBuffer(msg).should.be.true();
+                        msg.should.have.length(5);
                         done();
                     });
                 });
