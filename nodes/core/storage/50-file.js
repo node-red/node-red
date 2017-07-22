@@ -72,14 +72,53 @@ module.exports = function(RED) {
                         node.wstream.end(node.data.shift());
                     }
                     else {
-                        if ((!node.wstream) || (!node.filename)) {
+                        // Append mode
+                        var recreateStream = !node.wstream || !node.filename;
+                        if (node.wstream && node.wstreamIno) {
+                            // There is already a stream open and we have the inode
+                            // of the file. Check the file hasn't been deleted
+                            // or deleted and recreated.
+                            try {
+                                var stat = fs.statSync(filename);
+                                // File exists - check the inode matches
+                                if (stat.ino !== node.wstreamIno) {
+                                    // The file has been recreated. Close the current
+                                    // stream and recreate it
+                                    recreateStream = true;
+                                    node.wstream.end();
+                                    delete node.wstream;
+                                    delete node.wstreamIno;
+                                }
+                            } catch(err) {
+                                // File does not exist
+                                recreateStream = true;
+                                node.wstream.end();
+                                delete node.wstream;
+                                delete node.wstreamIno;
+                            }
+                        }
+                        if (recreateStream) {
                             node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'a', autoClose:true });
+                            node.wstream.on("open", function(fd) {
+                                try {
+                                    var stat = fs.statSync(filename);
+                                    node.wstreamIno = stat.ino;
+                                } catch(err) {
+                                }
+                            });
                             node.wstream.on("error", function(err) {
                                 node.error(RED._("file.errors.appendfail",{error:err.toString()}),msg);
                             });
                         }
-                        if (node.filename) { node.wstream.write(node.data.shift()); }
-                        else { node.wstream.end(node.data.shift()); }
+                        if (node.filename) {
+                            // Static filename - write and reuse the stream next time
+                            node.wstream.write(node.data.shift());
+                        } else {
+                            // Dynamic filename - write and close the stream
+                            node.wstream.end(node.data.shift());
+                            delete node.wstream;
+                            delete node.wstreamIno;
+                        }
                     }
                 }
             }
