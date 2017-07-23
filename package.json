@@ -36,6 +36,7 @@
         "cors":"2.8.3",
         "cron":"1.2.1",
         "express": "4.15.3",
+        "express-session": "1.15.2",
         "follow-redirects":"1.2.4",
         "fs-extra": "1.0.0",
         "fs.notify":"0.0.4",
