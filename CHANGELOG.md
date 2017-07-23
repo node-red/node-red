@@ -1,3 +1,16 @@
+#### 0.17.5: Maintenance Release
+
+ - Add express-session missing dependency for oauth
+ - Fix improper type tests is core test cases
+ - File node: recreate write stream when file deleted Fixes #1351
+ - Add flow stopping trace messages
+ - Fix userDir test case when .config.json exists (#1350)
+ - Do not try to send msg after http request error handled Fixes #1344
+ - Fix boundary problem in range node (#1338)
+ - Modify messages in node properties to refer messages.json (#1339)
+ - Fix settings.js replacing webSocketVerifyClient by webSocketNodeVerifyClient (#1343)
+
+
 #### 0.17.4: Maintenance Release
 
  - Add request node test case for POSTing 0
