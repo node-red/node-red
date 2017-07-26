@@ -41,6 +41,15 @@ RED.nodes = (function() {
         var typeToId = {};
         var nodeDefinitions = {};
 
+        nodeDefinitions['tab'] = {
+            defaults: {
+                label: {value:""},
+                disabled: {value: false},
+                info: {value: ""}
+            }
+        };
+
+
         var exports = {
             setModulePendingUpdated: function(module,version) {
                 moduleList[module].pending_version = version;
@@ -274,14 +283,7 @@ RED.nodes = (function() {
 
     function addWorkspace(ws) {
         workspaces[ws.id] = ws;
-        ws._def = {
-            defaults: {
-                label: {value:""},
-                disabled: {value: false},
-                info: {value: ""}
-            }
-        };
-
+        ws._def = RED.nodes.getType('tab');
         workspacesOrder.push(ws.id);
     }
     function getWorkspace(id) {
@@ -817,7 +819,7 @@ RED.nodes = (function() {
 
         // Add a tab if there isn't one there already
         if (defaultWorkspace == null) {
-            defaultWorkspace = { type:"tab", id:getID(), label:RED._('workspace.defaultName',{number:1})};
+            defaultWorkspace = { type:"tab", id:getID(), disabled: false, info:"",  label:RED._('workspace.defaultName',{number:1})};
             addWorkspace(defaultWorkspace);
             RED.workspaces.add(defaultWorkspace);
             new_workspaces.push(defaultWorkspace);

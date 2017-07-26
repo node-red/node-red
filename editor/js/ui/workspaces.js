@@ -30,7 +30,7 @@ RED.workspaces = (function() {
                 workspaceIndex += 1;
             } while ($("#workspace-tabs a[title='"+RED._('workspace.defaultName',{number:workspaceIndex})+"']").size() !== 0);
 
-            ws = {type:"tab",id:tabId,label:RED._('workspace.defaultName',{number:workspaceIndex})};
+            ws = {type:"tab",id:tabId,disabled: false,info:"",label:RED._('workspace.defaultName',{number:workspaceIndex})};
             RED.nodes.addWorkspace(ws);
             workspace_tabs.addTab(ws);
             workspace_tabs.activateTab(tabId);
