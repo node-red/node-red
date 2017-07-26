@@ -155,6 +155,9 @@ function start() {
                 if (settings.settingsFile) {
                     log.info(log._("runtime.paths.settings",{path:settings.settingsFile}));
                 }
+                if (settings.httpStatic) {
+                    log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
+                }
                 redNodes.loadFlows().then(redNodes.startFlows);
                 started = true;
             }).otherwise(function(err) {
