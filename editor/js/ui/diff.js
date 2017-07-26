@@ -587,7 +587,8 @@ RED.diff = (function() {
         if (localNode) {
             localCell.addClass("node-diff-node-unchanged");
             $('<span class="node-diff-status"></span>').appendTo(localCell);
-            RED.utils.createObjectElement(localNode.id).appendTo(localCell);
+            element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+            RED.utils.createObjectElement(localNode.id).appendTo(element);
         } else {
             localCell.addClass("node-diff-empty");
         }
@@ -596,7 +597,8 @@ RED.diff = (function() {
             remoteCell.addClass("node-diff-node-unchanged");
             if (remoteNode) {
                 $('<span class="node-diff-status"></span>').appendTo(remoteCell);
-                RED.utils.createObjectElement(remoteNode.id).appendTo(remoteCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                RED.utils.createObjectElement(remoteNode.id).appendTo(element);
             } else {
                 remoteCell.addClass("node-diff-empty");
             }
@@ -628,7 +630,8 @@ RED.diff = (function() {
             if (localNode) {
                 localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
                 $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(localCell);
-                RED.utils.createObjectElement({x:localNode.x,y:localNode.y}).appendTo(localCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+                RED.utils.createObjectElement({x:localNode.x,y:localNode.y}).appendTo(element);
             } else {
                 localCell.addClass("node-diff-empty");
             }
@@ -638,7 +641,8 @@ RED.diff = (function() {
                 remoteCell.addClass("node-diff-node-"+(remoteChanged?"changed":"unchanged"));
                 if (remoteNode) {
                     $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(remoteCell);
-                    RED.utils.createObjectElement({x:remoteNode.x,y:remoteNode.y}).appendTo(remoteCell);
+                    element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                    RED.utils.createObjectElement({x:remoteNode.x,y:remoteNode.y}).appendTo(element);
                 } else {
                     remoteCell.addClass("node-diff-empty");
                 }
@@ -742,7 +746,8 @@ RED.diff = (function() {
                     localCell.addClass("node-diff-node-conflict");
                     $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(localCell);
                 }
-                RED.utils.createObjectElement(localNode[d]).appendTo(localCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+                RED.utils.createObjectElement(localNode[d]).appendTo(element);
             } else {
                 localCell.addClass("node-diff-empty");
             }
@@ -756,7 +761,8 @@ RED.diff = (function() {
                         remoteCell.addClass("node-diff-node-conflict");
                         $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(remoteCell);
                     }
-                    RED.utils.createObjectElement(remoteNode[d]).appendTo(remoteCell);
+                    element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                    RED.utils.createObjectElement(remoteNode[d]).appendTo(element);
                 } else {
                     remoteCell.addClass("node-diff-empty");
                 }

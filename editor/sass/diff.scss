@@ -132,7 +132,7 @@
     table {
         border-collapse: collapse;
         table-layout:fixed;
-        
+
         // Fix for table-layout: fixed on safari:
         max-width: none;
         width: auto;
@@ -312,6 +312,10 @@
     margin-top: 6px;
     margin-bottom: 6px;
     text-align: center;
+}
+.node-diff-element {
+    display: inline-block;
+    width: calc(100% - 20px);
 }
 
 .node-diff-node-description {
