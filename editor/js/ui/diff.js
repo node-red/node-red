@@ -573,6 +573,7 @@ RED.diff = (function() {
         var nodePropertiesTable = $("<table>").appendTo(nodePropertiesDiv);
         var row;
         var localCell, remoteCell;
+        var element;
         var currentValue, localValue, remoteValue;
         var localChanged = false;
         var remoteChanged = false;
@@ -1073,7 +1074,7 @@ RED.diff = (function() {
             var tab = currentConfig.tabs[tabId];
             var el = {
                 diff: localDiff,
-                def: {},
+                def: RED.nodes.getType('tab'),
                 tab:tab
             };
             if (newConfig.tabs.hasOwnProperty(tabId)) {
@@ -1092,7 +1093,7 @@ RED.diff = (function() {
                 var tab = newConfig.tabs[tabId];
                 var el = {
                     diff: localDiff,
-                    def: {},
+                    def: RED.nodes.getType('tab'),
                     tab:tab,
                     newTab: tab
                 };
@@ -1110,7 +1111,7 @@ RED.diff = (function() {
                     var el = {
                         diff: localDiff,
                         remoteDiff: remoteDiff,
-                        def: {},
+                        def: RED.nodes.getType('tab'),
                         tab:tab,
                         remoteTab:tab
                     };
