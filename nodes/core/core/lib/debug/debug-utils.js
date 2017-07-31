@@ -441,7 +441,14 @@ RED.debug = (function() {
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
         var path = o.property||'';
-        var debugMessage = RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path);
+        var debugMessage = RED.utils.createObjectElement(payload, {
+            key: /*true*/null,
+            typeHint: format,
+            hideKey: false,
+            path: path,
+            sourceId: sourceNode&&sourceNode.id,
+            rootPath: path
+        });
         // Do this in a separate step so the element functions aren't stripped
         debugMessage.appendTo(el);
         // NOTE: relying on function error to have a "type" that all other msgs don't
