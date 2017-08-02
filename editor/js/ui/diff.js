@@ -726,9 +726,13 @@ RED.diff = (function() {
                 }
             }
         }
-        var properties = Object.keys(node).filter(function(p) { return p!='z'&&p!='wires'&&p!=='x'&&p!=='y'&&p!=='id'&&p!=='type'&&(!def.defaults||!def.defaults.hasOwnProperty(p))});
+
+        var properties = Object.keys(node).filter(function(p) { return p!='inputLabels'&&p!='outputLabels'&&p!='z'&&p!='wires'&&p!=='x'&&p!=='y'&&p!=='id'&&p!=='type'&&(!def.defaults||!def.defaults.hasOwnProperty(p))});
         if (def.defaults) {
             properties = properties.concat(Object.keys(def.defaults));
+        }
+        if (node.type !== 'tab' && node.type !== 'subflow') {
+            properties = properties.concat(['inputLabels','outputLabels']);
         }
         properties.forEach(function(d) {
             localChanged = false;
