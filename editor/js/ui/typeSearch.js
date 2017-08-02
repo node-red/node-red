@@ -236,7 +236,7 @@ RED.typeSearch = (function() {
         var items = [];
         RED.nodes.registry.getNodeTypes().forEach(function(t) {
             var def = RED.nodes.getType(t);
-            if (def.category !== 'config' && t !== 'unknown') {
+            if (def.category !== 'config' && t !== 'unknown' && t !== 'tab') {
                 items.push({type:t,def: def, label:getTypeLabel(t,def)});
             }
         });
