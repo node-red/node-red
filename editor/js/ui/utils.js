@@ -683,6 +683,8 @@ RED.utils = (function() {
             return "icons/node-red/subflow.png"
         } else if (node && node.type === 'unknown') {
             return "icons/node-red/alert.png"
+        } else if (node && node.type === 'subflow') {
+            return "icons/node-red/subflow.png"
         }
         var icon_url;
         if (typeof def.icon === "function") {
