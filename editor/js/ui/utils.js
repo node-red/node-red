@@ -531,8 +531,10 @@ RED.utils = (function() {
         if (exposeApi) {
             element.prop('expand', function() { return function(targetPath, state) {
                 if (path === targetPath) {
-                    header.prop('toggle')(state);
-                } else if (subElements[targetPath]) {
+                    if (header.prop('toggle')) {
+                        header.prop('toggle')(state);
+                    }
+                } else if (subElements[targetPath] && subElements[targetPath].prop('expand') ) {
                     subElements[targetPath].prop('expand')(targetPath,state);
                 }
             }});

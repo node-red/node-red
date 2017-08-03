@@ -16,8 +16,6 @@
 
 
 #node-dialog-view-diff {
-    height: 600px;
-
     .red-ui-editableList-container {
         border-radius:1px;
         padding:0;
@@ -132,11 +130,7 @@
     table {
         border-collapse: collapse;
         table-layout:fixed;
-
-        // Fix for table-layout: fixed on safari:
-        max-width: none;
-        width: auto;
-        min-width: 100%;
+        width: 100%;
     }
     td, th {
         border: 1px solid $secondary-border-color;
@@ -150,12 +144,16 @@
             white-space:nowrap;
             overflow:hidden;
         }
+        &:hover {
+            background: #f9f9f9;
+        }
+
     }
-    td:first-child {
+    col:first-child {
         width: 140px;
     }
-    td:not(:first-child) {
-        width: calc( 100% - 140px);
+    col:not(:first-child) {
+        width: 100%;
     }
     td  {
         .node-diff-status {
@@ -179,8 +177,8 @@
             width: 220px;
         }
     }
-    td:not(:first-child) {
-        width: calc( (100% - 140px) / 2);
+    col:not(:first-child) {
+        width:50%;
     }
 
     .node-diff-node-entry {
@@ -210,6 +208,9 @@
     cursor: pointer;
     padding: 0;
     // background: #f6f6f6;
+    &:hover {
+        background: #f9f9f9;
+    }
 }
 .node-diff-tab-title-meta {
     vertical-align: middle;
@@ -218,6 +219,9 @@
 }
 .node-diff-node-entry-header {
     cursor: pointer;
+    &:hover {
+        background: #f9f9f9;
+    }
 }
 .node-diff-node-entry-node {
     vertical-align: middle;
@@ -247,6 +251,9 @@
     }
     .node-diff-tab-title {
         cursor: default;
+        &:hover {
+            background: none;
+        }
     }
 }
 .node-diff-node-deleted {

@@ -132,6 +132,11 @@
     cursor: col-resize;
     border-left: 1px solid $primary-border-color;
     box-shadow: -1px 0 6px rgba(0,0,0,0.1);
+
+    &.editor-tray-resize-maximised {
+        background: $background-color;
+        cursor: default;
+    }
 }
 .editor-tray-resize-button {
     @include workspace-button;
