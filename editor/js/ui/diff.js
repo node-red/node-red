@@ -19,8 +19,8 @@ RED.diff = (function() {
 
     }
 
-    function buildDiffPanel() {
-        var diffPanel = $('<div id="node-dialog-view-diff"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>');
+    function buildDiffPanel(container) {
+        var diffPanel = $('<div id="node-dialog-view-diff"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>').appendTo(container);
 
         var toolbar = $('<div class="node-diff-toolbar">'+
             '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
@@ -1080,7 +1080,7 @@ RED.diff = (function() {
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var diffPanel = buildDiffPanel().appendTo(trayBody);
+                var diffPanel = buildDiffPanel(trayBody);
                 if (remoteDiff) {
                     $("#node-diff-view-diff-merge").show();
                     if (Object.keys(conflicts).length === 0) {
@@ -1120,7 +1120,7 @@ RED.diff = (function() {
                 if (remoteDiff !== undefined) {
                     diffPanel.addClass('node-diff-three-way');
 
-                    $('<div class="node-diff-node-entry-cell"></div><div class="node-diff-node-entry-cell" data-i18n="diff.local"></div><div class="node-diff-node-entry-cell" data-i18n="diff.remote"></div>').i18n().appendTo("#node-dialog-view-diff-headers");
+                    $('<div data-i18n="diff.local"></div><div data-i18n="diff.remote"></div>').i18n().appendTo("#node-dialog-view-diff-headers");
                     el.remoteTab = {
                         n:{},
                         nodes:remoteDiff.newConfig.globals

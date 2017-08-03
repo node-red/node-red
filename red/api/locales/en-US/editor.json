@@ -167,8 +167,8 @@
         },
         "nodeCount": "__count__ node",
         "nodeCount_plural": "__count__ nodes",
-        "local":"Local",
-        "remote":"Remote"
+        "local":"Local changes",
+        "remote":"Remote changes"
 
     },
     "subflow": {
