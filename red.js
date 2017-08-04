@@ -168,6 +168,10 @@ if (settings.httpNodeRoot !== false) {
 }
 
 settings.uiPort = parsedArgs.port||settings.uiPort||1880;
+if (settings.uiPort === -1){
+    settings.uiPort = 0;
+}
+
 settings.uiHost = settings.uiHost||"0.0.0.0";
 
 if (flowFile) {
@@ -292,6 +296,8 @@ RED.start().then(function() {
             if (settings.httpAdminRoot === false) {
                 RED.log.info(RED.log._("server.admin-ui-disabled"));
             }
+            if (settings.uiPort === 0)
+                settings.uiPort = server.address().port;
             process.title = parsedArgs.title || 'node-red';
             RED.log.info(RED.log._("server.now-running", {listenpath:getListenPath()}));
         });
