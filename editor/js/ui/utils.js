@@ -536,6 +536,17 @@ RED.utils = (function() {
                     }
                 } else if (subElements[targetPath] && subElements[targetPath].prop('expand') ) {
                     subElements[targetPath].prop('expand')(targetPath,state);
+                } else {
+                    for (var p in subElements) {
+                        if (subElements.hasOwnProperty(p)) {
+                            if (targetPath.indexOf(p) === 0) {
+                                if (subElements[p].prop('expand') ) {
+                                    subElements[p].prop('expand')(targetPath,state);
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
             }});
         }
