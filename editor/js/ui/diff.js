@@ -718,7 +718,7 @@ RED.diff = (function() {
         if (def.defaults) {
             properties = properties.concat(Object.keys(def.defaults));
         }
-        if (node.type !== 'tab' && node.type !== 'subflow') {
+        if (node.type !== 'tab') {
             properties = properties.concat(['inputLabels','outputLabels']);
         }
         properties.forEach(function(d) {
