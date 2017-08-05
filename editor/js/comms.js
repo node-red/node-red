@@ -28,19 +28,21 @@ RED.comms = (function() {
 
     function connectWS() {
         active = true;
-        /*
-        var path = location.hostname;
-        var port = location.port;
-        if (port.length !== 0) {
-            path = path+":"+port;
+        var path;
+        if (RED.settings.disableWebSockets) {
+            path = document.location.pathname;
+            path = path + (path.slice(-1) == "/"?"":"/")+"comms";
+        } else {
+            path = location.hostname;
+            var port = location.port;
+            if (port.length !== 0) {
+                path = path+":"+port;
+            }
+            path = path+document.location.pathname;
+            path = path+(path.slice(-1) == "/"?"":"/")+"comms";
+            path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
         }
-        path = path+document.location.pathname;
-        path = path+(path.slice(-1) == "/"?"":"/")+"comms";
-        path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
-        */
-        var path = document.location.pathname;
-        path = path + (path.slice(-1) == "/"?"":"/")+"comms";
-
+        
         var auth_tokens = RED.settings.get("auth-tokens");
         pendingAuth = (auth_tokens!=null);
 
@@ -51,8 +53,12 @@ RED.comms = (function() {
                 }
             }
         }
-
-        ws = new SockJS(path);
+        
+        if (RED.settings.disableWebSockets) {
+            ws = new SockJS(path);
+        } else {
+            ws = new WebSocket(path);
+        }
         ws.onopen = function() {
             reconnectAttempts = 0;
             if (errornotification) {

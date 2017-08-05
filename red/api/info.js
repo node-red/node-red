@@ -27,6 +27,7 @@ module.exports = {
         var safeSettings = {
             httpNodeRoot: settings.httpNodeRoot||"/",
             version: settings.version,
+            disableWebSockets: !!settings.disableWebSockets,
             user: req.user
         }
 
