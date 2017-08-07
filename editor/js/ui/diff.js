@@ -57,7 +57,7 @@ RED.diff = (function() {
                 } else if (tab.type === 'subflow') {
                     titleSpan.html((tabForLabel.name||tabForLabel.id));
                 } else {
-                    titleSpan.html("Global nodes");
+                    titleSpan.html(RED._("diff.globalNodes"));
                 }
                 var flowStats = {
                     local: {
@@ -133,7 +133,7 @@ RED.diff = (function() {
                             }
                         }
                         $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalNodeDiv);
-                        $('<span>').html("Flow Properties").appendTo(originalNodeDiv);
+                        $('<span>').html(RED._("diff.flowProperties")).appendTo(originalNodeDiv);
 
                         row.click(function(evt) {
                             evt.preventDefault();

@@ -29,6 +29,7 @@
         "label": {
             "view": {
                 "view": "表示",
+                "grid": "グリッド",
                 "showGrid": "グリッドを表示",
                 "snapGrid": "ノードの配置を補助",
                 "gridSize": "グリッドの大きさ",
@@ -41,12 +42,15 @@
             "sidebar": {
                 "show": "サイドバーを表示"
             },
-            "userSettings": "設定",
+            "settings": "設定",
+            "userSettings": "ユーザ設定",
+            "nodes": "ノード",
             "displayStatus": "ノードの状態を表示",
             "displayConfig": "ノードの設定",
             "import": "読み込み",
             "export": "書き出し",
             "search": "ノードを検索",
+            "searchInput": "ノードを検索",
             "clipboard": "クリップボード",
             "library": "ライブラリ",
             "examples": "サンプル",
@@ -61,11 +65,15 @@
             "login": "ログイン",
             "logout": "ログアウト",
             "editPalette": "パレットの管理",
-            "showTips": "ヒントを表示"
+            "other": "その他",
+            "showTips": "ヒントを表示",
+            "help": "Node-REDウェブサイト"
         }
     },
     "user": {
         "loggedInAs": "__name__ としてログインしました",
+        "username": "ユーザ名",
+        "password": "パスワード",
         "login": "ログイン",
         "loginFailed": "ログインに失敗しました",
         "notAuthorized": "権限がありません"
@@ -75,7 +83,7 @@
         "warnings": {
             "undeployedChanges": "ノードの変更をデプロイしていません",
             "nodeActionDisabled": "ノードのアクションは、サブフロー内で無効になっています",
-            "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください",
+            "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください。",
             "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります"
         },
         "error": "<strong>エラー</strong>: __message__",
@@ -85,7 +93,7 @@
             "lostConnectionTry": "すぐに接続",
             "cannotAddSubflowToItself": "サブフロー自身を追加できません",
             "cannotAddCircularReference": "循環参照を検出したため、サブフローを追加できません",
-            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください"
+            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。"
         }
     },
     "clipboard": {
@@ -144,6 +152,7 @@
             "improperlyConfigured": "以下のノードは、正しくプロパティが設定されていません:",
             "unknown": "ワークスペースに未知の型のノードがあります。",
             "confirm": "このままデプロイしても良いですか？",
+            "doNotWarn": "この警告を再度表示しない",
             "conflict": "フローを編集している間に、他のブラウザがフローをデプロイしました。デプロイを継続すると、他のブラウザがデプロイしたフローが削除されます。",
             "backgroundUpdate": "サーバ上のフローが更新されました",
             "conflictChecking": "変更を自動的にマージしてよいか確認してください。",
@@ -154,6 +163,8 @@
     "diff": {
         "unresolvedCount": "未解決の衝突 __count__",
         "unresolvedCount_plural": "未解決の衝突 __count__",
+        "globalNodes": "グローバルノード",
+        "flowProperties": "フロープロパティ",
         "type": {
             "added": "追加",
             "changed": "変更",
@@ -166,8 +177,8 @@
         },
         "nodeCount": "ノード数 __count__",
         "nodeCount_plural": "ノード数 __count__",
-        "local": "ローカル",
-        "remote": "リモート"
+        "local": "ローカルの変更",
+        "remote": "リモートの変更"
     },
     "subflow": {
         "editSubflow": "フローのテンプレートを編集: __name__",
@@ -208,7 +219,13 @@
     },
     "keyboard": {
         "title": "キーボードショートカット",
+        "keyboard": "キーボード",
+        "filterActions": "動作を検索",
+        "shortcut": "ショートカット",
+        "scope": "範囲",
         "unassigned": "未割当",
+        "global": "グローバル",
+        "workspace": "ワークスペース",
         "selectAll": "全てのノードを選択",
         "selectAllConnected": "接続された全てのノードを選択",
         "addRemoveNode": "ノードの選択、選択解除",
@@ -234,8 +251,8 @@
         "exportToLibrary": "ライブラリへフローを書き出す",
         "dialogSaveOverwrite": "__libraryName__ という __libraryType__ は既に存在しています 上書きしますか？",
         "invalidFilename": "不正なファイル名",
-        "savedNodes": "保存されたノード",
-        "savedType": "保存された __type__",
+        "savedNodes": "フローを保存しました",
+        "savedType": "__type__ を保存しました",
         "saveFailed": "保存に失敗しました: __message__",
         "filename": "ファイル名",
         "folder": "フォルダ",
@@ -271,6 +288,7 @@
         },
         "editor": {
             "title": "パレットの管理",
+            "palette": "パレット",
             "times": {
                 "seconds": "秒前",
                 "minutes": "分前",
@@ -312,12 +330,12 @@
             "sortRecent": "日付順",
             "more": "+ さらに __count__ 個",
             "errors": {
-                "catalogLoadFailed": "ノードのカタログの読み込みに失敗しました<br>詳細はブラウザのコンソールを確認してください",
-                "installFailed": "追加処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください",
-                "removeFailed": "削除処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください",
-                "updateFailed": "更新処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください",
-                "enableFailed": "有効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください",
-                "disableFailed": "無効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください"
+                "catalogLoadFailed": "ノードのカタログの読み込みに失敗しました。<br>詳細はブラウザのコンソールを確認してください。",
+                "installFailed": "追加処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "removeFailed": "削除処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "updateFailed": "更新処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "enableFailed": "有効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "disableFailed": "無効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。"
             },
             "confirm": {
                 "install": {
@@ -347,16 +365,24 @@
     "sidebar": {
         "info": {
             "name": "ノードの情報を表示",
+            "tabName": "名前",
             "label": "情報",
             "node": "ノード",
             "type": "型",
             "id": "ID",
+            "status": "状態",
+            "enabled": "有効",
+            "disabled": "無効",
             "subflow": "サブフロー",
             "instances": "インスタンス",
             "properties": "プロパティ",
             "info": "情報",
             "blank": "ブランク",
             "null": "ヌル",
+            "showMore": "さらに表示",
+            "showLess": "表示を省略",
+            "flow": "フロー",
+            "information": "情報",
             "arrayItems": "__count__ 要素",
             "showTips": "設定からヒントを表示できます"
         },
@@ -383,6 +409,7 @@
             "re": "正規表現",
             "bool": "真偽",
             "json": "JSON",
+            "bin": "バッファ",
             "date": "日時"
         }
     },

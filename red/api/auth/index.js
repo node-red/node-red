@@ -84,7 +84,7 @@ function login(req,res) {
         if (settings.adminAuth.type === "credentials") {
             response = {
                 "type":"credentials",
-                "prompts":[{id:"username",type:"text",label:"Username"},{id:"password",type:"password",label:"Password"}]
+                "prompts":[{id:"username",type:"text",label:"user.username"},{id:"password",type:"password",label:"user.password"}]
             }
         } else if (settings.adminAuth.type === "strategy") {
             response = {

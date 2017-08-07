@@ -89,7 +89,7 @@ RED.keyboard = (function() {
 
         RED.userSettings.add({
             id:'keyboard',
-            title: 'Keyboard',
+            title: RED._("keyboard.keyboard"),
             get: getSettingsPane,
             focus: function() {
                 setTimeout(function() {
@@ -350,7 +350,8 @@ RED.keyboard = (function() {
                 $(this).toggleClass("input-error",!valid);
             })
 
-            var scopeSelect = $('<select><option value="*">global</option><option value="workspace">workspace</option></select>').appendTo(scope);
+            var scopeSelect = $('<select><option value="*" data-i18n="keyboard.global"></option><option value="workspace" data-i18n="keyboard.workspace"></option></select>').appendTo(scope);
+            scopeSelect.i18n();
             scopeSelect.val(object.scope||'*');
 
             var div = $('<div class="keyboard-shortcut-edit button-group-vertical"></div>').appendTo(scope);
@@ -468,9 +469,9 @@ RED.keyboard = (function() {
         var pane = $('<div id="user-settings-tab-keyboard"></div>');
 
         $('<div class="keyboard-shortcut-entry keyboard-shortcut-list-header">'+
-        '<div class="keyboard-shortcut-entry-key keyboard-shortcut-entry-text"><input id="user-settings-tab-keyboard-filter" type="text" placeholder="filter actions"></div>'+
-        '<div class="keyboard-shortcut-entry-key">shortcut</div>'+
-        '<div class="keyboard-shortcut-entry-scope">scope</div>'+
+        '<div class="keyboard-shortcut-entry-key keyboard-shortcut-entry-text"><input id="user-settings-tab-keyboard-filter" type="text" data-i18n="[placeholder]keyboard.filterActions"></div>'+
+        '<div class="keyboard-shortcut-entry-key" data-i18n="keyboard.shortcut"></div>'+
+        '<div class="keyboard-shortcut-entry-scope" data-i18n="keyboard.scope"></div>'+
         '</div>').appendTo(pane);
 
         pane.find("input").searchBox({
