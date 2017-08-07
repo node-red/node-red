@@ -11,12 +11,6 @@ RED.diff = (function() {
         // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
         RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
 
-
-        // RED.actions.add("core:show-current-diff",showLocalDiff);
-        RED.actions.add("core:show-test-flow-diff",showTestFlowDiff);
-        // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
-        RED.keyboard.add("*","ctrl-shift-f","core:show-test-flow-diff");
-
     }
 
     function buildDiffPanel(container) {
