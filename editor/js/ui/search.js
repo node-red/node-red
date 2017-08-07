@@ -125,7 +125,7 @@ RED.search = (function() {
     function createDialog() {
         dialog = $("<div>",{id:"red-ui-search",class:"red-ui-search"}).appendTo("#main-container");
         var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(dialog);
-        searchInput = $('<input type="text" placeholder="search your flows">').appendTo(searchDiv).searchBox({
+        searchInput = $('<input type="text" data-i18n="[placeholder]menu.label.searchInput">').appendTo(searchDiv).searchBox({
             delay: 200,
             change: function() {
                 search($(this).val());
@@ -166,6 +166,7 @@ RED.search = (function() {
                 }
             }
         });
+        searchInput.i18n();
 
         var searchResultsDiv = $("<div>",{class:"red-ui-search-results-container"}).appendTo(dialog);
         searchResults = $('<ol>',{id:"search-result-list", style:"position: absolute;top: 5px;bottom: 5px;left: 5px;right: 5px;"}).appendTo(searchResultsDiv).editableList({

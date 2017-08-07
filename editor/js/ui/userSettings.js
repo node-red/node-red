@@ -33,7 +33,7 @@ RED.userSettings = (function() {
         var tabContainer;
 
         var trayOptions = {
-            title: "User Settings",
+            title: RED._("menu.label.userSettings"),
             buttons: [
                 {
                     id: "node-dialog-ok",
@@ -100,7 +100,7 @@ RED.userSettings = (function() {
 
     var viewSettings = [
         {
-            title: "Grid",
+            title: "menu.label.view.grid",
             options: [
                 {setting:"view-show-grid",oldSetting:"menu-menu-item-view-show-grid",label:"menu.label.view.showGrid",toggle:true,onchange:"core:toggle-show-grid"},
                 {setting:"view-snap-grid",oldSetting:"menu-menu-item-view-snap-grid",label:"menu.label.view.snapGrid",toggle:true,onchange:"core:toggle-snap-grid"},
@@ -108,13 +108,13 @@ RED.userSettings = (function() {
             ]
         },
         {
-            title: "Nodes",
+            title: "menu.label.nodes",
             options: [
                 {setting:"view-node-status",oldSetting:"menu-menu-item-status",label:"menu.label.displayStatus",default: true, toggle:true,onchange:"core:toggle-status"}
             ]
         },
         {
-            title: "Other",
+            title: "menu.label.other",
             options: [
                 {setting:"view-show-tips",oldSettings:"menu-menu-item-show-tips",label:"menu.label.showTips",toggle:true,default:true,onchange:"core:toggle-show-tips"}
             ]
@@ -128,7 +128,7 @@ RED.userSettings = (function() {
         var pane = $('<div id="user-settings-tab-view" class="node-help"></div>');
 
         viewSettings.forEach(function(section) {
-            $('<h3></h3>').text(section.title).appendTo(pane);
+            $('<h3></h3>').text(RED._(section.title)).appendTo(pane);
             section.options.forEach(function(opt) {
                 var initialState = RED.settings.get(opt.setting);
                 var row = $('<div class="user-settings-row"></div>').appendTo(pane);
@@ -169,7 +169,7 @@ RED.userSettings = (function() {
 
         addPane({
             id:'view',
-            title: 'View',
+            title: RED._("menu.label.view.view"),
             get: createViewPane,
             close: function() {
                 viewSettings.forEach(function(section) {

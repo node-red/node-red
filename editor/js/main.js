@@ -219,12 +219,12 @@
             menuOptions.push(null);
         }
 
-        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.userSettings"),onselect:"core:show-user-settings"});
+        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.settings"),onselect:"core:show-user-settings"});
         menuOptions.push(null);
 
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
         menuOptions.push({id:"menu-item-help",
-            label: RED.settings.theme("menu.menu-item-help.label","Node-RED website"),
+            label: RED.settings.theme("menu.menu-item-help.label",RED._("menu.label.help")),
             href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
         });
         menuOptions.push({id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: "core:show-about" });
