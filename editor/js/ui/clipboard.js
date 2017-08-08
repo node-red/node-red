@@ -203,7 +203,8 @@ RED.clipboard = (function() {
             var nodes = null;
             if (type === 'export-range-selected') {
                 var selection = RED.view.selection();
-                nodes = RED.nodes.createExportableNodeSet(selection.nodes);
+                // Don't include the subflow meta-port nodes in the exported selection
+                nodes = RED.nodes.createExportableNodeSet(selection.nodes.filter(function(n) { return n.type !== 'subflow'}));
             } else if (type === 'export-range-flow') {
                 var activeWorkspace = RED.workspaces.active();
                 nodes = RED.nodes.filterNodes({z:activeWorkspace});
