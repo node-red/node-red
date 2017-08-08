@@ -15,7 +15,9 @@
  **/
 RED.text = {};
 RED.text.bidi = (function() {
-    var textDir = "";
+    var textDir = "";    
+    var textDirPref = "auto";
+    var bidiEnabled = false;
     var LRE = "\u202A",
         RLE = "\u202B",
         PDF = "\u202C";
@@ -110,8 +112,8 @@ RED.text.bidi = (function() {
     }
 
     /**
-     * Sets the text direction preference
-     * @param dir - the text direction preference
+     * Sets the text direction
+     * @param dir - the actual text direction
      */
     function setTextDirection(dir) {
         textDir = dir;
@@ -120,9 +122,44 @@ RED.text.bidi = (function() {
         RED.palette.refresh();
         enforceTextDirectionOnPage();
     }
-
+    
+    /**
+     * Gets the bidi enabled preference
+     */
+    function getBidiEnabled() {
+        return bidiEnabled;
+    }
+        
+    /**
+     * Sets the bidi enabled preference
+     * @param state - the bidi enabled preference
+     */
+    function setBidiEnabled(state) {
+        bidiEnabled = state;
+        setTextDirection((state ? textDirPref : ""));
+    }
+    
+    /**
+     * Gets the text direction preference
+     */
+    function getTextDirPref() {        
+        return textDirPref;
+    }
+    
+    /**
+     * Sets the text direction preference
+     * @param dirPref - text direction preference
+     */
+    function setTextDirPref(dirPref) {
+        textDirPref = dirPref;
+        setTextDirection(textDirPref);
+    }
+   
     return {
-        setTextDirection: setTextDirection,
+        setBidiEnabled: setBidiEnabled,
+        setTextDirPref: setTextDirPref,
+        getBidiEnabled: getBidiEnabled,
+        getTextDirPref: getTextDirPref,
         enforceTextDirectionWithUCC: enforceTextDirectionWithUCC,
         resolveBaseTextDir: resolveBaseTextDir,
         prepareInput: prepareInput

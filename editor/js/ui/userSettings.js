@@ -142,7 +142,33 @@ RED.userSettings = (function() {
                 }
             });
         })
+        addBidiPreferences(pane);
         return pane;
+    }
+    
+    function addBidiPreferences(pane) {
+        $('<h3></h3>').text(RED._("menu.label.bidi")).appendTo(pane);                
+        var row;
+        
+        // Bidi enabled toggle
+        row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        var input = $('<label for="user-settings-view-bidi-enabled"><input id="user-settings-view-bidi-enabled" type="checkbox"> '+RED._("menu.label.bidiSupport") +'</label>').appendTo(row).find("input");
+        input.prop('checked',RED.text.bidi.getBidiEnabled());
+        
+        // Text Direction combo
+        row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        $('<label for="user-settings-view-text-direction">'+RED._("menu.label.view.textDir")+'</label>').appendTo(row);
+        var select = $('<select id="user-settings-view-text-direction"><option value="ltr">' + RED._("menu.label.view.ltr") + '</option><option value="rtl">'  + RED._("menu.label.view.rtl") + '</option><option value="auto">'  + RED._("menu.label.view.auto") + '</option></select>').appendTo(row);        
+        select.val(RED.text.bidi.getTextDirPref());
+        select.prop('disabled', !RED.text.bidi.getBidiEnabled());
+        
+        input.change(function() {
+            RED.text.bidi.setBidiEnabled(input.prop('checked'));
+            select.prop('disabled', !RED.text.bidi.getBidiEnabled());
+        });
+        select.change(function() {
+            RED.text.bidi.setTextDirPref(select.val());
+        });
     }
 
     function setSelected(id, value) {

@@ -67,7 +67,9 @@
             "editPalette":"Manage palette",
             "other": "Other",
             "showTips": "Show tips",
-            "help": "Node-RED website"
+            "help": "Node-RED website",
+			"bidi": "Bidi",
+			"bidiSupport": "Enable Bidi support"
         }
     },
     "user": {
