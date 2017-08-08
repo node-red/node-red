@@ -271,8 +271,9 @@ if (settings.httpStatic) {
 
 function getListenPath() {
     var port = settings.serverPort;
-    if (port === undefined)
+    if (port === undefined){
         port = settings.uiPort;
+    }
 
     var listenPath = 'http'+(settings.https?'s':'')+'://'+
                     (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
