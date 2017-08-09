@@ -69,7 +69,8 @@ function sockjsServerDriver(options) {
         "sockjs_url": "/vendor/vendor.js"
     });
     this._server.installHandlers(options.server, {
-        "prefix": options.path
+        "prefix": options.path,
+        "websocket": false
     });
 }
 sockjsServerDriver.prototype.on = function(event, handler) {
