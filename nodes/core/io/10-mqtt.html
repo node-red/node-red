@@ -166,6 +166,10 @@
 
 <script type="text/x-red" data-template-name="mqtt-broker">
     <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row">
         <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-config-mqtt-broker-tabs"></ul>
     </div>
     <div id="node-config-mqtt-broker-tabs-content" style="min-height: 170px;">
@@ -266,6 +270,7 @@
     RED.nodes.registerType('mqtt-broker',{
         category: 'config',
         defaults: {
+            name: {value:""},
             broker: {value:"",required:true},
             port: {value:1883,required:true,validate:RED.validators.number()},
             tls: {type:"tls-config",required: false},
@@ -296,9 +301,15 @@
             password: {type: "password"}
         },
         label: function() {
-            var b = this.broker;
-            if (b === "") { b = "undefined"; }
-            return (this.clientid?this.clientid+"@":"")+b+":"+this.port;
+            var lab = this.name;
+            if ((lab === undefined) || (lab ==="")) {
+                var b = this.broker;
+                if (b === "") { b = "undefined"; }
+                lab = (this.clientid?this.clientid+"@":"")+b+":"+this.port;
+            }
+            return lab;
+            
+            
         },
         oneditprepare: function () {
             var tabs = RED.tabs.create({
