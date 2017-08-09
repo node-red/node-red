@@ -15,6 +15,7 @@
  **/
 
 var ws = require("ws");
+var sockjs = require("sockjs");
 var log;
 
 var server;
@@ -47,6 +48,39 @@ function init(_server,runtime) {
     runtime.events.on("runtime-event",handleRuntimeEvent);
 }
 
+function sockjsConnDriver(conn) {
+    this._conn = conn;
+}
+sockjsConnDriver.prototype.on = function(event, handler) {
+    if (event == 'message') {
+        return this._conn.on('data', handler);
+    }
+    return this._conn.on(event, handler);
+};
+sockjsConnDriver.prototype.send = function(msg) {
+    return this._conn.write(msg);
+};
+sockjsConnDriver.prototype.close = function() {
+    return this._conn.close();
+};
+
+function sockjsServerDriver(options) {
+    this._server = sockjs.createServer({
+        "sockjs_url": "/vendor/vendor.js"
+    });
+    this._server.installHandlers(options.server, {
+        "prefix": options.path
+    });
+}
+sockjsServerDriver.prototype.on = function(event, handler) {
+    if (event == 'connection') {
+        return this._server.on('connection', function(conn) {
+            return handler(new sockjsConnDriver(conn));
+        });
+    }
+    return this._server.on(event, handler);
+};
+
 function start() {
     var Tokens = require("./auth/tokens");
     var Users = require("./auth/users");
@@ -56,16 +90,23 @@ function start() {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
             path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";
-            wsServer = new ws.Server({
-                server:server,
-                path:path,
-                // Disable the deflate option due to this issue
-                //  https://github.com/websockets/ws/pull/632
-                // that is fixed in the 1.x release of the ws module
-                // that we cannot currently pickup as it drops node 0.10 support
-                perMessageDeflate: false
-            });
-
+            if (settings.disableWebSockets) {
+                wsServer = new sockjsServerDriver({
+                    server:server,
+                    path:path
+                });
+            } else {
+                wsServer = new ws.Server({
+                    server:server,
+                    path:path,
+                    // Disable the deflate option due to this issue
+                    //  https://github.com/websockets/ws/pull/632
+                    // that is fixed in the 1.x release of the ws module
+                    // that we cannot currently pickup as it drops node 0.10 support
+                    perMessageDeflate: false
+                });
+            }
+            
             wsServer.on('connection',function(ws) {
                 log.audit({event: "comms.open"});
                 var pendingAuth = (settings.adminAuth != null);
