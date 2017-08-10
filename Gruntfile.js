@@ -158,7 +158,6 @@ module.exports = function(grunt) {
             vendor: {
                 files: {
                     "public/vendor/vendor.js": [
-                        "editor/vendor/sockjs/sockjs-1.1.4.min.js",
                         "editor/vendor/jquery/js/jquery-1.11.3.min.js",
                         "editor/vendor/bootstrap/js/bootstrap.min.js",
                         "editor/vendor/jquery/js/jquery-ui-1.10.3.custom.min.js",
@@ -178,6 +177,9 @@ module.exports = function(grunt) {
                     "public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "editor/vendor/jsonata/worker-jsonata.js"
+                    ],
+                    "public/vendor/sockjs/sockjs.min.js": [
+                        "editor/vendor/sockjs/sockjs-1.1.4.min.js"
                     ]
                 }
             }

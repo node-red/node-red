@@ -65,8 +65,11 @@ sockjsConnDriver.prototype.close = function() {
 };
 
 function sockjsServerDriver(options) {
+    var path = settings.httpAdminRoot || "/";
+    path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "vendor/sockjs/sockjs.min.js";
+            
     this._server = sockjs.createServer({
-        "sockjs_url": "/vendor/vendor.js"
+        "sockjs_url": path
     });
     this._server.installHandlers(options.server, {
         "prefix": options.path,
