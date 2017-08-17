@@ -181,7 +181,7 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             topic: {value:""},
             payload: {value:"", validate: RED.validators.typedInput("payloadType")},
             payloadType: {value:"date"},
-            repeat: {value:""},
+            repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0))) }},
             crontab: {value:""},
             once: {value:false}
         },
