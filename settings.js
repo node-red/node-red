@@ -174,7 +174,7 @@ module.exports = {
     // The following property can be used to verify websocket connection attempts.
     // This allows, for example, the HTTP request headers to be checked to ensure
     // they include valid authentication information.
-    //webSocketVerifyClient: function(info) {
+    //webSocketNodeVerifyClient: function(info) {
     //    // 'info' has three properties:
     //    //   - origin : the value in the Origin header
     //    //   - req : the HTTP request

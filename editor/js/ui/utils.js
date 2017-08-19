@@ -50,24 +50,58 @@ RED.utils = (function() {
         }
         return result;
     }
-    function makeExpandable(el,onexpand,expand) {
+    function makeExpandable(el,onbuild,ontoggle,expand) {
         el.addClass("debug-message-expandable");
+        el.prop('toggle',function() {
+            return function(state) {
+                var parent = el.parent();
+                if (parent.hasClass('collapsed')) {
+                    if (state) {
+                        if (onbuild && !parent.hasClass('built')) {
+                            onbuild();
+                            parent.addClass('built');
+                        }
+                        parent.removeClass('collapsed');
+                        return true;
+                    }
+                } else {
+                    if (!state) {
+                        parent.addClass('collapsed');
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
         el.click(function(e) {
             var parent = $(this).parent();
-            if (parent.hasClass('collapsed')) {
-                if (onexpand && !parent.hasClass('built')) {
-                    onexpand();
-                    parent.addClass('built');
+            var currentState = !parent.hasClass('collapsed');
+            if ($(this).prop('toggle')(!currentState)) {
+                if (ontoggle) {
+                    ontoggle(!currentState);
                 }
-                parent.removeClass('collapsed');
-            } else {
-                parent.addClass('collapsed');
             }
+            // if (parent.hasClass('collapsed')) {
+            //     if (onbuild && !parent.hasClass('built')) {
+            //         onbuild();
+            //         parent.addClass('built');
+            //     }
+            //     if (ontoggle) {
+            //         ontoggle(true);
+            //     }
+            //     parent.removeClass('collapsed');
+            // } else {
+            //     parent.addClass('collapsed');
+            //     if (ontoggle) {
+            //         ontoggle(false);
+            //     }
+            // }
             e.preventDefault();
         });
         if (expand) {
             el.click();
         }
+
     }
 
     var pinnedPaths = {};
@@ -189,10 +223,23 @@ RED.utils = (function() {
         }
     }
 
-    function buildMessageElement(obj,key,typeHint,hideKey,path,sourceId,rootPath,expandPaths) {
+    function buildMessageElement(obj,options) {
+        options = options || {};
+        var key = options.key;
+        var typeHint = options.typeHint;
+        var hideKey = options.hideKey;
+        var path = options.path;
+        var sourceId = options.sourceId;
+        var rootPath = options.rootPath;
+        var expandPaths = options.expandPaths;
+        var ontoggle = options.ontoggle;
+        var exposeApi = options.exposeApi;
+
+        var subElements = {};
         var i;
         var e;
         var entryObj;
+        var expandableHeader;
         var header;
         var headerHead;
         var value;
@@ -257,7 +304,7 @@ RED.utils = (function() {
                     $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
                     var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                     $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
-                },checkExpanded(strippedKey,expandPaths));
+                },function(state) {if (ontoggle) { ontoggle(path,state);}}, checkExpanded(strippedKey,expandPaths));
             }
             e = $('<span class="debug-message-type-string debug-message-object-header"></span>').html('"'+formatString(sanitize(obj))+'"').appendTo(entryObj);
             if (/^#[0-9a-f]{6}$/i.test(obj)) {
@@ -356,7 +403,20 @@ RED.utils = (function() {
                     if (fullLength <= 10) {
                         for (i=0;i<fullLength;i++) {
                             row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(arrayRows);
-                            buildMessageElement(data[i],""+i,type==='buffer'?'hex':false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
+                            subElements[path+"["+i+"]"] = buildMessageElement(
+                                data[i],
+                                {
+                                    key: ""+i,
+                                    typeHint: type==='buffer'?'hex':false,
+                                    hideKey: false,
+                                    path: path+"["+i+"]",
+                                    sourceId: sourceId,
+                                    rootPath: rootPath,
+                                    expandPaths: expandPaths,
+                                    ontoggle: ontoggle,
+                                    exposeApi: exposeApi
+                                }
+                            ).appendTo(row);
                         }
                     } else {
                         for (i=0;i<fullLength;i+=10) {
@@ -371,17 +431,35 @@ RED.utils = (function() {
                                 return function() {
                                     for (var i=min;i<=max;i++) {
                                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(parent);
-                                        buildMessageElement(data[i],""+i,type==='buffer'?'hex':false,false,path+"["+i+"]",sourceId,rootPath,expandPaths).appendTo(row);
+                                        subElements[path+"["+i+"]"] = buildMessageElement(
+                                            data[i],
+                                            {
+                                                key: ""+i,
+                                                typeHint: type==='buffer'?'hex':false,
+                                                hideKey: false,
+                                                path: path+"["+i+"]",
+                                                sourceId: sourceId,
+                                                rootPath: rootPath,
+                                                expandPaths: expandPaths,
+                                                ontoggle: ontoggle,
+                                                exposeApi: exposeApi
+
+                                            }
+                                        ).appendTo(row);
                                     }
                                 }
-                            })(),checkExpanded(strippedKey,expandPaths,minRange,Math.min(fullLength-1,(minRange+9))));
+                            })(),
+                            (function() { var path = path+"["+i+"]"; return function(state) {if (ontoggle) { ontoggle(path,state);}}})(),
+                            checkExpanded(strippedKey,expandPaths,minRange,Math.min(fullLength-1,(minRange+9))));
                             $('<span class="debug-message-object-key"></span>').html("["+minRange+" &hellip; "+Math.min(fullLength-1,(minRange+9))+"]").appendTo(header);
                         }
                         if (fullLength < originalLength) {
                              $('<div class="debug-message-object-entry collapsed"><span class="debug-message-object-key">['+fullLength+' &hellip; '+originalLength+']</span></div>').appendTo(arrayRows);
                         }
                     }
-                },checkExpanded(strippedKey,expandPaths));
+                },
+                function(state) {if (ontoggle) { ontoggle(path,state);}},
+                checkExpanded(strippedKey,expandPaths));
             }
         } else if (typeof obj === 'object') {
             element.addClass('collapsed');
@@ -395,17 +473,35 @@ RED.utils = (function() {
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                         var newPath = path;
-                        if (/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(keys[i])) {
-                            newPath += (newPath.length > 0?".":"")+keys[i];
-                        } else {
-                            newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
+                        if (newPath) {
+                            if (/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(keys[i])) {
+                                newPath += (newPath.length > 0?".":"")+keys[i];
+                            } else {
+                                newPath += "[\""+keys[i].replace(/"/,"\\\"")+"\"]"
+                            }
                         }
-                        buildMessageElement(obj[keys[i]],keys[i],false,false,newPath,sourceId,rootPath,expandPaths).appendTo(row);
+                        subElements[newPath] = buildMessageElement(
+                            obj[keys[i]],
+                            {
+                                key: keys[i],
+                                typeHint: false,
+                                hideKey: false,
+                                path: newPath,
+                                sourceId: sourceId,
+                                rootPath: rootPath,
+                                expandPaths: expandPaths,
+                                ontoggle: ontoggle,
+                                exposeApi: exposeApi
+
+                            }
+                        ).appendTo(row);
                     }
                     if (keys.length === 0) {
                         $('<div class="debug-message-object-entry debug-message-type-meta collapsed"></div>').text("empty").appendTo(element);
                     }
-                },checkExpanded(strippedKey,expandPaths));
+                },
+                function(state) {if (ontoggle) { ontoggle(path,state);}},
+                checkExpanded(strippedKey,expandPaths));
             }
             if (key) {
                 $('<span class="debug-message-type-meta"></span>').html('object').appendTo(entryObj);
@@ -431,6 +527,28 @@ RED.utils = (function() {
             }
         } else {
             $('<span class="debug-message-type-other"></span>').text(""+obj).appendTo(entryObj);
+        }
+        if (exposeApi) {
+            element.prop('expand', function() { return function(targetPath, state) {
+                if (path === targetPath) {
+                    if (header.prop('toggle')) {
+                        header.prop('toggle')(state);
+                    }
+                } else if (subElements[targetPath] && subElements[targetPath].prop('expand') ) {
+                    subElements[targetPath].prop('expand')(targetPath,state);
+                } else {
+                    for (var p in subElements) {
+                        if (subElements.hasOwnProperty(p)) {
+                            if (targetPath.indexOf(p) === 0) {
+                                if (subElements[p].prop('expand') ) {
+                                    subElements[p].prop('expand')(targetPath,state);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }});
         }
         return element;
     }
@@ -578,6 +696,8 @@ RED.utils = (function() {
             return "icons/node-red/subflow.png"
         } else if (node && node.type === 'unknown') {
             return "icons/node-red/alert.png"
+        } else if (node && node.type === 'subflow') {
+            return "icons/node-red/subflow.png"
         }
         var icon_url;
         if (typeof def.icon === "function") {

@@ -50,11 +50,11 @@ RED.sidebar.info = (function() {
         }).hide();
 
         nodeSection = sections.add({
-            title: "Node",
+            title: RED._("sidebar.info.node"),
             collapsible: false
         });
         infoSection = sections.add({
-            title: "Information",
+            title: RED._("sidebar.info.information"),
             collapsible: false
         });
         infoSection.content.css("padding","6px");
@@ -132,15 +132,15 @@ RED.sidebar.info = (function() {
         var propRow;
         var subflowNode;
         if (node.type === "tab") {
-            nodeSection.title.html("Flow");
-            propRow = $('<tr class="node-info-node-row"><td>Name</td><td></td></tr>').appendTo(tableBody);
+            nodeSection.title.html(RED._("sidebar.info.flow"));
+            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.tabName")+'</td><td></td></tr>').appendTo(tableBody);
             $(propRow.children()[1]).html('&nbsp;'+(node.label||""))
             propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.id")+"</td><td></td></tr>").appendTo(tableBody);
             RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-            propRow = $('<tr class="node-info-node-row"><td>Status</td><td></td></tr>').appendTo(tableBody);
-            $(propRow.children()[1]).html((!!!node.disabled)?"Enabled":"Disabled")
+            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
+            $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
         } else {
-            nodeSection.title.html("Node");
+            nodeSection.title.html(RED._("sidebar.info.node"));
             if (node.type !== "subflow" && node.name) {
                 $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td>&nbsp;<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
             }
@@ -188,7 +188,7 @@ RED.sidebar.info = (function() {
                         }
                     }
                     if (count > 0) {
-                        $('<tr class="node-info-property-expand blank"><td colspan="2"><a href="#" class=" node-info-property-header'+(expandedSections.property?" expanded":"")+'"><span class="node-info-property-show-more">show more</span><span class="node-info-property-show-less">show less</span> <i class="fa fa-caret-down"></i></a></td></tr>').appendTo(tableBody);
+                        $('<tr class="node-info-property-expand blank"><td colspan="2"><a href="#" class=" node-info-property-header'+(expandedSections.property?" expanded":"")+'"><span class="node-info-property-show-more">'+RED._("sidebar.info.showMore")+'</span><span class="node-info-property-show-less">'+RED._("sidebar.info.showLess")+'</span> <i class="fa fa-caret-down"></i></a></td></tr>').appendTo(tableBody);
                     }
                 }
             }

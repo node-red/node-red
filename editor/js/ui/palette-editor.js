@@ -423,7 +423,7 @@ RED.palette.editor = (function() {
 
         RED.userSettings.add({
             id:'palette',
-            title: 'Palette',
+            title: RED._("palette.editor.palette"),
             get: getSettingsPane,
             close: function() {
                 settingsPane.detach();

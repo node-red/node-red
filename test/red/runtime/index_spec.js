@@ -141,7 +141,7 @@ describe("runtime", function() {
                     {  module:"node-red",enabled:true,loaded:false,types:["typeC","typeD"]} // missing
                 ].filter(cb);
             });
-            var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return when.resolve();});
+            var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return when.resolve({nodes:[]});});
             runtime.init({testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}});
             sinon.stub(console,"log");
             runtime.start().then(function() {

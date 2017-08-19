@@ -41,14 +41,14 @@ RED.debug = (function() {
         var content = $("<div>").css({"position":"relative","height":"100%"});
         var toolbar = $('<div class="sidebar-header">'+
             '<span class="button-group"><a id="debug-tab-filter" class="sidebar-header-button" href="#"><i class="fa fa-filter"></i> <span></span></a></span>'+
-            '<span class="button-group"><a id="debug-tab-clear" title="clear log" class="sidebar-header-button" href="#"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
+            '<span class="button-group"><a id="debug-tab-clear" class="sidebar-header-button" href="#" data-i18n="[title]node-red:debug.sidebar.clearLog"><i class="fa fa-trash"></i></a></span></div>').appendTo(content);
 
         var footerToolbar = $('<div>'+
             // '<span class="button-group">'+
             //     '<a class="sidebar-footer-button-toggle text-button selected" id="debug-tab-view-list" href="#"><span data-i18n="">list</span></a>'+
             //     '<a class="sidebar-footer-button-toggle text-button" id="debug-tab-view-table" href="#"><span data-i18n="">table</span></a> '+
             // '</span>'+
-            '<span class="button-group"><a id="debug-tab-open" title="open in new window" class="sidebar-footer-button" href="#"><i class="fa fa-desktop"></i></a></span> ' +
+            '<span class="button-group"><a id="debug-tab-open" class="sidebar-footer-button" href="#" data-i18n="[title]node-red:debug.sidebar.openWindow"><i class="fa fa-desktop"></i></a></span> ' +
             '</div>');
 
         messageList = $('<div class="debug-content debug-content-list"/>').appendTo(content);
@@ -70,7 +70,7 @@ RED.debug = (function() {
 
         var debugNodeListRow = $('<div class="debug-filter-row hide"></div>').appendTo(filterDialog);
         var flowCheckboxes = {};
-        var debugNodeListHeader = $('<div><span>Debug nodes</span><span></span></div>');
+        var debugNodeListHeader = $('<div><span data-i18n="node-red:debug.sidebar.debugNodes"></span><span></span></div>');
         var headerCheckbox = $('<input type="checkbox">').appendTo(debugNodeListHeader.find("span")[1]).checkboxSet();
 
         debugNodeList = $('<ol>',{style:"text-align: left; min-height: 250px; max-height: 250px"}).appendTo(debugNodeListRow).editableList({
@@ -441,7 +441,14 @@ RED.debug = (function() {
         }
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
         var path = o.property||'';
-        var debugMessage = RED.utils.createObjectElement(payload,/*true*/null,format,false,path,sourceNode&&sourceNode.id,path);
+        var debugMessage = RED.utils.createObjectElement(payload, {
+            key: /*true*/null,
+            typeHint: format,
+            hideKey: false,
+            path: path,
+            sourceId: sourceNode&&sourceNode.id,
+            rootPath: path
+        });
         // Do this in a separate step so the element functions aren't stripped
         debugMessage.appendTo(el);
         // NOTE: relying on function error to have a "type" that all other msgs don't

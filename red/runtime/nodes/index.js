@@ -30,8 +30,6 @@ var library = require("./library");
 
 var events = require("../events");
 
-var child_process = require('child_process');
-
 var settings;
 
 /**

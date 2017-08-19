@@ -171,6 +171,7 @@ module.exports = function(RED) {
                 }
                 if (msg.hasOwnProperty("reset")) {
                     clearInterval(node.intervalID);
+                    node.intervalID = -1;
                     node.buffer = [];
                     node.status({text:"reset"});
                 }

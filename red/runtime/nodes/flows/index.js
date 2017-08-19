@@ -58,7 +58,7 @@ function init(runtime) {
                     log.info(log._("nodes.flows.registered-missing", {type:type}));
                     activeFlowConfig.missingTypes.splice(i,1);
                     if (activeFlowConfig.missingTypes.length === 0 && started) {
-                        events.emit("runtime-event",{id:"runtime-state"});
+                        events.emit("runtime-event",{id:"runtime-state",retain: true});
                         start();
                     }
                 }
@@ -135,13 +135,13 @@ function setFlows(_config,type,muteLog) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
                     start(type,diff,muteLog).then(function() {
-                        events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
+                        events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
                     });
                     return flowRevision;
                 }).otherwise(function(err) {
                 })
             } else {
-                events.emit("runtime-event",{id:"runtime-deploy",revision:flowRevision});
+                events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
             }
         });
 }
@@ -251,7 +251,7 @@ function start(type,diff,muteLog) {
             log.info(log._("nodes.flows.missing-type-install-2"));
             log.info("  "+settings.userDir);
         }
-        events.emit("runtime-event",{id:"runtime-state",type:"warning",text:"notification.warnings.missing-types"});
+        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",text:"notification.warnings.missing-types"},retain:true});
         return when.resolve();
     }
     if (!muteLog) {
@@ -310,7 +310,7 @@ function start(type,diff,muteLog) {
         }
     }
     events.emit("nodes-started");
-    events.emit("runtime-event",{id:"runtime-state"});
+    events.emit("runtime-event",{id:"runtime-state",retain:true});
 
     if (!muteLog) {
         if (type !== "full") {
@@ -351,6 +351,7 @@ function stop(type,diff,muteLog) {
     for (var id in activeFlows) {
         if (activeFlows.hasOwnProperty(id)) {
             var flowStateChanged = diff && (diff.added.indexOf(id) !== -1 || diff.removed.indexOf(id) !== -1);
+            log.debug("red/nodes/flows.stop : stopping flow : "+id);
             promises = promises.concat(activeFlows[id].stop(flowStateChanged?null:stopList,removedList));
             if (type === "full" || flowStateChanged || diff.removed.indexOf(id)!==-1) {
                 delete activeFlows[id];

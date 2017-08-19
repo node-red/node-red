@@ -157,8 +157,8 @@ RED.deploy = (function() {
                 create: function() {
                     $("#node-dialog-confirm-deploy").parent().find("div.ui-dialog-buttonpane")
                         .prepend('<div style="height:0; vertical-align: middle; display:inline-block; margin-top: 13px; float:left;">'+
-                                   '<input style="vertical-align:top;" type="checkbox" id="node-dialog-confirm-deploy-hide">'+
-                                   '<label style="display:inline;" for="node-dialog-confirm-deploy-hide"> do not warn about this again</label>'+
+                                   '<input style="vertical-align:top;" type="checkbox" id="node-dialog-confirm-deploy-hide"> '+
+                                   '<label style="display:inline;" for="node-dialog-confirm-deploy-hide" data-i18n="deploy.confirm.doNotWarn"></label>'+
                                    '<input type="hidden" id="node-dialog-confirm-deploy-type">'+
                                    '</div>');
                 },
@@ -361,6 +361,10 @@ RED.deploy = (function() {
             }
 
             deployInflight = true;
+            $("#header-shade").show();
+            $("#editor-shade").show();
+            $("#palette-shade").show();
+            $("#sidebar-shade").show();
             $.ajax({
                 url:"flows",
                 type: "POST",
@@ -424,6 +428,10 @@ RED.deploy = (function() {
                 setTimeout(function() {
                     $(".deploy-button-content").css('opacity',1);
                     $(".deploy-button-spinner").hide();
+                    $("#header-shade").hide();
+                    $("#editor-shade").hide();
+                    $("#palette-shade").hide();
+                    $("#sidebar-shade").hide();
                 },delta);
             });
         }

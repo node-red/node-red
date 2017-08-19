@@ -1,52 +1,26 @@
 RED.diff = (function() {
 
     var currentDiff = {};
+    var diffVisible = false;
+    var diffList;
 
     function init() {
 
         // RED.actions.add("core:show-current-diff",showLocalDiff);
         RED.actions.add("core:show-remote-diff",showRemoteDiff);
-
         // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
         RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
 
+    }
 
-        var dialog = $('<div id="node-dialog-view-diff" class="hide"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>').appendTo(document.body);
+    function buildDiffPanel(container) {
+        var diffPanel = $('<div id="node-dialog-view-diff"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>').appendTo(container);
 
         var toolbar = $('<div class="node-diff-toolbar">'+
             '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
-            '</div>').prependTo(dialog);
+            '</div>').prependTo(diffPanel);
 
-        $("#node-dialog-view-diff").dialog({
-            title: RED._('deploy.confirm.button.review'),
-            modal: true,
-            autoOpen: false,
-            buttons: [
-                {
-                    text: RED._("common.label.cancel"),
-                    click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    id: "node-diff-view-diff-merge",
-                    text: RED._("deploy.confirm.button.merge"),
-                    class: "primary disabled",
-                    click: function() {
-                        if (!$("#node-diff-view-diff-merge").hasClass('disabled')) {
-                            refreshConflictHeader();
-                            mergeDiff(currentDiff);
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                }
-            ],
-            open: function() {
-                $(this).dialog({width:Math.min($(window).width(),900),height:Math.min($(window).height(),600)});
-            }
-        });
-
-        var diffList = $("#node-dialog-view-diff-diff").editableList({
+        diffList = diffPanel.find("#node-dialog-view-diff-diff").editableList({
             addButton: false,
             scrollOnAdd: false,
             addItem: function(container,i,object) {
@@ -77,7 +51,7 @@ RED.diff = (function() {
                 } else if (tab.type === 'subflow') {
                     titleSpan.html((tabForLabel.name||tabForLabel.id));
                 } else {
-                    titleSpan.html("Global nodes");
+                    titleSpan.html(RED._("diff.globalNodes"));
                 }
                 var flowStats = {
                     local: {
@@ -153,7 +127,7 @@ RED.diff = (function() {
                             }
                         }
                         $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalNodeDiv);
-                        $('<span>').html("Flow Properties").appendTo(originalNodeDiv);
+                        $('<span>').html(RED._("diff.flowProperties")).appendTo(originalNodeDiv);
 
                         row.click(function(evt) {
                             evt.preventDefault();
@@ -307,6 +281,7 @@ RED.diff = (function() {
                 container.i18n();
             }
         });
+        return diffPanel;
     }
     function formatWireProperty(wires,allNodes) {
         var result = $("<div>",{class:"node-diff-property-wires"})
@@ -563,6 +538,7 @@ RED.diff = (function() {
         return div;
     }
     function createNodePropertiesTable(def,node,localNodeObj,remoteNodeObj) {
+        var propertyElements = {};
         var localNode = localNodeObj.node;
         var remoteNode;
         if (remoteNodeObj) {
@@ -571,8 +547,15 @@ RED.diff = (function() {
 
         var nodePropertiesDiv = $("<div>",{class:"node-diff-node-entry-properties"});
         var nodePropertiesTable = $("<table>").appendTo(nodePropertiesDiv);
+        var nodePropertiesTableCols = $('<colgroup><col/><col/></colgroup>').appendTo(nodePropertiesTable);
+        if (remoteNode !== undefined) {
+            $("<col/>").appendTo(nodePropertiesTableCols);
+        }
+        var nodePropertiesTableBody = $("<tbody>").appendTo(nodePropertiesTable);
+
         var row;
         var localCell, remoteCell;
+        var element;
         var currentValue, localValue, remoteValue;
         var localChanged = false;
         var remoteChanged = false;
@@ -581,13 +564,14 @@ RED.diff = (function() {
         var conflict = false;
         var status;
 
-        row = $("<tr>").appendTo(nodePropertiesTable);
+        row = $("<tr>").appendTo(nodePropertiesTableBody);
         $("<td>",{class:"node-diff-property-cell-label"}).html("id").appendTo(row);
         localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
         if (localNode) {
             localCell.addClass("node-diff-node-unchanged");
             $('<span class="node-diff-status"></span>').appendTo(localCell);
-            RED.utils.createObjectElement(localNode.id).appendTo(localCell);
+            element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+            propertyElements['local.id'] = RED.utils.createObjectElement(localNode.id).appendTo(element);
         } else {
             localCell.addClass("node-diff-empty");
         }
@@ -596,7 +580,8 @@ RED.diff = (function() {
             remoteCell.addClass("node-diff-node-unchanged");
             if (remoteNode) {
                 $('<span class="node-diff-status"></span>').appendTo(remoteCell);
-                RED.utils.createObjectElement(remoteNode.id).appendTo(remoteCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                propertyElements['remote.id'] = RED.utils.createObjectElement(remoteNode.id).appendTo(element);
             } else {
                 remoteCell.addClass("node-diff-empty");
             }
@@ -622,13 +607,24 @@ RED.diff = (function() {
             ) {
                 conflict = true;
             }
-            row = $("<tr>").appendTo(nodePropertiesTable);
+            row = $("<tr>").appendTo(nodePropertiesTableBody);
             $("<td>",{class:"node-diff-property-cell-label"}).html("position").appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
                 $('<span class="node-diff-status">'+(localChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(localCell);
-                RED.utils.createObjectElement({x:localNode.x,y:localNode.y}).appendTo(localCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+                propertyElements['local.position'] = RED.utils.createObjectElement({x:localNode.x,y:localNode.y},
+                    {
+                        path: "position",
+                        exposeApi: true,
+                        ontoggle: function(path,state) {
+                            if (propertyElements['remote.'+path]) {
+                                propertyElements['remote.'+path].prop('expand')(path,state)
+                            }
+                        }
+                    }
+                ).appendTo(element);
             } else {
                 localCell.addClass("node-diff-empty");
             }
@@ -638,7 +634,18 @@ RED.diff = (function() {
                 remoteCell.addClass("node-diff-node-"+(remoteChanged?"changed":"unchanged"));
                 if (remoteNode) {
                     $('<span class="node-diff-status">'+(remoteChanged?'<i class="fa fa-square"></i>':'')+'</span>').appendTo(remoteCell);
-                    RED.utils.createObjectElement({x:remoteNode.x,y:remoteNode.y}).appendTo(remoteCell);
+                    element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                    propertyElements['remote.position'] = RED.utils.createObjectElement({x:remoteNode.x,y:remoteNode.y},
+                        {
+                            path: "position",
+                            exposeApi: true,
+                            ontoggle: function(path,state) {
+                                if (propertyElements['local.'+path]) {
+                                    propertyElements['local.'+path].prop('expand')(path,state);
+                                }
+                            }
+                        }
+                    ).appendTo(element);
                 } else {
                     remoteCell.addClass("node-diff-empty");
                 }
@@ -668,7 +675,7 @@ RED.diff = (function() {
             ){
                 conflict = true;
             }
-            row = $("<tr>").appendTo(nodePropertiesTable);
+            row = $("<tr>").appendTo(nodePropertiesTableBody);
             $("<td>",{class:"node-diff-property-cell-label"}).html("wires").appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
@@ -700,9 +707,13 @@ RED.diff = (function() {
                 }
             }
         }
-        var properties = Object.keys(node).filter(function(p) { return p!='z'&&p!='wires'&&p!=='x'&&p!=='y'&&p!=='id'&&p!=='type'&&(!def.defaults||!def.defaults.hasOwnProperty(p))});
+
+        var properties = Object.keys(node).filter(function(p) { return p!='inputLabels'&&p!='outputLabels'&&p!='z'&&p!='wires'&&p!=='x'&&p!=='y'&&p!=='id'&&p!=='type'&&(!def.defaults||!def.defaults.hasOwnProperty(p))});
         if (def.defaults) {
             properties = properties.concat(Object.keys(def.defaults));
+        }
+        if (node.type !== 'tab') {
+            properties = properties.concat(['inputLabels','outputLabels']);
         }
         properties.forEach(function(d) {
             localChanged = false;
@@ -731,8 +742,8 @@ RED.diff = (function() {
                 conflict = true;
             }
 
-            row = $("<tr>").appendTo(nodePropertiesTable);
-            $("<td>",{class:"node-diff-property-cell-label"}).html(d).appendTo(row);
+            row = $("<tr>").appendTo(nodePropertiesTableBody);
+            var propertyNameCell = $("<td>",{class:"node-diff-property-cell-label"}).html(d).appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 if (!conflict) {
@@ -742,7 +753,18 @@ RED.diff = (function() {
                     localCell.addClass("node-diff-node-conflict");
                     $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(localCell);
                 }
-                RED.utils.createObjectElement(localNode[d]).appendTo(localCell);
+                element = $('<span class="node-diff-element"></span>').appendTo(localCell);
+                propertyElements['local.'+d] = RED.utils.createObjectElement(localNode[d],
+                    {
+                        path: d,
+                        exposeApi: true,
+                        ontoggle: function(path,state) {
+                            if (propertyElements['remote.'+d]) {
+                                propertyElements['remote.'+d].prop('expand')(path,state)
+                            }
+                        }
+                    }
+                ).appendTo(element);
             } else {
                 localCell.addClass("node-diff-empty");
             }
@@ -756,7 +778,18 @@ RED.diff = (function() {
                         remoteCell.addClass("node-diff-node-conflict");
                         $('<span class="node-diff-status"><i class="fa fa-exclamation"></i></span>').appendTo(remoteCell);
                     }
-                    RED.utils.createObjectElement(remoteNode[d]).appendTo(remoteCell);
+                    element = $('<span class="node-diff-element"></span>').appendTo(remoteCell);
+                    propertyElements['remote.'+d] = RED.utils.createObjectElement(remoteNode[d],
+                        {
+                            path: d,
+                            exposeApi: true,
+                            ontoggle: function(path,state) {
+                                if (propertyElements['local.'+d]) {
+                                    propertyElements['local.'+d].prop('expand')(path,state)
+                                }
+                            }
+                        }
+                    ).appendTo(element);
                 } else {
                     remoteCell.addClass("node-diff-empty");
                 }
@@ -1002,186 +1035,225 @@ RED.diff = (function() {
         // console.log(conflicted);
         return diff;
     }
+
     function showDiff(diff) {
+        if (diffVisible) {
+            return;
+        }
+
         var localDiff = diff.localDiff;
         var remoteDiff = diff.remoteDiff;
         var conflicts = diff.conflicts;
         currentDiff = diff;
-        var list = $("#node-dialog-view-diff-diff");
-        list.editableList('empty');
 
-        if (remoteDiff) {
-            $("#node-diff-view-diff-merge").show();
-            if (Object.keys(conflicts).length === 0) {
-                $("#node-diff-view-diff-merge").removeClass('disabled');
-            } else {
-                $("#node-diff-view-diff-merge").addClass('disabled');
-            }
-        } else {
-            $("#node-diff-view-diff-merge").hide();
-        }
-        refreshConflictHeader();
-
-        $("#node-dialog-view-diff-headers").empty();
-        // console.log("--------------");
-        // console.log(localDiff);
-        // console.log(remoteDiff);
-        var currentConfig = localDiff.currentConfig;
-        var newConfig = localDiff.newConfig;
-        conflicts = conflicts || {};
-
-        var el = {
-            diff: localDiff,
-            def: {
-                category: 'config',
-                color: '#f0f0f0'
+        var trayOptions = {
+            title: "Review Changes", //TODO: nls
+            width: Infinity,
+            buttons: [
+                {
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-diff-view-diff-merge",
+                    text: RED._("deploy.confirm.button.merge"),
+                    class: "primary disabled",
+                    click: function() {
+                        if (!$("#node-diff-view-diff-merge").hasClass('disabled')) {
+                            refreshConflictHeader();
+                            mergeDiff(currentDiff);
+                            RED.tray.close();
+                        }
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
             },
-            tab: {
-                n: {},
-                nodes: currentConfig.globals
-            },
-            newTab: {
-                n: {},
-                nodes: newConfig.globals
-            }
-        };
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = buildDiffPanel(trayBody);
+                if (remoteDiff) {
+                    $("#node-diff-view-diff-merge").show();
+                    if (Object.keys(conflicts).length === 0) {
+                        $("#node-diff-view-diff-merge").removeClass('disabled');
+                    } else {
+                        $("#node-diff-view-diff-merge").addClass('disabled');
+                    }
+                } else {
+                    $("#node-diff-view-diff-merge").hide();
+                }
+                refreshConflictHeader();
 
-        if (remoteDiff !== undefined) {
-            $('#node-dialog-view-diff').addClass('node-diff-three-way');
+                $("#node-dialog-view-diff-headers").empty();
+                // console.log("--------------");
+                // console.log(localDiff);
+                // console.log(remoteDiff);
+                var currentConfig = localDiff.currentConfig;
+                var newConfig = localDiff.newConfig;
+                conflicts = conflicts || {};
 
-            $('<div class="node-diff-node-entry-cell"></div><div class="node-diff-node-entry-cell" data-i18n="diff.local"></div><div class="node-diff-node-entry-cell" data-i18n="diff.remote"></div>').i18n().appendTo("#node-dialog-view-diff-headers");
-            el.remoteTab = {
-                n:{},
-                nodes:remoteDiff.newConfig.globals
-            };
-            el.remoteDiff = remoteDiff;
-        } else {
-            $('#node-dialog-view-diff').removeClass('node-diff-three-way');
-        }
-
-        list.editableList('addItem',el);
-
-        var seenTabs = {};
-
-        currentConfig.tabOrder.forEach(function(tabId) {
-            var tab = currentConfig.tabs[tabId];
-            var el = {
-                diff: localDiff,
-                def: {},
-                tab:tab
-            };
-            if (newConfig.tabs.hasOwnProperty(tabId)) {
-                el.newTab = newConfig.tabs[tabId];
-            }
-            if (remoteDiff !== undefined) {
-                el.remoteTab = remoteDiff.newConfig.tabs[tabId];
-                el.remoteDiff = remoteDiff;
-            }
-            seenTabs[tabId] = true;
-            list.editableList('addItem',el)
-        });
-        newConfig.tabOrder.forEach(function(tabId) {
-            if (!seenTabs[tabId]) {
-                seenTabs[tabId] = true;
-                var tab = newConfig.tabs[tabId];
                 var el = {
                     diff: localDiff,
-                    def: {},
-                    tab:tab,
-                    newTab: tab
+                    def: {
+                        category: 'config',
+                        color: '#f0f0f0'
+                    },
+                    tab: {
+                        n: {},
+                        nodes: currentConfig.globals
+                    },
+                    newTab: {
+                        n: {},
+                        nodes: newConfig.globals
+                    }
                 };
+
                 if (remoteDiff !== undefined) {
+                    diffPanel.addClass('node-diff-three-way');
+
+                    $('<div data-i18n="diff.local"></div><div data-i18n="diff.remote"></div>').i18n().appendTo("#node-dialog-view-diff-headers");
+                    el.remoteTab = {
+                        n:{},
+                        nodes:remoteDiff.newConfig.globals
+                    };
                     el.remoteDiff = remoteDiff;
+                } else {
+                    diffPanel.removeClass('node-diff-three-way');
                 }
-                list.editableList('addItem',el)
-            }
-        });
-        if (remoteDiff !== undefined) {
-            remoteDiff.newConfig.tabOrder.forEach(function(tabId) {
-                if (!seenTabs[tabId]) {
-                    var tab = remoteDiff.newConfig.tabs[tabId];
-                    // TODO how to recognise this is a remotely added flow
+
+                diffList.editableList('addItem',el);
+
+                var seenTabs = {};
+
+                currentConfig.tabOrder.forEach(function(tabId) {
+                    var tab = currentConfig.tabs[tabId];
                     var el = {
                         diff: localDiff,
-                        remoteDiff: remoteDiff,
-                        def: {},
-                        tab:tab,
-                        remoteTab:tab
+                        def: RED.nodes.getType('tab'),
+                        tab:tab
                     };
-                    list.editableList('addItem',el)
-                }
-            });
-        }
-        var subflowId;
-        for (subflowId in currentConfig.subflows) {
-            if (currentConfig.subflows.hasOwnProperty(subflowId)) {
-                seenTabs[subflowId] = true;
-                el = {
-                    diff: localDiff,
-                    def: {
-                        defaults:{},
-                        icon:"subflow.png",
-                        category: "subflows",
-                        color: "#da9"
-                    },
-                    tab:currentConfig.subflows[subflowId]
-                }
-                if (newConfig.subflows.hasOwnProperty(subflowId)) {
-                    el.newTab = newConfig.subflows[subflowId];
-                }
-                if (remoteDiff !== undefined) {
-                    el.remoteTab = remoteDiff.newConfig.subflows[subflowId];
-                    el.remoteDiff = remoteDiff;
-                }
-                list.editableList('addItem',el)
-            }
-        }
-        for (subflowId in newConfig.subflows) {
-            if (newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
-                seenTabs[subflowId] = true;
-                el = {
-                    diff: localDiff,
-                    def: {
-                        defaults:{},
-                        icon:"subflow.png",
-                        category: "subflows",
-                        color: "#da9"
-                    },
-                    tab:newConfig.subflows[subflowId],
-                    newTab:newConfig.subflows[subflowId]
-                }
-                if (remoteDiff !== undefined) {
-                    el.remoteDiff = remoteDiff;
-                }
-                list.editableList('addItem',el)
-            }
-        }
-        if (remoteDiff !== undefined) {
-            for (subflowId in remoteDiff.newConfig.subflows) {
-                if (remoteDiff.newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
-                    el = {
-                        diff: localDiff,
-                        remoteDiff: remoteDiff,
-                        def: {
-                            defaults:{},
-                            icon:"subflow.png",
-                            category: "subflows",
-                            color: "#da9"
-                        },
-                        tab:remoteDiff.newConfig.subflows[subflowId],
-                        remoteTab: remoteDiff.newConfig.subflows[subflowId]
+                    if (newConfig.tabs.hasOwnProperty(tabId)) {
+                        el.newTab = newConfig.tabs[tabId];
                     }
-                    list.editableList('addItem',el)
+                    if (remoteDiff !== undefined) {
+                        el.remoteTab = remoteDiff.newConfig.tabs[tabId];
+                        el.remoteDiff = remoteDiff;
+                    }
+                    seenTabs[tabId] = true;
+                    diffList.editableList('addItem',el)
+                });
+                newConfig.tabOrder.forEach(function(tabId) {
+                    if (!seenTabs[tabId]) {
+                        seenTabs[tabId] = true;
+                        var tab = newConfig.tabs[tabId];
+                        var el = {
+                            diff: localDiff,
+                            def: RED.nodes.getType('tab'),
+                            tab:tab,
+                            newTab: tab
+                        };
+                        if (remoteDiff !== undefined) {
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                });
+                if (remoteDiff !== undefined) {
+                    remoteDiff.newConfig.tabOrder.forEach(function(tabId) {
+                        if (!seenTabs[tabId]) {
+                            var tab = remoteDiff.newConfig.tabs[tabId];
+                            // TODO how to recognise this is a remotely added flow
+                            var el = {
+                                diff: localDiff,
+                                remoteDiff: remoteDiff,
+                                def: RED.nodes.getType('tab'),
+                                tab:tab,
+                                remoteTab:tab
+                            };
+                            diffList.editableList('addItem',el)
+                        }
+                    });
                 }
+                var subflowId;
+                for (subflowId in currentConfig.subflows) {
+                    if (currentConfig.subflows.hasOwnProperty(subflowId)) {
+                        seenTabs[subflowId] = true;
+                        el = {
+                            diff: localDiff,
+                            def: {
+                                defaults:{},
+                                icon:"subflow.png",
+                                category: "subflows",
+                                color: "#da9"
+                            },
+                            tab:currentConfig.subflows[subflowId]
+                        }
+                        if (newConfig.subflows.hasOwnProperty(subflowId)) {
+                            el.newTab = newConfig.subflows[subflowId];
+                        }
+                        if (remoteDiff !== undefined) {
+                            el.remoteTab = remoteDiff.newConfig.subflows[subflowId];
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                }
+                for (subflowId in newConfig.subflows) {
+                    if (newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
+                        seenTabs[subflowId] = true;
+                        el = {
+                            diff: localDiff,
+                            def: {
+                                defaults:{},
+                                icon:"subflow.png",
+                                category: "subflows",
+                                color: "#da9"
+                            },
+                            tab:newConfig.subflows[subflowId],
+                            newTab:newConfig.subflows[subflowId]
+                        }
+                        if (remoteDiff !== undefined) {
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                }
+                if (remoteDiff !== undefined) {
+                    for (subflowId in remoteDiff.newConfig.subflows) {
+                        if (remoteDiff.newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
+                            el = {
+                                diff: localDiff,
+                                remoteDiff: remoteDiff,
+                                def: {
+                                    defaults:{},
+                                    icon:"subflow.png",
+                                    category: "subflows",
+                                    color: "#da9"
+                                },
+                                tab:remoteDiff.newConfig.subflows[subflowId],
+                                remoteTab: remoteDiff.newConfig.subflows[subflowId]
+                            }
+                            diffList.editableList('addItem',el)
+                        }
+                    }
+                }
+                $("#sidebar-shade").show();
+            },
+            close: function() {
+                diffVisible = false;
+                $("#sidebar-shade").hide();
+
+            },
+            show: function() {
+
             }
         }
-
-
-        $("#node-diff-filter-changed").addClass("selected");
-        $("#node-diff-filter-all").removeClass("selected");
-
-        $("#node-dialog-view-diff").dialog("open");
+        RED.tray.show(trayOptions);
     }
+
     function mergeDiff(diff) {
         var currentConfig = diff.localDiff.currentConfig;
         var localDiff = diff.localDiff;
@@ -1260,7 +1332,6 @@ RED.diff = (function() {
         RED.palette.refresh();
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
-
     }
     return {
         init: init,

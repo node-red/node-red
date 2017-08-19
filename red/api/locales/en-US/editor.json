@@ -29,6 +29,7 @@
         "label": {
             "view": {
                 "view": "View",
+                "grid": "Grid",
                 "showGrid": "Show grid",
                 "snapGrid": "Snap to grid",
                 "gridSize": "Grid size",
@@ -41,12 +42,15 @@
             "sidebar": {
                 "show": "Show sidebar"
             },
-            "userSettings": "Settings",
+            "settings": "Settings",
+            "userSettings": "User Settings",
+            "nodes": "Nodes",
             "displayStatus": "Show node status",
             "displayConfig": "Configuration nodes",
             "import": "Import",
             "export": "Export",
             "search": "Search flows",
+            "searchInput": "search your flows",
             "clipboard": "Clipboard",
             "library": "Library",
             "examples": "Examples",
@@ -61,11 +65,15 @@
             "login": "Login",
             "logout": "Logout",
             "editPalette":"Manage palette",
-            "showTips": "Show tips"
+            "other": "Other",
+            "showTips": "Show tips",
+            "help": "Node-RED website"
         }
     },
     "user": {
         "loggedInAs": "Logged in as __name__",
+        "username": "Username",
+        "password": "Password",
         "login": "Login",
         "loginFailed": "Login failed",
         "notAuthorized": "Not authorized"
@@ -145,6 +153,7 @@
             "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
             "unknown": "The workspace contains some unknown node types:",
             "confirm": "Are you sure you want to deploy?",
+            "doNotWarn": "do not warn about this again",
             "conflict": "The server is running a more recent set of flows.",
             "backgroundUpdate": "The flows on the server have been updated.",
             "conflictChecking": "Checking to see if the changes can be merged automatically",
@@ -155,6 +164,8 @@
     "diff": {
         "unresolvedCount": "__count__ unresolved conflict",
         "unresolvedCount_plural": "__count__ unresolved conflicts",
+        "globalNodes": "Global nodes",
+        "flowProperties": "Flow Properties",
         "type": {
             "added": "added",
             "changed": "changed",
@@ -167,8 +178,8 @@
         },
         "nodeCount": "__count__ node",
         "nodeCount_plural": "__count__ nodes",
-        "local":"Local",
-        "remote":"Remote"
+        "local":"Local changes",
+        "remote":"Remote changes"
 
     },
     "subflow": {
@@ -210,7 +221,13 @@
     },
     "keyboard": {
         "title": "Keyboard Shortcuts",
+        "keyboard": "Keyboard",
+        "filterActions": "filter actions",
+        "shortcut": "shortcut",
+        "scope": "scope",
         "unassigned": "Unassigned",
+        "global": "global",
+        "workspace": "workspace",
         "selectAll": "Select all nodes",
         "selectAllConnected": "Select all connected nodes",
         "addRemoveNode": "Add/remove node from selection",
@@ -275,6 +292,7 @@
         },
         "editor": {
             "title": "Manage palette",
+            "palette": "Palette",
             "times": {
                 "seconds": "seconds ago",
                 "minutes": "minutes ago",
@@ -353,16 +371,24 @@
     "sidebar": {
         "info": {
             "name": "Node information",
+            "tabName": "Name",
             "label": "info",
             "node": "Node",
             "type": "Type",
             "id": "ID",
+            "status": "Status",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
             "subflow": "Subflow",
             "instances": "Instances",
             "properties": "Properties",
             "info": "Information",
             "blank": "blank",
             "null": "null",
+            "showMore": "show more",
+            "showLess": "show less",
+            "flow": "Flow",
+            "information": "Information",
             "arrayItems": "__count__ items",
             "showTips":"You can open the tips from the settings panel"
         },
@@ -389,6 +415,7 @@
             "re": "regular expression",
             "bool": "boolean",
             "json": "JSON",
+            "bin": "buffer",
             "date": "timestamp"
         }
     },

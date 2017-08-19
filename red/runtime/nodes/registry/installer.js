@@ -131,7 +131,7 @@ function installModule(module,version) {
                         resolve(require("./index").addModule(module).then(reportAddedModules));
                     } else {
                         log.info(log._("server.install.upgraded",{name:module, version:version}));
-                        events.emit("runtime-event",{id:"restart-required",type:"warning",text:"notification.warnings.restartRequired"});
+                        events.emit("runtime-event",{id:"restart-required",payload:{type:"warning",text:"notification.warnings.restartRequired"},retain:true});
                         resolve(require("./registry").setModulePendingUpdated(module,version));
                     }
                 }

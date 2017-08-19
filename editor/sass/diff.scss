@@ -16,8 +16,6 @@
 
 
 #node-dialog-view-diff {
-    height: 600px;
-
     .red-ui-editableList-container {
         border-radius:1px;
         padding:0;
@@ -35,7 +33,6 @@
             border: none;
             min-height: 0;
         }
-
     }
     .red-ui-editableList-item-content {
         padding: 5px;
@@ -44,19 +41,23 @@
 }
 #node-dialog-view-diff-headers {
     position: absolute;
-    left:17px;
-    right:32px;
+    left:237px;
+    right:18px;
     top: 55px;
     height: 25px;
-    .node-diff-node-entry-cell:not(:first-child) {
+    div {
+        height: 25px;
+        display: inline-block;
+        box-sizing: border-box;
+        width: 50%;
         background: #f9f9f9;
         text-align: center;
         border-top: 1px solid $secondary-border-color;
         border-color:$secondary-border-color;
+        border-left: 1px solid $secondary-border-color;
     }
-    .node-diff-node-entry-cell:last-child {
+    div:last-child {
         border-right: 1px solid $secondary-border-color;
-
     }
 }
 
@@ -106,10 +107,10 @@
     font-size: 0.9em;
 
     &:first-child {
-        border-top: 1px solid #eee;
+        border-top: 1px solid $secondary-border-color;
     }
     &:not(:last-child) {
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid $secondary-border-color;
     }
 
     &.collapsed {
@@ -132,14 +133,21 @@
     table {
         border-collapse: collapse;
         table-layout:fixed;
-        
-        // Fix for table-layout: fixed on safari:
-        max-width: none;
-        width: auto;
-        min-width: 100%;
+        width: calc(100% - 20px);
+        margin-left: 20px;
+    }
+    col:first-child {
+        width: 180px;
+    }
+    col:not(:first-child) {
+        width: 100%;
     }
     td, th {
-        border: 1px solid $secondary-border-color;
+        border-top: 1px solid #f3f3f3;
+        border-left: 1px solid $secondary-border-color;
+        &:first-child {
+            border-left: none;
+        }
         padding: 0 0 0 3px;
         text-align: left;
         overflow-x: auto;
@@ -150,13 +158,12 @@
             white-space:nowrap;
             overflow:hidden;
         }
+        &:hover {
+            background: #f9f9f9;
+        }
+
     }
-    td:first-child {
-        width: 140px;
-    }
-    td:not(:first-child) {
-        width: calc( 100% - 140px);
-    }
+
     td  {
         .node-diff-status {
             margin-left: 0;
@@ -179,8 +186,8 @@
             width: 220px;
         }
     }
-    td:not(:first-child) {
-        width: calc( (100% - 140px) / 2);
+    col:not(:first-child) {
+        width:50%;
     }
 
     .node-diff-node-entry {
@@ -210,6 +217,9 @@
     cursor: pointer;
     padding: 0;
     // background: #f6f6f6;
+    &:hover {
+        background: #f9f9f9;
+    }
 }
 .node-diff-tab-title-meta {
     vertical-align: middle;
@@ -218,6 +228,9 @@
 }
 .node-diff-node-entry-header {
     cursor: pointer;
+    &:hover {
+        background: #f9f9f9;
+    }
 }
 .node-diff-node-entry-node {
     vertical-align: middle;
@@ -247,6 +260,9 @@
     }
     .node-diff-tab-title {
         cursor: default;
+        &:hover {
+            background: none;
+        }
     }
 }
 .node-diff-node-deleted {
@@ -301,7 +317,7 @@
     }
 }
 .node-diff-node-entry-properties {
-    margin: 5px ;
+    margin: 0;
     color: #666;
 }
 .node-diff-status {
@@ -312,6 +328,10 @@
     margin-top: 6px;
     margin-bottom: 6px;
     text-align: center;
+}
+.node-diff-element {
+    display: inline-block;
+    width: calc(100% - 20px);
 }
 
 .node-diff-node-description {
@@ -346,7 +366,7 @@
     box-sizing: border-box;
     width: calc( (100% - 20px) / 2);
     height: 32px;
-    border-left: 1px solid #eee;
+    border-left: 1px solid $secondary-border-color;
     padding-top: 2px;
     white-space: nowrap;
     overflow: hidden;

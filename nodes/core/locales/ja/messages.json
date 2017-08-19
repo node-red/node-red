@@ -90,7 +90,7 @@
             "node": "ノード",
             "type": "型",
             "selectAll": "全て選択",
-            "sortByLabel": "ノード名で並び替え",
+            "sortByLabel": "ノード名で並べ替え",
             "sortByType": "型で並べ替え"
         },
         "scope": {
@@ -114,7 +114,10 @@
             "name": "デバッグメッセージ",
             "filterAll": "全てのフロー",
             "filterSelected": "選択したノード",
-            "filterCurrent": "現在のフロー"
+            "filterCurrent": "現在のフロー",
+            "debugNodes": "debugノード",
+            "clearLog": "ログを削除",
+            "openWindow": "新しいウィンドウで開く"
         },
         "messageMenu": {
             "collapseAll": "全パスを折りたたむ",
@@ -127,7 +130,11 @@
         "linkIn": "link in",
         "linkOut": "link out",
         "label": {
-            "event": "イベント名"
+            "event": "イベント名",
+            "node": "名前",
+            "type": "フロー",
+            "sortByFlow": "フロー名で並べ替え",
+            "sortByLabel": "名前で並べ替え"
         }
     },
     "tls": {
@@ -155,7 +162,8 @@
             "append": "引数",
             "timeout": "タイムアウト",
             "timeoutplace": "任意",
-            "return": "出力"
+            "return": "出力",
+            "seconds": "秒"
         },
         "placeholder": {
             "extraparams": "追加引数"
@@ -164,7 +172,7 @@
             "exec": "コマンド終了時 - execモード",
             "spawn": "コマンド実行中 - spawnモード"
         },
-        "oldrc": "旧型式の出力を使用(互換性モード)"
+        "oldrc": "旧型式の出力を使用(互換モード)"
     },
     "function": {
         "label": {
@@ -186,7 +194,8 @@
             "output": "出力形式",
             "mustache": "Mustacheテンプレート",
             "plain": "平文",
-            "json": "JSON"
+            "json": "JSON",
+            "none": "なし"
         },
         "templatevalue": "This is the payload: {{payload}} !"
     },
@@ -212,6 +221,7 @@
         "days": "日",
         "day": "日",
         "between": "頻度",
+        "and": "回／",
         "rate": "流量",
         "msgper": "メッセージ／",
         "dropmsg": "仲介メッセージを削除",
@@ -293,6 +303,7 @@
     "mqtt": {
         "label": {
             "broker": "サーバ",
+            "example": "例) localhost",
             "qos": "QoS",
             "clientid": "クライアント",
             "port": "ポート",
@@ -339,7 +350,8 @@
             "return": "出力形式",
             "upload": "ファイルのアップロード",
             "status": "状態コード",
-            "headers": "ヘッダ"
+            "headers": "ヘッダ",
+            "other": "その他"
         },
         "setby": "- msg.methodに定義 -",
         "basicauth": "ベーシック認証を使用",
@@ -380,7 +392,7 @@
         "tip": {
             "path1": "標準では <code>payload</code> がwebsocketから送信、受信されるデータを持ちます。クライアントはJSON形式の文字列としてメッセージ全体を送信、受信するよう設定できます。",
             "path2": "This path will be relative to ",
-            "url1": "URLには ws:&#47;&#47; or wss:&#47;&#47; スキーマを使用して、存在するwebsocketリスナを設定してください。",
+            "url1": "URLには ws:&#47;&#47; または wss:&#47;&#47; スキーマを使用して、存在するwebsocketリスナを設定してください。",
             "url2": "標準では <code>payload</code> がwebsocketから送信、受信されるデータを持ちます。クライアントはJSON形式の文字列としてメッセージ全体を送信、受信するよう設定できます。"
         },
         "errors": {
@@ -410,7 +422,9 @@
             "close-connection": "メッセージを送信するたびに接続を切断",
             "decode-base64": "Base64メッセージの復号",
             "server": "サーバ",
-            "return": "戻り値"
+            "return": "戻り値",
+            "ms": "ミリ秒",
+            "chars": "文字"
         },
         "type": {
             "listen": "待ち受け",
@@ -760,6 +774,7 @@
             "breakchunks": "チャンクへ分割",
             "breaklines": "行へ分割",
             "filelabel": "file",
+            "sendError": "エラーメッセージを送信(互換モード)",
             "deletelabel": "delete __file__"
         },
         "action": {

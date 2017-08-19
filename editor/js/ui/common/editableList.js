@@ -85,7 +85,7 @@
             if (this.element.css("position") === "absolute") {
                 ["top","left","bottom","right"].forEach(function(s) {
                     var v = that.element.css(s);
-                    if (s!=="auto" && s!=="") {
+                    if (v!=="auto" && v!=="") {
                         that.topContainer.css(s,v);
                         that.uiContainer.css(s,"0");
                         that.element.css(s,'auto');

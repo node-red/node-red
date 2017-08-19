@@ -213,7 +213,7 @@ msg.cookies = {
     var headerTypes = [
         {value:"content-type",label:"Content-Type",hasValue: false},
         {value:"location",label:"Location",hasValue: false},
-        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+        {value:"other",label:RED._("node-red:httpin.label.other"),icon:"red/images/typedInput/az.png"}
        ]
     var contentTypes = [
         {value:"application/json",label:"application/json",hasValue: false},
@@ -223,7 +223,7 @@ msg.cookies = {
         {value:"text/plain",label:"text/plain",hasValue: false},
         {value:"image/gif",label:"image/gif",hasValue: false},
         {value:"image/png",label:"image/png",hasValue: false},
-        {value:"other",label:"other",icon:"red/images/typedInput/az.png"}
+        {value:"other",label:RED._("node-red:httpin.label.other"),icon:"red/images/typedInput/az.png"}
     ];
 
     RED.nodes.registerType('http response',{

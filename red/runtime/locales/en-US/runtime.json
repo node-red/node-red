@@ -4,7 +4,8 @@
         "version": "__component__ version: __version__",
         "unsupported_version": "Unsupported version of __component__. Requires: __requires__ Found: __version__",
         "paths": {
-            "settings": "Settings file  : __path__"
+            "settings": "Settings file  : __path__",
+            "httpStatic": "HTTP Static    : __path__"
         }
     },
 

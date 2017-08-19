@@ -128,7 +128,7 @@ function saveNodeList() {
         }
     }
     if (hadPending && !hasPending) {
-        events.emit("runtime-event",{id:"restart-required"});
+        events.emit("runtime-event",{id:"restart-required",retain: true});
     }
     if (settings.available()) {
         return settings.set("nodes",moduleList);

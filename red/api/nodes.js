@@ -15,12 +15,12 @@
  **/
 
 var when = require("when");
-var comms = require("./comms");
 var locales = require("./locales");
 var redNodes;
 var log;
 var i18n;
 var settings;
+var events;
 
 module.exports = {
     init: function(runtime) {
@@ -28,6 +28,7 @@ module.exports = {
         log = runtime.log;
         i18n = runtime.i18n;
         settings = runtime.settings;
+        events = runtime.events;
     },
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
@@ -72,9 +73,9 @@ module.exports = {
         }
         promise.then(function(info) {
             if (isUpgrade) {
-                comms.publish("node/upgraded",{module:node.module,version:node.version},false);
+                events.emit("runtime-event",{id:"node/upgraded",retain:false,payload:{module:node.module,version:node.version}});
             } else {
-                comms.publish("node/added",info.nodes,false);
+                events.emit("runtime-event",{id:"node/added",retain:false,payload:info.nodes});
             }
             if (node.module) {
                 log.audit({event: "nodes.install",module:node.module,version:node.version},req);
@@ -113,7 +114,7 @@ module.exports = {
             }
 
             promise.then(function(list) {
-                comms.publish("node/removed",list,false);
+                events.emit("runtime-event",{id:"node/removed",retain:false,payload:list});
                 log.audit({event: "nodes.remove",module:mod},req);
                 res.status(204).end();
             }).otherwise(function(err) {
@@ -245,7 +246,7 @@ function putNode(node, enabled) {
 
         return promise.then(function(info) {
             if (info.enabled === enabled && !info.err) {
-                comms.publish("node/"+(enabled?"enabled":"disabled"),info,false);
+                events.emit("runtime-event",{id:"node/"+(enabled?"enabled":"disabled"),retain:false,payload:info});
                 log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
                 for (var i=0;i<info.types.length;i++) {
                     log.info(" - "+info.types[i]);

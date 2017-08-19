@@ -660,7 +660,7 @@ RED.editor = (function() {
     function buildLabelRow(type, index, value, placeHolder) {
         var result = $('<div>',{class:"node-label-form-row"});
         if (type === undefined) {
-            $('<span>').html("none").appendTo(result);
+            $('<span>').html(RED._("editor.noDefaultLabel")).appendTo(result);
             result.addClass("node-label-form-none");
         } else {
             result.addClass("");

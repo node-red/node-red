@@ -72,6 +72,10 @@
                         // handled in ui/deploy.js
                         return;
                     }
+                    if (notificationId === "node") {
+                        // handled below
+                        return;
+                    }
                     if (msg.text) {
                         var text = RED._(msg.text,{default:msg.text});
                         if (!persistentNotifications.hasOwnProperty(notificationId)) {
@@ -98,11 +102,11 @@
                         RED.view.redraw();
                     }
                 });
-                RED.comms.subscribe("node/#",function(topic,msg) {
+                RED.comms.subscribe("notification/node/#",function(topic,msg) {
                     var i,m;
                     var typeList;
                     var info;
-                    if (topic == "node/added") {
+                    if (topic == "notification/node/added") {
                         var addedTypes = [];
                         msg.forEach(function(m) {
                             var id = m.id;
@@ -118,7 +122,7 @@
                             typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
                         }
-                    } else if (topic == "node/removed") {
+                    } else if (topic == "notification/node/removed") {
                         for (i=0;i<msg.length;i++) {
                             m = msg[i];
                             info = RED.nodes.removeNodeSet(m.id);
@@ -127,7 +131,7 @@
                                 RED.notify(RED._("palette.event.nodeRemoved", {count:m.types.length})+typeList,"success");
                             }
                         }
-                    } else if (topic == "node/enabled") {
+                    } else if (topic == "notification/node/enabled") {
                         if (msg.types) {
                             info = RED.nodes.getNodeSet(msg.id);
                             if (info.added) {
@@ -142,7 +146,7 @@
                                 });
                             }
                         }
-                    } else if (topic == "node/disabled") {
+                    } else if (topic == "notification/node/disabled") {
                         if (msg.types) {
                             RED.nodes.disableNodeSet(msg.id);
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
@@ -215,12 +219,12 @@
             menuOptions.push(null);
         }
 
-        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.userSettings"),onselect:"core:show-user-settings"});
+        menuOptions.push({id:"menu-item-user-settings",label:RED._("menu.label.settings"),onselect:"core:show-user-settings"});
         menuOptions.push(null);
 
         menuOptions.push({id:"menu-item-keyboard-shortcuts",label:RED._("menu.label.keyboardShortcuts"),onselect:"core:show-help"});
         menuOptions.push({id:"menu-item-help",
-            label: RED.settings.theme("menu.menu-item-help.label","Node-RED website"),
+            label: RED.settings.theme("menu.menu-item-help.label",RED._("menu.label.help")),
             href: RED.settings.theme("menu.menu-item-help.url","http://nodered.org/docs")
         });
         menuOptions.push({id:"menu-item-node-red-version", label:"v"+RED.settings.version, onselect: "core:show-about" });
@@ -249,12 +253,11 @@
         RED.deploy.init(RED.settings.theme("deployButton",null));
 
         RED.actions.add("core:show-about", showAbout);
-
+        RED.nodes.init();
         RED.comms.connect();
 
         $("#main-container").show();
         $(".header-toolbar").show();
-
 
         loadNodeList();
     }

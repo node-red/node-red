@@ -34,6 +34,10 @@ RED.tray = (function() {
         if (options.title) {
             $('<div class="editor-tray-titlebar">'+options.title+'</div>').appendTo(header);
         }
+        if (options.width === Infinity) {
+            options.maximized = true;
+            resizer.addClass('editor-tray-resize-maximised');
+        }
         var buttonBar = $('<div class="editor-tray-toolbar"></div>').appendTo(header);
         var primaryButton;
         if (options.buttons) {
@@ -74,7 +78,8 @@ RED.tray = (function() {
         };
         stack.push(tray);
 
-        el.draggable({
+        if (!options.maximized) {
+            el.draggable({
                 handle: resizer,
                 axis: "x",
                 start:function(event,ui) {
@@ -103,6 +108,7 @@ RED.tray = (function() {
                     tray.width = -ui.position.left;
                 }
             });
+        }
 
         function finishBuild() {
             $("#header-shade").show();
@@ -175,7 +181,7 @@ RED.tray = (function() {
             var tray = stack[stack.length-1];
             var trayHeight = tray.tray.height()-tray.header.outerHeight()-tray.footer.outerHeight();
             tray.body.height(trayHeight);
-            if (tray.width > $("#editor-stack").position().left-8) {
+            if (tray.options.maximized || tray.width > $("#editor-stack").position().left-8) {
                 tray.width = $("#editor-stack").position().left-8;
                 tray.tray.width(tray.width);
                 // tray.body.parent().width(tray.width);

@@ -67,6 +67,9 @@ describe('file Nodes', function() {
 
         it('should append to a file and add newline', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false}];
+            try {
+                fs.unlinkSync(fileToTest);
+            }catch(err) {}
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
                 n1.emit("input", {payload:"test2"});    // string
@@ -93,6 +96,92 @@ describe('file Nodes', function() {
                 },wait);
             });
         });
+
+        it('should append to a file after it has been deleted ', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false}];
+            try {
+                fs.unlinkSync(fileToTest);
+            } catch(err) {}
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                // Send two messages to the file
+                n1.emit("input", {payload:"one"});
+                n1.emit("input", {payload:"two"});
+                setTimeout(function() {
+                    try {
+                        // Check they got appended as expected
+                        var f = fs.readFileSync(fileToTest).toString();
+                        f.should.equal("onetwo");
+
+                        // Delete the file
+                        fs.unlinkSync(fileToTest);
+
+                        // Send two more messages to the file
+                        n1.emit("input", {payload:"three"});
+                        n1.emit("input", {payload:"four"});
+
+                        setTimeout(function() {
+                            // Check the file was updated
+                            try {
+                                var f = fs.readFileSync(fileToTest).toString();
+                                f.should.equal("threefour");
+                                fs.unlinkSync(fileToTest);
+                                done();
+                            } catch(err) {
+                                done(err);
+                            }
+                        },wait);
+                    } catch(err) {
+                        done(err);
+                    }
+                },wait);
+            });
+        });
+
+        it('should append to a file after it has been recreated ', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false}];
+            try {
+                fs.unlinkSync(fileToTest);
+            } catch(err) {}
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                // Send two messages to the file
+                n1.emit("input", {payload:"one"});
+                n1.emit("input", {payload:"two"});
+                setTimeout(function() {
+                    try {
+                        // Check they got appended as expected
+                        var f = fs.readFileSync(fileToTest).toString();
+                        f.should.equal("onetwo");
+
+                        // Delete the file
+                        fs.unlinkSync(fileToTest);
+
+                        // Recreate it
+                        fs.writeFileSync(fileToTest,"");
+
+                        // Send two more messages to the file
+                        n1.emit("input", {payload:"three"});
+                        n1.emit("input", {payload:"four"});
+
+                        setTimeout(function() {
+                            // Check the file was updated
+                            try {
+                                var f = fs.readFileSync(fileToTest).toString();
+                                f.should.equal("threefour");
+                                fs.unlinkSync(fileToTest);
+                                done();
+                            } catch(err) {
+                                done(err);
+                            }
+                        },wait);
+                    } catch(err) {
+                        done(err);
+                    }
+                },wait);
+            });
+        });
+
 
         it('should use msg.filename if filename not set in node', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":true}];
@@ -407,7 +496,8 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload');
-                    msg.payload.should.have.length(40).and.be.a.Buffer;
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.should.have.length(40);
                     msg.payload.toString().should.equal('File message line 1\nFile message line 2\n');
                     done();
                 });
@@ -422,10 +512,15 @@ describe('file Nodes', function() {
                 var n1 = helper.getNode("fileInNode1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload');
-                    msg.payload.should.have.length(40).and.be.a.string;
-                    msg.payload.should.equal("File message line 1\nFile message line 2\n");
-                    done();
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.have.length(40)
+                        msg.payload.should.equal("File message line 1\nFile message line 2\n");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 });
                 n1.receive({payload:""});
             });
@@ -440,7 +535,8 @@ describe('file Nodes', function() {
                 var c = 0;
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload');
-                    msg.payload.should.have.length(19).and.be.a.string;
+                    msg.payload.should.be.a.String();
+                    msg.payload.should.have.length(19);
                     if (c === 0) {
                         msg.payload.should.equal("File message line 1");
                         c++;
@@ -466,7 +562,8 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload');
-                    msg.payload.should.have.length(40).and.be.a.Buffer;
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.should.have.length(40);
                     msg.should.have.property('parts');
                     msg.parts.should.have.property('count',1);
                     msg.parts.should.have.property('type','buffer');

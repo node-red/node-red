@@ -50,7 +50,7 @@ RED.user = (function() {
                     for (;i<data.prompts.length;i++) {
                         var field = data.prompts[i];
                         var row = $("<div/>",{class:"form-row"});
-                        $('<label for="node-dialog-login-'+field.id+'">'+field.label+':</label><br/>').appendTo(row);
+                        $('<label for="node-dialog-login-'+field.id+'">'+RED._(field.label)+':</label><br/>').appendTo(row);
                         var input = $('<input style="width: 100%" id="node-dialog-login-'+field.id+'" type="'+field.type+'" tabIndex="'+(i+1)+'"/>').appendTo(row);
 
                         if (i<data.prompts.length-1) {
