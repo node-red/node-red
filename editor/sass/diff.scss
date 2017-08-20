@@ -49,6 +49,10 @@
         height: 25px;
         display: inline-block;
         box-sizing: border-box;
+        padding-top: 2px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
         width: 50%;
         background: #f9f9f9;
         text-align: center;
@@ -534,4 +538,68 @@
 
 #node-diff-toolbar-resolved-conflicts .node-diff-status {
     margin:0;
+}
+.node-diff-text-diff-button {
+    float: right;
+    margin: 2px 3px;
+    line-height: 14px;
+    height: 16px;
+
+}
+.node-text-diff {
+    height: 100%;
+    overflow-y:auto;
+    table {
+        margin: 10px;
+        border: 1px solid $secondary-border-color;
+        border-radius: 3px;
+        font-family: monospace;
+        table-layout: fixed;
+        width: calc(100% - 20px);
+    }
+    td {
+        vertical-align: top;
+        word-wrap: break-word;
+    }
+    td:nth-child(odd) {
+        text-align: right;
+        color: #999;
+        background: #fafafa;
+        padding: 1px 5px;
+    }
+    td:nth-child(3) {
+        border-left: 1px solid $secondary-border-color;
+    }
+    td:nth-child(even) {
+        white-space: pre-wrap;
+        padding: 1px 5px;
+    }
+    td.blank {
+        background: #f6f6f6;
+    }
+    td.added {
+        background: #eefaee;
+    }
+    td.removed {
+        background: #fadddd;
+    }
+    tr.unchanged {
+        background: #fefefe;
+    }
+    tr.start-block {
+        border-top: 1px solid #f3f3f3;
+    }
+    tr.end-block {
+        border-bottom: 1px solid #f3f3f3;
+    }
+    tr.node-text-diff-expand td {
+        text-align: left;
+        color: #999;
+        background: #ffd;
+        &:hover {
+            cursor: pointer;
+            background: #ffc;
+        }
+    }
+
 }

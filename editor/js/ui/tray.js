@@ -210,7 +210,7 @@ RED.tray = (function() {
             });
         },
         show: function show(options) {
-            if (stack.length > 0) {
+            if (stack.length > 0 && !options.overlay) {
                 var oldTray = stack[stack.length-1];
                 oldTray.tray.css({
                     right: -(oldTray.tray.width()+10)+"px"
@@ -238,14 +238,21 @@ RED.tray = (function() {
                     tray.tray.remove();
                     if (stack.length > 0) {
                         var oldTray = stack[stack.length-1];
-                        oldTray.tray.appendTo("#editor-stack");
-                        setTimeout(function() {
+                        if (!oldTray.options.overlay) {
+                            oldTray.tray.appendTo("#editor-stack");
+                            setTimeout(function() {
+                                handleWindowResize();
+                                oldTray.tray.css({right:0});
+                                if (oldTray.options.show) {
+                                    oldTray.options.show();
+                                }
+                            },0);
+                        } else {
                             handleWindowResize();
-                            oldTray.tray.css({right:0});
                             if (oldTray.options.show) {
                                 oldTray.options.show();
                             }
-                        },0);
+                        }
                     }
                     if (done) {
                         done();

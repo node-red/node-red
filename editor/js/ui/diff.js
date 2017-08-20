@@ -11,6 +11,15 @@ RED.diff = (function() {
         // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
         RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
 
+
+        RED.actions.add("core:show-test-flow-diff-1",function(){showTestFlowDiff(1)});
+        RED.keyboard.add("*","ctrl-shift-f 1","core:show-test-flow-diff-1");
+
+        RED.actions.add("core:show-test-flow-diff-2",function(){showTestFlowDiff(2)});
+        RED.keyboard.add("*","ctrl-shift-f 2","core:show-test-flow-diff-2");
+        RED.actions.add("core:show-test-flow-diff-3",function(){showTestFlowDiff(3)});
+        RED.keyboard.add("*","ctrl-shift-f 3","core:show-test-flow-diff-3");
+
     }
 
     function buildDiffPanel(container) {
@@ -794,6 +803,15 @@ RED.diff = (function() {
                     remoteCell.addClass("node-diff-empty");
                 }
             }
+            if (localNode && remoteNode && typeof localNode[d] === "string") {
+                if (/\n/.test(localNode[d]) || /\n/.test(remoteNode[d])) {
+                    $('<button class="editor-button editor-button-small node-diff-text-diff-button"><i class="fa fa-file-o"> <i class="fa fa-caret-left"></i> <i class="fa fa-caret-right"></i> <i class="fa fa-file-o"></i></button>').click(function() {
+                        showTextDiff(localNode[d],remoteNode[d]);
+                    }).appendTo(propertyNameCell);
+                }
+            }
+
+
         });
         return nodePropertiesDiv;
     }
@@ -1333,6 +1351,304 @@ RED.diff = (function() {
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
     }
+    function showTestFlowDiff(index) {
+        if (index === 1) {
+            var localFlow = RED.nodes.createCompleteNodeSet();
+            var originalFlow = RED.nodes.originalFlow();
+            showTextDiff(JSON.stringify(localFlow,null,4),JSON.stringify(originalFlow,null,4))
+        } else if (index === 2) {
+            var local = "1\n2\n3\n4\n5\nA\n6\n7\n8\n9\n";
+            var remote = "1\nA\n2\n3\nD\nE\n6\n7\n8\n9\n";
+            showTextDiff(local,remote);
+        } else if (index === 3) {
+            var local =  "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22";
+            var remote = "1\nTWO\nTHREE\nEXTRA\n4\n5\n6\n7\n8\n9\n10\n11\n12\nTHIRTEEN\n14\n15\n16\n17\n18\n19\n20\n21\n22";
+            showTextDiff(local,remote);
+        }
+    }
+
+    function showTextDiff(textA,textB) {
+        var trayOptions = {
+            title: "Compare Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._("common.label.done"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+
+                var codeTable = $("<table>").appendTo(diffPanel);
+                $('<colgroup><col width="50"><col width="50%"><col width="50"><col width="50%"></colgroup>').appendTo(codeTable);
+                var codeBody = $('<tbody>').appendTo(codeTable);
+                var diffSummary = diffText(textA||"",textB||"");
+                var aIndex = 0;
+                var bIndex = 0;
+                var diffLength = Math.max(diffSummary.a.length, diffSummary.b.length);
+
+                var diffLines = [];
+                var diffBlocks = [];
+                var currentBlock;
+                var blockLength = 0;
+                var blockType = 0;
+
+                for (var i=0;i<diffLength;i++) {
+                    var diffLine = diffSummary[i];
+                    var Adiff = (aIndex < diffSummary.a.length)?diffSummary.a[aIndex]:{type:2,line:""};
+                    var Bdiff = (bIndex < diffSummary.b.length)?diffSummary.b[bIndex]:{type:2,line:""};
+                    if (Adiff.type === 0 && Bdiff.type !== 0) {
+                        Adiff = {type:2,line:""};
+                        bIndex++;
+                    } else if (Bdiff.type === 0 && Adiff.type !== 0) {
+                        Bdiff = {type:2,line:""};
+                        aIndex++;
+                    } else {
+                        aIndex++;
+                        bIndex++;
+                    }
+                    diffLines.push({
+                        a: Adiff,
+                        b: Bdiff
+                    });
+                    if (currentBlock === undefined) {
+                        currentBlock = {start:i,end:i};
+                        blockLength = 0;
+                        blockType = (Adiff.type === 0 && Bdiff.type === 0)?0:1;
+                    } else {
+                        if (Adiff.type === 0 && Bdiff.type === 0) {
+                            // Unchanged line
+                            if (blockType === 0) {
+                                // still unchanged - extend the block
+                                currentBlock.end = i;
+                                blockLength++;
+                            } else if (blockType === 1) {
+                                // end of a change
+                                currentBlock.end = i;
+                                blockType = 2;
+                                blockLength = 0;
+                            } else if (blockType === 2) {
+                                // post-change unchanged
+                                currentBlock.end = i;
+                                blockLength++;
+                                if (blockLength === 8) {
+                                    currentBlock.end -= 5; // rollback the end
+                                    diffBlocks.push(currentBlock);
+                                    currentBlock = {start:i-5,end:i-5};
+                                    blockType = 0;
+                                    blockLength = 0;
+                                }
+                            }
+                        } else {
+                            // in a change
+                            currentBlock.end = i;
+                            blockLength++;
+                            if (blockType === 0) {
+                                if (currentBlock.end > 3) {
+                                    currentBlock.end -= 3;
+                                    currentBlock.empty = true;
+                                    diffBlocks.push(currentBlock);
+                                    currentBlock = {start:i-3,end:i-3};
+                                }
+                                blockType = 1;
+                            } else if (blockType === 2) {
+                                // we were in unchanged, but hit a change again
+                                blockType = 1;
+                            }
+                        }
+                    }
+                }
+                if (blockType === 0) {
+                    currentBlock.empty = true;
+                }
+                currentBlock.end = diffLength;
+                diffBlocks.push(currentBlock);
+console.table(diffBlocks);
+                var diffRow;
+                for (var b = 0; b<diffBlocks.length; b++) {
+                    currentBlock = diffBlocks[b];
+                    if (currentBlock.empty) {
+                        diffRow = createExpandLine(currentBlock.start,currentBlock.end,diffLines).appendTo(codeBody);
+                    } else {
+                        for (var i=currentBlock.start;i<currentBlock.end;i++) {
+                            var row = createDiffLine(diffLines[i]).appendTo(codeBody);
+                            if (i === currentBlock.start) {
+                                row.addClass("start-block");
+                            } else if (i === currentBlock.end-1) {
+                                row.addClass("end-block");
+                            }
+                        }
+                    }
+                }
+
+            },
+            close: function() {
+                diffVisible = false;
+
+            },
+            show: function() {
+
+            }
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function createExpandLine(start,end,diffLines) {
+        diffRow = $('<tr class="node-text-diff-expand">');
+        var content = $('<td colspan="4"> <i class="fa fa-arrows-v"></i> </td>').appendTo(diffRow);
+        var label = $('<span></span>').appendTo(content);
+        if (end < diffLines.length-1) {
+            label.text("@@ -"+(diffLines[end-1].a.i+1)+" +"+(diffLines[end-1].b.i+1));
+        }
+        diffRow.click(function(evt) {
+            console.log(start,end,diffLines.length);
+            if (end - start > 20) {
+                var startPos = $(this).offset();
+                console.log(startPos);
+                if (start > 0) {
+                    for (var i=start;i<start+10;i++) {
+                        createDiffLine(diffLines[i]).addClass("unchanged").insertBefore($(this));
+                    }
+                    start += 10;
+                }
+                if (end < diffLines.length-1) {
+                    for (var i=end-1;i>end-11;i--) {
+                        createDiffLine(diffLines[i]).addClass("unchanged").insertAfter($(this));
+                    }
+                    end -= 10;
+                }
+                if (end < diffLines.length-1) {
+                    label.text("@@ -"+(diffLines[end-1].a.i+1)+" +"+(diffLines[end-1].b.i+1));
+                }
+                var endPos = $(this).offset();
+                var delta = endPos.top - startPos.top;
+                $(".node-text-diff").scrollTop($(".node-text-diff").scrollTop() + delta);
+            } else {
+                for (var i=start;i<end;i++) {
+                    createDiffLine(diffLines[i]).addClass("unchanged").insertBefore($(this));
+                }
+                $(this).remove();
+            }
+        });
+        return diffRow;
+    }
+
+    function createDiffLine(diffLine) {
+        var diffRow = $('<tr>');
+        var Adiff = diffLine.a;
+        var Bdiff = diffLine.b;
+        //console.log(diffLine);
+        var cellNo = $("<td>").text(Adiff.type === 2?"":Adiff.i).appendTo(diffRow);
+        var cellLine = $("<td>").text(Adiff.line).appendTo(diffRow);
+        if (Adiff.type === 2) {
+            cellNo.addClass('blank');
+            cellLine.addClass('blank');
+        } else if (Adiff.type === 1) {
+            cellNo.addClass('added');
+            cellLine.addClass('added');
+        } else if (Adiff.type === 4) {
+            cellNo.addClass('removed');
+            cellLine.addClass('removed');
+        }
+        cellNo = $("<td>").text(Bdiff.type === 2?"":Bdiff.i).appendTo(diffRow);
+        cellLine = $("<td>").text(Bdiff.line).appendTo(diffRow);
+        if (Bdiff.type === 2) {
+            cellNo.addClass('blank');
+            cellLine.addClass('blank');
+        } else if (Bdiff.type === 1) {
+            cellNo.addClass('added');
+            cellLine.addClass('added');
+        } else if (Bdiff.type === 4) {
+            cellNo.addClass('removed');
+            cellLine.addClass('removed');
+        }
+        return diffRow;
+    }
+
+    function diffText(string1, string2,ignoreWhitespace) {
+        var lines1 = string1.split(/\r?\n/);
+        var lines2 = string2.split(/\r?\n/);
+        var i = lines1.length;
+        var j = lines2.length;
+        var k;
+        var m;
+        var diffSummary = {a:[],b:[]};
+        var diffMap = [];
+        for (k = 0; k < i + 1; k++) {
+            diffMap[k] = [];
+            for (m = 0; m < j + 1; m++) {
+                diffMap[k][m] = 0;
+            }
+        }
+        var c = 0;
+        for (k = i - 1; k >= 0; k--) {
+            for (m = j - 1; m >=0; m--) {
+                c++;
+                if (compareLines(lines1[k],lines2[m],ignoreWhitespace) !== 1) {
+                    diffMap[k][m] = diffMap[k+1][m+1]+1;
+                } else {
+                    diffMap[k][m] = Math.max(diffMap[(k + 1)][m], diffMap[k][(m + 1)]);
+                }
+            }
+        }
+        //console.log(c);
+        k = 0;
+        m = 0;
+
+        while ((k < i) && (m < j)) {
+            var n = compareLines(lines1[k],lines2[m],ignoreWhitespace);
+            if (n !== 1) {
+                var d = 0;
+                if (n===0) {
+                    d = 0;
+                } else if (n==2) {
+                    d = 3;
+                }
+                diffSummary.a.push({i:k+1,j:m+1,line:lines1[k],type:d});
+                diffSummary.b.push({i:m+1,j:k+1,line:lines2[m],type:d});
+                k++;
+                m++;
+            } else if (diffMap[(k + 1)][m] >= diffMap[k][(m + 1)]) {
+                diffSummary.a.push({i:k+1,line:lines1[k],type:1});
+                k++;
+            } else {
+                diffSummary.b.push({i:m+1,line:lines2[m],type:4});
+                m++;
+            }
+        }
+        while ((k < i) || (m < j)) {
+            if (k == i) {
+                diffSummary.b.push({i:m+1,line:lines2[m],type:4});
+                m++;
+            } else if (m == j) {
+                diffSummary.a.push({i:k+1,line:lines1[k],type:1});
+                k++;
+            }
+        }
+        return diffSummary;
+    }
+
+    function compareLines(string1, string2, ignoreWhitespace) {
+        if (ignoreWhitespace) {
+            if (string1 === string2) {
+                return 0;
+            }
+            return string1.trim() === string2.trime() ? 2 : 1;
+        }
+        return string1 === string2 ? 0 : 1;
+    }
+
+
+
+
     return {
         init: init,
         getRemoteDiff: getRemoteDiff,
