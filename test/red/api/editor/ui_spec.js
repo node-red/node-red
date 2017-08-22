@@ -22,10 +22,10 @@ var path = require("path");
 
 var EventEmitter = require('events').EventEmitter;
 var events = new EventEmitter();
-var ui = require("../../../red/api/ui");
+var ui = require("../../../../red/api/editor/ui");
 
 
-describe("ui api", function() {
+describe("api/editor/ui", function() {
     var app;
 
     before(function() {
@@ -33,7 +33,7 @@ describe("ui api", function() {
             events:events,
             nodes: {
                 getNodeIconPath: function(module,icon) {
-                    return path.resolve(__dirname+'/../../../public/icons/arrow-in.png');
+                    return path.resolve(__dirname+'/../../../../public/icons/arrow-in.png');
                 }
             }
         });
@@ -91,7 +91,7 @@ describe("ui api", function() {
             }
         }
         it('returns the requested icon', function(done) {
-            var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../public/icons/arrow-in.png'));
+            var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../../public/icons/arrow-in.png'));
             request(app)
                 .get("/icons/module/icon.png")
                 .expect("Content-Type", /image\/png/)

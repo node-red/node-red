@@ -15,17 +15,10 @@
  **/
 var fs = require('fs');
 var path = require('path');
+//var apiUtil = require('../util');
 var i18n;
 var redNodes;
 
-function determineLangFromHeaders(acceptedLanguages){
-    var lang = i18n.defaultLang;
-    acceptedLanguages = acceptedLanguages || [];
-    if (acceptedLanguages.length >= 1) {
-        lang = acceptedLanguages[0];
-    }
-    return lang;
-}
 module.exports = {
     init: function(runtime) {
         i18n = runtime.i18n;
@@ -35,7 +28,7 @@ module.exports = {
         var namespace = req.params[0];
         var lngs = req.query.lng;
         namespace = namespace.replace(/\.json$/,"");
-        var lang = req.query.lng; //determineLangFromHeaders(req.acceptsLanguages() || []);
+        var lang = req.query.lng; //apiUtil.determineLangFromHeaders(req.acceptsLanguages() || []);
         var prevLang = i18n.i.lng();
         // Trigger a load from disk of the language if it is not the default
         i18n.i.setLng(lang, function(){
@@ -55,6 +48,5 @@ module.exports = {
             }
         });
         res.json(result);
-    },
-    determineLangFromHeaders: determineLangFromHeaders
+    }
 }

@@ -21,7 +21,7 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var flow = require("../../../red/api/flow");
+var flow = require("../../../../red/api/admin/flow");
 
 describe("flow api", function() {
 

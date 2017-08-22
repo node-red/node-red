@@ -23,14 +23,14 @@ var express = require('express');
 var app = express();
 var WebSocket = require('ws');
 
-var comms = require("../../../red/api/comms");
-var Users = require("../../../red/api/auth/users");
-var Tokens = require("../../../red/api/auth/tokens");
+var comms = require("../../../../red/api/editor/comms");
+var Users = require("../../../../red/api/auth/users");
+var Tokens = require("../../../../red/api/auth/tokens");
 
 var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port
 
-describe("api/comms", function() {
+describe("api/editor/comms", function() {
     describe("with default keepalive", function() {
         var server;
         var url;
@@ -327,7 +327,7 @@ describe("api/comms", function() {
             ws.on('message', function(data) {
                 var msg = JSON.parse(data);
                 msg.should.have.property('topic','hb');
-                msg.should.have.property('data').be.a.Number;
+                msg.should.have.property('data').be.a.Number();
                 count++;
                 if (count == 3) {
                     ws.close();

@@ -21,7 +21,7 @@ var redApp = null;
 var storage;
 var log;
 var redNodes;
-var needsPermission = require("./auth").needsPermission;
+var needsPermission = require("../auth").needsPermission;
 
 function createLibrary(type) {
     if (redApp) {

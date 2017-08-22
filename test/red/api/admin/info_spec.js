@@ -21,8 +21,8 @@ var sinon = require('sinon');
 var when = require('when');
 
 var app = express();
-var info = require("../../../red/api/info");
-var theme = require("../../../red/api/theme");
+var info = require("../../../../red/api/admin/info");
+var theme = require("../../../../red/api/editor/theme");
 
 describe("info api", function() {
     describe("settings handler", function() {

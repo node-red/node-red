@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var request = require('supertest');
 var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
@@ -23,9 +22,9 @@ var fs = require("fs");
 
 var app = express();
 
-var theme = require("../../../red/api/theme");
+var theme = require("../../../../red/api/editor/theme");
 
-describe("theme handler", function() {
+describe("api/editor/theme", function() {
     beforeEach(function() {
         sinon.stub(fs,"statSync",function() { return true; });
     });

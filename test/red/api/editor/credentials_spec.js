@@ -20,9 +20,9 @@ var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
 
-var credentials = require("../../../red/api/credentials");
+var credentials = require("../../../../red/api/editor/credentials");
 
-describe('credentials api', function() {
+describe('api/editor/credentials', function() {
     var app;
 
     before(function() {

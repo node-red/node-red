@@ -22,7 +22,7 @@ var theme = require("./theme");
 
 var redNodes;
 
-var templateDir = path.resolve(__dirname+"/../../editor/templates");
+var templateDir = path.resolve(__dirname+"/../../../editor/templates");
 var editorTemplate;
 
 module.exports = {
@@ -52,5 +52,5 @@ module.exports = {
     editor: function(req,res) {
         res.send(Mustache.render(editorTemplate,theme.context()));
     },
-    editorResources: express.static(__dirname + '/../../public')
+    editorResources: express.static(__dirname + '/../../../public')
 };

@@ -22,10 +22,10 @@ var bodyParser = require('body-parser');
 var when = require('when');
 
 var app;
-var library = require("../../../red/api/library");
-var auth = require("../../../red/api/auth");
+var library = require("../../../../red/api/editor/library");
+var auth = require("../../../../red/api/auth");
 
-describe("library api", function() {
+describe("api/editor/library", function() {
 
     function initLibrary(_flows,_libraryEntries,_examples) {
         var flows = _flows;

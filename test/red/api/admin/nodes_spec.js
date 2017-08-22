@@ -21,8 +21,8 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var nodes = require("../../../red/api/nodes");
-var locales = require("../../../red/api/locales");
+var nodes = require("../../../../red/api/admin/nodes");
+var apiUtil = require("../../../../red/api/util");
 
 describe("nodes api", function() {
 
@@ -51,11 +51,13 @@ describe("nodes api", function() {
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.putModule);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.putSet);
         app.delete("/nodes/:id",nodes.delete);
-        sinon.stub(locales,"determineLangFromHeaders", function() {
+        sinon.stub(apiUtil,"determineLangFromHeaders", function() {
             return "en-US";
         });
     });
-
+    after(function() {
+        apiUtil.determineLangFromHeaders.restore();
+    })
 
     describe('get nodes', function() {
         it('returns node list', function(done) {

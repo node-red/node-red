@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var theme = require("./theme");
+var theme = require("../editor/theme");
 var util = require('util');
 var runtime;
 var settings;
 
 module.exports = {
     init: function(_runtime) {
+        console.log("info.init");
         runtime = _runtime;
         settings = runtime.settings;
     },
@@ -50,7 +51,6 @@ module.exports = {
         }
 
         settings.exportNodeSettings(safeSettings);
-
         res.json(safeSettings);
     }
 }
