@@ -34,14 +34,11 @@ module.exports = {
     },
 
     determineLangFromHeaders: function(acceptedLanguages){
-        console.log("GOT",acceptedLanguages)
         var lang = i18n.defaultLang;
         acceptedLanguages = acceptedLanguages || [];
         if (acceptedLanguages.length >= 1) {
-            console.log("WE HAVE SOMETHING");
             lang = acceptedLanguages[0];
         }
-        console.log("RETURNING",lang);
         return lang;
     }
 }
