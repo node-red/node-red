@@ -73,7 +73,16 @@ module.exports = function(RED) {
             try {
                 var value;
                 if (node.syntax === "mustache") {
-                    value = mustache.render(node.template,new NodeContext(msg, node.context()));
+                    if (node.outputFormat === "json") {
+                        value = mustache.render(node.template, new NodeContext(JSON.parse(JSON.stringify(msg), function (key, value) {
+                            if (typeof value === "string") {
+                                value = value.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r").replace(/\f/g, "\\f").replace(/[\b]/g, "\\b");
+                            }
+                            return value;
+                        }), node.context()));
+                    } else {
+                        value = mustache.render(node.template, new NodeContext(msg, node.context()));
+                    }
                 } else {
                     value = node.template;
                 }
