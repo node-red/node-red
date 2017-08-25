@@ -29,6 +29,7 @@ RED.debug = (function() {
     var messagesByNode = {};
     var sbc;
     var activeWorkspace;
+    var numMessages = 100;
 
     var filterVisible = false;
 
@@ -369,7 +370,25 @@ RED.debug = (function() {
         })
         menuOptionMenu.show();
     }
+
+    var stack = [];
+    var busy = false;
     function handleDebugMessage(o) {
+        if (o) { stack.push(o); }
+        if (!busy && (stack.length > 0)) {
+            busy = true;
+            if (stack.length > numMessages) { stack = stack.splice(-numMessages); }
+            var a = stack.shift();
+            reallyHandleDebugMessage(a, function() {
+                setTimeout(function() {
+                    busy = false;
+                    handleDebugMessage();
+                }, 20);  // every 20mS = 50 times a second
+            });
+        }
+    }
+
+    function reallyHandleDebugMessage(o,cb) {
         var msg = document.createElement("div");
 
         var sourceNode = o._source;
@@ -497,7 +516,7 @@ RED.debug = (function() {
             }
         }
 
-        if (messages.length === 100) {
+        if (messages.length === numMessages) {
             m = messages.shift();
             if (view === "list") {
                 m.el.remove();
@@ -506,12 +525,13 @@ RED.debug = (function() {
         if (atBottom) {
             messageList.scrollTop(sbc.scrollHeight);
         }
+
+        if (cb) { cb(); }
     }
 
     return {
         init: init,
         refreshMessageList:refreshMessageList,
-        handleDebugMessage: handleDebugMessage,
-
+        handleDebugMessage: handleDebugMessage
     }
 })();
