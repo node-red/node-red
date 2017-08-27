@@ -377,14 +377,13 @@ RED.debug = (function() {
         if (o) { stack.push(o); }
         if (!busy && (stack.length > 0)) {
             busy = true;
-            if (stack.length > numMessages) { stack = stack.splice(-numMessages); }
-            var a = stack.shift();
-            reallyHandleDebugMessage(a, function() {
+            reallyHandleDebugMessage(stack.shift(), function() {
                 setTimeout(function() {
                     busy = false;
                     handleDebugMessage();
-                }, 20);  // every 20mS = 50 times a second
+                }, 15);  // every 15mS = 66 times a second
             });
+            if (stack.length > numMessages) { stack = stack.splice(-numMessages); }
         }
     }
 
