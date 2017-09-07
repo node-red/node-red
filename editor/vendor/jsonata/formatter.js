@@ -128,6 +128,8 @@
         '$map':{ args:[ 'array', 'function' ]},
         '$match':{ args:[ 'str', 'pattern', 'limit' ]},
         '$max':{ args:[ 'array' ]},
+        '$merge':{ args:[ 'array' ]},
+        '$millis':{ args:[  ]},
         '$min':{ args:[ 'array' ]},
         '$not':{ args:[ 'arg' ]},
         '$now':{ args:[  ]},
