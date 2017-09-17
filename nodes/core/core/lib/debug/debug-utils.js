@@ -29,7 +29,7 @@ RED.debug = (function() {
     var messagesByNode = {};
     var sbc;
     var activeWorkspace;
-    var numMessages = 100;
+    var numMessages = 100;  // Hardcoded number of message to show in debug window scrollback
 
     var filterVisible = false;
 
@@ -377,19 +377,17 @@ RED.debug = (function() {
         if (o) { stack.push(o); }
         if (!busy && (stack.length > 0)) {
             busy = true;
-            reallyHandleDebugMessage(stack.shift(), function() {
-                setTimeout(function() {
-                    busy = false;
-                    handleDebugMessage();
-                }, 15);  // every 15mS = 66 times a second
-            });
+            processDebugMessage(stack.shift());
+            setTimeout(function() {
+                busy = false;
+                handleDebugMessage();
+            }, 15);  // every 15mS = 66 times a second
             if (stack.length > numMessages) { stack = stack.splice(-numMessages); }
         }
     }
 
-    function reallyHandleDebugMessage(o,cb) {
+    function processDebugMessage(o) {
         var msg = document.createElement("div");
-
         var sourceNode = o._source;
 
         msg.onmouseenter = function() {
