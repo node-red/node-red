@@ -164,6 +164,33 @@ describe('CSV node', function() {
             });
         });
 
+        it('should be able to use the first msg as a template if msg.parts specified', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrin:true, wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    if (c === 0) {
+                        msg.should.have.property('payload', { w: 1, x: 2, y: 3, z: 4 });
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.property('payload', { w: 5, x: 6, y: 7, z: 8 });
+                        done();
+                    }
+                });
+                var testString1 = "w,x,y,z\n";
+                var testString2 = "1,2,3,4\n";
+                var testString3 = "5,6,7,8";
+                n1.emit("input", {payload:testString1, parts:{index:0, count:3}});
+                n1.emit("input", {payload:testString2, parts:{index:1, count:3}});
+                n1.emit("input", {payload:testString3, parts:{index:2, count:3}});
+            });
+        });
+
         it('should be able to output multiple lines as one array', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", multi:"yes", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
