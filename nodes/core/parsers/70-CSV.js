@@ -134,6 +134,9 @@ module.exports = function(RED) {
                         var line = msg.payload;
                         var tmp = "";
                         var reg = /^[-]?[0-9]*\.?[0-9]+$/;
+                        if (msg.hasOwnProperty("parts")) {
+                            if (msg.parts.index > 0) { first = false; }
+                        }
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
