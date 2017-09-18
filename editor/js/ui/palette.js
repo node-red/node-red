@@ -21,7 +21,7 @@ RED.palette = (function() {
 
     var categoryContainers = {};
 
-    function createCategoryContainer(category, label){
+    function createCategoryContainer(category, label) {
         label = (label || category).replace(/_/g, " ");
         var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
@@ -325,14 +325,26 @@ RED.palette = (function() {
             }
         }
     }
+
     function hideNodeType(nt) {
         var nodeTypeId = escapeNodeType(nt);
-        $("#palette_node_"+nodeTypeId).hide();
+        var paletteNode = $("#palette_node_"+nodeTypeId);
+        paletteNode.hide();
+        var categoryNode = paletteNode.closest(".palette-category");
+        var cl = categoryNode.find(".palette_node");
+        var c = 0;
+        for (var i = 0; i < cl.length; i++) {
+            if ($(cl[i]).css('display') === 'none') { c += 1; }
+        }
+        if (c === cl.length) { categoryNode.hide(); }
     }
 
     function showNodeType(nt) {
         var nodeTypeId = escapeNodeType(nt);
-        $("#palette_node_"+nodeTypeId).show();
+        var paletteNode = $("#palette_node_"+nodeTypeId);
+        var categoryNode = paletteNode.closest(".palette-category");
+        categoryNode.show();
+        paletteNode.show();
     }
 
     function refreshNodeTypes() {
@@ -396,7 +408,6 @@ RED.palette = (function() {
         RED.events.on('registry:node-type-removed', function(nodeType) {
             removeNodeType(nodeType);
         });
-
         RED.events.on('registry:node-set-enabled', function(nodeSet) {
             for (var j=0;j<nodeSet.types.length;j++) {
                 showNodeType(nodeSet.types[j]);
@@ -426,7 +437,6 @@ RED.palette = (function() {
                 }
             }
         });
-
 
         $("#palette > .palette-spinner").show();
 
