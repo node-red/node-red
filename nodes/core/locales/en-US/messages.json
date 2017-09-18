@@ -204,7 +204,7 @@
         "for": "For",
         "delaymsg": "Delay each message",
         "delayfixed": "Fixed delay",
-        "delayvarmsg": "Set delay with msg.delay",
+        "delayvarmsg": "Override delay with msg.delay",
         "randomdelay": "Random delay",
         "limitrate": "Rate Limit",
         "limitall": "All messages",

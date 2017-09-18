@@ -105,15 +105,15 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "delayv") {
             node.on("input", function(msg) {
-                var delayvar = Number(msg.delay || 0);
-                if (delayvar < 0) { delayvar = 0; }
+                var delayvar = Number(msg.delay || node.timeout);
+                if (delayvar < 0) { delayvar = node.timeout; }
                 var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     if (node.idList.length === 0) { node.status({}); }
                     node.send(msg);
                 }, delayvar);
                 node.idList.push(id);
-                if ((delayvar >= 1) && (node.idList.length !== 0)) {
+                if ((delayvar >= 0) && (node.idList.length !== 0)) {
                     node.status({fill:"blue",shape:"dot",text:delayvar/1000+"s"});
                 }
                 if (msg.hasOwnProperty("reset")) { clearDelayList(); }
