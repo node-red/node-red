@@ -130,7 +130,8 @@ module.exports = function(RED) {
                         if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                         var msg2 = null;
                         if (stderr) {
-                            msg2 = {payload: stderr};
+                            msg2 = RED.util.cloneMessage(msg);
+                            msg2.payload = stderr;
                         }
                         var msg3 = null;
                         node.status({});
@@ -142,10 +143,15 @@ module.exports = function(RED) {
                             if (error.code === null) { node.status({fill:"red",shape:"dot",text:"killed"}); }
                             else { node.status({fill:"red",shape:"dot",text:"error:"+error.code}); }
                             node.log('error:' + error);
-                        } else if (node.oldrc === "false") {
+                        }
+                        else if (node.oldrc === "false") {
                             msg3 = {payload:{code:0}};
                         }
                         if (!msg3) { node.status({}); }
+                        else {
+                            msg.rc = msg3.payload;
+                            if (msg2) { msg2.rc = msg3.payload; }
+                        }
                         node.send([msg,msg2,msg3]);
                         if (child.tout) { clearTimeout(child.tout); }
                         delete node.activeProcesses[child.pid];
