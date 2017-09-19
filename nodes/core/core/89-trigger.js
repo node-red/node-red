@@ -100,14 +100,14 @@ module.exports = function(RED) {
                         msg.payload = RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg);
                     }
 
-                    if (node.op1type !== "nul") { node.send(msg); }
+                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
 
                     if (node.duration === 0) { node.topics[topic].tout = 0; }
                     else if (node.loop === true) {
                         if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
                         if (node.op1type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
-                            node.topics[topic].tout = setInterval(function() { node.send(msg2); }, node.duration);
+                            node.topics[topic].tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); }, node.duration);
                         }
                     }
                     else {
@@ -143,7 +143,7 @@ module.exports = function(RED) {
                     }, node.duration);
                 }
                 else {
-                    if (node.op2type === "payl") { node.topics[topic].m2 = msg.payload; }
+                    if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
                 }
             }
         });
