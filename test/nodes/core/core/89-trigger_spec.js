@@ -161,6 +161,126 @@ describe('trigger node', function() {
         });
     });
 
+    it('should handle multiple topics as one if not asked to handle', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"all", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "A");
+                    }
+                    else if (c === 2) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "A");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:1,topic:"A"});
+            n1.emit("input", {payload:2,topic:"B"});
+            n1.emit("input", {payload:3,topic:"C"});
+        });
+    });
+
+    it('should handle multiple topics individually if asked to do so', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "A");
+                    }
+                    else if (c === 2) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "B");
+                    }
+                    else if (c === 3) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "C");
+                    }
+                    else if (c === 4) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "A");
+                    }
+                    else if (c === 5) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "B");
+                    }
+                    else if (c === 6) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "C");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:1,topic:"A"});
+            n1.emit("input", {payload:2,topic:"B"});
+            n1.emit("input", {payload:3,topic:"C"});
+        });
+    });
+
+    it('should handle multiple topics individually, and extend one, if asked to do so', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", extend:"true", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "A");
+                    }
+                    else if (c === 2) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "B");
+                    }
+                    else if (c === 3) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("topic", "C");
+                    }
+                    else if (c === 4) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "A");
+                    }
+                    else if (c === 5) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "C");
+                    }
+                    else if (c === 6) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("topic", "B");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:1,topic:"A"});
+            n1.emit("input", {payload:2,topic:"B"});
+            n1.emit("input", {payload:3,topic:"C"});
+            setTimeout( function() { n1.emit("input", {payload:2,topic:"B"})}, 25 );
+        });
+    });
+
     it('should be able to not output anything on first trigger', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"nul", op1:"true",op2:"false",op2type:"val",duration:"30", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
