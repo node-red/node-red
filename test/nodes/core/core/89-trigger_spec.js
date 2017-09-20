@@ -81,14 +81,17 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", '1');
-                    c+=1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", '1');
+                        c+=1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", '0');
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", '0');
-                    done();
-                }
+                catch(err) { done(err); }
             });
             n1.emit("input", {payload:null});
         });
@@ -307,8 +310,11 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                msg.should.have.a.property("payload", true);
-                c += 1;
+                try {
+                    msg.should.have.a.property("payload", true);
+                    c += 1;
+                }
+                catch(err) { done(err); }
             });
             setTimeout( function() {
                 c.should.equal(1); // should only have had one output.
@@ -326,16 +332,19 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", "Hello");
-                    c += 1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Hello");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "true");
+                        //console.log(Date.now() - ss);
+                        (Date.now() - ss).should.be.greaterThan(149);
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "true");
-                    //console.log(Date.now() - ss);
-                    (Date.now() - ss).should.be.greaterThan(149);
-                    done();
-                }
+                catch(err) { done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
@@ -353,16 +362,19 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", "Hello");
-                    c += 1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Hello");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "World");
+                        //console.log(Date.now() - ss);
+                        (Date.now() - ss).should.be.greaterThan(70);
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "World");
-                    //console.log(Date.now() - ss);
-                    (Date.now() - ss).should.be.greaterThan(70);
-                    done();
-                }
+                catch(err) { done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
@@ -383,15 +395,18 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", "Goodbye");
-                    c += 1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Goodbye");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "World");
+                        (Date.now() - ss).should.be.greaterThan(70);
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "World");
-                    (Date.now() - ss).should.be.greaterThan(70);
-                    done();
-                }
+                catch(err) { done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
@@ -412,15 +427,18 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", "Goodbye");
-                    c += 1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Goodbye");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "World");
+                        (Date.now() - ss).should.be.greaterThan(70);
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "World");
-                    (Date.now() - ss).should.be.greaterThan(70);
-                    done();
-                }
+                catch(err) { done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
@@ -441,14 +459,17 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", "Hello");
-                    c+=1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Hello");
+                        c+=1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "World");
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "World");
-                    done();
-                }
+                catch(err) { done(err); }
             });
             n1.emit("input", {payload:"Hello",topic:"World"});
         });
@@ -462,14 +483,17 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 0) {
-                    msg.should.have.a.property("payload", null);
-                    c+=1;
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", null);
+                        c+=1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "World");
+                        done();
+                    }
                 }
-                else {
-                    msg.should.have.a.property("payload", "World");
-                    done();
-                }
+                catch(err) { done(err); }
             });
             n1.emit("input", {payload:"World"});
         });
@@ -483,8 +507,11 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                c += 1;
-                msg.should.have.a.property("payload", 1);
+                try {
+                    c += 1;
+                    msg.should.have.a.property("payload", "1");
+                }
+                catch(err) { done(err); }
             });
             setTimeout( function() {
                 if (c === 2) { done(); }
@@ -508,8 +535,11 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                c += 1;
-                msg.should.have.a.property("payload", 1);
+                try {
+                    c += 1;
+                    msg.should.have.a.property("payload", "1");
+                }
+                catch(err) { done(err); }
             });
             setTimeout( function() {
                 if (c === 2) { done(); }
