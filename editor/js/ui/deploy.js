@@ -437,6 +437,10 @@ RED.deploy = (function() {
         }
     }
     return {
-        init: init
+        init: init,
+        setDeployInflight: function(state) {
+            deployInflight = state;
+        }
+
     }
 })();

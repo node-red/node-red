@@ -24,7 +24,7 @@ var app = express();
 var info = require("../../../../red/api/admin/info");
 var theme = require("../../../../red/api/editor/theme");
 
-describe("info api", function() {
+describe("api/admin/info", function() {
     describe("settings handler", function() {
         before(function() {
             sinon.stub(theme,"settings",function() { return { test: 456 };});

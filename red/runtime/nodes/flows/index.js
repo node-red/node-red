@@ -73,15 +73,18 @@ function loadFlows() {
     return storage.getFlows().then(function(config) {
         log.debug("loaded flow revision: "+config.rev);
         return credentials.load(config.credentials).then(function() {
+            events.emit("runtime-event",{id:"runtime-state",retain:true});
             return config;
         });
     }).otherwise(function(err) {
+        activeConfig = null;
+        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:"credentials_load_failed",text:"notification.warnings.invalid-credentials-secret"},retain:true});
         log.warn(log._("nodes.flows.error",{message:err.toString()}));
-        console.log(err.stack);
+        throw err;
     });
 }
-function load() {
-    return setFlows(null,"load",false);
+function load(forceStart) {
+    return setFlows(null,"load",false,forceStart);
 }
 
 /*
@@ -89,7 +92,7 @@ function load() {
  * type - full/nodes/flows/load (default full)
  * muteLog - don't emit the standard log messages (used for individual flow api)
  */
-function setFlows(_config,type,muteLog) {
+function setFlows(_config,type,muteLog,forceStart) {
     type = type||"full";
 
     var configSavePromise = null;
@@ -131,7 +134,7 @@ function setFlows(_config,type,muteLog) {
                 rev:flowRevision
             };
             activeFlowConfig = newFlowConfig;
-            if (started) {
+            if (forceStart || started) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
                     start(type,diff,muteLog).then(function() {
@@ -228,6 +231,7 @@ function handleStatus(node,statusMessage) {
 
 
 function start(type,diff,muteLog) {
+    console.log("START----")
     //dumpActiveNodes();
     type = type||"full";
     started = true;
@@ -323,6 +327,9 @@ function start(type,diff,muteLog) {
 }
 
 function stop(type,diff,muteLog) {
+    if (!started) {
+        return when.resolve();
+    }
     type = type||"full";
     diff = diff||{
         added:[],

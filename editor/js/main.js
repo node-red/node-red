@@ -42,12 +42,127 @@
                 $("#palette > .palette-spinner").hide();
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
-                loadFlows();
+                loadFlows(function() {
+                    RED.projects.refreshSidebar();
+
+                    var persistentNotifications = {};
+                    RED.comms.subscribe("notification/#",function(topic,msg) {
+                        var parts = topic.split("/");
+                        var notificationId = parts[1];
+                        if (notificationId === "runtime-deploy") {
+                            // handled in ui/deploy.js
+                            return;
+                        }
+                        if (notificationId === "node") {
+                            // handled below
+                            return;
+                        }
+                        if (notificationId === "project-change") {
+                            RED.nodes.clear();
+                            RED.history.clear();
+                            RED.projects.refreshSidebar();
+                            RED.projects.showSidebar();
+                            loadFlows(function() {
+                                RED.notify("NLS: Project changed to "+msg.project);
+                            });
+                            return;
+                        }
+                        if (msg.text) {
+                            var text = RED._(msg.text,{default:msg.text});
+                            if (notificationId === "runtime-state") {
+                                if (msg.error === "credentials_load_failed") {
+                                    text += '<p><a href="#" onclick="RED.projects.showCredentialsPrompt(); return false;">'+'Setup credentials'+'</a></p>';
+                                }
+                            }
+
+
+                            if (!persistentNotifications.hasOwnProperty(notificationId)) {
+                                persistentNotifications[notificationId] = RED.notify(text,msg.type,msg.timeout === undefined,msg.timeout);
+                            } else {
+                                persistentNotifications[notificationId].update(text,msg.timeout);
+                            }
+                        } else if (persistentNotifications.hasOwnProperty(notificationId)) {
+                            persistentNotifications[notificationId].close();
+                            delete persistentNotifications[notificationId];
+                        }
+                    });
+                    RED.comms.subscribe("status/#",function(topic,msg) {
+                        var parts = topic.split("/");
+                        var node = RED.nodes.node(parts[1]);
+                        if (node) {
+                            if (msg.hasOwnProperty("text")) {
+                                if (msg.text[0] !== ".") {
+                                    msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
+                                }
+                            }
+                            node.status = msg;
+                            node.dirty = true;
+                            RED.view.redraw();
+                        }
+                    });
+                    RED.comms.subscribe("notification/node/#",function(topic,msg) {
+                        var i,m;
+                        var typeList;
+                        var info;
+                        if (topic == "notification/node/added") {
+                            var addedTypes = [];
+                            msg.forEach(function(m) {
+                                var id = m.id;
+                                RED.nodes.addNodeSet(m);
+                                addedTypes = addedTypes.concat(m.types);
+                                RED.i18n.loadCatalog(id, function() {
+                                    $.get('nodes/'+id, function(data) {
+                                        $("body").append(data);
+                                    });
+                                });
+                            });
+                            if (addedTypes.length) {
+                                typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
+                                RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
+                            }
+                        } else if (topic == "notification/node/removed") {
+                            for (i=0;i<msg.length;i++) {
+                                m = msg[i];
+                                info = RED.nodes.removeNodeSet(m.id);
+                                if (info.added) {
+                                    typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
+                                    RED.notify(RED._("palette.event.nodeRemoved", {count:m.types.length})+typeList,"success");
+                                }
+                            }
+                        } else if (topic == "notification/node/enabled") {
+                            if (msg.types) {
+                                info = RED.nodes.getNodeSet(msg.id);
+                                if (info.added) {
+                                    RED.nodes.enableNodeSet(msg.id);
+                                    typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                                    RED.notify(RED._("palette.event.nodeEnabled", {count:msg.types.length})+typeList,"success");
+                                } else {
+                                    $.get('nodes/'+msg.id, function(data) {
+                                        $("body").append(data);
+                                        typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                                        RED.notify(RED._("palette.event.nodeAdded", {count:msg.types.length})+typeList,"success");
+                                    });
+                                }
+                            }
+                        } else if (topic == "notification/node/disabled") {
+                            if (msg.types) {
+                                RED.nodes.disableNodeSet(msg.id);
+                                typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                                RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
+                            }
+                        } else if (topic == "node/upgraded") {
+                            RED.notify(RED._("palette.event.nodeUpgraded", {module:msg.module,version:msg.version}),"success");
+                            RED.nodes.registry.setModulePendingUpdated(msg.module,msg.version);
+                        }
+                        // Refresh flow library to ensure any examples are updated
+                        RED.library.loadFlowLibrary();
+                    });
+                });
             }
         });
     }
 
-    function loadFlows() {
+    function loadFlows(done) {
         $.ajax({
             headers: {
                 "Accept":"application/json",
@@ -55,110 +170,17 @@
             cache: false,
             url: 'flows',
             success: function(nodes) {
-                var currentHash = window.location.hash;
-                RED.nodes.version(nodes.rev);
-                RED.nodes.import(nodes.flows);
-                RED.nodes.dirty(false);
-                RED.view.redraw(true);
-                if (/^#flow\/.+$/.test(currentHash)) {
-                    RED.workspaces.show(currentHash.substring(6));
+                if (nodes) {
+                    var currentHash = window.location.hash;
+                    RED.nodes.version(nodes.rev);
+                    RED.nodes.import(nodes.flows);
+                    RED.nodes.dirty(false);
+                    RED.view.redraw(true);
+                    if (/^#flow\/.+$/.test(currentHash)) {
+                        RED.workspaces.show(currentHash.substring(6));
+                    }
                 }
-
-                var persistentNotifications = {};
-                RED.comms.subscribe("notification/#",function(topic,msg) {
-                    var parts = topic.split("/");
-                    var notificationId = parts[1];
-                    if (notificationId === "runtime-deploy") {
-                        // handled in ui/deploy.js
-                        return;
-                    }
-                    if (notificationId === "node") {
-                        // handled below
-                        return;
-                    }
-                    if (msg.text) {
-                        var text = RED._(msg.text,{default:msg.text});
-                        if (!persistentNotifications.hasOwnProperty(notificationId)) {
-                            persistentNotifications[notificationId] = RED.notify(text,msg.type,msg.timeout === undefined,msg.timeout);
-                        } else {
-                            persistentNotifications[notificationId].update(text,msg.timeout);
-                        }
-                    } else if (persistentNotifications.hasOwnProperty(notificationId)) {
-                        persistentNotifications[notificationId].close();
-                        delete persistentNotifications[notificationId];
-                    }
-                });
-                RED.comms.subscribe("status/#",function(topic,msg) {
-                    var parts = topic.split("/");
-                    var node = RED.nodes.node(parts[1]);
-                    if (node) {
-                        if (msg.hasOwnProperty("text")) {
-                            if (msg.text[0] !== ".") {
-                                msg.text = node._(msg.text.toString(),{defaultValue:msg.text.toString()});
-                            }
-                        }
-                        node.status = msg;
-                        node.dirty = true;
-                        RED.view.redraw();
-                    }
-                });
-                RED.comms.subscribe("notification/node/#",function(topic,msg) {
-                    var i,m;
-                    var typeList;
-                    var info;
-                    if (topic == "notification/node/added") {
-                        var addedTypes = [];
-                        msg.forEach(function(m) {
-                            var id = m.id;
-                            RED.nodes.addNodeSet(m);
-                            addedTypes = addedTypes.concat(m.types);
-                            RED.i18n.loadCatalog(id, function() {
-                                $.get('nodes/'+id, function(data) {
-                                    $("body").append(data);
-                                });
-                            });
-                        });
-                        if (addedTypes.length) {
-                            typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
-                            RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
-                        }
-                    } else if (topic == "notification/node/removed") {
-                        for (i=0;i<msg.length;i++) {
-                            m = msg[i];
-                            info = RED.nodes.removeNodeSet(m.id);
-                            if (info.added) {
-                                typeList = "<ul><li>"+m.types.join("</li><li>")+"</li></ul>";
-                                RED.notify(RED._("palette.event.nodeRemoved", {count:m.types.length})+typeList,"success");
-                            }
-                        }
-                    } else if (topic == "notification/node/enabled") {
-                        if (msg.types) {
-                            info = RED.nodes.getNodeSet(msg.id);
-                            if (info.added) {
-                                RED.nodes.enableNodeSet(msg.id);
-                                typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                RED.notify(RED._("palette.event.nodeEnabled", {count:msg.types.length})+typeList,"success");
-                            } else {
-                                $.get('nodes/'+msg.id, function(data) {
-                                    $("body").append(data);
-                                    typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                                    RED.notify(RED._("palette.event.nodeAdded", {count:msg.types.length})+typeList,"success");
-                                });
-                            }
-                        }
-                    } else if (topic == "notification/node/disabled") {
-                        if (msg.types) {
-                            RED.nodes.disableNodeSet(msg.id);
-                            typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
-                            RED.notify(RED._("palette.event.nodeDisabled", {count:msg.types.length})+typeList,"success");
-                        }
-                    } else if (topic == "node/upgraded") {
-                        RED.notify(RED._("palette.event.nodeUpgraded", {module:msg.module,version:msg.version}),"success");
-                        RED.nodes.registry.setModulePendingUpdated(msg.module,msg.version);
-                    }
-                    // Refresh flow library to ensure any examples are updated
-                    RED.library.loadFlowLibrary();
-                });
+                done();
             }
         });
     }
@@ -176,6 +198,13 @@
 
     function loadEditor() {
         var menuOptions = [];
+
+        menuOptions.push({id:"menu-item-projects-menu",label:"NLS: Projects",options:[
+            {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
+            {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"},
+        ]});
+
+
         menuOptions.push({id:"menu-item-view-menu",label:RED._("menu.label.view.view"),options:[
             // {id:"menu-item-view-show-grid",setting:"view-show-grid",label:RED._("menu.label.view.showGrid"),toggle:true,onselect:"core:toggle-show-grid"},
             // {id:"menu-item-view-snap-grid",setting:"view-snap-grid",label:RED._("menu.label.view.snapGrid"),toggle:true,onselect:"core:toggle-snap-grid"},
@@ -241,6 +270,7 @@
         }
 
         RED.sidebar.init();
+        RED.projects.init();
         RED.subflow.init();
         RED.workspaces.init();
         RED.clipboard.init();

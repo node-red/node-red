@@ -54,7 +54,10 @@ var storageModuleInterface = {
             } catch (e) {
                 return when.reject(e);
             }
-            return storageModule.init(runtime.settings);
+            if (storageModule.projects) {
+                storageModuleInterface.projects = storageModule.projects;
+            }
+            return storageModule.init(runtime.settings,runtime);
         },
         getFlows: function() {
             return storageModule.getFlows().then(function(flows) {

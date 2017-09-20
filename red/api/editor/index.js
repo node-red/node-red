@@ -66,10 +66,10 @@ module.exports = {
             editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
 
-            // //Projects
-            // var projects = require("./projects");
-            // projects.init(runtime);
-            // editorApp.get("/projects",projects.app());
+            //Projects
+            var projects = require("./projects");
+            projects.init(runtime);
+            editorApp.use("/projects",projects.app());
 
             // Locales
             var locales = require("./locales");

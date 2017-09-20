@@ -321,6 +321,9 @@ RED.history = (function() {
         },
         peek: function() {
             return undo_history[undo_history.length-1];
+        },
+        clear: function() {
+            undo_history = [];
         }
     }
 

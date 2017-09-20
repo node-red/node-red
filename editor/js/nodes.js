@@ -1201,11 +1201,12 @@ RED.nodes = (function() {
         });
         defaultWorkspace = null;
 
-        RED.nodes.dirty(true);
+        RED.nodes.dirty(false);
         RED.view.redraw(true);
         RED.palette.refresh();
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
+        RED.sidebar.info.refresh();
 
         // var node_defs = {};
         // var nodes = [];

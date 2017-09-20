@@ -16,7 +16,6 @@
 
 var fs = require('fs-extra');
 var when = require('when');
-var nodeFn = require('when/node/function');
 var fspath = require("path");
 
 var log = require("../../log");
@@ -24,6 +23,7 @@ var util = require("./util");
 var library = require("./library");
 var sessions = require("./sessions");
 var runtimeSettings = require("./settings");
+var projects = require("./projects");
 
 var initialFlowLoadComplete = false;
 var settings;
@@ -32,10 +32,9 @@ var flowsFullPath;
 var flowsFileBackup;
 var credentialsFile;
 var credentialsFileBackup;
-var oldCredentialsFile;
 
 var localfilesystem = {
-    init: function(_settings) {
+    init: function(_settings, runtime) {
         settings = _settings;
 
         var promises = [];
@@ -62,49 +61,13 @@ var localfilesystem = {
             }
         }
 
-        if (settings.flowFile) {
-            flowsFile = settings.flowFile;
-            // handle Unix and Windows "C:\"
-            if ((flowsFile[0] == "/") || (flowsFile[1] == ":")) {
-                // Absolute path
-                flowsFullPath = flowsFile;
-            } else if (flowsFile.substring(0,2) === "./") {
-                // Relative to cwd
-                flowsFullPath = fspath.join(process.cwd(),flowsFile);
-            } else {
-                try {
-                    fs.statSync(fspath.join(process.cwd(),flowsFile));
-                    // Found in cwd
-                    flowsFullPath = fspath.join(process.cwd(),flowsFile);
-                } catch(err) {
-                    // Use userDir
-                    flowsFullPath = fspath.join(settings.userDir,flowsFile);
-                }
-            }
-
-        } else {
-            flowsFile = 'flows_'+require('os').hostname()+'.json';
-            flowsFullPath = fspath.join(settings.userDir,flowsFile);
-        }
-        var ffExt = fspath.extname(flowsFullPath);
-        var ffName = fspath.basename(flowsFullPath);
-        var ffBase = fspath.basename(flowsFullPath,ffExt);
-        var ffDir = fspath.dirname(flowsFullPath);
-
-        credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
-        credentialsFileBackup = fspath.join(settings.userDir,"."+ffBase+"_cred"+ffExt+".backup");
-
-        oldCredentialsFile = fspath.join(settings.userDir,"credentials.json");
-
-        flowsFileBackup = fspath.join(ffDir,"."+ffName+".backup");
-
         sessions.init(settings);
         runtimeSettings.init(settings);
+        promises.push(library.init(settings));
+        promises.push(projects.init(settings, runtime));
 
         var packageFile = fspath.join(settings.userDir,"package.json");
         var packagePromise = when.resolve();
-
-        promises.push(library.init(settings));
 
         if (!settings.readOnly) {
             packagePromise = function() {
@@ -124,64 +87,19 @@ var localfilesystem = {
         return when.all(promises).then(packagePromise);
     },
 
-    getFlows: function() {
-        if (!initialFlowLoadComplete) {
-            initialFlowLoadComplete = true;
-            log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
-            log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
-        }
-        return util.readFile(flowsFullPath,flowsFileBackup,[],'flow');
-    },
 
-    saveFlows: function(flows) {
-        if (settings.readOnly) {
-            return when.resolve();
-        }
+    getFlows: projects.getFlows,
+    saveFlows: projects.saveFlows,
+    getCredentials: projects.getCredentials,
+    saveCredentials: projects.saveCredentials,
 
-        try {
-            fs.renameSync(flowsFullPath,flowsFileBackup);
-        } catch(err) {
-        }
-
-        var flowData;
-
-        if (settings.flowFilePretty) {
-            flowData = JSON.stringify(flows,null,4);
-        } else {
-            flowData = JSON.stringify(flows);
-        }
-        return util.writeFile(flowsFullPath, flowData);
-    },
-
-    getCredentials: function() {
-        return util.readFile(credentialsFile,credentialsFileBackup,{},'credentials');
-    },
-
-    saveCredentials: function(credentials) {
-        if (settings.readOnly) {
-            return when.resolve();
-        }
-
-        try {
-            fs.renameSync(credentialsFile,credentialsFileBackup);
-        } catch(err) {
-        }
-        var credentialData;
-        if (settings.flowFilePretty) {
-            credentialData = JSON.stringify(credentials,null,4);
-        } else {
-            credentialData = JSON.stringify(credentials);
-        }
-        return util.writeFile(credentialsFile, credentialData);
-    },
-    
     getSettings: runtimeSettings.getSettings,
     saveSettings: runtimeSettings.saveSettings,
     getSessions: sessions.getSessions,
     saveSessions: sessions.saveSessions,
     getLibraryEntry: library.getLibraryEntry,
-    saveLibraryEntry: library.saveLibraryEntry
-
+    saveLibraryEntry: library.saveLibraryEntry,
+    projects: projects
 };
 
 module.exports = localfilesystem;

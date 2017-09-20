@@ -23,7 +23,7 @@ var when = require('when');
 
 var flow = require("../../../../red/api/admin/flow");
 
-describe("flow api", function() {
+describe("api/admin/flow", function() {
 
     var app;
 

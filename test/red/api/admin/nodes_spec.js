@@ -24,7 +24,7 @@ var when = require('when');
 var nodes = require("../../../../red/api/admin/nodes");
 var apiUtil = require("../../../../red/api/util");
 
-describe("nodes api", function() {
+describe("api/admin/nodes", function() {
 
     var app;
     function initNodes(runtime) {

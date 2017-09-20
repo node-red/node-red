@@ -84,7 +84,8 @@
             "undeployedChanges": "node has undeployed changes",
             "nodeActionDisabled": "node actions disabled within subflow",
             "missing-types": "Flows stopped due to missing node types. Check logs for details.",
-            "restartRequired": "Node-RED must be restarted to enable upgraded modules"
+            "restartRequired": "Node-RED must be restarted to enable upgraded modules",
+            "invalid-credentials-secret": "Flows stopped due to missing or invalid credentialSecret"
         },
 
         "error": "<strong>Error</strong>: __message__",
@@ -388,7 +389,12 @@
             "showMore": "show more",
             "showLess": "show less",
             "flow": "Flow",
-            "information": "Information",
+            "selection":"Selection",
+            "nodes":"__count__ nodes",
+            "flowDesc": "Flow Description",
+            "subflowDesc": "Subflow Description",
+            "nodeHelp": "Node Help",
+            "none":"None",
             "arrayItems": "__count__ items",
             "showTips":"You can open the tips from the settings panel"
         },
@@ -406,6 +412,15 @@
         "palette": {
             "name": "Palette management",
             "label": "palette"
+        },
+        "project": {
+            "label": "project",
+            "name": "Project",
+            "description": "Description",
+            "dependencies": "Dependencies",
+            "settings": "Settings",
+            "editDescription": "Edit project description",
+            "editDependencies": "Edit project dependencies"
         }
     },
     "typedInput": {
@@ -446,6 +461,9 @@
     "jsonEditor": {
         "title": "JSON editor",
         "format": "format JSON"
+    },
+    "markdownEditor": {
+        "title": "Markdown editor"
     },
     "bufferEditor": {
         "title": "Buffer editor",

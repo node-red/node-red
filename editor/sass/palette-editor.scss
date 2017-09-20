@@ -95,29 +95,6 @@
     .palette-module-shade-status {
         color: #666;
     }
-
-    .palette-module-meta {
-        color: #666;
-        position: relative;
-        &.disabled {
-            color: #ccc;
-        }
-
-        .fa {
-            width: 15px;
-            text-align: center;
-            margin-right: 5px;
-        }
-    }
-    .palette-module-name {
-        white-space: nowrap;
-        @include enable-selection;
-    }
-    .palette-module-version, .palette-module-updated, .palette-module-link {
-        font-style:italic;
-        font-size: 0.8em;
-        @include enable-selection;
-    }
     .palette-module-updated {
         margin-left: 10px;
     }
@@ -222,5 +199,34 @@
             }
         }
     }
+
+}
+.palette-module-meta {
+    color: #666;
+    position: relative;
+    &.disabled {
+        color: #ccc;
+    }
+
+    .fa {
+        width: 15px;
+        text-align: center;
+        margin-right: 5px;
+    }
+}
+.palette-module-name {
+    white-space: nowrap;
+    @include enable-selection;
+}
+.palette-module-version, .palette-module-updated, .palette-module-link {
+    font-style:italic;
+    font-size: 0.8em;
+    @include enable-selection;
+}
+.palette-module-section {
+    padding:0 !important;
+    background: #f9f9f9 !important;
+    font-size: 0.9em;
+    color: #666;
 
 }

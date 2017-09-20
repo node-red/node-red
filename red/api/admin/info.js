@@ -20,7 +20,6 @@ var settings;
 
 module.exports = {
     init: function(_runtime) {
-        console.log("info.init");
         runtime = _runtime;
         settings = runtime.settings;
     },

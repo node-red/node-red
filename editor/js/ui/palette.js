@@ -206,11 +206,11 @@ RED.palette = (function() {
                 RED.view.focus();
                 var helpText;
                 if (nt.indexOf("subflow:") === 0) {
-                    helpText = marked(RED.nodes.subflow(nt.substring(8)).info||"");
+                    helpText = marked(RED.nodes.subflow(nt.substring(8)).info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
                 } else {
-                    helpText = $("script[data-help-name='"+d.type+"']").html()||"";
+                    helpText = $("script[data-help-name='"+d.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
                 }
-                RED.sidebar.info.set(helpText);
+                RED.sidebar.info.set(helpText,RED._("sidebar.info.nodeHelp"));
             });
             var chart = $("#chart");
             var chartOffset = chart.offset();

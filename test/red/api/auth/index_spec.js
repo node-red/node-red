@@ -24,7 +24,7 @@ var auth = require("../../../../red/api/auth");
 var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
 
-describe("api auth middleware",function() {
+describe("api/auth/index",function() {
 
 
 
