@@ -130,6 +130,7 @@ Node.prototype.send = function(msg) {
             if (!msg._msgid) {
                 msg._msgid = redUtil.generateId();
             }
+            msg._srcid = this.id;
             this.metric("send",msg);
             node = flows.get(this._wire);
             /* istanbul ignore else */
@@ -199,6 +200,7 @@ Node.prototype.send = function(msg) {
         if (!ev.m._msgid) {
             ev.m._msgid = sentMessageId;
         }
+        ev.m._srcid = this.id;
         ev.n.receive(ev.m);
     }
 };
