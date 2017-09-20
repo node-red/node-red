@@ -43,7 +43,7 @@
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
                 loadFlows(function() {
-                    RED.projects.refreshSidebar();
+                    RED.projects.refresh();
 
                     var persistentNotifications = {};
                     RED.comms.subscribe("notification/#",function(topic,msg) {
@@ -60,10 +60,11 @@
                         if (notificationId === "project-change") {
                             RED.nodes.clear();
                             RED.history.clear();
-                            RED.projects.refreshSidebar();
-                            RED.projects.showSidebar();
+                            RED.view.redraw(true);
+                            RED.projects.refresh();
                             loadFlows(function() {
                                 RED.notify("NLS: Project changed to "+msg.project);
+                                RED.sidebar.info.refresh()
                             });
                             return;
                         }
@@ -74,8 +75,6 @@
                                     text += '<p><a href="#" onclick="RED.projects.showCredentialsPrompt(); return false;">'+'Setup credentials'+'</a></p>';
                                 }
                             }
-
-
                             if (!persistentNotifications.hasOwnProperty(notificationId)) {
                                 persistentNotifications[notificationId] = RED.notify(text,msg.type,msg.timeout === undefined,msg.timeout);
                             } else {

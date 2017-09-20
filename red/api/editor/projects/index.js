@@ -80,9 +80,14 @@ module.exports = {
                 } else {
                     res.redirect(303,req.baseUrl + '/');
                 }
-            } else if (req.body.credentialSecret || req.body.description || req.body.dependencies) {
+            } else if (req.body.hasOwnProperty('credentialSecret') ||
+                       req.body.hasOwnProperty('description') ||
+                       req.body.hasOwnProperty('dependencies')||
+                       req.body.hasOwnProperty('summary')) {
                 runtime.storage.projects.updateProject(req.params.id, req.body).then(function() {
-                    res.redirect(303,req.baseUrl + '/');
+                    setTimeout(function() {
+                        res.redirect(303,req.baseUrl + '/');
+                    },5000);
                 }).otherwise(function(err) {
                     if (err.code) {
                         res.status(400).json({error:err.code, message: err.message});

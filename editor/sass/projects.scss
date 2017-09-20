@@ -34,7 +34,8 @@
         input[type=checkbox], input[type=radio] {
             width: auto;
             vertical-align: top;
-        }    }
+        }
+    }
 }
 .projects-dialog-spinner {
     position: absolute;
@@ -58,10 +59,10 @@
         width: 80px;
     }
     &.projects-dialog-spinner-sidebar {
-        padding: 20px;
-        background: $shade-color;
+        background: white;
+        padding:0;
         img {
-            width: 50px;
+            width: 40px;
         }
     }
 
@@ -230,4 +231,15 @@
             color: #b07575; //#b72828;
         }
     }
+}
+
+
+.project-settings-tab-pane {
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    overflow-y: scroll;
+    padding: 8px 20px 20px;
 }

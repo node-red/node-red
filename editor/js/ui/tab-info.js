@@ -109,6 +109,11 @@ RED.sidebar.info = (function() {
         return el;
     }
     function refresh(node) {
+        console.log('sidebar.info.refresh');
+        if (node === undefined) {
+            refreshSelection();
+            return;
+        }
         sections.show();
         $(nodeSection.content).empty();
         $(infoSection.content).empty();
@@ -123,17 +128,22 @@ RED.sidebar.info = (function() {
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {
             propRow = $('<tr class="node-info-node-row"><td>Project</td><td></td></tr>').appendTo(tableBody);
-            $(propRow.children()[1]).html('&nbsp;'+(activeProject.name||""))
+            $(propRow.children()[1]).text(activeProject.name||"");
             $('<tr class="node-info-property-expand blank"><td colspan="2"></td></tr>').appendTo(tableBody);
+            $('<button class="editor-button editor-button-small" style="position:absolute;right:2px;"><i class="fa fa-ellipsis-h"></i></button>')
+                .appendTo(propRow.children()[1])
+                .click(function(evt) {
+                    evt.preventDefault();
+                    RED.projects.editProject();
+                });
         }
         infoSection.container.show();
-        if (node === undefined) {
+        if (node === null) {
             return;
         } else if (Array.isArray(node)) {
             infoSection.container.hide();
             propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.selection")+"</td><td></td></tr>").appendTo(tableBody);
-            $(propRow.children()[1]).html('&nbsp;'+RED._("sidebar.info.nodes",{count:node.length}))
-
+            $(propRow.children()[1]).text(RED._("sidebar.info.nodes",{count:node.length}))
         } else {
             var m = /^subflow(:(.+))?$/.exec(node.type);
             if (m) {
@@ -155,7 +165,7 @@ RED.sidebar.info = (function() {
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info."+(node.type==='tab'?'flow':'subflow'))+'</td><td></td></tr>').appendTo(tableBody);
                 RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.tabName")+"</td><td></td></tr>").appendTo(tableBody);
-                $(propRow.children()[1]).html('&nbsp;'+(node.label||node.name||""))
+                $(propRow.children()[1]).text(node.label||node.name||"");
                 if (node.type === "tab") {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
                     $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
@@ -166,10 +176,10 @@ RED.sidebar.info = (function() {
 
 
                 if (node.type !== "subflow" && node.name) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td>&nbsp;<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
+                    $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
                 }
                 if (!m) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>&nbsp;"+node.type+"</td></tr>").appendTo(tableBody);
+                    $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>"+node.type+"</td></tr>").appendTo(tableBody);
                 }
 
                 if (!m && node.type != "subflow" && node.type != "comment") {
@@ -357,7 +367,7 @@ RED.sidebar.info = (function() {
 
     function clear() {
         // sections.hide();
-        refresh();
+        refresh(null);
     }
 
     function set(html,title) {
@@ -365,15 +375,16 @@ RED.sidebar.info = (function() {
         // sections.show();
         // nodeSection.container.hide();
         infoSection.title.text(title||"");
-        refresh();
+        refresh(null);
         $(infoSection.content).empty();
         setInfoText(html);
         $(".sidebar-node-info-stack").scrollTop(0);
     }
 
-
-
-    RED.events.on("view:selection-changed",function(selection) {
+    function refreshSelection(selection) {
+        if (selection === undefined) {
+            selection = RED.view.selection();
+        }
         if (selection.nodes) {
             if (selection.nodes.length == 1) {
                 var node = selection.nodes[0];
@@ -396,12 +407,15 @@ RED.sidebar.info = (function() {
                 if (workspace && workspace.info) {
                     refresh(workspace);
                 } else {
-                    refresh()
+                    refresh(null)
                     // clear();
                 }
             }
         }
-    });
+    }
+
+
+    RED.events.on("view:selection-changed",refreshSelection);
 
     return {
         init: init,

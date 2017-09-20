@@ -102,6 +102,7 @@ table.node-info tr:not(.blank) td:first-child{
 table.node-info tr:not(.blank) td:last-child{
     padding: 3px 3px 3px 6px;
     color: #666;
+    overflow-y: hidden;
 }
 div.node-info {
     margin: 5px;

@@ -143,6 +143,7 @@ function getProject(project) {
             if (missingFiles.indexOf('package.json') === -1) {
                 promises.push(nodeFn.call(fs.readFile,fspath.join(projectPath,"package.json"),"utf8").then(function(content) {
                     var package = util.parseJSON(content);
+                    projectData.summary = package.description||"";
                     projectData.dependencies = package.dependencies||{};
                 }));
             }
@@ -424,16 +425,22 @@ function updateProject(project,data) {
             return setCredentialSecret(project,data.credentialSecret).then(function() {
                 return reloadActiveProject(project);
             })
-        } else if (data.description) {
+        } else if (data.hasOwnProperty('description')) {
             var projectPath = fspath.join(projectsDir,project);
             var readmeFile = fspath.join(projectPath,"README.md");
             return util.writeFile(readmeFile, data.description);
-        } else if (data.dependencies) {
+        } else if (data.hasOwnProperty('dependencies') || data.hasOwnProperty('summary')) {
             var projectPath = fspath.join(projectsDir,project);
             var packageJSON = fspath.join(projectPath,"package.json");
             return nodeFn.call(fs.readFile,packageJSON,"utf8").then(function(content) {
                 var package = util.parseJSON(content);
-                package.dependencies = data.dependencies;
+                if (data.dependencies) {
+                    package.dependencies = data.dependencies;
+                }
+                if (data.summary) {
+                    package.description = data.summary;
+                }
+
                 return util.writeFile(packageJSON,JSON.stringify(package,"",4));
             });
         }

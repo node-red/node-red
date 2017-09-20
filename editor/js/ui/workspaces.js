@@ -312,6 +312,9 @@ RED.workspaces = (function() {
                 workspace_tabs.removeTab(ws.id);
             }
         }
+        if (ws.id === activeWorkspace) {
+            activeWorkspace = 0;
+        }
     }
 
     function setWorkspaceOrder(order) {

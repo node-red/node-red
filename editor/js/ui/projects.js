@@ -464,6 +464,7 @@ RED.projects = (function() {
         // dialogBody.hide();
         console.log(options.url);
         var start = Date.now();
+        // TODO: this is specific to the dialog-based requests
         $(".projects-dialog-spinner").show();
         $("#projects-dialog").parent().find(".ui-dialog-buttonset").children().css("visibility","hidden")
         if (body) {
@@ -535,8 +536,10 @@ RED.projects = (function() {
         RED.actions.add("core:new-project",RED.projects.newProject);
         RED.actions.add("core:open-project",RED.projects.selectProject);
 
+        RED.projects.settings.init({sendRequest:sendRequest});
+
         initScreens();
-        initSidebar();
+        // initSidebar();
     }
 
     // function getRepoAuthDetails(req) {
@@ -598,6 +601,7 @@ RED.projects = (function() {
     //     ])
     // }
 
+/*
 
     var sidebarContent;
     var sidebarSections;
@@ -876,7 +880,6 @@ RED.projects = (function() {
     function addSpinnerOverlay(container) {
         var spinner = $('<div class="projects-dialog-spinner projects-dialog-spinner-sidebar"><img src="red/images/spin.svg"/></div>').appendTo(container);
         return spinner;
-
     }
     function updateProjectSummary() {
         sidebarSectionsInfo.empty();
@@ -928,18 +931,6 @@ RED.projects = (function() {
         }
     }
 
-    function refreshSidebar() {
-        $.getJSON("projects",function(data) {
-            if (data.active) {
-                $.getJSON("projects/"+data.active, function(project) {
-                    activeProject = project;
-                    updateProjectSummary();
-                    updateProjectDescription();
-                    updateProjectDependencies();
-                });
-            }
-        });
-    }
 
     // function getUsedModules() {
     //     var inuseModules = {};
@@ -966,6 +957,24 @@ RED.projects = (function() {
         });
         return el;
     }
+*/
+
+function refresh() {
+    $.getJSON("projects",function(data) {
+        if (data.active) {
+            $.getJSON("projects/"+data.active, function(project) {
+                activeProject = project;
+                // updateProjectSummary();
+                // updateProjectDescription();
+                // updateProjectDependencies();
+                console.log("project triggering a info refresh for ",activeProject)
+                RED.sidebar.info.refresh();
+            });
+        }
+    });
+}
+
+
 
     return {
         init: init,
@@ -981,15 +990,16 @@ RED.projects = (function() {
         showCredentialsPrompt: function() {
             show('credentialSecret');
         },
-        showSidebar: showSidebar,
-        refreshSidebar: refreshSidebar,
-        showProjectEditor: function() {
-            RED.editor.editProject({
-                project: activeProject,
-                complete: function(result) {
-                    console.log(result);
-                }
-            });
+        // showSidebar: showSidebar,
+        refresh: refresh,
+        editProject: function() {
+            RED.projects.settings.show();
+            // RED.editor.editProject({
+            //     project: activeProject,
+            //     complete: function(result) {
+            //         console.log(result);
+            //     }
+            // });
         },
         getActiveProject: function() {
             return activeProject;
