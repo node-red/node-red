@@ -66,8 +66,8 @@ module.exports = function(RED) {
         this.op2Templated = (this.op2type === 'str' && this.op2.indexOf("{{") != -1);
         if ((this.op1type === "num") && (!isNaN(this.op1))) { this.op1 = Number(this.op1); }
         if ((this.op2type === "num") && (!isNaN(this.op2))) { this.op2 = Number(this.op2); }
-        if (this.op1 == "null") { this.op1 = null; }
-        if (this.op2 == "null") { this.op2 = null; }
+        //if (this.op1 == "null") { this.op1 = null; }
+        //if (this.op2 == "null") { this.op2 = null; }
         //try { this.op1 = JSON.parse(this.op1); }
         //catch(e) { this.op1 = this.op1; }
         //try { this.op2 = JSON.parse(this.op2); }

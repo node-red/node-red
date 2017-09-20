@@ -15,8 +15,10 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
 var helper = require("../../helper.js");
 var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
+var RED = require("../../../../red/red.js");
 
 describe('trigger node', function() {
 
@@ -284,6 +286,35 @@ describe('trigger node', function() {
         });
     });
 
+    it('should be able to return things from flow and global context variables', function(done) {
+        var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
+            function(arg1, arg2, arg3, arg4) { return arg1; }
+        );
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"flow", op2:"bar", op2type:"global", duration:"20", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "foo");
+                        c+=1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "bar");
+                        spy.restore();
+                        done();
+                    }
+                }
+                catch(err) { spy.restore(); done(err); }
+            });
+            n1.emit("input", {payload:null});
+        });
+
+    });
+
     it('should be able to not output anything on first trigger', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"nul", op1:"true",op2:"false",op2type:"val",duration:"30", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -325,7 +356,10 @@ describe('trigger node', function() {
     });
 
     it('should be able to extend the delay', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op1:"false",  op2:"true", duration:"100", wires:[["n2"]] },
+        var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
+            function(arg1, arg2, arg3, arg4) { return arg1; }
+        );
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"flow", op1:"foo",  op2:"bar", op2type:"global", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -334,17 +368,18 @@ describe('trigger node', function() {
             n2.on("input", function(msg) {
                 try {
                     if (c === 0) {
-                        msg.should.have.a.property("payload", "Hello");
+                        msg.should.have.a.property("payload", "foo");
                         c += 1;
                     }
                     else {
-                        msg.should.have.a.property("payload", "true");
+                        msg.should.have.a.property("payload", "bar");
                         //console.log(Date.now() - ss);
                         (Date.now() - ss).should.be.greaterThan(149);
+                        spy.restore();
                         done();
                     }
                 }
-                catch(err) { done(err); }
+                catch(err) { spy.restore(); done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
@@ -499,6 +534,30 @@ describe('trigger node', function() {
         });
     });
 
+    it('should handle string null as null on op2', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"null", op2:"null", duration:"40", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", null);
+                        c+=1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", null);
+                        done();
+                    }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"null"});
+        });
+    });
+
     it('should be able to set infinite timeout, and clear timeout', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:"0", extend: false, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -570,6 +629,7 @@ describe('trigger node', function() {
                 }
                 catch(err) { done(err); }
             });
+            n1.emit("input", {payload:"foo"});   // trigger
             n1.emit("input", {payload:"foo"});   // trigger
             setTimeout( function() {
                 n1.emit("input", {reset:true});   // reset
