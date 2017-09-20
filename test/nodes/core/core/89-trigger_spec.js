@@ -526,7 +526,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to set a repeat, and clear loop by reset', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", duration:-25, wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"boo", op1:"", op1type:"pay", duration:-25, wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -534,7 +534,11 @@ describe('trigger node', function() {
             var c = 0;
             n2.on("input", function(msg) {
                 c += 1;
-                msg.should.have.a.property("payload", "foo");
+                try {
+                    msg.should.have.property('payload','foo');
+                    msg.payload = "bar"; // try to provoke pass by reference error
+                }
+                catch(err) { done(err); }
             });
             n1.emit("input", {payload:"foo"});   // trigger
             setTimeout( function() {
