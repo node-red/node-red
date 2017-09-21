@@ -552,7 +552,7 @@ describe('exec node', function() {
             } else {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"mkdir /foo/bar/doo/dah", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                expected = 'No such file or directory';
+                expected = ' directory';
             }
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -561,7 +561,6 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n3.on("input", function(msg) {
                     try {
-                        console.log("MSG",msg);
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.indexOf(expected).should.not.be.equal(-1);
