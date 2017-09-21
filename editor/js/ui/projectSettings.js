@@ -44,7 +44,7 @@ RED.projects.settings = (function() {
         var tabContainer;
 
         var trayOptions = {
-            title: "NLS: Project Information",// RED._("menu.label.userSettings"),
+            title: "Project Information",// RED._("menu.label.userSettings"),, // TODO: nls
             buttons: [
                 {
                     id: "node-dialog-ok",
@@ -211,11 +211,11 @@ RED.projects.settings = (function() {
         if (summary) {
             container.text(summary).removeClass('node-info-node');
         } else {
-            container.text("NLS: No summary available").addClass('node-info-none');
+            container.text("No summary available").addClass('node-info-none');// TODO: nls
         }
     }
 
-    function createViewPane(activeProject) {
+    function createMainPane(activeProject) {
 
         var pane = $('<div id="project-settings-tab-main" class="project-settings-tab-pane node-help"></div>');
         $('<h1>').text(activeProject.name).appendTo(pane);
@@ -244,16 +244,203 @@ RED.projects.settings = (function() {
 
         return pane;
     }
+    function updateProjectDependencies(activeProject,depsList) {
+        depsList.editableList('empty');
+        depsList.editableList('addItem',{index:1, label:"Unknown Dependencies"}); // TODO: nls
+        depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
+
+        for (var m in modulesInUse) {
+            if (modulesInUse.hasOwnProperty(m)) {
+                depsList.editableList('addItem',{
+                    module: modulesInUse[m].module,
+                    version: modulesInUse[m].version,
+                    count: modulesInUse[m].count,
+                    known: activeProject.dependencies.hasOwnProperty(m)
+                });
+            }
+        }
+
+        if (activeProject.dependencies) {
+            for (var m in activeProject.dependencies) {
+                if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
+                    depsList.editableList('addItem',{
+                        module: m,
+                        version: activeProject.dependencies[m], //RED.nodes.registry.getModule(module).version,
+                        count: 0,
+                        known: true
+                    });
+                }
+            }
+        }
+    }
+
+    function editDependencies(activeProject,depsJSON,container,depsList) {
+        RED.editor.editJSON({
+            title: RED._('sidebar.project.editDependencies'),
+            value: depsJSON||JSON.stringify(activeProject.dependencies||{},"",4),
+            requireValid: true,
+            complete: function(v) {
+                try {
+                    var parsed = JSON.parse(v);
+                    var spinner = addSpinnerOverlay(container);
+
+                    var done = function(err,res) {
+                        if (err) {
+                            editDependencies(activeProject,v,container,depsList);
+                        }
+                        activeProject.dependencies = parsed;
+                        updateProjectDependencies(activeProject,depsList);
+                    }
+                    utils.sendRequest({
+                        url: "projects/"+activeProject.name,
+                        type: "PUT",
+                        responses: {
+                            0: function(error) {
+                                done(error,null);
+                            },
+                            200: function(data) {
+                                done(null,data);
+                            },
+                            400: {
+                                'unexpected_error': function(error) {
+                                    done(error,null);
+                                }
+                            },
+                        }
+                    },{dependencies:parsed}).always(function() {
+                        spinner.remove();
+                    });
+                } catch(err) {
+                    editDependencies(activeProject,v,container,depsList);
+                }
+            }
+        });
+    }
+
+    function createDependenciesPane(activeProject) {
+        var pane = $('<div id="project-settings-tab-deps" class="project-settings-tab-pane node-help"></div>');
+        $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">edit</button>')
+            .appendTo(pane)
+            .click(function(evt) {
+                evt.preventDefault();
+                editDependencies(activeProject,null,pane,depsList)
+            });
+        var depsList = $("<ol>",{style:"position: absolute;top: 60px;bottom: 20px;left: 20px;right: 20px;"}).appendTo(pane);
+        depsList.editableList({
+            addButton: false,
+            addItem: function(row,index,entry) {
+                // console.log(entry);
+                var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(row);
+                if (entry.label) {
+                    row.parent().addClass("palette-module-section");
+                    headerRow.text(entry.label);
+                    if (entry.index === 1) {
+                        var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
+                            evt.preventDefault();
+                            var deps = $.extend(true, {}, activeProject.dependencies);
+                            for (var m in modulesInUse) {
+                                if (modulesInUse.hasOwnProperty(m) && !modulesInUse[m].known) {
+                                    deps[m] = modulesInUse[m].version;
+                                }
+                            }
+                            editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                        });
+                    } else if (entry.index === 3) {
+                        var removeButton = $('<button class="editor-button editor-button-small palette-module-button">remove from project</button>').appendTo(headerRow).click(function(evt) {
+                            evt.preventDefault();
+                            var deps = $.extend(true, {}, activeProject.dependencies);
+                            for (var m in activeProject.dependencies) {
+                                if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
+                                    delete deps[m];
+                                }
+                            }
+                            editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                        });
+                    }
+                } else {
+                    headerRow.toggleClass("palette-module-unused",entry.count === 0);
+                    entry.element = headerRow;
+                    var titleRow = $('<div class="palette-module-meta palette-module-name"></div>').appendTo(headerRow);
+                    var icon = $('<i class="fa fa-'+(entry.known?'cube':'warning')+'"></i>').appendTo(titleRow);
+                    entry.icon = icon;
+                    $('<span>').html(entry.module).appendTo(titleRow);
+                    var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
+                    var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
+                    if (!entry.known) {
+                        headerRow.addClass("palette-module-unknown");
+                    } else if (entry.known && entry.count === 0) {
+
+                    }
+                }
+            },
+            sort: function(A,B) {
+                if (A.index && B.index) {
+                    return A.index - B.index;
+                }
+                var Acategory = A.index?A.index:(A.known?(A.count>0?0:4):2);
+                var Bcategory = B.index?B.index:(B.known?(B.count>0?0:4):2);
+                if (Acategory === Bcategory) {
+                    return A.module.localeCompare(B.module);
+                } else {
+                    return Acategory - Bcategory;
+                }
+            }
+        });
+
+        updateProjectDependencies(activeProject,depsList);
+        return pane;
+
+    }
 
     var utils;
+    var modulesInUse = {};
     function init(_utils) {
         utils = _utils;
         addPane({
             id:'main',
-            title: "NLS: Project",
-            get: createViewPane,
+            title: "Project", // TODO: nls
+            get: createMainPane,
             close: function() { }
+        });
+        addPane({
+            id:'deps',
+            title: "Dependencies", // TODO: nls
+            get: createDependenciesPane,
+            close: function() { }
+        });
+
+        RED.events.on('nodes:add', function(n) {
+            if (!/^subflow:/.test(n.type)) {
+                var module = RED.nodes.registry.getNodeSetForType(n.type).module;
+                if (module !== 'node-red') {
+                    if (!modulesInUse.hasOwnProperty(module)) {
+                        modulesInUse[module] = {
+                            module: module,
+                            version: RED.nodes.registry.getModule(module).version,
+                            count: 0,
+                            known: false
+                        }
+                    }
+                    modulesInUse[module].count++;
+                }
+            }
         })
+        RED.events.on('nodes:remove', function(n) {
+            if (!/^subflow:/.test(n.type)) {
+                var module = RED.nodes.registry.getNodeSetForType(n.type).module;
+                if (module !== 'node-red' && modulesInUse.hasOwnProperty(module)) {
+                    modulesInUse[module].count--;
+                    if (modulesInUse[module].count === 0) {
+                        if (!modulesInUse[module].known) {
+                            delete modulesInUse[module];
+                        }
+                    }
+                }
+            }
+        })
+
+
+
     }
     return {
         init: init,

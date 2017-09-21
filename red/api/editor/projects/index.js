@@ -85,9 +85,7 @@ module.exports = {
                        req.body.hasOwnProperty('dependencies')||
                        req.body.hasOwnProperty('summary')) {
                 runtime.storage.projects.updateProject(req.params.id, req.body).then(function() {
-                    setTimeout(function() {
-                        res.redirect(303,req.baseUrl + '/');
-                    },5000);
+                    res.redirect(303,req.baseUrl + '/');
                 }).otherwise(function(err) {
                     if (err.code) {
                         res.status(400).json({error:err.code, message: err.message});

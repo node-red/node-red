@@ -1981,7 +1981,19 @@ RED.editor = (function() {
         editStack.push({type:type});
         RED.view.state(RED.state.EDITING);
         var expressionEditor;
+        var changeTimer;
 
+        var checkValid = function() {
+            var v = expressionEditor.getValue();
+            try {
+                JSON.parse(v);
+                $("#node-dialog-ok").removeClass('disabled');
+                return true;
+            } catch(err) {
+                $("#node-dialog-ok").addClass('disabled');
+                return false;
+            }
+        }
         var trayOptions = {
             title: options.title || getEditStackTitle(),
             buttons: [
@@ -1997,6 +2009,9 @@ RED.editor = (function() {
                     text: RED._("common.label.done"),
                     class: "primary",
                     click: function() {
+                        if (options.requireValid && !checkValid()) {
+                            return;
+                        }
                         onComplete(expressionEditor.getValue());
                         RED.tray.close();
                     }
@@ -2024,6 +2039,13 @@ RED.editor = (function() {
                     mode:"ace/mode/json"
                 });
                 expressionEditor.getSession().setValue(value||"",-1);
+                if (options.requireValid) {
+                    expressionEditor.getSession().on('change', function() {
+                        clearTimeout(changeTimer);
+                        changeTimer = setTimeout(checkValid,200);
+                    });
+                    checkValid();
+                }
                 $("#node-input-json-reformat").click(function(evt) {
                     evt.preventDefault();
                     var v = expressionEditor.getValue()||"";

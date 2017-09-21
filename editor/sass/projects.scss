@@ -200,14 +200,11 @@
     }
 }
 
-.sidebar-projects-dependencies {
-    position: relative;
-    height: 100%;
+#project-settings-tab-deps {
     .red-ui-editableList-container {
         padding: 0;
     }
     .red-ui-editableList-border {
-        border: none;
         border-radius: 0;
     }
     .red-ui-editableList-item-content {
@@ -240,6 +237,6 @@
     left:0;
     right:0;
     bottom:0;
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: 8px 20px 20px;
 }
