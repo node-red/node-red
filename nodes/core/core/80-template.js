@@ -22,9 +22,10 @@ module.exports = function(RED) {
      * Custom Mustache Context capable to resolve message property and node
      * flow and global context
      */
-    function NodeContext(msg, nodeContext,parent) {
+    function NodeContext(msg, nodeContext, parent, escapeStrings) {
         this.msgContext = new mustache.Context(msg,parent);
         this.nodeContext = nodeContext;
+        this.escapeStrings = escapeStrings;
     }
 
     NodeContext.prototype = new mustache.Context();
@@ -34,6 +35,14 @@ module.exports = function(RED) {
         try {
             var value = this.msgContext.lookup(name);
             if (value !== undefined) {
+                if (this.escapeStrings && typeof value === "string") {
+                    value = value.replace(/\\/g, "\\\\");
+                    value = value.replace(/\n/g, "\\n");
+                    value = value.replace(/\t/g, "\\t");
+                    value = value.replace(/\r/g, "\\r");
+                    value = value.replace(/\f/g, "\\f");
+                    value = value.replace(/[\b]/g, "\\b");
+                }
                 return value;
             }
 
@@ -74,14 +83,9 @@ module.exports = function(RED) {
                 var value;
                 if (node.syntax === "mustache") {
                     if (node.outputFormat === "json") {
-                        value = mustache.render(node.template, new NodeContext(JSON.parse(JSON.stringify(msg), function (key, value) {
-                            if (typeof value === "string") {
-                                value = value.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r").replace(/\f/g, "\\f").replace(/[\b]/g, "\\b");
-                            }
-                            return value;
-                        }), node.context()));
+                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, true));
                     } else {
-                        value = mustache.render(node.template, new NodeContext(msg, node.context()));
+                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, false));
                     }
                 } else {
                     value = node.template;

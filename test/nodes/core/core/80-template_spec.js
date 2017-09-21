@@ -88,7 +88,7 @@ describe('template node', function() {
         });
     });
 
-    it('should handle escape charactors in Mustache format and JSON output mode', function(done) {
+    it('should handle escape characters in Mustache format and JSON output mode', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", syntax:"mustache", template:"{\"data\":\"{{payload}}\"}", output:"json", wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
