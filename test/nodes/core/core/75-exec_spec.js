@@ -561,6 +561,7 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n3.on("input", function(msg) {
                     try {
+                        console.log("MSG",msg);
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.indexOf(expected).should.not.be.equal(-1);
