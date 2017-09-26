@@ -273,61 +273,6 @@ RED.projects = (function() {
                     ]
                 }
             })(),
-            'credentialSecret': {
-                content: function() {
-                    // Provide new secret or reset credentials.
-                    var container = $('<div class="projects-dialog-screen-secret"></div>');
-                    var row = $('<div class="form-row"></div>').appendTo(container);
-                    // $('<label for=""><input type="radio" name="projects-dialog-credential-secret" value="set"> Update credential key</label>').appendTo(row);
-                    $('<label for="projects-dialog-secret">Update credential key</label>').appendTo(row);
-                    var projectSecret = $('<input id="projects-dialog-secret" type="password"></input>').appendTo(row);
-
-                    return container;
-                },
-                buttons: [
-                    {
-                        // id: "clipboard-dialog-cancel",
-                        text:  RED._("common.label.cancel"),
-                        click: function() {
-                            dialog.dialog( "close" );
-                        }
-                    },
-                    {
-                        // id: "clipboard-dialog-cancel",
-                        text: "Update",
-                        click: function() {
-                            var done = function(err,data) {
-                                if (err) {
-                                    console.log(err);
-                                }
-                                dialog.dialog( "close" );
-                            }
-                            RED.deploy.setDeployInflight(true);
-                            sendRequest({
-                                url: "projects/"+activeProject.name,
-                                type: "PUT",
-                                responses: {
-                                    200: function(data) {
-                                        done(null,data);
-                                    },
-                                    400: {
-                                        'credentials_load_failed': function(error) {
-                                            done(error,null);
-                                        },
-                                        'unexpected_error': function(error) {
-                                            done(error,null);
-                                        }
-                                    },
-                                }
-                            },{credentialSecret:$('#projects-dialog-secret').val()}).always(function() {
-                                RED.deploy.setDeployInflight(false);
-                            })
-
-
-                        }
-                    }
-                ]
-            },
             'open': {
                 content: function() {
                     return createProjectList({
@@ -371,7 +316,7 @@ RED.projects = (function() {
 
     function switchProject(name,done) {
         RED.deploy.setDeployInflight(true);
-        modulesInUse = {};
+        RED.projects.settings.switchProject(name);
         sendRequest({
             url: "projects/"+name,
             type: "PUT",
@@ -497,7 +442,7 @@ RED.projects = (function() {
             console.log(err);
         }).always(function() {
             var delta = Date.now() - start;
-            delta = Math.max(0,1000-delta);
+            delta = Math.max(0,500-delta);
             setTimeout(function() {
                 // dialogBody.show();
                 $(".projects-dialog-spinner").hide();
@@ -967,7 +912,6 @@ function refresh() {
                 // updateProjectSummary();
                 // updateProjectDescription();
                 // updateProjectDependencies();
-                console.log("project triggering a info refresh for ",activeProject)
                 RED.sidebar.info.refresh();
             });
         }
@@ -987,19 +931,13 @@ function refresh() {
         selectProject: function() {
             show('open')
         },
-        showCredentialsPrompt: function() {
-            show('credentialSecret');
+        showCredentialsPrompt: function() { //TODO: rename this function
+            RED.projects.settings.show('settings');
         },
         // showSidebar: showSidebar,
         refresh: refresh,
         editProject: function() {
             RED.projects.settings.show();
-            // RED.editor.editProject({
-            //     project: activeProject,
-            //     complete: function(result) {
-            //         console.log(result);
-            //     }
-            // });
         },
         getActiveProject: function() {
             return activeProject;

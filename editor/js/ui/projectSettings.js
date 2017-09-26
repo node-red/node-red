@@ -89,7 +89,7 @@ RED.projects.settings = (function() {
                     pane.get(project).hide().appendTo(tabContents);
                 });
                 settingsContent.i18n();
-                settingsTabs.activateTab("project-settings-tab-"+(initialTab||'view'))
+                settingsTabs.activateTab("project-settings-tab-"+(initialTab||'main'))
                 $("#sidebar-shade").show();
             },
             close: function() {
@@ -246,8 +246,10 @@ RED.projects.settings = (function() {
     }
     function updateProjectDependencies(activeProject,depsList) {
         depsList.editableList('empty');
-        depsList.editableList('addItem',{index:1, label:"Unknown Dependencies"}); // TODO: nls
-        depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
+
+        var totalCount = 0;
+        var unknownCount = 0;
+        var unusedCount = 0;
 
         for (var m in modulesInUse) {
             if (modulesInUse.hasOwnProperty(m)) {
@@ -257,6 +259,13 @@ RED.projects.settings = (function() {
                     count: modulesInUse[m].count,
                     known: activeProject.dependencies.hasOwnProperty(m)
                 });
+                totalCount++;
+                if (modulesInUse[m].count === 0) {
+                    unusedCount++;
+                }
+                if (!activeProject.dependencies.hasOwnProperty(m)) {
+                    unknownCount++;
+                }
             }
         }
 
@@ -269,15 +278,31 @@ RED.projects.settings = (function() {
                         count: 0,
                         known: true
                     });
+                    totalCount++;
+                    unusedCount++;
                 }
             }
         }
+        if (unknownCount > 0) {
+            depsList.editableList('addItem',{index:1, label:"Unknown Dependencies"}); // TODO: nls
+        }
+        if (unusedCount > 0) {
+            depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
+        }
+        if (totalCount === 0) {
+            depsList.editableList('addItem',{index:0, label:"None"}); // TODO: nls
+        }
+
     }
 
     function editDependencies(activeProject,depsJSON,container,depsList) {
+        var json = depsJSON||JSON.stringify(activeProject.dependencies||{},"",4);
+        if (json === "{}") {
+            json = "{\n\n}";
+        }
         RED.editor.editJSON({
             title: RED._('sidebar.project.editDependencies'),
-            value: depsJSON||JSON.stringify(activeProject.dependencies||{},"",4),
+            value: json,
             requireValid: true,
             complete: function(v) {
                 try {
@@ -286,7 +311,7 @@ RED.projects.settings = (function() {
 
                     var done = function(err,res) {
                         if (err) {
-                            editDependencies(activeProject,v,container,depsList);
+                            return editDependencies(activeProject,v,container,depsList);
                         }
                         activeProject.dependencies = parsed;
                         updateProjectDependencies(activeProject,depsList);
@@ -332,7 +357,11 @@ RED.projects.settings = (function() {
                 // console.log(entry);
                 var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(row);
                 if (entry.label) {
-                    row.parent().addClass("palette-module-section");
+                    if (entry.index === 0) {
+                        headerRow.addClass("red-ui-search-empty")
+                    } else {
+                        row.parent().addClass("palette-module-section");
+                    }
                     headerRow.text(entry.label);
                     if (entry.index === 1) {
                         var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
@@ -358,6 +387,7 @@ RED.projects.settings = (function() {
                         });
                     }
                 } else {
+                    headerRow.addClass("palette-module-header");
                     headerRow.toggleClass("palette-module-unused",entry.count === 0);
                     entry.element = headerRow;
                     var titleRow = $('<div class="palette-module-meta palette-module-name"></div>').appendTo(headerRow);
@@ -392,6 +422,216 @@ RED.projects.settings = (function() {
 
     }
 
+    function createSettingsPane(activeProject) {
+        var pane = $('<div id="project-settings-tab-settings" class="project-settings-tab-pane node-help"></div>');
+        $('<h3></h3>').text("Credentials").appendTo(pane);
+        var row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        if (activeProject.settings.credentialsEncrypted) {
+            $('<span style="margin-right: 20px;"><i class="fa fa-lock"></i> Credentials are encrypted</span>').appendTo(row);
+        } else {
+            $('<span style="margin-right: 20px;"><i class="fa fa-unlock"></i> Credentials are not encrypted</span>').appendTo(row);
+        }
+        var resetButton;
+        var action;
+        var changeButton = $('<button id="" class="editor-button"></button>')
+            .text(activeProject.settings.credentialsEncrypted?"Change key":"Enable encryption")
+            .appendTo(row)
+            .click(function(evt) {
+                evt.preventDefault();
+                newKey.val("");
+                if (currentKey) {
+                    currentKey.val("");
+                    currentKey.removeClass("input-error");
+                }
+                checkInputs();
+                saveButton.text("Save");
+
+                $(".project-settings-credentials-row").show();
+                $(".project-settings-credentials-current-row").show();
+                $(this).prop('disabled',true);
+                if (resetButton) {
+                    resetButton.prop('disabled',true);
+                }
+                action = 'change';
+            });
+        if (activeProject.settings.credentialsEncrypted) {
+            resetButton = $('<button id="" style="margin-left: 10px;" class="editor-button"></button>')
+                .text("Reset key")
+                .appendTo(row)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    newKey.val("");
+                    if (currentKey) {
+                        currentKey.val("");
+                        currentKey.removeClass("input-error");
+                    }
+                    checkInputs();
+                    saveButton.text("Reset key");
+
+                    $(".project-settings-credentials-row").show();
+                    $(".project-settings-credentials-reset-row").show();
+
+                    $(this).prop('disabled',true);
+                    changeButton.prop('disabled',true);
+                    action = 'reset';
+                });
+        }
+
+        if (activeProject.settings.credentialsInvalid) {
+            row = $('<div class="user-settings-row"></div>').appendTo(pane);
+            $('<div class="form-tips form-warning"><i class="fa fa-warning"></i> The current key is not valid. Set the correct key or reset credentials.</div>').appendTo(row);
+        }
+
+        var credentialsContainer = $('<div>',{style:"position:relative"}).appendTo(pane);
+        var currentKey;
+        var newKey;
+
+        var checkInputs = function() {
+            var valid = true;
+            if (newKey.val().length === 0) {
+                valid = false;
+            }
+            if (currentKey && currentKey.val() === 0) {
+                valid = false;
+            }
+            saveButton.toggleClass('disabled',!valid);
+        }
+
+        if (activeProject.settings.credentialsEncrypted) {
+            if  (!activeProject.settings.credentialsInvalid) {
+                row = $('<div class="user-settings-row project-settings-credentials-current-row hide"></div>').appendTo(credentialsContainer);
+                $('<label for="">Current key</label>').appendTo(row);
+                currentKey = $('<input type="password">').appendTo(row);
+                currentKey.on("change keyup paste",function() {
+                    if (popover) {
+                        popover.close();
+                        popover = null;
+                        $(this).removeClass('input-error');
+                    }
+                    checkInputs();
+                });
+            }
+            row = $('<div class="user-settings-row project-settings-credentials-reset-row hide"></div>').appendTo(credentialsContainer);
+            $('<div class="form-tips form-warning"><i class="fa fa-warning"></i> Resetting the key will delete all existing credentials</div>').appendTo(row);
+
+        }
+        // $('<label for="" style="margin-left:20px; width: auto;"><input type="radio" name="project-settings-credentials-current" value="lost"> Forgotten key?</label>').appendTo(row);
+
+        row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
+        $('<label for=""></label>').text((activeProject.settings.credentialsEncrypted&& !activeProject.settings.credentialsInvalid)?"New key":"Encryption key").appendTo(row);
+        newKey = $('<input type="password">').appendTo(row).on("change keyup paste",checkInputs);
+
+        row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
+        var bg = $('<div class="button-group" style="text-align: right; margin-right:20px;"></div>').appendTo(row);
+        $('<button class="editor-button">Cancel</button>')
+            .appendTo(bg)
+            .click(function(evt) {
+                evt.preventDefault();
+                if (popover) {
+                    popover.close();
+                    popover = null;
+                }
+                changeButton.prop('disabled',false);
+                if (resetButton) {
+                    resetButton.prop('disabled',false);
+                }
+                $(".project-settings-credentials-row").hide();
+                $(".project-settings-credentials-current-row").hide();
+                $(".project-settings-credentials-reset-row").hide();
+            });
+        var saveButton = $('<button class="editor-button primary disabled"></button>')
+            .text("Save")
+            .appendTo(bg)
+            .click(function(evt) {
+                evt.preventDefault();
+                if ($(this).hasClass('disabled')) {
+                    return;
+                }
+                var spinner = addSpinnerOverlay(credentialsContainer);
+                var payload = {
+                    credentialSecret: newKey.val()
+                };
+                if (activeProject.settings.credentialsInvalid) {
+                    RED.deploy.setDeployInflight(true);
+                }
+
+                if (activeProject.settings.credentialsEncrypted) {
+                    if (action === 'reset') {
+                        payload.resetCredentialSecret = true;
+                    } else if (!activeProject.settings.credentialsInvalid) {
+                        payload.currentCredentialSecret = currentKey.val();
+                    }
+                }
+                var done = function(err,res) {
+                    spinner.remove();
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                }
+                utils.sendRequest({
+                    url: "projects/"+activeProject.name,
+                    type: "PUT",
+                    responses: {
+                        0: function(error) {
+                            done(error,null);
+                        },
+                        200: function(data) {
+                            if (popover) {
+                                popover.close();
+                                popover = null;
+                            }
+                            changeButton.prop('disabled',false);
+                            if (resetButton) {
+                                resetButton.prop('disabled',false);
+                            }
+                            $(".project-settings-credentials-row").hide();
+                            $(".project-settings-credentials-current-row").hide();
+                            $(".project-settings-credentials-reset-row").hide();
+                        },
+                        400: {
+                            'unexpected_error': function(error) {
+                                done(error,null);
+                            },
+                            'missing_current_credential_key':  function(error) {
+                                currentKey.addClass("input-error");
+                                popover = RED.popover.create({
+                                    target: currentKey,
+                                    direction: 'right',
+                                    size: 'small',
+                                    content: "Incorrect key"
+                                }).open();
+                                done();
+                            }
+                        },
+                    }
+                },payload).always(function() {
+                    if (activeProject.settings.credentialsInvalid) {
+                        RED.deploy.setDeployInflight(false);
+                    }
+                });
+            });
+
+
+
+        // $('<h3></h3>').text("Credentials").appendTo(pane);
+        // row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        // $('<span style="margin-right: 20px;"><i class="fa fa-unlock"></i> Credentials are not encrypted</span>').appendTo(row);
+        // $('<button id="" class="editor-button">Set key</button>').appendTo(row);
+
+
+        // $('<h3></h3>').text("Repository").appendTo(pane);
+        // row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        // var input;
+        // $('<label for="">'+'Remote'+'</label>').appendTo(row);
+        // $('<input id="" type="text">').appendTo(row);
+
+
+        return pane;
+    }
+
+    var popover;
+
     var utils;
     var modulesInUse = {};
     function init(_utils) {
@@ -407,6 +647,17 @@ RED.projects.settings = (function() {
             title: "Dependencies", // TODO: nls
             get: createDependenciesPane,
             close: function() { }
+        });
+        addPane({
+            id:'settings',
+            title: "Settings", // TODO: nls
+            get: createSettingsPane,
+            close: function() {
+                if (popover) {
+                    popover.close();
+                    popover = null;
+                }
+            }
         });
 
         RED.events.on('nodes:add', function(n) {
@@ -444,6 +695,10 @@ RED.projects.settings = (function() {
     }
     return {
         init: init,
-        show: show
+        show: show,
+        switchProject: function(name) {
+            // TODO: not ideal way to trigger this; should there be an editor-wide event?
+            modulesInUse = {};
+        }
     };
 })();

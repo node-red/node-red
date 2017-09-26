@@ -109,7 +109,6 @@ RED.sidebar.info = (function() {
         return el;
     }
     function refresh(node) {
-        console.log('sidebar.info.refresh');
         if (node === undefined) {
             refreshSelection();
             return;

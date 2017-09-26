@@ -84,16 +84,16 @@ var storageModuleInterface = {
 
             return credentialSavePromise.then(function() {
                 return storageModule.saveFlows(flows).then(function() {
-                    return crypto.createHash('md5').update(JSON.stringify(config)).digest("hex");
+                    return crypto.createHash('md5').update(JSON.stringify(config.flows)).digest("hex");
                 })
             });
         },
         // getCredentials: function() {
         //     return storageModule.getCredentials();
         // },
-        // saveCredentials: function(credentials) {
-        //     return storageModule.saveCredentials(credentials);
-        // },
+        saveCredentials: function(credentials) {
+            return storageModule.saveCredentials(credentials);
+        },
         getSettings: function() {
             if (settingsAvailable) {
                 return storageModule.getSettings();

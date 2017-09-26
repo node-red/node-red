@@ -500,8 +500,6 @@ RED.editor = (function() {
                 label = RED._("markdownEditor.title");
             } else if (node.type === '_buffer') {
                 label = RED._("bufferEditor.title");
-            } else if (node.type === '_project') {
-                label = "NLS: Edit project settings";
             } else if (node.type === 'subflow') {
                 label = RED._("subflow.editSubflow",{name:node.name})
             } else if (node.type.indexOf("subflow:")===0) {
@@ -2133,76 +2131,6 @@ RED.editor = (function() {
         RED.tray.show(trayOptions);
     }
 
-    function editProject(options) {
-        var project = options.project;
-        var onComplete = options.complete;
-        var type = "_project"
-        editStack.push({type:type});
-        RED.view.state(RED.state.EDITING);
-
-        var trayOptions = {
-            title: options.title || getEditStackTitle(),
-            buttons: [
-                {
-                    id: "node-dialog-cancel",
-                    text: RED._("common.label.cancel"),
-                    click: function() {
-                        RED.tray.close();
-                    }
-                },
-                {
-                    id: "node-dialog-ok",
-                    text: RED._("common.label.done"),
-                    class: "primary",
-                    click: function() {
-                        onComplete("Whheeeeee");
-                        RED.tray.close();
-                    }
-                }
-            ],
-            resize: function(dimensions) {
-                // editTrayWidthCache[type] = dimensions.width;
-                //
-                // var rows = $("#dialog-form>div:not(.node-text-editor-row)");
-                // var editorRow = $("#dialog-form>div.node-text-editor-row");
-                // var height = $("#dialog-form").height();
-                // for (var i=0;i<rows.size();i++) {
-                //     height -= $(rows[i]).outerHeight(true);
-                // }
-                // height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
-                // $(".node-text-editor").css("height",height+"px");
-                // expressionEditor.resize();
-            },
-            open: function(tray) {
-                var trayBody = tray.find('.editor-tray-body');
-                trayBody.addClass("projects-edit-form");
-                var dialogForm = buildEditForm(trayBody,'dialog-form',type,'editor');
-                project._def = projectNodeDefinition;
-                prepareEditDialog(project,project._def,"node-input-project");
-                dialogForm.i18n();
-            },
-            close: function() {
-                editStack.pop();
-            },
-            show: function() {}
-        }
-        if (editTrayWidthCache.hasOwnProperty(type)) {
-            trayOptions.width = editTrayWidthCache[type];
-        }
-        RED.tray.show(trayOptions);
-    }
-
-    var projectNodeDefinition = {
-        defaults:{
-            name: {default:""},
-            summary: {default:""},
-            key: {default:""}
-        },
-        oneditprepare: function() {
-
-        }
-    }
-
     function stringToUTF8Array(str) {
         var data = [];
         var i=0, l = str.length;
@@ -2409,7 +2337,6 @@ RED.editor = (function() {
         editJSON: editJSON,
         editMarkdown: editMarkdown,
         editBuffer: editBuffer,
-        editProject: editProject,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 

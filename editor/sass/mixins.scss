@@ -48,26 +48,26 @@
     text-decoration: none;
     cursor:pointer;
 
-    &.disabled {
+    &.disabled, &:disabled  {
         cursor: default;
         color: $workspace-button-color-disabled !important;
     }
     &:hover, &:focus {
         text-decoration: none;
     }
-    &:not(.disabled):hover {
+    &:not(.disabled):not(:disabled):hover, {
         color: $workspace-button-color-hover !important;
         background: $workspace-button-background-hover;
     }
-    &:not(.disabled):focus {
+    &:not(.disabled):not(:disabled):focus {
         color: $workspace-button-color-focus !important;
     }
-    &:not(.disabled):active {
+    &:not(.disabled):not(:disabled):active {
         color: $workspace-button-color-active !important;
         background: $workspace-button-background-active;
         text-decoration: none;
     }
-    &.selected:not(.disabled) {
+    &.selected:not(.disabled):not(:disabled) {
         color: $workspace-button-color-selected !important;
         background: $workspace-button-background-active;
     }

@@ -131,10 +131,20 @@ function getProject(project) {
             projectSettings = globalProjectSettings.projects[project]||{};
         }
 
-        // console.log(projectSettings);
         var projectData = {
-            name: project
+            name: project,
+            settings: {}
         };
+
+        if (typeof projectSettings.credentialSecret === "string") {
+            projectData.settings.credentialsEncrypted = true;
+        } else {
+            projectData.settings.credentialsEncrypted = false;
+        }
+        if (projectSettings.credentialSecretInvalid) {
+            projectData.settings.credentialsInvalid = true;
+        }
+
         var promises = [];
         checkProjectFiles(project).then(function(missingFiles) {
             if (missingFiles.length > 0) {
@@ -158,17 +168,6 @@ function getProject(project) {
             when.settle(promises).then(function() {
                 resolve(projectData);
             })
-            // if (missingFiles.indexOf('flow_cred.json') === -1) {
-            //     promises.push(nodeFn.call(fs.readFile,fspath.join(projectPath,"flow_cred.json"),"utf8").then(function(creds) {
-            //         var credentials = util.parseJSON(creds);
-            //         if (credentials.hasOwnProperty('$')) {
-            //             // try {
-            //             //     decryptCredentials
-            //             // }
-            //         }
-            //     }));
-            // }
-
         });
 
         // fs.stat(projectPath,function(err,stat) {
@@ -185,22 +184,45 @@ function getProject(project) {
     });
 }
 
-var encryptionAlgorithm = "aes-256-ctr";
-function decryptCredentials(key,credentials) {
-    var creds = credentials["$"];
-    var initVector = new Buffer(creds.substring(0, 32),'hex');
-    creds = creds.substring(32);
-    var decipher = crypto.createDecipheriv(encryptionAlgorithm, key, initVector);
-    var decrypted = decipher.update(creds, 'base64', 'utf8') + decipher.final('utf8');
-    return JSON.parse(decrypted);
-}
+function setCredentialSecret(project,data) { //existingSecret,secret) {
+    var existingSecret = data.currentCredentialSecret;
+    var isReset = data.resetCredentialSecret;
+    var secret = data.credentialSecret;
+    var wasInvalid = false;
 
-function setCredentialSecret(project,secret) {
     var globalProjectSettings = settings.get("projects");
     globalProjectSettings.projects = globalProjectSettings.projects || {};
-    globalProjectSettings.projects[project] = globalProjectSettings.projects[project] || {};
+    if (globalProjectSettings.projects.hasOwnProperty(project)) {
+        if (!isReset &&
+            globalProjectSettings.projects[project].credentialSecret &&
+            !globalProjectSettings.projects[project].credentialSecretInvalid &&
+            globalProjectSettings.projects[project].credentialSecret !== existingSecret) {
+                var e = new Error("Cannot change credentialSecret without current key");
+                e.code = "missing_current_credential_key";
+                throw e;
+        }
+    } else {
+        globalProjectSettings.projects[project] = {};
+    }
+
     globalProjectSettings.projects[project].credentialSecret = secret;
-    return settings.set("projects",globalProjectSettings);
+    wasInvalid = globalProjectSettings.projects[project].credentialSecretInvalid;
+    delete globalProjectSettings.projects[project].credentialSecretInvalid;
+
+    return settings.set("projects",globalProjectSettings).then(function() {
+        if (isReset || !wasInvalid) {
+            if (isReset) {
+                runtime.nodes.clearCredentials();
+            }
+            runtime.nodes.setCredentialSecret(secret);
+            return runtime.nodes.exportCredentials()
+                .then(runtime.storage.saveCredentials)
+                .then(function() {
+                    return wasInvalid;
+                });
+        }
+        return wasInvalid;
+    });
 }
 
 function createProject(metadata) {
@@ -218,7 +240,7 @@ function createProject(metadata) {
             }
             createProjectDirectory(project).then(function() {
                 if (metadata.credentialSecret) {
-                    return setCredentialSecret(project,metadata.credentialSecret);
+                    return setCredentialSecret(project,{credentialSecret: credentialSecret});
                 }
                 return when.resolve();
             }).then(function() {
@@ -422,8 +444,10 @@ function updateProject(project,data) {
     return checkProjectExists(project).then(function() {
         if (data.credentialSecret) {
             // TODO: this path assumes we aren't trying to migrate the secret
-            return setCredentialSecret(project,data.credentialSecret).then(function() {
-                return reloadActiveProject(project);
+            return setCredentialSecret(project,data).then(function(wasInvalid) {
+                if (wasInvalid) {
+                    return reloadActiveProject(project);
+                }
             })
         } else if (data.hasOwnProperty('description')) {
             var projectPath = fspath.join(projectsDir,project);

@@ -38,6 +38,28 @@ function decryptCredentials(key,credentials) {
     return JSON.parse(decrypted);
 }
 
+function markProjectSecretValid(project,valid) {
+    try {
+        var projects = settings.get('projects');
+        if (projects) {
+            if (valid) {
+                if (!projects.projects[project].credentialSecretInvalid) {
+                    return when.resolve();
+                } else {
+                    delete projects.projects[project].credentialSecretInvalid;
+                }
+            } else {
+                projects.projects[project].credentialSecretInvalid = true;
+            }
+            return settings.set('projects',projects);
+        } else {
+            return when.resolve();
+        }
+    } catch(err) {
+        return when.resolve();
+    }
+}
+
 var api = module.exports = {
     init: function(runtime) {
         log = runtime.log;
@@ -75,16 +97,17 @@ var api = module.exports = {
             }
 
             var projectKey = false;
+            var activeProject;
             try {
                 var projects = settings.get('projects');
                 if (projects && projects.activeProject) {
+                    activeProject = projects.activeProject;
                     projectKey = projects.projects[projects.activeProject].credentialSecret;
                 }
             } catch(err) {
             }
             if (projectKey) {
                 log.debug("red/runtime/nodes/credentials.load : using active project key - ignoring user provided key");
-                console.log(projectKey);
                 userKey = projectKey;
             }
 
@@ -171,20 +194,31 @@ var api = module.exports = {
             encryptedCredentials = credentials;
         }
         return setupEncryptionPromise.then(function() {
+            var clearInvalidFlag = false;
             if (credentials.hasOwnProperty("$")) {
                 // These are encrypted credentials
                 try {
                     credentialCache = decryptCredentials(encryptionKey,credentials)
+                    clearInvalidFlag = true;
                 } catch(err) {
                     credentialCache = {};
                     dirty = true;
                     log.warn(log._("nodes.credentials.error",{message:err.toString()}))
                     var error = new Error("Failed to decrypt credentials");
                     error.code = "credentials_load_failed";
+                    if (projectKey) {
+                        // This is a project with a bad key. Mark it as invalid
+                        return markProjectSecretValid(activeProject,false).then(function() {
+                            return when.reject(error);
+                        })
+                    }
                     return when.reject(error);
                 }
             } else {
                 credentialCache = credentials;
+            }
+            if (clearInvalidFlag) {
+                return markProjectSecretValid(activeProject,true)
             }
         });
     },
@@ -222,6 +256,10 @@ var api = module.exports = {
         dirty = true;
     },
 
+    clear: function() {
+        credentialCache = {};
+        dirty = true;
+    },
     /**
      * Deletes any credentials for nodes that no longer exist
      * @param config a flow config
@@ -321,9 +359,14 @@ var api = module.exports = {
     dirty: function() {
         return dirty;
     },
-
+    setKey: function(key) {
+        encryptionKey = crypto.createHash('sha256').update(key).digest();
+        encryptionEnabled = true;
+        dirty = true;
+    },
     export: function() {
         var result = credentialCache;
+
         if (encryptionEnabled) {
             if (dirty) {
                 try {

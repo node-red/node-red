@@ -231,7 +231,6 @@ function handleStatus(node,statusMessage) {
 
 
 function start(type,diff,muteLog) {
-    console.log("START----")
     //dumpActiveNodes();
     type = type||"full";
     started = true;

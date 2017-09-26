@@ -234,21 +234,6 @@
         </div>
     </div>
 </script>
-<script type="text/x-red" data-template-name="_project">
-    <div class="form-row">
-        <label>Project name</label>
-        <input type="text" id="node-input-project-name">
-    </div>
-    <div class="form-row">
-        <label>Summary</label>
-        <input type="text" id="node-input-project-summary">
-    </div>
-    <div class="form-row">
-        <label>Credential key</label>
-        <input type="password" id="node-input-project-key">
-    </div>
-</script>
-
 <script src="vendor/vendor.js"></script>
 <script src="vendor/jsonata/jsonata.min.js"></script>
 <script src="vendor/ace/ace.js"></script>
