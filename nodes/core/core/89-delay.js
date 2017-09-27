@@ -105,8 +105,11 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "delayv") {
             node.on("input", function(msg) {
-                var delayvar = Number(msg.delay || node.timeout);
-                if (delayvar < 0) { delayvar = node.timeout; }
+                var delayvar = Number(node.timeout);
+                if (msg.hasOwnProperty("delay") && !isNaN(parseFloat(msg.delay))) {
+                    delayvar = parseFloat(msg.delay);
+                }
+                if (delayvar < 0) { delayvar = 0; }
                 var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
                     if (node.idList.length === 0) { node.status({}); }

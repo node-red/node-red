@@ -404,8 +404,12 @@ describe('delay Node', function() {
         variableDelayTest("450", "550", "milliseconds", null, done);
     });
 
-    it('variable delay is the default if msg.delay is negative', function(done) {
-        variableDelayTest("450", "550", "milliseconds", -250, done);
+    it('variable delay is zero if msg.delay is zero', function(done) {
+        variableDelayTest("0", "20", "milliseconds", 0, done);
+    });
+
+    it('variable delay is zero if msg.delay is negative', function(done) {
+        variableDelayTest("0", "20", "milliseconds", -250, done);
     });
 
     /**
