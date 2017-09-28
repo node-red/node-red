@@ -201,7 +201,7 @@ module.exports = function(RED) {
                         } else if (rule.t === 'set') {
                             target.set(property,value);
                         } else if (rule.t === 'change') {
-                            current = target.get(msg,property);
+                            current = target.get(property);
                             if (typeof current === 'string') {
                                 if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
                                     // str representation of exact from number/boolean
