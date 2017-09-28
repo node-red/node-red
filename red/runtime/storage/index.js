@@ -66,7 +66,7 @@ var storageModuleInterface = {
                         flows: flows,
                         credentials: creds
                     };
-                    result.rev = crypto.createHash('md5').update(JSON.stringify(result)).digest("hex");
+                    result.rev = crypto.createHash('md5').update(JSON.stringify(result.flows)).digest("hex");
                     return result;
                 })
             });
