@@ -20,7 +20,7 @@ var util = require("../util");
 
 function createContext(id,seed) {
     var data = seed || {};
-    var obj = seed || {};
+    var obj = {};
     obj.get = function get(key) {
         return util.getMessageProperty(data,key);
     };
