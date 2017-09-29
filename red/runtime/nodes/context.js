@@ -20,7 +20,7 @@ var util = require("../util");
 
 function createContext(id,seed) {
     var data = seed || {};
-    var obj = {};
+    var obj = seed || {};
     obj.get = function get(key) {
         return util.getMessageProperty(data,key);
     };
@@ -28,7 +28,14 @@ function createContext(id,seed) {
         util.setMessageProperty(data,key,value);
     }
     obj.keys = function() {
-        return Object.keys(data);
+        var keysData = Object.keys(data);
+        if (seed == null) {
+            return keysData;
+        } else {
+            return keysData.filter(function (key) {
+                return key !== "set" && key !== "get" && key !== "keys";
+            });
+        }
     }
     return obj;
 }
