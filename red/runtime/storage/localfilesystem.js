@@ -45,62 +45,64 @@ function getFileMeta(root,path) {
     var meta = {};
     var read = 0;
     var length = 10;
-    var remaining = "";
+    var remaining = Buffer(0);
     var buffer = Buffer(length);
+    var idx = -1;
     while(read < size) {
         read+=fs.readSync(fd,buffer,0,length);
-        var data = remaining+buffer.toString();
-        var parts = data.split("\n");
-        remaining = parts.splice(-1);
-        for (var i=0;i<parts.length;i+=1) {
-            var match = /^\/\/ (\w+): (.*)/.exec(parts[i]);
+        var data = Buffer.concat([remaining,buffer]);
+        while((idx = data.indexOf("\n")) != -1){
+            var part = data.slice(0,idx+1);
+            var match = /^\/\/ (\w+): (.*)/.exec(part.toString());
             if (match) {
                 meta[match[1]] = match[2];
             } else {
                 read = size;
                 break;
             }
+            data = data.slice(idx+1);
         }
+        remaining = data;
     }
     fs.closeSync(fd);
     return meta;
 }
 
 function getFileBody(root,path) {
-    var body = "";
+    var body = Buffer(0);
     var fn = fspath.join(root,path);
     var fd = fs.openSync(fn,"r");
     var size = fs.fstatSync(fd).size;
     var scanning = true;
     var read = 0;
     var length = 50;
-    var remaining = "";
+    var remaining = Buffer(0);
     var buffer = Buffer(length);
+    var idx = -1;
     while(read < size) {
         var thisRead = fs.readSync(fd,buffer,0,length);
         read += thisRead;
         if (scanning) {
-            var data = remaining+buffer.slice(0,thisRead).toString();
-            var parts = data.split("\n");
-            remaining = parts.splice(-1)[0];
-            for (var i=0;i<parts.length;i+=1) {
-                if (! /^\/\/ \w+: /.test(parts[i])) {
+            var data = Buffer.concat([remaining,buffer.slice(0,thisRead)]);
+            while((idx = data.indexOf("\n")) != -1){
+                var part = data.slice(0,idx+1);
+                if (! /^\/\/ \w+: /.test(part.toString())) {
                     scanning = false;
-                    body += parts[i]+"\n";
+                    body = Buffer.concat([body,data]);
+                    break;
                 }
+                data = data.slice(idx+1);
             }
-            if (! /^\/\/ \w+: /.test(remaining)) {
-                scanning = false;
-            }
-            if (!scanning) {
-                body += remaining;
+            remaining = data;
+            if (scanning && read >= size) {
+                body = Buffer.concat([body,remaining]);
             }
         } else {
-            body += buffer.slice(0,thisRead).toString();
+            body = Buffer.concat([body,buffer.slice(0,thisRead)]);
         }
     }
     fs.closeSync(fd);
-    return body;
+    return body.toString();
 }
 
 /**

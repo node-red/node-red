@@ -88,6 +88,18 @@ describe('template node', function() {
         });
     });
 
+    it('should handle escape characters in Mustache format and JSON output mode', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", syntax:"mustache", template:"{\"data\":\"{{payload}}\"}", output:"json", wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.payload.should.have.property('data', 'line\t1\nline\\2\r\nline\b3\f');
+                done();
+            });
+            n1.receive({payload:"line\t1\nline\\2\r\nline\b3\f"});
+        });
+    });
 
     it('should modify payload in plain text mode', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", syntax:"plain", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
