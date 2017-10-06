@@ -65,6 +65,13 @@
             width: 40px;
         }
     }
+    &.projects-version-control-spinner-sidebar {
+        background: white;
+        padding:0;
+        img {
+            width: 20px;
+        }
+    }
 
 
 }
@@ -72,7 +79,7 @@
     button.editor-button {
         width: calc(50% - 40px);
         margin: 20px;
-        height: 200px;
+        height: 175px;
         line-height: 2em;
         font-size: 1.5em !important;
         i {
@@ -173,10 +180,10 @@
 }
 
 
-.sidebar-projects {
+.sidebar-version-control {
     height: 100%;
 }
-.sidebar-projects-stack-info {
+.sidebar-version-control-stack-info {
     height: 100px;
     box-sizing: border-box;
     border-bottom: 1px solid $secondary-border-color;
@@ -185,13 +192,13 @@
         color: #999;
     }
 }
-.sidebar-projects-stack {
+.sidebar-version-control-stack {
     position: absolute;
-    top: 100px;
+    top: 0px;
     bottom: 0;
     left: 0;
     right: 0;
-    overflow-y: scroll;
+    overflow: hidden;
 
     .palette-category {
         &:not(.palette-category-expanded) button {
@@ -239,4 +246,87 @@
     bottom:0;
     overflow-y: auto;
     padding: 8px 20px 20px;
+}
+
+.sidebar-version-control-change-container {
+    position: relative;
+    height: 50%;
+    box-sizing: border-box;
+    border-top: 1px solid $secondary-border-color;
+    transition: height 0.2s ease-in-out;
+    &:first-child {
+        // border-bottom: 1px solid $primary-border-color;
+    }
+    .red-ui-editableList-container {
+        background: #f9f9f9;
+        padding: 0;
+        li {
+            padding:0;
+            background: #fff;
+        }
+    }
+    .red-ui-editableList-border {
+        border: none;
+        border-radius: 0;
+    }
+}
+.sidebar-version-control-change-commit-box {
+    position:absolute;
+    bottom: 0;
+    left:0;
+    right:0;
+    height:0;
+    transition: height 0.2s ease-in-out;
+    background: #f6f6f6;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-top: 1px solid $secondary-border-color;
+    textarea {
+        height: 110px;
+        margin: 10px;
+        width: calc(100% - 20px);
+        box-sizing: border-box;
+        border-radius: 1px;
+        resize: none;
+    }
+}
+.sidebar-version-control-change-commit-toolbar {
+    padding: 0 20px;
+    text-align: right;
+
+}
+.sidebar-version-control-change-entry {
+    height: 20px;
+    padding: 5px 10px;
+    position: relative;
+    white-space: nowrap;
+    span {
+        margin: 0 6px;
+    }
+    .button-group {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        display: none;
+    }
+    button {
+        width: 24px;
+    }
+
+    &:hover {
+        .button-group {
+            display: block;
+        }
+    }
+}
+.sidebar-version-control-change-header {
+    color: #666;
+    background: #f6f6f6;
+    padding: 4px 10px;
+    height: 30px;
+    box-sizing: border-box;
+    border-bottom: 1px solid $secondary-border-color;
+    i {
+        transition: all 0.2s ease-in-out;
+    }
 }

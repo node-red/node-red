@@ -29,6 +29,7 @@ var runtime;
 
 var projectsDir;
 
+var defaultFileSet = require("./defaultFileSet");
 
 function init(_settings, _runtime) {
     settings = _settings;
@@ -69,7 +70,7 @@ function init(_settings, _runtime) {
     credentialsFileBackup = getBackupFilename(credentialsFile)
 
     if (!settings.readOnly) {
-        return util.promiseDir(projectsDir)
+        return fs.ensureDir(projectsDir)
              //TODO: this is accessing settings from storage directly as settings
              //      has not yet been initialised. That isn't ideal - can this be deferred?
             .then(storageSettings.getSettings)
@@ -103,7 +104,7 @@ function getBackupFilename(filename) {
 }
 
 function listProjects() {
-    return nodeFn.call(fs.readdir, projectsDir).then(function(fns) {
+    return fs.readdir(projectsDir).then(function(fns) {
         var dirs = [];
         fns.sort().filter(function(fn) {
             var fullPath = fspath.join(projectsDir,fn);
@@ -151,14 +152,14 @@ function getProject(project) {
                 projectData.missingFiles = missingFiles;
             }
             if (missingFiles.indexOf('package.json') === -1) {
-                promises.push(nodeFn.call(fs.readFile,fspath.join(projectPath,"package.json"),"utf8").then(function(content) {
+                promises.push(fs.readFile(fspath.join(projectPath,"package.json"),"utf8").then(function(content) {
                     var package = util.parseJSON(content);
                     projectData.summary = package.description||"";
                     projectData.dependencies = package.dependencies||{};
                 }));
             }
             if (missingFiles.indexOf('README.md') === -1) {
-                promises.push(nodeFn.call(fs.readFile,fspath.join(projectPath,"README.md"),"utf8").then(function(content) {
+                promises.push(fs.readFile(fspath.join(projectPath,"README.md"),"utf8").then(function(content) {
                     projectData.description = content;
                 }));
             } else {
@@ -174,9 +175,9 @@ function getProject(project) {
         //     if (err) {
         //         return resolve(null);
         //     }
-        //     resolve(nodeFn.call(fs.readFile,projectPackage,'utf8').then(util.parseJSON));
+        //     resolve(fs.readFile(projectPackage,'utf8').then(util.parseJSON));
         // })
-    }).otherwise(function(err) {
+    }).catch(function(err) {
         console.log(err);
         var e = new Error("NLD: project not found");
         e.code = "project_not_found";
@@ -191,7 +192,6 @@ function setCredentialSecret(project,data) { //existingSecret,secret) {
     var wasInvalid = false;
 
     var globalProjectSettings = settings.get("projects");
-    globalProjectSettings.projects = globalProjectSettings.projects || {};
     if (globalProjectSettings.projects.hasOwnProperty(project)) {
         if (!isReset &&
             globalProjectSettings.projects[project].credentialSecret &&
@@ -239,10 +239,12 @@ function createProject(metadata) {
                 return reject(e);
             }
             createProjectDirectory(project).then(function() {
+                var projects = settings.get('projects');
+                projects[project] = {};
                 if (metadata.credentialSecret) {
-                    return setCredentialSecret(project,{credentialSecret: credentialSecret});
+                    projects[project].credentialSecret = metadata.credentialSecret;
                 }
-                return when.resolve();
+                return settings.set('projects',projects);
             }).then(function() {
                 if (metadata.remote) {
                     return gitTools.pull(metadata.remote,projectPath).then(function(result) {
@@ -259,41 +261,24 @@ function createProject(metadata) {
                         });
 
                         resolve(project);
-                    }).otherwise(function(error) {
+                    }).catch(function(error) {
                         fs.remove(projectPath,function() {
                             reject(error);
                         });
                     })
                 } else {
-                    createDefaultProject(metadata).then(function() { resolve(project)}).otherwise(reject);
+                    createDefaultProject(metadata).then(function() { resolve(project)}).catch(reject);
                 }
-            }).otherwise(reject);
+            }).catch(reject);
         })
     })
 }
 
 function createProjectDirectory(project) {
     var projectPath = fspath.join(projectsDir,project);
-    return util.promiseDir(projectPath).then(function() {
+    return fs.ensureDir(projectPath).then(function() {
         return gitTools.initRepo(projectPath)
     });
-}
-
-var defaultFileSet = {
-    "package.json": function(project) {
-        return JSON.stringify({
-            "name": project.name,
-            "description": project.summary||"A Node-RED Project",
-            "version": "0.0.1",
-            "dependencies": {}
-        },"",4);
-    },
-    "README.md": function(project) {
-        return project.name+"\n"+("=".repeat(project.name.length))+"\n\n"+(project.summary||"A Node-RED Project")+"\n\n";
-    },
-    "settings.json": function() { return "{}" },
-    "flow.json": function() { return "[]" },
-    "flow_cred.json": function() { return "{}" }
 }
 
 function createDefaultProject(project) {
@@ -309,10 +294,13 @@ function createDefaultProject(project) {
 }
 function checkProjectExists(project) {
     var projectPath = fspath.join(projectsDir,project);
-    return nodeFn.call(fs.stat,projectPath).otherwise(function(err) {
-        var e = new Error("NLD: project not found");
-        e.code = "project_not_found";
-        throw e;
+    return fs.pathExists(projectPath).then(function(exists) {
+        console.log(projectPath,exists);
+        if (!exists) {
+            var e = new Error("NLD: project not found");
+            e.code = "project_not_found";
+            throw e;
+        }
     });
 }
 function checkProjectFiles(project) {
@@ -322,7 +310,7 @@ function checkProjectFiles(project) {
     for (var file in defaultFileSet) {
         if (defaultFileSet.hasOwnProperty(file)) {
             paths.push(file);
-            promises.push(nodeFn.call(fs.stat,fspath.join(projectPath,file)));
+            promises.push(fs.stat(fspath.join(projectPath,file)));
         }
     }
     return when.settle(promises).then(function(results) {
@@ -349,49 +337,22 @@ function checkProjectFiles(project) {
 
 function getFiles(project) {
     var projectPath = fspath.join(projectsDir,project);
-    return nodeFn.call(listFiles,projectPath,"/");
+    return gitTools.getFiles(projectPath);
+}
+function stageFile(project,file) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.stageFile(projectPath,file);
+}
+function unstageFile(project,file) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.unstageFile(projectPath,file);
+}
+function commit(project,options) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.commit(projectPath,options.message);
 }
 function getFile(project,path) {
 
-}
-
-function listFiles(root,path,done) {
-    var entries = [];
-    var fullPath = fspath.join(root,path);
-    fs.readdir(fullPath, function(err,fns) {
-        var childCount = fns.length;
-        fns.sort().forEach(function(fn) {
-            if (fn === ".git") {
-                childCount--;
-                return;
-            }
-            var child = {
-                path: fspath.join(path,fn),
-                name: fn
-            };
-            entries.push(child);
-            var childFullPath = fspath.join(fullPath,fn);
-            fs.lstat(childFullPath, function(err, stats) {
-                if (stats.isDirectory()) {
-                    child.type = 'd';
-                    listFiles(root,child.path,function(err,children) {
-                        child.children = children;
-                        childCount--;
-                        if (childCount === 0) {
-                            done(null,entries);
-                        }
-                    })
-                } else {
-                    child.type = 'f';
-                    childCount--;
-                    console.log(child,childCount)
-                    if (childCount === 0) {
-                        done(null,entries);
-                    }
-                }
-            });
-        });
-    });
 }
 
 var activeProject
@@ -403,7 +364,7 @@ function reloadActiveProject(project) {
     return runtime.nodes.stopFlows().then(function() {
         return runtime.nodes.loadFlows(true).then(function() {
             runtime.events.emit("runtime-event",{id:"project-change",payload:{ project: project}});
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             // We're committed to the project change now, so notify editors
             // that it has changed.
             runtime.events.emit("runtime-event",{id:"project-change",payload:{ project: project}});
@@ -456,7 +417,7 @@ function updateProject(project,data) {
         } else if (data.hasOwnProperty('dependencies') || data.hasOwnProperty('summary')) {
             var projectPath = fspath.join(projectsDir,project);
             var packageJSON = fspath.join(projectPath,"package.json");
-            return nodeFn.call(fs.readFile,packageJSON,"utf8").then(function(content) {
+            return fs.readFile(packageJSON,"utf8").then(function(content) {
                 var package = util.parseJSON(content);
                 if (data.dependencies) {
                     package.dependencies = data.dependencies;
@@ -483,8 +444,10 @@ function getFlows() {
     if (!initialFlowLoadComplete) {
         initialFlowLoadComplete = true;
         log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
+        if (activeProject) {
+            log.info(log._("storage.localfilesystem.active-project",{project:activeProject||"none"}));
+        }
         log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
-        log.info(log._("storage.localfilesystem.active-project",{project:activeProject||"none"}));
     }
     return util.readFile(flowsFullPath,flowsFileBackup,[],'flow');
 }
@@ -541,6 +504,9 @@ module.exports = {
     createProject: createProject,
     updateProject: updateProject,
     getFiles: getFiles,
+    stageFile: stageFile,
+    unstageFile: unstageFile,
+    commit: commit,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

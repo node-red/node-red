@@ -213,7 +213,7 @@
     height: 34px;
     line-height: 32px;
     font-size: 13px;
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 0 10px;
     &.toggle {
         @include workspace-button-toggle;

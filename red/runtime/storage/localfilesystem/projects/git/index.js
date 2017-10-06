@@ -67,6 +67,112 @@ function isAuthError(err) {
     // lines.forEach(console.log);
 }
 
+function cleanFilename(name) {
+    if (name[0] !== '"') {
+        return name;
+    }
+    return name.substring(1,name.length-1);
+}
+function parseFilenames(name) {
+    var re = /([^ "]+|(".*?"))($| -> ([^ ]+|(".*"))$)/;
+    var m = re.exec(name);
+    var result = [];
+    if (m) {
+        result.push(cleanFilename(m[1]));
+        if (m[4]) {
+            result.push(cleanFilename(m[4]));
+        }
+    }
+    return result;
+}
+
+function getFiles(localRepo) {
+    // parseFilename('"test with space"');
+    // parseFilename('"test with space" -> knownFile.txt');
+    // parseFilename('"test with space" -> "un -> knownFile.txt"');
+    var files = {};
+    return runCommand(gitCommand,["ls-files","--cached","--others","--exclude-standard"],localRepo).then(function(output) {
+        var lines = output.split("\n");
+        lines.forEach(function(l) {
+            if (l==="") {
+                return;
+            }
+            var fullName = cleanFilename(l);
+            // parseFilename(l);
+            var parts = fullName.split("/");
+            var p = files;
+            var name;
+            for (var i = 0;i<parts.length-1;i++) {
+                var name = parts.slice(0,i+1).join("/")+"/";
+                if (!p.hasOwnProperty(name)) {
+                    p[name] = {
+                        type:"d"
+                    }
+                }
+            }
+            files[fullName] = {
+                type: "f"
+            }
+        })
+        return runCommand(gitCommand,["status","--porcelain"],localRepo).then(function(output) {
+            var lines = output.split("\n");
+            var unknownDirs = [];
+            lines.forEach(function(line) {
+                if (line==="") {
+                    return;
+                }
+                if (line[0] === "#") {
+                    return;
+                }
+                var status = line.substring(0,2);
+                var fileName;
+                var names;
+                if (status !== '??') {
+                    names = parseFilenames(line.substring(3));
+                } else {
+                    names = [cleanFilename(line.substring(3))];
+                }
+                fileName = names[0];
+                if (names.length > 1) {
+                    fileName = names[1];
+                }
+
+                // parseFilename(fileName);
+                if (fileName.charCodeAt(0) === 34) {
+                    fileName = fileName.substring(1,fileName.length-1);
+                }
+                if (files.hasOwnProperty(fileName)) {
+                    files[fileName].status = status;
+                } else {
+                    files[fileName] = {
+                        type: "f",
+                        status: status
+                    };
+                }
+                if (names.length > 1) {
+                    files[fileName].oldName = names[0];
+                }
+                if (status === "??" && fileName[fileName.length-1] === '/') {
+                    unknownDirs.push(fileName);
+                }
+            })
+            var allFilenames = Object.keys(files);
+            allFilenames.forEach(function(f) {
+                var entry = files[f];
+                if (!entry.hasOwnProperty('status')) {
+                    unknownDirs.forEach(function(uf) {
+                        if (f.startsWith(uf)) {
+                            entry.status = "??"
+                        }
+                    });
+                }
+            })
+            // console.log(files);
+            return files;
+        })
+    })
+}
+
 var gitCommand = "git";
 module.exports = {
     initRepo: function(cwd) {
@@ -81,6 +187,27 @@ module.exports = {
     },
     clone: function(repo, cwd) {
         var args = ["clone",repo,"."];
+        return runCommand(gitCommand,args,cwd);
+    },
+    getFiles: getFiles,
+    stageFile: function(cwd,file) {
+        var args = ["add"];
+        if (Array.isArray(file)) {
+            args = args.concat(file);
+        } else {
+            args.push(file);
+        }
+        return runCommand(gitCommand,args,cwd);
+    },
+    unstageFile: function(cwd, file) {
+        var args = ["reset","--"];
+        if (file) {
+            args.push(file);
+        }
+        return runCommand(gitCommand,args,cwd);
+    },
+    commit: function(cwd, message) {
+        var args = ["commit","-m",message];
         return runCommand(gitCommand,args,cwd);
     }
 }

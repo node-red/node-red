@@ -55,7 +55,7 @@ var localfilesystem = {
                 if (!settings.userDir) {
                     settings.userDir = fspath.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red");
                     if (!settings.readOnly) {
-                        promises.push(util.promiseDir(fspath.join(settings.userDir,"node_modules")));
+                        promises.push(fs.ensureDir(fspath.join(settings.userDir,"node_modules")));
                     }
                 }
             }

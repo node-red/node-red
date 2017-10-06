@@ -38,7 +38,7 @@
         "express": "4.15.3",
         "express-session": "1.15.2",
         "follow-redirects":"1.2.4",
-        "fs-extra": "1.0.0",
+        "fs-extra": "4.0.2",
         "fs.notify":"0.0.4",
         "hash-sum":"1.0.2",
         "i18next":"1.10.6",

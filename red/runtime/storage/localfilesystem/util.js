@@ -73,7 +73,6 @@ function readFile(path,backupPath,emptyResponse,type) {
 }
 
 module.exports = {
-    promiseDir: nodeFn.lift(fs.mkdirs),
     /**
      * Write content to a file using UTF8 encoding.
      * This forces a fsync before completing to ensure

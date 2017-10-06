@@ -97,6 +97,23 @@
     &:focus {
         outline: 1px solid $workspace-button-color-focus-outline;
     }
+
+    &.primary {
+        border-color: $editor-button-background-primary;
+        color: $editor-button-color-primary !important;
+        background: $editor-button-background-primary;
+        &.disabled, &.ui-state-disabled {
+            background: none;
+            color: $editor-button-color !important;
+            border-color: $form-input-border-color;
+        }
+        &:not(.disabled):not(.ui-button-disabled):hover {
+            border-color: $editor-button-background-primary-hover;
+            background: $editor-button-background-primary-hover;
+            color: $editor-button-color-primary !important;
+        }
+    }
+
 }
 .button-group-vertical {
     display: inline-block;
@@ -132,21 +149,21 @@
     color: $editor-button-color !important;
     background: $editor-button-background;
 
-    &.primary {
-        border-color: $editor-button-background-primary;
-        color: $editor-button-color-primary !important;
-        background: $editor-button-background-primary;
-        &.disabled, &.ui-state-disabled {
-            background: none;
-            color: $editor-button-color !important;
-            border-color: $form-input-border-color;
-        }
-        &:not(.disabled):not(.ui-button-disabled):hover {
-            border-color: $editor-button-background-primary-hover;
-            background: $editor-button-background-primary-hover;
-            color: $editor-button-color-primary !important;
-        }
-    }
+    // &.primary {
+    //     border-color: $editor-button-background-primary;
+    //     color: $editor-button-color-primary !important;
+    //     background: $editor-button-background-primary;
+    //     &.disabled, &.ui-state-disabled {
+    //         background: none;
+    //         color: $editor-button-color !important;
+    //         border-color: $form-input-border-color;
+    //     }
+    //     &:not(.disabled):not(.ui-button-disabled):hover {
+    //         border-color: $editor-button-background-primary-hover;
+    //         background: $editor-button-background-primary-hover;
+    //         color: $editor-button-color-primary !important;
+    //     }
+    // }
     &:not(.disabled):hover {
         //color: $editor-button-color;
     }

@@ -482,7 +482,7 @@ RED.projects = (function() {
         RED.actions.add("core:open-project",RED.projects.selectProject);
 
         RED.projects.settings.init({sendRequest:sendRequest});
-
+        RED.sidebar.versionControl.init({sendRequest:sendRequest});
         initScreens();
         // initSidebar();
     }

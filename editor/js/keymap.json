@@ -17,7 +17,7 @@
 
         "ctrl-alt-n": "core:new-project",
         "ctrl-alt-o": "core:open-project",
-        "ctrl-g p": "core:show-projects-tab"
+        "ctrl-g v": "core:show-version-control-tab"
     },
     "workspace": {
         "backspace": "core:delete-selection",

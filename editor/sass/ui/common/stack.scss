@@ -18,5 +18,9 @@
     background: white;
     .palette-category {
         background: white;
+
+        &:last-child {
+            border-bottom: none;
+        }
     }
 }

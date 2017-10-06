@@ -121,7 +121,7 @@ function getLibraryEntry(type,path) {
             });
             return dirs.concat(files);
         });
-    }).otherwise(function(err) {
+    }).catch(function(err) {
         // if path is empty, then assume it was a folder, return empty
         if (path === ""){
             return [];
@@ -137,7 +137,7 @@ function getLibraryEntry(type,path) {
         // check for path.json as an alternative if flows
         if (type === "flows" && !/\.json$/.test(path)) {
             return getLibraryEntry(type,path+".json")
-            .otherwise(function(e) {
+            .catch(function(e) {
                 throw err;
             });
         } else {
@@ -152,7 +152,7 @@ module.exports = {
         libDir = fspath.join(settings.userDir,"lib");
         libFlowsDir = fspath.join(libDir,"flows");
         if (!settings.readOnly) {
-            return util.promiseDir(libFlowsDir);
+            return fs.ensureDir(libFlowsDir);
         } else {
             return when.resolve();
         }
@@ -176,7 +176,7 @@ module.exports = {
         if (type === "flows" && settings.flowFilePretty) {
             body = JSON.stringify(JSON.parse(body),null,4);
         }
-        return util.promiseDir(fspath.dirname(fn)).then(function () {
+        return fs.ensureDir(fspath.dirname(fn)).then(function () {
             util.writeFile(fn,headers+body);
         });
     }
