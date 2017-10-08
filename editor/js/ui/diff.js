@@ -1471,7 +1471,7 @@ RED.diff = (function() {
                 }
                 currentBlock.end = diffLength;
                 diffBlocks.push(currentBlock);
-console.table(diffBlocks);
+                // console.table(diffBlocks);
                 var diffRow;
                 for (var b = 0; b<diffBlocks.length; b++) {
                     currentBlock = diffBlocks[b];
@@ -1502,7 +1502,7 @@ console.table(diffBlocks);
     }
 
     function createExpandLine(start,end,diffLines) {
-        diffRow = $('<tr class="node-text-diff-expand">');
+        diffRow = $('<tr class="node-text-diff-header node-text-diff-expand">');
         var content = $('<td colspan="4"> <i class="fa fa-arrows-v"></i> </td>').appendTo(diffRow);
         var label = $('<span></span>').appendTo(content);
         if (end < diffLines.length-1) {
@@ -1546,8 +1546,8 @@ console.table(diffBlocks);
         var Adiff = diffLine.a;
         var Bdiff = diffLine.b;
         //console.log(diffLine);
-        var cellNo = $("<td>").text(Adiff.type === 2?"":Adiff.i).appendTo(diffRow);
-        var cellLine = $("<td>").text(Adiff.line).appendTo(diffRow);
+        var cellNo = $('<td class="lineno">').text(Adiff.type === 2?"":Adiff.i).appendTo(diffRow);
+        var cellLine = $('<td class="linetext">').text(Adiff.line).appendTo(diffRow);
         if (Adiff.type === 2) {
             cellNo.addClass('blank');
             cellLine.addClass('blank');
@@ -1558,8 +1558,8 @@ console.table(diffBlocks);
             cellNo.addClass('removed');
             cellLine.addClass('removed');
         }
-        cellNo = $("<td>").text(Bdiff.type === 2?"":Bdiff.i).appendTo(diffRow);
-        cellLine = $("<td>").text(Bdiff.line).appendTo(diffRow);
+        cellNo = $('<td class="lineno">').text(Bdiff.type === 2?"":Bdiff.i).appendTo(diffRow);
+        cellLine = $('<td class="linetext">').text(Bdiff.line).appendTo(diffRow);
         if (Bdiff.type === 2) {
             cellNo.addClass('blank');
             cellLine.addClass('blank');
@@ -1646,13 +1646,115 @@ console.table(diffBlocks);
         return string1 === string2 ? 0 : 1;
     }
 
+    function showUnifiedDiff(diff,title) {
+        var hunks = parseUnifiedDiff(diff);
+        var trayOptions = {
+            title: title||"Compare Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._("common.label.done"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+
+                var codeTable = $("<table>").appendTo(diffPanel);
+                $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
+                var codeBody = $('<tbody>').appendTo(codeTable);
+
+                for (var i=0;i<hunks.length;i++) {
+
+                    var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                    var content = $('<td colspan="3"></td>').appendTo(diffRow);
+                    var label = $('<span></span>').text(hunks[i].header).appendTo(content);
+
+                    var localLine = hunks[i].localStartLine;
+                    var remoteLine = hunks[i].remoteStartLine;
 
 
+                    for (var j=0;j<hunks[i].lines.length;j++) {
+                        var lineText = hunks[i].lines[j];
+                        diffRow = $('<tr>').appendTo(codeBody);
+                        var localLineNo = $('<td class="lineno">').appendTo(diffRow);
+                        var remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
+                        var line = $('<td class="linetext">').appendTo(diffRow);
+                        $('<span class="prefix">').text(lineText[0]).appendTo(line);
+                        $('<span>').text(lineText.substring(1)).appendTo(line);
+                        if (lineText[0] === '+') {
+                            line.addClass("added");
+                            remoteLineNo.text(remoteLine++);
+                        } else if (lineText[0] === '-') {
+                            line.addClass("removed");
+                            localLineNo.text(localLine++);
+                        } else {
+                            line.addClass("unchanged");
+                            localLineNo.text(localLine++);
+                            remoteLineNo.text(remoteLine++);
+                        }
+                    }
+                }
+            },
+            close: function() {
+                diffVisible = false;
+
+            },
+            show: function() {
+
+            }
+        }
+        RED.tray.show(trayOptions);
+
+
+    }
+    function parseUnifiedDiff(diff) {
+        var lines = diff.split("\n");
+        var hunks = [];
+        var inHunk = false;
+        var currentHunk;
+        var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
+        var comment = /^\\/;
+        var localChange = /^-/;
+        var remoteChange = /^\+/;
+
+        for (var i=0;i<lines.length;i++) {
+            var hunkLine = hunkHeader.exec(lines[i]);
+            if (hunkLine) {
+                if (inHunk) {
+                    hunks.push(currentHunk);
+                }
+                currentHunk = {
+                    header: lines[i],
+                    localStartLine: hunkLine[2],
+                    localLength: hunkLine[4]||1,
+                    remoteStartLine: hunkLine[6],
+                    remoteLength: hunkLine[8]||1,
+                    lines: []
+                }
+                inHunk = true;
+            } else if (inHunk) {
+                currentHunk.lines.push(lines[i]);
+            }
+        }
+        if (currentHunk) {
+            hunks.push(currentHunk);
+        }
+        return hunks;
+    }
 
     return {
         init: init,
         getRemoteDiff: getRemoteDiff,
         showRemoteDiff: showRemoteDiff,
+        showUnifiedDiff: showUnifiedDiff,
         mergeDiff: mergeDiff
     }
 })();

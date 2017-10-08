@@ -188,6 +188,21 @@ module.exports = {
             })
         });
 
+        app.get(/([^\/]+)\/diff\/([^\/]+)\/(.+)$/, function(req,res) {
+            var projectName = req.params[0];
+            var type = req.params[1];
+            var file = req.params[2];
+            runtime.storage.projects.getFileDiff(projectName,file,type).then(function(data) {
+                res.json({
+                    diff: data
+                })
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            })
+        });
+
         app.get(new RegExp("/([^\/]+)\/files\/(.*)"), function(req,res) {
             // Get project file
         });

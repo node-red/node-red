@@ -351,6 +351,10 @@ function commit(project,options) {
     var projectPath = fspath.join(projectsDir,project);
     return gitTools.commit(projectPath,options.message);
 }
+function getFileDiff(project,file,type) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.getFileDiff(projectPath,file,type);
+}
 function getFile(project,path) {
 
 }
@@ -507,6 +511,7 @@ module.exports = {
     stageFile: stageFile,
     unstageFile: unstageFile,
     commit: commit,
+    getFileDiff: getFileDiff,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

@@ -561,18 +561,24 @@
         vertical-align: top;
         word-wrap: break-word;
     }
-    td:nth-child(odd) {
+    td.lineno {
         text-align: right;
         color: #999;
         background: #fafafa;
         padding: 1px 5px;
     }
-    td:nth-child(3) {
+    td.lineno:nth-child(3) {
         border-left: 1px solid $secondary-border-color;
     }
-    td:nth-child(even) {
+    td.linetext {
         white-space: pre-wrap;
         padding: 1px 5px;
+        span.prefix {
+            width: 30px;
+            display: inline-block;
+            text-align: center;
+            color: #999;
+        }
     }
     td.blank {
         background: #f6f6f6;
@@ -583,21 +589,28 @@
     td.removed {
         background: #fadddd;
     }
+    td.unchanged {
+        color: #999;
+    }
     tr.unchanged {
         background: #fefefe;
     }
     tr.start-block {
-        border-top: 1px solid #f3f3f3;
+        border-top: 1px solid #f0f0f0;
     }
     tr.end-block {
-        border-bottom: 1px solid #f3f3f3;
+        border-bottom: 1px solid #f0f0f0;
     }
-    tr.node-text-diff-expand td {
+    tr.node-text-diff-header td {
         text-align: left;
         color: #999;
         background: #ffd;
+        height: 30px;
+        vertical-align: middle;
+    }
+    tr.node-text-diff-expand td {
+        cursor: pointer;
         &:hover {
-            cursor: pointer;
             background: #ffc;
         }
     }

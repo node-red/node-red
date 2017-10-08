@@ -41,7 +41,33 @@ RED.sidebar.versionControl = (function() {
         var label = $('<span>').appendTo(container);
 
         var bg = $('<div class="button-group"></div>').appendTo(row);
-        $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>').appendTo(bg);
+        $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>')
+            .appendTo(bg)
+            .click(function(evt) {
+                evt.preventDefault();
+                var activeProject = RED.projects.getActiveProject();
+                utils.sendRequest({
+                    url: "projects/"+activeProject.name+"/diff/"+(unstaged?"tree":"index")+"/"+encodeURIComponent(entry.file),
+                    type: "GET",
+                    responses: {
+                        0: function(error) {
+                            console.log(error);
+                            // done(error,null);
+                        },
+                        200: function(data) {
+                            RED.diff.showUnifiedDiff(data.diff,(unstaged?"Unstaged":"Staged")+" changes : "+entry.file);
+                            // console.log(data.diff);
+                        },
+                        400: {
+                            'unexpected_error': function(error) {
+                                console.log(error);
+                                // done(error,null);
+                            }
+                        },
+                    }
+                })
+
+            })
         $('<button class="editor-button editor-button-small"><i class="fa fa-'+(unstaged?"plus":"minus")+'"></i></button>')
             .appendTo(bg)
             .click(function(evt) {

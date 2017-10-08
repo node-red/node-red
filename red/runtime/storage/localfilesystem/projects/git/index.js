@@ -209,5 +209,15 @@ module.exports = {
     commit: function(cwd, message) {
         var args = ["commit","-m",message];
         return runCommand(gitCommand,args,cwd);
+    },
+    getFileDiff(cwd,file,type) {
+        var args = ["diff"];
+        if (type === "tree") {
+            // nothing else to do
+        } else if (type === "index") {
+            args.push("--cached");
+        }
+        args.push(file);
+        return runCommand(gitCommand,args,cwd);
     }
 }
