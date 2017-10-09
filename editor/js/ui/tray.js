@@ -115,10 +115,10 @@ RED.tray = (function() {
             $("#editor-shade").show();
             $("#palette-shade").show();
             $(".sidebar-shade").show();
-
             tray.preferredWidth = Math.max(el.width(),500);
-            body.css({"minWidth":tray.preferredWidth-40});
-
+            if (!options.maximized) {
+                body.css({"minWidth":tray.preferredWidth-40});
+            }
             if (options.width) {
                 if (options.width > $("#editor-stack").position().left-8) {
                     options.width = $("#editor-stack").position().left-8;

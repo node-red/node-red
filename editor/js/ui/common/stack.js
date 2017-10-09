@@ -22,11 +22,17 @@ RED.stack = (function() {
         var entries = [];
 
         var visible = true;
+        // TODO: make this a singleton function - and watch out for stacks no longer
+        //       in the DOM
         var resizeStack = function() {
             if (entries.length > 0) {
-                var headerHeight = entries[0].header.outerHeight();
+                var headerHeight = 0;
+                entries.forEach(function(entry) {
+                    headerHeight += entry.header.outerHeight();
+                });
+
                 var height = container.innerHeight();
-                contentHeight = height - entries.length*headerHeight - (entries.length-1);
+                contentHeight = height - headerHeight - (entries.length-1);
                 entries.forEach(function(e) {
                     e.contentWrap.height(contentHeight);
                 });

@@ -318,6 +318,10 @@
             display: block;
         }
     }
+    &.node-info-none {
+        text-align: center;
+        background: #fefefe;
+    }
 }
 .sidebar-version-control-change-header {
     color: #666;

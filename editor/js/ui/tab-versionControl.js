@@ -37,11 +37,18 @@ RED.sidebar.versionControl = (function() {
     function createChangeEntry(row, entry, status, unstaged) {
         row.addClass("sidebar-version-control-change-entry");
         var container = $('<div>').appendTo(row);
+        if (entry.label) {
+            row.addClass('node-info-none');
+            container.text(entry.label);
+            return;
+        }
+
+
         var icon = $('<i class=""></i>').appendTo(container);
         var label = $('<span>').appendTo(container);
 
         var bg = $('<div class="button-group"></div>').appendTo(row);
-        $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>')
+        var viewDiffButton = $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -131,6 +138,12 @@ RED.sidebar.versionControl = (function() {
                 entry.spinner.remove();
                 delete entry.spinner;
             }
+
+            viewDiffButton.attr("disabled",(status === 'D' || status === '?'));
+            viewDiffButton.find("i")
+                .toggleClass('fa-eye',!(status === 'D' || status === '?'))
+                .toggleClass('fa-eye-slash',(status === 'D' || status === '?'))
+
         }
         entry["update"+(unstaged?"Unstaged":"Staged")](entry, status);
     }
@@ -156,7 +169,7 @@ RED.sidebar.versionControl = (function() {
         localChanges.content.css({height:"100%"});
 
         var bg = $('<div style="float: right"></div>').appendTo(localChanges.header);
-        $('<button class="sidebar-header-button"><i class="fa fa-refresh"></i></button>')
+        $('<button class="editor-button editor-button-small"><i class="fa fa-refresh"></i></button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -208,6 +221,7 @@ RED.sidebar.versionControl = (function() {
                 submitCommitButton.attr("disabled",true);
                 unstagedContent.css("height","30px");
                 stagedContent.css("height","calc(100% - 30px - 175px)");
+                commitBox.show();
                 commitBox.css("height","175px");
                 stageAllButton.attr("disabled",true);
                 unstageAllButton.attr("disabled",true);
@@ -239,7 +253,7 @@ RED.sidebar.versionControl = (function() {
             }
         })
 
-        commitBox = $('<div class="sidebar-version-control-change-commit-box"></div>').appendTo(localChanges.content);
+        commitBox = $('<div class="sidebar-version-control-change-commit-box"></div>').hide().appendTo(localChanges.content);
 
         var commitMessage = $('<textarea>')
             .appendTo(commitBox)
@@ -256,6 +270,9 @@ RED.sidebar.versionControl = (function() {
                 unstagedContent.css("height","");
                 stagedContent.css("height","");
                 commitBox.css("height","");
+                setTimeout(function() {
+                    commitBox.hide();
+                },200);
                 stageAllButton.attr("disabled",false);
                 unstageAllButton.attr("disabled",false);
                 commitButton.attr("disabled",false);
@@ -350,13 +367,16 @@ RED.sidebar.versionControl = (function() {
 
     var refreshInProgress = false;
 
+    var emptyStagedItem = { label:"None" };
+
     function refreshFiles(result) {
         if (bulkChangeSpinner) {
             bulkChangeSpinner.remove();
             bulkChangeSpinner = null;
         }
-        // unstagedChangesList.editableList('empty');
-        // stagedChangesList.editableList('empty');
+        unstagedChangesList.editableList('removeItem',emptyStagedItem);
+        stagedChangesList.editableList('removeItem',emptyStagedItem);
+
         var fileNames = Object.keys(result).filter(function(f) { return result[f].type === 'f'})
         fileNames.sort();
         var updateIndex = Date.now()+Math.floor(Math.random()*100);
@@ -424,6 +444,14 @@ RED.sidebar.versionControl = (function() {
         commitButton.attr('disabled',stagedCount === 0);
         stageAllButton.attr('disabled',unstagedCount === 0);
         unstageAllButton.attr('disabled',stagedCount === 0);
+
+        if (stagedCount === 0) {
+            stagedChangesList.editableList('addItem',emptyStagedItem);
+        }
+        if (unstagedCount === 0) {
+            unstagedChangesList.editableList('addItem',emptyStagedItem);
+        }
+
 
     }
 
