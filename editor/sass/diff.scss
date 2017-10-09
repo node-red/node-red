@@ -601,12 +601,21 @@
     tr.end-block {
         border-bottom: 1px solid #f0f0f0;
     }
+    tr.node-text-diff-file-header td {
+        background: #f3f3f3;
+        padding: 5px 10px;
+        color: #333;
+    }
+
     tr.node-text-diff-header td {
+        padding: 5px 10px;
         text-align: left;
-        color: #999;
+        color: #666;
         background: #ffd;
         height: 30px;
         vertical-align: middle;
+        border-top: 1px solid #f0f0f0;
+        border-bottom: 1px solid #f0f0f0;
     }
     tr.node-text-diff-expand td {
         cursor: pointer;

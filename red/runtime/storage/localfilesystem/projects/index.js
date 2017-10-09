@@ -355,6 +355,15 @@ function getFileDiff(project,file,type) {
     var projectPath = fspath.join(projectsDir,project);
     return gitTools.getFileDiff(projectPath,file,type);
 }
+function getCommits(project,options) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.getCommits(projectPath,options);
+}
+function getCommit(project,sha) {
+    var projectPath = fspath.join(projectsDir,project);
+    return gitTools.getCommit(projectPath,sha);
+}
+
 function getFile(project,path) {
 
 }
@@ -512,6 +521,8 @@ module.exports = {
     unstageFile: unstageFile,
     commit: commit,
     getFileDiff: getFileDiff,
+    getCommits: getCommits,
+    getCommit: getCommit,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

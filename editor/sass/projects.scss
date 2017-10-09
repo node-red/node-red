@@ -247,16 +247,7 @@
     overflow-y: auto;
     padding: 8px 20px 20px;
 }
-
-.sidebar-version-control-change-container {
-    position: relative;
-    height: 50%;
-    box-sizing: border-box;
-    border-top: 1px solid $secondary-border-color;
-    transition: height 0.2s ease-in-out;
-    &:first-child {
-        // border-bottom: 1px solid $primary-border-color;
-    }
+.sidebar-version-control {
     .red-ui-editableList-container {
         background: #f9f9f9;
         padding: 0;
@@ -269,6 +260,17 @@
         border: none;
         border-radius: 0;
     }
+}
+.sidebar-version-control-change-container {
+    position: relative;
+    height: 50%;
+    box-sizing: border-box;
+    border-top: 1px solid $secondary-border-color;
+    transition: height 0.2s ease-in-out;
+    &:first-child {
+        // border-bottom: 1px solid $primary-border-color;
+    }
+
 }
 .sidebar-version-control-change-commit-box {
     position:absolute;
@@ -323,6 +325,38 @@
         background: #fefefe;
     }
 }
+
+.sidebar-version-control-commit-entry {
+    min-height: 20px;
+    padding: 5px 10px;
+    position: relative;
+    white-space: nowrap;
+    cursor: pointer;
+    &:hover {
+        background: #eee;
+    }
+}
+.sidebar-version-control-commit-sha {
+    float: right;
+    font-family: monospace;
+    color: #c38888;
+    display: inline-block;
+    font-size: 0.85em;
+    margin-left: 5px;
+}
+.sidebar-version-control-commit-subject {
+    color: #666;
+}
+.sidebar-version-control-commit-date {
+    color: #999;
+    font-size: 0.85em;
+}
+.sidebar-version-control-commit-user {
+    float: right;
+    color: #999;
+    font-size: 0.85em;
+}
+
 .sidebar-version-control-change-header {
     color: #666;
     background: #f6f6f6;

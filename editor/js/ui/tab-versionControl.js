@@ -29,6 +29,9 @@ RED.sidebar.versionControl = (function() {
     var bulkChangeSpinner;
     var commitButton;
 
+    var localCommitList;
+
+
     // TODO: DRY projectSummary.js
     function addSpinnerOverlay(container) {
         var spinner = $('<div class="projects-dialog-spinner"><img src="red/images/spin.svg"/></div>').appendTo(container);
@@ -315,6 +318,37 @@ RED.sidebar.versionControl = (function() {
             collapsible: true
         });
 
+        var bg = $('<div style="float: right"></div>').appendTo(localHistory.header);
+        $('<button class="editor-button editor-button-small"><i class="fa fa-refresh"></i></button>')
+            .appendTo(bg)
+            .click(function(evt) {
+                evt.preventDefault();
+                refreshLocalCommits();
+            })
+
+        localCommitList = $("<ol>",{style:"position: absolute; top: 0px; bottom: 0; right:0; left:0;"}).appendTo(localHistory.content);
+        localCommitList.editableList({
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(row,index,entry) {
+                row.addClass('sidebar-version-control-commit-entry');
+                row.click(function(e) {
+                    var activeProject = RED.projects.getActiveProject();
+                    if (activeProject) {
+                        $.getJSON("/projects/"+activeProject.name+"/commits/"+entry.sha,function(result) {
+                            RED.diff.showCommitDiff(result.commit);
+                        });
+                    }
+                });
+                var container = $('<div>').appendTo(row);
+                $('<div class="sidebar-version-control-commit-sha">').text(entry.sha.substring(0,7)).appendTo(container);
+                $('<div class="sidebar-version-control-commit-subject">').text(entry.subject).appendTo(container);
+                $('<div class="sidebar-version-control-commit-user">').text(entry.author).appendTo(container);
+                $('<div class="sidebar-version-control-commit-date">').text(humanizeSinceDate(parseInt(entry.date))).appendTo(container);
+
+            }
+        });
+
         var remoteHistory = sections.add({
             title: "Remote History",
             collapsible: true
@@ -333,6 +367,26 @@ RED.sidebar.versionControl = (function() {
             }
         });
 
+    }
+
+    function humanizeSinceDate(date) {
+        var delta = (Date.now()/1000) - date;
+
+        var daysDelta = Math.floor(delta / (60*60*24));
+        if (daysDelta > 30) {
+            return (new Date(date*1000)).toLocaleDateString();
+        } else if (daysDelta > 0) {
+            return daysDelta+" day"+(daysDelta>1?"s":"")+" ago";
+        }
+        var hoursDelta = Math.floor(delta / (60*60));
+        if (hoursDelta > 0) {
+            return hoursDelta+" hour"+(hoursDelta>1?"s":"")+" ago";
+        }
+        var minutesDelta = Math.floor(delta / 60);
+        if (minutesDelta > 0) {
+            return minutesDelta+" minute"+(minutesDelta>1?"s":"")+" ago";
+        }
+        return "Seconds ago";
     }
 
     function updateBulk(files,unstaged) {
@@ -368,6 +422,21 @@ RED.sidebar.versionControl = (function() {
     var refreshInProgress = false;
 
     var emptyStagedItem = { label:"None" };
+
+    function refreshLocalCommits() {
+        localCommitList.editableList('empty');
+        var spinner = addSpinnerOverlay(localCommitList);
+        var activeProject = RED.projects.getActiveProject();
+        if (activeProject) {
+            $.getJSON("/projects/"+activeProject.name+"/commits",function(result) {
+                result.commits.forEach(function(c) {
+                    localCommitList.editableList('addItem',c);
+                })
+                spinner.remove();
+            });
+        }
+    }
+
 
     function refreshFiles(result) {
         if (bulkChangeSpinner) {
@@ -464,6 +533,7 @@ RED.sidebar.versionControl = (function() {
             unstagedChangesList.editableList('empty');
             stagedChangesList.editableList('empty');
         }
+
         refreshInProgress = true;
 
         var activeProject = RED.projects.getActiveProject();

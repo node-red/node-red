@@ -203,6 +203,31 @@ module.exports = {
             })
         });
 
+        app.get("/:id/commits", function(req, res) {
+            var projectName = req.params.id;
+            var options = {};
+            runtime.storage.projects.getCommits(projectName,options).then(function(data) {
+                res.json(data);
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            })
+        });
+
+        app.get("/:id/commits/:sha", function(req, res) {
+            var projectName = req.params.id;
+            var sha = req.params.sha;
+
+            runtime.storage.projects.getCommit(projectName,sha).then(function(data) {
+                res.json({commit:data});
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            })
+        });
+
         app.get(new RegExp("/([^\/]+)\/files\/(.*)"), function(req,res) {
             // Get project file
         });

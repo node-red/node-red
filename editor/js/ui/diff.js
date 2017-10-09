@@ -1509,10 +1509,10 @@ RED.diff = (function() {
             label.text("@@ -"+(diffLines[end-1].a.i+1)+" +"+(diffLines[end-1].b.i+1));
         }
         diffRow.click(function(evt) {
-            console.log(start,end,diffLines.length);
+            // console.log(start,end,diffLines.length);
             if (end - start > 20) {
                 var startPos = $(this).offset();
-                console.log(startPos);
+                // console.log(startPos);
                 if (start > 0) {
                     for (var i=start;i<start+10;i++) {
                         createDiffLine(diffLines[i]).addClass("unchanged").insertBefore($(this));
@@ -1646,8 +1646,63 @@ RED.diff = (function() {
         return string1 === string2 ? 0 : 1;
     }
 
-    function showUnifiedDiff(diff,title) {
-        var hunks = parseUnifiedDiff(diff);
+    function createUnifiedDiffTable(files) {
+        var diffPanel = $('<div></div>');
+        files.forEach(function(file) {
+            var hunks = file.hunks;
+
+            var codeTable = $("<table>").appendTo(diffPanel);
+            $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
+            var codeBody = $('<tbody>').appendTo(codeTable);
+
+            var diffRow = $('<tr class="node-text-diff-file-header">').appendTo(codeBody);
+            var content = $('<td colspan="3"></td>').appendTo(diffRow);
+            var label = $('<span></span>').text(file.file).appendTo(content);
+
+            for (var i=0;i<hunks.length;i++) {
+                var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                var content = $('<td colspan="3"></td>').appendTo(diffRow);
+                var label = $('<span></span>').text(hunks[i].header).appendTo(content);
+
+                var localLine = hunks[i].localStartLine;
+                var remoteLine = hunks[i].remoteStartLine;
+
+
+                for (var j=0;j<hunks[i].lines.length;j++) {
+                    var lineText = hunks[i].lines[j];
+                    if (lineText[0] === '\\' || lineText === "") {
+                        // Comment line - bail out of this hunk
+                        break;
+                    }
+                    diffRow = $('<tr>').appendTo(codeBody);
+                    var localLineNo = $('<td class="lineno">').appendTo(diffRow);
+                    var remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
+                    var line = $('<td class="linetext">').appendTo(diffRow);
+                    $('<span class="prefix">').text(lineText[0]).appendTo(line);
+                    $('<span>').text(lineText.substring(1)).appendTo(line);
+                    if (lineText[0] === '+') {
+                        line.addClass("added");
+                        remoteLineNo.text(remoteLine++);
+                    } else if (lineText[0] === '-') {
+                        line.addClass("removed");
+                        localLineNo.text(localLine++);
+                    } else {
+                        line.addClass("unchanged");
+                        if (localLine > 0) {
+                            localLineNo.text(localLine++);
+                        }
+                        if (remoteLine > 0) {
+                            remoteLineNo.text(remoteLine++);
+                        }
+                    }
+                }
+            }
+        });
+        return diffPanel;
+    }
+
+    function showCommitDiff(diff,title) {
+        var commit = parseCommitDiff(diff);
         var trayOptions = {
             title: title||"Compare Changes", //TODO: nls
             width: Infinity,
@@ -1671,83 +1726,125 @@ RED.diff = (function() {
                 $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
                 var codeBody = $('<tbody>').appendTo(codeTable);
 
-                for (var i=0;i<hunks.length;i++) {
-
-                    var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
-                    var content = $('<td colspan="3"></td>').appendTo(diffRow);
-                    var label = $('<span></span>').text(hunks[i].header).appendTo(content);
-
-                    var localLine = hunks[i].localStartLine;
-                    var remoteLine = hunks[i].remoteStartLine;
+                var diffRow = $('<tr class="node-text-diff-file-header">').appendTo(codeBody);
+                var content = $('<td colspan="3"></td>').appendTo(diffRow);
+                var label = $('<pre></pre>').text(commit.preamble).appendTo(content);
 
 
-                    for (var j=0;j<hunks[i].lines.length;j++) {
-                        var lineText = hunks[i].lines[j];
-                        diffRow = $('<tr>').appendTo(codeBody);
-                        var localLineNo = $('<td class="lineno">').appendTo(diffRow);
-                        var remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
-                        var line = $('<td class="linetext">').appendTo(diffRow);
-                        $('<span class="prefix">').text(lineText[0]).appendTo(line);
-                        $('<span>').text(lineText.substring(1)).appendTo(line);
-                        if (lineText[0] === '+') {
-                            line.addClass("added");
-                            remoteLineNo.text(remoteLine++);
-                        } else if (lineText[0] === '-') {
-                            line.addClass("removed");
-                            localLineNo.text(localLine++);
-                        } else {
-                            line.addClass("unchanged");
-                            localLineNo.text(localLine++);
-                            remoteLineNo.text(remoteLine++);
-                        }
-                    }
-                }
+                createUnifiedDiffTable(commit.files).appendTo(diffPanel);
+
+
             },
             close: function() {
                 diffVisible = false;
-
             },
             show: function() {
 
             }
         }
         RED.tray.show(trayOptions);
+    }
+    function showUnifiedDiff(diff,title) {
+        var files = parseUnifiedDiff(diff);
+        var trayOptions = {
+            title: title||"Compare Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._("common.label.done"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+                createUnifiedDiffTable(files).appendTo(diffPanel);
 
 
+            },
+            close: function() {
+                diffVisible = false;
+            },
+            show: function() {
+
+            }
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function parseCommitDiff(diff) {
+        var result = {
+        };
+        var lines = diff.split("\n");
+        for (var i=0;i<lines.length;i++) {
+            if (/^diff /.test(lines[i])) {
+                result.files = parseUnifiedDiff(lines.slice(i));
+                break;
+            }
+         }
+         result.preamble = lines.slice(0,i).join("\n");
+         return result;
     }
     function parseUnifiedDiff(diff) {
-        var lines = diff.split("\n");
-        var hunks = [];
-        var inHunk = false;
-        var currentHunk;
+        var lines;
+        if (Array.isArray(diff)) {
+            lines = diff;
+        } else {
+            lines = diff.split("\n");
+        }
+        var fileHeader = /^\+\+\+ b\/(.*)\t?/;
         var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
-        var comment = /^\\/;
-        var localChange = /^-/;
-        var remoteChange = /^\+/;
-
+        var files = [];
+        var currentFile;
+        var hunks = [];
+        var currentHunk;
         for (var i=0;i<lines.length;i++) {
-            var hunkLine = hunkHeader.exec(lines[i]);
-            if (hunkLine) {
-                if (inHunk) {
-                    hunks.push(currentHunk);
+            var line = lines[i];
+            if (/^diff/.test(line)) {
+                if (currentHunk) {
+                    currentFile.hunks.push(currentHunk);
+                    files.push(currentFile);
                 }
-                currentHunk = {
-                    header: lines[i],
-                    localStartLine: hunkLine[2],
-                    localLength: hunkLine[4]||1,
-                    remoteStartLine: hunkLine[6],
-                    remoteLength: hunkLine[8]||1,
-                    lines: []
+                currentHunk = null;
+                currentFile = {
+                    file: null,
+                    hunks: []
                 }
-                inHunk = true;
-            } else if (inHunk) {
-                currentHunk.lines.push(lines[i]);
+            } else {
+                var fileLine = fileHeader.exec(line);
+                if (fileLine) {
+                    currentFile.file = fileLine[1];
+                } else {
+                    var hunkLine = hunkHeader.exec(line);
+                    if (hunkLine) {
+                        if (currentHunk) {
+                            currentFile.hunks.push(currentHunk);
+                        }
+                        currentHunk = {
+                            header: line,
+                            localStartLine: hunkLine[2],
+                            localLength: hunkLine[4]||1,
+                            remoteStartLine: hunkLine[6],
+                            remoteLength: hunkLine[8]||1,
+                            lines: []
+                        }
+                    } else if (currentHunk) {
+                        currentHunk.lines.push(line);
+                    }
+                }
             }
         }
         if (currentHunk) {
-            hunks.push(currentHunk);
+            currentFile.hunks.push(currentHunk);
+            files.push(currentFile);
         }
-        return hunks;
+        return files;
     }
 
     return {
@@ -1755,6 +1852,7 @@ RED.diff = (function() {
         getRemoteDiff: getRemoteDiff,
         showRemoteDiff: showRemoteDiff,
         showUnifiedDiff: showUnifiedDiff,
+        showCommitDiff: showCommitDiff,
         mergeDiff: mergeDiff
     }
 })();

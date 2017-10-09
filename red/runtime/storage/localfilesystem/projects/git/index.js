@@ -173,6 +173,28 @@ function getFiles(localRepo) {
     })
 }
 
+function parseLog(log) {
+    var lines = log.split("\n");
+    var currentCommit = null;
+    var commits = [];
+    lines.forEach(function(l) {
+        if (/^sha: /.test(l)) {
+            if (currentCommit) {
+                commits.push(currentCommit);
+            }
+            currentCommit = {}
+        }
+        var m = /^(.*): (.*)$/.exec(l);
+        if (m) {
+            currentCommit[m[1]] = m[2];
+        }
+    });
+    if (currentCommit) {
+        commits.push(currentCommit);
+    }
+    return {commits: commits};
+}
+
 var gitCommand = "git";
 module.exports = {
     initRepo: function(cwd) {
@@ -218,6 +240,14 @@ module.exports = {
             args.push("--cached");
         }
         args.push(file);
+        return runCommand(gitCommand,args,cwd);
+    },
+    getCommits: function(cwd,options) {
+        var args = ["log", "--format=sha: %H%nauthor: %an%ndate: %ct%nsubject: %s","-n 10"];
+        return runCommand(gitCommand,args,cwd).then(parseLog);
+    },
+    getCommit: function(cwd,sha) {
+        var args = ["show",sha];
         return runCommand(gitCommand,args,cwd);
     }
 }
