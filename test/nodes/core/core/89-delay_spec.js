@@ -347,7 +347,7 @@ describe('delay Node', function() {
      * @param delay - the variable delay: milliseconds
      */
     function variableDelayTest(aTimeoutFrom, aTimeoutTo, aTimeoutUnit, delay, done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delayv","timeout":5,"timeoutUnits":"seconds","rate":"1","rateUnits":"second","randomFirst":aTimeoutFrom,"randomLast":aTimeoutTo,"randomUnits":aTimeoutUnit,"drop":false,"wires":[["helperNode1"]]},
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delayv","timeout":0.5,"timeoutUnits":"seconds","rate":"1","rateUnits":"second","randomFirst":aTimeoutFrom,"randomLast":aTimeoutTo,"randomUnits":aTimeoutUnit,"drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
@@ -400,12 +400,16 @@ describe('delay Node', function() {
         variableDelayTest("200", "300", "milliseconds", 250, done);
     });
 
-    it('variable delay is zero if msg.delay not specified', function(done) {
-        variableDelayTest("0", "50", "milliseconds", null, done);
+    it('variable delay is the default if msg.delay not specified', function(done) {
+        variableDelayTest("450", "550", "milliseconds", null, done);
+    });
+
+    it('variable delay is zero if msg.delay is zero', function(done) {
+        variableDelayTest("0", "20", "milliseconds", 0, done);
     });
 
     it('variable delay is zero if msg.delay is negative', function(done) {
-        variableDelayTest("0", "50", "milliseconds", -250, done);
+        variableDelayTest("0", "20", "milliseconds", -250, done);
     });
 
     /**

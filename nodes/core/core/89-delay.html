@@ -102,7 +102,7 @@
         <dt class="optional">delay <span class="property-type">number</span></dt>
         <dd>Sets the delay, in milliseconds, to be applied to the message. This
             option only applies if the node is configured to allow the message to
-            provide the delay interval.</dd>
+            override the configured default delay interval.</dd>
         <dt class="optional">reset</dt>
         <dd>If the received message has this property set to any value, all
             outstanding messages held by the node are cleared without being sent.</dd>
@@ -260,7 +260,7 @@
                     $("#delay-details-for").show();
                     $("#random-details").hide();
                 } else if (this.value === "delayv") {
-                    $("#delay-details-for").hide();
+                    $("#delay-details-for").show();
                     $("#random-details").hide();
                 } else if (this.value === "random") {
                     $("#delay-details-for").hide();
