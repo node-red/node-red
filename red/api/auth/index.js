@@ -89,7 +89,7 @@ function login(req,res) {
         } else if (settings.adminAuth.type === "strategy") {
             response = {
                 "type":"strategy",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/strategy"}]
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: settings.httpAdminRoot + "auth/strategy"}]
             }
             if (settings.adminAuth.strategy.icon) {
                 response.prompts[0].icon = settings.adminAuth.strategy.icon;
@@ -186,12 +186,12 @@ module.exports = {
 
         adminApp.get('/auth/strategy', passport.authenticate(strategy.name));
         adminApp.get('/auth/strategy/callback',
-            passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
+            passport.authenticate(strategy.name, {session:false, failureRedirect: settings.httpAdminRoot }),
             function(req, res) {
                 var tokens = req.user.tokens;
                 delete req.user.tokens;
                 // Successful authentication, redirect home.
-                res.redirect('/?access_token='+tokens.accessToken);
+                res.redirect(settings.httpAdminRoot + '?access_token='+tokens.accessToken);
             }
         );
 
