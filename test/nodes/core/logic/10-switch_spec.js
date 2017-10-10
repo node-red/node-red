@@ -187,6 +187,10 @@ describe('switch Node', function() {
         twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });
 
+    it('should check if payload is between given string values', function(done) {
+        twoFieldSwitchTest("btwn", "c", "e", true, true, "d", done);
+    });
+
     it('should check if payload is not between given values', function(done) {
         twoFieldSwitchTest("btwn", 3, 5, true, false, 12, done);
     });
@@ -489,4 +493,9 @@ describe('switch Node', function() {
         });
     });
 
+    it('should handle JSONata expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs(payload)",propertyType:"jsonata",rules:[{"t":"btwn","v":"$sqrt(16)","vt":"jsonata","v2":"$sqrt(36)","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSwitchTest(flow, true, -5, done);
+    });
 });
