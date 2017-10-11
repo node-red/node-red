@@ -428,22 +428,6 @@ describe('function node', function() {
         });
     });
 
-    it('should get keys in global context', function(done) {
-        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.keys();return msg;"},
-                    {id:"n2", type:"helper"}];
-        helper.load(functionNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n1.context().global.set("count","0");
-            n2.on("input", function(msg) {
-                msg.should.have.property('topic', 'bar');
-                msg.should.have.property('payload', ['get','set','keys','count']);
-                done();
-            });
-            n1.receive({payload:"foo",topic: "bar"});
-        });
-    });
-
     it('should handle setTimeout()', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"setTimeout(function(){node.send(msg);},1000);"},
                     {id:"n2", type:"helper"}];
