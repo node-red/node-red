@@ -125,15 +125,15 @@ module.exports = function(RED) {
                     if (node.append.trim() !== "") { cl += " "+node.append; }
                     /* istanbul ignore else  */
                     if (RED.settings.verbose) { node.log(cl); }
-                    child = exec(cl, {encoding: 'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
-                        msg.payload = Buffer.from(stdout,"binary");
-                        if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
-                        var msg2 = null;
+                    child = exec(cl, {encoding:'binary', maxBuffer:10000000}, function (error, stdout, stderr) {
+                        var msg2, msg3;
+                        delete msg.payload;
                         if (stderr) {
                             msg2 = RED.util.cloneMessage(msg);
                             msg2.payload = stderr;
                         }
-                        var msg3 = null;
+                        msg.payload = Buffer.from(stdout,"binary");
+                        if (isUtf8(msg.payload)) { msg.payload = msg.payload.toString(); }
                         node.status({});
                         //console.log('[exec] stdout: ' + stdout);
                         //console.log('[exec] stderr: ' + stderr);
