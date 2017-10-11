@@ -522,8 +522,6 @@ RED.debug = (function() {
         if (atBottom) {
             messageList.scrollTop(sbc.scrollHeight);
         }
-
-        if (cb) { cb(); }
     }
 
     return {
