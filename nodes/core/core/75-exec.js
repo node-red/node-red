@@ -157,6 +157,9 @@ module.exports = function(RED) {
                     }
                     node.activeProcesses[child.pid] = child;
                 }
+                // report pid so one could kill this exact process later
+                msg.payload = {pid:child.pid};
+                node.send([null,null,RED.util.cloneMessage(msg)]);
             }
         });
 
