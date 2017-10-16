@@ -158,9 +158,9 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
-                redNodes.loadFlows().then(redNodes.startFlows).otherwise(function(err) {});
+                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
                 started = true;
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 console.log(err);
             });
         });

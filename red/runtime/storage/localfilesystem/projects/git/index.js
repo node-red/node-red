@@ -208,6 +208,9 @@ module.exports = {
         return runCommand(gitCommand,args,cwd);
     },
     clone: function(repo, cwd) {
+        if (repo.url) {
+            repo = repo.url;
+        }
         var args = ["clone",repo,"."];
         return runCommand(gitCommand,args,cwd);
     },

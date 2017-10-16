@@ -477,7 +477,7 @@ RED.projects.settings = (function() {
                 });
         }
 
-        if (activeProject.settings.credentialsInvalid) {
+        if (activeProject.settings.credentialSecretInvalid) {
             row = $('<div class="user-settings-row"></div>').appendTo(pane);
             $('<div class="form-tips form-warning"><i class="fa fa-warning"></i> The current key is not valid. Set the correct key or reset credentials.</div>').appendTo(row);
         }
@@ -498,7 +498,7 @@ RED.projects.settings = (function() {
         }
 
         if (activeProject.settings.credentialsEncrypted) {
-            if  (!activeProject.settings.credentialsInvalid) {
+            if  (!activeProject.settings.credentialSecretInvalid) {
                 row = $('<div class="user-settings-row project-settings-credentials-current-row hide"></div>').appendTo(credentialsContainer);
                 $('<label for="">Current key</label>').appendTo(row);
                 currentKey = $('<input type="password">').appendTo(row);
@@ -518,7 +518,7 @@ RED.projects.settings = (function() {
         // $('<label for="" style="margin-left:20px; width: auto;"><input type="radio" name="project-settings-credentials-current" value="lost"> Forgotten key?</label>').appendTo(row);
 
         row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
-        $('<label for=""></label>').text((activeProject.settings.credentialsEncrypted&& !activeProject.settings.credentialsInvalid)?"New key":"Encryption key").appendTo(row);
+        $('<label for=""></label>').text((activeProject.settings.credentialsEncrypted&& !activeProject.settings.credentialSecretInvalid)?"New key":"Encryption key").appendTo(row);
         newKey = $('<input type="password">').appendTo(row).on("change keyup paste",checkInputs);
 
         row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
@@ -551,14 +551,14 @@ RED.projects.settings = (function() {
                 var payload = {
                     credentialSecret: newKey.val()
                 };
-                if (activeProject.settings.credentialsInvalid) {
+                if (activeProject.settings.credentialSecretInvalid) {
                     RED.deploy.setDeployInflight(true);
                 }
 
                 if (activeProject.settings.credentialsEncrypted) {
                     if (action === 'reset') {
                         payload.resetCredentialSecret = true;
-                    } else if (!activeProject.settings.credentialsInvalid) {
+                    } else if (!activeProject.settings.credentialSecretInvalid) {
                         payload.currentCredentialSecret = currentKey.val();
                     }
                 }
@@ -606,7 +606,7 @@ RED.projects.settings = (function() {
                         },
                     }
                 },payload).always(function() {
-                    if (activeProject.settings.credentialsInvalid) {
+                    if (activeProject.settings.credentialSecretInvalid) {
                         RED.deploy.setDeployInflight(false);
                     }
                 });
@@ -620,11 +620,11 @@ RED.projects.settings = (function() {
         // $('<button id="" class="editor-button">Set key</button>').appendTo(row);
 
 
-        // $('<h3></h3>').text("Repository").appendTo(pane);
-        // row = $('<div class="user-settings-row"></div>').appendTo(pane);
-        // var input;
-        // $('<label for="">'+'Remote'+'</label>').appendTo(row);
-        // $('<input id="" type="text">').appendTo(row);
+        $('<h3></h3>').text("Repository").appendTo(pane);
+        row = $('<div class="user-settings-row"></div>').appendTo(pane);
+        var input;
+        $('<label for="">'+'Remote'+'</label>').appendTo(row);
+        $('<input id="" type="text">').appendTo(row);
 
 
         return pane;

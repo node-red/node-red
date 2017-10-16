@@ -178,7 +178,10 @@
         padding-top: 4px;
     }
 }
-
+.projects-dialog-screen-create-type.editor-button.toggle.selected:not(.disabled):not(:disabled) {
+    background: #fff !important;
+    color: #666 !important;
+}
 
 .sidebar-version-control {
     height: 100%;

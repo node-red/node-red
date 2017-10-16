@@ -33,7 +33,7 @@ module.exports = {
             runtime.storage.projects.listProjects().then(function(list) {
                 var active = runtime.storage.projects.getActiveProject();
                 var response = {
-                    active: active,
+                    active: active.name,
                     projects: list
                 };
                 res.json(response);
@@ -68,7 +68,7 @@ module.exports = {
             //TODO: validate the payload properly
             if (req.body.active) {
                 var currentProject = runtime.storage.projects.getActiveProject();
-                if (req.params.id !== currentProject) {
+                if (req.params.id !== currentProject.name) {
                     runtime.storage.projects.setActiveProject(req.params.id).then(function() {
                         res.redirect(303,req.baseUrl + '/');
                     }).catch(function(err) {

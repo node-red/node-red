@@ -76,7 +76,7 @@ function loadFlows() {
             events.emit("runtime-event",{id:"runtime-state",retain:true});
             return config;
         });
-    }).otherwise(function(err) {
+    }).catch(function(err) {
         activeConfig = null;
         events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:"credentials_load_failed",text:"notification.warnings.invalid-credentials-secret"},retain:true});
         log.warn(log._("nodes.flows.error",{message:err.toString()}));
@@ -141,7 +141,7 @@ function setFlows(_config,type,muteLog,forceStart) {
                         events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
                     });
                     return flowRevision;
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                 })
             } else {
                 events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});

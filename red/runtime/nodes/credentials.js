@@ -16,6 +16,7 @@
 
 var when = require("when");
 var crypto = require('crypto');
+var runtime;
 var settings;
 var log;
 
@@ -38,30 +39,9 @@ function decryptCredentials(key,credentials) {
     return JSON.parse(decrypted);
 }
 
-function markProjectSecretValid(project,valid) {
-    try {
-        var projects = settings.get('projects');
-        if (projects) {
-            if (valid) {
-                if (!projects.projects[project].credentialSecretInvalid) {
-                    return when.resolve();
-                } else {
-                    delete projects.projects[project].credentialSecretInvalid;
-                }
-            } else {
-                projects.projects[project].credentialSecretInvalid = true;
-            }
-            return settings.set('projects',projects);
-        } else {
-            return when.resolve();
-        }
-    } catch(err) {
-        return when.resolve();
-    }
-}
-
 var api = module.exports = {
-    init: function(runtime) {
+    init: function(_runtime) {
+        runtime = _runtime;
         log = runtime.log;
         settings = runtime.settings;
         dirty = false;
@@ -98,14 +78,14 @@ var api = module.exports = {
 
             var projectKey = false;
             var activeProject;
-            try {
-                var projects = settings.get('projects');
-                if (projects && projects.activeProject) {
-                    activeProject = projects.activeProject;
-                    projectKey = projects.projects[projects.activeProject].credentialSecret;
+            if (runtime.storage.projects) {
+                // projects enabled
+                activeProject = runtime.storage.projects.getActiveProject();
+                if (activeProject) {
+                    projectKey = activeProject.credentialSecret;
                 }
-            } catch(err) {
             }
+
             if (projectKey) {
                 log.debug("red/runtime/nodes/credentials.load : using active project key - ignoring user provided key");
                 userKey = projectKey;
@@ -208,9 +188,9 @@ var api = module.exports = {
                     error.code = "credentials_load_failed";
                     if (projectKey) {
                         // This is a project with a bad key. Mark it as invalid
-                        return markProjectSecretValid(activeProject,false).then(function() {
-                            return when.reject(error);
-                        })
+                        // TODO: this delves too deep into Project structure
+                        activeProject.info.settings.credentialSecretInvalid = true;
+                        return when.reject(error);
                     }
                     return when.reject(error);
                 }
@@ -218,7 +198,7 @@ var api = module.exports = {
                 credentialCache = credentials;
             }
             if (clearInvalidFlag) {
-                return markProjectSecretValid(activeProject,true)
+                delete activeProject.info.settings.credentialSecretInvalid;
             }
         });
     },
