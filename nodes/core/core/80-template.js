@@ -17,6 +17,8 @@
 module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
+    var yaml = require("js-yaml");
+
 
     /**
      * Custom Mustache Context capable to resolve message property and node
@@ -79,6 +81,9 @@ module.exports = function(RED) {
                 }
                 if (node.outputFormat === "json") {
                     value = JSON.parse(value);
+                }
+                if (node.outputFormat === "yaml") {
+                    value = yaml.load(value);
                 }
 
                 if (node.fieldType === 'msg') {
