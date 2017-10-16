@@ -159,7 +159,6 @@ describe('file Nodes', function() {
 
                         // Delete the file
                         fs.unlinkSync(fileToTest);
-                        n1.close();
 
                         // Recreate it
                         fs.writeFileSync(fileToTest,"");
