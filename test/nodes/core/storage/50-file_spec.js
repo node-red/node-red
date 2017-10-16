@@ -139,6 +139,9 @@ describe('file Nodes', function() {
         });
 
         it('should append to a file after it has been recreated ', function(done) {
+            if (os.type() === "Windows_NT") {
+                return done();
+            }
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false}];
             try {
                 fs.unlinkSync(fileToTest);
