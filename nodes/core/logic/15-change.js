@@ -129,9 +129,9 @@ module.exports = function(RED) {
                     if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
                         if (rule.fromt === "msg") {
                             fromValue = RED.util.getMessageProperty(msg,rule.from);
-                        } else if (rule.tot === 'flow') {
+                        } else if (rule.fromt === 'flow') {
                             fromValue = node.context().flow.get(rule.from);
-                        } else if (rule.tot === 'global') {
+                        } else if (rule.fromt === 'global') {
                             fromValue = node.context().global.get(rule.from);
                         }
                         if (typeof fromValue === 'number' || fromValue instanceof Number) {
