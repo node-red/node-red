@@ -113,35 +113,43 @@ function loadProject(name) {
 }
 
 function getProject(name) {
-    if (!activeProject || activeProject.name !== name) {
-        //TODO: throw better err
-        throw new Error("Cannot get inactive project");
-    }
+    checkActiveProject(name);
     //return when.resolve(activeProject.info);
-    return Projects.get(name).then(function(p) {
-        return p.info
-    })
+    return Projects.get(name);
 }
 
+function checkActiveProject(project) {
+    if (!activeProject || activeProject.name !== project) {
+        //TODO: throw better err
+        throw new Error("Cannot operate on inactive project");
+    }
+}
 function getFiles(project) {
+    checkActiveProject(project);
     return activeProject.getFiles();
 }
 function stageFile(project,file) {
+    checkActiveProject(project);
     return activeProject.stageFile(file);
 }
 function unstageFile(project,file) {
+    checkActiveProject(project);
     return activeProject.unstageFile(file);
 }
 function commit(project,options) {
+    checkActiveProject(project);
     return activeProject.commit(options);
 }
 function getFileDiff(project,file,type) {
+    checkActiveProject(project);
     return activeProject.getFileDiff(file,type);
 }
 function getCommits(project,options) {
+    checkActiveProject(project);
     return activeProject.getCommits(options);
 }
 function getCommit(project,sha) {
+    checkActiveProject(project);
     return activeProject.getCommit(sha);
 }
 
@@ -167,7 +175,9 @@ function reloadActiveProject() {
 }
 function createProject(metadata) {
     return Projects.create(metadata).then(function(p) {
-        return p.name;
+        return setActiveProject(p.name);
+    }).then(function() {
+        return getProject(metadata.name);
     })
 }
 function setActiveProject(projectName) {
@@ -198,7 +208,7 @@ function updateProject(project,data) {
 }
 function setCredentialSecret(data) { //existingSecret,secret) {
     var isReset = data.resetCredentialSecret;
-    var wasInvalid = activeProject.info.settings.credentialSecretInvalid;
+    var wasInvalid = activeProject.credentialSecretInvalid;
     return activeProject.update(data).then(function() {
         if (isReset || !wasInvalid) {
             if (isReset) {

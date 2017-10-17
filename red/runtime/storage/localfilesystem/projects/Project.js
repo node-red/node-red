@@ -33,10 +33,9 @@ function Project(name) {
     this.name = name;
     this.path = fspath.join(projectsDir,name);
     this.paths = {};
-    this.info = {
-        name: name,
-        settings: {}
-    };
+
+    this.missingFiles = [];
+
     this.credentialSecret = null;
 }
 Project.prototype.load = function () {
@@ -49,32 +48,28 @@ Project.prototype.load = function () {
     }
 
     this.credentialSecret = projectSettings.credentialSecret;
-// console.log(this.name,"credSec",this.credentialSecret )
-    if (typeof projectSettings.credentialSecret === "string") {
-        this.info.settings.credentialsEncrypted = true;
-    } else {
-        this.info.settings.credentialsEncrypted = false;
-    }
+
+    this.paths.flowFile = fspath.join(this.path,"flow.json");
+    this.paths.credentialsFile = fspath.join(this.path,"flow_cred.json");
+
     var promises = [];
     return checkProjectFiles(project.name).then(function(missingFiles) {
         if (missingFiles.length > 0) {
-            project.info.missingFiles = missingFiles;
+            project.missingFiles = missingFiles;
         }
         if (missingFiles.indexOf('package.json') === -1) {
             project.paths['package.json'] = fspath.join(project.path,"package.json");
             promises.push(fs.readFile(project.paths['package.json'],"utf8").then(function(content) {
                 project.package = util.parseJSON(content);
-                project.info.summary = project.package.description||"";
-                project.info.dependencies = project.package.dependencies||{};
             }));
         }
         if (missingFiles.indexOf('README.md') === -1) {
             project.paths['README.md'] = fspath.join(project.path,"README.md");
             promises.push(fs.readFile(project.paths['README.md'],"utf8").then(function(content) {
-                project.info.description = content;
+                project.description = content;
             }));
         } else {
-            project.info.description = "";
+            project.description = "";
         }
 
         return when.settle(promises).then(function() {
@@ -101,7 +96,7 @@ Project.prototype.update = function (data) {
 
         if (!isReset && // not a reset
             this.credentialSecret && // key already set
-            !this.info.settings.credentialSecretInvalid && // key not invalid
+            !this.credentialSecretInvalid && // key not invalid
             this.credentialSecret !== existingSecret) { // key doesn't match provided existing key
                 var e = new Error("Cannot change credentialSecret without current key");
                 e.code = "missing_current_credential_key";
@@ -112,7 +107,7 @@ Project.prototype.update = function (data) {
         var globalProjectSettings = settings.get("projects");
         globalProjectSettings.projects[this.name] = globalProjectSettings.projects[this.name]||{}
         globalProjectSettings.projects[this.name].credentialSecret = project.credentialSecret;
-        delete this.info.settings.credentialSecretInvalid;
+        delete this.credentialSecretInvalid;
 
         return settings.set("projects",globalProjectSettings);
     }
@@ -121,21 +116,19 @@ Project.prototype.update = function (data) {
         filesToUpdate[this.paths['README.md']] = function() {
             return data.description;
         };
-        this.info.description = data.description;
+        this.description = data.description;
     }
     if (data.hasOwnProperty('dependencies')) {
         filesToUpdate[this.paths['package.json']] = function() {
             return JSON.stringify(project.package,"",4)
         };
         this.package.dependencies = data.dependencies;
-        this.info.dependencies = data.dependencies;
     }
     if (data.hasOwnProperty('summary')) {
         filesToUpdate[this.paths['package.json']] = function() {
             return JSON.stringify(project.package,"",4)
         };
         this.package.description = data.summary;
-        this.info.summary = data.summary;
     }
 
     var files = Object.keys(filesToUpdate);
@@ -168,17 +161,36 @@ Project.prototype.getCommit = function(sha) {
 }
 
 Project.prototype.getFlowFile = function() {
-    return fspath.join(this.path,"flow.json");
+    return this.paths.flowFile;
 }
 Project.prototype.getFlowFileBackup = function() {
     return getBackupFilename(this.getFlowFile());
 }
 Project.prototype.getCredentialsFile = function() {
-    return fspath.join(this.path,"flow_cred.json");
+    return this.paths.credentialsFile;
 }
 Project.prototype.getCredentialsFileBackup = function() {
     return getBackupFilename(this.getCredentialsFile());
 }
+
+
+Project.prototype.toJSON = function () {
+
+    return {
+        name: this.name,
+        summary: this.package.description,
+        description: this.description,
+        dependencies: this.package.dependencies,
+        settings: {
+            credentialsEncrypted: (typeof this.credentialSecret === "string"),
+            credentialSecretInvalid: this.credentialSecretInvalid
+        },
+        files: {
+            flowFile: this.paths.flowFile&&this.paths.flowFile.substring(this.path.length),
+            credentialsFile: this.paths.credentialsFile&&this.paths.credentialsFile.substring(this.path.length)
+        }
+    }
+};
 
 function getBackupFilename(filename) {
     var ffName = fspath.basename(filename);
@@ -212,7 +224,11 @@ function createDefaultProject(project) {
                 promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project)));
             }
         }
-        return when.all(promises);
+        return when.all(promises).then(function() {
+            return gitTools.stageFile(projectPath,Object.keys(defaultFileSet));
+        }).then(function() {
+            return gitTools.commit(projectPath,"Create project");
+        })
     });
 }
 

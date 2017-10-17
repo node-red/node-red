@@ -49,10 +49,8 @@ module.exports = {
 
         app.post("/", function(req,res) {
             // Create project
-            runtime.storage.projects.createProject(req.body).then(function(name) {
-                runtime.storage.projects.getProject(name).then(function(data) {
-                    res.json(data);
-                });
+            runtime.storage.projects.createProject(req.body).then(function(data) {
+                res.json(data);
             }).catch(function(err) {
                 console.log(err.stack);
                 if (err.code) {

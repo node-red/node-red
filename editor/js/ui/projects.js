@@ -188,18 +188,15 @@ RED.projects = (function() {
                                     }
                                 }
 
+                                RED.deploy.setDeployInflight(true);
+                                RED.projects.settings.switchProject(projectData.name);
+
                                 sendRequest({
                                         url: "projects",
                                         type: "POST",
                                         responses: {
                                             200: function(data) {
-                                                switchProject(projectData.name,function(err,data) {
-                                                    if (err) {
-                                                        console.log("unexpected_error",error)
-                                                    } else {
-                                                        dialog.dialog( "close" );
-                                                    }
-                                                })
+                                                dialog.dialog( "close" );
                                             },
                                             400: {
                                                 'project_exists': function(error) {
@@ -217,7 +214,9 @@ RED.projects = (function() {
                                                 }
                                             }
                                         }
-                                    },projectData)
+                                    },projectData).always(function() {
+                                        RED.deploy.setDeployInflight(false);
+                                    })
 
 
 

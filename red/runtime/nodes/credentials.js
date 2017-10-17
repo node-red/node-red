@@ -189,7 +189,7 @@ var api = module.exports = {
                     if (projectKey) {
                         // This is a project with a bad key. Mark it as invalid
                         // TODO: this delves too deep into Project structure
-                        activeProject.info.settings.credentialSecretInvalid = true;
+                        activeProject.credentialSecretInvalid = true;
                         return when.reject(error);
                     }
                     return when.reject(error);
@@ -198,7 +198,8 @@ var api = module.exports = {
                 credentialCache = credentials;
             }
             if (clearInvalidFlag) {
-                delete activeProject.info.settings.credentialSecretInvalid;
+                // TODO: this delves too deep into Project structure
+                delete activeProject.credentialSecretInvalid;
             }
         });
     },
