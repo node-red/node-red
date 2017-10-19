@@ -170,7 +170,7 @@ RED.projects.settings = (function() {
                 updateProjectSummary(activeProject.summary, container);
                 editButton.show();
             });
-        $('<button class="editor-button">Done</button>')
+        $('<button class="editor-button">Save</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -422,211 +422,517 @@ RED.projects.settings = (function() {
 
     }
 
-    function createSettingsPane(activeProject) {
-        var pane = $('<div id="project-settings-tab-settings" class="project-settings-tab-pane node-help"></div>');
-        $('<h3></h3>').text("Credentials").appendTo(pane);
-        var row = $('<div class="user-settings-row"></div>').appendTo(pane);
-        if (activeProject.settings.credentialsEncrypted) {
-            $('<span style="margin-right: 20px;"><i class="fa fa-lock"></i> Credentials are encrypted</span>').appendTo(row);
-        } else {
-            $('<span style="margin-right: 20px;"><i class="fa fa-unlock"></i> Credentials are not encrypted</span>').appendTo(row);
-        }
-        var resetButton;
-        var action;
-        var changeButton = $('<button id="" class="editor-button"></button>')
-            .text(activeProject.settings.credentialsEncrypted?"Change key":"Enable encryption")
-            .appendTo(row)
-            .click(function(evt) {
-                evt.preventDefault();
-                newKey.val("");
-                if (currentKey) {
-                    currentKey.val("");
-                    currentKey.removeClass("input-error");
-                }
-                checkInputs();
-                saveButton.text("Save");
+    function showProjectFileListing(row,activeProject,current,done) {
+        var dialog;
+        var dialogBody;
+        var filesList;
+        var selected;
+        var container = $('<div class="project-file-listing-container"></div>',{style:"position: relative; min-height: 175px; height: 175px;"}).appendTo(row);
+        var spinner = addSpinnerOverlay(container);
 
-                $(".project-settings-credentials-row").show();
-                $(".project-settings-credentials-current-row").show();
-                $(this).prop('disabled',true);
-                if (resetButton) {
-                    resetButton.prop('disabled',true);
-                }
-                action = 'change';
+        $.getJSON("/projects/"+activeProject.name+"/files",function(result) {
+            var fileNames = Object.keys(result);
+            var files = {};
+            fileNames.sort();
+            fileNames.forEach(function(file) {
+                file.split("/").reduce(function(r,v,i,arr) { if (v) { if (i<arr.length-1) { r[v] = r[v]||{};} else { r[v] = true }return r[v];}},files);
             });
-        if (activeProject.settings.credentialsEncrypted) {
-            resetButton = $('<button id="" style="margin-left: 10px;" class="editor-button"></button>')
-                .text("Reset key")
-                .appendTo(row)
-                .click(function(evt) {
-                    evt.preventDefault();
-                    newKey.val("");
-                    if (currentKey) {
-                        currentKey.val("");
-                        currentKey.removeClass("input-error");
+            var sortFiles = function(key,value,fullPath) {
+                var result = {
+                    name: key||"/",
+                    path: fullPath+(fullPath?"/":"")+key,
+                };
+                if (value === true) {
+                    result.type = 'f';
+                    return result;
+                }
+                result.type = 'd';
+                result.children = [];
+                result.path = result.path;
+                var files = Object.keys(value);
+                files.forEach(function(file) {
+                    result.children.push(sortFiles(file,value[file],result.path));
+                })
+                result.children.sort(function(A,B) {
+                    if (A.hasOwnProperty("children") && !B.hasOwnProperty("children")) {
+                        return -1;
+                    } else if (!A.hasOwnProperty("children") && B.hasOwnProperty("children")) {
+                        return 1;
                     }
-                    checkInputs();
-                    saveButton.text("Reset key");
-
-                    $(".project-settings-credentials-row").show();
-                    $(".project-settings-credentials-reset-row").show();
-
-                    $(this).prop('disabled',true);
-                    changeButton.prop('disabled',true);
-                    action = 'reset';
-                });
-        }
-
-        if (activeProject.settings.credentialSecretInvalid) {
-            row = $('<div class="user-settings-row"></div>').appendTo(pane);
-            $('<div class="form-tips form-warning"><i class="fa fa-warning"></i> The current key is not valid. Set the correct key or reset credentials.</div>').appendTo(row);
-        }
-
-        var credentialsContainer = $('<div>',{style:"position:relative"}).appendTo(pane);
-        var currentKey;
-        var newKey;
-
-        var checkInputs = function() {
-            var valid = true;
-            if (newKey.val().length === 0) {
-                valid = false;
+                    return A.name.localeCompare(B.name);
+                })
+                return result;
             }
-            if (currentKey && currentKey.val() === 0) {
-                valid = false;
-            }
-            saveButton.toggleClass('disabled',!valid);
-        }
+            var files = sortFiles("",files,"");
+            createFileSubList(container,files.children,current,done,"height: 175px");
+            spinner.remove();
+        });
+    }
+    function createFileSubList(container, files, current, onselect, style) {
+        style = style || "";
+        var list = $('<ol>',{class:"projects-dialog-file-list", style:style}).appendTo(container).editableList({
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(row,index,entry) {
+                var header = $('<div></div>',{class:"projects-dialog-file-list-entry"}).appendTo(row);
+                if (entry.children) {
+                    $('<span class="projects-dialog-file-list-entry-folder"><i class="fa fa-angle-right"></i> <i class="fa fa-folder-o"></i></span>').appendTo(header);
+                    if (entry.children.length > 0) {
+                        var children = $('<div></div>',{style:"padding-left: 20px;"}).appendTo(row);
+                        if (current.indexOf(entry.path+"/") === 0) {
+                            header.addClass("expanded");
+                        } else {
+                            children.hide();
+                        }
+                        createFileSubList(children,entry.children,current,onselect);
+                        header.addClass("selectable");
+                        header.click(function(e) {
+                            if ($(this).hasClass("expanded")) {
+                                $(this).removeClass("expanded");
+                                children.slideUp(200);
+                            } else {
+                                $(this).addClass("expanded");
+                                children.slideDown(200);
+                            }
 
-        if (activeProject.settings.credentialsEncrypted) {
-            if  (!activeProject.settings.credentialSecretInvalid) {
-                row = $('<div class="user-settings-row project-settings-credentials-current-row hide"></div>').appendTo(credentialsContainer);
-                $('<label for="">Current key</label>').appendTo(row);
-                currentKey = $('<input type="password">').appendTo(row);
-                currentKey.on("change keyup paste",function() {
-                    if (popover) {
-                        popover.close();
-                        popover = null;
-                        $(this).removeClass('input-error');
+                        });
+
                     }
-                    checkInputs();
-                });
+                } else {
+                    var fileIcon = "fa-file-o";
+                    var fileClass = "";
+                    if (/\.json$/i.test(entry.name)) {
+                        fileIcon = "fa-file-code-o"
+                    } else if (/\.md$/i.test(entry.name)) {
+                        fileIcon = "fa-book";
+                    } else if (/^\.git/i.test(entry.name)) {
+                        fileIcon = "fa-code-fork";
+                        header.addClass("projects-dialog-file-list-entry-file-type-git");
+                    }
+                    $('<span class="projects-dialog-file-list-entry-file"> <i class="fa '+fileIcon+'"></i></span>').appendTo(header);
+                    header.addClass("selectable");
+                    if (entry.path === current) {
+                        header.addClass("selected");
+                    }
+                    header.click(function(e) {
+                        $(".projects-dialog-file-list-entry.selected").removeClass("selected");
+                        $(this).addClass("selected");
+                        onselect(entry.path);
+                    })
+                    header.dblclick(function(e) {
+                        e.preventDefault();
+                        onselect(entry.path,true);
+                    })
+                }
+                $('<span class="projects-dialog-file-list-entry-name" style=""></span>').text(entry.name).appendTo(header);
             }
-            row = $('<div class="user-settings-row project-settings-credentials-reset-row hide"></div>').appendTo(credentialsContainer);
-            $('<div class="form-tips form-warning"><i class="fa fa-warning"></i> Resetting the key will delete all existing credentials</div>').appendTo(row);
-
+        });
+        if (!style) {
+            list.parent().css("overflow-y","");
         }
-        // $('<label for="" style="margin-left:20px; width: auto;"><input type="radio" name="project-settings-credentials-current" value="lost"> Forgotten key?</label>').appendTo(row);
+        files.forEach(function(f) {
+            list.editableList('addItem',f);
+        })
+    }
 
-        row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
-        $('<label for=""></label>').text((activeProject.settings.credentialsEncrypted&& !activeProject.settings.credentialSecretInvalid)?"New key":"Encryption key").appendTo(row);
-        newKey = $('<input type="password">').appendTo(row).on("change keyup paste",checkInputs);
+    // function editFiles(activeProject, container,flowFile, flowFileLabel) {
+    //     var editButton = container.children().first();
+    //     editButton.hide();
+    //
+    //     var flowFileInput = $('<input id="" type="text" style="width: calc(100% - 300px);">').val(flowFile).insertAfter(flowFileLabel);
+    //
+    //     var flowFileInputSearch = $('<button class="editor-button" style="margin-left: 10px"><i class="fa fa-folder-open-o"></i></button>')
+    //         .insertAfter(flowFileInput)
+    //         .click(function(e) {
+    //             showProjectFileListing(activeProject,'Select flow file',flowFileInput.val(),function(result) {
+    //                 flowFileInput.val(result);
+    //                 checkFiles();
+    //             })
+    //         })
+    //
+    //     var checkFiles = function() {
+    //         saveButton.toggleClass('disabled',flowFileInput.val()==="");
+    //         saveButton.prop('disabled',flowFileInput.val()==="");
+    //     }
+    //     flowFileInput.on("change keyup paste",checkFiles);
+    //     flowFileLabel.hide();
+    //
+    //     var bg = $('<span class="button-group" style="position: relative; float: right; margin-right:0;"></span>').prependTo(container);
+    //     $('<button class="editor-button">Cancel</button>')
+    //         .appendTo(bg)
+    //         .click(function(evt) {
+    //             evt.preventDefault();
+    //
+    //             flowFileLabel.show();
+    //             flowFileInput.remove();
+    //             flowFileInputSearch.remove();
+    //             bg.remove();
+    //             editButton.show();
+    //         });
+    //     var saveButton = $('<button class="editor-button">Save</button>')
+    //         .appendTo(bg)
+    //         .click(function(evt) {
+    //             evt.preventDefault();
+    //             var newFlowFile = flowFileInput.val();
+    //             var newCredsFile = credentialsFileInput.val();
+    //             var spinner = addSpinnerOverlay(container);
+    //             var done = function(err,res) {
+    //                 if (err) {
+    //                     spinner.remove();
+    //                     return;
+    //                 }
+    //                 activeProject.summary = v;
+    //                 spinner.remove();
+    //                 flowFileLabel.text(newFlowFile);
+    //                 flowFileLabel.show();
+    //                 flowFileInput.remove();
+    //                 flowFileInputSearch.remove();
+    //                 bg.remove();
+    //                 editButton.show();
+    //             }
+    //             // utils.sendRequest({
+    //             //     url: "projects/"+activeProject.name,
+    //             //     type: "PUT",
+    //             //     responses: {
+    //             //         0: function(error) {
+    //             //             done(error,null);
+    //             //         },
+    //             //         200: function(data) {
+    //             //             done(null,data);
+    //             //         },
+    //             //         400: {
+    //             //             'unexpected_error': function(error) {
+    //             //                 done(error,null);
+    //             //             }
+    //             //         },
+    //             //     }
+    //             // },{summary:v});
+    //         });
+    //
+    //
+    //     checkFiles();
+    //
+    // }
 
-        row = $('<div class="user-settings-row project-settings-credentials-row hide"></div>').appendTo(credentialsContainer);
-        var bg = $('<div class="button-group" style="text-align: right; margin-right:20px;"></div>').appendTo(row);
-        $('<button class="editor-button">Cancel</button>')
-            .appendTo(bg)
+    function createFilesSection(activeProject,pane) {
+        var title = $('<h3></h3>').text("Files").appendTo(pane);
+        var filesContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
+        var editButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+            .appendTo(title)
             .click(function(evt) {
                 evt.preventDefault();
+                formButtons.show();
+                editButton.hide();
+                flowFileLabelText.hide();
+                flowFileInput.show();
+                flowFileInputSearch.show();
+                credFileLabel.hide();
+                credFileInput.show();
+                flowFileInput.focus();
+                // credentialStateLabel.parent().hide();
+                credentialStateLabel.addClass("uneditable-input");
+                $(".user-settings-row-credentials").show();
+                credentialStateLabel.css('height','auto');
+                credentialFormRows.hide();
+                credentialSecretButtons.show();
+            });
+
+        var row;
+
+        // Flow files
+        row = $('<div class="user-settings-row"></div>').appendTo(filesContainer);
+        $('<label for=""></label>').text('Flow').appendTo(row);
+        var flowFileLabel = $('<div class="uneditable-input" style="padding:0">').appendTo(row);
+        var flowFileLabelText = $('<span style="display:inline-block; padding: 6px">').text(activeProject.files.flow).appendTo(flowFileLabel);
+
+        var flowFileInput = $('<input id="" type="text" style="margin-bottom: 0;width: 100%; border: none;">').val(activeProject.files.flow).hide().appendTo(flowFileLabel);
+        var flowFileInputSearch = $('<button class="editor-button" style="width: 36px; height: 36px; position: absolute; top: -1px; right: -1px;"><i class="fa fa-folder-open-o"></i></button>')
+            .hide()
+            .appendTo(flowFileLabel)
+            .click(function(e) {
+                if ($(this).hasClass('selected')) {
+                    $(this).removeClass('selected');
+                    flowFileLabel.find('.project-file-listing-container').remove();
+                    flowFileLabel.css('height','');
+                    flowFileLabel.css('color','');
+
+                } else {
+                    $(this).addClass('selected');
+                    flowFileLabel.css('height','auto');
+                    flowFileLabel.css('color','inherit');
+                    showProjectFileListing(flowFileLabel,activeProject,flowFileInput.val(),function(result,isDblClick) {
+                        if (result) {
+                            flowFileInput.val(result);
+                        }
+                        if (isDblClick) {
+                            $(flowFileInputSearch).click();
+                        }
+                        checkFiles();
+                    })
+                }
+            })
+
+        row = $('<div class="user-settings-row"></div>').appendTo(filesContainer);
+        $('<label for=""></label>').text('Credentials').appendTo(row);
+        var credFileLabel = $('<div class="uneditable-input">').text(activeProject.files.credentials).appendTo(row);
+        var credFileInput = $('<div class="uneditable-input">').text(activeProject.files.credentials).hide().insertAfter(credFileLabel);
+
+        var checkFiles = function() {
+            var saveDisabled;
+            var currentFlowValue = flowFileInput.val();
+            var m = /^(.+?)(\.[^.]*)?$/.exec(currentFlowValue);
+            if (m) {
+                credFileInput.text(m[1]+"_cred"+(m[2]||".json"));
+            } else if (currentFlowValue === "") {
+                credFileInput.text("");
+            }
+            var isFlowInvalid = currentFlowValue==="" ||
+                                /\.\./.test(currentFlowValue) ||
+                                /\/$/.test(currentFlowValue);
+
+            saveDisabled = isFlowInvalid || credFileInput.text()==="";
+
+            if (credentialSecretExistingInput.is(":visible")) {
+                credentialSecretExistingInput.toggleClass("input-error", credentialSecretExistingInput.val() === "");
+                saveDisabled = saveDisabled || credentialSecretExistingInput.val() === "";
+            }
+            if (credentialSecretNewInput.is(":visible")) {
+                credentialSecretNewInput.toggleClass("input-error", credentialSecretNewInput.val() === "");
+                saveDisabled = saveDisabled || credentialSecretNewInput.val() === "";
+            }
+
+
+            flowFileInput.toggleClass("input-error", isFlowInvalid);
+            credFileInput.toggleClass("input-error",credFileInput.text()==="");
+            saveButton.toggleClass('disabled',saveDisabled);
+            saveButton.prop('disabled',saveDisabled);
+        }
+        flowFileInput.on("change keyup paste",checkFiles);
+
+
+        if (!activeProject.files.flow) {
+            $('<span class="form-warning"><i class="fa fa-warning"></i> Missing</span>').appendTo(flowFileLabelText);
+        }
+        if (!activeProject.files.credentials) {
+            $('<span class="form-warning"><i class="fa fa-warning"></i> Missing</span>').appendTo(credFileLabel);
+        }
+
+
+        row = $('<div class="user-settings-row"></div>').appendTo(filesContainer);
+
+        $('<label></label>').appendTo(row);
+        var credentialStateLabel = $('<span><i class="user-settings-credentials-state-icon fa"></i> <span class="user-settings-credentials-state"></span></span>').appendTo(row);
+        var credentialSecretButtons = $('<span class="button-group" style="margin-left: -72px;">').hide().appendTo(row);
+
+        credentialStateLabel.css('color','#666');
+        credentialSecretButtons.css('vertical-align','top');
+        var credentialSecretResetButton = $('<button class="editor-button" style="vertical-align: top; width: 36px; margin-bottom: 10px"><i class="fa fa-trash-o"></i></button>')
+            .appendTo(credentialSecretButtons)
+            .click(function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('selected')) {
+                    credentialSecretNewInput.val("");
+                    credentialSecretExistingRow.hide();
+                    credentialSecretNewRow.show();
+                    $(this).addClass("selected");
+                    credentialSecretEditButton.removeClass("selected");
+                    credentialResetLabel.show();
+                    credentialResetWarning.show();
+                    credentialSetLabel.hide();
+                    credentialChangeLabel.hide();
+
+                    credentialFormRows.show();
+                } else {
+                    $(this).removeClass("selected");
+                    credentialFormRows.hide();
+                }
+                checkFiles();
+            });
+        var credentialSecretEditButton = $('<button class="editor-button" style="vertical-align: top; width: 36px; margin-bottom: 10px"><i class="fa fa-pencil"></i></button>')
+            .appendTo(credentialSecretButtons)
+            .click(function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('selected')) {
+                    credentialSecretExistingInput.val("");
+                    credentialSecretNewInput.val("");
+                    if (activeProject.settings.credentialSecretInvalid || !activeProject.settings.credentialsEncrypted) {
+                        credentialSetLabel.show();
+                        credentialChangeLabel.hide();
+                        credentialSecretExistingRow.hide();
+                    } else {
+                        credentialSecretExistingRow.show();
+                        credentialSetLabel.hide();
+                        credentialChangeLabel.show();
+                    }
+                    credentialSecretNewRow.show();
+                    credentialSecretEditButton.addClass("selected");
+                    credentialSecretResetButton.removeClass("selected");
+
+                    credentialResetLabel.hide();
+                    credentialResetWarning.hide();
+                    credentialFormRows.show();
+                } else {
+                    $(this).removeClass("selected");
+                    credentialFormRows.hide();
+                }
+                checkFiles();
+            })
+
+
+        row = $('<div class="user-settings-row user-settings-row-credentials"></div>').hide().appendTo(filesContainer);
+
+
+
+        var credentialFormRows = $('<div>',{style:"margin-top:10px"}).hide().appendTo(credentialStateLabel);
+
+        var credentialSetLabel = $('<div style="margin: 20px 0 10px 5px;">Set the encryption key:</div>').hide().appendTo(credentialFormRows);
+        var credentialChangeLabel = $('<div style="margin: 20px 0 10px 5px;">Change the encryption key:</div>').hide().appendTo(credentialFormRows);
+        var credentialResetLabel = $('<div style="margin: 20px 0 10px 5px;">Reset the encryption key:</div>').hide().appendTo(credentialFormRows);
+
+        var credentialSecretExistingRow = $('<div class="user-settings-row user-settings-row-credentials"></div>').appendTo(credentialFormRows);
+        $('<label for=""></label>').text('Current key').appendTo(credentialSecretExistingRow);
+        var credentialSecretExistingInput = $('<input type="password">').appendTo(credentialSecretExistingRow)
+            .on("change keyup paste",function() {
                 if (popover) {
                     popover.close();
                     popover = null;
                 }
-                changeButton.prop('disabled',false);
-                if (resetButton) {
-                    resetButton.prop('disabled',false);
-                }
-                $(".project-settings-credentials-row").hide();
-                $(".project-settings-credentials-current-row").hide();
-                $(".project-settings-credentials-reset-row").hide();
+                checkFiles();
             });
-        var saveButton = $('<button class="editor-button primary disabled"></button>')
-            .text("Save")
-            .appendTo(bg)
+
+        var credentialSecretNewRow = $('<div class="user-settings-row user-settings-row-credentials"></div>').appendTo(credentialFormRows);
+
+
+        $('<label for=""></label>').text('New key').appendTo(credentialSecretNewRow);
+        var credentialSecretNewInput = $('<input type="password">').appendTo(credentialSecretNewRow).on("change keyup paste",checkFiles);
+
+        var credentialResetWarning = $('<div class="form-tips form-warning" style="margin: 10px;"><i class="fa fa-warning"></i> This will delete all existing credentials</div>').hide().appendTo(credentialFormRows);
+
+
+        var hideEditForm = function() {
+            editButton.show();
+            formButtons.hide();
+            flowFileLabelText.show();
+            flowFileInput.hide();
+            flowFileInputSearch.hide();
+            credFileLabel.show();
+            credFileInput.hide();
+            // credentialStateLabel.parent().show();
+            credentialStateLabel.removeClass("uneditable-input");
+            credentialStateLabel.css('height','');
+
+            $(".user-settings-row-credentials").hide();
+            credentialFormRows.hide();
+            credentialSecretButtons.hide();
+            credentialSecretResetButton.removeClass("selected");
+            credentialSecretEditButton.removeClass("selected");
+
+
+        }
+
+        var formButtons = $('<span class="button-group" style="position: relative; float: right; margin-right:0;"></span>').hide().appendTo(filesContainer);
+        var cancelButton = $('<button class="editor-button">Cancel</button>')
+            .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
-                if ($(this).hasClass('disabled')) {
-                    return;
-                }
-                var spinner = addSpinnerOverlay(credentialsContainer);
-                var payload = {
-                    credentialSecret: newKey.val()
-                };
-                if (activeProject.settings.credentialSecretInvalid) {
-                    RED.deploy.setDeployInflight(true);
-                }
-
-                if (activeProject.settings.credentialsEncrypted) {
-                    if (action === 'reset') {
-                        payload.resetCredentialSecret = true;
-                    } else if (!activeProject.settings.credentialSecretInvalid) {
-                        payload.currentCredentialSecret = currentKey.val();
-                    }
-                }
-                var done = function(err,res) {
+                hideEditForm();
+            });
+        var saveButton = $('<button class="editor-button">Save</button>')
+            .appendTo(formButtons)
+            .click(function(evt) {
+                evt.preventDefault();
+                var spinner = addSpinnerOverlay(filesContainer);
+                var done = function(err) {
                     spinner.remove();
                     if (err) {
                         console.log(err);
                         return;
                     }
+                    flowFileLabelText.text(flowFileInput.val());
+                    credFileLabel.text(credFileInput.text());
+                    hideEditForm();
                 }
+                var payload = {
+                    files: {
+                        flow: flowFileInput.val(),
+                        credentials: credFileInput.text()
+                    }
+                }
+
+                if (credentialSecretResetButton.hasClass('selected')) {
+                    payload.resetCredentialSecret = true;
+                }
+                if (credentialSecretResetButton.hasClass('selected') || credentialSecretEditButton.hasClass('selected')) {
+                    payload.credentialSecret = credentialSecretNewInput.val();
+                    if (credentialSecretExistingInput.is(":visible")) {
+                        payload.currentCredentialSecret = credentialSecretExistingInput.val();
+                    }
+                }
+
+                // console.log(JSON.stringify(payload,null,4));
+                RED.deploy.setDeployInflight(true);
                 utils.sendRequest({
                     url: "projects/"+activeProject.name,
                     type: "PUT",
                     responses: {
                         0: function(error) {
-                            done(error,null);
+                            done(error);
                         },
                         200: function(data) {
-                            if (popover) {
-                                popover.close();
-                                popover = null;
-                            }
-                            changeButton.prop('disabled',false);
-                            if (resetButton) {
-                                resetButton.prop('disabled',false);
-                            }
-                            $(".project-settings-credentials-row").hide();
-                            $(".project-settings-credentials-current-row").hide();
-                            $(".project-settings-credentials-reset-row").hide();
+                            activeProject = data;
+                            console.log("updating form");
+                            updateForm();
+                            done();
                         },
                         400: {
+                            'credentials_load_failed': function(error) {
+                                done(error);
+                            },
                             'unexpected_error': function(error) {
-                                done(error,null);
+                                console.log(error);
+                                done(error);
                             },
                             'missing_current_credential_key':  function(error) {
-                                currentKey.addClass("input-error");
+                                credentialSecretExistingInput.addClass("input-error");
                                 popover = RED.popover.create({
-                                    target: currentKey,
+                                    target: credentialSecretExistingInput,
                                     direction: 'right',
                                     size: 'small',
-                                    content: "Incorrect key"
+                                    content: "Incorrect key",
+                                    autoClose: 3000
                                 }).open();
-                                done();
+                                done(error);
                             }
                         },
                     }
                 },payload).always(function() {
-                    if (activeProject.settings.credentialSecretInvalid) {
-                        RED.deploy.setDeployInflight(false);
-                    }
+                    RED.deploy.setDeployInflight(false);
                 });
+
+
+
             });
+        var updateForm = function() {
+            if (activeProject.settings.credentialSecretInvalid) {
+                credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-warning");
+                credentialStateLabel.find(".user-settings-credentials-state").text("Invalid encryption key");
+            } else if (activeProject.settings.credentialsEncrypted) {
+                credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-lock");
+                credentialStateLabel.find(".user-settings-credentials-state").text("Encryption enabled");
+            } else {
+                credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-unlock");
+                credentialStateLabel.find(".user-settings-credentials-state").text("Encryption disabled");
+            }
+            credentialSecretResetButton.toggleClass('disabled',!activeProject.settings.credentialsEncrypted);
+            credentialSecretResetButton.prop('disabled',!activeProject.settings.credentialsEncrypted);
+        }
 
-
-
-        // $('<h3></h3>').text("Credentials").appendTo(pane);
-        // row = $('<div class="user-settings-row"></div>').appendTo(pane);
-        // $('<span style="margin-right: 20px;"><i class="fa fa-unlock"></i> Credentials are not encrypted</span>').appendTo(row);
-        // $('<button id="" class="editor-button">Set key</button>').appendTo(row);
-
-
-        $('<h3></h3>').text("Repository").appendTo(pane);
-        row = $('<div class="user-settings-row"></div>').appendTo(pane);
-        var input;
-        $('<label for="">'+'Remote'+'</label>').appendTo(row);
-        $('<input id="" type="text">').appendTo(row);
-
-
+        checkFiles();
+        updateForm();
+    }
+    function createSettingsPane(activeProject) {
+        var pane = $('<div id="project-settings-tab-settings" class="project-settings-tab-pane node-help"></div>');
+        createFilesSection(activeProject,pane);
         return pane;
     }
 

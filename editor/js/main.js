@@ -69,10 +69,15 @@
                             return;
                         }
                         if (msg.text) {
+                            console.log(msg);
                             var text = RED._(msg.text,{default:msg.text});
                             if (notificationId === "runtime-state") {
                                 if (msg.error === "credentials_load_failed") {
+                                    // TODO: NLS
                                     text += '<p><a href="#" onclick="RED.projects.showCredentialsPrompt(); return false;">'+'Setup credentials'+'</a></p>';
+                                } else if (msg.error === "missing_flow_file") {
+                                    // TODO: NLS
+                                    text += '<p><a href="#" onclick="RED.projects.showFilesPrompt(); return false;">'+'Setup project files'+'</a></p>';
                                 }
                             }
                             if (!persistentNotifications.hasOwnProperty(notificationId)) {

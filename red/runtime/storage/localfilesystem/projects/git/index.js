@@ -111,7 +111,7 @@ function getFiles(localRepo) {
                 }
             }
             files[fullName] = {
-                type: "f"
+                type: /\/$/.test(fullName)?"d":"f"
             }
         })
         return runCommand(gitCommand,["status","--porcelain"],localRepo).then(function(output) {

@@ -77,14 +77,15 @@ module.exports = {
                         }
                     })
                 } else {
-                    res.redirect(303,req.baseUrl + '/');
+                    res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }
             } else if (req.body.hasOwnProperty('credentialSecret') ||
                        req.body.hasOwnProperty('description') ||
                        req.body.hasOwnProperty('dependencies')||
-                       req.body.hasOwnProperty('summary')) {
+                       req.body.hasOwnProperty('summary') ||
+                       req.body.hasOwnProperty('files')) {
                 runtime.storage.projects.updateProject(req.params.id, req.body).then(function() {
-                    res.redirect(303,req.baseUrl + '/');
+                    res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }).catch(function(err) {
                     if (err.code) {
                         res.status(400).json({error:err.code, message: err.message});
@@ -92,6 +93,8 @@ module.exports = {
                         res.status(400).json({error:"unexpected_error", message:err.toString()});
                     }
                 })
+            } else {
+                res.status(400).json({error:"unexpected_error", message:"invalid_request"});
             }
 
         });

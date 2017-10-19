@@ -78,7 +78,7 @@ function loadFlows() {
         });
     }).catch(function(err) {
         activeConfig = null;
-        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:"credentials_load_failed",text:"notification.warnings.invalid-credentials-secret"},retain:true});
+        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,text:"notification.warnings."+err.code},retain:true});
         log.warn(log._("nodes.flows.error",{message:err.toString()}));
         throw err;
     });

@@ -33,6 +33,7 @@ function handleStatus(event) {
     publish("status/"+event.id,event.status,true);
 }
 function handleRuntimeEvent(event) {
+    log.trace("runtime event: "+JSON.stringify(event));
     publish("notification/"+event.id,event.payload||{},event.retain);
 }
 function init(_server,runtime) {

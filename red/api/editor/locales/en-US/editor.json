@@ -85,7 +85,8 @@
             "nodeActionDisabled": "node actions disabled within subflow",
             "missing-types": "Flows stopped due to missing node types. Check logs for details.",
             "restartRequired": "Node-RED must be restarted to enable upgraded modules",
-            "invalid-credentials-secret": "Flows stopped due to missing or invalid credentialSecret"
+            "credentials_load_failed": "Flows stopped due to missing or invalid credentialSecret",
+            "missing_flow_file": "Could not find the project flow file"
         },
 
         "error": "<strong>Error</strong>: __message__",

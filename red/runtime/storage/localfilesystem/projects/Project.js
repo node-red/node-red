@@ -49,11 +49,11 @@ Project.prototype.load = function () {
 
     this.credentialSecret = projectSettings.credentialSecret;
 
-    this.paths.flowFile = fspath.join(this.path,"flow.json");
-    this.paths.credentialsFile = fspath.join(this.path,"flow_cred.json");
+    // this.paths.flowFile = fspath.join(this.path,"flow.json");
+    // this.paths.credentialsFile = fspath.join(this.path,"flow_cred.json");
 
     var promises = [];
-    return checkProjectFiles(project.name).then(function(missingFiles) {
+    return checkProjectFiles(project).then(function(missingFiles) {
         if (missingFiles.length > 0) {
             project.missingFiles = missingFiles;
         }
@@ -61,7 +61,18 @@ Project.prototype.load = function () {
             project.paths['package.json'] = fspath.join(project.path,"package.json");
             promises.push(fs.readFile(project.paths['package.json'],"utf8").then(function(content) {
                 project.package = util.parseJSON(content);
+                if (project.package.hasOwnProperty('node-red')) {
+                    if (project.package['node-red'].hasOwnProperty('settings')) {
+                        project.paths.flowFile = project.package['node-red'].settings.flowFile;
+                        project.paths.credentialsFile = project.package['node-red'].settings.credentialsFile;
+                    }
+                } else {
+                    // TODO: package.json doesn't have a node-red section
+                    //       is that a bad thing?
+                }
             }));
+        } else {
+            project.package = {};
         }
         if (missingFiles.indexOf('README.md') === -1) {
             project.paths['README.md'] = fspath.join(project.path,"README.md");
@@ -71,6 +82,16 @@ Project.prototype.load = function () {
         } else {
             project.description = "";
         }
+        // if (missingFiles.indexOf('flow.json') !== -1) {
+        //     console.log("MISSING FLOW FILE");
+        // } else {
+        //     project.paths.flowFile = fspath.join(project.path,"flow.json");
+        // }
+        // if (missingFiles.indexOf('flow_cred.json') !== -1) {
+        //     console.log("MISSING CREDS FILE");
+        // } else {
+        //     project.paths.credentialsFile = fspath.join(project.path,"flow_cred.json");
+        // }
 
         return when.settle(promises).then(function() {
             return project;
@@ -79,11 +100,23 @@ Project.prototype.load = function () {
 };
 
 Project.prototype.update = function (data) {
-    var filesToUpdate = {};
+
     var promises = [];
     var project = this;
+    var saveSettings = false;
+    var saveREADME = false;
+    var savePackage = false;
+    var flowFilesChanged = false;
+    var credentialSecretChanged = false;
 
-    if (data.credentialSecret) {
+    var globalProjectSettings = settings.get("projects");
+    if (!globalProjectSettings.projects.hasOwnProperty(this.name)) {
+        globalProjectSettings.projects[this.name] = {};
+        saveSettings = true;
+    }
+
+
+    if (data.credentialSecret && data.credentialSecret !== this.credentialSecret) {
         var existingSecret = data.currentCredentialSecret;
         var isReset = data.resetCredentialSecret;
         var secret = data.credentialSecret;
@@ -100,42 +133,62 @@ Project.prototype.update = function (data) {
             this.credentialSecret !== existingSecret) { // key doesn't match provided existing key
                 var e = new Error("Cannot change credentialSecret without current key");
                 e.code = "missing_current_credential_key";
-                throw e;
+                return when.reject(e);
         }
         this.credentialSecret = secret;
 
-        var globalProjectSettings = settings.get("projects");
-        globalProjectSettings.projects[this.name] = globalProjectSettings.projects[this.name]||{}
         globalProjectSettings.projects[this.name].credentialSecret = project.credentialSecret;
         delete this.credentialSecretInvalid;
-
-        return settings.set("projects",globalProjectSettings);
+        saveSettings = true;
+        credentialSecretChanged = true;
     }
 
     if (data.hasOwnProperty('description')) {
-        filesToUpdate[this.paths['README.md']] = function() {
-            return data.description;
-        };
+        saveREADME = true;
         this.description = data.description;
     }
     if (data.hasOwnProperty('dependencies')) {
-        filesToUpdate[this.paths['package.json']] = function() {
-            return JSON.stringify(project.package,"",4)
-        };
+        savePackage = true;
         this.package.dependencies = data.dependencies;
     }
     if (data.hasOwnProperty('summary')) {
-        filesToUpdate[this.paths['package.json']] = function() {
-            return JSON.stringify(project.package,"",4)
-        };
+        savePackage = true;
         this.package.description = data.summary;
     }
 
-    var files = Object.keys(filesToUpdate);
-    files.forEach(function(f) {
-        promises.push(util.writeFile(f,filesToUpdate[f]()));
-    });
-    return when.settle(promises);
+    if (data.hasOwnProperty('files')) {
+        this.package['node-red'] = this.package['node-red'] || { settings: {}};
+        if (data.files.hasOwnProperty('flow') && this.package['node-red'].settings.flowFile !== data.files.flow) {
+            this.paths.flowFile = data.files.flow;
+            this.package['node-red'].settings.flowFile = data.files.flow;
+            savePackage = true;
+            flowFilesChanged = true;
+        }
+        if (data.files.hasOwnProperty('credentials') && this.package['node-red'].settings.credentialsFile !== data.files.credentials) {
+            this.paths.credentialsFile = data.files.credentials;
+            this.package['node-red'].settings.credentialsFile = data.files.credentials;
+            // Don't know if the credSecret is invalid or not so clear the flag
+            delete this.credentialSecretInvalid;
+
+            savePackage = true;
+            flowFilesChanged = true;
+        }
+    }
+    if (saveSettings) {
+        promises.push(settings.set("projects",globalProjectSettings));
+    }
+    if (saveREADME) {
+        promises.push(util.writeFile(this.paths['README.md'], this.description));
+    }
+    if (savePackage) {
+        promises.push(util.writeFile(this.paths['package.json'], JSON.stringify(this.package,"",4)));
+    }
+    return when.settle(promises).then(function(res) {
+        return {
+            flowFilesChanged: flowFilesChanged,
+            credentialSecretChanged: credentialSecretChanged
+        }
+    })
 };
 
 Project.prototype.getFiles = function () {
@@ -161,13 +214,23 @@ Project.prototype.getCommit = function(sha) {
 }
 
 Project.prototype.getFlowFile = function() {
-    return this.paths.flowFile;
+    console.log("Project.getFlowFile = ",this.paths.flowFile);
+    if (this.paths.flowFile) {
+        return fspath.join(this.path,this.paths.flowFile);
+    } else {
+        return null;
+    }
 }
 Project.prototype.getFlowFileBackup = function() {
     return getBackupFilename(this.getFlowFile());
 }
 Project.prototype.getCredentialsFile = function() {
-    return this.paths.credentialsFile;
+    console.log("Project.getCredentialsFile = ",this.paths.credentialsFile);
+    if (this.paths.credentialsFile) {
+        return fspath.join(this.path,this.paths.credentialsFile);
+    } else {
+        return this.paths.credentialsFile;
+    }
 }
 Project.prototype.getCredentialsFileBackup = function() {
     return getBackupFilename(this.getCredentialsFile());
@@ -186,8 +249,8 @@ Project.prototype.toJSON = function () {
             credentialSecretInvalid: this.credentialSecretInvalid
         },
         files: {
-            flowFile: this.paths.flowFile&&this.paths.flowFile.substring(this.path.length),
-            credentialsFile: this.paths.credentialsFile&&this.paths.credentialsFile.substring(this.path.length)
+            flow: this.paths.flowFile,
+            credentials: this.paths.credentialsFile
         }
     }
 };
@@ -233,7 +296,7 @@ function createDefaultProject(project) {
 }
 
 function checkProjectFiles(project) {
-    var projectPath = fspath.join(projectsDir,project);
+    var projectPath = project.path;
     var promises = [];
     var paths = [];
     for (var file in defaultFileSet) {
@@ -278,6 +341,9 @@ function createProject(metadata) {
                 projects.projects[project] = {};
                 if (metadata.credentialSecret) {
                     projects.projects[project].credentialSecret = metadata.credentialSecret;
+                }
+                if (metadata.remote) {
+                    projects.projects[project].remote = metadata.remote;
                 }
                 return settings.set('projects',projects);
             }).then(function() {

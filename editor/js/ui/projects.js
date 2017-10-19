@@ -933,6 +933,9 @@ function refresh() {
         showCredentialsPrompt: function() { //TODO: rename this function
             RED.projects.settings.show('settings');
         },
+        showFilesPrompt: function() { //TODO: rename this function
+            RED.projects.settings.show('settings');
+        },
         // showSidebar: showSidebar,
         refresh: refresh,
         editProject: function() {

@@ -33,6 +33,7 @@ RED.popover = (function() {
         var trigger = options.trigger;
         var content = options.content;
         var delay = options.delay;
+        var autoClose = options.autoClose;
         var width = options.width||"auto";
         var size = options.size||"default";
         if (!deltaSizes[size]) {
@@ -92,7 +93,6 @@ RED.popover = (function() {
         }
 
         if (trigger === 'hover') {
-
             target.on('mouseenter',function(e) {
                 clearTimeout(timer);
                 active = true;
@@ -116,6 +116,11 @@ RED.popover = (function() {
                     openPopup();
                 }
             });
+        } else if (autoClose) {
+            setTimeout(function() {
+                active = false;
+                closePopup();
+            },autoClose);
         }
         var res = {
             setContent: function(_content) {

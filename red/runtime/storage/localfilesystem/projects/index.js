@@ -200,11 +200,36 @@ function updateProject(project,data) {
         // TODO standardise
         throw new Error("Cannot update inactive project");
     }
-    if (data.hasOwnProperty('credentialSecret')) {
-        return setCredentialSecret(data);
-    } else {
-        return activeProject.update(data);
-    }
+    // In case this triggers a credential secret change
+    var isReset = data.resetCredentialSecret;
+    var wasInvalid = activeProject.credentialSecretInvalid;
+
+    return activeProject.update(data).then(function(result) {
+
+        if (result.flowFilesChanged) {
+            flowsFullPath = activeProject.getFlowFile();
+            flowsFileBackup = activeProject.getFlowFileBackup();
+            credentialsFile = activeProject.getCredentialsFile();
+            credentialsFileBackup = activeProject.getCredentialsFileBackup();
+            return reloadActiveProject();
+        } else if (result.credentialSecretChanged) {
+            if (isReset || !wasInvalid) {
+                if (isReset) {
+                    runtime.nodes.clearCredentials();
+                }
+                runtime.nodes.setCredentialSecret(activeProject.credentialSecret);
+                return runtime.nodes.exportCredentials()
+                    .then(runtime.storage.saveCredentials)
+                    .then(function() {
+                        if (wasInvalid) {
+                            return reloadActiveProject();
+                        }
+                    });
+            } else if (wasInvalid) {
+                return reloadActiveProject();
+            }
+        }
+    });
 }
 function setCredentialSecret(data) { //existingSecret,secret) {
     var isReset = data.resetCredentialSecret;
@@ -249,6 +274,14 @@ function getFlows() {
             });
         } else {
             log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
+        }
+    }
+    if (activeProject) {
+        if (!activeProject.getFlowFile()) {
+            log.warn("NLS: project has no flow file");
+            var error = new Error("NLS: project has no flow file");
+            error.code = "missing_flow_file";
+            return when.reject(error);
         }
     }
     return util.readFile(flowsFullPath,flowsFileBackup,[],'flow');
