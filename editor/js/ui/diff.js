@@ -1670,10 +1670,10 @@ RED.diff = (function() {
 
                 for (var j=0;j<hunks[i].lines.length;j++) {
                     var lineText = hunks[i].lines[j];
-                    if (lineText[0] === '\\' || lineText === "") {
-                        // Comment line - bail out of this hunk
-                        break;
-                    }
+                    // if (lineText[0] === '\\' || lineText === "") {
+                    //     // Comment line - bail out of this hunk
+                    //     break;
+                    // }
                     diffRow = $('<tr>').appendTo(codeBody);
                     var localLineNo = $('<td class="lineno">').appendTo(diffRow);
                     var remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
@@ -1688,10 +1688,10 @@ RED.diff = (function() {
                         localLineNo.text(localLine++);
                     } else {
                         line.addClass("unchanged");
-                        if (localLine > 0) {
+                        if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
                             localLineNo.text(localLine++);
                         }
-                        if (remoteLine > 0) {
+                        if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
                             remoteLineNo.text(remoteLine++);
                         }
                     }
