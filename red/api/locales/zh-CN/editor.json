@@ -256,7 +256,7 @@
             "social": "社交",
             "storage": "存储",
             "analysis": "分析",
-            "advanced": "高级的"
+            "advanced": "高级"
         },
         "event": {
             "nodeAdded": "添加到面板中的节点:",
