@@ -449,6 +449,34 @@ describe('debug node', function() {
         });
     });
 
+    it('should truncate a large buffer in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Buffer(1001).fill("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            foo:{
+                                type: "Buffer",
+                                data: Array(1000).fill(88),
+                                __encoded__: true,
+                                length: 1001
+                            }
+                        },null," "),
+                        property:"payload",
+                        format:"Object"
+                    }
+                });
+            }, done);
+        });
+    });
+
     it('should convert Buffer to hex', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
