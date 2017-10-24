@@ -64,7 +64,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal("changed");
@@ -83,7 +82,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal(12345);
@@ -305,7 +303,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         (Date.now() - msg.ts).should.be.approximately(0,50);
@@ -344,7 +341,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal("Change456Me");
@@ -365,7 +361,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal(456);
