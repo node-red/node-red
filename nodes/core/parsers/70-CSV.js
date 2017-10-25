@@ -72,15 +72,18 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
+                                    /* istanbul ignore else */
                                     if (tmpwarn === true) { // just warn about missing template once
                                         node.warn(RED._("csv.errors.obj_csv"));
                                         tmpwarn = false;
                                     }
                                     ou = "";
                                     for (var p in msg.payload[0]) {
+                                        /* istanbul ignore else */
                                         if (msg.payload[0].hasOwnProperty(p)) {
+                                            /* istanbul ignore else */
                                             if (typeof msg.payload[0][p] !== "object") {
-                                                var q = msg.payload[0][p];
+                                                var q = "" + msg.payload[0][p];
                                                 if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                     q = q.replace(/"/g, '""');
                                                     ou += node.quo + q + node.quo + node.sep;
@@ -102,7 +105,7 @@ module.exports = function(RED) {
                                         else {
                                             // aaargh - resorting to eval here - but fairly contained front and back.
                                             var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
-
+                                            /* istanbul ignore else */
                                             if (p === "undefined") { p = ""; }
                                             if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                 p = p.replace(/"/g, '""');
@@ -134,6 +137,9 @@ module.exports = function(RED) {
                         var line = msg.payload;
                         var tmp = "";
                         var reg = /^[-]?[0-9]*\.?[0-9]+$/;
+                        if (msg.hasOwnProperty("parts")) {
+                            if (msg.parts.index > 0) { first = false; }
+                        }
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
