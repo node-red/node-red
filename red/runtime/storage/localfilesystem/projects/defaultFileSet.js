@@ -14,20 +14,43 @@
  * limitations under the License.
  **/
 
+
+var fspath = require("path");
+
+function getCredentialsFilename(filename) {
+    // TODO: DRY - ./index.js
+    var ffDir = fspath.dirname(filename);
+    var ffExt = fspath.extname(filename);
+    var ffBase = fspath.basename(filename,ffExt);
+    return fspath.join(ffDir,ffBase+"_cred"+ffExt);
+}
+
+
 module.exports = {
     "package.json": function(project) {
-        return JSON.stringify({
+        var package = {
             "name": project.name,
             "description": project.summary||"A Node-RED Project",
             "version": "0.0.1",
-            "dependencies": {}
-        },"",4);
+            "dependencies": {},
+            "node-red": {
+                "settings": {
+                }
+            }
+        };
+        if (project.files) {
+            if (project.files.flow) {
+                package['node-red'].settings.flowFile = project.files.flow;
+                package['node-red'].settings.credentialsFile = getCredentialsFilename(project.files.flow);
+            }
+        }
+        return JSON.stringify(package,"",4);
     },
     "README.md": function(project) {
         return project.name+"\n"+("=".repeat(project.name.length))+"\n\n"+(project.summary||"A Node-RED Project")+"\n\n";
     },
     "settings.json": function() { return "{}" },
-    "flow.json": function() { return "[]" },
-    "flow_cred.json": function() { return "{}" },
+    // "flow.json": function() { return "[]" },
+    // "flow_cred.json": function() { return "{}" },
     ".gitignore": function() { return "*.backup" ;}
 }

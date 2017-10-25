@@ -129,9 +129,24 @@ module.exports = {
             })
         });
 
-        app.post(/([^\/]+)\/stage\/(.+)$/, function(req,res) {
-            var projectName = req.params[0];
-            var file = req.params[1];
+        // /:project/files/:treeish/file-path
+        app.get("/:id/files/:treeish/*", function(req,res) {
+            var projectId = req.params.id;
+            var treeish = req.params.treeish;
+            var filePath = req.params[0];
+
+            runtime.storage.projects.getFile(projectId,filePath,treeish).then(function(data) {
+                res.json({content:data});
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            })
+        });
+
+        app.post("/:id/stage/*", function(req,res) {
+            var projectName = req.params.id;
+            var file = req.params[0];
 
             runtime.storage.projects.stageFile(projectName,file).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/files");
@@ -166,9 +181,9 @@ module.exports = {
             })
         });
 
-        app.delete(/([^\/]+)\/stage\/(.+)$/, function(req,res) {
-            var projectName = req.params[0];
-            var file = req.params[1];
+        app.delete("/:id/stage/*", function(req,res) {
+            var projectName = req.params.id;
+            var file = req.params[0];
 
             runtime.storage.projects.unstageFile(projectName,file).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/files");
@@ -189,10 +204,10 @@ module.exports = {
             })
         });
 
-        app.get(/([^\/]+)\/diff\/([^\/]+)\/(.+)$/, function(req,res) {
-            var projectName = req.params[0];
-            var type = req.params[1];
-            var file = req.params[2];
+        app.get("/:id/diff/:type/*", function(req,res) {
+            var projectName = req.params.id;
+            var type = req.params.type;
+            var file = req.params[0];
             runtime.storage.projects.getFileDiff(projectName,file,type).then(function(data) {
                 res.json({
                     diff: data
@@ -227,14 +242,6 @@ module.exports = {
                 console.log(err.stack);
                 res.status(400).json({error:"unexpected_error", message:err.toString()});
             })
-        });
-
-        app.get(new RegExp("/([^\/]+)\/files\/(.*)"), function(req,res) {
-            // Get project file
-        });
-
-        app.post(new RegExp("/([^\/]+)\/files\/(.*)"), function(req,res) {
-            // Update project file
         });
 
         return app;

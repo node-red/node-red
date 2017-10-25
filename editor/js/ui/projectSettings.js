@@ -908,9 +908,6 @@ RED.projects.settings = (function() {
                 },payload).always(function() {
                     RED.deploy.setDeployInflight(false);
                 });
-
-
-
             });
         var updateForm = function() {
             if (activeProject.settings.credentialSecretInvalid) {

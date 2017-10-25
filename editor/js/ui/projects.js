@@ -44,11 +44,13 @@ RED.projects = (function() {
             },
             'create': (function() {
                 var projectNameInput;
-                var projectSummaryEditor;
+                var projectSummaryInput;
+                var projectFlowFileInput;
                 var projectSecretInput;
                 var projectSecretSelect;
                 var copyProject;
                 var projectRepoInput;
+                var emptyProjectCredentialInput;
 
                 return {
                     title: "Create a new project", // TODO: NLS
@@ -84,6 +86,16 @@ RED.projects = (function() {
                                     projectRepoInput.removeClass("input-error");
 
                                 }
+                            } else if (projectType === 'empty') {
+                                projectFlowFileInput.toggleClass("input-error",projectFlowFileInput.val()==='')
+                                valid = valid && projectFlowFileInput.val()!=='';
+                                var encryptionState = $("input[name=projects-encryption-type]:checked").val();
+                                if (encryptionState === 'enabled') {
+                                    var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
+                                    if (encryptionKeyType === 'custom') {
+                                        valid = valid && emptyProjectCredentialInput.val()!==''
+                                    }
+                                }
                             }
 
                             $("#projects-dialog-create").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
@@ -108,12 +120,79 @@ RED.projects = (function() {
 
                         projectNameInput = $('<input type="text"></input>').appendTo(row);
                         var projectNameInputChanged = false;
-                        projectNameInput.on("change keyup paste",function() { validateForm(); });
+                        projectNameInput.on("change keyup paste",function() { projectNameInputChanged = true; validateForm(); });
+                        $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row);
 
                         // Empty Project
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label>Summary <small>(optional)</small></label>').appendTo(row);
-                        projectSummaryEditor = $('<input type="text">').appendTo(row);
+                        $('<label>Description</label>').appendTo(row);
+                        projectSummaryInput = $('<input type="text">').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row);
+
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
+                        $('<label>Flow file</label>').appendTo(row);
+                        projectFlowFileInput = $('<input type="text">').val("flow.json")
+                            .on("change keyup paste",validateForm)
+                            .appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>*.json</small></label>').appendTo(row);
+
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
+                        $('<label>Credentials</label>').appendTo(row);
+
+                        var credentialsBox = $('<div style="width: 550px">').appendTo(row);
+                        var credentialsRightBox = $('<div style="min-height:150px; box-sizing: border-box; float: right; vertical-align: top; width: 331px; margin-left: -1px; padding: 15px; margin-top: -15px; border: 1px solid #ccc; border-radius: 3px;  display: inline-block">').appendTo(credentialsBox);
+                        var credentialsLeftBox = $('<div style="vertical-align: top; width: 220px;  display: inline-block">').appendTo(credentialsBox);
+
+                        var credentialsEnabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid #ccc;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: white;"></div>').appendTo(credentialsLeftBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" checked style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">Enable encryption</span></label>').appendTo(credentialsEnabledBox);
+                        var credentialsDisabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid white;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: #ccc; "></div>').appendTo(credentialsLeftBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">Disable encryption</span></label>').appendTo(credentialsDisabledBox);
+
+                        credentialsLeftBox.find("input[name=projects-encryption-type]").click(function(e) {
+                            var val = $(this).val();
+                            var toEnable;
+                            var toDisable;
+                            if (val === 'enabled') {
+                                toEnable = credentialsEnabledBox;
+                                toDisable = credentialsDisabledBox;
+                                $(".projects-encryption-enabled-row").show();
+                                $(".projects-encryption-disabled-row").hide();
+                            } else {
+                                toDisable = credentialsEnabledBox;
+                                toEnable = credentialsDisabledBox;
+                                $(".projects-encryption-enabled-row").hide();
+                                $(".projects-encryption-disabled-row").show();
+
+                            }
+
+                            toEnable.css({
+                                borderColor: "#ccc",
+                                borderRightColor: "white"
+                            });
+                            toDisable.css({
+                                borderColor: "white",
+                                borderRightColor: "#ccc"
+                            })
+                            validateForm();
+                        })
+
+                        row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" checked style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="default" name="projects-encryption-key"> <span style="vertical-align: middle;">Use default key</span></label>').appendTo(row);
+                        row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="custom" name="projects-encryption-key"> <span style="vertical-align: middle;">Use custom key</span></label>').appendTo(row);
+                        row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        emptyProjectCredentialInput = $('<input disabled type="password" style="margin-left: 25px; width: calc(100% - 30px);"></input>').appendTo(row);
+                        emptyProjectCredentialInput.on("change keyup paste", validateForm);
+
+                        row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
+                        $('<div class="form-tips form-warning" style="padding: 15px; margin: 5px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
+
+                        credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
+                            var val = $(this).val();
+                            emptyProjectCredentialInput.attr("disabled",val === 'default');
+                            validateForm();
+                        })
+
 
                         // Copy Project
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-copy"></div>').appendTo(container);
@@ -151,10 +230,12 @@ RED.projects = (function() {
                             validateForm();
                         });
 
-                        // Secret - empty/clone
-                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label>Credentials key</label>').appendTo(row);
+                        // Secret - clone
+                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
+                        $('<label>Credentials encryption key</label>').appendTo(row);
                         projectSecretInput = $('<input type="text"></input>').appendTo(row);
+
+                        createAsEmpty.click();
 
                         return container;
                     },
@@ -177,8 +258,25 @@ RED.projects = (function() {
                                     name: projectNameInput.val(),
                                 }
                                 if (projectType === 'empty') {
-                                    projectData.summary = projectSummaryEditor.val();
-                                    projectData.credentialSecret = projectSecretInput.val();
+                                    projectData.summary = projectSummaryInput.val();
+                                    projectData.files = {
+                                        flow: projectFlowFileInput.val()
+                                    };
+                                    var encryptionState = $("input[name=projects-encryption-type]:checked").val();
+                                    if (encryptionState === 'enabled') {
+                                        var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
+                                        if (encryptionKeyType === 'custom') {
+                                            projectData.credentialSecret = emptyProjectCredentialInput.val();
+                                        } else {
+                                            // If 'use default', leave projectData.credentialSecret blank - as that will trigger
+                                            // it to use the default (TODO: if its set...)
+                                        }
+                                    } else {
+                                        // Disabled encryption by explicitly setting credSec to false
+                                        projectData.credentialSecret = false;
+                                    }
+
+
                                 } else if (projectType === 'copy') {
                                     projectData.copy = copyProject.name;
                                 } else if (projectType === 'clone') {

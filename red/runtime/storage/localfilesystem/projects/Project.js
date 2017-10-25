@@ -212,6 +212,13 @@ Project.prototype.getCommits = function(options) {
 Project.prototype.getCommit = function(sha) {
     return gitTools.getCommit(this.path,sha);
 }
+Project.prototype.getFile = function (filePath,treeish) {
+    if (treeish !== "_") {
+        return gitTools.getFile(this.path, filePath, treeish);
+    } else {
+        return fs.readFile(fspath.join(this.path,filePath),"utf8");
+    }
+};
 
 Project.prototype.getFlowFile = function() {
     console.log("Project.getFlowFile = ",this.paths.flowFile);
@@ -255,7 +262,16 @@ Project.prototype.toJSON = function () {
     }
 };
 
+
+function getCredentialsFilename(filename) {
+    // TODO: DRY - ./index.js
+    var ffDir = fspath.dirname(filename);
+    var ffExt = fspath.extname(filename);
+    var ffBase = fspath.basename(filename,ffExt);
+    return fspath.join(ffDir,ffBase+"_cred"+ffExt);
+}
 function getBackupFilename(filename) {
+    // TODO: DRY - ./index.js
     var ffName = fspath.basename(filename);
     var ffDir = fspath.dirname(filename);
     return fspath.join(ffDir,"."+ffName+".backup");
@@ -287,8 +303,23 @@ function createDefaultProject(project) {
                 promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project)));
             }
         }
+        if (project.files) {
+            if (project.files.flow && !/\.\./.test(project.files.flow)) {
+                var flowFilePath = fspath.join(projectPath,project.files.flow);
+                promises.push(util.writeFile(flowFilePath,"[]"));
+                var credsFilePath = getCredentialsFilename(flowFilePath);
+                promises.push(util.writeFile(credsFilePath,"{}"));
+            }
+        }
         return when.all(promises).then(function() {
-            return gitTools.stageFile(projectPath,Object.keys(defaultFileSet));
+            var files = Object.keys(defaultFileSet);
+            if (project.files) {
+                if (project.files.flow && !/\.\./.test(project.files.flow)) {
+                    files.push(project.files.flow);
+                    files.push(getCredentialsFilename(flowFilePath))
+                }
+            }
+            return gitTools.stageFile(projectPath,files);
         }).then(function() {
             return gitTools.commit(projectPath,"Create project");
         })
@@ -339,7 +370,7 @@ function createProject(metadata) {
             createProjectDirectory(project).then(function() {
                 var projects = settings.get('projects');
                 projects.projects[project] = {};
-                if (metadata.credentialSecret) {
+                if (metadata.hasOwnProperty('credentialSecret')) {
                     projects.projects[project].credentialSecret = metadata.credentialSecret;
                 }
                 if (metadata.remote) {

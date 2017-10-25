@@ -489,9 +489,10 @@ RED.editor = (function() {
 
     function getEditStackTitle() {
         var title = '<ul class="editor-tray-breadcrumbs">';
-        for (var i=0;i<editStack.length;i++) {
+        var label;
+        for (var i=editStack.length-1;i<editStack.length;i++) {
             var node = editStack[i];
-            var label = node.type;
+            label = node.type;
             if (node.type === '_expression') {
                 label = RED._("expressionEditor.title");
             } else if (node.type === '_json') {
@@ -524,7 +525,7 @@ RED.editor = (function() {
             title += '<li>'+label+'</li>';
         }
         title += '</ul>';
-        return title;
+        return label;
     }
 
     function buildEditForm(container,formId,type,ns) {

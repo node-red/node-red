@@ -153,8 +153,9 @@ function getCommit(project,sha) {
     return activeProject.getCommit(sha);
 }
 
-function getFile(project,path) {
-
+function getFile(project,filePath,sha) {
+    checkActiveProject(project);
+    return activeProject.getFile(filePath,sha);
 }
 
 function getActiveProject() {
@@ -339,6 +340,7 @@ module.exports = {
     createProject: createProject,
     updateProject: updateProject,
     getFiles: getFiles,
+    getFile: getFile,
     stageFile: stageFile,
     unstageFile: unstageFile,
     commit: commit,

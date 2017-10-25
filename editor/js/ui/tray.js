@@ -32,7 +32,11 @@ RED.tray = (function() {
         // var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
         // var shrinkButton = $('<a class="editor-tray-resize-button" style="cursor: e-resize;"><i style="margin-left: 1px;" class="fa fa-angle-right"></i></a>').appendTo(resizer);
         if (options.title) {
-            $('<div class="editor-tray-titlebar">'+options.title+'</div>').appendTo(header);
+            var titles = stack.map(function(e) { return e.options.title });
+            titles.push(options.title);
+            var title = '<ul class="editor-tray-breadcrumbs"><li>'+titles.join("</li><li>")+'</li></ul>';
+
+            $('<div class="editor-tray-titlebar">'+title+'</div>').appendTo(header);
         }
         if (options.width === Infinity) {
             options.maximized = true;

@@ -23,10 +23,23 @@
 .projects-edit-form form {
     margin: 0;
     .form-row {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         label {
-            width: auto;
+            color: #555;
+            width: 100%;
             display: block;
+            font-weight: 500;
+            &.projects-edit-form-sublabel {
+                color: #999;
+                text-align: right;
+                margin-bottom: -15px;
+                font-weight: normal;
+            }
+            &.projects-edit-form-inline-label {
+                font-weight: normal;
+                color: inherit;
+                width: auto;
+            }
         }
         input[type=text], input[type=password],textarea {
             width: 100%;
@@ -36,6 +49,7 @@
             vertical-align: top;
         }
     }
+
 }
 .projects-dialog-spinner {
     position: absolute;

@@ -27,11 +27,6 @@ var projects = require("./projects");
 
 var initialFlowLoadComplete = false;
 var settings;
-var flowsFile;
-var flowsFullPath;
-var flowsFileBackup;
-var credentialsFile;
-var credentialsFileBackup;
 
 var localfilesystem = {
     init: function(_settings, runtime) {

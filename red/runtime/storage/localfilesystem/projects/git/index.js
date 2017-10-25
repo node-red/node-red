@@ -215,6 +215,10 @@ module.exports = {
         return runCommand(gitCommand,args,cwd);
     },
     getFiles: getFiles,
+    getFile: function(cwd, filePath, treeish) {
+        var args = ["show",treeish+":"+filePath];
+        return runCommand(gitCommand,args,cwd);
+    },
     stageFile: function(cwd,file) {
         var args = ["add"];
         if (Array.isArray(file)) {

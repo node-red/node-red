@@ -65,7 +65,16 @@ RED.sidebar.versionControl = (function() {
                             // done(error,null);
                         },
                         200: function(data) {
-                            RED.diff.showUnifiedDiff(data.diff,(unstaged?"Unstaged":"Staged")+" changes : "+entry.file);
+                            var options = {
+                                diff: data.diff,
+                                title: (unstaged?"Unstaged":"Staged")+" changes : "+entry.file,
+                                oldRevTitle: unstaged?(entry.indexStatus === " "?"HEAD":"Staged"):"HEAD",
+                                newRevTitle: unstaged?"Unstaged":"Staged",
+                                oldRev: unstaged?(entry.indexStatus === " "?"@":":0"):"@",
+                                newRev: unstaged?"_":":0",
+                                project: activeProject
+                            }
+                            RED.diff.showUnifiedDiff(options);
                             // console.log(data.diff);
                         },
                         400: {
@@ -336,7 +345,13 @@ RED.sidebar.versionControl = (function() {
                     var activeProject = RED.projects.getActiveProject();
                     if (activeProject) {
                         $.getJSON("/projects/"+activeProject.name+"/commits/"+entry.sha,function(result) {
-                            RED.diff.showCommitDiff(result.commit);
+                            result.project = activeProject;
+                            result.oldRev = entry.sha+"~1";
+                            result.newRev = entry.sha;
+                            result.oldRevTitle = "Commit "+entry.sha.substring(0,7)+"~1";
+                            result.newRevTitle = "Commit "+entry.sha.substring(0,7);
+                            result.date = humanizeSinceDate(parseInt(entry.date));
+                            RED.diff.showCommitDiff(result);
                         });
                     }
                 });
