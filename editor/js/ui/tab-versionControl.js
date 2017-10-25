@@ -306,6 +306,7 @@ RED.sidebar.versionControl = (function() {
                             spinner.remove();
                             cancelCommitButton.click();
                             refreshFiles(data);
+                            refreshLocalCommits();
                         },
                         400: {
                             'unexpected_error': function(error) {
@@ -550,6 +551,7 @@ RED.sidebar.versionControl = (function() {
         }
 
         refreshInProgress = true;
+        refreshLocalCommits();
 
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {

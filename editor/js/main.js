@@ -61,15 +61,15 @@
                             RED.nodes.clear();
                             RED.history.clear();
                             RED.view.redraw(true);
-                            RED.projects.refresh();
-                            loadFlows(function() {
-                                RED.notify("NLS: Project changed to "+msg.project);
-                                RED.sidebar.info.refresh()
+                            RED.projects.refresh(function() {
+                                loadFlows(function() {
+                                    RED.notify("NLS: Project changed to "+msg.project);
+                                    RED.sidebar.info.refresh()
+                                });
                             });
                             return;
                         }
                         if (msg.text) {
-                            console.log(msg);
                             var text = RED._(msg.text,{default:msg.text});
                             if (notificationId === "runtime-state") {
                                 if (msg.error === "credentials_load_failed") {
