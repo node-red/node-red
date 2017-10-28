@@ -428,8 +428,10 @@
     },
     "expressionEditor": {
         "functions": "Functions",
+        "functionReference": "Function reference",
         "insert": "Insert",
         "title": "JSONata Expression editor",
+        "test": "Test",
         "data": "Example message",
         "result": "Result",
         "format": "format expression",

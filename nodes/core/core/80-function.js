@@ -187,6 +187,13 @@ module.exports = function(RED) {
                 }
             }
         };
+        if (util.hasOwnProperty('promisify')) {
+            sandbox.setTimeout[util.promisify.custom] = function(after, value) {
+                return new Promise(function(resolve, reject) {
+                    sandbox.setTimeout(function(){ resolve(value) }, after);
+                });
+            }
+        }
         var context = vm.createContext(sandbox);
         try {
             this.script = vm.createScript(functionText);
