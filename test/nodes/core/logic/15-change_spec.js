@@ -64,7 +64,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal("changed");
@@ -83,7 +82,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal(12345);
@@ -305,7 +303,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         (Date.now() - msg.ts).should.be.approximately(0,50);
@@ -344,7 +341,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal("Change456Me");
@@ -365,7 +361,6 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                var rule = helper.getNode("changeNode1").rules[0];
                 helperNode1.on("input", function(msg) {
                     try {
                         msg.payload.should.equal(456);
@@ -541,6 +536,44 @@ describe('change Node', function() {
             });
         });
 
+        it('changes the value using flow context property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"123","fromt":"flow","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc123abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("topic","ABC");
+                changeNode1.receive({payload:"abcABCabc"});
+            });
+        });
+
+        it('changes the value using global context property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"123","fromt":"global","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc123abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().global.set("topic","ABC");
+                changeNode1.receive({payload:"abcABCabc"});
+            });
+        });
+
         it('changes the value using number - string payload', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"123","to":"456","fromt":"num","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -610,6 +643,103 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:true});
+            });
+        });
+
+        it('changes the value of the global context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "global", "from": "Hello", "fromt": "str", "to": "Goodbye", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        helperNode1.context().global.get("payload").should.equal("Goodbye World!");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().global.set("payload","Hello World!");
+                changeNode1.receive({payload:""});
+            });
+        });
+
+        it('changes the value and doesnt change type of the flow context for partial match', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        helperNode1.context().flow.get("payload").should.equal("Change456Me");
+                        helperNode1.context().flow.get("payload").should.be.a.String();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("payload","Change123Me");
+                changeNode1.receive({payload:""});
+            });
+        });
+
+        it('changes the value and type of the flow context if a complete match', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        helperNode1.context().flow.get("payload").should.equal(456);
+                        helperNode1.context().flow.get("payload").should.be.a.Number();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("payload","123");
+                changeNode1.receive({payload:""});
+            });
+        });
+
+        it('changes the value using number - number flow context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "123", "fromt": "num", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        helperNode1.context().flow.get("payload").should.equal("abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("payload",123);
+                changeNode1.receive({payload:""});
+            });
+        });
+
+        it('changes the value using boolean - boolean flow context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "true", "fromt": "bool", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        helperNode1.context().flow.get("payload").should.equal("abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("payload",true);
+                changeNode1.receive({payload:""});
             });
         });
     });

@@ -2,7 +2,7 @@
     "common": {
         "label": {
             "name": "姓名",
-            "ok": "Ok",
+            "ok": "确认",
             "done": "完成",
             "cancel": "取消",
             "delete": "删除",
@@ -28,8 +28,8 @@
     "menu": {
         "label": {
             "view": {
-                "view": "表示",
-                "showGrid": "表示网格",
+                "view": "显示",
+                "showGrid": "显示网格",
                 "snapGrid": "对齐网格",
                 "gridSize": "网格尺寸",
                 "textDir": "文本方向",
@@ -42,7 +42,7 @@
                 "show": "显示侧边栏"
             },
             "userSettings": "设定",
-            "displayStatus": "表示节点状态",
+            "displayStatus": "显示节点状态",
             "displayConfig": "配置节点设定",
             "import": "导入",
             "export": "导出",
@@ -256,7 +256,7 @@
             "social": "社交",
             "storage": "存储",
             "analysis": "分析",
-            "advanced": "高级的"
+            "advanced": "高级"
         },
         "event": {
             "nodeAdded": "添加到面板中的节点:",
@@ -381,7 +381,7 @@
             "str": "文字列",
             "num": "数字",
             "re": "正则表达式",
-            "bool": "真伪判断",
+            "bool": "布尔",
             "json": "JSON",
             "date": "时间戳"
         }
