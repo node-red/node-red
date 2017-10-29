@@ -28,7 +28,7 @@ describe('TCP Request Node', function() {
         port += 1;
         server = net.createServer(function(c) {
 	    c.on('data', function(data) {
-		let rdata = "ACK:"+data.toString();
+		var rdata = "ACK:"+data.toString();
 		c.write(rdata);
 	    });
             c.on('error', function(err) {
