@@ -36,7 +36,7 @@ describe('UDP in Node', function() {
 
     function sendIPv4(msg) {
         var sock = dgram.createSocket('udp4');
-        sock.send(msg, port, "127.0.0.1", function(msg) {
+        sock.send(msg, 0, msg.length, port, "127.0.0.1", function(msg) {
             sock.close();
         });
     }
