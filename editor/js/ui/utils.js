@@ -171,7 +171,7 @@ RED.utils = (function() {
     }
 
     function formatNumber(element,obj,sourceId,path,cycle,initialFormat) {
-        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || initialFormat || "dec";
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path] && formattedPaths[sourceId][path]['number']) || initialFormat || "dec";
         if (cycle) {
             if (format === 'dec') {
                 if ((obj.toString().length===13) && (obj<=2147483647000)) {
@@ -187,10 +187,12 @@ RED.utils = (function() {
                 format = 'dec';
             }
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['number'] = format;
         } else if (initialFormat !== undefined){
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['number'] = format;
         }
         if (format === 'dec') {
             element.text(""+obj);
@@ -204,7 +206,7 @@ RED.utils = (function() {
     }
 
     function formatBuffer(element,button,sourceId,path,cycle) {
-        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || "raw";
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path] && formattedPaths[sourceId][path]['buffer']) || "raw";
         if (cycle) {
             if (format === 'raw') {
                 format = 'string';
@@ -212,7 +214,8 @@ RED.utils = (function() {
                 format = 'raw';
             }
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['buffer'] = format;
         }
         if (format === 'raw') {
             button.text('raw');
