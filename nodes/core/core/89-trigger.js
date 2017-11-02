@@ -47,7 +47,7 @@ module.exports = function(RED) {
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
         this.reset = n.reset || '';
-        this.duration = parseInt(n.duration);
+        this.duration = parseFloat(n.duration);
         if (isNaN(this.duration)) {
             this.duration = 250;
         }
@@ -96,14 +96,14 @@ module.exports = function(RED) {
                         msg.payload = RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg);
                     }
 
-                    if (node.op1type !== "nul") { node.send(msg); }
+                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
 
                     if (node.duration === 0) { tout = 0; }
                     else if (node.loop === true) {
                         if (tout) { clearInterval(tout); }
                         if (node.op1type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
-                            tout = setInterval(function() { node.send(msg2); },node.duration);
+                            tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); },node.duration);
                         }
                     }
                     else {
@@ -124,7 +124,7 @@ module.exports = function(RED) {
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     if (tout) { clearTimeout(tout); }
-                    if (node.op2type === "payl") { m2 = msg.payload; }
+                    if (node.op2type === "payl") { m2 = RED.util.cloneMessage(msg.payload); }
                     tout = setTimeout(function() {
                         if (node.op2type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
@@ -139,7 +139,7 @@ module.exports = function(RED) {
                     },node.duration);
                 }
                 else {
-                    if (node.op2type === "payl") { m2 = msg.payload; }
+                    if (node.op2type === "payl") { m2 = RED.util.cloneMessage(msg.payload); }
                 }
             }
         });
