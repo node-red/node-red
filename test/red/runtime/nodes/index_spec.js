@@ -26,11 +26,11 @@ var registry = require("../../../../red/runtime/nodes/registry");
 
 describe("red/nodes/index", function() {
     before(function() {
-        sinon.stub(index,"startFlows");
+        sinon.stub(flows,"startFlows");
         process.env.NODE_RED_HOME = path.resolve(path.join(__dirname,"..","..","..",".."))
     });
     after(function() {
-        index.startFlows.restore();
+        flows.startFlows.restore();
         delete process.env.NODE_RED_HOME;
     });
 
