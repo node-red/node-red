@@ -270,6 +270,9 @@
         "wait-reset": "wait to be reset",
         "wait-for": "wait for",
         "wait-loop": "resend it every",
+        "for": "Handling",
+        "bytopics": "each msg.topic independently",
+        "alltopics": "all messages",
         "duration": {
             "ms": "Milliseconds",
             "s": "Seconds",
