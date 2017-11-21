@@ -689,6 +689,20 @@ RED.utils = (function() {
         return result;
     }
 
+    function separateIconPath(icon) {
+        var result = {module: "", file: ""};
+        if (icon) {
+            var index = icon.indexOf('/');
+            if (index !== -1) {
+                result.module = icon.slice(0, index);
+                result.file = icon.slice(index + 1);
+            } else {
+                result.file = icon;
+            }
+        }
+        return result;
+    }
+
     function getNodeIcon(def,node) {
         if (def.category === 'config') {
             return "icons/node-red/cog.png"
@@ -698,6 +712,13 @@ RED.utils = (function() {
             return "icons/node-red/alert.png"
         } else if (node && node.type === 'subflow') {
             return "icons/node-red/subflow.png"
+        } else if (node && node.icon) {
+            var iconPath = RED.utils.separateIconPath(node.icon);
+            var iconSets = RED.nodes.getIconSets();
+            var iconFileList = iconSets[iconPath.module];
+            if (iconFileList && $.inArray(iconPath.file, iconFileList) !== -1) {
+                return "icons/" + node.icon;
+            }
         }
         var icon_url;
         if (typeof def.icon === "function") {
@@ -710,7 +731,13 @@ RED.utils = (function() {
         } else {
             icon_url = def.icon;
         }
-        return "icons/"+def.set.module+"/"+icon_url;
+
+        var iconPath = RED.utils.separateIconPath(icon_url);
+        var moduleName = iconPath.module;
+        if (!moduleName) {
+            moduleName = def.set.module;
+        }
+        return "icons/"+moduleName+"/"+iconPath.file;
     }
 
     function getNodeLabel(node,defaultLabel) {
@@ -735,6 +762,7 @@ RED.utils = (function() {
         getMessageProperty: getMessageProperty,
         normalisePropertyExpression: normalisePropertyExpression,
         validatePropertyExpression: validatePropertyExpression,
+        separateIconPath: separateIconPath,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
     }

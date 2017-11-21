@@ -108,6 +108,14 @@ RED.editor = (function() {
                 }
             }
         }
+        if (node.icon) {
+            var iconPath = RED.utils.separateIconPath(node.icon);
+            var iconSets = RED.nodes.getIconSets();
+            var iconFileList = iconSets[iconPath.module];
+            if (!iconFileList || $.inArray(iconPath.file, iconFileList) === -1) {
+                isValid = false;
+            }
+        }
         return isValid;
     }
 
@@ -157,6 +165,23 @@ RED.editor = (function() {
                 if (node._def.credentials.hasOwnProperty(prop)) {
                     validateNodeEditorProperty(node,node._def.credentials,prop,prefix);
                 }
+            }
+        }
+        if (node.icon) {
+            var iconPath = RED.utils.separateIconPath(node.icon);
+            var iconSets = RED.nodes.getIconSets();
+            var iconFileList = iconSets[iconPath.module];
+            var iconModule = $("#node-settings-icon-module");
+            var iconFile = $("#node-settings-icon-file");
+            if (!iconFileList) {
+                iconModule.addClass("input-error");
+                iconFile.removeClass("input-error");
+            } else if ($.inArray(iconPath.file, iconFileList) === -1) {
+                iconModule.removeClass("input-error");
+                iconFile.addClass("input-error");
+            } else {
+                iconModule.removeClass("input-error");
+                iconFile.removeClass("input-error");
             }
         }
     }
@@ -710,6 +735,70 @@ RED.editor = (function() {
         } else {
             buildLabelRow().appendTo(outputsDiv);
         }
+
+        $('<div class="form-row"><span data-i18n="editor.settingIcon"></span><div id="node-settings-icon"></div></div>').appendTo(dialogForm);
+        var iconDiv = $("#node-settings-icon");
+        var resultIconModule = $('<div>',{class:"node-label-form-row"});
+        $('<label></label>').appendTo(resultIconModule);
+        // $('<label for="node-input-info" data-i18n="editor.settingIconModule" style="margin-left: 10px;"></label>').appendTo(resultIconModule);
+
+        var selectIconModule = $('<select id="node-settings-icon-module" style="width:auto;"><option value=""></option></select>').appendTo(resultIconModule);
+        var iconPath = RED.utils.separateIconPath(node.icon);
+        var iconSets = RED.nodes.getIconSets();
+        Object.keys(iconSets).forEach(function(moduleName) {
+            selectIconModule.append($("<option></option>").val(moduleName).text(moduleName));
+        });
+        if (iconPath.module && !iconSets[iconPath.module]) {
+            selectIconModule.append($("<option disabled></option>").val(iconPath.module).text(iconPath.module));
+        }
+        selectIconModule.val(iconPath.module);
+        resultIconModule.appendTo(iconDiv);
+
+        var resultIconFile = $('<div>',{class:"node-label-form-row"});
+        $('<label></label>').appendTo(resultIconFile);
+        // $('<label for="node-input-info" data-i18n="editor.settingIconFile" style="margin-left: 10px;"></label>').appendTo(resultIconFile);
+        var selectIconFile = $('<select id="node-settings-icon-file" style="width:auto;"><option value=""></option></select>').appendTo(resultIconFile);
+        var iconModuleHidden = $('<input type="hidden" id="node-settings-icon-module-hidden"></input>').appendTo(resultIconModule);
+        iconModuleHidden.val(iconPath.module);
+        selectIconModule.change(function() {
+            moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
+        });
+
+        var iconFileHidden = $('<input type="hidden" id="node-settings-icon-file-hidden"></input>').appendTo(resultIconFile);
+        iconFileHidden.val(iconPath.file);
+        selectIconFile.change(function() {
+            selectIconFile.removeClass("input-error");
+            var fileName = selectIconFile.val();
+            iconFileHidden.val(fileName);
+        });
+
+        moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, false);
+        var iconFileList = iconSets[selectIconModule.val()];
+        if ($.inArray(iconPath.file, iconFileList) === -1) {
+            selectIconFile.append($("<option disabled></option>").val(iconPath.file).text(iconPath.file));
+        }
+        selectIconFile.val(iconPath.file);
+        resultIconFile.appendTo(iconDiv);
+    }
+
+    function moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, updateIconFile) {
+        selectIconFile.children().remove();
+        var moduleName = selectIconModule.val();
+        if (moduleName !== null) {
+            iconModuleHidden.val(moduleName);
+        }
+        var iconFileList = iconSets[moduleName];
+        if (iconFileList) {
+            iconFileList.forEach(function(fileName) {
+                if (updateIconFile) {
+                    updateIconFile = false;
+                    iconFileHidden.val(fileName);
+                }
+                selectIconFile.append($("<option></option>").val(fileName).text(fileName));
+            });
+        }
+        selectIconFile.prop("disabled", !iconFileList);
+        selectIconModule.removeClass("input-error");
     }
 
     function showEditDialog(node) {
@@ -957,6 +1046,16 @@ RED.editor = (function() {
                             (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
                             changes.outputLabels = editing_node.outputLabels;
                             editing_node.outputLabels = newValue;
+                            changed = true;
+                        }
+
+                        var iconModule = $("#node-settings-icon-module-hidden").val();
+                        var iconFile = $("#node-settings-icon-file-hidden").val();
+                        var icon = (iconModule && iconFile) ? iconModule+"/"+iconFile : "";
+                        if ((editing_node.icon === undefined && icon) ||
+                            (editing_node.icon !== undefined && icon !== editing_node.icon)) {
+                            changes.icon = editing_node.icon;
+                            editing_node.icon = icon;
                             changed = true;
                         }
 

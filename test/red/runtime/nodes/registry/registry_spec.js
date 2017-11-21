@@ -486,9 +486,8 @@ describe("red/nodes/registry/registry",function() {
 
     describe('#getNodeIconPath', function() {
         it('returns the default icon when getting an unknown icon', function() {
-            var defaultIcon = path.resolve(__dirname+'/../../../../../public/icons/arrow-in.png');
             var iconPath = typeRegistry.getNodeIconPath('random-module','youwonthaveme.png');
-            iconPath.should.eql(defaultIcon);
+            should.equal(iconPath, null);
         });
 
         it('returns a registered icon' , function() {

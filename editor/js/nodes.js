@@ -40,6 +40,7 @@ RED.nodes = (function() {
         var nodeSets = {};
         var typeToId = {};
         var nodeDefinitions = {};
+        var iconSets = {};
 
         nodeDefinitions['tab'] = {
             defaults: {
@@ -95,6 +96,7 @@ RED.nodes = (function() {
                     moduleList[ns.module].pending_version = ns.pending_version;
                 }
                 moduleList[ns.module].sets[ns.name] = ns;
+                iconSets[ns.module] = iconSets[ns.module] || ns.icons;
                 RED.events.emit("registry:node-set-added",ns);
             },
             removeNodeSet: function(id) {
@@ -113,6 +115,7 @@ RED.nodes = (function() {
                 if (Object.keys(moduleList[ns.module].sets).length === 0) {
                     delete moduleList[ns.module];
                 }
+                delete iconSets[ns.module];
                 RED.events.emit("registry:node-set-removed",ns);
                 return ns;
             },
@@ -170,6 +173,12 @@ RED.nodes = (function() {
             },
             getNodeType: function(nt) {
                 return nodeDefinitions[nt];
+            },
+            setIconSets: function(sets) {
+                iconSets = sets;
+            },
+            getIconSets: function() {
+                return iconSets;
             }
         };
         return exports;
@@ -430,6 +439,7 @@ RED.nodes = (function() {
         node.id = n.id;
         node.type = n.type;
         node.z = n.z;
+        node.icon = n.icon;
 
         if (node.type == "unknown") {
             for (var p in n._orig) {
@@ -484,6 +494,9 @@ RED.nodes = (function() {
             }
             if (n.outputs > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
                 node.outputLabels = n.outputLabels.slice();
+            }
+            if (n.icon) {
+                node.icon = n.icon;
             }
         }
         return node;
@@ -915,6 +928,7 @@ RED.nodes = (function() {
                         wires:n.wires,
                         inputLabels: n.inputLabels,
                         outputLabels: n.outputLabels,
+                        icon: n.icon,
                         changed:false,
                         _config:{}
                     };
@@ -1271,6 +1285,9 @@ RED.nodes = (function() {
         removeNodeSet: registry.removeNodeSet,
         enableNodeSet: registry.enableNodeSet,
         disableNodeSet: registry.disableNodeSet,
+
+        setIconSets: registry.setIconSets,
+        getIconSets: registry.getIconSets,
 
         registerType: registry.registerNodeType,
         getType: registry.getNodeType,

@@ -95,7 +95,7 @@ function init(_server,_runtime) {
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
             editorApp.get("/icons/:module/:icon",ui.icon);
-            editorApp.get("/icons/:scope/:module/:icon",ui.icon);            
+            editorApp.get("/icons/:scope/:module/:icon",ui.icon);
             theme.init(runtime);
             editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
@@ -151,6 +151,8 @@ function init(_server,_runtime) {
         adminApp.get('/locales/nodes',locales.getAllNodes,errorHandler);
         adminApp.get(/locales\/(.+)\/?$/,locales.get,errorHandler);
 
+        adminApp.get("/icons",needsPermission("nodes.read"),nodes.getIcons,errorHandler);
+        
         // Library
         adminApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post,errorHandler);
         adminApp.get("/library/flows",needsPermission("library.read"),library.getAll,errorHandler);

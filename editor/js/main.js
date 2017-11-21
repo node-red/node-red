@@ -24,7 +24,21 @@
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-                RED.i18n.loadNodeCatalogs(loadNodes);
+                RED.i18n.loadNodeCatalogs(loadIconList);
+            }
+        });
+    }
+
+    function loadIconList() {
+        $.ajax({
+            headers: {
+                "Accept":"application/json"
+            },
+            cache: false,
+            url: 'icons',
+            success: function(data) {
+                RED.nodes.setIconSets(data);
+                loadNodes();
             }
         });
     }
