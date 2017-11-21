@@ -43,7 +43,9 @@
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
                 loadFlows(function() {
-                    RED.projects.refresh();
+                    RED.projects.refresh(function() {
+                        RED.sidebar.info.refresh()
+                    });
 
                     var persistentNotifications = {};
                     RED.comms.subscribe("notification/#",function(topic,msg) {

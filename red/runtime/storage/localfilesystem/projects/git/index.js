@@ -17,25 +17,32 @@
 var when = require('when');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
+var authResponseServer = require('./authServer').ResponseServer;
+var clone = require('clone');
+var path = require("path");
 
+var gitCommand = "git";
+var log;
 
-function execCommand(command,args,cwd) {
+// function execCommand(command,args,cwd) {
+//     return when.promise(function(resolve,reject) {
+//         var fullCommand = command+" "+args.join(" ");
+//         child = exec(fullCommand, {cwd: cwd, timeout:3000, killSignal: 'SIGTERM'}, function (error, stdout, stderr) {
+//             if (error) {
+//                 reject(error);
+//             } else {
+//                 resolve(stdout);
+//             }
+//         });
+//     });
+// }
+
+function runGitCommand(args,cwd,env) {
+    log.trace(gitCommand + JSON.stringify(args));
     return when.promise(function(resolve,reject) {
-        var fullCommand = command+" "+args.join(" ");
-        child = exec(fullCommand, {cwd: cwd, timeout:3000, killSignal: 'SIGTERM'}, function (error, stdout, stderr) {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(stdout);
-            }
-        });
-    });
-}
-
-function runCommand(command,args,cwd) {
-    console.log(cwd,command,args);
-    return when.promise(function(resolve,reject) {
-        var child = spawn(command, args, {cwd:cwd, detached:true});
+        args.unshift("credential.helper=")
+        args.unshift("-c");
+        var child = spawn(gitCommand, args, {cwd:cwd, detached:true, env:env});
         var stdout = "";
         var stderr = "";
         child.stdout.on('data', function(data) {
@@ -49,10 +56,14 @@ function runCommand(command,args,cwd) {
         child.on('close', function(code) {
             if (code !== 0) {
                 var err = new Error(stderr);
+                err.stdout = stdout;
+                err.stderr = stderr;
                 if (/fatal: could not read Username/.test(stderr)) {
                     err.code = "git_auth_failed";
                 } else if(/HTTP Basic: Access denied/.test(stderr)) {
                     err.code = "git_auth_failed";
+                } else if(/Connection refused/.test(stderr)) {
+                    err.code = "git_connection_failed";
                 } else {
                     err.code = "git_error";
                 }
@@ -62,9 +73,17 @@ function runCommand(command,args,cwd) {
         });
     });
 }
-function isAuthError(err) {
-    // var lines = err.toString().split("\n");
-    // lines.forEach(console.log);
+function runGitCommandWithAuth(args,cwd,auth) {
+    return authResponseServer(auth).then(function(rs) {
+        var commandEnv = clone(process.env);
+        commandEnv.GIT_ASKPASS = path.join(__dirname,"node-red-ask-pass.sh");
+        commandEnv.NODE_RED_GIT_NODE_PATH = process.execPath;
+        commandEnv.NODE_RED_GIT_SOCK_PATH = rs.path;
+        commandEnv.NODE_RED_GIT_ASKPASS_PATH = path.join(__dirname,"authWriter.js");
+        return runGitCommand(args,cwd,commandEnv).finally(function() {
+            rs.close();
+        });
+    })
 }
 
 function cleanFilename(name) {
@@ -85,139 +104,312 @@ function parseFilenames(name) {
     }
     return result;
 }
-
-function getFiles(localRepo) {
+function getBranchInfo(localRepo) {
+    return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
+        var lines = output.split("\n");
+        var unknownDirs = [];
+        var branchLineRE = /^## (.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/m;
+        var m = branchLineRE.exec(output);
+        var result = {}; //commits:{}};
+        if (m) {
+            result.local = m[1];
+            if (m[3]) {
+                result.remote = m[3];
+            }
+            // if (m[6] !== undefined) {
+            //     result.commits.ahead = parseInt(m[6]);
+            // }
+            // if (m[8] !== undefined) {
+            //     result.commits.behind = parseInt(m[8]);
+            // }
+        }
+        return result;
+    });
+}
+function getStatus(localRepo) {
     // parseFilename('"test with space"');
     // parseFilename('"test with space" -> knownFile.txt');
     // parseFilename('"test with space" -> "un -> knownFile.txt"');
-    var files = {};
-    return runCommand(gitCommand,["ls-files","--cached","--others","--exclude-standard"],localRepo).then(function(output) {
-        var lines = output.split("\n");
-        lines.forEach(function(l) {
-            if (l==="") {
-                return;
-            }
-            var fullName = cleanFilename(l);
-            // parseFilename(l);
-            var parts = fullName.split("/");
-            var p = files;
-            var name;
-            for (var i = 0;i<parts.length-1;i++) {
-                var name = parts.slice(0,i+1).join("/")+"/";
-                if (!p.hasOwnProperty(name)) {
-                    p[name] = {
-                        type:"d"
+    var result = {
+        files: {},
+        commits: {},
+        branches: {}
+    }
+    return runGitCommand(['rev-list', 'HEAD', '--count'],localRepo).then(function(count) {
+        result.commits.total = parseInt(count);
+    }).then(function() {
+        return runGitCommand(["ls-files","--cached","--others","--exclude-standard"],localRepo).then(function(output) {
+            var lines = output.split("\n");
+            lines.forEach(function(l) {
+                if (l==="") {
+                    return;
+                }
+                var fullName = cleanFilename(l);
+                // parseFilename(l);
+                var parts = fullName.split("/");
+                var p = result.files;
+                var name;
+                for (var i = 0;i<parts.length-1;i++) {
+                    var name = parts.slice(0,i+1).join("/")+"/";
+                    if (!p.hasOwnProperty(name)) {
+                        p[name] = {
+                            type:"d"
+                        }
                     }
                 }
-            }
-            files[fullName] = {
-                type: /\/$/.test(fullName)?"d":"f"
-            }
-        })
-        return runCommand(gitCommand,["status","--porcelain"],localRepo).then(function(output) {
-            var lines = output.split("\n");
-            var unknownDirs = [];
-            lines.forEach(function(line) {
-                if (line==="") {
-                    return;
-                }
-                if (line[0] === "#") {
-                    return;
-                }
-                var status = line.substring(0,2);
-                var fileName;
-                var names;
-                if (status !== '??') {
-                    names = parseFilenames(line.substring(3));
-                } else {
-                    names = [cleanFilename(line.substring(3))];
-                }
-                fileName = names[0];
-                if (names.length > 1) {
-                    fileName = names[1];
-                }
-
-                // parseFilename(fileName);
-                if (fileName.charCodeAt(0) === 34) {
-                    fileName = fileName.substring(1,fileName.length-1);
-                }
-                if (files.hasOwnProperty(fileName)) {
-                    files[fileName].status = status;
-                } else {
-                    files[fileName] = {
-                        type: "f",
-                        status: status
-                    };
-                }
-                if (names.length > 1) {
-                    files[fileName].oldName = names[0];
-                }
-                if (status === "??" && fileName[fileName.length-1] === '/') {
-                    unknownDirs.push(fileName);
+                result.files[fullName] = {
+                    type: /\/$/.test(fullName)?"d":"f"
                 }
             })
-            var allFilenames = Object.keys(files);
-            allFilenames.forEach(function(f) {
-                var entry = files[f];
-                if (!entry.hasOwnProperty('status')) {
-                    unknownDirs.forEach(function(uf) {
-                        if (f.startsWith(uf)) {
-                            entry.status = "??"
+            return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
+                var lines = output.split("\n");
+                var unknownDirs = [];
+                var branchLineRE = /^## (.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/;
+                lines.forEach(function(line) {
+                    if (line==="") {
+                        return;
+                    }
+                    if (line[0] === "#") {
+                        var m = branchLineRE.exec(line);
+                        if (m) {
+                            result.branches.local = m[1];
+                            if (m[3]) {
+                                result.branches.remote = m[3];
+                                result.commits.ahead = 0;
+                                result.commits.behind = 0;
+                            }
+                            if (m[6] !== undefined) {
+                                result.commits.ahead = parseInt(m[6]);
+                            }
+                            if (m[8] !== undefined) {
+                                result.commits.behind = parseInt(m[8]);
+                            }
                         }
-                    });
-                }
+                        return;
+                    }
+                    var status = line.substring(0,2);
+                    var fileName;
+                    var names;
+                    if (status !== '??') {
+                        names = parseFilenames(line.substring(3));
+                    } else {
+                        names = [cleanFilename(line.substring(3))];
+                    }
+                    fileName = names[0];
+                    if (names.length > 1) {
+                        fileName = names[1];
+                    }
+
+                    // parseFilename(fileName);
+                    if (fileName.charCodeAt(0) === 34) {
+                        fileName = fileName.substring(1,fileName.length-1);
+                    }
+                    if (result.files.hasOwnProperty(fileName)) {
+                        result.files[fileName].status = status;
+                    } else {
+                        result.files[fileName] = {
+                            type: "f",
+                            status: status
+                        };
+                    }
+                    if (names.length > 1) {
+                        result.files[fileName].oldName = names[0];
+                    }
+                    if (status === "??" && fileName[fileName.length-1] === '/') {
+                        unknownDirs.push(fileName);
+                    }
+                })
+                var allFilenames = Object.keys(result.files);
+                allFilenames.forEach(function(f) {
+                    var entry = result.files[f];
+                    if (!entry.hasOwnProperty('status')) {
+                        unknownDirs.forEach(function(uf) {
+                            if (f.startsWith(uf)) {
+                                entry.status = "??"
+                            }
+                        });
+                    }
+                })
+                // console.log(files);
+                return result;
             })
-            // console.log(files);
-            return files;
         })
     })
 }
 
 function parseLog(log) {
     var lines = log.split("\n");
-    var currentCommit = null;
+    var currentCommit = {};
     var commits = [];
     lines.forEach(function(l) {
-        if (/^sha: /.test(l)) {
-            if (currentCommit) {
-                commits.push(currentCommit);
-            }
+        if (l === "-----") {
+            commits.push(currentCommit);
             currentCommit = {}
+            return;
         }
         var m = /^(.*): (.*)$/.exec(l);
         if (m) {
-            currentCommit[m[1]] = m[2];
+            if (m[1] === 'refs' && m[2]) {
+                currentCommit[m[1]] = m[2].split(",").map(function(v) { return v.trim() });
+            } else {
+                if (m[1] === 'parents') {
+                    currentCommit[m[1]] = m[2].split(" ");
+                } else {
+                    currentCommit[m[1]] = m[2];
+                }
+            }
         }
     });
-    if (currentCommit) {
-        commits.push(currentCommit);
-    }
-    return {commits: commits};
+    return commits;
 }
 
-var gitCommand = "git";
+// function getCommitCounts(cwd, options) {
+//     var commands = [
+//         runGitCommand(['rev-list', 'HEAD', '--count'],cwd), // #commits on master
+//     ];
+//     if (options.hasRemote) {
+//         commands.push(runGitCommand(['rev-list', 'master','^origin/master', '--count'],cwd)); // #commits master ahead
+//         commands.push(runGitCommand(['rev-list', '^master','origin/master', '--count'],cwd)); // #commits master behind
+//     }
+//     return when.all(commands).then(function(results) {
+//         var result = {
+//             total: parseInt(results[0])
+//         }
+//         if (options.hasRemote) {
+//             result.ahead = parseInt(results[1]);
+//             result.behind = parseInt(results[2]);
+//         }
+//         return result;
+//     });
+// }
+
+function getRemotes(cwd) {
+    return runGitCommand(['remote','-v'],cwd).then(function(output) {
+        var result;
+        if (output.length > 0) {
+            result = {};
+            var remoteRE = /^(.+)\t(.+) \((.+)\)$/gm;
+            var m;
+            while ((m = remoteRE.exec(output)) !== null) {
+                result[m[1]] = result[m[1]]||{};
+                result[m[1]][m[3]] = m[2];
+            }
+        }
+        return result;
+    })
+}
+
+function getBranches(cwd, remote) {
+    var args = ['branch','--no-color'];
+    if (remote) {
+        args.push('-r');
+    }
+    return runGitCommand(args,cwd).then(function(output) {
+        var branches = [];
+        var lines = output.split("\n");
+        branches = lines.map(function(l) { return l.substring(2)})
+                        .filter(function(l) {
+                            return !/HEAD ->/.test(l) && (l.length > 0)
+                        });
+        return {branches:branches};
+    })
+}
+function getBranchStatus(cwd,remoteBranch) {
+    var commands = [
+        // #commits master ahead
+        runGitCommand(['rev-list', 'HEAD','^'+remoteBranch, '--count'],cwd),
+        // #commits master behind
+        runGitCommand(['rev-list', '^HEAD',remoteBranch, '--count'],cwd)
+    ];
+    return when.all(commands).then(function(results) {
+        return {
+            commits: {
+                ahead: parseInt(results[0]),
+                behind: parseInt(results[1])
+            }
+        }
+    })
+}
+
 module.exports = {
+    init: function(_settings,_runtime) {
+        log = _runtime.log
+    },
     initRepo: function(cwd) {
-        return runCommand(gitCommand,["init"],cwd);
+        return runGitCommand(["init"],cwd);
     },
-    pull: function(repo, cwd) {
-        if (repo.url) {
-            repo = repo.url;
+    setUpstream: function(cwd,remoteBranch) {
+        var args = ["branch","--set-upstream-to",remoteBranch];
+        return runGitCommand(args,cwd);
+    },
+    pull: function(cwd,remoteBranch) {
+        var args = ["pull"];
+        var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
+        if (m) {
+            args.push(m[1]);
+            args.push(m[2])
         }
-        var args = ["pull",repo,"master"];
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd).otherwise(function(err) {
+            if (/CONFLICT/.test(err.stdout)) {
+                var e = new Error("NLS: pull failed - merge conflict");
+                e.code = "git_pull_merge_conflict";
+                throw e;
+            } else if (/Please commit your changes or stash/.test(err.message)) {
+                var e = new Error("NLS: Pull failed - local changes would be overwritten");
+                e.code = "git_pull_overwrite";
+                throw e;
+            }
+            throw err;
+        });
     },
-    clone: function(repo, cwd) {
-        if (repo.url) {
-            repo = repo.url;
+    push: function(cwd,remoteBranch,setUpstream) {
+        var args = ["push"];
+        var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
+        if (m) {
+            if (setUpstream) {
+                args.push("-u");
+            }
+            args.push(m[1]);
+            args.push("HEAD:"+m[2]);
+        } else {
+            args.push("origin");
         }
-        var args = ["clone",repo,"."];
-        return runCommand(gitCommand,args,cwd);
+        args.push("--porcelain");
+        return runGitCommand(args,cwd).otherwise(function(err) {
+            if (err.code === 'git_error') {
+                if (/^!.*non-fast-forward/m.test(err.stdout)) {
+                    err.code = 'git_push_failed';
+                }
+                throw err;
+            }
+        });
     },
-    getFiles: getFiles,
+    clone: function(remote, cwd) {
+        var args = ["clone",remote.url];
+        if (remote.name) {
+            args.push("-o");
+            args.push(remote.name);
+        }
+        if (remote.branch) {
+            args.push("-b");
+            args.push(remote.branch);
+        }
+        args.push(".");
+        if (remote.hasOwnProperty("username") && remote.hasOwnProperty("password")) {
+            return runGitCommandWithAuth(args,cwd,remote);
+        } else {
+            return runGitCommand(args,cwd);
+        }
+    },
+    getStatus: getStatus,
     getFile: function(cwd, filePath, treeish) {
         var args = ["show",treeish+":"+filePath];
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd);
+    },
+    getFiles: function(cwd) {
+        return getStatus(cwd).then(function(status) {
+            return status.files;
+        })
     },
     stageFile: function(cwd,file) {
         var args = ["add"];
@@ -226,18 +418,18 @@ module.exports = {
         } else {
             args.push(file);
         }
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd);
     },
     unstageFile: function(cwd, file) {
         var args = ["reset","--"];
         if (file) {
             args.push(file);
         }
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd);
     },
     commit: function(cwd, message) {
         var args = ["commit","-m",message];
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd);
     },
     getFileDiff(cwd,file,type) {
         var args = ["diff"];
@@ -247,14 +439,53 @@ module.exports = {
             args.push("--cached");
         }
         args.push(file);
-        return runCommand(gitCommand,args,cwd);
+        return runGitCommand(args,cwd);
+    },
+    fetch: function(cwd) {
+        return runGitCommand(["fetch"],cwd);
     },
     getCommits: function(cwd,options) {
-        var args = ["log", "--format=sha: %H%nauthor: %an%ndate: %ct%nsubject: %s","-n 10"];
-        return runCommand(gitCommand,args,cwd).then(parseLog);
+        var args = ["log", "--format=sha: %H%nparents: %p%nrefs: %D%nauthor: %an%ndate: %ct%nsubject: %s%n-----"];
+        var limit = parseInt(options.limit) || 20;
+        args.push("-n "+limit);
+        var before = options.before;
+        if (before) {
+            args.push(before);
+        }
+        var commands = [
+            runGitCommand(['rev-list', 'HEAD', '--count'],cwd),
+            runGitCommand(args,cwd).then(parseLog)
+        ];
+        return when.all(commands).then(function(results) {
+            var result = results[0];
+            result.count = results[1].length;
+            result.before = before;
+            result.commits = results[1];
+            return {
+                count: results[1].length,
+                commits: results[1],
+                before: before,
+                total: parseInt(results[0])
+            };
+        })
     },
     getCommit: function(cwd,sha) {
         var args = ["show",sha];
-        return runCommand(gitCommand,args,cwd);
-    }
+        return runGitCommand(args,cwd);
+    },
+    abortMerge: function(cwd) {
+        return runGitCommand(['merge','--abort'],cwd);
+    },
+    getRemotes: getRemotes,
+    getBranches: getBranches,
+    getBranchInfo: getBranchInfo,
+    checkoutBranch: function(cwd, branchName, isCreate) {
+        var args = ['checkout'];
+        if (isCreate) {
+            args.push('-b');
+        }
+        args.push(branchName);
+        return runGitCommand(args,cwd);
+    },
+    getBranchStatus: getBranchStatus
 }

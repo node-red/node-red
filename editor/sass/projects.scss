@@ -20,6 +20,9 @@
     }
 
 }
+#project-settings-tab-settings {
+    overflow-y: scroll;
+}
 .projects-edit-form form {
     margin: 0;
     .form-row {
@@ -28,13 +31,6 @@
             color: #555;
             width: 100%;
             display: block;
-            font-weight: 500;
-            &.projects-edit-form-sublabel {
-                color: #999;
-                text-align: right;
-                margin-bottom: -15px;
-                font-weight: normal;
-            }
             &.projects-edit-form-inline-label {
                 font-weight: normal;
                 color: inherit;
@@ -51,12 +47,25 @@
     }
 
 }
+.projects-edit-form-sublabel {
+    color: #999;
+    text-align: right;
+    margin-bottom: -15px;
+    font-weight: normal;
+}
+.project-settings-tab-pane {
+    & * .projects-edit-form-sublabel {
+        margin-right: 50px;
+        margin-top: -10px;
+        margin-bottom: 5px;
+    }
+}
 .projects-dialog-spinner {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 1px;
+    bottom: 1px;
+    left: 1px;
+    right: 1px;
     text-align: center;
     padding: 40px;
     background: white;
@@ -87,6 +96,14 @@
         }
     }
 
+    &.projects-dialog-spinner-contain {
+        padding: 0;
+        img {
+            width: auto;
+            height: 100%;
+            max-height: 50px;
+        }
+    }
 
 }
 .projects-dialog-screen-start {
@@ -196,6 +213,15 @@
     background: #fff !important;
     color: #666 !important;
 }
+.projects-dialog-screen-input-status {
+    text-align: right;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+    width: 70px;
+    height: 30px;
+    color: #999;
+}
 
 .sidebar-version-control {
     height: 100%;
@@ -278,18 +304,22 @@
         border-radius: 0;
     }
 }
+
 .sidebar-version-control-change-container {
     position: relative;
     height: 50%;
     box-sizing: border-box;
-    border-top: 1px solid $secondary-border-color;
     transition: height 0.2s ease-in-out;
     &:first-child {
         // border-bottom: 1px solid $primary-border-color;
     }
-
 }
-.sidebar-version-control-change-commit-box {
+.sidebar-version-control-merging {
+    .sidebar-version-control-change-container {
+        height: 33%;
+    }
+}
+.sidebar-version-control-slide-box {
     position:absolute;
     bottom: 0;
     left:0;
@@ -299,7 +329,28 @@
     background: #f6f6f6;
     box-sizing: border-box;
     overflow: hidden;
-    border-top: 1px solid $secondary-border-color;
+    &.sidebar-version-control-slide-box-top {
+        z-index: 10;
+        top: 0px;
+        left: auto;
+        width: 100%;
+        max-width: 280px;
+        border-left: 1px solid $primary-border-color;
+        border-right: 1px solid $primary-border-color;
+        border-bottom: 1px solid $primary-border-color;
+        box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+
+        color: #666;
+        background: #f6f6f6;
+        padding: 10px;
+        box-sizing: border-box;
+
+    }
+    &.sidebar-version-control-slide-box-bottom {
+        bottom: 0px;
+        border-top: 1px solid $secondary-border-color;
+    }
+
     textarea {
         height: 110px;
         margin: 10px;
@@ -308,12 +359,84 @@
         border-radius: 1px;
         resize: none;
     }
-}
-.sidebar-version-control-change-commit-toolbar {
-    padding: 0 20px;
-    text-align: right;
 
 }
+.projects-branch-list {
+    position: relative;
+    .red-ui-searchBox-container {
+        border-top: 1px solid $secondary-border-color;
+        border-left: 1px solid $secondary-border-color;
+        border-right: 1px solid $secondary-border-color;
+        border-top-left-radius: 2px;
+        border-top-right-radius: 2px;
+        overflow: hidden;
+    }
+    .red-ui-editableList {
+        border: 1px solid $secondary-border-color;
+        border-bottom-left-radius: 2px;
+        border-bottom-right-radius: 2px;
+        & > .red-ui-editableList-border {
+            border-radius: 0;
+            border: none;
+        }
+        .red-ui-editableList-container {
+            padding: 0;
+            li {
+                padding: 0;
+                background: #fff;
+            }
+        }
+    }
+}
+.uneditable-input .projects-branch-list {
+    .red-ui-editableList {
+        border-left: none;
+        border-bottom: none;
+        border-right: none;
+    }
+    .red-ui-searchBox-container {
+        border-left: none;
+        border-right: none;
+    }
+}
+.sidebar-version-control-slide-box-header {
+    margin-bottom: 10px;
+}
+
+.sidebar-version-control-slide-box-toolbar {
+    padding: 0 20px;
+    text-align: right;
+}
+.sidebar-version-control-branch-list-entry {
+    padding: 5px 8px;
+    color: #666;
+    cursor: pointer;
+    &.selected {
+        border-left-color:#999;
+        border-right-color:#999;
+    }
+    border-left: 2px solid #fff;
+    border-right: 2px solid #fff;
+    margin: 0 1px;
+    i { width: 16px; text-align: center}
+    &.input-error {
+        cursor: default;
+    }
+    &:not(.input-error):hover {
+        background: #f3f3f3;
+        border-left-color:#999;
+        border-right-color:#999;
+    }
+    span {
+        margin-left: 5px;
+    }
+    span.current {
+        float: right;
+        font-size: 0.8em;
+        color: #999;
+    }
+}
+
 .sidebar-version-control-change-entry {
     height: 20px;
     padding: 5px 10px;
@@ -340,6 +463,8 @@
     &.node-info-none {
         text-align: center;
         background: #fefefe;
+        white-space: normal;
+        height: auto;
     }
 }
 
@@ -348,10 +473,17 @@
     padding: 5px 10px;
     position: relative;
     white-space: nowrap;
+    overflow: hidden;
     cursor: pointer;
     &:hover {
         background: #eee;
     }
+}
+.sidebar-version-control-commit-more {
+    color: #999;
+    text-align: center;
+    padding: 10px;
+    font-style: italic;
 }
 .sidebar-version-control-commit-sha {
     float: right;
@@ -364,6 +496,17 @@
 .sidebar-version-control-commit-subject {
     color: #666;
 }
+.sidebar-version-control-commit-refs {
+    min-height: 22px;
+}
+.sidebar-version-control-commit-ref {
+    color: #aaa;
+    font-size: 0.7em;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 2px 5px;
+    margin-right: 5px;
+}
 .sidebar-version-control-commit-date {
     color: #999;
     font-size: 0.85em;
@@ -373,18 +516,44 @@
     color: #999;
     font-size: 0.85em;
 }
-
+.sidebar-version-control-commit-head {
+}
 .sidebar-version-control-change-header {
     color: #666;
     background: #f6f6f6;
     padding: 4px 10px;
     height: 30px;
     box-sizing: border-box;
+    border-top: 1px solid $secondary-border-color;
     border-bottom: 1px solid $secondary-border-color;
     i {
         transition: all 0.2s ease-in-out;
     }
 }
+.sidebar-version-control-repo-toolbar {
+    color: #666;
+    background: #f6f6f6;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.sidebar-version-control-repo-count {
+    margin-right: 8px;
+    display: none;
+}
+.sidebar-version-control-repo-action  {
+    text-align: left;
+    width: 100%;
+}
+.sidebar-version-control-repo-sub-action  {
+    width: calc(50% - 5px);
+    margin-right: 5px;
+    &:not(:first-child) {
+        margin-right: 0;
+        margin-left: 5px;
+    }
+}
+
 .project-file-listing-container > .red-ui-editableList > .red-ui-editableList-border {
     border-radius: 0;
     border: none;

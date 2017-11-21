@@ -215,6 +215,9 @@
     font-size: 13px;
     border-radius: 2px;
     padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     &.toggle {
         @include workspace-button-toggle;
     }
@@ -223,6 +226,7 @@
 
 .editor-button-small {
     height: 20px;
+    min-width: 20px;
     line-height: 18px;
     font-size: 10px;
     border-radius: 2px;

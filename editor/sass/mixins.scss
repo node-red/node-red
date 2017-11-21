@@ -243,3 +243,6 @@
     background: $shade-color;
     z-index: 5;
 }
+.component-shade {
+    @include shade
+}

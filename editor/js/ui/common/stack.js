@@ -101,6 +101,14 @@ RED.stack = (function() {
                         if (entry.onexpand) {
                             entry.onexpand.call(entry);
                         }
+                        if (options.singleExpanded) {
+                            entries.forEach(function(e) {
+                                if (e !== entry) {
+                                    e.collapse();
+                                }
+                            })
+                        }
+
                         icon.addClass("expanded");
                         entry.container.addClass("palette-category-expanded");
                         entry.contentWrap.slideDown(200);

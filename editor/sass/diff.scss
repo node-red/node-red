@@ -573,8 +573,8 @@
     td.lineno {
         font-family: monospace;
         text-align: right;
-        color: #999;
-        background: #fafafa;
+        color: #aaa;
+        background: #f6f6f6;
         padding: 1px 5px;
     }
     td.lineno:nth-child(3) {
@@ -600,6 +600,23 @@
     td.removed {
         background: #fadddd;
     }
+    tr.mergeHeader td {
+        color: #800080;
+        background: #e5f9ff;
+        height: 26px;
+        vertical-align: middle;
+    }
+    tr.mergeHeader-separator td {
+        color: #800080;
+        background: darken(#e5f9ff, 10%);
+        height: 0px;
+    }
+    tr.mergeHeader-ours td {
+        border-top: 2px solid darken(#e5f9ff, 10%);
+    }
+    tr.mergeHeader-theirs td {
+        border-bottom: 2px solid darken(#e5f9ff, 10%);
+    }
     td.unchanged {
         color: #999;
     }
@@ -613,7 +630,9 @@
         border-bottom: 1px solid #f0f0f0;
     }
     tr.node-text-diff-file-header td {
-        font-family: monospace;
+        .filename {
+            font-family: monospace;
+        }
         background: #f3f3f3;
         padding: 5px 10px 5px 0;
         color: #333;

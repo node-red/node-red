@@ -49,6 +49,8 @@ Project.prototype.load = function () {
 
     this.credentialSecret = projectSettings.credentialSecret;
 
+    this.remote = projectSettings.remote;
+
     // this.paths.flowFile = fspath.join(this.path,"flow.json");
     // this.paths.credentialsFile = fspath.join(this.path,"flow_cred.json");
 
@@ -60,15 +62,20 @@ Project.prototype.load = function () {
         if (missingFiles.indexOf('package.json') === -1) {
             project.paths['package.json'] = fspath.join(project.path,"package.json");
             promises.push(fs.readFile(project.paths['package.json'],"utf8").then(function(content) {
-                project.package = util.parseJSON(content);
-                if (project.package.hasOwnProperty('node-red')) {
-                    if (project.package['node-red'].hasOwnProperty('settings')) {
-                        project.paths.flowFile = project.package['node-red'].settings.flowFile;
-                        project.paths.credentialsFile = project.package['node-red'].settings.credentialsFile;
+                try {
+                    project.package = util.parseJSON(content);
+                    if (project.package.hasOwnProperty('node-red')) {
+                        if (project.package['node-red'].hasOwnProperty('settings')) {
+                            project.paths.flowFile = project.package['node-red'].settings.flowFile;
+                            project.paths.credentialsFile = project.package['node-red'].settings.credentialsFile;
+                        }
+                    } else {
+                        // TODO: package.json doesn't have a node-red section
+                        //       is that a bad thing?
                     }
-                } else {
-                    // TODO: package.json doesn't have a node-red section
-                    //       is that a bad thing?
+                } catch(err) {
+                    // package.json isn't valid JSON... is a merge underway?
+                    project.package = {};
                 }
             }));
         } else {
@@ -92,6 +99,13 @@ Project.prototype.load = function () {
         // } else {
         //     project.paths.credentialsFile = fspath.join(project.path,"flow_cred.json");
         // }
+
+        promises.push(gitTools.getRemotes(project.path).then(function(remotes) {
+            project.remotes = remotes;
+        }));
+        promises.push(gitTools.getBranchInfo(project.path).then(function(branches) {
+            project.branches = branches;
+        }));
 
         return when.settle(promises).then(function() {
             return project;
@@ -207,7 +221,24 @@ Project.prototype.getFileDiff = function(file,type) {
     return gitTools.getFileDiff(this.path,file,type);
 }
 Project.prototype.getCommits = function(options) {
-    return gitTools.getCommits(this.path,options);
+    var self = this;
+    var fetchPromise;
+    if (this.remote) {
+        options.hasRemote = true;
+        fetchPromise = gitTools.fetch(this.path)
+    } else {
+        fetchPromise = when.resolve();
+    }
+    return fetchPromise.then(function() {
+        return gitTools.getCommits(self.path,options);
+    }).otherwise(function(e) {
+        if (e.code === 'git_auth_failed') {
+            throw e;
+        }
+        console.log("Fetch failed");
+        console.log(e);
+        return gitTools.getCommits(self.path,options);
+    });
 }
 Project.prototype.getCommit = function(sha) {
     return gitTools.getCommit(this.path,sha);
@@ -220,6 +251,94 @@ Project.prototype.getFile = function (filePath,treeish) {
     }
 };
 
+Project.prototype.status = function() {
+    var self = this;
+    var promises = [
+        gitTools.getStatus(this.path),
+        fs.exists(fspath.join(this.path,".git","MERGE_HEAD"))
+    ]
+    return when.all(promises).then(function(results) {
+        var result = results[0];
+        if (results[1]) {
+            result.merging = true;
+        }
+        self.branches.local = result.branches.local;
+        self.branches.remote = result.branches.remote;
+        return result;
+    })
+};
+
+Project.prototype.push = function (remoteBranchName,setRemote) {
+    return gitTools.push(this.path, remoteBranchName, setRemote);
+};
+
+Project.prototype.pull = function (remoteBranchName,setRemote) {
+    if (setRemote) {
+        return gitTools.setUpstream(this.path, remoteBranchName).then(function() {
+            return gitTools.pull(this.path);
+        })
+    } else {
+        return gitTools.pull(this.path, remoteBranchName);
+    }
+};
+
+Project.prototype.resolveMerge = function (file,resolutions) {
+    var filePath = fspath.join(this.path,file);
+    var self = this;
+    return fs.readFile(filePath,"utf8").then(function(content) {
+        var lines = content.split("\n");
+        var result = [];
+        var ignoreBlock = false;
+        var currentBlock;
+        for (var i=1;i<=lines.length;i++) {
+            if (resolutions.hasOwnProperty(i)) {
+                currentBlock = resolutions[i];
+                if (currentBlock.selection === "A") {
+                    ignoreBlock = false;
+                } else {
+                    ignoreBlock = true;
+                }
+                continue;
+            }
+            if (currentBlock) {
+                if (currentBlock.separator === i) {
+                    if (currentBlock.selection === "A") {
+                        ignoreBlock = true;
+                    } else {
+                        ignoreBlock = false;
+                    }
+                    continue;
+                } else if (currentBlock.changeEnd === i) {
+                    currentBlock = null;
+                    continue;
+                } else if (ignoreBlock) {
+                    continue;
+                }
+            }
+            result.push(lines[i-1]);
+        }
+        var finalResult = result.join("\n");
+        return util.writeFile(filePath,finalResult).then(function() {
+            return self.stageFile(file);
+        })
+    });
+};
+Project.prototype.abortMerge = function () {
+    return gitTools.abortMerge(this.path);
+};
+
+Project.prototype.getBranches = function (remote) {
+    return gitTools.getBranches(this.path,remote);
+};
+Project.prototype.setBranch = function (branchName, isCreate) {
+    var self = this;
+    return gitTools.checkoutBranch(this.path, branchName, isCreate).then(function() {
+        return self.load();
+    })
+};
+Project.prototype.getBranchStatus = function (branchName) {
+    return gitTools.getBranchStatus(this.path,branchName);
+};
 Project.prototype.getFlowFile = function() {
     console.log("Project.getFlowFile = ",this.paths.flowFile);
     if (this.paths.flowFile) {
@@ -243,14 +362,13 @@ Project.prototype.getCredentialsFileBackup = function() {
     return getBackupFilename(this.getCredentialsFile());
 }
 
-
 Project.prototype.toJSON = function () {
 
     return {
         name: this.name,
         summary: this.package.description,
         description: this.description,
-        dependencies: this.package.dependencies,
+        dependencies: this.package.dependencies||{},
         settings: {
             credentialsEncrypted: (typeof this.credentialSecret === "string"),
             credentialSecretInvalid: this.credentialSecretInvalid
@@ -258,7 +376,9 @@ Project.prototype.toJSON = function () {
         files: {
             flow: this.paths.flowFile,
             credentials: this.paths.credentialsFile
-        }
+        },
+        remotes: this.remotes,
+        branches: this.branches
     }
 };
 
@@ -281,7 +401,7 @@ function checkProjectExists(project) {
     var projectPath = fspath.join(projectsDir,project);
     return fs.pathExists(projectPath).then(function(exists) {
         if (!exists) {
-            var e = new Error("NLD: project not found");
+            var e = new Error("NLS: project not found");
             e.code = "project_not_found";
             throw e;
         }
@@ -379,6 +499,7 @@ function createProject(metadata) {
                 return settings.set('projects',projects);
             }).then(function() {
                 if (metadata.remote) {
+                    console.log(metadata.remote);
                     return gitTools.clone(metadata.remote,projectPath).then(function(result) {
                         // Check this is a valid project
                         // If it is empty
@@ -415,8 +536,7 @@ function getProject(name) {
         }
         currentProject = new Project(name);
         return currentProject.load();
-    })
-
+    });
 }
 
 function listProjects() {

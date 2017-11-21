@@ -51,24 +51,61 @@ RED.projects = (function() {
                 var copyProject;
                 var projectRepoInput;
                 var emptyProjectCredentialInput;
+                var projectRepoUserInput;
+                var projectRepoPasswordInput;
+                var projectNameSublabel;
+                var projectRepoPassphrase;
+                var projectRepoRemoteName
+                var projectRepoBranch;
 
                 return {
                     title: "Create a new project", // TODO: NLS
                     content: function() {
+                        var projectList = null;
+                        var pendingFormValidation = false;
+                        $.getJSON("projects", function(data) {
+                            projectList = {};
+                            data.projects.forEach(function(p) {
+                                projectList[p] = true;
+                                if (pendingFormValidation) {
+                                    pendingFormValidation = false;
+                                    validateForm();
+                                }
+                            })
+                        });
+
                         var container = $('<div class="projects-dialog-screen-create"></div>');
                         var row;
 
                         var validateForm = function() {
                             var projectName = projectNameInput.val();
                             var valid = true;
-                            if (!/^[a-zA-Z0-9\-_]+$/.test(projectName)) {
-                                if (projectNameInputChanged) {
-                                    projectNameInput.addClass("input-error");
+                            if (projectNameInputChanged) {
+                                if (projectList === null) {
+                                    pendingFormValidation = true;
+                                    return;
                                 }
-                                valid = false;
-                            } else {
-                                projectNameInput.removeClass("input-error");
+                                projectNameStatus.empty();
+                                if (!/^[a-zA-Z0-9\-_]+$/.test(projectName) || projectList[projectName]) {
+                                    projectNameInput.addClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-exclamation-triangle"></i>').appendTo(projectNameStatus);
+                                    projectNameValid = false;
+                                    valid = false;
+                                    if (projectList[projectName]) {
+                                        projectNameSublabel.text("Project already exists");
+                                    } else {
+                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    }
+                                } else {
+                                    projectNameInput.removeClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
+                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameValid = true;
+                                }
+                                projectNameLastChecked = projectName;
                             }
+                            valid = projectNameValid;
+
                             var projectType = $(".projects-dialog-screen-create-type.selected").data('type');
                             if (projectType === 'copy') {
                                 if (!copyProject) {
@@ -76,19 +113,43 @@ RED.projects = (function() {
                                 }
                             } else if (projectType === 'clone') {
                                 var repo = projectRepoInput.val();
-                                if (repo.trim() === '') {
-                                    // TODO: could do more url regex checking...
+
+                                var validRepo = /^(?:git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+\.git(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
+                                if (!validRepo) {
                                     if (projectRepoChanged) {
                                         projectRepoInput.addClass("input-error");
                                     }
                                     valid = false;
                                 } else {
                                     projectRepoInput.removeClass("input-error");
-
                                 }
+                                if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repo)) {
+                                    $(".projects-dialog-screen-create-row-creds").hide();
+                                    $(".projects-dialog-screen-create-row-passphrase").show();
+                                } else if (/^https?:\/\//.test(repo)) {
+                                    $(".projects-dialog-screen-create-row-creds").show();
+                                    $(".projects-dialog-screen-create-row-passphrase").hide();
+                                } else {
+                                    $(".projects-dialog-screen-create-row-creds").show();
+                                    $(".projects-dialog-screen-create-row-passphrase").hide();
+                                }
+
+
                             } else if (projectType === 'empty') {
-                                projectFlowFileInput.toggleClass("input-error",projectFlowFileInput.val()==='')
-                                valid = valid && projectFlowFileInput.val()!=='';
+                                var flowFile = projectFlowFileInput.val();
+                                if (flowFile === "" || !/\.json$/.test(flowFile)) {
+                                    valid = false;
+                                    if (!projectFlowFileInput.hasClass("input-error")) {
+                                        projectFlowFileInput.addClass("input-error");
+                                        projectFlowFileInput.next().empty().append('<i style="margin-top: 8px;" class="fa fa-exclamation-triangle"></i>');
+                                    }
+                                } else {
+                                    if (projectFlowFileInput.hasClass("input-error")) {
+                                        projectFlowFileInput.removeClass("input-error");
+                                        projectFlowFileInput.next().empty();
+                                    }
+                                }
+
                                 var encryptionState = $("input[name=projects-encryption-type]:checked").val();
                                 if (encryptionState === 'enabled') {
                                     var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
@@ -103,7 +164,7 @@ RED.projects = (function() {
 
                         row = $('<div class="form-row button-group"></div>').appendTo(container);
                         var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type toggle selected"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>Empty Project</button>').appendTo(row);
-                        var createAsCopy = $('<button data-type="copy" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i class="fa fa-long-arrow-right fa-2x"></i><i class="fa fa-archive fa-2x"></i><br/>Copy existing</button>').appendTo(row);
+                        // var createAsCopy = $('<button data-type="copy" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i class="fa fa-long-arrow-right fa-2x"></i><i class="fa fa-archive fa-2x"></i><br/>Copy existing</button>').appendTo(row);
                         var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-git fa-2x"></i><i class="fa fa-arrows-h fa-2x"></i><i class="fa fa-archive fa-2x"></i><br/>Clone repository</button>').appendTo(row);
                         row.find(".projects-dialog-screen-create-type").click(function(evt) {
                             evt.preventDefault();
@@ -116,24 +177,51 @@ RED.projects = (function() {
 
 
                         row = $('<div class="form-row"></div>').appendTo(container);
-                        $('<label>Project name</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
 
-                        projectNameInput = $('<input type="text"></input>').appendTo(row);
+                        var subrow = $('<div style="position:relative;"></div>').appendTo(row);
+                        projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').appendTo(subrow);
+                        var projectNameStatus = $('<div class="projects-dialog-screen-input-status"></div>').appendTo(subrow);
+
                         var projectNameInputChanged = false;
-                        projectNameInput.on("change keyup paste",function() { projectNameInputChanged = true; validateForm(); });
-                        $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row);
+                        var projectNameLastChecked = "";
+                        var projectNameValid;
+                        var checkProjectName;
+                        var autoInsertedName = "";
+
+
+                        projectNameInput.on("change keyup paste",function() {
+                            projectNameInputChanged = (projectNameInput.val() !== projectNameLastChecked);
+                            if (checkProjectName) {
+                                clearTimeout(checkProjectName);
+                            } else if (projectNameInputChanged) {
+                                projectNameStatus.empty();
+                                $('<img src="red/images/spin.svg"/>').appendTo(projectNameStatus);
+                                if (projectNameInput.val() === '') {
+                                    validateForm();
+                                    return;
+                                }
+                            }
+                            checkProjectName = setTimeout(function() {
+                                validateForm();
+                                checkProjectName = null;
+                            },300)
+                        });
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
 
                         // Empty Project
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label>Description</label>').appendTo(row);
-                        projectSummaryInput = $('<input type="text">').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-desc">Description</label>').appendTo(row);
+                        projectSummaryInput = $('<input id="projects-dialog-screen-create-project-desc" type="text">').appendTo(row);
                         $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label>Flow file</label>').appendTo(row);
-                        projectFlowFileInput = $('<input type="text">').val("flow.json")
+                        $('<label for="projects-dialog-screen-create-project-file">Flow file</label>').appendTo(row);
+                        subrow = $('<div style="position:relative;"></div>').appendTo(row);
+                        projectFlowFileInput = $('<input id="projects-dialog-screen-create-project-file" type="text">').val("flow.json")
                             .on("change keyup paste",validateForm)
-                            .appendTo(row);
+                            .appendTo(subrow);
+                        $('<div class="projects-dialog-screen-input-status"></div>').appendTo(subrow);
                         $('<label class="projects-edit-form-sublabel"><small>*.json</small></label>').appendTo(row);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
@@ -185,7 +273,7 @@ RED.projects = (function() {
                         emptyProjectCredentialInput.on("change keyup paste", validateForm);
 
                         row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
-                        $('<div class="form-tips form-warning" style="padding: 15px; margin: 5px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
+                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
 
                         credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
                             var val = $(this).val();
@@ -195,29 +283,31 @@ RED.projects = (function() {
 
 
                         // Copy Project
-                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-copy"></div>').appendTo(container);
-                        $('<label> Select project to copy</label>').appendTo(row);
-                        var autoInsertedName = "";
-                        createProjectList({
-                            height: "250px",
-                            small: true,
-                            select: function(project) {
-                                copyProject = project;
-                                var projectName = projectNameInput.val();
-                                if (projectName === "" || projectName === autoInsertedName) {
-                                    autoInsertedName = project.name+"-copy";
-                                    projectNameInput.val(autoInsertedName);
-                                }
-                                validateForm();
-                            }
-                        }).appendTo(row);
+                        // row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-copy"></div>').appendTo(container);
+                        // $('<label> Select project to copy</label>').appendTo(row);
+                        // createProjectList({
+                        //     height: "250px",
+                        //     small: true,
+                        //     select: function(project) {
+                        //         copyProject = project;
+                        //         var projectName = projectNameInput.val();
+                        //         if (projectName === "" || projectName === autoInsertedName) {
+                        //             autoInsertedName = project.name+"-copy";
+                        //             projectNameInput.val(autoInsertedName);
+                        //         }
+                        //         validateForm();
+                        //     }
+                        // }).appendTo(row);
 
                         // Clone Project
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label>Git repository URL</label>').appendTo(row);
-                        projectRepoInput = $('<input type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
+                        projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>https:// or ssh://</small></label>').appendTo(row);
+
                         var projectRepoChanged = false;
                         projectRepoInput.on("change keyup paste",function() {
+                            projectRepoChanged = true;
                             var repo = $(this).val();
                             var m = /\/([^/]+)\.git/.exec(repo);
                             if (m) {
@@ -230,10 +320,35 @@ RED.projects = (function() {
                             validateForm();
                         });
 
-                        // Secret - clone
-                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label>Credentials encryption key</label>').appendTo(row);
-                        projectSecretInput = $('<input type="text"></input>').appendTo(row);
+                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone projects-dialog-screen-create-row-creds"></div>').hide().appendTo(container);
+
+                        var subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-user">Username</label>').appendTo(subrow);
+                        projectRepoUserInput = $('<input id="projects-dialog-screen-create-project-repo-user" type="text"></input>').appendTo(subrow);
+
+                        subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-pass">Password</label>').appendTo(subrow);
+                        projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
+
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-passphrase"></div>').hide().appendTo(container);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH key passphrase</label>').appendTo(row);
+                        projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password" style="width: calc(100% - 250px);"></input>').appendTo(row);
+
+                        // row = $('<div style="width: calc(50% - 10px); display:inline-block;" class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').hide().appendTo(container);
+                        // $('<label for="projects-dialog-screen-create-project-repo-remote-name">Remote name</label>').appendTo(row);
+                        // projectRepoRemoteName = $('<input id="projects-dialog-screen-create-project-repo-remote-name" type="text" style="width: 100%;"></input>').val("origin").appendTo(row);
+                        //
+                        // row = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;" class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').hide().appendTo(container);
+                        // $('<label for="projects-dialog-screen-create-project-repo-branch">Branch</label>').appendTo(row);
+                        // projectRepoBranch = $('<input id="projects-dialog-screen-create-project-repo-branch" type="text"></input>').val('master').appendTo(row);
+
+
+
+
+                        // // Secret - clone
+                        // row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
+                        // $('<label>Credentials encryption key</label>').appendTo(row);
+                        // projectSecretInput = $('<input type="text"></input>').appendTo(row);
 
                         createAsEmpty.click();
 
@@ -280,9 +395,13 @@ RED.projects = (function() {
                                 } else if (projectType === 'copy') {
                                     projectData.copy = copyProject.name;
                                 } else if (projectType === 'clone') {
-                                    projectData.credentialSecret = projectSecretInput.val();
+                                    // projectData.credentialSecret = projectSecretInput.val();
                                     projectData.remote = {
-                                        url: projectRepoInput.val()
+                                        // name: projectRepoRemoteName.val()||'origin',
+                                        // branch: projectRepoBranch.val()||'master',
+                                        url: projectRepoInput.val(),
+                                        username: projectRepoUserInput.val(),
+                                        password: projectRepoPasswordInput.val()
                                     }
                                 }
 
@@ -304,6 +423,8 @@ RED.projects = (function() {
                                                     console.log("git error",error);
                                                 },
                                                 'git_auth_failed': function(error) {
+                                                    projectRepoUserInput.addClass("input-error");
+                                                    projectRepoPasswordInput.addClass("input-error");
                                                     // getRepoAuthDetails(req);
                                                     console.log("git auth error",error);
                                                 },
@@ -551,6 +672,115 @@ RED.projects = (function() {
         });
     }
 
+    function createBranchList(options) {
+        var branchFilterTerm = "";
+        var branchFilterCreateItem;
+        var branches = [];
+        var currentBranch;
+        var branchPrefix = "";
+        var container = $('<div class="projects-branch-list">').appendTo(options.container);
+
+        var branchFilter = $('<input type="text">').attr('placeholder',options.placeholder).appendTo(container).searchBox({
+            delay: 200,
+            change: function() {
+                branchFilterTerm = $(this).val();
+                if (/(\.\.|\/\.|[?*[~^: \\]|\/\/|\/.$|\/$)/.test(branchFilterTerm)) {
+                    if (!branchFilterCreateItem.hasClass("input-error")) {
+                        branchFilterCreateItem.addClass("input-error");
+                        branchFilterCreateItem.find("i").addClass("fa-warning").removeClass("fa-code-fork");
+                    }
+                    branchFilterCreateItem.find("span").text("Invalid branch: "+branchPrefix+branchFilterTerm);
+                } else {
+                    if (branchFilterCreateItem.hasClass("input-error")) {
+                        branchFilterCreateItem.removeClass("input-error");
+                        branchFilterCreateItem.find("i").removeClass("fa-warning").addClass("fa-code-fork");
+                    }
+                    branchFilterCreateItem.find(".sidebar-version-control-branch-list-entry-create-name").text(branchPrefix+branchFilterTerm);
+                }
+                branchList.editableList("filter");
+            }
+        });
+        var branchList = $("<ol>",{style:"height: 130px;"}).appendTo(container);
+        branchList.editableList({
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(row,index,entry) {
+                var container = $('<div class="sidebar-version-control-branch-list-entry">').appendTo(row);
+                if (typeof entry !== "string") {
+                    branchFilterCreateItem = container;
+                    $('<i class="fa fa-code-fork"></i>').appendTo(container);
+                    $('<span>').text("Create branch:").appendTo(container);
+                    $('<div class="sidebar-version-control-branch-list-entry-create-name" style="margin-left: 10px;">').text(entry.name).appendTo(container);
+                } else {
+                    $('<i class="fa fa-code-fork"></i>').appendTo(container);
+                    $('<span>').text(entry).appendTo(container);
+                    if (currentBranch === entry) {
+                        container.addClass("selected");
+                        $('<span class="current"></span>').text(options.currentLabel||"current").appendTo(container);
+                    }
+                }
+                container.click(function(evt) {
+                    evt.preventDefault();
+                    if ($(this).hasClass('input-error')) {
+                        return;
+                    }
+                    var body = {};
+                    if (typeof entry !== "string") {
+                        body.name = branchFilter.val();
+                        body.create = true;
+                        if (options.remote) {
+                            body.name = options.remote()+"/"+body.name;
+                        }
+                    } else {
+                        if ($(this).hasClass('selected')) {
+                            body.current = true;
+                        }
+                        body.name = entry;
+                    }
+                    if (options.onselect) {
+                        options.onselect(body);
+                    }
+                });
+            },
+            filter: function(data) {
+                var isCreateEntry = (typeof data !=="string");
+                return (isCreateEntry && (branchFilterTerm !== "" && branches.indexOf(branchPrefix+branchFilterTerm) === -1) ) ||  (!isCreateEntry && data.indexOf(branchPrefix+branchFilterTerm) !== -1);
+            }
+        });
+        return {
+            refresh: function(url) {
+                branchFilter.searchBox("value","");
+                branchList.editableList('empty');
+                var start = Date.now();
+                var spinner = addSpinnerOverlay(container).addClass("projects-dialog-spinner-contain");
+                currentBranch = options.current();
+                if (options.remote) {
+                    branchPrefix = options.remote()+"/";
+                } else {
+                    branchPrefix = "";
+                }
+                $.getJSON(url,function(result) {
+                    branches = result.branches;
+                    result.branches.forEach(function(b) {
+                        branchList.editableList('addItem',b);
+                    });
+                    branchList.editableList('addItem',{});
+                    setTimeout(function() {
+                        spinner.remove();
+                    },Math.max(300-(Date.now() - start),0));
+                });
+            },
+            addItem: function(data) { branchList.editableList('addItem',data) },
+            filter: function() { branchList.editableList('filter') },
+            focus: function() { branchFilter.focus() }
+        }
+    }
+
+    function addSpinnerOverlay(container) {
+        var spinner = $('<div class="projects-dialog-spinner"><img src="red/images/spin.svg"/></div>').appendTo(container);
+        return spinner;
+    }
+
     function init() {
         dialog = $('<div id="projects-dialog" class="hide node-red-dialog projects-edit-form"><form class="form-horizontal"></form><div class="projects-dialog-spinner hide"><img src="red/images/spin.svg"/></div></div>')
             .appendTo("body")
@@ -577,9 +807,13 @@ RED.projects = (function() {
 
         RED.actions.add("core:new-project",RED.projects.newProject);
         RED.actions.add("core:open-project",RED.projects.selectProject);
-
-        RED.projects.settings.init({sendRequest:sendRequest});
-        RED.sidebar.versionControl.init({sendRequest:sendRequest});
+        var projectsAPI = {
+            sendRequest:sendRequest,
+            createBranchList:createBranchList,
+            addSpinnerOverlay:addSpinnerOverlay
+        };
+        RED.projects.settings.init(projectsAPI);
+        RED.sidebar.versionControl.init(projectsAPI);
         initScreens();
         // initSidebar();
     }
@@ -589,6 +823,7 @@ RED.projects = (function() {
         $.getJSON("projects",function(data) {
             if (data.active) {
                 $.getJSON("projects/"+data.active, function(project) {
+                    console.log(project.branches);
                     activeProject = project;
                     // updateProjectSummary();
                     // updateProjectDescription();

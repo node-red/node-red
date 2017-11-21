@@ -36,6 +36,7 @@ function init(_settings, _runtime) {
     settings = _settings;
     runtime = _runtime;
     log = runtime.log;
+    gitTools.init(_settings, _runtime);
 
     Projects.init(settings,runtime);
 
@@ -121,7 +122,7 @@ function getProject(name) {
 function checkActiveProject(project) {
     if (!activeProject || activeProject.name !== project) {
         //TODO: throw better err
-        throw new Error("Cannot operate on inactive project");
+        throw new Error("Cannot operate on inactive project wanted:"+project+" current:"+(activeProject&&activeProject.name));
     }
 }
 function getFiles(project) {
@@ -157,7 +158,38 @@ function getFile(project,filePath,sha) {
     checkActiveProject(project);
     return activeProject.getFile(filePath,sha);
 }
-
+function push(project,remoteBranchName,setRemote) {
+    checkActiveProject(project);
+    return activeProject.push(remoteBranchName,setRemote);
+}
+function pull(project,remoteBranchName,setRemote) {
+    checkActiveProject(project);
+    return activeProject.pull(remoteBranchName,setRemote).then(reloadActiveProject);
+}
+function getStatus(project) {
+    checkActiveProject(project);
+    return activeProject.status();
+}
+function resolveMerge(project,file,resolution) {
+    checkActiveProject(project);
+    return activeProject.resolveMerge(file,resolution);
+}
+function abortMerge(project) {
+    checkActiveProject(project);
+    return activeProject.abortMerge().then(reloadActiveProject);
+}
+function getBranches(project,remote) {
+    checkActiveProject(project);
+    return activeProject.getBranches(remote);
+}
+function setBranch(project,branchName,isCreate) {
+    checkActiveProject(project);
+    return activeProject.setBranch(branchName,isCreate).then(reloadActiveProject);
+}
+function getBranchStatus(project,branchName) {
+    checkActiveProject(project);
+    return activeProject.getBranchStatus(branchName);
+}
 function getActiveProject() {
     return activeProject;
 }
@@ -347,6 +379,14 @@ module.exports = {
     getFileDiff: getFileDiff,
     getCommits: getCommits,
     getCommit: getCommit,
+    push: push,
+    pull: pull,
+    getStatus:getStatus,
+    resolveMerge: resolveMerge,
+    abortMerge: abortMerge,
+    getBranches: getBranches,
+    setBranch: setBranch,
+    getBranchStatus:getBranchStatus,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

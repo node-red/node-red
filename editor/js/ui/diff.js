@@ -1581,10 +1581,10 @@ RED.diff = (function() {
         if (Adiff.type === 2) {
             cellNo.addClass('blank');
             cellLine.addClass('blank');
-        } else if (Adiff.type === 1) {
+        } else if (Adiff.type === 4) {
             cellNo.addClass('added');
             cellLine.addClass('added');
-        } else if (Adiff.type === 4) {
+        } else if (Adiff.type === 1) {
             cellNo.addClass('removed');
             cellLine.addClass('removed');
         }
@@ -1593,10 +1593,10 @@ RED.diff = (function() {
         if (Bdiff.type === 2) {
             cellNo.addClass('blank');
             cellLine.addClass('blank');
-        } else if (Bdiff.type === 1) {
+        } else if (Bdiff.type === 4) {
             cellNo.addClass('added');
             cellLine.addClass('added');
-        } else if (Bdiff.type === 4) {
+        } else if (Bdiff.type === 1) {
             cellNo.addClass('removed');
             cellLine.addClass('removed');
         }
@@ -1694,9 +1694,14 @@ RED.diff = (function() {
                 var isCollapsed = diffFileRow.hasClass("collapsed");
                 diffFileRow.nextUntil(".node-text-diff-file-header").toggle(!isCollapsed);
             })
-            var label = $('<span></span>').text(file.file).appendTo(content);
+            var label = $('<span class="filename"></span>').text(file.file).appendTo(content);
 
-            if (commitOptions.project.files && commitOptions.project.files.flow === file.file) {
+            var conflictHeader;
+            var unresolvedConflicts = 0;
+            var resolvedConflicts = 0;
+            var conflictResolutions = {};
+
+            if (!commitOptions.unmerged && commitOptions.project.files && commitOptions.project.files.flow === file.file) {
                 var tools = $('<span style="float: right;" class="button-group"></span>').appendTo(content);
                 $('<button class="editor-button editor-button-small">show flow diff</button>').appendTo(tools).click(function(e) {
                     e.preventDefault();
@@ -1740,47 +1745,143 @@ RED.diff = (function() {
             }
 
 
-            for (var i=0;i<hunks.length;i++) {
+            hunks.forEach(function(hunk) {
                 var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
                 var content = $('<td colspan="3"></td>').appendTo(diffRow);
-                var label = $('<span></span>').text(hunks[i].header).appendTo(content);
+                var label = $('<span></span>').text(hunk.header).appendTo(content);
+                var isConflict = hunk.conflict;
+                var localLine = hunk.localStartLine;
+                var remoteLine = hunk.remoteStartLine;
+                if (isConflict) {
+                    unresolvedConflicts++;
+                }
 
-                var localLine = hunks[i].localStartLine;
-                var remoteLine = hunks[i].remoteStartLine;
-
-
-                for (var j=0;j<hunks[i].lines.length;j++) {
-                    var lineText = hunks[i].lines[j];
+                hunk.lines.forEach(function(lineText,lineNumber) {
                     // if (lineText[0] === '\\' || lineText === "") {
                     //     // Comment line - bail out of this hunk
                     //     break;
                     // }
-                    diffRow = $('<tr>').appendTo(codeBody);
+
+                    var actualLineNumber = hunk.diffStart + lineNumber;
+                    var isMergeHeader = isConflict && /^..(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
+                    var diffRow = $('<tr>').appendTo(codeBody);
                     var localLineNo = $('<td class="lineno">').appendTo(diffRow);
-                    var remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
-                    var line = $('<td class="linetext">').appendTo(diffRow);
-                    $('<span class="prefix">').text(lineText[0]).appendTo(line);
-                    $('<span>').text(lineText.substring(1)).appendTo(line);
-                    if (lineText[0] === '+') {
-                        localLineNo.addClass("added");
-                        remoteLineNo.addClass("added");
-                        line.addClass("added");
-                        remoteLineNo.text(remoteLine++);
-                    } else if (lineText[0] === '-') {
-                        localLineNo.addClass("removed");
-                        remoteLineNo.addClass("removed");
-                        line.addClass("removed");
-                        localLineNo.text(localLine++);
+                    var remoteLineNo;
+                    if (!isMergeHeader) {
+                        remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
                     } else {
-                        line.addClass("unchanged");
-                        if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
-                            localLineNo.text(localLine++);
+                        localLineNo.attr('colspan',2);
+                    }
+                    var line = $('<td class="linetext">').appendTo(diffRow);
+                    var prefixStart = 0;
+                    var prefixEnd = 1;
+                    if (isConflict) {
+                        prefixEnd = 2;
+                    }
+                    if (!isMergeHeader) {
+                        var changeMarker = lineText[0];
+                        if (isConflict && !commitOptions.unmerged && changeMarker === ' ') {
+                            changeMarker = lineText[1];
                         }
-                        if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
-                            remoteLineNo.text(remoteLine++);
+                        $('<span class="prefix">').text(changeMarker).appendTo(line);
+                        var handledlLine = false;
+                        if (isConflict && commitOptions.unmerged) {
+                            $('<span class="prefix">').text(lineText[1]).appendTo(line);
+                            if (lineText[0] === '+') {
+                                localLineNo.text(localLine++);
+                                handledlLine = true;
+                            }
+                            if (lineText[1] === '+') {
+                                remoteLineNo.text(remoteLine++);
+                                handledlLine = true;
+                            }
+                        } else {
+                            if (lineText[0] === '+' || (isConflict && lineText[1] === '+')) {
+                                localLineNo.addClass("added");
+                                remoteLineNo.addClass("added");
+                                line.addClass("added");
+                                remoteLineNo.text(remoteLine++);
+                                handledlLine = true;
+                            } else if (lineText[0] === '-' || (isConflict && lineText[1] === '-')) {
+                                localLineNo.addClass("removed");
+                                remoteLineNo.addClass("removed");
+                                line.addClass("removed");
+                                localLineNo.text(localLine++);
+                                handledlLine = true;
+                            }
+                        }
+                        if (!handledlLine) {
+                            line.addClass("unchanged");
+                            if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                localLineNo.text(localLine++);
+                            }
+                            if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                remoteLineNo.text(remoteLine++);
+                            }
+                        }
+                        $('<span>').text(lineText.substring(prefixEnd)).appendTo(line);
+                    } else {
+                        diffRow.addClass("mergeHeader");
+                        var isSeparator = /^..(=======$)/.test(lineText);
+                        if (!isSeparator) {
+                            var isOurs = /^..<<<<<<</.test(lineText);
+                            if (isOurs) {
+                                $('<span>').text("<<<<<<< Local Changes").appendTo(line);
+                                hunk.localChangeStart = actualLineNumber;
+                            } else {
+                                hunk.remoteChangeEnd = actualLineNumber;
+                                $('<span>').text(">>>>>>> Remote Changes").appendTo(line);
+
+                            }
+                            diffRow.addClass("mergeHeader-"+(isOurs?"ours":"theirs"));
+                            $('<button class="editor-button editor-button-small" style="float: right; margin-right: 20px;"><i class="fa fa-angle-double-'+(isOurs?"down":"up")+'"></i> use '+(isOurs?"local":"remote")+' changes</button>')
+                                .appendTo(line)
+                                .click(function(evt) {
+                                    evt.preventDefault();
+                                    resolvedConflicts++;
+                                    var addedRows;
+                                    var midRow;
+                                    if (isOurs) {
+                                        addedRows = diffRow.nextUntil(".mergeHeader-separator");
+                                        midRow = addedRows.last().next();
+                                        midRow.nextUntil(".mergeHeader").remove();
+                                        midRow.next().remove();
+                                    } else {
+                                        addedRows = diffRow.prevUntil(".mergeHeader-separator");
+                                        midRow = addedRows.last().prev();
+                                        midRow.prevUntil(".mergeHeader").remove();
+                                        midRow.prev().remove();
+                                    }
+                                    midRow.remove();
+                                    diffRow.remove();
+                                    addedRows.find(".linetext").addClass('added');
+                                    conflictHeader.empty();
+                                    $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
+
+                                    conflictResolutions[file.file] = conflictResolutions[file.file] || {};
+                                    conflictResolutions[file.file][hunk.localChangeStart] = {
+                                        changeStart: hunk.localChangeStart,
+                                        separator: hunk.changeSeparator,
+                                        changeEnd: hunk.remoteChangeEnd,
+                                        selection: isOurs?"A":"B"
+                                    }
+                                    if (commitOptions.resolveConflict) {
+                                        commitOptions.resolveConflict({
+                                            conflicts: unresolvedConflicts,
+                                            resolved: resolvedConflicts,
+                                            resolutions: conflictResolutions
+                                        });
+                                    }
+                                })
+                        } else {
+                            hunk.changeSeparator = actualLineNumber;
+                            diffRow.addClass("mergeHeader-separator");
                         }
                     }
-                }
+                });
+            });
+            if (commitOptions.unmerged) {
+                conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
             }
         });
         return diffPanel;
@@ -1820,8 +1921,9 @@ RED.diff = (function() {
                 $('<div style="float: right">').text("Commit "+commit.sha).appendTo(summary);
                 $('<div>').text((commit.authorName||commit.author)+" - "+options.date).appendTo(summary);
 
-
-                createUnifiedDiffTable(commit.files,options).appendTo(diffPanel);
+                if (commit.files) {
+                    createUnifiedDiffTable(commit.files,options).appendTo(diffPanel);
+                }
 
 
             },
@@ -1837,16 +1939,30 @@ RED.diff = (function() {
     function showUnifiedDiff(options) {
         var diff = options.diff;
         var title = options.title;
-
         var files = parseUnifiedDiff(diff);
+
+        var currentResolution;
+        if (options.unmerged) {
+            options.resolveConflict = function(results) {
+                currentResolution = results;
+                if (results.conflicts === results.resolved) {
+                    $("#node-diff-view-resolve-diff").removeClass('disabled');
+                }
+            }
+        }
+
+
         var trayOptions = {
             title: title||"Compare Changes", //TODO: nls
             width: Infinity,
             overlay: true,
             buttons: [
                 {
-                    text: RED._("common.label.close"),
+                    text: RED._((options.unmerged)?"common.label.cancel":"common.label.close"),
                     click: function() {
+                        if (options.oncancel) {
+                            options.oncancel();
+                        }
                         RED.tray.close();
                     }
                 }
@@ -1858,8 +1974,6 @@ RED.diff = (function() {
                 var trayBody = tray.find('.editor-tray-body');
                 var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
                 createUnifiedDiffTable(files,options).appendTo(diffPanel);
-
-
             },
             close: function() {
                 diffVisible = false;
@@ -1867,6 +1981,23 @@ RED.diff = (function() {
             show: function() {
 
             }
+        }
+        if (options.unmerged) {
+            trayOptions.buttons.push(
+                {
+                    id: "node-diff-view-resolve-diff",
+                    text: "Save conflict resolution",
+                    class: "primary disabled",
+                    click: function() {
+                        if (!$("#node-diff-view-resolve-diff").hasClass('disabled')) {
+                            if (options.onresolve) {
+                                options.onresolve(currentResolution);
+                            }
+                            RED.tray.close();
+                        }
+                    }
+                }
+            );
         }
         RED.tray.show(trayOptions);
     }
@@ -1912,6 +2043,7 @@ RED.diff = (function() {
         }
         var fileHeader = /^\+\+\+ b\/(.*)\t?/;
         var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
+        var conflictHunkHeader = /^@+ -((\d+)(,(\d+))?) -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @+/;
         var files = [];
         var currentFile;
         var hunks = [];
@@ -1944,9 +2076,29 @@ RED.diff = (function() {
                             localLength: hunkLine[4]||1,
                             remoteStartLine: hunkLine[6],
                             remoteLength: hunkLine[8]||1,
-                            lines: []
+                            lines: [],
+                            conflict: false
                         }
-                    } else if (currentHunk) {
+                        continue;
+                    }
+                    hunkLine = conflictHunkHeader.exec(line);
+                    if (hunkLine) {
+                        if (currentHunk) {
+                            currentFile.hunks.push(currentHunk);
+                        }
+                        currentHunk = {
+                            header: line,
+                            localStartLine: hunkLine[2],
+                            localLength: hunkLine[4]||1,
+                            remoteStartLine: hunkLine[6],
+                            remoteLength: hunkLine[8]||1,
+                            diffStart: parseInt(hunkLine[10]),
+                            lines: [],
+                            conflict: true
+                        }
+                        continue;
+                    }
+                    if (currentHunk) {
                         currentHunk.lines.push(line);
                     }
                 }

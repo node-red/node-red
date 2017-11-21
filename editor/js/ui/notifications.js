@@ -78,7 +78,7 @@ RED.notify = (function() {
                     window.clearTimeout(nn.timeoutid);
                 };
             })());
-            n.timeoutid = window.setTimeout(n.close,timeout||3000);
+            n.timeoutid = window.setTimeout(n.close,timeout||5000);
         }
         currentNotifications.push(n);
         c+=1;
