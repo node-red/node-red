@@ -263,26 +263,6 @@ function parseLog(log) {
     return commits;
 }
 
-// function getCommitCounts(cwd, options) {
-//     var commands = [
-//         runGitCommand(['rev-list', 'HEAD', '--count'],cwd), // #commits on master
-//     ];
-//     if (options.hasRemote) {
-//         commands.push(runGitCommand(['rev-list', 'master','^origin/master', '--count'],cwd)); // #commits master ahead
-//         commands.push(runGitCommand(['rev-list', '^master','origin/master', '--count'],cwd)); // #commits master behind
-//     }
-//     return when.all(commands).then(function(results) {
-//         var result = {
-//             total: parseInt(results[0])
-//         }
-//         if (options.hasRemote) {
-//             result.ahead = parseInt(results[1]);
-//             result.behind = parseInt(results[2]);
-//         }
-//         return result;
-//     });
-// }
-
 function getRemotes(cwd) {
     return runGitCommand(['remote','-v'],cwd).then(function(output) {
         var result;
@@ -362,7 +342,7 @@ module.exports = {
             throw err;
         });
     },
-    push: function(cwd,remoteBranch,setUpstream) {
+    push: function(cwd,remoteBranch,setUpstream, auth) {
         var args = ["push"];
         var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
         if (m) {
@@ -375,7 +355,13 @@ module.exports = {
             args.push("origin");
         }
         args.push("--porcelain");
-        return runGitCommand(args,cwd).otherwise(function(err) {
+        var promise;
+        if (auth) {
+            promise = runGitCommandWithAuth(args,cwd,auth);
+        } else {
+            promise = runGitCommand(args,cwd)
+        }
+        return promise.catch(function(err) {
             if (err.code === 'git_error') {
                 if (/^!.*non-fast-forward/m.test(err.stdout)) {
                     err.code = 'git_push_failed';
@@ -384,7 +370,7 @@ module.exports = {
             }
         });
     },
-    clone: function(remote, cwd) {
+    clone: function(remote, auth, cwd) {
         var args = ["clone",remote.url];
         if (remote.name) {
             args.push("-o");
@@ -395,8 +381,8 @@ module.exports = {
             args.push(remote.branch);
         }
         args.push(".");
-        if (remote.hasOwnProperty("username") && remote.hasOwnProperty("password")) {
-            return runGitCommandWithAuth(args,cwd,remote);
+        if (auth) {
+            return runGitCommandWithAuth(args,cwd,auth);
         } else {
             return runGitCommand(args,cwd);
         }
@@ -441,8 +427,13 @@ module.exports = {
         args.push(file);
         return runGitCommand(args,cwd);
     },
-    fetch: function(cwd) {
-        return runGitCommand(["fetch"],cwd);
+    fetch: function(cwd,auth) {
+        var args = ["fetch"];
+        if (auth) {
+            return runGitCommandWithAuth(args,cwd,auth);
+        } else {
+            return runGitCommand(args,cwd);
+        }
     },
     getCommits: function(cwd,options) {
         var args = ["log", "--format=sha: %H%nparents: %p%nrefs: %D%nauthor: %an%ndate: %ct%nsubject: %s%n-----"];

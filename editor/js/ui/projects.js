@@ -411,6 +411,7 @@ RED.projects = (function() {
                                 sendRequest({
                                         url: "projects",
                                         type: "POST",
+                                        handleAuthFail: false,
                                         responses: {
                                             200: function(data) {
                                                 dialog.dialog( "close" );
@@ -647,6 +648,70 @@ RED.projects = (function() {
                 if (typeof responses === 'function') {
                     resultCallback = responses;
                     resultCallbackArgs = {error:responses.statusText};
+                    return;
+                } else if (options.handleAuthFail !== false && xhr.responseJSON.error === 'git_auth_failed') {
+                    var url = activeProject.remotes.origin.fetch;
+                    var message = $('<div>'+
+                        '<div class="form-row">Authentication required for repository:</div>'+
+                        '<div class="form-row"><div style="margin-left: 20px;">'+url+'</div></div>'+
+                        '<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
+                        '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>'+
+                        '<hr>'+
+                        '<div class="ui-dialog-buttonset">'+
+                            '<button>'+RED._("common.label.cancel")+'</button>'+
+                            '<button><i class="fa fa-refresh"></i> Retry</button>'+
+                        '</div>'+
+                        '</div>');
+                    $(message.find('button')[0]).click(function(evt) {
+                        evt.preventDefault();
+                        notification.close();
+                    })
+                    $(message.find('button')[1]).click(function(evt) {
+                        evt.preventDefault();
+                        var username = $('#projects-user-auth-username').val();
+                        var password = $('#projects-user-auth-password').val();
+                        body = body || {};
+                        var done = function(err) {
+                            if (err) {
+                                console.log("Failed to update auth");
+                                console.log(err);
+                            } else {
+                                sendRequest(options,body);
+                                notification.close();
+                            }
+
+                        }
+                        sendRequest({
+                            url: "projects/"+activeProject.name,
+                            type: "PUT",
+                            responses: {
+                                0: function(error) {
+                                    done(error,null);
+                                },
+                                200: function(data) {
+                                    done(null,data);
+                                },
+                                400: {
+                                    'unexpected_error': function(error) {
+                                        done(error,null);
+                                    }
+                                },
+                            }
+                        },{
+                            remote: {
+                                origin: {
+                                    username: username,
+                                    password: password
+                                }
+                            }
+                        });
+
+                    })
+                    var notification = RED.notify(message,{
+                        type:"error",
+                        fixed: true,
+                        modal: true
+                    });
                     return;
                 } else if (responses[xhr.responseJSON.error]) {
                     resultCallback = responses[xhr.responseJSON.error];

@@ -28,7 +28,7 @@ function getListenPath() {
     } else {
         listenPath = path.join(process.env['XDG_RUNTIME_DIR'] || os.tmpdir(), fn);
     }
-    console.log(listenPath);
+    // console.log(listenPath);
     return listenPath;
 }
 
@@ -68,7 +68,7 @@ var ResponseServer = function(auth) {
             resolve({path:listenPath,close:function() { server.close(); }});
         });
         server.on('close', function() {
-            console.log("Closing response server");
+            // console.log("Closing response server");
             fs.removeSync(listenPath);
         });
         server.on('error',function(err) {

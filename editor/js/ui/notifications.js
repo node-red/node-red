@@ -17,6 +17,21 @@ RED.notify = (function() {
     var currentNotifications = [];
     var c = 0;
     return function(msg,type,fixed,timeout) {
+        var options = {};
+        if (typeof type === 'object') {
+            options = type;
+            fixed = options.fixed;
+            timeout = options.timeout;
+            type = options.type;
+        }
+
+        if (options.modal) {
+            $("#header-shade").show();
+            $("#editor-shade").show();
+            $("#palette-shade").show();
+            $(".sidebar-shade").show();
+        }
+
         if (currentNotifications.length > 4) {
             var ll = currentNotifications.length;
             for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {
@@ -50,6 +65,12 @@ RED.notify = (function() {
                 $(nn).slideUp(300, function() {
                     nn.parentNode.removeChild(nn);
                 });
+                if (options.modal) {
+                    $("#header-shade").hide();
+                    $("#editor-shade").hide();
+                    $("#palette-shade").hide();
+                    $(".sidebar-shade").hide();
+                }
             };
         })();
 

@@ -216,7 +216,21 @@ RED.sidebar.versionControl = (function() {
         utils = _utils;
 
         RED.actions.add("core:show-version-control-tab",show);
+        RED.events.on("deploy", function() {
+            var activeProject = RED.projects.getActiveProject();
+            if (activeProject) {
+                // TODO: this is a full refresh of the files - should be able to
+                //       just do an incremental refresh
+                allChanges = {};
+                unstagedChangesList.editableList('empty');
+                stagedChangesList.editableList('empty');
+                unmergedChangesList.editableList('empty');
 
+                $.getJSON("/projects/"+activeProject.name+"/status",function(result) {
+                    refreshFiles(result);
+                });
+            }
+        })
         sidebarContent = $('<div>', {class:"sidebar-version-control"});
         var stackContainer = $("<div>",{class:"sidebar-version-control-stack"}).appendTo(sidebarContent);
         sections = RED.stack.create({
@@ -414,8 +428,7 @@ RED.sidebar.versionControl = (function() {
                         200: function(data) {
                             spinner.remove();
                             cancelCommitButton.click();
-                            refreshFiles(data);
-                            refreshLocalCommits();
+                            refresh(true);
                         },
                         400: {
                             'unexpected_error': function(error) {
@@ -442,7 +455,7 @@ RED.sidebar.versionControl = (function() {
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
-                refreshLocalCommits();
+                refresh(true);
             })
 
         var localBranchToolbar = $('<div class="sidebar-version-control-change-header" style="text-align: right;"></div>').appendTo(localHistory.content);
@@ -466,7 +479,15 @@ RED.sidebar.versionControl = (function() {
                     },100);
                 }
             })
-        var repoStatusButton = $('<button class="editor-button editor-button-small" style="margin-left: 10px;" id="sidebar-version-control-repo-status-button"><i class="fa fa-long-arrow-up"></i> <span id="sidebar-version-control-commits-ahead"></span> <i class="fa fa-long-arrow-down"></i> <span id="sidebar-version-control-commits-behind"></span></button>')
+        var repoStatusButton = $('<button class="editor-button editor-button-small" style="margin-left: 10px;" id="sidebar-version-control-repo-status-button">'+
+                                 '<span id="sidebar-version-control-repo-status-stats">'+
+                                    '<i class="fa fa-long-arrow-up"></i> <span id="sidebar-version-control-commits-ahead"></span> '+
+                                    '<i class="fa fa-long-arrow-down"></i> <span id="sidebar-version-control-commits-behind"></span>'+
+                                 '</span>'+
+                                 '<span id="sidebar-version-control-repo-status-auth-issue">'+
+                                    '<i class="fa fa-warning"></i>'+
+                                 '</span>'+
+                                 '</button>')
             .appendTo(localBranchToolbar)
             .click(function(evt) {
                 evt.preventDefault();
@@ -485,7 +506,7 @@ RED.sidebar.versionControl = (function() {
             });
 
         localCommitList = $("<ol>",{style:"position: absolute; top: 30px; bottom: 0px; right:0; left:0;"}).appendTo(localHistory.content);
-        localCommitListShade = $('<div class="component-shade"></div>').css('top',"30px").hide().appendTo(localHistory.content);
+        localCommitListShade = $('<div class="component-shade" style="z-Index: 3"></div>').css('top',"30px").hide().appendTo(localHistory.content);
         localCommitList.editableList({
             addButton: false,
             scrollOnAdd: false,
@@ -635,6 +656,39 @@ RED.sidebar.versionControl = (function() {
             });
 
         $('<div id="sidebar-version-control-repo-toolbar-message" class="sidebar-version-control-slide-box-header" style="min-height: 100px;"></div>').appendTo(remoteBox);
+
+
+        var errorMessage = $('<div id="sidebar-version-control-repo-toolbar-error-message" class="sidebar-version-control-slide-box-header" style="min-height: 100px;"></div>').hide().appendTo(remoteBox);
+        $('<div style="margin-top: 10px;"><i class="fa fa-warning"></i> Unable to access remote repository</div>').appendTo(errorMessage)
+        var buttonRow = $('<div style="margin: 10px 30px; text-align: center"></div>').appendTo(errorMessage);
+        $('<button class="editor-button" style="width: 80%;"><i class="fa fa-refresh"></i> Retry</button>')
+            .appendTo(buttonRow)
+            .click(function(e) {
+                e.preventDefault();
+                var activeProject = RED.projects.getActiveProject();
+                var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
+                utils.sendRequest({
+                    url: "/projects/"+activeProject.name+"/branches/remote",
+                    type: "GET",
+                    responses: {
+                        0: function(error) {
+                            console.log(error);
+                            // done(error,null);
+                        },
+                        200: function(data) {
+                            refresh(true);
+                        },
+                        400: {
+                            'unexpected_error': function(error) {
+                                console.log(error);
+                                // done(error,null);
+                            }
+                        }
+                    }
+                }).always(function() {
+                    spinner.remove();
+                });
+            })
 
         $('<div class="sidebar-version-control-slide-box-header" style="height: 20px;"><label id="sidebar-version-control-repo-toolbar-set-upstream-row" for="sidebar-version-control-repo-toolbar-set-upstream" class="hide"><input type="checkbox" id="sidebar-version-control-repo-toolbar-set-upstream"> Set as upstream branch</label></div>').appendTo(remoteBox);
 
@@ -891,14 +945,6 @@ RED.sidebar.versionControl = (function() {
                     'unexpected_error': function(error) {
                         console.log(error);
                         // done(error,null);
-                    },
-                    'git_auth_failed': function(error) {
-                        RED.notify('Authentication failed against remote repository','error');
-                        $('#sidebar-version-control-repo-toolbar-message').text("Failed to fetch remote repository status");
-                        $("#sidebar-version-control-repo-pull").attr('disabled',true);
-                        $("#sidebar-version-control-repo-push").attr('disabled',true);
-
-                        spinner.remove();
                     }
                 }
             }
@@ -1071,7 +1117,6 @@ RED.sidebar.versionControl = (function() {
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {
             $.getJSON("/projects/"+activeProject.name+"/status",function(result) {
-
                 refreshFiles(result);
 
                 $('#sidebar-version-control-local-branch').text(result.branches.local);
@@ -1079,19 +1124,36 @@ RED.sidebar.versionControl = (function() {
 
                 var commitsAhead = result.commits.ahead || 0;
                 var commitsBehind = result.commits.behind || 0;
-                console.log(commitsBehind,commitsAhead);
 
                 if (activeProject.hasOwnProperty('remotes')) {
-                    $("#sidebar-version-control-repo-status-button").show();
-                    if (result.branches.hasOwnProperty('remote')) {
-                        updateRemoteStatus(commitsAhead, commitsBehind);
-                    } else {
-                        $('#sidebar-version-control-commits-ahead').text("");
-                        $('#sidebar-version-control-commits-behind').text("");
-
-                        $('#sidebar-version-control-repo-toolbar-message').text("Your local branch is not currently tracking a remote branch.");
+                    if (result.branches.hasOwnProperty("remoteError")) {
+                        $("#sidebar-version-control-repo-status-auth-issue").show();
+                        $("#sidebar-version-control-repo-status-stats").hide();
+                        $('#sidebar-version-control-repo-branch').attr('disabled',true);
                         $("#sidebar-version-control-repo-pull").attr('disabled',true);
                         $("#sidebar-version-control-repo-push").attr('disabled',true);
+                        $('#sidebar-version-control-repo-toolbar-message').hide();
+                        $('#sidebar-version-control-repo-toolbar-error-message').show();
+                    } else {
+                        $('#sidebar-version-control-repo-toolbar-message').show();
+                        $('#sidebar-version-control-repo-toolbar-error-message').hide();
+
+                        $("#sidebar-version-control-repo-status-auth-issue").hide();
+                        $("#sidebar-version-control-repo-status-stats").show();
+
+                        $('#sidebar-version-control-repo-branch').attr('disabled',false);
+
+                        $("#sidebar-version-control-repo-status-button").show();
+                        if (result.branches.hasOwnProperty('remote')) {
+                            updateRemoteStatus(commitsAhead, commitsBehind);
+                        } else {
+                            $('#sidebar-version-control-commits-ahead').text("");
+                            $('#sidebar-version-control-commits-behind').text("");
+
+                            $('#sidebar-version-control-repo-toolbar-message').text("Your local branch is not currently tracking a remote branch.");
+                            $("#sidebar-version-control-repo-pull").attr('disabled',true);
+                            $("#sidebar-version-control-repo-push").attr('disabled',true);
+                        }
                     }
                 } else {
                     $("#sidebar-version-control-repo-status-button").hide();
