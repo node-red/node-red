@@ -322,14 +322,20 @@ module.exports = {
         var args = ["branch","--set-upstream-to",remoteBranch];
         return runGitCommand(args,cwd);
     },
-    pull: function(cwd,remoteBranch) {
+    pull: function(cwd,remoteBranch,auth) {
         var args = ["pull"];
         var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
         if (m) {
             args.push(m[1]);
             args.push(m[2])
         }
-        return runGitCommand(args,cwd).otherwise(function(err) {
+        var promise;
+        if (auth) {
+            promise = runGitCommandWithAuth(args,cwd,auth);
+        } else {
+            promise = runGitCommand(args,cwd)
+        }
+        return promise.catch(function(err) {
             if (/CONFLICT/.test(err.stdout)) {
                 var e = new Error("NLS: pull failed - merge conflict");
                 e.code = "git_pull_merge_conflict";

@@ -296,9 +296,10 @@ Project.prototype.push = function (remoteBranchName,setRemote) {
 };
 
 Project.prototype.pull = function (remoteBranchName,setRemote) {
+    var self = this;
     if (setRemote) {
         return gitTools.setUpstream(this.path, remoteBranchName).then(function() {
-            return gitTools.pull(this.path, null, getAuth(this.name,'origin'));
+            return gitTools.pull(self.path, null, getAuth(self.name,'origin'));
         })
     } else {
         return gitTools.pull(this.path, remoteBranchName, getAuth(this.name,'origin'));

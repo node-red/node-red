@@ -297,7 +297,7 @@ module.exports = {
         });
 
         // Pull remote commits
-        app.get("/:id/pull/?*", function(req,res) {
+        app.post("/:id/pull/?*", function(req,res) {
             var projectName = req.params.id;
             var remoteBranchName = req.params[0];
             var setRemote = req.query.u;
