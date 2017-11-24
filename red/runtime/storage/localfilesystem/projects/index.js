@@ -147,7 +147,7 @@ function getFileDiff(project,file,type) {
 }
 function getCommits(project,options) {
     checkActiveProject(project);
-    return activeProject.getCommits(options);
+        return activeProject.getCommits(options);
 }
 function getCommit(project,sha) {
     checkActiveProject(project);
@@ -164,7 +164,9 @@ function push(project,remoteBranchName,setRemote) {
 }
 function pull(project,remoteBranchName,setRemote) {
     checkActiveProject(project);
-    return activeProject.pull(remoteBranchName,setRemote).then(reloadActiveProject);
+    return activeProject.pull(remoteBranchName,setRemote).then(function() {
+        return reloadActiveProject("pull");
+    });
 }
 function getStatus(project) {
     checkActiveProject(project);
@@ -176,7 +178,9 @@ function resolveMerge(project,file,resolution) {
 }
 function abortMerge(project) {
     checkActiveProject(project);
-    return activeProject.abortMerge().then(reloadActiveProject);
+    return activeProject.abortMerge().then(function() {
+        return reloadActiveProject("abort-merge")
+    });
 }
 function getBranches(project,remote) {
     checkActiveProject(project);
@@ -184,7 +188,9 @@ function getBranches(project,remote) {
 }
 function setBranch(project,branchName,isCreate) {
     checkActiveProject(project);
-    return activeProject.setBranch(branchName,isCreate).then(reloadActiveProject);
+    return activeProject.setBranch(branchName,isCreate).then(function() {
+        return reloadActiveProject("change-branch");
+    });
 }
 function getBranchStatus(project,branchName) {
     checkActiveProject(project);
@@ -194,14 +200,14 @@ function getActiveProject() {
     return activeProject;
 }
 
-function reloadActiveProject() {
+function reloadActiveProject(action) {
     return runtime.nodes.stopFlows().then(function() {
         return runtime.nodes.loadFlows(true).then(function() {
-            runtime.events.emit("runtime-event",{id:"project-change",payload:{ project: activeProject.name}});
+            runtime.events.emit("runtime-event",{id:"project-update", payload:{ project: activeProject.name, action:action}});
         }).catch(function(err) {
             // We're committed to the project change now, so notify editors
             // that it has changed.
-            runtime.events.emit("runtime-event",{id:"project-change",payload:{ project: activeProject.name}});
+            runtime.events.emit("runtime-event",{id:"project-update", payload:{ project: activeProject.name, action:action}});
             throw err;
         });
     });
@@ -224,7 +230,7 @@ function setActiveProject(projectName) {
             // console.log("Updated file targets to");
             // console.log(flowsFullPath)
             // console.log(credentialsFile)
-            return reloadActiveProject();
+            return reloadActiveProject("loaded");
         })
     });
 }
@@ -244,7 +250,7 @@ function updateProject(project,data) {
             flowsFileBackup = activeProject.getFlowFileBackup();
             credentialsFile = activeProject.getCredentialsFile();
             credentialsFileBackup = activeProject.getCredentialsFileBackup();
-            return reloadActiveProject();
+            return reloadActiveProject("updated");
         } else if (result.credentialSecretChanged) {
             if (isReset || !wasInvalid) {
                 if (isReset) {
@@ -255,11 +261,11 @@ function updateProject(project,data) {
                     .then(runtime.storage.saveCredentials)
                     .then(function() {
                         if (wasInvalid) {
-                            return reloadActiveProject();
+                            return reloadActiveProject("updated");
                         }
                     });
             } else if (wasInvalid) {
-                return reloadActiveProject();
+                return reloadActiveProject("updated");
             }
         }
     });
@@ -277,11 +283,11 @@ function setCredentialSecret(data) { //existingSecret,secret) {
                 .then(runtime.storage.saveCredentials)
                 .then(function() {
                     if (wasInvalid) {
-                        return reloadActiveProject();
+                        return reloadActiveProject("updated");
                     }
                 });
         } else if (wasInvalid) {
-            return reloadActiveProject();
+            return reloadActiveProject("updated");
         }
     })
 }

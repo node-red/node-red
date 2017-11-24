@@ -59,13 +59,22 @@
                             // handled below
                             return;
                         }
-                        if (notificationId === "project-change") {
+                        if (notificationId === "project-update") {
                             RED.nodes.clear();
                             RED.history.clear();
                             RED.view.redraw(true);
                             RED.projects.refresh(function() {
                                 loadFlows(function() {
-                                    RED.notify("NLS: Project changed to "+msg.project);
+                                    console.log(msg);
+                                    var project = RED.projects.getActiveProject();
+                                    var message = {
+                                        "change-branch":"Change to local branch '"+project.branches.local+"'",
+                                        "abort-merge":"Git merge aborted",
+                                        "loaded":"Project '"+msg.project+"' loaded",
+                                        "updated":"Project '"+msg.project+"' updated",
+                                        "pull":"Project '"+msg.project+"' reloaded"
+                                    }[msg.action]
+                                    RED.notify(message);
                                     RED.sidebar.info.refresh()
                                 });
                             });

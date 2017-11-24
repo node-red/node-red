@@ -582,9 +582,14 @@ RED.sidebar.versionControl = (function() {
                 }
                 var spinner = utils.addSpinnerOverlay(localBranchBox);
                 var activeProject = RED.projects.getActiveProject();
+                RED.deploy.setDeployInflight(true);
                 utils.sendRequest({
                     url: "projects/"+activeProject.name+"/branches",
                     type: "POST",
+                    requireCleanWorkspace: true,
+                    cancel: function() {
+                        spinner.remove();
+                    },
                     responses: {
                         0: function(error) {
                             spinner.remove();
@@ -606,7 +611,10 @@ RED.sidebar.versionControl = (function() {
                             }
                         },
                     }
-                },body);
+                },body).always(function(){
+                    console.log("switch deployinflight to false")
+                    RED.deploy.setDeployInflight(false);
+                });
             }
         });
 
@@ -679,6 +687,9 @@ RED.sidebar.versionControl = (function() {
                             refresh(true);
                         },
                         400: {
+                            'git_connection_failed': function(error) {
+                                RED.notify(error.message);
+                            },
                             'unexpected_error': function(error) {
                                 console.log(error);
                                 // done(error,null);

@@ -224,24 +224,29 @@ RED.deploy = (function() {
                 if (currentRev === null || deployInflight || currentRev === msg.revision) {
                     return;
                 }
-                var message = $('<div>'+RED._('deploy.confirm.backgroundUpdate')+
-                    '<br><br><div class="ui-dialog-buttonset">'+
-                    '<button>'+RED._('deploy.confirm.button.ignore')+'</button>'+
-                    '<button class="primary">'+RED._('deploy.confirm.button.review')+'</button>'+
-                    '</div></div>');
-                $(message.find('button')[0]).click(function(evt) {
-                    evt.preventDefault();
-                    activeNotifyMessage.close();
-                    activeNotifyMessage = null;
-                })
-                $(message.find('button')[1]).click(function(evt) {
-                    evt.preventDefault();
-                    activeNotifyMessage.close();
-                    var nns = RED.nodes.createCompleteNodeSet();
-                    resolveConflict(nns,false);
-                    activeNotifyMessage = null;
-                })
-                activeNotifyMessage = RED.notify(message,null,true);
+                var message = $('<div>').text(RED._('deploy.confirm.backgroundUpdate'));
+                activeNotifyMessage = RED.notify(message,{
+                    fixed: true,
+                    buttons: [
+                        {
+                            text: RED._('deploy.confirm.button.ignore'),
+                            click: function() {
+                                activeNotifyMessage.close();
+                                activeNotifyMessage = null;
+                            }
+                        },
+                        {
+                            text: RED._('deploy.confirm.button.review'),
+                            class: "primary",
+                            click: function() {
+                                activeNotifyMessage.close();
+                                var nns = RED.nodes.createCompleteNodeSet();
+                                resolveConflict(nns,false);
+                                activeNotifyMessage = null;
+                            }
+                        }
+                    ]
+                });
             }
         });
     }

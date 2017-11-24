@@ -29,14 +29,8 @@ var log;
 
 var projectsDir;
 
-var authCache = {};
+var authCache = require("./git/authCache");
 
-function getAuth(project,remote) {
-    if (authCache.hasOwnProperty(project) && authCache[project].hasOwnProperty(remote)) {
-        return authCache[project][remote];
-    }
-    return null;
-}
 function Project(name) {
     this.name = name;
     this.path = fspath.join(projectsDir,name);
@@ -179,10 +173,9 @@ Project.prototype.update = function (data) {
         this.package.description = data.summary;
     }
     if (data.hasOwnProperty('remote')) {
-        authCache[project.name] = authCache[project.name]||{};
         for (var remote in data.remote) {
             if (data.remote.hasOwnProperty(remote)) {
-                authCache[project.name][remote] = data.remote[remote];
+                authCache.set(project.name,remote,data.remote[remote]);
             }
         }
     }
@@ -255,7 +248,7 @@ Project.prototype.status = function() {
 
     var fetchPromise;
     if (this.remote) {
-        fetchPromise = gitTools.fetch(this.path,getAuth(this.name,'origin'));
+        fetchPromise = gitTools.fetch(this.path,authCache.get(this.name,'origin'));
     } else {
         fetchPromise = when.resolve();
     }
@@ -281,9 +274,7 @@ Project.prototype.status = function() {
         });
     }
     return fetchPromise.then(completeStatus).catch(function(e) {
-        if (e.code === 'git_auth_failed') {
-            console.log("Fetch auth failed");
-        } else {
+        if (e.code !== 'git_auth_failed') {
             console.log("Fetch failed");
             console.log(e);
         }
@@ -292,17 +283,17 @@ Project.prototype.status = function() {
 };
 
 Project.prototype.push = function (remoteBranchName,setRemote) {
-    return gitTools.push(this.path, remoteBranchName, setRemote, getAuth(this.name,'origin'));
+    return gitTools.push(this.path, remoteBranchName, setRemote, authCache.get(this.name,'origin'));
 };
 
 Project.prototype.pull = function (remoteBranchName,setRemote) {
     var self = this;
     if (setRemote) {
         return gitTools.setUpstream(this.path, remoteBranchName).then(function() {
-            return gitTools.pull(self.path, null, getAuth(self.name,'origin'));
+            return gitTools.pull(self.path, null, authCache.get(self.name,'origin'));
         })
     } else {
-        return gitTools.pull(this.path, remoteBranchName, getAuth(this.name,'origin'));
+        return gitTools.pull(this.path, remoteBranchName, authCache.get(this.name,'origin'));
     }
 };
 
@@ -355,7 +346,7 @@ Project.prototype.getBranches = function (remote) {
     var self = this;
     var fetchPromise;
     if (remote) {
-        fetchPromise = gitTools.fetch(this.path,getAuth(this.name,'origin'))
+        fetchPromise = gitTools.fetch(this.path,authCache.get(this.name,'origin'))
     } else {
         fetchPromise = when.resolve();
     }
@@ -535,13 +526,12 @@ function createProject(metadata) {
                 if (metadata.remote) {
                     var auth;
                     if (metadata.remote.hasOwnProperty("username") && metadata.remote.hasOwnProperty("password")) {
-                        authCache[project] = {
-                            origin: { // TODO: hardcoded remote name
+                        authCache.set(project,'origin',{ // TODO: hardcoded remote name
                                 username: metadata.remote.username,
                                 password: metadata.remote.password
                             }
-                        }
-                        auth = authCache[project].origin;
+                        );
+                        auth = authCache.get(project,'origin');
                     }
 
                     return gitTools.clone(metadata.remote,auth,projectPath).then(function(result) {

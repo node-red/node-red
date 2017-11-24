@@ -371,7 +371,6 @@ module.exports = {
                 res.json(data);
             })
             .catch(function(err) {
-                console.log(err.stack);
                 if (err.code) {
                     res.status(400).json({error:err.code, message: err.message});
                 } else {
