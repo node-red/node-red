@@ -337,9 +337,6 @@ function getModuleInfo(module) {
         for (var i = 0; i < nodes.length; ++i) {
             var nodeInfo = filterNodeInfo(moduleConfigs[module].nodes[nodes[i]]);
             nodeInfo.version = m.version;
-            if (i === 0) {
-                nodeInfo.icons = moduleConfigs[module].icons;
-            }
             m.nodes.push(nodeInfo);
         }
         return m;
@@ -583,14 +580,14 @@ function nodeIconDir(dir) {
     icon_paths[dir.name] = icon_paths[dir.name] || [];
     icon_paths[dir.name].push(path.resolve(dir.path));
 
-    if (!moduleConfigs[dir.name]) {
-        moduleConfigs[dir.name] = {
-            name: dir.name,
-            nodes: {},
-            icons: []
-        };
-    }
     if (dir.icons) {
+        if (!moduleConfigs[dir.name]) {
+            moduleConfigs[dir.name] = {
+                name: dir.name,
+                nodes: {},
+                icons: []
+            };
+        }
         var module = moduleConfigs[dir.name];
         if (module.icons === undefined) {
             module.icons = [];
@@ -625,7 +622,7 @@ function getNodeIconPath(module,icon) {
             return getNodeIconPath("node-red", icon);
         }
 
-        return null;
+        return defaultIcon;
     }
 }
 

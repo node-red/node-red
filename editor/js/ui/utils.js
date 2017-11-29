@@ -703,23 +703,7 @@ RED.utils = (function() {
         return result;
     }
 
-    function getNodeIcon(def,node) {
-        if (def.category === 'config') {
-            return "icons/node-red/cog.png"
-        } else if (node && node.type === 'tab') {
-            return "icons/node-red/subflow.png"
-        } else if (node && node.type === 'unknown') {
-            return "icons/node-red/alert.png"
-        } else if (node && node.type === 'subflow') {
-            return "icons/node-red/subflow.png"
-        } else if (node && node.icon) {
-            var iconPath = RED.utils.separateIconPath(node.icon);
-            var iconSets = RED.nodes.getIconSets();
-            var iconFileList = iconSets[iconPath.module];
-            if (iconFileList && $.inArray(iconPath.file, iconFileList) !== -1) {
-                return "icons/" + node.icon;
-            }
-        }
+    function getDefaultNodeIcon(def,node) {
         var icon_url;
         if (typeof def.icon === "function") {
             try {
@@ -732,12 +716,33 @@ RED.utils = (function() {
             icon_url = def.icon;
         }
 
-        var iconPath = RED.utils.separateIconPath(icon_url);
-        var moduleName = iconPath.module;
-        if (!moduleName) {
-            moduleName = def.set.module;
+        var iconPath = separateIconPath(icon_url);
+        if (!iconPath.module) {
+            iconPath.module = def.set.module;
         }
-        return "icons/"+moduleName+"/"+iconPath.file;
+        return iconPath;
+    }
+
+    function getNodeIcon(def,node) {
+        if (def.category === 'config') {
+            return "icons/node-red/cog.png"
+        } else if (node && node.type === 'tab') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.type === 'unknown') {
+            return "icons/node-red/alert.png"
+        } else if (node && node.type === 'subflow') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.icon) {
+            var iconPath = separateIconPath(node.icon);
+            var iconSets = RED.nodes.getIconSets();
+            var iconFileList = iconSets[iconPath.module];
+            if (iconFileList && iconFileList.indexOf(iconPath.file) !== -1) {
+                return "icons/" + node.icon;
+            }
+        }
+
+        var iconPath = getDefaultNodeIcon(def, node);
+        return "icons/"+iconPath.module+"/"+iconPath.file;
     }
 
     function getNodeLabel(node,defaultLabel) {
@@ -763,6 +768,7 @@ RED.utils = (function() {
         normalisePropertyExpression: normalisePropertyExpression,
         validatePropertyExpression: validatePropertyExpression,
         separateIconPath: separateIconPath,
+        getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
     }

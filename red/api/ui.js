@@ -47,11 +47,7 @@ module.exports = {
         var scope = req.params.scope;
         var module = scope ? scope + '/' +  req.params.module : req.params.module;
         var iconPath = redNodes.getNodeIconPath(module,icon);
-        if (iconPath != null) {
-            res.sendFile(iconPath);
-        } else {
-            res.status(404).end();
-        }
+        res.sendFile(iconPath);
     },
     editor: function(req,res) {
         res.send(Mustache.render(editorTemplate,theme.context()));

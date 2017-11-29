@@ -96,7 +96,6 @@ RED.nodes = (function() {
                     moduleList[ns.module].pending_version = ns.pending_version;
                 }
                 moduleList[ns.module].sets[ns.name] = ns;
-                iconSets[ns.module] = iconSets[ns.module] || ns.icons;
                 RED.events.emit("registry:node-set-added",ns);
             },
             removeNodeSet: function(id) {
@@ -115,7 +114,6 @@ RED.nodes = (function() {
                 if (Object.keys(moduleList[ns.module].sets).length === 0) {
                     delete moduleList[ns.module];
                 }
-                delete iconSets[ns.module];
                 RED.events.emit("registry:node-set-removed",ns);
                 return ns;
             },
@@ -439,7 +437,6 @@ RED.nodes = (function() {
         node.id = n.id;
         node.type = n.type;
         node.z = n.z;
-        node.icon = n.icon;
 
         if (node.type == "unknown") {
             for (var p in n._orig) {
@@ -496,7 +493,10 @@ RED.nodes = (function() {
                 node.outputLabels = n.outputLabels.slice();
             }
             if (n.icon) {
-                node.icon = n.icon;
+                var defIcon = RED.utils.getDefaultNodeIcon(n._def, n);
+                if (n.icon !== defIcon.module+"/"+defIcon.file) {
+                    node.icon = n.icon;
+                }
             }
         }
         return node;

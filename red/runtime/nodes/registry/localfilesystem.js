@@ -24,6 +24,7 @@ var i18n;
 
 var settings;
 var disableNodePathScan = false;
+var iconFileExtensions = [".png", ".gif"];
 
 function init(runtime) {
     settings = runtime.settings;
@@ -314,7 +315,7 @@ function scanIconDir(dir) {
         var files = fs.readdirSync(dir);
         files.forEach(function(file) {
             var stats = fs.statSync(path.join(dir, file));
-            if (stats.isFile()) {
+            if (stats.isFile() && iconFileExtensions.indexOf(path.extname(file)) !== -1) {
                 iconList.push(file);
             }
         });

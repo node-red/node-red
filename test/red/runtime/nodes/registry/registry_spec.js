@@ -486,13 +486,14 @@ describe("red/nodes/registry/registry",function() {
 
     describe('#getNodeIconPath', function() {
         it('returns the default icon when getting an unknown icon', function() {
+            var defaultIcon = path.resolve(__dirname+'/../../../../../public/icons/arrow-in.png');
             var iconPath = typeRegistry.getNodeIconPath('random-module','youwonthaveme.png');
-            should.equal(iconPath, null);
+            iconPath.should.eql(defaultIcon);
         });
 
         it('returns a registered icon' , function() {
             var testIcon = path.resolve(__dirname+'/../../../../resources/icons/test_icon.png');
-            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../../../resources/icons')});
+            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../../../resources/icons'), icons:[]});
             var iconPath = typeRegistry.getNodeIconPath('test-module','test_icon.png');
             iconPath.should.eql(testIcon);
         });
@@ -501,6 +502,26 @@ describe("red/nodes/registry/registry",function() {
             var debugIcon = path.resolve(__dirname+'/../../../../../public/icons/debug.png');
             var iconPath = typeRegistry.getNodeIconPath('unknown-module', 'debug.png');
             iconPath.should.eql(debugIcon);
+        });
+    });
+
+    describe('#getNodeIcons', function() {
+        it('returns empty icon list when no modules are registered', function() {
+            var iconList = typeRegistry.getNodeIcons();
+            iconList.should.eql({});
+        });
+
+        it('returns an icon list of registered node module', function() {
+            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1,"0.0.1");
+            events.emit("node-icon-dir",{name:"test-module", path:"",icons:["test_icon1.png"]});
+            var iconList = typeRegistry.getNodeIcons();
+            iconList.should.eql({"test-module":["test_icon1.png"]});
+        });
+
+        it('returns an icon list of unregistered node module', function() {
+            events.emit("node-icon-dir",{name:"test-module", path:"", icons:["test_icon1.png", "test_icon2.png"]});
+            var iconList = typeRegistry.getNodeIcons();
+            iconList.should.eql({"test-module":["test_icon1.png","test_icon2.png"]});
         });
     });
 
