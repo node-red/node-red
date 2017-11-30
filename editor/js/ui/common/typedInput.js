@@ -99,7 +99,7 @@
             this.uiSelect = this.elementDiv.wrap( "<div>" ).parent();
             var attrStyle = this.element.attr('style');
             var m;
-            if ((m = /width\s*:\s*(\d+(%|px))/i.exec(attrStyle)) !== null) {
+            if ((m = /width\s*:\s*(calc\s*\(.*\)|\d+(%|px))/i.exec(attrStyle)) !== null) {
                 this.element.css('width','100%');
                 this.uiSelect.width(m[1]);
                 this.uiWidth = null;
