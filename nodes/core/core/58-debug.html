@@ -6,11 +6,15 @@
         <input id="node-input-complete" type="hidden">
     </div>
     <div class="form-row">
-        <label for="node-input-console"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
-        <select type="text" id="node-input-console" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false" data-i18n="debug.debtab"></option>
-            <option value="true" data-i18n="debug.tabcon"></option>
-        </select>
+        <label for="node-input-console" style="margin-bottom:0px;"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
+        <input type="checkbox" id="node-input-tosidebar" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toSidebar"></span>
+        <br>
+        <label></label>
+        <input type="checkbox" id="node-input-console" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toConsole"></span>
+        <div id="node-tostatus-line">
+        <label></label>
+        <input type="checkbox" id="node-input-tostatus" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toStatus"></span>
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -38,7 +42,9 @@
         defaults: {
             name: {value:""},
             active: {value:true},
-            console: {value:"false"},
+            tosidebar: {value:true},
+            console: {value:false},
+            tostatus: {value:false},
             complete: {value:"false", required:true}
         },
         label: function() {
@@ -100,7 +106,6 @@
             }
         },
         onpaletteadd: function() {
-
             var options = {
                 messageMouseEnter: function(sourceId) {
                     if (sourceId) {
@@ -148,7 +153,7 @@
 
             var that = this;
             RED._debug = function(msg) {
-                that.handleDebugMessage("",{
+                that.handleDebugMessage("", {
                     name:"debug",
                     msg:msg
                 });
@@ -170,7 +175,6 @@
                 var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
                 if (sourceNode) {
                     o._source = {id:sourceNode.id,z:sourceNode.z,name:sourceNode.name};
-
                 }
                 RED.debug.handleDebugMessage(o);
                 if (subWindow) {
@@ -225,6 +229,11 @@
             delete RED._debug;
         },
         oneditprepare: function() {
+            if (typeof this.console === "string") {
+                this.console = (this.console == 'true');
+                $("#node-input-console").prop('checked', this.console);
+                $("#node-input-tosidebar").prop('checked', true);
+            }
             $("#node-input-typed-complete").typedInput({types:['msg', {value:"full",label:RED._("node-red:debug.msgobj"),hasValue:false}]});
             if (this.complete === "true" || this.complete === true) {
                 // show complete message object
@@ -240,6 +249,16 @@
                 ) {
                     $("#node-input-typed-complete").typedInput('value','payload');
                 }
+                if ($("#node-input-typed-complete").typedInput('type') === 'msg') {
+                    $("#node-tostatus-line").show();
+                }
+                else { $("#node-tostatus-line").hide(); }
+            });
+            $("#node-input-complete").on('change',function() {
+                if ($("#node-input-typed-complete").typedInput('type') === 'msg') {
+                    $("#node-tostatus-line").show();
+                }
+                else { $("#node-tostatus-line").hide(); }
             });
         },
         oneditsave: function() {
@@ -250,7 +269,6 @@
                 $("#node-input-complete").val($("#node-input-typed-complete").typedInput('value'));
             }
         }
-
     });
 })();
 </script>
