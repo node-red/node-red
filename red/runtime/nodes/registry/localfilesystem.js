@@ -24,6 +24,7 @@ var i18n;
 
 var settings;
 var disableNodePathScan = false;
+var iconFileExtensions = [".png", ".gif"];
 
 function init(runtime) {
     settings = runtime.settings;
@@ -104,7 +105,8 @@ function getLocalNodeFiles(dir) {
             if (!/^(\..*|lib|icons|node_modules|test|locales)$/.test(fn)) {
                 result = result.concat(getLocalNodeFiles(path.join(dir,fn)));
             } else if (fn === "icons") {
-                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn)});
+                var iconList = scanIconDir(path.join(dir,fn));
+                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn),icons:iconList});
             }
         }
     });
@@ -197,7 +199,8 @@ function getModuleNodeFiles(module) {
             if (iconDirs.indexOf(iconDir) == -1) {
                 try {
                     fs.statSync(iconDir);
-                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir});
+                    var iconList = scanIconDir(iconDir);
+                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir,icons:iconList});
                     iconDirs.push(iconDir);
                 } catch(err) {
                 }
@@ -217,6 +220,10 @@ function getNodeFiles(disableNodePathScan) {
     var dir;
     // Find all of the nodes to load
     var nodeFiles = [];
+
+    var dir = path.resolve(__dirname + '/../../../../public/icons');
+    var iconList = scanIconDir(dir);
+    events.emit("node-icon-dir",{name:'node-red',path:dir,icons:iconList});
 
     if (settings.coreNodesDir) {
         nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
@@ -302,6 +309,20 @@ function getModuleFiles(module) {
     return nodeList;
 }
 
+function scanIconDir(dir) {
+    var iconList = [];
+    try {
+        var files = fs.readdirSync(dir);
+        files.forEach(function(file) {
+            var stats = fs.statSync(path.join(dir, file));
+            if (stats.isFile() && iconFileExtensions.indexOf(path.extname(file)) !== -1) {
+                iconList.push(file);
+            }
+        });
+    } catch(err) {
+    }
+    return iconList;
+}
 
 module.exports = {
     init: init,

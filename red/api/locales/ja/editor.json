@@ -208,9 +208,10 @@
         "editConfig": "__type__ ノードの設定を編集",
         "addNewType": "新規に __type__ を追加...",
         "nodeProperties": "プロパティ",
-        "portLabels": "端子名",
+        "portLabels": "設定",
         "labelInputs": "入力",
         "labelOutputs": "出力",
+        "settingIcon": "アイコン",
         "noDefaultLabel": "なし",
         "defaultLabel": "既定の名前を使用",
         "errors": {

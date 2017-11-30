@@ -210,9 +210,10 @@
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
         "nodeProperties": "node properties",
-        "portLabels": "port labels",
+        "portLabels": "node settings",
         "labelInputs": "Inputs",
         "labelOutputs": "Outputs",
+        "settingIcon": "Icon",
         "noDefaultLabel": "none",
         "defaultLabel": "use default label",
         "errors": {
