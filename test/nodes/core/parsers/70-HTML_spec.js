@@ -213,6 +213,12 @@ describe('html node', function() {
             cnt = 0;
         });
 
+        function check_parts(msg, index, count) {
+            msg.should.have.property('parts');
+            msg.parts.should.have.property('index', index);
+            msg.parts.should.have.property('count', count);
+        }
+
         it('should retrieve list contents as html as default with output as multiple msgs ', function(done) {
             fs.readFile(file, 'utf8', function(err, data) {
                 var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ul",as:"multi"},
@@ -224,6 +230,7 @@ describe('html node', function() {
                     n2.on("input", function(msg) {
                         cnt++;
                         msg.should.have.property('topic', 'bar');
+                        check_parts(msg, cnt -1, 2);
                         if (cnt !== 1 && cnt !== 2) {
                             return false;
                         }
@@ -252,6 +259,7 @@ describe('html node', function() {
                     n2.on("input", function(msg) {
                         cnt++;
                         msg.should.have.property('topic', 'bar');
+                        check_parts(msg, cnt -1, 2);
                         if (cnt !== 1 && cnt !== 2) {
                             return false;
                         }
@@ -281,6 +289,7 @@ describe('html node', function() {
                         msg.should.have.property('payload');
                         msg.payload.should.have.property('src','foo.png');
                         msg.should.have.property('topic', 'bar');
+                        check_parts(msg, 0, 1);
                         cnt = 2;  // frig the answer as only one img tag
                         done();
                     });
