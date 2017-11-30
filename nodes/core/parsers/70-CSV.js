@@ -174,12 +174,7 @@ module.exports = function(RED) {
                                         o[node.template[j]] = k[j];
                                     }
                                     if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                                        if (node.multi === "one") {
-                                            var newMessage = RED.util.cloneMessage(msg);
-                                            newMessage.payload = o;
-                                            node.send(newMessage); // either send
-                                        }
-                                        else { a.push(o); } // or add to the array
+                                        a.push(o); // add to the array
                                     }
                                     j = 0;
                                     k = [""];
@@ -200,17 +195,25 @@ module.exports = function(RED) {
                             o[node.template[j]] = k[j];
                         }
                         if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                            if (node.multi === "one") {
-                                var newMessage = RED.util.cloneMessage(msg);
-                                newMessage.payload = o;
-                                node.send(newMessage); // either send
-                            }
-                            else { a.push(o); } // or add to the aray
+                            a.push(o); // add to the aray
                         }
                         if (node.multi !== "one") {
                             msg.payload = a;
                             node.send(msg); // finally send the array
                         }
+			else {
+			    var len = a.length;
+			    for(var i = 0; i < len; i++) {
+                                var newMessage = RED.util.cloneMessage(msg);
+                                newMessage.payload = a[i];
+				newMessage.parts = {
+				    id: msg._msgid,
+				    index: i,
+				    count: len
+				};
+                                node.send(newMessage);
+			    }
+			}
                     }
                     catch(e) { node.error(e,msg); }
                 }
