@@ -46,8 +46,20 @@ describe('CSV node', function() {
     });
 
     describe('csv to json', function() {
+        var parts_id = undefined;
+
+        afterEach(function() {
+            parts_id = undefined;
+        });
+
         function check_parts(msg, index, count) {
             msg.should.have.property('parts');
+            if(parts_id === undefined) {
+                parts_id = msg.parts.id;
+            }
+            else {
+                msg.parts.should.have.property('id', parts_id);
+            }
             msg.parts.should.have.property('index', index);
             msg.parts.should.have.property('count', count);
         }
@@ -208,6 +220,23 @@ describe('CSV node', function() {
                 n1.emit("input", {payload:testString});
             });
         });
+
+        it('should preserve parts property', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
+                    check_parts(msg, 3, 4);
+                    done();
+                });
+                var testString = "1,2,3,4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString, parts: {id:"X", index:3, count:4} });
+            });
+        });
+
     });
 
     describe('json object to csv', function() {

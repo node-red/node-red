@@ -200,19 +200,22 @@ module.exports = function(RED) {
                             msg.payload = a;
                             node.send(msg); // finally send the array
                         }
-			else {
-			    var len = a.length;
-			    for(var i = 0; i < len; i++) {
+                        else {
+                            var has_parts = msg.hasOwnProperty("parts");
+                            var len = a.length;
+                            for(var i = 0; i < len; i++) {
                                 var newMessage = RED.util.cloneMessage(msg);
                                 newMessage.payload = a[i];
-				newMessage.parts = {
-				    id: msg._msgid,
-				    index: i,
-				    count: len
-				};
+                                if(!has_parts) {
+                                    newMessage.parts = {
+                                        id: msg._msgid,
+                                        index: i,
+                                        count: len
+                                    };
+                                }
                                 node.send(newMessage);
-			    }
-			}
+                            }
+                        }
                     }
                     catch(e) { node.error(e,msg); }
                 }
