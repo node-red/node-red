@@ -207,16 +207,27 @@ describe('html node', function() {
 
     describe('multiple messages', function(){
         var cnt = 0;
+        var parts_id = undefined;
 
         afterEach(function() {
             cnt.should.be.exactly(2);
             cnt = 0;
+            parts_id = undefined;
         });
 
         function check_parts(msg, index, count) {
             msg.should.have.property('parts');
+            msg.parts.should.have.property('id');
+            if(parts_id === undefined) {
+                parts_id = msg.parts.id;
+            }
+            else {
+                msg.parts.should.have.property('id', parts_id);
+            }
             msg.parts.should.have.property('index', index);
             msg.parts.should.have.property('count', count);
+            msg.parts.should.have.property('type', 'string');
+            msg.parts.should.have.property('ch', '');
         }
 
         it('should retrieve list contents as html as default with output as multiple msgs ', function(done) {

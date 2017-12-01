@@ -49,7 +49,9 @@ module.exports = function(RED) {
 				msg.parts = {
 				    id: msg._msgid,
 				    index: index,
-				    count: count
+				    count: count,
+                                    type: "string",
+                                    ch: ""
 				};
                                 node.send(msg);
                             }
