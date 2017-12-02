@@ -198,19 +198,55 @@ describe('CSV node', function() {
     describe('json object to csv', function() {
 
         it('should convert a simple object back to a csv', function(done) {
-            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,,e", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '4,3,2,1\n');
+                        msg.should.have.property('payload', '4,foo,true,,0\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = { d: 1, b: 3, c: 2, a: 4 };
+                var testJson = { e:0, d:1, b:"foo", c:true, a:4 };
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert a simple object back to a csv with no template', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:" ", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '1,foo,"ba""r","di,ng"\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = { d:1, b:"foo", c:"ba\"r", a:"di,ng" };
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should handle a template with spaces in the property names', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b o,c p,,e", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '4,foo,true,,0\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = { e:0, d:1, "b o":"foo", "c p":true, a:4 };
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -241,12 +277,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '0,1,2,3,4\n');
+                        msg.should.have.property('payload', ',0,1,foo,"ba""r","di,ng"\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [0,1,2,3,4];
+                var testJson = ["",0,1,"foo",'ba"r','di,ng'];
                 n1.emit("input", {payload:testJson});
             });
         });

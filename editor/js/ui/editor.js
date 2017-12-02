@@ -1838,12 +1838,12 @@ RED.editor = (function() {
 
                 tabs.addTab({
                     id: 'expression-help',
-                    label: 'Function reference',
+                    label: RED._('expressionEditor.functionReference'),
                     content: $("#node-input-expression-tab-help")
                 });
                 tabs.addTab({
                     id: 'expression-tests',
-                    label: 'Test',
+                    label: RED._('expressionEditor.test'),
                     content: $("#node-input-expression-tab-test")
                 });
                 testDataEditor = RED.editor.createEditor({

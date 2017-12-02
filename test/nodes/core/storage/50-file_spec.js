@@ -154,32 +154,43 @@ describe('file Nodes', function() {
                         var f = fs.readFileSync(fileToTest).toString();
                         f.should.equal("onetwo");
 
-                        // Delete the file
-                        fs.unlinkSync(fileToTest);
-
-                        // Recreate it
-                        fs.writeFileSync(fileToTest,"");
-
-                        // Send two more messages to the file
-                        n1.emit("input", {payload:"three"});
-                        n1.emit("input", {payload:"four"});
-
-                        setTimeout(function() {
-                            // Check the file was updated
-                            try {
-                                var f = fs.readFileSync(fileToTest).toString();
-                                f.should.equal("threefour");
-                                fs.unlinkSync(fileToTest);
-                                done();
-                            } catch(err) {
-                                done(err);
-                            }
-                        },wait);
+                        if (os.type() === "Windows_NT") {
+                            var dummyFile = path.join(resourcesDir,"50-file-test-dummy.txt");
+                            fs.rename(fileToTest, dummyFile, function() {
+                                recreateTest(n1, dummyFile);
+                            });
+                        } else {
+                            recreateTest(n1, fileToTest);
+                        }
                     } catch(err) {
                         done(err);
                     }
                 },wait);
             });
+
+            function recreateTest(n1, fileToDelete) {
+                // Delete the file
+                fs.unlinkSync(fileToDelete);
+
+                // Recreate it
+                fs.writeFileSync(fileToTest,"");
+
+                // Send two more messages to the file
+                n1.emit("input", {payload:"three"});
+                n1.emit("input", {payload:"four"});
+
+                setTimeout(function() {
+                    // Check the file was updated
+                    try {
+                        var f = fs.readFileSync(fileToTest).toString();
+                        f.should.equal("threefour");
+                        fs.unlinkSync(fileToTest);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },wait);
+            }
         });
 
 

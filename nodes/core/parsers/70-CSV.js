@@ -78,9 +78,11 @@ module.exports = function(RED) {
                                     }
                                     ou = "";
                                     for (var p in msg.payload[0]) {
+                                        /* istanbul ignore else */
                                         if (msg.payload[0].hasOwnProperty(p)) {
+                                            /* istanbul ignore else */
                                             if (typeof msg.payload[0][p] !== "object") {
-                                                var q = msg.payload[0][p];
+                                                var q = "" + msg.payload[0][p];
                                                 if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                     q = q.replace(/"/g, '""');
                                                     ou += node.quo + q + node.quo + node.sep;
@@ -100,9 +102,8 @@ module.exports = function(RED) {
                                             ou += node.sep;
                                         }
                                         else {
-                                            // aaargh - resorting to eval here - but fairly contained front and back.
-                                            var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
-
+                                            var p = RED.util.ensureString(RED.util.getMessageProperty(msg,"payload["+s+"]['"+node.template[t]+"']"));
+                                            /* istanbul ignore else */
                                             if (p === "undefined") { p = ""; }
                                             if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                 p = p.replace(/"/g, '""');

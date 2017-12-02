@@ -29,6 +29,7 @@ RED.debug = (function() {
     var messagesByNode = {};
     var sbc;
     var activeWorkspace;
+    var numMessages = 100;  // Hardcoded number of message to show in debug window scrollback
 
     var filterVisible = false;
 
@@ -369,9 +370,24 @@ RED.debug = (function() {
         })
         menuOptionMenu.show();
     }
-    function handleDebugMessage(o) {
-        var msg = document.createElement("div");
 
+    var stack = [];
+    var busy = false;
+    function handleDebugMessage(o) {
+        if (o) { stack.push(o); }
+        if (!busy && (stack.length > 0)) {
+            busy = true;
+            processDebugMessage(stack.shift());
+            setTimeout(function() {
+                busy = false;
+                handleDebugMessage();
+            }, 15);  // every 15mS = 66 times a second
+            if (stack.length > numMessages) { stack = stack.splice(-numMessages); }
+        }
+    }
+
+    function processDebugMessage(o) {
+        var msg = document.createElement("div");
         var sourceNode = o._source;
 
         msg.onmouseenter = function() {
@@ -497,7 +513,7 @@ RED.debug = (function() {
             }
         }
 
-        if (messages.length === 100) {
+        if (messages.length === numMessages) {
             m = messages.shift();
             if (view === "list") {
                 m.el.remove();
@@ -511,7 +527,6 @@ RED.debug = (function() {
     return {
         init: init,
         refreshMessageList:refreshMessageList,
-        handleDebugMessage: handleDebugMessage,
-
+        handleDebugMessage: handleDebugMessage
     }
 })();

@@ -75,11 +75,19 @@
                 <dt>payload <span class="property-type">string</span></dt>
                 <dd>the standard output of the command.</dd>
             </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">object</span></dt>
+                <dd>exec mode only, a copy of the return code object (also available on port 3)</dd>
+            </dl>
         </li>
         <li>Standard error
             <dl class="message-properties">
                 <dt>payload <span class="property-type">string</span></dt>
                 <dd>the standard error of the command.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">object</span></dt>
+                <dd>exec mode only, a copy of the return code object (also available on port 3)</dd>
             </dl>
         </li>
         <li>Return code
