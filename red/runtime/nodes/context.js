@@ -28,7 +28,14 @@ function createContext(id,seed) {
         util.setMessageProperty(data,key,value);
     }
     obj.keys = function() {
-        return Object.keys(data);
+        var keysData = Object.keys(data);
+        if (seed == null) {
+            return keysData;
+        } else {
+            return keysData.filter(function (key) {
+                return key !== "set" && key !== "get" && key !== "keys";
+            });
+        }
     }
     return obj;
 }

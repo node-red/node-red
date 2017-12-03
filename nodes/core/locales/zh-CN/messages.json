@@ -1,0 +1,846 @@
+{
+    "common": {
+        "label": {
+            "payload": "内容",
+            "topic": "主题",
+            "name": "名称",
+            "username": "用户名",
+            "password": "密码"
+        },
+        "status": {
+            "connected": "已连接",
+            "not-connected": "未连接",
+            "disconnected": "已断开",
+            "connecting": "连接中",
+            "error": "错误",
+            "ok": "确认"
+        },
+        "notification": {
+            "error": "<strong>错误</strong>: __message__",
+            "errors": {
+                "not-deployed": "节点未部署",
+                "no-response": "服务器无反应",
+                "unexpected": "发生意外错误 (__status__) __message__"
+            }
+        },
+        "errors": {
+            "nooverride": "警告: 信息的属性已经不可以改写节点的属性. 详情参考 bit.ly/nr-override-msg-props"
+        }
+    },
+    "inject": {
+        "inject": "注入",
+        "repeat": "重复 = __repeat__",
+        "crontab": "crontab = __crontab__",
+        "stopped": "停止",
+        "failed": "注入失败: __error__",
+        "label": {
+            "repeat": "重复"
+        },
+        "timestamp": "时间戳",
+        "none": "空白",
+        "interval": "间隔",
+        "interval-time": "特定时间内间隔",
+        "time": "特定时间",
+        "seconds": "秒",
+        "minutes": "分钟",
+        "hours": "小时",
+        "between": "介于",
+        "previous": "之前数值",
+        "at": "在",
+        "and": "之间",
+        "every": "每个",
+        "days": [
+            "星期一",
+            "星期二",
+            "星期三",
+            "星期四",
+            "星期五",
+            "星期六",
+            "星期天"
+        ],
+        "on": "在",
+        "onstart": "运行时注入?",
+        "tip": "<b>注意:</b> \"特定时间内间隔\" 和 \"特定时间\" 会用cron系统.<br/> 详情擦看信息页.",
+        "success": "成功注入: __label__",
+        "errors": {
+            "failed": "注入失败, 请查看日志"
+        }
+    },
+    "catch": {
+        "catch": "检测异常",
+        "catchNodes": "检测到 (__number__)",
+        "label": {
+            "source": "检测错误来自",
+            "node": "节点",
+            "type": "类型",
+            "selectAll": "全选",
+            "sortByLabel": "按名称排序",
+            "sortByType": "按类型排序"
+        },
+        "scope": {
+            "all": "所有节点",
+            "selected": "已选节点"
+        }
+    },
+    "status": {
+        "status": "状态 (所有)",
+        "statusNodes": "状态显示 (__number__)",
+        "label": {
+            "source": "状态报告来自",
+            "node": "节点",
+            "type": "类型",
+            "selectAll": "全选",
+            "sortByLabel": "按名称排序",
+            "sortByType": "按类型排序"
+        },
+        "scope": {
+            "all": "所有节点",
+            "selected": "已选节点"
+        }
+    },
+    "debug": {
+        "output": "输出",
+        "msgprop": "信息属性",
+        "msgobj": "完整信息",
+        "to": "目标",
+        "debtab": "调试窗口",
+        "tabcon": "调试窗口及终端控制台",
+        "notification": {
+            "activated": "成功激活: __label__",
+            "deactivated": "成功取消: __label__"
+        },
+        "sidebar": {
+            "label": "调试窗口",
+            "name": "名称",
+            "filterAll": "所有节点",
+            "filterSelected": "已选节点",
+            "filterCurrent": "目前流程",
+            "debugNodes": "调试节点",
+            "clearLog": "清理日志",
+            "openWindow": "在新窗口打开"
+        },
+        "messageMenu": {
+            "collapseAll": "折叠所有路径",
+            "clearPinned": "清理已固定路径",
+            "filterNode": "过滤此节点",
+            "clearFilter": "清除已设过滤"
+        }
+    },
+    "link": {
+        "linkIn": "连接入口",
+        "linkOut": "连接出口",
+        "label": {
+            "event": "事件名称",
+            "node": "节点名称",
+            "type": "流程",
+            "sortByFlow":"根据流程排序",
+            "sortByLabel": "根据名称排序"
+        }
+    },
+    "tls": {
+        "tls": "TLS设置",
+        "label": {
+            "use-local-files": "使用本地密匙及证书文件",
+            "upload": "上传",
+            "cert": "证书",
+            "key": "私钥",
+            "ca": "CA证书",
+            "verify-server-cert":"验证服务器证书"
+        },
+        "placeholder": {
+            "cert":"证书路径 (PEM 格式)",
+            "key":"私匙路径 (PEM 格式)",
+            "ca":"CA证书路径 (PEM 格式)"
+        },
+        "error": {
+            "missing-file": "无证书/密匙文件提供"
+        }
+    },
+    "exec": {
+        "label": {
+            "command": "命令",
+            "append": "追加",
+            "timeout": "超时",
+            "timeoutplace": "可选填",
+            "return": "输出",
+            "seconds": "秒"
+        },
+        "placeholder": {
+            "extraparams": "额外的输入参数"
+        },
+        "opt": {
+            "exec": "当命令任务完成时 - exec 模式",
+            "spawn": "当命令任务进行时 - spawn 模式"
+        },
+        "oldrc": "使用旧式输出模式 (传统模式)"
+    },
+    "function": {
+        "label": {
+            "function": "函数",
+            "outputs": "输出"
+        },
+        "error": {
+            "inputListener":"无法在函数里面加入对‘注入’事件的监视",
+            "non-message-returned":"函数节点尝试返回类型为 __type__ 的信息"
+        },
+        "tip": "可从信息页面查看更多关于如何编写函数的帮助"
+    },
+    "template": {
+        "label": {
+            "template": "模版",
+            "property": "设定属性",
+            "format": "语法高亮",
+            "syntax": "格式",
+            "output": "输出为",
+            "mustache": "Mustache 模版",
+            "plain": "纯文本",
+            "json": "解析JSON",
+            "none": "无"
+        },
+        "templatevalue": "This is the payload: {{payload}} !"
+    },
+    "delay": {
+        "action": "行为设置",
+        "for": "时长",
+        "delaymsg": "延迟每一条信息",
+        "delayfixed": "固定延迟时间",
+        "delayvarmsg": "用 msg.delay 改写延迟时长",
+        "randomdelay": "随机延迟",
+        "limitrate": "信息速度限制",
+        "limitall": "所有信息",
+        "limittopic": "每一个 msg.topic",
+        "fairqueue": "轮流发每一个主题",
+        "timedqueue": "发所有主题",
+        "milisecs": "毫秒",
+        "secs": "秒",
+        "sec": "秒",
+        "mins": "分",
+        "min": "分",
+        "hours": "小时",
+        "hour": "小时",
+        "days": "日",
+        "day": "日",
+        "between": "介于",
+        "and": "和",
+        "rate": "速度",
+        "msgper": "信息 每",
+        "dropmsg": "不传输中间信息",
+        "label": {
+            "delay": "延迟",
+            "variable": "变量",
+            "limit": "限制",
+            "limitTopic": "限制主题",
+            "random": "随机",
+            "units" : {
+                "second": {
+                    "plural" : "秒",
+                    "singular": "秒"
+                },
+                "minute": {
+                    "plural" : "分钟",
+                    "singular": "分钟"
+                },
+                "hour": {
+                    "plural" : "小时",
+                    "singular": "小时"
+                },
+                "day": {
+                    "plural" : "日",
+                    "singular": "日"
+                }
+            }
+        },
+        "error": {
+            "buffer": "缓冲超过了 1000 条信息",
+            "buffer1": "缓冲超过了 10000 条信息"
+        }
+    },
+    "trigger": {
+        "send": "发送",
+        "then": "然后",
+        "then-send": "然后发送",
+        "output": {
+            "string": "字符串",
+            "number": "数字",
+            "existing": "现有信息对象",
+            "original": "原本信息对象",
+            "latest": "最新信息对象",
+            "nothing": "无"
+        },
+        "wait-reset": "等待至重置",
+        "wait-for": "等待",
+        "wait-loop": "重发每",
+        "duration": {
+            "ms": "毫秒",
+            "s": "秒",
+            "m": "分钟",
+            "h": "小时"
+        },
+        "extend": " 如有新信息，延长延迟",
+        "label": {
+            "trigger": "触发",
+            "trigger-block": "出发并阻止",
+            "trigger-loop": "重发每",
+            "reset": "重置触发节点条件 如果:",
+            "resetMessage":"msg.reset 已设置",
+            "resetPayload":"msg.payload 等于",
+            "resetprompt": "可选填"
+        }
+    },
+    "comment": {
+        "label": {
+            "title": "标题",
+            "body": "主体"
+        },
+        "tip": "提示: 主题内容可以添加格式化为 <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\">Github 风格 Markdown</a>"
+    },
+    "unknown": {
+        "label": {
+            "unknown": "未知"
+        },
+        "tip": "<p>此节点是您安装，但Node-RED所不知道的类型。</p><p><i>如果在此状态下部署节点，那么它的配置将被保留，但是流程将不会启动，直到安装缺少的类型。</i></p><p>有关更多帮助，请参阅信息侧栏</p>"
+    },
+    "mqtt": {
+        "label": {
+            "broker": "服务端",
+            "example": "e.g. localhost",
+            "qos": "QoS",
+            "clientid": "客户端ID",
+            "port": "端口",
+            "keepalive": "存货定时器(秒)",
+            "cleansession": "使用新的会话",
+            "use-tls": "使用安全连接 (SSL/TLS)",
+            "tls-config":"TLS 设置",
+            "verify-server-cert":"验证服务器证书",
+            "compatmode": "使用旧式 MQTT 3.1 支持"
+        },
+        "tabs-label": {
+            "connection": "连接",
+            "security": "安全",
+            "will": "终结信息",
+            "birth": "初始信息"
+        },
+        "placeholder": {
+            "clientid": "留空白将会自动生成",
+            "clientid-nonclean":"如非新会话，必须设置客户端ID",
+            "will-topic": "留空白将禁止终止信息",
+            "birth-topic": "留空白将禁止初始信息"
+        },
+        "state": {
+            "connected": "已连接到服务端: __broker__",
+            "disconnected": "已断开与服务端 __broker__ 的链接",
+            "connect-failed": "与服务端 __broker__ 的连接失败"
+        },
+        "retain": "保留",
+        "true": "是",
+        "false": "否",
+        "tip": "提示: 如果你想用msg属性来设置主题，qos 或者是否保存，请将这几个区域留空",
+        "errors": {
+            "not-defined": "主题未设置",
+            "missing-config": "未设置服务端",
+            "invalid-topic": "主题无效",
+            "nonclean-missingclientid": "客户端ID未设定，使用新会话"
+        }
+    },
+    "httpin": {
+        "label": {
+            "method": "方法",
+            "url": "URL",
+            "doc": "文档",
+            "return": "返回",
+            "upload": "接受文件上传?",
+            "status": "状态码",
+            "headers": "头子段",
+            "other": "其他"
+        },
+        "setby": "- 用 msg.method 设定 -",
+        "basicauth": "基本认证",
+        "use-tls": "使用安全连接 (SSL/TLS) ",
+        "tls-config":"TLS 设置",
+        "utf8": "UTF-8 字符串",
+        "binary": "二进制缓冲模块",
+        "json": "解析JSON对象",
+        "tip": {
+            "in": "相对URL",
+            "res": "发送到此节点的消息<b>必须</b>来自 <i>http input</i> 节点",
+            "req": "提示：如果JSON解析失败，则获取的字符串将按原样返回."
+        },
+        "httpreq": "http 请求",
+        "errors": {
+            "not-created": "当httpNodeRoot为否时，无法创建 http-in 节点",
+            "missing-path": "无路径",
+            "no-response": "无响应对象",
+            "json-error": "JSON 解析错误",
+            "no-url": "未设定 URL",
+            "deprecated-call":"__method__ 方法已弃用",
+            "invalid-transport":"非HTTP传输请求"
+        },
+        "status": {
+            "requesting": "请求中"
+        }
+    },
+    "websocket": {
+        "label": {
+            "type": "类型",
+            "path": "路径",
+            "url": "URL"
+        },
+        "listenon": "监听",
+        "connectto": "连接",
+        "payload": "发送/接受 有效载荷",
+        "message": "发送/接受 完整信息",
+        "tip": {
+            "path1": "默认情况下，<code> payload </code>将包含要发送或从Websocket接收的数据。侦听器可以配置为以JSON格式的字符串发送或接收整个消息对象.",
+            "path2": "这条路径将相对于 ",
+            "url1": "URL 应该使用 ws:&#47;&#47; 或者 wss:&#47;&#47; 方案并指向现有的websocket侦听器.",
+            "url2": "默认情况下，<code> payload </code>将包含要发送或从Websocket接收的数据。可以将客户端配置为以JSON格式的字符串发送或接收整个消息对象."
+        },
+        "errors": {
+            "connect-error": "ws连接发生了错误: ",
+            "send-error": "发送时发生了错误: ",
+            "missing-conf": "未设置服务器"
+        }
+    },
+    "watch": {
+        "label": {
+            "files": "文件(s)",
+            "recursive": "递归查看文件夹"
+        },
+        "placeholder": {
+            "files": "逗号分开文件或文件夹"
+        },
+        "tip": "在Windows上，请务必使用双斜杠 \\\\ 来隔开文件夹名字"
+    },
+    "tcpin": {
+        "label": {
+            "type": "类型",
+            "output": "输出",
+            "port": "端口",
+            "host": "主服务器",
+            "payload": "有效载荷(s)",
+            "delimited": "分隔符号",
+            "close-connection": "是否在成功发送每条信息后断开连接?",
+            "decode-base64": "用 Base64 解码信息?",
+            "server": "服务器",
+            "return": "返回",
+            "ms": "毫秒",
+            "chars": "字符"
+        },
+        "type": {
+            "listen": "监听",
+            "connect": "连接",
+            "reply": "回应到 TCP"
+        },
+        "output": {
+            "stream": "字串流",
+            "single": "单一",
+            "buffer": "缓冲模块",
+            "string": "字符串",
+            "base64": "Base64 字符串"
+        },
+        "return": {
+            "timeout": "在固定时间超时后",
+            "character": "当收到某个字符时",
+            "number": "固定数目的字符",
+            "never": "永不 - 保持连接",
+            "immed": "马上 - 不需要等待回复"
+        },
+        "status": {
+            "connecting": "正在连接到 __host__:__port__",
+            "connected": "已经连接到 __host__:__port__",
+            "listening-port": "监听端口 __port__",
+            "stopped-listening": "已停止监听端口",
+            "connection-from": "连接来自 __host__:__port__",
+            "connection-closed": "连接已关闭 __host__:__port__",
+            "connections": "__count__ 段连接",
+            "connections_plural": "__count__ 段连接"
+
+        },
+        "errors": {
+            "connection-lost": "连接中断 __host__:__port__",
+            "timeout": "超时关闭套接字连接，端口 __port__",
+            "cannot-listen": "无法监听端口 __port__, 错误: __error__",
+            "error": "错误: __error__",
+
+            "socket-error": "套接字连接错误来自 __host__:__port__",
+            "no-host": "主服务器和／或者端口未设定",
+            "connect-timeout": "连接超时",
+            "connect-fail": "连接失败"
+        }
+    },
+    "udp": {
+        "label": {
+            "listen": "监听",
+            "onport": "端口",
+            "using": "使用",
+            "output": "输出",
+            "group": "组",
+            "interface": "本地IP",
+            "interfaceprompt": "（可选填）本地 IP 绑定到",
+            "send": "发送一个",
+            "toport": "到端口",
+            "address": "地址",
+            "decode-base64": "是否解码编码为Base64的信息?"
+        },
+        "placeholder": {
+            "interface": "（可选填）eth0 的 ip 地址",
+            "address": "目的地 ip 地址"
+        },
+        "udpmsgs": "udp 信息",
+        "mcmsgs": "组播信息",
+        "udpmsg": "udp 信息",
+        "bcmsg": "广播信息",
+        "mcmsg": "组播信息",
+        "output": {
+            "buffer": "缓冲模块",
+            "string": "字符串",
+            "base64": "Base64编码字符串"
+        },
+        "bind": {
+            "random": "绑定到任意本地端口",
+            "local": "绑定到本地端口",
+            "target": "绑定到目标端口"
+        },
+        "tip": {
+            "in": "提示：确保您的防火墙将允许数据进入",
+            "out": "提示：如果要使用<code> msg.ip </code>和<code> msg.port </code>设置，请将地址和端口留空",
+            "port": "端口已在使用: "
+        },
+        "status": {
+            "listener-at": "udp 监听器正在监听 __host__:__port__",
+            "mc-group": "udp 组播到 __group__",
+            "listener-stopped": "udp 监听器已停止",
+            "output-stopped": "udp 输出已停止",
+            "mc-ready": "udp 组播已准备好: __outport__ -> __host__:__port__",
+            "bc-ready": "udp 广播已准备好: __outport__ -> __host__:__port__",
+            "ready": "udp 已准备好: __outport__ -> __host__:__port__",
+            "ready-nolocal": "udp 已准备好: __host__:__port__"
+        },
+        "errors": {
+            "access-error": "UDP 访问错误, 你可能需要root权限才能接入1024以下的端口",
+            "error": "错误: __error__",
+            "bad-mcaddress": "无效的组播地址",
+            "interface": "必须是需要接口的 ip 地址",
+            "ip-notset": "udp: ip 地址未设定",
+            "port-notset": "udp: 端口未设定",
+            "port-invalid": "udp: 无效端口号码",
+            "alreadyused": "udp: 端口已经在使用"
+        }
+    },
+    "switch": {
+        "label": {
+            "property": "属性",
+            "rule": "规矩"
+        },
+        "and": "和",
+        "checkall": "全选所有规则",
+        "stopfirst": "接受第一条匹配信息后停止",
+        "ignorecase": "忽视大小写",
+        "rules": {
+            "btwn":"在之间",
+            "cont":"包含",
+            "regex":"匹配正则表达式",
+            "true":"为真",
+            "false":"为假",
+            "null":"为空值",
+            "nnull":"非空值",
+            "else":"除此以外"
+        },
+        "errors": {
+            "invalid-expr": "无效 JSONata 表达: __error__"
+        }
+    },
+    "change": {
+        "label": {
+            "rules": "规矩",
+            "rule": "规矩",
+            "set": "设定 __property__",
+            "change": "改变 __property__",
+            "delete": "删除 __property__",
+            "move": "移动 __property__",
+            "changeCount": "改变: __count__ 条规矩",
+            "regex": "用正则表达式"
+        },
+        "action": {
+            "set": "设定",
+            "change": "更改",
+            "delete": "删除",
+            "move": "转移",
+            "to": "到",
+            "search": "搜索",
+            "replace": "更改为"
+        },
+        "errors": {
+            "invalid-from": "无效来源 ‘from’ 属性: __error__",
+            "invalid-json": "无效 ‘to’ 属性",
+            "invalid-expr": "无效 JSONata 表示: __error__"
+        }
+    },
+    "range": {
+        "label": {
+            "action": "行为作用",
+            "inputrange": "映射输入数据范围",
+            "resultrange": "至目标范围",
+            "from": "从",
+            "to": "到",
+            "roundresult": "取最接近整数？"
+        },
+        "placeholder": {
+            "min": "e.g. 0",
+            "maxin": "e.g. 99",
+            "maxout": "e.g. 255"
+        },
+        "scale": {
+            "payload": "按比例 msg.payload",
+            "limit": "按比例并设定界限至目标范围",
+            "wrap": "按比例并包含在目标范围内"
+        },
+        "tip": "提示: 此节点仅对数字有效",
+        "errors": {
+            "notnumber": "不是一个数"
+        }
+    },
+    "csv": {
+        "label": {
+            "columns": "列",
+            "separator": "分隔符号",
+            "c2o": "CSV 至对象选项",
+            "o2c": "对象至 to CSV 选项",
+            "input": "输入",
+            "firstrow": "第一行包含列名",
+            "output": "输出",
+            "includerow": "包含列名行",
+            "newline": "新的一行"
+        },
+        "placeholder": {
+            "columns": "用逗号分割列名"
+        },
+        "separator": {
+            "comma": "逗号",
+            "tab": "Tab",
+            "space": "空格",
+            "semicolon": "分号",
+            "colon": "冒号",
+            "hashtag": "井号",
+            "other": "其他..."
+        },
+        "output": {
+            "row": "每行包含一条信息",
+            "array": "一条单独信息 [数组]"
+        },
+        "newline": {
+            "linux": "Linux (\\n)",
+            "mac": "Mac (\\r)",
+            "windows": "Windows (\\r\\n)"
+        },
+        "errors": {
+            "csv_js": "此节点仅处理 CSV 字符串或 js 对象",
+            "obj_csv": "对象 -> CSV 转换未设定列模版"
+        }
+    },
+    "html": {
+        "label": {
+            "select": "选取项",
+            "output": "输出"
+        },
+        "output": {
+            "html": "选定元素的 html 内容",
+            "text": "选定元素的纯文本内容",
+            "attr": "选定元素的所有属性对象"
+        },
+        "format": {
+            "single": "由一个单独信息包含一个数组",
+            "multi": "由多条信息，每一条包含一个元素"
+        }
+    },
+    "json": {
+        "errors": {
+            "dropped-object": "忽略非对象格式的有效负载",
+            "dropped": "忽略不支持格式的有效负载类型",
+            "dropped-error": "转换有效负载失败"
+        },
+        "label": {
+            "o2j": "对象至 JSON 选项",
+            "pretty": "格式化 JSON 字符串"
+        }
+    },
+    "yaml": {
+        "errors": {
+            "dropped-object": "忽略非对象格式的有效负载",
+            "dropped": "忽略不支持格式的有效负载类型",
+            "dropped-error": "转换有效负载失败"
+        }
+    },
+    "xml": {
+        "label": {
+            "represent": "XML标签属性的属性名称",
+            "prefix": "标签文本内容的属性名称",
+            "advanced": "高级选项",
+            "x2o": "XML到对象选项"
+        },
+        "errors": {
+            "xml_js": "此节点仅处理XML字符串或JS对象."
+        }
+    },
+    "rpi-gpio": {
+        "label": {
+            "gpiopin": "GPIO",
+            "selectpin": "选择引脚",
+            "resistor": "电阻?",
+            "readinitial": "在部署/重新启动时读取引脚的初始状态?",
+            "type": "类型",
+            "initpin": "初始化引脚状态?",
+            "debounce": "去抖动",
+            "freq": "频率",
+            "button": "按钮",
+            "pimouse": "Pi 鼠标",
+            "pikeyboard": "Pi 键盘",
+            "left": "左",
+            "right": "右",
+            "middle": "中"
+        },
+        "resistor": {
+            "none": "无",
+            "pullup": "上拉电阻",
+            "pulldown": "下拉电阻"
+        },
+        "digout": "数字输出",
+        "pwmout": "PWM 输出",
+        "servo": "伺服输出",
+        "initpin0": "初始引脚电平 - 低 (0)",
+        "initpin1": "初始引脚电平 - 高 (1)",
+        "left": "左",
+        "right": "右",
+        "middle": "中",
+        "any": "任何",
+        "pinname": "引脚",
+        "alreadyuse": "已经在用",
+        "alreadyset": "已经设定为",
+        "tip": {
+            "pin": "<b>引脚在使用</b>: ",
+            "in": "提示: 仅接受数字输入 - 输出必须为 0 或 1.",
+            "dig": "提示: 如用数字输出 - 输入必须为 0 或 1.",
+            "pwm": "提示: 如用PWM输出 - 输入必须为0至100之间; 如用高频率可能会比预期占用更多CPU资源.",
+            "ser": "<b>提示</b>: 如用伺服输出 - 输入必须为0至100之间. 50为中间值."
+        },
+        "types": {
+            "digout": "数字输出",
+            "input": "输入",
+            "pullup": "含有上拉电阻的输入",
+            "pulldown": "含有下拉电阻的输入",
+            "pwmout": "PWM 输出",
+            "servo": "伺服输出"
+        },
+        "status": {
+            "stopped": "已停止",
+            "closed": "已关闭",
+            "not-running": "不运行"
+        },
+        "errors": {
+            "ignorenode": "忽略树莓派的特定节点",
+            "version": "版本命令失败",
+            "sawpitype": "查看Pi类型",
+            "libnotfound": "找不到树莓派 RPi.GPIO python库",
+            "alreadyset": "GPIO 引脚 __pin__ 已经被设定为类型: __type__",
+            "invalidpin": "无效 GPIO 引脚",
+            "invalidinput": "无效输入",
+            "needtobeexecutable": "__command__ 需要为可运行命令",
+            "mustbeexecutable": "nrgpio 需要为可运行",
+            "commandnotfound": "nrgpio 命令不存在",
+            "commandnotexecutable": "nrgpio 命令无法运行",
+            "error": "错误: __error__",
+            "pythoncommandnotfound": "nrpgio python 命令不运行"
+        }
+    },
+    "tail": {
+        "label": {
+            "filename": "文件名",
+            "type": "文件类型",
+            "splitlines": "拆分线 \\n?"
+        },
+        "action": {
+            "text": "文本 - 返回字符串",
+            "binary": "二进制 - 返回缓冲区"
+        },
+        "errors": {
+            "windowsnotsupport": "Windows目前不支持."
+        }
+    },
+    "file": {
+        "label": {
+            "filename": "文件名",
+            "action": "行为",
+            "addnewline": "向每个有效载荷添加换行符（\\ n）?",
+            "createdir": "创建目录（如果不存在）?",
+            "outputas": "输出",
+            "breakchunks": "分拆成块",
+            "breaklines": "分拆成行",
+            "filelabel": "文件",
+            "sendError": "发生错误时发送消息（传统模式）",
+            "deletelabel": "删除 __file__"
+        },
+        "action": {
+            "append": "追加至文件",
+            "overwrite": "改写文件",
+            "delete": "删除文件"
+        },
+        "output": {
+            "utf8": "一条单独 utf8 字符串",
+            "buffer": "一条单独缓冲区对象",
+            "lines": "每行一条信息",
+            "stream": "缓冲区流"
+        },
+        "status": {
+            "wrotefile": "写入至文件: __file__",
+            "deletedfile": "删除文件: __file__",
+            "appendedfile": "追加至文件: __file__"
+        },
+        "errors": {
+            "nofilename": "未指定文件名",
+            "invaliddelete": "警告：无效删除。请在配置对话框中使用特定的删除选项",
+            "deletefail": "无法删除文件: __error__",
+            "writefail": "无法写入文件: __error__",
+            "appendfail": "无法追加到文件: __error__",
+            "createfail": "文件创建失败: __error__"
+        },
+        "tip": "提示: 文件名应该是绝对路径，否则它将相对于Node-RED进程的工作目录。"
+    },
+    "split": {
+        "intro":"分裂 <code>msg.payload</code> 基于类型:",
+        "object":"<b>对象</b>",
+        "objectSend":"发送每个键/值对的消息",
+        "strBuff":"<b>字符串</b> / <b>缓冲区</b>",
+        "array":"<b>数组</b>",
+        "splitUsing":"拆分使用",
+        "splitLength":"固定长度",
+        "stream":"处理为消息流",
+        "addname":" 复制键到 "
+    },
+    "join":{
+        "mode":{
+            "mode":"模式",
+            "auto":"自动",
+            "custom":"手动"
+        },
+        "combine":"结合每一个",
+        "create":"创建输出",
+        "type":{
+            "string":"字符串",
+            "array":"数组",
+            "buffer":"缓冲区",
+            "object":"键/值对象",
+            "merged":"合并对象"
+        },
+        "using":"使用数值",
+        "key":"当作键",
+        "joinedUsing":"合并符号",
+        "send":"发送信息:",
+        "afterCount":"当达到一定数目的信息部件时",
+        "count":"数目",
+        "subsequent":"和每个后续的消息",
+        "afterTimeout":"第一条消息的超时后",
+        "seconds":"秒",
+        "complete":"在使用<code> msg.complete </ code>属性设置的消息后",
+        "tip":"此模式假定此节点与 <i>split</i> 或者接收到的消息将具有正确配置的 <code>msg.parts</code> 属性."
+    }
+}

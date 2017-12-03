@@ -52,6 +52,21 @@ describe('function node', function() {
         });
     });
 
+    it('should send returned message using send()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.send(msg);"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     it('should pass through _topic', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"return msg;"},
                     {id:"n2", type:"helper"}];
@@ -160,6 +175,22 @@ describe('function node', function() {
         });
     });
 
+    it('should get keys in global context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.keys();return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().global.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', ['count']);
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     function testNonObjectMessage(functionText,done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:functionText},
                 {id:"n2", type:"helper"}];
@@ -228,6 +259,251 @@ describe('function node', function() {
             }
         });
     });
+
+    it('should handle node.on()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.on('close',function(){node.log('closed')});"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            n1.receive({payload:"foo",topic: "bar"});
+            helper.getNode("n1").close();
+            try {
+                helper.log().called.should.be.true();
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "function";
+                });
+                logEvents.should.have.length(1);
+                var msg = logEvents[0][0];
+                msg.should.have.property('level', helper.log().INFO);
+                msg.should.have.property('id', 'n1');
+                msg.should.have.property('type', 'function');
+                msg.should.have.property('msg', 'closed');
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
+    it('should set node context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                n1.context().get("count").should.equal("0");
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get node context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.get('count');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get keys in node context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.keys();return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', ['count']);
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should set flow context', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                n2.context().flow.get("count").should.equal("0");
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get flow context', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.get('count');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get flow context', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=context.flow.get('count');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get keys in flow context', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.keys();return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', ['count']);
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should set global context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"global.set('count','0');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                n2.context().global.get("count").should.equal("0");
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get global context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.get('count');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().global.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should get global context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.global.get('count');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().global.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle setTimeout()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"setTimeout(function(){node.send(msg);},1000);"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                var endTime = process.hrtime(startTime);
+                var nanoTime = endTime[0] * 1000000000 + endTime[1];
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                if (900000000 < nanoTime && nanoTime < 1100000000) {
+                    done();
+                } else {
+                    try {
+                        should.fail(null, null, "Delayed time was not between 900 and 1100 ms");
+                    } catch (err) {
+                        done(err);
+                    }
+                }
+            });
+            var startTime = process.hrtime();
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle setInterval()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"setInterval(function(){node.send(msg);},100);"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                count++;
+                if (count > 2) {
+                    done();
+                }
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle clearInterval()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"var id=setInterval(null,100);setTimeout(function(){clearInterval(id);node.send(msg);},1000);"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     describe('Logger', function () {
         it('should log an Info Message', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.log('test');"}];

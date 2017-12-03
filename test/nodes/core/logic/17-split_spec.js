@@ -559,6 +559,31 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should join complete message objects into an array after a count', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"array", timeout:0, count:3, propertyType:"full",mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.be.an.Object();
+                    msg.payload[0].should.have.property("payload","a");
+                    msg.payload[1].should.be.an.Object();
+                    msg.payload[1].should.have.property("payload","b");
+                    msg.payload[2].should.be.an.Object();
+                    msg.payload[2].should.have.property("payload","c");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a"});
+            n1.receive({payload:"b"});
+            n1.receive({payload:"c"});
+        });
+    });
+
     it('should join split things back into an array', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
