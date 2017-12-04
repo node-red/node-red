@@ -283,6 +283,7 @@
         if (RED.settings.theme('palette.editable') !== false) {
             RED.palette.editor.init();
         }
+        RED.gitconfig.init();
 
         RED.sidebar.init();
         RED.projects.init();
