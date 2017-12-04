@@ -23,7 +23,7 @@ module.exports = {
         runtime = _runtime;
         settings = runtime.settings;
     },
-    settings: function(req,res) {
+    runtimeSettings: function(req,res) {
         var safeSettings = {
             httpNodeRoot: settings.httpNodeRoot||"/",
             version: settings.version,
@@ -51,5 +51,29 @@ module.exports = {
 
         settings.exportNodeSettings(safeSettings);
         res.json(safeSettings);
+    },
+    userSettings: function(req, res) {
+        var username;
+        if (!req.user || req.user.anonymous) {
+            username = '_';
+        } else {
+            username = req.user.username;
+        }
+        res.json(settings.getUserSettings(username)||{});
+    },
+    updateUserSettings: function(req,res) {
+        var username;
+        if (!req.user || req.user.anonymous) {
+            username = '_';
+        } else {
+            username = req.user.username;
+        }
+        settings.setUserSettings(username, req.body).then(function() {
+            log.audit({event: "settings.update",username:username},req);
+            res.status(204).end();
+        }).otherwise(function(err) {
+            log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
+            res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+        });
     }
 }

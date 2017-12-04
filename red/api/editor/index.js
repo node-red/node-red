@@ -19,6 +19,7 @@ var path = require('path');
 
 var comms = require("./comms");
 var library = require("./library");
+var info = require("./settings");
 
 var auth = require("../auth");
 var needsPermission = auth.needsPermission;
@@ -41,7 +42,7 @@ module.exports = {
         log = runtime.log;
         var settings = runtime.settings;
         if (!settings.disableEditor) {
-
+            info.init(runtime);
             comms.init(server,runtime);
 
             var ui = require("./ui");
@@ -88,6 +89,14 @@ module.exports = {
             var credentials = require("./credentials");
             credentials.init(runtime);
             editorApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,apiUtil.errorHandler);
+
+            // Settings
+            editorApp.get("/settings",needsPermission("settings.read"),info.runtimeSettings,apiUtil.errorHandler);
+            // User Settings
+            editorApp.get("/settings/user",needsPermission("settings.read"),info.userSettings,apiUtil.errorHandler);
+            // User Settings
+            editorApp.post("/settings/user",needsPermission("settings.write"),info.updateUserSettings,apiUtil.errorHandler);
+
 
             return editorApp;
         }

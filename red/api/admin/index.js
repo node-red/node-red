@@ -19,7 +19,6 @@ var express = require("express");
 var nodes = require("./nodes");
 var flows = require("./flows");
 var flow = require("./flow");
-var info = require("./info");
 var auth = require("../auth");
 
 var apiUtil = require("../util");
@@ -28,7 +27,6 @@ module.exports = {
     init: function(runtime) {
         flows.init(runtime);
         flow.init(runtime);
-        info.init(runtime);
         nodes.init(runtime);
 
         var needsPermission = auth.needsPermission;
@@ -53,9 +51,6 @@ module.exports = {
         adminApp.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.delete,apiUtil.errorHandler);
         adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.read"),nodes.getSet,apiUtil.errorHandler);
         adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.write"),nodes.putSet,apiUtil.errorHandler);
-
-        // Settings
-        adminApp.get("/settings",needsPermission("settings.read"),info.settings,apiUtil.errorHandler);
 
         return adminApp;
     }

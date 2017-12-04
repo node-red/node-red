@@ -24,6 +24,7 @@ module.exports = {
         i18n = _runtime.i18n;
     },
     errorHandler: function(err,req,res,next) {
+        console.error(err.stack);
         if (err.message === "request entity too large") {
             log.error(err);
         } else {

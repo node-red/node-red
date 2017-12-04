@@ -24,7 +24,6 @@ var auth = require("../../../../red/api/auth");
 var nodes = require("../../../../red/api/admin/nodes");
 var flows = require("../../../../red/api/admin/flows");
 var flow = require("../../../../red/api/admin/flow");
-var info = require("../../../../red/api/admin/info");
 
 /**
 * Ensure all API routes are correctly mounted, with the expected permissions checks
@@ -33,7 +32,7 @@ describe("api/admin/index", function() {
     describe("Ensure all API routes are correctly mounted, with the expected permissions checks", function() {
         var app;
         var mockList = [
-            flows,flow,info,nodes
+            flows,flow,nodes
         ]
         var permissionChecks = {};
         var lastRequest;
@@ -68,8 +67,6 @@ describe("api/admin/index", function() {
             sinon.stub(nodes,"getSet",stubApp);
             sinon.stub(nodes,"putSet",stubApp);
 
-            sinon.stub(info,"settings",stubApp);
-
         });
         after(function() {
             mockList.forEach(function(m) {
@@ -91,7 +88,6 @@ describe("api/admin/index", function() {
             nodes.getSet.restore();
             nodes.putSet.restore();
 
-            info.settings.restore();
         });
 
         before(function() {
@@ -282,16 +278,6 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('nodes.write',1);
                 lastRequest.params.should.have.property(0,'@scope/module')
                 lastRequest.params.should.have.property(2,'set')
-                done();
-            })
-        });
-
-        it('GET /settings', function(done) {
-            request(app).get("/settings").expect(200).end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                permissionChecks.should.have.property('settings.read',1);
                 done();
             })
         });

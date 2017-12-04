@@ -21,15 +21,15 @@ var sinon = require('sinon');
 var when = require('when');
 
 var app = express();
-var info = require("../../../../red/api/admin/info");
+var info = require("../../../../red/api/editor/settings");
 var theme = require("../../../../red/api/editor/theme");
 
-describe("api/admin/info", function() {
+describe("api/editor/settings", function() {
     describe("settings handler", function() {
         before(function() {
             sinon.stub(theme,"settings",function() { return { test: 456 };});
             app = express();
-            app.get("/settings",info.settings);
+            app.get("/settings",info.runtimeSettings);
         });
 
         after(function() {
@@ -49,7 +49,8 @@ describe("api/admin/info", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; }
-                }
+                },
+                log: { error: console.error }
             });
             request(app)
                 .get("/settings")
@@ -78,7 +79,8 @@ describe("api/admin/info", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return false; }
-                }
+                },
+                log: { error: console.error }
             });
             request(app)
                 .get("/settings")

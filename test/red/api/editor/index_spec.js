@@ -20,6 +20,7 @@ var request = require("supertest");
 var express = require("express");
 var editorApi = require("../../../../red/api/editor");
 var comms = require("../../../../red/api/editor/comms");
+var info = require("../../../../red/api/editor/settings");
 
 
 describe("api/editor/index", function() {
@@ -27,9 +28,11 @@ describe("api/editor/index", function() {
     describe("disabled the editor", function() {
         beforeEach(function() {
             sinon.stub(comms,'init', function(){});
+            sinon.stub(info,'init', function(){});
         });
         afterEach(function() {
             comms.init.restore();
+            info.init.restore();
         });
         it("disables the editor", function() {
             var editorApp = editorApi.init({},{
@@ -37,6 +40,7 @@ describe("api/editor/index", function() {
             });
             should.not.exist(editorApp);
             comms.init.called.should.be.false();
+            info.init.called.should.be.false();
         });
     });
     describe("enables the editor", function() {
@@ -61,9 +65,10 @@ describe("api/editor/index", function() {
         before(function() {
             app = editorApi.init({},{
                 log:{audit:function(){},error:function(msg){errors.push(msg)}},
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
+                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},
                 events:{on:function(){},removeListener:function(){}},
-                isStarted: function() { return isStarted; }
+                isStarted: function() { return isStarted; },
+                nodes: {paletteEditorEnabled: function() { return false }}
             });
         });
         it('serves the editor', function(done) {
@@ -104,6 +109,15 @@ describe("api/editor/index", function() {
                 errors[0].should.eql("Node-RED runtime not started");
                 done();
             });
+        });
+        it('GET /settings', function(done) {
+            request(app).get("/settings").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                // permissionChecks.should.have.property('settings.read',1);
+                done();
+            })
         });
     });
 });
