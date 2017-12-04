@@ -67,7 +67,7 @@ describe('template node', function() {
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'topic=bar');
-                msg.should.have.property('template', '{{topic}}');
+                msg.should.have.property('template', 'topic={{topic}}');
                 done();
             });
             n1.receive({payload:"foo", topic: "bar", template: "topic={{topic}}"});
