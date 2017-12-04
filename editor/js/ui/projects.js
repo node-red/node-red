@@ -397,12 +397,14 @@ RED.projects = (function() {
                                     projectData.copy = copyProject.name;
                                 } else if (projectType === 'clone') {
                                     // projectData.credentialSecret = projectSecretInput.val();
-                                    projectData.remote = {
-                                        // name: projectRepoRemoteName.val()||'origin',
-                                        // branch: projectRepoBranch.val()||'master',
-                                        url: projectRepoInput.val(),
-                                        username: projectRepoUserInput.val(),
-                                        password: projectRepoPasswordInput.val()
+                                    projectData.git = {
+                                        remotes: {
+                                            'origin': {
+                                                url: projectRepoInput.val(),
+                                                username: projectRepoUserInput.val(),
+                                                password: projectRepoPasswordInput.val()
+                                            }
+                                        }
                                     }
                                 }
 
@@ -632,7 +634,7 @@ RED.projects = (function() {
 
     function sendRequest(options,body) {
         // dialogBody.hide();
-        console.log(options.url);
+        console.log(options.url,body);
 
         if (options.requireCleanWorkspace && RED.nodes.dirty()) {
             var message = 'You have undeployed changes that will be lost. Do you want to continue?';
@@ -698,7 +700,7 @@ RED.projects = (function() {
                     resultCallbackArgs = {error:responses.statusText};
                     return;
                 } else if (options.handleAuthFail !== false && xhr.responseJSON.error === 'git_auth_failed') {
-                    var url = activeProject.remotes.origin.fetch;
+                    var url = activeProject.git.remotes.origin.fetch;
                     var message = $('<div>'+
                         '<div class="form-row">Authentication required for repository:</div>'+
                         '<div class="form-row"><div style="margin-left: 20px;">'+url+'</div></div>'+
@@ -723,6 +725,11 @@ RED.projects = (function() {
                                     var username = $('#projects-user-auth-username').val();
                                     var password = $('#projects-user-auth-password').val();
                                     body = body || {};
+                                    var authBody = {git:{remotes:{}}};
+                                    authBody.git.remotes[options.remote||'origin'] = {
+                                        username: username,
+                                        password: password
+                                    };
                                     var done = function(err) {
                                         if (err) {
                                             console.log("Failed to update auth");
@@ -749,14 +756,7 @@ RED.projects = (function() {
                                                 }
                                             },
                                         }
-                                    },{
-                                        remote: {
-                                            origin: {
-                                                username: username,
-                                                password: password
-                                            }
-                                        }
-                                    });
+                                    },authBody);
                                 }
                             }
                         ]
@@ -858,7 +858,17 @@ RED.projects = (function() {
             },
             filter: function(data) {
                 var isCreateEntry = (typeof data !=="string");
-                return (isCreateEntry && (branchFilterTerm !== "" && branches.indexOf(branchPrefix+branchFilterTerm) === -1) ) ||  (!isCreateEntry && data.indexOf(branchPrefix+branchFilterTerm) !== -1);
+                return (
+                            isCreateEntry &&
+                            (
+                                branchFilterTerm !== "" &&
+                                branches.indexOf(branchPrefix+branchFilterTerm) === -1
+                            )
+                     ) ||
+                     (
+                         !isCreateEntry &&
+                         data.indexOf(branchFilterTerm) !== -1
+                     );
             }
         });
         return {

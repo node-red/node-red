@@ -37,7 +37,6 @@ function getListenPath() {
 var ResponseServer = function(auth) {
     return new Promise(function(resolve, reject) {
         server = net.createServer(function(connection) {
-            // Stop accepting new connections
             connection.setEncoding('utf8');
             var parts = [];
             connection.on('data', function(data) {
@@ -46,6 +45,7 @@ var ResponseServer = function(auth) {
                     parts.push(data.substring(0, m));
                     data = data.substring(m);
                     var line = parts.join("");
+                    console.log("LINE",line);
                     parts = [];
                     if (line==='Username') {
                         connection.end(auth.username);

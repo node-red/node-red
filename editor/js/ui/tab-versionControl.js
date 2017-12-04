@@ -226,7 +226,7 @@ RED.sidebar.versionControl = (function() {
                 stagedChangesList.editableList('empty');
                 unmergedChangesList.editableList('empty');
 
-                $.getJSON("/projects/"+activeProject.name+"/status",function(result) {
+                $.getJSON("projects/"+activeProject.name+"/status",function(result) {
                     refreshFiles(result);
                 });
             }
@@ -471,7 +471,7 @@ RED.sidebar.versionControl = (function() {
                     localCommitListShade.show();
                     $(this).addClass('selected');
                     var activeProject = RED.projects.getActiveProject();
-                    localBranchList.refresh("/projects/"+activeProject.name+"/branches");
+                    localBranchList.refresh("projects/"+activeProject.name+"/branches");
                     localBranchBox.show();
                     setTimeout(function() {
                         localBranchBox.css("height","215px");
@@ -523,7 +523,7 @@ RED.sidebar.versionControl = (function() {
                     row.click(function(e) {
                         var activeProject = RED.projects.getActiveProject();
                         if (activeProject) {
-                            $.getJSON("/projects/"+activeProject.name+"/commits/"+entry.sha,function(result) {
+                            $.getJSON("projects/"+activeProject.name+"/commits/"+entry.sha,function(result) {
                                 result.project = activeProject;
                                 result.parents = entry.parents;
                                 result.oldRev = entry.sha+"~1";
@@ -572,7 +572,7 @@ RED.sidebar.versionControl = (function() {
 
         var localBranchList = utils.createBranchList({
             current: function() {
-                return  RED.projects.getActiveProject().branches.local
+                return  RED.projects.getActiveProject().git.branches.local
             },
             placeholder: "Find or create a branch",
             container: localBranchBox,
@@ -653,7 +653,7 @@ RED.sidebar.versionControl = (function() {
                 } else {
                     $(this).addClass('selected');
                     var activeProject = RED.projects.getActiveProject();
-                    remoteBranchList.refresh("/projects/"+activeProject.name+"/branches/remote");
+                    remoteBranchList.refresh("projects/"+activeProject.name+"/branches/remote");
                     remoteBranchSubRow.show();
                     setTimeout(function() {
                         remoteBranchSubRow.height(180);
@@ -676,7 +676,7 @@ RED.sidebar.versionControl = (function() {
                 var activeProject = RED.projects.getActiveProject();
                 var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
                 utils.sendRequest({
-                    url: "/projects/"+activeProject.name+"/branches/remote",
+                    url: "projects/"+activeProject.name+"/branches/remote",
                     type: "GET",
                     responses: {
                         0: function(error) {
@@ -706,13 +706,13 @@ RED.sidebar.versionControl = (function() {
         var remoteBranchSubRow = $('<div style="height: 0;overflow:hidden; transition: height 0.2s ease-in-out;"></div>').hide().appendTo(remoteBranchRow);
         var remoteBranchList = utils.createBranchList({
             current: function() {
-                return  RED.projects.getActiveProject().branches.remote
+                return  RED.projects.getActiveProject().git.branches.remote
             },
             placeholder: "Find or create a remote branch",
             currentLabel: "upstream",
             remote: function() {
                 var project = RED.projects.getActiveProject();
-                var remotes = Object.keys(project.remotes);
+                var remotes = Object.keys(project.git.remotes);
                 return remotes[0];
             },
             container: remoteBranchSubRow,
@@ -721,12 +721,12 @@ RED.sidebar.versionControl = (function() {
                 $("#sidebar-version-control-repo-toolbar-set-upstream").prop('disabled',false);
                 $("#sidebar-version-control-remote-branch").text(body.name+(body.create?" *":""));
                 var activeProject = RED.projects.getActiveProject();
-                if (activeProject.branches.remote === body.name) {
-                    delete activeProject.branches.remoteAlt;
+                if (activeProject.git.branches.remote === body.name) {
+                    delete activeProject.git.branches.remoteAlt;
                 } else {
-                    activeProject.branches.remoteAlt = body.name;
+                    activeProject.git.branches.remoteAlt = body.name;
                 }
-                $("#sidebar-version-control-repo-toolbar-set-upstream-row").toggle(!!activeProject.branches.remoteAlt);
+                $("#sidebar-version-control-repo-toolbar-set-upstream-row").toggle(!!activeProject.git.branches.remoteAlt);
                 closeRemoteBranchBox(function() {
                     if (!body.create) {
                         var start = Date.now();
@@ -738,7 +738,7 @@ RED.sidebar.versionControl = (function() {
                             },Math.max(400-(Date.now() - start),0));
                         })
                     } else {
-                        if (!activeProject.branches.remote) {
+                        if (!activeProject.git.branches.remote) {
                             $('#sidebar-version-control-repo-toolbar-message').text("The created branch will be set as the tracked upstream branch.");
                             $("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked',true);
                             $("#sidebar-version-control-repo-toolbar-set-upstream").prop('disabled',true);
@@ -762,8 +762,8 @@ RED.sidebar.versionControl = (function() {
                 var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
                 var activeProject = RED.projects.getActiveProject();
                 var url = "projects/"+activeProject.name+"/push";
-                if (activeProject.branches.remoteAlt) {
-                    url+="/"+activeProject.branches.remoteAlt;
+                if (activeProject.git.branches.remoteAlt) {
+                    url+="/"+activeProject.git.branches.remoteAlt;
                 }
                 if ($("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked')) {
                     url+="?u=true"
@@ -803,8 +803,8 @@ RED.sidebar.versionControl = (function() {
                 var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
                 var activeProject = RED.projects.getActiveProject();
                 var url = "projects/"+activeProject.name+"/pull";
-                if (activeProject.branches.remoteAlt) {
-                    url+="/"+activeProject.branches.remoteAlt;
+                if (activeProject.git.branches.remoteAlt) {
+                    url+="/"+activeProject.git.branches.remoteAlt;
                 }
                 if ($("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked')) {
                     url+="?u=true"
@@ -965,7 +965,7 @@ RED.sidebar.versionControl = (function() {
         localCommitList.editableList('empty');
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {
-            getCommits("/projects/"+activeProject.name+"/commits",localCommitList,localCommitList.parent());
+            getCommits("projects/"+activeProject.name+"/commits",localCommitList,localCommitList.parent());
         }
     }
     // function refreshRemoteCommits() {
@@ -973,7 +973,7 @@ RED.sidebar.versionControl = (function() {
     //     var spinner = utils.addSpinnerOverlay(remoteCommitList);
     //     var activeProject = RED.projects.getActiveProject();
     //     if (activeProject) {
-    //         getCommits("/projects/"+activeProject.name+"/commits/origin",remoteCommitList,remoteCommitList.parent());
+    //         getCommits("projects/"+activeProject.name+"/commits/origin",remoteCommitList,remoteCommitList.parent());
     //     }
     // }
 
@@ -1127,7 +1127,7 @@ RED.sidebar.versionControl = (function() {
 
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {
-            $.getJSON("/projects/"+activeProject.name+"/status",function(result) {
+            $.getJSON("projects/"+activeProject.name+"/status",function(result) {
                 refreshFiles(result);
 
                 $('#sidebar-version-control-local-branch').text(result.branches.local);
@@ -1136,7 +1136,7 @@ RED.sidebar.versionControl = (function() {
                 var commitsAhead = result.commits.ahead || 0;
                 var commitsBehind = result.commits.behind || 0;
 
-                if (activeProject.hasOwnProperty('remotes')) {
+                if (activeProject.git.hasOwnProperty('remotes')) {
                     if (result.branches.hasOwnProperty("remoteError")) {
                         $("#sidebar-version-control-repo-status-auth-issue").show();
                         $("#sidebar-version-control-repo-status-stats").hide();

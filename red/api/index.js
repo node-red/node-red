@@ -46,13 +46,6 @@ function init(_server,_runtime) {
         adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
         adminApp.use(bodyParser.urlencoded({limit:maxApiRequestSize,extended:true}));
 
-        // Editor
-        if (!settings.disableEditor) {
-            editor = require("./editor");
-            var editorApp = editor.init(server, runtime);
-            adminApp.use(editorApp);
-        }
-
         adminApp.get("/auth/login",auth.login,apiUtil.errorHandler);
         if (settings.adminAuth) {
             if (settings.adminAuth.type === "strategy") {
@@ -67,6 +60,13 @@ function init(_server,_runtime) {
                 );
             }
             adminApp.post("/auth/revoke",auth.needsPermission(""),auth.revoke,apiUtil.errorHandler);
+        }
+        
+        // Editor
+        if (!settings.disableEditor) {
+            editor = require("./editor");
+            var editorApp = editor.init(server, runtime);
+            adminApp.use(editorApp);
         }
 
         if (settings.httpAdminCors) {

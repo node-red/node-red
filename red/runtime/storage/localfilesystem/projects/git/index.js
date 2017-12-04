@@ -311,6 +311,15 @@ function getBranchStatus(cwd,remoteBranch) {
     })
 }
 
+function addRemote(cwd,name,options) {
+    var args = ["remote","add",name,options.url]
+    return runGitCommand(args,cwd);
+}
+function removeRemote(cwd,name) {
+    var args = ["remote","remove",name];
+    return runGitCommand(args,cwd);
+}
+
 module.exports = {
     init: function(_settings,_runtime) {
         log = _runtime.log
@@ -322,12 +331,11 @@ module.exports = {
         var args = ["branch","--set-upstream-to",remoteBranch];
         return runGitCommand(args,cwd);
     },
-    pull: function(cwd,remoteBranch,auth) {
+    pull: function(cwd,remote,branch,auth) {
         var args = ["pull"];
-        var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
-        if (m) {
-            args.push(m[1]);
-            args.push(m[2])
+        if (remote && branch) {
+            args.push(remote);
+            args.push(branch);
         }
         var promise;
         if (auth) {
@@ -348,17 +356,16 @@ module.exports = {
             throw err;
         });
     },
-    push: function(cwd,remoteBranch,setUpstream, auth) {
+    push: function(cwd,remote,branch,setUpstream, auth) {
         var args = ["push"];
-        var m = /^(.*?)\/(.*)$/.exec(remoteBranch);
-        if (m) {
+        if (branch) {
             if (setUpstream) {
                 args.push("-u");
             }
-            args.push(m[1]);
-            args.push("HEAD:"+m[2]);
+            args.push(remote);
+            args.push("HEAD:"+branch);
         } else {
-            args.push("origin");
+            args.push(remote);
         }
         args.push("--porcelain");
         var promise;
@@ -419,9 +426,16 @@ module.exports = {
         }
         return runGitCommand(args,cwd);
     },
-    commit: function(cwd, message) {
+    commit: function(cwd, message, gitUser) {
         var args = ["commit","-m",message];
-        return runGitCommand(args,cwd);
+        var env;
+        if (gitUser && gitUser['name'] && gitUser['email']) {
+            args.unshift('user.name="'+gitUser['name']+'"');
+            args.unshift('-c');
+            args.unshift('user.email="'+gitUser['email']+'"');
+            args.unshift('-c');
+        }
+        return runGitCommand(args,cwd,env);
     },
     getFileDiff(cwd,file,type) {
         var args = ["diff"];
@@ -433,8 +447,8 @@ module.exports = {
         args.push(file);
         return runGitCommand(args,cwd);
     },
-    fetch: function(cwd,auth) {
-        var args = ["fetch"];
+    fetch: function(cwd,remote,auth) {
+        var args = ["fetch",remote];
         if (auth) {
             return runGitCommandWithAuth(args,cwd,auth);
         } else {
@@ -474,6 +488,9 @@ module.exports = {
         return runGitCommand(['merge','--abort'],cwd);
     },
     getRemotes: getRemotes,
+    getRemoteBranch: function(cwd) {
+        return runGitCommand(['rev-parse','--abbrev-ref','--symbolic-full-name','@{u}'],cwd)
+    },
     getBranches: getBranches,
     getBranchInfo: getBranchInfo,
     checkoutBranch: function(cwd, branchName, isCreate) {
@@ -484,5 +501,7 @@ module.exports = {
         args.push(branchName);
         return runGitCommand(args,cwd);
     },
-    getBranchStatus: getBranchStatus
+    getBranchStatus: getBranchStatus,
+    addRemote: addRemote,
+    removeRemote: removeRemote
 }

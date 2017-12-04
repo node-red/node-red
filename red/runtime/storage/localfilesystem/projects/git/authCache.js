@@ -25,15 +25,13 @@ module.exports = {
         delete authCache[project];
     },
     set: function(project,remote,auth) {
-        if (authCache.hasOwnProperty(project)) {
-            authCache[project][remote] = auth;
-        } else {
-            authCache[project] = {
-                remote: auth
-            }
-        }
+         console.log("AuthCache.set",remote,auth);
+        authCache[project] = authCache[project]||{};
+        authCache[project][remote] = auth;
+        // console.log(JSON.stringify(authCache,'',4));
     },
     get: function(project,remote) {
+        console.log("AuthCache.get",remote,authCache[project]&&authCache[project][remote]);
         if (authCache.hasOwnProperty(project)) {
             return authCache[project][remote];
         }

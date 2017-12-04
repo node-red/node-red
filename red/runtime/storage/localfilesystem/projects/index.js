@@ -96,6 +96,11 @@ function init(_settings, _runtime) {
     }
 }
 
+function getUserGitSettings(user) {
+    var userSettings = settings.getUserSettings(user)||{};
+    return userSettings.git;
+}
+
 function getBackupFilename(filename) {
     var ffName = fspath.basename(filename);
     var ffDir = fspath.dirname(filename);
@@ -113,10 +118,27 @@ function loadProject(name) {
     })
 }
 
-function getProject(name) {
+function listProjects(user) {
+    return Projects.list();
+}
+
+function getProject(user, name) {
     checkActiveProject(name);
     //return when.resolve(activeProject.info);
-    return Projects.get(name);
+    var username;
+    if (!user) {
+        username = "_";
+    } else {
+        username = user.username;
+    }
+    return Projects.get(name).then(function(project) {
+        var result = project.toJSON();
+        var projectSettings = settings.get("projects").projects;
+        if (projectSettings[name].git && projectSettings[name].git.user[username]) {
+            result.git.user = projectSettings[name].git.user[username];
+        }
+        return result;
+    });
 }
 
 function checkActiveProject(project) {
@@ -125,78 +147,78 @@ function checkActiveProject(project) {
         throw new Error("Cannot operate on inactive project wanted:"+project+" current:"+(activeProject&&activeProject.name));
     }
 }
-function getFiles(project) {
+function getFiles(user, project) {
     checkActiveProject(project);
     return activeProject.getFiles();
 }
-function stageFile(project,file) {
+function stageFile(user, project,file) {
     checkActiveProject(project);
     return activeProject.stageFile(file);
 }
-function unstageFile(project,file) {
+function unstageFile(user, project,file) {
     checkActiveProject(project);
     return activeProject.unstageFile(file);
 }
-function commit(project,options) {
+function commit(user, project,options) {
     checkActiveProject(project);
-    return activeProject.commit(options);
+    return activeProject.commit(user, options);
 }
-function getFileDiff(project,file,type) {
+function getFileDiff(user, project,file,type) {
     checkActiveProject(project);
     return activeProject.getFileDiff(file,type);
 }
-function getCommits(project,options) {
+function getCommits(user, project,options) {
     checkActiveProject(project);
         return activeProject.getCommits(options);
 }
-function getCommit(project,sha) {
+function getCommit(user, project,sha) {
     checkActiveProject(project);
     return activeProject.getCommit(sha);
 }
 
-function getFile(project,filePath,sha) {
+function getFile(user, project,filePath,sha) {
     checkActiveProject(project);
     return activeProject.getFile(filePath,sha);
 }
-function push(project,remoteBranchName,setRemote) {
+function push(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
     return activeProject.push(remoteBranchName,setRemote);
 }
-function pull(project,remoteBranchName,setRemote) {
+function pull(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
     return activeProject.pull(remoteBranchName,setRemote).then(function() {
         return reloadActiveProject("pull");
     });
 }
-function getStatus(project) {
+function getStatus(user, project) {
     checkActiveProject(project);
     return activeProject.status();
 }
-function resolveMerge(project,file,resolution) {
+function resolveMerge(user, project,file,resolution) {
     checkActiveProject(project);
     return activeProject.resolveMerge(file,resolution);
 }
-function abortMerge(project) {
+function abortMerge(user, project) {
     checkActiveProject(project);
     return activeProject.abortMerge().then(function() {
         return reloadActiveProject("abort-merge")
     });
 }
-function getBranches(project,remote) {
+function getBranches(user, project,isRemote) {
     checkActiveProject(project);
-    return activeProject.getBranches(remote);
+    return activeProject.getBranches(isRemote);
 }
-function setBranch(project,branchName,isCreate) {
+function setBranch(user, project,branchName,isCreate) {
     checkActiveProject(project);
     return activeProject.setBranch(branchName,isCreate).then(function() {
         return reloadActiveProject("change-branch");
     });
 }
-function getBranchStatus(project,branchName) {
+function getBranchStatus(user, project,branchName) {
     checkActiveProject(project);
     return activeProject.getBranchStatus(branchName);
 }
-function getActiveProject() {
+function getActiveProject(user) {
     return activeProject;
 }
 
@@ -212,14 +234,15 @@ function reloadActiveProject(action) {
         });
     });
 }
-function createProject(metadata) {
-    return Projects.create(metadata).then(function(p) {
-        return setActiveProject(p.name);
+function createProject(user, metadata) {
+    // var userSettings = getUserGitSettings(user);
+    return Projects.create(null,metadata).then(function(p) {
+        return setActiveProject(user, p.name);
     }).then(function() {
-        return getProject(metadata.name);
+        return getProject(user, metadata.name);
     })
 }
-function setActiveProject(projectName) {
+function setActiveProject(user, projectName) {
     return loadProject(projectName).then(function(project) {
         var globalProjectSettings = settings.get("projects");
         globalProjectSettings.activeProject = project.name;
@@ -234,7 +257,7 @@ function setActiveProject(projectName) {
         })
     });
 }
-function updateProject(project,data) {
+function updateProject(user, project, data) {
     if (!activeProject || activeProject.name !== project) {
         // TODO standardise
         throw new Error("Cannot update inactive project");
@@ -243,7 +266,7 @@ function updateProject(project,data) {
     var isReset = data.resetCredentialSecret;
     var wasInvalid = activeProject.credentialSecretInvalid;
 
-    return activeProject.update(data).then(function(result) {
+    return activeProject.update(user,data).then(function(result) {
 
         if (result.flowFilesChanged) {
             flowsFullPath = activeProject.getFlowFile();
@@ -371,7 +394,7 @@ function saveCredentials(credentials) {
 
 module.exports = {
     init: init,
-    listProjects: Projects.list,
+    listProjects: listProjects,
     getActiveProject: getActiveProject,
     setActiveProject: setActiveProject,
     getProject: getProject,

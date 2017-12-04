@@ -68,7 +68,7 @@
                                     console.log(msg);
                                     var project = RED.projects.getActiveProject();
                                     var message = {
-                                        "change-branch":"Change to local branch '"+project.branches.local+"'",
+                                        "change-branch":"Change to local branch '"+project.git.branches.local+"'",
                                         "abort-merge":"Git merge aborted",
                                         "loaded":"Project '"+msg.project+"' loaded",
                                         "updated":"Project '"+msg.project+"' updated",

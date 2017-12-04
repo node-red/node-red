@@ -180,7 +180,6 @@
             border-right-color: #aaa;
         }
     }
-
     i {
         color: #ccc;
         font-size: 2em;
@@ -592,6 +591,9 @@
             border-right-color:#999;
         }
     }
+    &.unselectable {
+        color: #ccc;
+    }
 
     i {
         color: #999;
@@ -627,3 +629,47 @@
     }
 }
 .projects-dialog-file-list-entry-file-type-git { color: #999 }
+
+.projects-dialog-remote-list {
+    .red-ui-editableList-container {
+        padding: 0;
+        li {
+            padding: 0;
+            border: none;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+    }
+}
+
+.projects-dialog-remote-list-entry-header {
+    padding: 8px 10px;
+    background: #f6f6f6;
+    margin-bottom: 8px;
+}
+.projects-dialog-remote-list-entry-delete {
+    float: right;
+}
+
+/*
+.expandable-list-entry {
+    .exandable-list-entry-header {
+        padding: 15px 0;
+        cursor: pointer;
+        &:hover {
+            background: #f3f3f3;
+        }
+        i {
+            width: 16px;
+            text-align: center;
+        }
+        .fa-angle-right {
+            color: #333;
+            transition: all 0.2s ease-in-out;
+        }
+    }
+    &.expanded .fa-angle-right {
+        transform: rotate(90deg);
+    }
+}
+*/

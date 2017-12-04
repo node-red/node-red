@@ -2766,7 +2766,7 @@ RED.view = (function() {
             if (v === undefined) {
                 return gridSize;
             } else {
-                gridSize = v;
+                gridSize = Math.max(5,v);
                 updateGrid();
             }
         }

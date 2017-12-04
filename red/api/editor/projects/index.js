@@ -17,6 +17,7 @@
 var express = require("express");
 var runtime;
 var settings;
+var needsPermission = require("../../auth").needsPermission;
 
 module.exports = {
     init: function(_runtime) {
@@ -29,9 +30,10 @@ module.exports = {
         // Projects
 
         // List all projects
-        app.get("/", function(req,res) {
-            runtime.storage.projects.listProjects().then(function(list) {
-                var active = runtime.storage.projects.getActiveProject();
+        app.get("/", needsPermission("projects.read"), function(req,res) {
+            console.log(req.user);
+            runtime.storage.projects.listProjects(req.user, req.user).then(function(list) {
+                var active = runtime.storage.projects.getActiveProject(req.user);
                 var response = {
                     active: active.name,
                     projects: list
@@ -48,8 +50,8 @@ module.exports = {
         });
 
         // Create project
-        app.post("/", function(req,res) {
-            runtime.storage.projects.createProject(req.body).then(function(data) {
+        app.post("/", needsPermission("projects.write"), function(req,res) {
+            runtime.storage.projects.createProject(req.user, req.body).then(function(data) {
                 res.json(data);
             }).catch(function(err) {
                 console.log(err.stack);
@@ -62,12 +64,12 @@ module.exports = {
         });
 
         // Update a project
-        app.put("/:id", function(req,res) {
+        app.put("/:id", needsPermission("projects.write"), function(req,res) {
             //TODO: validate the payload properly
             if (req.body.active) {
-                var currentProject = runtime.storage.projects.getActiveProject();
+                var currentProject = runtime.storage.projects.getActiveProject(req.user);
                 if (req.params.id !== currentProject.name) {
-                    runtime.storage.projects.setActiveProject(req.params.id).then(function() {
+                    runtime.storage.projects.setActiveProject(req.user, req.params.id).then(function() {
                         res.redirect(303,req.baseUrl + '/');
                     }).catch(function(err) {
                         if (err.code) {
@@ -84,8 +86,8 @@ module.exports = {
                        req.body.hasOwnProperty('dependencies')||
                        req.body.hasOwnProperty('summary') ||
                        req.body.hasOwnProperty('files') ||
-                       req.body.hasOwnProperty('remote')) {
-                runtime.storage.projects.updateProject(req.params.id, req.body).then(function() {
+                        req.body.hasOwnProperty('git')) {
+                runtime.storage.projects.updateProject(req.user, req.params.id, req.body).then(function() {
                     res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }).catch(function(err) {
                     if (err.code) {
@@ -100,8 +102,8 @@ module.exports = {
         });
 
         // Get project metadata
-        app.get("/:id", function(req,res) {
-            runtime.storage.projects.getProject(req.params.id).then(function(data) {
+        app.get("/:id", needsPermission("projects.read"), function(req,res) {
+            runtime.storage.projects.getProject(req.user, req.params.id).then(function(data) {
                 if (data) {
                     res.json(data);
                 } else {
@@ -114,13 +116,13 @@ module.exports = {
         });
 
         // Delete project - tbd
-        app.delete("/:id", function(req,res) {
+        app.delete("/:id", needsPermission("projects.write"), function(req,res) {
         });
 
 
         // Get project status - files, commit counts, branch info
-        app.get("/:id/status", function(req,res) {
-            runtime.storage.projects.getStatus(req.params.id).then(function(data) {
+        app.get("/:id/status", needsPermission("projects.read"), function(req,res) {
+            runtime.storage.projects.getStatus(req.user, req.params.id).then(function(data) {
                 if (data) {
                     res.json(data);
                 } else {
@@ -134,8 +136,8 @@ module.exports = {
 
 
         // Project file listing
-        app.get("/:id/files", function(req,res) {
-            runtime.storage.projects.getFiles(req.params.id).then(function(data) {
+        app.get("/:id/files", needsPermission("projects.read"), function(req,res) {
+            runtime.storage.projects.getFiles(req.user, req.params.id).then(function(data) {
                 console.log("TODO: REMOVE /:id/files as /:id/status is better!")
                 res.json(data);
             })
@@ -147,12 +149,12 @@ module.exports = {
 
 
         // Get file content in a given tree (index/stage)
-        app.get("/:id/files/:treeish/*", function(req,res) {
+        app.get("/:id/files/:treeish/*", needsPermission("projects.read"), function(req,res) {
             var projectId = req.params.id;
             var treeish = req.params.treeish;
             var filePath = req.params[0];
 
-            runtime.storage.projects.getFile(projectId,filePath,treeish).then(function(data) {
+            runtime.storage.projects.getFile(req.user, projectId,filePath,treeish).then(function(data) {
                 res.json({content:data});
             })
             .catch(function(err) {
@@ -162,11 +164,11 @@ module.exports = {
         });
 
         // Stage a file
-        app.post("/:id/stage/*", function(req,res) {
+        app.post("/:id/stage/*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var file = req.params[0];
 
-            runtime.storage.projects.stageFile(projectName,file).then(function(data) {
+            runtime.storage.projects.stageFile(req.user, projectName,file).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
@@ -176,11 +178,11 @@ module.exports = {
         });
 
         // Stage multiple files
-        app.post("/:id/stage", function(req,res) {
+        app.post("/:id/stage", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var files = req.body.files;
 
-            runtime.storage.projects.stageFile(projectName,files).then(function(data) {
+            runtime.storage.projects.stageFile(req.user, projectName,files).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
@@ -190,10 +192,10 @@ module.exports = {
         });
 
         // Commit changes
-        app.post("/:id/commit", function(req,res) {
+        app.post("/:id/commit", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
 
-            runtime.storage.projects.commit(projectName,req.body).then(function(data) {
+            runtime.storage.projects.commit(req.user, projectName,req.body).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
@@ -203,11 +205,11 @@ module.exports = {
         });
 
         // Unstage a file
-        app.delete("/:id/stage/*", function(req,res) {
+        app.delete("/:id/stage/*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var file = req.params[0];
 
-            runtime.storage.projects.unstageFile(projectName,file).then(function(data) {
+            runtime.storage.projects.unstageFile(req.user, projectName,file).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
@@ -217,9 +219,9 @@ module.exports = {
         });
 
         // Unstage multiple files
-        app.delete("/:id/stage", function(req, res) {
+        app.delete("/:id/stage", needsPermission("projects.write"), function(req, res) {
             var projectName = req.params.id;
-            runtime.storage.projects.unstageFile(projectName).then(function(data) {
+            runtime.storage.projects.unstageFile(req.user, projectName).then(function(data) {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
@@ -229,11 +231,11 @@ module.exports = {
         });
 
         // Get a file diff
-        app.get("/:id/diff/:type/*", function(req,res) {
+        app.get("/:id/diff/:type/*", needsPermission("projects.read"), function(req,res) {
             var projectName = req.params.id;
             var type = req.params.type;
             var file = req.params[0];
-            runtime.storage.projects.getFileDiff(projectName,file,type).then(function(data) {
+            runtime.storage.projects.getFileDiff(req.user, projectName,file,type).then(function(data) {
                 res.json({
                     diff: data
                 })
@@ -245,13 +247,13 @@ module.exports = {
         });
 
         // Get a list of commits
-        app.get("/:id/commits", function(req, res) {
+        app.get("/:id/commits", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
             var options = {
                 limit: req.query.limit||20,
                 before: req.query.before
             };
-            runtime.storage.projects.getCommits(projectName,options).then(function(data) {
+            runtime.storage.projects.getCommits(req.user, projectName,options).then(function(data) {
                 res.json(data);
             })
             .catch(function(err) {
@@ -265,11 +267,11 @@ module.exports = {
         });
 
         // Get an individual commit details
-        app.get("/:id/commits/:sha", function(req, res) {
+        app.get("/:id/commits/:sha", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
             var sha = req.params.sha;
 
-            runtime.storage.projects.getCommit(projectName,sha).then(function(data) {
+            runtime.storage.projects.getCommit(req.user, projectName,sha).then(function(data) {
                 res.json({commit:data});
             })
             .catch(function(err) {
@@ -279,11 +281,11 @@ module.exports = {
         });
 
         // Push local commits to remote
-        app.post("/:id/push/?*", function(req,res) {
+        app.post("/:id/push/?*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var remoteBranchName = req.params[0]
             var setRemote = req.query.u;
-            runtime.storage.projects.push(projectName,remoteBranchName,setRemote).then(function(data) {
+            runtime.storage.projects.push(req.user, projectName,remoteBranchName,setRemote).then(function(data) {
                 res.status(204).end();
             })
             .catch(function(err) {
@@ -297,11 +299,11 @@ module.exports = {
         });
 
         // Pull remote commits
-        app.post("/:id/pull/?*", function(req,res) {
+        app.post("/:id/pull/?*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var remoteBranchName = req.params[0];
             var setRemote = req.query.u;
-            runtime.storage.projects.pull(projectName,remoteBranchName,setRemote).then(function(data) {
+            runtime.storage.projects.pull(req.user, projectName,remoteBranchName,setRemote).then(function(data) {
                 res.status(204).end();
             })
             .catch(function(err) {
@@ -315,9 +317,9 @@ module.exports = {
         });
 
         // Abort an ongoing merge
-        app.delete("/:id/merge", function(req, res) {
+        app.delete("/:id/merge", needsPermission("projects.write"), function(req, res) {
             var projectName = req.params.id;
-            runtime.storage.projects.abortMerge(projectName).then(function(data) {
+            runtime.storage.projects.abortMerge(req.user, projectName).then(function(data) {
                 res.status(204).end();
             })
             .catch(function(err) {
@@ -331,11 +333,11 @@ module.exports = {
         });
 
         // Resolve a merge
-        app.post("/:id/resolve/*", function(req, res) {
+        app.post("/:id/resolve/*", needsPermission("projects.write"), function(req, res) {
             var projectName = req.params.id;
             var file = req.params[0];
             var resolution = req.body.resolutions;
-            runtime.storage.projects.resolveMerge(projectName,file,resolution).then(function(data) {
+            runtime.storage.projects.resolveMerge(req.user, projectName,file,resolution).then(function(data) {
                 res.status(204).end();
             })
             .catch(function(err) {
@@ -349,9 +351,9 @@ module.exports = {
         });
 
         // Get a list of local branches
-        app.get("/:id/branches", function(req, res) {
+        app.get("/:id/branches", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
-            runtime.storage.projects.getBranches(projectName,false).then(function(data) {
+            runtime.storage.projects.getBranches(req.user, projectName,false).then(function(data) {
                 res.json(data);
             })
             .catch(function(err) {
@@ -365,12 +367,13 @@ module.exports = {
         });
 
         // Get a list of remote branches
-        app.get("/:id/branches/remote", function(req, res) {
+        app.get("/:id/branches/remote", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
-            runtime.storage.projects.getBranches(projectName,true).then(function(data) {
+            runtime.storage.projects.getBranches(req.user, projectName,true).then(function(data) {
                 res.json(data);
             })
             .catch(function(err) {
+                console.log(err.stack);
                 if (err.code) {
                     res.status(400).json({error:err.code, message: err.message});
                 } else {
@@ -380,10 +383,10 @@ module.exports = {
         });
 
         // Get branch status - commit counts/ahead/behind
-        app.get("/:id/branches/remote/*/status", function(req, res) {
+        app.get("/:id/branches/remote/*/status", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
             var branch = req.params[0];
-            runtime.storage.projects.getBranchStatus(projectName,branch).then(function(data) {
+            runtime.storage.projects.getBranchStatus(req.user, projectName,branch).then(function(data) {
                 res.json(data);
             })
             .catch(function(err) {
@@ -397,11 +400,11 @@ module.exports = {
         });
 
         // Set the active local branch
-        app.post("/:id/branches", function(req, res) {
+        app.post("/:id/branches", needsPermission("projects.write"), function(req, res) {
             var projectName = req.params.id;
             var branchName = req.body.name;
             var isCreate = req.body.create;
-            runtime.storage.projects.setBranch(projectName,branchName,isCreate).then(function(data) {
+            runtime.storage.projects.setBranch(req.user, projectName,branchName,isCreate).then(function(data) {
                 res.json(data);
             })
             .catch(function(err) {
