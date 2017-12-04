@@ -489,7 +489,12 @@ module.exports = {
     },
     getRemotes: getRemotes,
     getRemoteBranch: function(cwd) {
-        return runGitCommand(['rev-parse','--abbrev-ref','--symbolic-full-name','@{u}'],cwd)
+        return runGitCommand(['rev-parse','--abbrev-ref','--symbolic-full-name','@{u}'],cwd).catch(function(err) {
+            if (/no upstream configured for branch/.test(err.message)) {
+                return null;
+            }
+            throw err;
+        })
     },
     getBranches: getBranches,
     getBranchInfo: getBranchInfo,

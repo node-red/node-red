@@ -345,14 +345,16 @@ Project.prototype.status = function() {
     var fetchPromise;
     if (this.remotes) {
         fetchPromise = gitTools.getRemoteBranch(self.path).then(function(remoteBranch) {
-            var allRemotes = Object.keys(self.remotes);
-            var match = "";
-            allRemotes.forEach(function(remote) {
-                if (remoteBranch.indexOf(remote) === 0 && match.length < remote.length) {
-                    match = remote;
-                }
-            })
-            return self.fetch(match);
+            if (remoteBranch) {
+                var allRemotes = Object.keys(self.remotes);
+                var match = "";
+                allRemotes.forEach(function(remote) {
+                    if (remoteBranch.indexOf(remote) === 0 && match.length < remote.length) {
+                        match = remote;
+                    }
+                })
+                return self.fetch(match);
+            }
         });
     } else {
         fetchPromise = when.resolve();
@@ -390,7 +392,7 @@ Project.prototype.status = function() {
 
 Project.prototype.push = function (remoteBranchName,setRemote) {
     var remote = this.parseRemoteBranch(remoteBranchName);
-    return gitTools.push(this.path, remote.remote || this.currentRemote,remote.branch, setRemote, authCache.get(this.name,this.remotes[this.currentRemote].fetch));
+    return gitTools.push(this.path, remote.remote || this.currentRemote,remote.branch, setRemote, authCache.get(this.name,this.remotes[remote.remote || this.currentRemote].fetch));
 };
 
 Project.prototype.pull = function (remoteBranchName,setRemote) {

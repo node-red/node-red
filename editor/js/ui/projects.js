@@ -883,16 +883,32 @@ RED.projects = (function() {
                 } else {
                     branchPrefix = "";
                 }
-                $.getJSON(url,function(result) {
-                    branches = result.branches;
-                    result.branches.forEach(function(b) {
-                        branchList.editableList('addItem',b);
-                    });
-                    branchList.editableList('addItem',{});
-                    setTimeout(function() {
-                        spinner.remove();
-                    },Math.max(300-(Date.now() - start),0));
-                });
+
+
+                sendRequest({
+                    url: url,
+                    type: "GET",
+                    responses: {
+                        0: function(error) {
+                            console.log(error);
+                        },
+                        200: function(result) {
+                            branches = result.branches;
+                            result.branches.forEach(function(b) {
+                                branchList.editableList('addItem',b);
+                            });
+                            branchList.editableList('addItem',{});
+                            setTimeout(function() {
+                                spinner.remove();
+                            },Math.max(300-(Date.now() - start),0));
+                        },
+                        400: {
+                            'unexpected_error': function(error) {
+                                console.log(error);
+                            }
+                        }
+                    }
+                })
             },
             addItem: function(data) { branchList.editableList('addItem',data) },
             filter: function() { branchList.editableList('filter') },
