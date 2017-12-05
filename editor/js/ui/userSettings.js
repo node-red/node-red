@@ -197,7 +197,7 @@ RED.userSettings = (function() {
                 allSettings[opt.setting] = opt;
                 if (opt.onchange) {
                     var value = RED.settings.get(opt.setting);
-                    if (value === null && opt.hasOwnProperty('default')) {
+                    if ((value === null || value === undefined) && opt.hasOwnProperty('default')) {
                         value = opt.default;
                         RED.settings.set(opt.setting,value);
                     }
