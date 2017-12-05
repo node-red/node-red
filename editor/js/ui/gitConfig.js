@@ -21,14 +21,11 @@ RED.gitconfig = (function() {
     
         function createRemoteRepositorySection(pane) {
             var title = $('<h3></h3>').text("Version Control").appendTo(pane);
-            var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+            var editGitUserButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
                 .appendTo(title)
                 .click(function(evt) {
-                    editRepoButton.hide();
+                    editGitUserButton.hide();
                     formButtons.show();
-    
-                    // $('.projects-dialog-remote-list-entry-delete').show();
-                    // remoteListAddButton.show();
     
                     gitUsernameLabel.hide();
                     gitUsernameInput.show();
@@ -50,71 +47,81 @@ RED.gitconfig = (function() {
             var gitEmailLabel = $('<div class="uneditable-input">').appendTo(row);
             var gitEmailInput = $('<input type="text">').hide().appendTo(row);
     
-            // if (activeProject.git.user) {
-            //     gitUsernameLabel.text(activeProject.git.user.name);
-            //     gitUsernameInput.val(activeProject.git.user.name);
-    
-            //     gitEmailLabel.text(activeProject.git.user.email);
-            //     gitEmailInput.val(activeProject.git.user.email);
-            // }
             // var formButtons = $('<span class="button-group" style="position: relative; float: right; margin-right:0;"></span>')
             var formButtonArea = $('<div style="width: 100%; height: 35px;"></div>').appendTo(gitconfigContainer);
             var formButtons = $('<span class="button-group" style="position: absolute; right: 0px; margin-right:0;"></span>')
                 .hide().appendTo(formButtonArea);
 
     
-            var sshkeyTitle = $('<h4></h4>').text("SSH Keys").appendTo(gitconfigContainer);
-            var generateSshKeyButton = $('<button class="editor-button editor-button-small" style="float: right;">generate new ssh key</button>')
-                .appendTo(sshkeyTitle)
-                .click(function(evt) {
-                    console.log('click generateSshKeyButton');
-                });
+            // var sshkeyTitle = $('<h4></h4>').text("SSH Keys").appendTo(gitconfigContainer);
+            // var generateSshKeyButton = $('<button class="editor-button editor-button-small" style="float: right;">generate new ssh key</button>')
+            //     .appendTo(sshkeyTitle)
+            //     .click(function(evt) {
+            //         console.log('click generateSshKeyButton');
+            //     });
 
-            row = $('<div class="user-settings-row projects-dialog-remote-list"></div>').appendTo(gitconfigContainer);
-            var sshkeysList = $('<ol>').appendTo(row);
-            sshkeysList.editableList({
-                addButton: false,
-                height: 'auto',
-                addItem: function(outer,index,entry) {
+            // row = $('<div class="user-settings-row projects-dialog-remote-list"></div>').appendTo(gitconfigContainer);
+            // var sshkeysList = $('<ol>').appendTo(row);
+            // sshkeysList.editableList({
+            //     addButton: false,
+            //     height: 'auto',
+            //     addItem: function(outer,index,entry) {
     
-                    var header = $('<div class="projects-dialog-remote-list-entry-header"></div>').appendTo(outer);
-                    entry.header = $('<span>').text(entry.path||"Add new remote").appendTo(header);
-                    var body = $('<div>').appendTo(outer);
-                    entry.body = body;
-                    if (entry.path) {
-                        if (entry.data) {
-                            entry.copyToClipboard = $('<button class="editor-button editor-button-small projects-dialog-remote-list-entry-copy">copy</button>')
-                                .hide()
-                                .appendTo(header)
-                                .clip(function(e) {
-                                    var textarea = $('textarea').hide().value(entry.data);
-                                    textarea.select();
-                                    document.execCommand('copy')
-                                });
-                        }
-                        entry.removeButton = $('<button class="editor-button editor-button-small projects-dialog-remote-list-entry-delete">remove</button>')
-                            // .hide()
-                            .appendTo(header)
-                            .click(function(e) {
-                                entry.removed = true;
-                                body.fadeOut(100);
-                                entry.header.css("text-decoration","line-through")
-                                entry.header.css("font-style","italic")
-                                $(this).hide();
-                            });
-                        // if (entry.urls.fetch === entry.urls.push) {
-                        //     row = $('<div class="user-settings-row"></div>').appendTo(body);
-                        //     $('<label for=""></label>').text('URL').appendTo(row);
-                        //     $('<div class="uneditable-input">').text(entry.urls.fetch).appendTo(row);
-                        // }
-                    }
-                }
-            });
+            //         var header = $('<div class="projects-dialog-remote-list-entry-header"></div>').appendTo(outer);
+            //         entry.header = $('<span>').text(entry.path||"Add new remote").appendTo(header);
+            //         var body = $('<div>').appendTo(outer);
+            //         entry.body = body;
+            //         if (entry.path) {
+            //             entry.removeButton = $('<button class="editor-button editor-button-small projects-dialog-remote-list-entry-delete">remove</button>')
+            //             // .hide()
+            //             .appendTo(header)
+            //             .click(function(e) {
+            //                 entry.removed = true;
+            //                 body.fadeOut(100);
+            //                 entry.header.css("text-decoration","line-through")
+            //                 entry.header.css("font-style","italic")
+            //                 if (entry.copyToClipboard) {
+            //                     entry.copyToClipboard.hide();
+            //                 }
+            //                 $(this).hide();
+            //             });
+            //             if (entry.data) {
+            //                 entry.copyToClipboard = $('<button class="editor-button editor-button-small projects-dialog-remote-list-entry-copy">copy</button>')
+            //                     // .hide()
+            //                     .appendTo(header)
+            //                     .click(function(e) {
+            //                         var textarea = document.createElement("textarea");
+            //                         textarea.style.position = 'fixed';
+            //                         textarea.style.top = 0;
+            //                         textarea.style.left = 0;
+            //                         textarea.style.width = '2em';
+            //                         textarea.style.height = '2em';
+            //                         textarea.style.padding = 0;
+            //                         textarea.style.border = 'none';
+            //                         textarea.style.outline = 'none';
+            //                         textarea.style.boxShadow = 'none';
+            //                         textarea.style.background = 'transparent';
+            //                         textarea.value = entry.data;
+            //                         document.body.appendChild(textarea);
+            //                         textarea.select();
+            //                         try {
+            //                             var ret = document.execCommand('copy');
+            //                             var msg = ret ? 'successful' : 'unsuccessful';
+            //                             console.log('Copy text command was ' + msg);
+            //                         } catch (err) {
+            //                             console.log('Oops unable to copy');
+            //                         }
+            //                         document.body.removeChild(textarea);
+            //                     });
+            //             }
+            //         }
+            //     }
+            // });
     
             // var remoteListAddButton = row.find(".red-ui-editableList-addButton").hide();
     
-            var hideEditForm = function() {
-                editRepoButton.show();
+            var hideGitUserEditForm = function() {
+                editGitUserButton.show();
                 formButtons.hide();
                 // $('.projects-dialog-remote-list-entry-delete').hide();
                 // remoteListAddButton.hide();
@@ -130,54 +137,19 @@ RED.gitconfig = (function() {
                 .appendTo(formButtons)
                 .click(function(evt) {
                     evt.preventDefault();
-    
-                    var items = sshkeysList.editableList('items');
-                    items.each(function() {
-                        var data = $(this).data('data');
-                        if (!data.path) {
-                            sshkeysList.editableList('removeItem',data);
-                        } else if (data.removed) {
-                            delete data.removed;
-                            data.body.show();
-                            data.header.css("text-decoration","");
-                            data.header.css("font-style","");
-                        }
-                    })
-    
-                    hideEditForm();
+                    hideGitUserEditForm();
                 });
+            
             var saveButton = $('<button class="editor-button">Save</button>')
                 .appendTo(formButtons)
                 .click(function(evt) {
                     evt.preventDefault();
-                    var spinner = utils.addSpinnerOverlay(gitconfigContainer);
+                    var spinner = addSpinnerOverlay(gitconfigContainer);
     
                     var body = {
-                        user: {
-                            name: gitUsernameInput.val(),
-                            email: gitEmailInput.val()
-                        },
-                        remotes: {}
+                        name: gitUsernameInput.val(),
+                        email: gitEmailInput.val()
                     }
-    
-                    var items = sshkeysList.editableList('items');
-                    items.each(function() {
-                        var data = $(this).data('data');
-                        if (!data.name) {
-                            body.remotes[data.nameInput.val()] = {
-                                url: data.urlInput.val()
-                            };
-                            sshkeysList.editableList('removeItem',data);
-                        } else if (data.removed) {
-                            body.remotes[data.name] = {
-                                removed: true
-                            };
-                            delete data.removed;
-                            data.body.show();
-                            data.header.css("text-decoration","");
-                            data.header.css("font-style","");
-                        }
-                    })
     
                     var done = function(err) {
                         spinner.remove();
@@ -185,30 +157,19 @@ RED.gitconfig = (function() {
                             console.log(err);
                             return;
                         }
-                        hideEditForm();
+                        hideGitUserEditForm();
                     }
-                    var payload = { git: body };
     
-                    // console.log(JSON.stringify(payload,null,4));
-                    RED.deploy.setDeployInflight(true);
-                    utils.sendRequest({
-                        url: "projects/"+activeProject.name,
-                        type: "PUT",
+                    sendRequest({
+                        url: "settings/user",
+                        type: "POST",
                         responses: {
                             0: function(error) {
                                 done(error);
                             },
                             200: function(data) {
-                                activeProject.git.remotes = data.git.remotes;
-                                activeProject.git.user = data.git.user;
-                                if (activeProject.git.user) {
-                                    gitUsernameLabel.text(activeProject.git.user.name);
-                                    gitUsernameInput.val(activeProject.git.user.name);
-                                    gitEmailLabel.text(activeProject.git.user.email);
-                                    gitEmailInput.val(activeProject.git.user.email);
-                                }
-    
-                                updateForm();
+                                gitUsernameLabel.text(body.name);
+                                gitEmailLabel.text(body.email);
                                 done();
                             },
                             400: {
@@ -218,10 +179,10 @@ RED.gitconfig = (function() {
                                 }
                             },
                         }
-                    },payload);
+                    },body);
                 });
             var updateForm = function() {
-                sshkeysList.editableList('empty');
+                // sshkeysList.editableList('empty');
                 // if (activeProject.git.hasOwnProperty('remotes')) {
                 //     for (var name in activeProject.git.remotes) {
                 //         if (activeProject.git.remotes.hasOwnProperty(name)) {
@@ -229,13 +190,38 @@ RED.gitconfig = (function() {
                 //         }
                 //     }
                 // }
-                var sshkeyFiles = ["/User/hideki/.node-red/sshkeys/node-red-ssh-test01", "/User/hideki/.node-red/sshkeys/node-red-ssh-test02"];
-                if ( sshkeyFiles ) {
-                    sshkeyFiles.map(function(sshkeyFilePath) {
-                        sshkeysList.editableList('addItem', {path: sshkeyFilePath, data: 'XXXXXXX'});
-                    });
-                }
+                // var sshkeyFiles = ["/User/hideki/.node-red/sshkeys/node-red-ssh-test01", "/User/hideki/.node-red/sshkeys/node-red-ssh-test02"];
+                // if ( sshkeyFiles ) {
+                //     sshkeyFiles.map(function(sshkeyFilePath) {
+                //         sshkeysList.editableList('addItem', {path: sshkeyFilePath, data: 'XXXXXXX'});
+                //     });
+                // }
             }
+
+            sendRequest({
+                url: "settings/user",
+                type: "GET",
+                responses: {
+                    0: function(error) {
+                        console.log(error);
+                    },
+                    200: function(result) {
+                        console.log(result);
+                        if ( result ) {
+                            gitUsernameLabel.text(result.name);
+                            gitUsernameInput.val(result.name);
+                            gitEmailLabel.text(result.email);
+                            gitEmailInput.val(result.email);
+                        }
+                    },
+                    400: {
+                        'unexpected_error': function(error) {
+                            console.log(error);
+                        }
+                    }
+                }
+            })
+
             updateForm();
         }
 
@@ -248,7 +234,6 @@ RED.gitconfig = (function() {
         var popover;
     
         var utils;
-        // var modulesInUse = {};
         function init(_utils) {
             utils = _utils;
             RED.userSettings.add({
@@ -264,6 +249,62 @@ RED.gitconfig = (function() {
             });
     
         }
+
+        function addSpinnerOverlay(container) {
+            var spinner = $('<div class="projects-dialog-spinner"><img src="red/images/spin.svg"/></div>').appendTo(container);
+            return spinner;
+        }
+            
+        function sendRequest(options,body) {
+            // dialogBody.hide();
+            console.log(options.url,body);
+    
+            var start = Date.now();
+            // TODO: this is specific to the dialog-based requests
+            $(".projects-dialog-spinner").show();
+            // $("#projects-dialog").parent().find(".ui-dialog-buttonset").children().css("visibility","hidden")
+            if (body) {
+                options.data = JSON.stringify(body);
+                options.contentType = "application/json; charset=utf-8";
+            }
+            var resultCallback;
+            var resultCallbackArgs;
+            return $.ajax(options).done(function(data,textStatus,xhr) {
+                if (options.responses && options.responses[200]) {
+                    resultCallback = options.responses[200];
+                    resultCallbackArgs = data;
+                }
+            }).fail(function(xhr,textStatus,err) {
+                if (options.responses && options.responses[xhr.status]) {
+                    var responses = options.responses[xhr.status];
+                    if (typeof responses === 'function') {
+                        resultCallback = responses;
+                        resultCallbackArgs = {error:responses.statusText};
+                        return;
+                    } else if (responses[xhr.responseJSON.error]) {
+                        resultCallback = responses[xhr.responseJSON.error];
+                        resultCallbackArgs = xhr.responseJSON;
+                        return;
+                    }
+                }
+                console.log("Unhandled error response:");
+                console.log(xhr);
+                console.log(textStatus);
+                console.log(err);
+            }).always(function() {
+                console.log('[sendRequest] --- always');
+                var delta = Date.now() - start;
+                delta = Math.max(0,500-delta);
+                setTimeout(function() {
+                    // dialogBody.show();
+                    // $("#projects-dialog").parent().find(".ui-dialog-buttonset").children().css("visibility","")
+                    if (resultCallback) {
+                        resultCallback(resultCallbackArgs)
+                    }
+                },delta);
+            });
+        }
+    
         return {
             init: init,
         };
