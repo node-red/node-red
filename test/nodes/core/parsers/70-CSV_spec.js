@@ -46,6 +46,23 @@ describe('CSV node', function() {
     });
 
     describe('csv to json', function() {
+        var parts_id = undefined;
+
+        afterEach(function() {
+            parts_id = undefined;
+        });
+
+        function check_parts(msg, index, count) {
+            msg.should.have.property('parts');
+            if(parts_id === undefined) {
+                parts_id = msg.parts.id;
+            }
+            else {
+                msg.parts.should.have.property('id', parts_id);
+            }
+            msg.parts.should.have.property('index', index);
+            msg.parts.should.have.property('count', count);
+        }
 
         it('should convert a simple csv string to a javascript object', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
@@ -55,6 +72,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -70,6 +88,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -85,6 +104,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { col1: 1, col2: 2, col3: 3, col4: 4 });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -100,6 +120,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: 1, d: 4 });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
@@ -117,6 +138,7 @@ describe('CSV node', function() {
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = '"1","-2","+3","04","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
@@ -134,6 +156,7 @@ describe('CSV node', function() {
                     //console.log(msg);
                     msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes" });
                     //msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
@@ -152,10 +175,12 @@ describe('CSV node', function() {
                     //console.log(msg);
                     if (c === 0) {
                         msg.should.have.property('payload', { w: 1, x: 2, y: 3, z: 4 });
+                        check_parts(msg, 0, 2);
                         c += 1;
                     }
                     else {
                         msg.should.have.property('payload', { w: 5, x: 6, y: 7, z: 8 });
+                        check_parts(msg, 1, 2);
                         done();
                     }
                 });
@@ -172,6 +197,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: 7, d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
+                    msg.should.not.have.property('parts');
                     done();
                 });
                 var testString = "1,2,3,4\n5,-6,07,+8\n9,0,a,b\nc,d,e,f";
@@ -187,12 +213,30 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: "a", b: "127.0.0.1", c: 56.7, d: -32.8, e: "+76.22C" });
+                    check_parts(msg, 0, 1);
                     done();
                 });
                 var testString = "a,127.0.0.1,56.7,-32.8,+76.22C";
                 n1.emit("input", {payload:testString});
             });
         });
+
+        it('should preserve parts property', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
+                    check_parts(msg, 3, 4);
+                    done();
+                });
+                var testString = "1,2,3,4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString, parts: {id:"X", index:3, count:4} });
+            });
+        });
+
     });
 
     describe('json object to csv', function() {
