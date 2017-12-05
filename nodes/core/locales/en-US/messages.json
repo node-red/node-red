@@ -846,5 +846,17 @@
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
         "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+    },
+    "sort" : {
+	"key-type" : "Key type",
+	"payload" : "payload or element",
+	"exp" : "expression",
+	"key-exp" : "Key exp.",
+	"order" : "Order",
+	"ascending" : "ascending",
+	"descending" : "descending",
+	"as-number" : "as number",
+        "invalid-exp" : "invalid JSONata expression in sort node",
+        "too-many" : "too many pending messages in sort node"
     }
 }
