@@ -175,7 +175,7 @@ var persistentSettings = {
             assert.deepEqual(current,settings);
             return when.resolve();
         } catch(err) {
-            globalSettings.user = userSettings;
+            globalSettings.users = userSettings;
             return storage.saveSettings(globalSettings);
         }
     }
