@@ -55,7 +55,7 @@ var persistentSettings = {
         storage = _storage;
         return storage.getSettings().then(function(_settings) {
             globalSettings = _settings;
-            userSettings = globalSettings.users || {};
+            userSettings = globalSettings.user || {};
         });
     },
     get: function(prop) {
