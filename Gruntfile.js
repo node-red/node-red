@@ -155,6 +155,7 @@ module.exports = function(grunt) {
                     "editor/js/ui/userSettings.js",
                     "editor/js/ui/projects.js",
                     "editor/js/ui/projectSettings.js",
+                    "editor/js/ui/projectUserSettings.js",
                     "editor/js/ui/tab-versionControl.js",
                     "editor/js/ui/touch/radialMenu.js"
                 ],

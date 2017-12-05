@@ -957,38 +957,10 @@ RED.projects.settings = (function() {
 
                 $('.projects-dialog-remote-list-entry-delete').show();
                 remoteListAddButton.show();
-
-                gitUsernameLabel.hide();
-                gitUsernameInput.show();
-                gitEmailLabel.hide();
-                gitEmailInput.show();
             });
-
+        
         var repoContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        var subtitle = $('<h4></h4>').text("Committer Details").appendTo(repoContainer);
-        $('<div style="display: inline-block; margin-left: 20px;"><small style="color:#aaa;"></small></div>').appendTo(subtitle).find('small').text("Leave blank to use system default");
-
-        var row = $('<div class="user-settings-row"></div>').appendTo(repoContainer);
-        $('<label for=""></label>').text('Username').appendTo(row);
-        var gitUsernameLabel = $('<div class="uneditable-input">').appendTo(row);
-        var gitUsernameInput = $('<input type="text">').hide().appendTo(row);
-
-        row = $('<div class="user-settings-row"></div>').appendTo(repoContainer);
-        $('<label for=""></label>').text('Email').appendTo(row);
-        var gitEmailLabel = $('<div class="uneditable-input">').appendTo(row);
-        var gitEmailInput = $('<input type="text">').hide().appendTo(row);
-
-        if (activeProject.git.user) {
-            gitUsernameLabel.text(activeProject.git.user.name);
-            gitUsernameInput.val(activeProject.git.user.name);
-
-            gitEmailLabel.text(activeProject.git.user.email);
-            gitEmailInput.val(activeProject.git.user.email);
-        }
-
-
         var grTitle = $('<h4></h4>').text("Git remotes").appendTo(repoContainer);
-
 
         row = $('<div class="user-settings-row projects-dialog-remote-list"></div>').appendTo(repoContainer);
         var remotesList = $('<ol>').appendTo(row);
@@ -1043,12 +1015,6 @@ RED.projects.settings = (function() {
             formButtons.hide();
             $('.projects-dialog-remote-list-entry-delete').hide();
             remoteListAddButton.hide();
-
-            gitUsernameLabel.show();
-            gitUsernameInput.hide();
-            gitEmailLabel.show();
-            gitEmailInput.hide();
-
         }
 
         var formButtons = $('<span class="button-group" style="position: relative; float: right; margin-right:0;"></span>')
@@ -1081,10 +1047,6 @@ RED.projects.settings = (function() {
                 var spinner = utils.addSpinnerOverlay(repoContainer);
 
                 var body = {
-                    user: {
-                        name: gitUsernameInput.val(),
-                        email: gitEmailInput.val()
-                    },
                     remotes: {}
                 }
 
@@ -1128,13 +1090,6 @@ RED.projects.settings = (function() {
                         },
                         200: function(data) {
                             activeProject.git.remotes = data.git.remotes;
-                            activeProject.git.user = data.git.user;
-                            if (activeProject.git.user) {
-                                gitUsernameLabel.text(activeProject.git.user.name);
-                                gitUsernameInput.val(activeProject.git.user.name);
-                                gitEmailLabel.text(activeProject.git.user.email);
-                                gitEmailInput.val(activeProject.git.user.email);
-                            }
 
                             updateForm();
                             done();
