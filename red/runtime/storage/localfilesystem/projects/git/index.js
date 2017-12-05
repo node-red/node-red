@@ -24,19 +24,6 @@ var path = require("path");
 var gitCommand = "git";
 var log;
 
-// function execCommand(command,args,cwd) {
-//     return when.promise(function(resolve,reject) {
-//         var fullCommand = command+" "+args.join(" ");
-//         child = exec(fullCommand, {cwd: cwd, timeout:3000, killSignal: 'SIGTERM'}, function (error, stdout, stderr) {
-//             if (error) {
-//                 reject(error);
-//             } else {
-//                 resolve(stdout);
-//             }
-//         });
-//     });
-// }
-
 function runGitCommand(args,cwd,env) {
     log.trace(gitCommand + JSON.stringify(args));
     return when.promise(function(resolve,reject) {
@@ -64,9 +51,14 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_auth_failed";
                 } else if(/Connection refused/.test(stderr)) {
                     err.code = "git_connection_failed";
-                } else {
-                    err.code = "git_error";
+                } else if (/commit your changes or stash/.test(stderr)) {
+                    err.code = "git_local_overwrite";
+                } else if (/CONFLICT/.test(err.stdout)) {
+                    err.code = "git_pull_merge_conflict";
                 }
+
+
+
                 return reject(err);
             }
             resolve(stdout);

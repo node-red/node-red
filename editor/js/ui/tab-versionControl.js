@@ -604,6 +604,13 @@ RED.sidebar.versionControl = (function() {
                             });
                         },
                         400: {
+                            'git_local_overwrite': function(error) {
+                                spinner.remove();
+                                RED.notify("You have local changes that would be overwritten by changing the branch. You must either commit or undo those changes first.",{
+                                    type:'error',
+                                    timeout: 8000
+                                });
+                            },
                             'unexpected_error': function(error) {
                                 spinner.remove();
                                 console.log(error);
@@ -612,7 +619,6 @@ RED.sidebar.versionControl = (function() {
                         },
                     }
                 },body).always(function(){
-                    console.log("switch deployinflight to false")
                     RED.deploy.setDeployInflight(false);
                 });
             }
@@ -823,7 +829,7 @@ RED.sidebar.versionControl = (function() {
                             closeRemoteBox();
                         },
                         400: {
-                            'git_pull_overwrite': function(err) {
+                            'git_local_overwrite': function(err) {
                                 RED.notify("Unable to pull remote changes; your unstaged local changes would be overwritten. Commit your changes and try again."+
                                     '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+'Show unstaged changes'+'</a></p>',"error",false,10000000);
                             },
