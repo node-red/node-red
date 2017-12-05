@@ -953,6 +953,7 @@ RED.projects = (function() {
             addSpinnerOverlay:addSpinnerOverlay
         };
         RED.projects.settings.init(projectsAPI);
+        RED.projects.userSettings.init(projectsAPI);
         RED.sidebar.versionControl.init(projectsAPI);
         initScreens();
         // initSidebar();

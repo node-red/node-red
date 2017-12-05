@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-RED.gitconfig = (function() {
+RED.projects.userSettings = (function() {
     
         var trayWidth = 700;
         var settingsVisible = false;
@@ -144,11 +144,15 @@ RED.gitconfig = (function() {
                 .appendTo(formButtons)
                 .click(function(evt) {
                     evt.preventDefault();
-                    var spinner = addSpinnerOverlay(gitconfigContainer);
+                    var spinner = utils.addSpinnerOverlay(gitconfigContainer);
     
                     var body = {
-                        name: gitUsernameInput.val(),
-                        email: gitEmailInput.val()
+                        git: {
+                            user: {
+                                name: gitUsernameInput.val(),
+                                email: gitEmailInput.val()
+                            }
+                        }
                     }
     
                     var done = function(err) {
@@ -160,7 +164,7 @@ RED.gitconfig = (function() {
                         hideGitUserEditForm();
                     }
     
-                    sendRequest({
+                    utils.sendRequest({
                         url: "settings/user",
                         type: "POST",
                         responses: {
@@ -168,8 +172,8 @@ RED.gitconfig = (function() {
                                 done(error);
                             },
                             200: function(data) {
-                                gitUsernameLabel.text(body.name);
-                                gitEmailLabel.text(body.email);
+                                gitUsernameLabel.text(body.git.user.name);
+                                gitEmailLabel.text(body.git.user.email);
                                 done();
                             },
                             400: {
@@ -198,7 +202,7 @@ RED.gitconfig = (function() {
                 // }
             }
 
-            sendRequest({
+            utils.sendRequest({
                 url: "settings/user",
                 type: "GET",
                 responses: {
@@ -207,11 +211,13 @@ RED.gitconfig = (function() {
                     },
                     200: function(result) {
                         console.log(result);
-                        if ( result ) {
-                            gitUsernameLabel.text(result.name);
-                            gitUsernameInput.val(result.name);
-                            gitEmailLabel.text(result.email);
-                            gitEmailInput.val(result.email);
+                        if ( result && result.git && result.git.user ) {
+                            var username = result.git.user.name  || "";
+                            var email    = result.git.user.email || "";
+                            gitUsernameLabel.text(username);
+                            gitUsernameInput.val(username);
+                            gitEmailLabel.text(email);
+                            gitEmailInput.val(email);
                         }
                     },
                     400: {
@@ -248,61 +254,6 @@ RED.gitconfig = (function() {
                 }
             });
     
-        }
-
-        function addSpinnerOverlay(container) {
-            var spinner = $('<div class="projects-dialog-spinner"><img src="red/images/spin.svg"/></div>').appendTo(container);
-            return spinner;
-        }
-            
-        function sendRequest(options,body) {
-            // dialogBody.hide();
-            console.log(options.url,body);
-    
-            var start = Date.now();
-            // TODO: this is specific to the dialog-based requests
-            $(".projects-dialog-spinner").show();
-            // $("#projects-dialog").parent().find(".ui-dialog-buttonset").children().css("visibility","hidden")
-            if (body) {
-                options.data = JSON.stringify(body);
-                options.contentType = "application/json; charset=utf-8";
-            }
-            var resultCallback;
-            var resultCallbackArgs;
-            return $.ajax(options).done(function(data,textStatus,xhr) {
-                if (options.responses && options.responses[200]) {
-                    resultCallback = options.responses[200];
-                    resultCallbackArgs = data;
-                }
-            }).fail(function(xhr,textStatus,err) {
-                if (options.responses && options.responses[xhr.status]) {
-                    var responses = options.responses[xhr.status];
-                    if (typeof responses === 'function') {
-                        resultCallback = responses;
-                        resultCallbackArgs = {error:responses.statusText};
-                        return;
-                    } else if (responses[xhr.responseJSON.error]) {
-                        resultCallback = responses[xhr.responseJSON.error];
-                        resultCallbackArgs = xhr.responseJSON;
-                        return;
-                    }
-                }
-                console.log("Unhandled error response:");
-                console.log(xhr);
-                console.log(textStatus);
-                console.log(err);
-            }).always(function() {
-                console.log('[sendRequest] --- always');
-                var delta = Date.now() - start;
-                delta = Math.max(0,500-delta);
-                setTimeout(function() {
-                    // dialogBody.show();
-                    // $("#projects-dialog").parent().find(".ui-dialog-buttonset").children().css("visibility","")
-                    if (resultCallback) {
-                        resultCallback(resultCallbackArgs)
-                    }
-                },delta);
-            });
         }
     
         return {
