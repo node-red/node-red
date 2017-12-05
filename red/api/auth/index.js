@@ -87,9 +87,11 @@ function login(req,res) {
                 "prompts":[{id:"username",type:"text",label:"user.username"},{id:"password",type:"password",label:"user.password"}]
             }
         } else if (settings.adminAuth.type === "strategy") {
+
+            var urlPrefix = (settings.httpAdminRoot==='/')?"":settings.httpAdminRoot;
             response = {
                 "type":"strategy",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: settings.httpAdminRoot + "auth/strategy"}]
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: urlPrefix + "auth/strategy"}]
             }
             if (settings.adminAuth.strategy.icon) {
                 response.prompts[0].icon = settings.adminAuth.strategy.icon;
