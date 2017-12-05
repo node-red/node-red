@@ -125,7 +125,7 @@ module.exports = function(RED) {
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
 
         var sock;
-        if (udpInputPortsInUse[this.outport]) {
+        if (udpInputPortsInUse[this.outport || this.port]) {
             sock = udpInputPortsInUse[this.outport || this.port];
         }
         else {
