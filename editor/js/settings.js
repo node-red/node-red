@@ -202,6 +202,7 @@ RED.settings = (function () {
     return {
         init: init,
         load: load,
+        loadUserSettings: loadUserSettings,
         set: set,
         get: get,
         remove: remove,

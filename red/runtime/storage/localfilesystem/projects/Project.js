@@ -53,7 +53,6 @@ Project.prototype.load = function () {
     this.credentialSecret = projectSettings.credentialSecret;
     this.git = projectSettings.git || { user:{} };
 
-console.log("LOADED",this.git);
     // this.paths.flowFile = fspath.join(this.path,"flow.json");
     // this.paths.credentialsFile = fspath.join(this.path,"flow_cred.json");
 

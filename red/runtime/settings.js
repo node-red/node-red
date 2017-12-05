@@ -165,17 +165,18 @@ var persistentSettings = {
         });
     },
     getUserSettings: function(username) {
-        console.log(username);
-        return userSettings[username];
+        return clone(userSettings[username]);
     },
     setUserSettings: function(username,settings) {
         var current = userSettings[username];
         userSettings[username] = settings;
         try {
             assert.deepEqual(current,settings);
+            console.log("skip the save");
             return when.resolve();
         } catch(err) {
             globalSettings.users = userSettings;
+            console.log("saving");
             return storage.saveSettings(globalSettings);
         }
     }

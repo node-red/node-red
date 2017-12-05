@@ -68,7 +68,9 @@ module.exports = {
         } else {
             username = req.user.username;
         }
-        settings.setUserSettings(username, req.body).then(function() {
+        var currentSettings = settings.getUserSettings(username)||{};
+        currentSettings = extend(currentSettings, req.body);
+        settings.setUserSettings(username, currentSettings).then(function() {
             log.audit({event: "settings.update",username:username},req);
             res.status(204).end();
         }).otherwise(function(err) {
@@ -76,4 +78,28 @@ module.exports = {
             res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
         });
     }
+}
+
+function extend(target, source) {
+    var keys = Object.keys(source);
+    var i = keys.length;
+    while(i--) {
+        var value = source[keys[i]]
+        var type = typeof value;
+        if (type === 'string' || type === 'number' || type === 'boolean' || Array.isArray(value)) {
+            target[keys[i]] = value;
+        } else if (value === null) {
+            if (target.hasOwnProperty(keys[i])) {
+                delete target[keys[i]];
+            }
+        } else {
+            // Object
+            if (target.hasOwnProperty(keys[i])) {
+                target[keys[i]] = extend(target[keys[i]],value);
+            } else {
+                target[keys[i]] = value;
+            }
+        }
+    }
+    return target;
 }
