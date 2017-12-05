@@ -441,7 +441,7 @@ module.exports = function(RED) {
                         }
                     } else {
                         for (propertyKey in property) {
-                            if (property.hasOwnProperty(propertyKey)) {
+                            if (property.hasOwnProperty(propertyKey) && propertyKey !== '_msgid') {
                                 group.payload[propertyKey] = property[propertyKey];
                             }
                         }
