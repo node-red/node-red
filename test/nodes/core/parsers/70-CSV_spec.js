@@ -237,6 +237,34 @@ describe('CSV node', function() {
             });
         });
 
+        it('should be able to use the first of multiple parts as a template if parts are present', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrin:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    if (c === 0) {
+                        msg.should.have.property('payload', { w: 1, x: 2, y: 3, z: 4 });
+                        check_parts(msg, 0, 2);
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.property('payload', { w: 5, x: 6, y: 7, z: 8 });
+                        check_parts(msg, 1, 2);
+                        done();
+                    }
+                });
+                var testString1 = "w,x,y,z\n";
+                var testString2 = "1,2,3,4\n";
+                var testString3 = "5,6,7,8\n";
+                n1.emit("input", {payload:testString1, parts:{id:"X", index:0, count:3}});
+                n1.emit("input", {payload:testString2, parts:{id:"X", index:1, count:3}});
+                n1.emit("input", {payload:testString3, parts:{id:"X", index:2, count:3}});
+            });
+        });
+
     });
 
     describe('json object to csv', function() {

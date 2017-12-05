@@ -72,6 +72,7 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
+                                    /* istanbul ignore else */
                                     if (tmpwarn === true) { // just warn about missing template once
                                         node.warn(RED._("csv.errors.obj_csv"));
                                         tmpwarn = false;
@@ -135,6 +136,9 @@ module.exports = function(RED) {
                         var line = msg.payload;
                         var tmp = "";
                         var reg = /^[-]?[0-9]*\.?[0-9]+$/;
+                        if (msg.hasOwnProperty("parts")) {
+                            if (msg.parts.index > 0) { first = false; }
+                        }
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
@@ -201,22 +205,26 @@ module.exports = function(RED) {
                             msg.payload = a;
                             node.send(msg); // finally send the array
                         }
-                        else {
+            			else {
                             var has_parts = msg.hasOwnProperty("parts");
-                            var len = a.length;
-                            for(var i = 0; i < len; i++) {
+            			    var len = a.length;
+            			    for (var i = 0; i < len; i++) {
                                 var newMessage = RED.util.cloneMessage(msg);
                                 newMessage.payload = a[i];
-                                if(!has_parts) {
-                                    newMessage.parts = {
-                                        id: msg._msgid,
-                                        index: i,
-                                        count: len
-                                    };
+                                if (!has_parts) {
+                				    newMessage.parts = {
+                    				    id: msg._msgid,
+                    				    index: i,
+                    				    count: len
+                    				};
+                                }
+                                else if (node.hdrin) { // if we removed the header line then shift the counts by 1
+                                    newMessage.parts.index -= 1;
+                                    newMessage.parts.count -= 1;
                                 }
                                 node.send(newMessage);
-                            }
-                        }
+            			    }
+            			}
                     }
                     catch(e) { node.error(e,msg); }
                 }
