@@ -83,6 +83,16 @@ module.exports = function(RED) {
         node.on("input", function(msg) {
             try {
                 var value;
+                /***
+                * Allow template contents to be defined externally
+                * through inbound msg.template IFF node.template empty
+                */
+                if (msg.hasOwnProperty("template")) {
+                    if (node.template == "" || node.template === null) {
+                        node.template = msg.template;
+                    }
+                }
+
                 if (node.syntax === "mustache") {
                     if (node.outputFormat === "json") {
                         value = mustache.render(node.template,new NodeContext(msg, node.context(), null, true));
