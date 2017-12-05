@@ -79,11 +79,11 @@ module.exports = function(RED) {
             return function(x, y) {
                 var xp = conv(key(x));
                 var yp = conv(key(y));
-                if (xp === yp) return 0;
-                if (xp > yp) return dir;
+                if (xp === yp) { return 0; }
+                if (xp > yp) { return dir; }
                 return -dir;
             };
-        };
+        }
 
         function send_group(group) {
             var key = key_is_payload
@@ -104,7 +104,7 @@ module.exports = function(RED) {
                 msg.parts.index = i;
                 node.send(msg);
             }
-        };
+        }
 
         function sort_payload(msg) {
             var payload = msg.payload;
@@ -133,7 +133,7 @@ module.exports = function(RED) {
             }
             return false;
         }
-        
+
         function process_msg(msg) {
             if (!msg.hasOwnProperty("parts")) {
                 if (sort_payload(msg)) {
@@ -168,10 +168,10 @@ module.exports = function(RED) {
             if ((max_msgs > 0) && (pending_count > max_msgs)) {
                 pending = {};
                 pending_count = 0;
-                node.error(RED._("sort.too-many"));
+                node.error(RED._("sort.too-many"),msg);
             }
         }
-        
+
         this.on("input", function(msg) {
             process_msg(msg);
         });
@@ -179,4 +179,3 @@ module.exports = function(RED) {
 
     RED.nodes.registerType("sort", SortNode);
 }
-
