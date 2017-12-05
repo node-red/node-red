@@ -217,6 +217,7 @@
         menuOptions.push({id:"menu-item-projects-menu",label:"NLS: Projects",options:[
             {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
             {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"},
+            {id:"menu-item-projects-delete",label:"Delete...",disabled:false,onselect:"core:delete-project"},
         ]});
 
 
