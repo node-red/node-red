@@ -294,7 +294,7 @@ RED.sidebar.versionControl = (function() {
             .click(function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                var spinner =u(unmergedContent);
+                var spinner = utils.addSpinnerOverlay(unmergedContent);
                 var activeProject = RED.projects.getActiveProject();
                 utils.sendRequest({
                     url: "projects/"+activeProject.name+"/merge",
