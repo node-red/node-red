@@ -427,6 +427,31 @@ describe('change Node', function() {
             });
         });
 
+        it('sets a property in the node\'s local context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"delta","pt":"msg","to":"payload - $number($localContext(\"lastValue\"))","tot":"jsonata"},{"t":"set","p":"lastValue","pt":"local","to":"payload","tot":"msg"}],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql(changeNode1.context().get("lastValue"));
+                        if (msg.topic === "msg1") {
+                            msg.should.not.have.property("delta");
+                        }
+                        else if (msg.topic === "msg2") {
+                            msg.should.have.property("delta", 21);
+                            done();
+                        }
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({topic:"msg1",payload:21});
+                changeNode1.receive({topic:"msg2",payload:42});
+            });
+        });
+
     });
     describe('#change', function() {
         it('changes the value of the message property', function(done) {
@@ -447,7 +472,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and doesnt change type of the message property for partial match', function(done) {
+        it('changes the value and doesn\'t change type of the message property for partial match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "msg", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
@@ -648,6 +673,25 @@ describe('change Node', function() {
             });
         });
 
+        it('changes the value using local context property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"123","fromt":"local","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal("abc123abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().set("topic","ABC");
+                changeNode1.receive({payload:"abcABCabc"});
+            });
+        });
+
         it('changes the value using flow context property', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"123","fromt":"flow","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -796,7 +840,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and doesnt change type of the flow context for partial match', function(done) {
+        it('changes the value and doesn\'t change type of the flow context for partial match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
@@ -832,6 +876,26 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.context().flow.set("payload","123");
+                changeNode1.receive({payload:""});
+            });
+        });
+
+        it('changes the value using number - number local context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "value", "pt": "local", "from": "123", "fromt": "num", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '');
+                        changeNode1.context().get("value").should.equal("abc");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().set("value",123);
                 changeNode1.receive({payload:""});
             });
         });

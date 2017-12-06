@@ -442,7 +442,7 @@
         "errors": {
             "invalid-expr": "Invalid JSONata expression:\n  __message__",
             "invalid-msg": "Invalid example JSON message:\n  __message__",
-            "context-unsupported": "Cannot test context functions\n $flowContext or $globalContext",
+            "context-unsupported": "Cannot test context functions\n $localContext, $flowContext, or $globalContext",
             "eval": "Error evaluating expression:\n  __message__"
         }
     },

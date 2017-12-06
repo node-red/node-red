@@ -1991,6 +1991,10 @@ RED.editor = (function() {
                     $(".node-input-expression-legacy").toggle(legacyMode);
                     try {
                         expr = jsonata(currentExpression);
+                        expr.assign('localContext',function(val) {
+                            usesContext = true;
+                            return null;
+                        });
                         expr.assign('flowContext',function(val) {
                             usesContext = true;
                             return null;

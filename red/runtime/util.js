@@ -319,6 +319,8 @@ function evaluateNodeProperty(value, type, node, msg) {
         return Buffer.from(data);
     } else if (type === 'msg' && msg) {
         return getMessageProperty(msg,value);
+    } else if (type === 'local' && node) {
+        return node.context().get(value);
     } else if (type === 'flow' && node) {
         return node.context().flow.get(value);
     } else if (type === 'global' && node) {
@@ -334,6 +336,9 @@ function evaluateNodeProperty(value, type, node, msg) {
 
 function prepareJSONataExpression(value,node) {
     var expr = jsonata(value);
+    expr.assign('localContext',function(val) {
+        return node.context().get(val);
+    });
     expr.assign('flowContext',function(val) {
         return node.context().flow.get(val);
     });

@@ -407,18 +407,28 @@ describe("red/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("hello");
           });
+          it('accesses local context from an expression', function() {
+              var expr = util.prepareJSONataExpression('$localContext("foo")',{context:function() { return {get: function(key) { return {'foo':'bar'}[key]}}}});
+              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
+              result.should.eql("bar");
+          });
+          it('handles non-existent local context variable', function() {
+              var expr = util.prepareJSONataExpression('$localContext("nonExistent")',{context:function() { return {get: function(key) { return {'foo':'bar'}[key]}}}});
+              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
+              should.not.exist(result);
+          });
           it('accesses flow context from an expression', function() {
               var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("bar");
           });
-          it('handles non-existant flow context variable', function() {
-              var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
+          it('handles non-existent flow context variable', function() {
+              var expr = util.prepareJSONataExpression('$flowContext("nonExistent")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);
           });
-          it('handles non-existant global context variable', function() {
-              var expr = util.prepareJSONataExpression('$globalContext("nonExistant")',{context:function() { return {global:{get: function(key) { return {'foo':'bar'}[key]}}}}});
+          it('handles non-existent global context variable', function() {
+              var expr = util.prepareJSONataExpression('$globalContext("nonExistent")',{context:function() { return {global:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);
           });

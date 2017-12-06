@@ -187,6 +187,10 @@
         "args": "array, function [, init]",
         "desc": "配列の各要素値に関数 `function` を連続的に適用して得られる集約値を返します。 `function` の適用の際には、直前の `function` の適用結果と要素値が引数として与えられます。\n\n関数 `function` は引数を2つ取り、配列の各要素の間に配置する中置演算子のように作用しなくてはなりません。\n\n任意の引数 `init` には、集約時の初期値を設定します。"
     },
+    "$localContext": {
+        "args": "string",
+        "desc": "このノードからコンテキストプロパティを取得します。"
+    },
     "$flowContext": {
         "args": "string",
         "desc": "フローコンテキストのプロパティを取得します。"

@@ -62,7 +62,7 @@ module.exports = function(RED) {
             if (!rule.fromt) {
                 rule.fromt = "str";
             }
-            if (rule.t === "change" && rule.fromt !== 'msg' && rule.fromt !== 'flow' && rule.fromt !== 'global') {
+            if (rule.t === "change" && rule.fromt !== 'msg' && rule.fromt !== 'local' && rule.fromt !== 'flow' && rule.fromt !== 'global') {
                 rule.fromRE = rule.from;
                 if (rule.fromt !== 're') {
                     rule.fromRE = rule.fromRE.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
@@ -111,6 +111,8 @@ module.exports = function(RED) {
                 var fromRE;
                 if (rule.tot === "msg") {
                     value = RED.util.getMessageProperty(msg,rule.to);
+                } else if (rule.tot === 'local') {
+                    value = node.context().get(rule.to);
                 } else if (rule.tot === 'flow') {
                     value = node.context().flow.get(rule.to);
                 } else if (rule.tot === 'global') {
@@ -126,9 +128,11 @@ module.exports = function(RED) {
                     }
                 }
                 if (rule.t === 'change') {
-                    if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
+                    if (rule.fromt === 'msg' || rule.fromt === 'local' || rule.fromt === 'flow' || rule.fromt === 'global') {
                         if (rule.fromt === "msg") {
                             fromValue = RED.util.getMessageProperty(msg,rule.from);
+                        } else if (rule.fromt === 'local') {
+                            fromValue = node.context().get(rule.from);
                         } else if (rule.fromt === 'flow') {
                             fromValue = node.context().flow.get(rule.from);
                         } else if (rule.fromt === 'global') {
@@ -190,7 +194,9 @@ module.exports = function(RED) {
                 }
                 else {
                     var target;
-                    if (rule.pt === 'flow') {
+                    if (rule.pt === 'local') {
+                        target = node.context();
+                    } else if (rule.pt === 'flow') {
                         target = node.context().flow;
                     } else if (rule.pt === 'global') {
                         target = node.context().global;

@@ -16,6 +16,7 @@
 (function($) {
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
+        local: {value:"local",label:"local.",validate:RED.utils.validatePropertyExpression},
         flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
         global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
         str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
