@@ -78,7 +78,7 @@ var api = module.exports = {
 
             var projectKey = false;
             var activeProject;
-            if (runtime.storage.projects) {
+            if (runtime.storage && runtime.storage.projects) {
                 // projects enabled
                 activeProject = runtime.storage.projects.getActiveProject();
                 if (activeProject) {
@@ -199,7 +199,9 @@ var api = module.exports = {
             }
             if (clearInvalidFlag) {
                 // TODO: this delves too deep into Project structure
-                delete activeProject.credentialSecretInvalid;
+                if (activeProject) {
+                    delete activeProject.credentialSecretInvalid;
+                }
             }
         });
     },
