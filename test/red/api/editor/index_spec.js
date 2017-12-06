@@ -21,6 +21,8 @@ var express = require("express");
 var editorApi = require("../../../../red/api/editor");
 var comms = require("../../../../red/api/editor/comms");
 var info = require("../../../../red/api/editor/settings");
+var auth = require("../../../../red/api/auth");
+var when = require("when");
 
 
 describe("api/editor/index", function() {
@@ -49,6 +51,7 @@ describe("api/editor/index", function() {
         ]
         var isStarted = true;
         var errors = [];
+        var session_data = {};
         before(function() {
             mockList.forEach(function(m) {
                 sinon.stub(require("../../../../red/api/editor/"+m),"init",function(){});
@@ -63,6 +66,25 @@ describe("api/editor/index", function() {
         });
 
         before(function() {
+            auth.init({
+                settings:{
+                    adminAuth: {
+                        default: {
+                            permissions: ['read']
+                        }
+                    },
+                    storage: {
+                        getSessions: function(){
+                            return when.resolve(session_data);
+                        },
+                        setSessions: function(_session) {
+                            session_data = _session;
+                            return when.resolve();
+                        }
+                    },
+                    log:{audit:function(){},error:function(msg){errors.push(msg)}}
+                }
+            });
             app = editorApi.init({},{
                 log:{audit:function(){},error:function(msg){errors.push(msg)}},
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},
