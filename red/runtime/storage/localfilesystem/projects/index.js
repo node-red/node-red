@@ -182,17 +182,17 @@ function getFile(user, project,filePath,sha) {
 }
 function push(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
-    return activeProject.push(remoteBranchName,setRemote);
+    return activeProject.push(user,remoteBranchName,setRemote);
 }
 function pull(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
-    return activeProject.pull(remoteBranchName,setRemote).then(function() {
+    return activeProject.pull(user,remoteBranchName,setRemote).then(function() {
         return reloadActiveProject("pull");
     });
 }
 function getStatus(user, project) {
     checkActiveProject(project);
-    return activeProject.status();
+    return activeProject.status(user);
 }
 function resolveMerge(user, project,file,resolution) {
     checkActiveProject(project);
@@ -206,7 +206,7 @@ function abortMerge(user, project) {
 }
 function getBranches(user, project,isRemote) {
     checkActiveProject(project);
-    return activeProject.getBranches(isRemote);
+    return activeProject.getBranches(user, isRemote);
 }
 function setBranch(user, project,branchName,isCreate) {
     checkActiveProject(project);

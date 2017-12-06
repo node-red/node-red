@@ -17,23 +17,26 @@
 var authCache = {}
 
 module.exports = {
-    clear: function(project,remote) {
-        if (remote && authCache.hasOwnProperty(project)) {
+    clear: function(project,remote, user) {
+        if (user && remote && authCache[project] && authCache[project][remote]) {
+            delete authCache[project][remote][user];
+        } else if (remote && authCache.hasOwnProperty(project)) {
             delete authCache[project][remote];
-            return;
+        } else {
+            delete authCache[project];
         }
-        delete authCache[project];
     },
-    set: function(project,remote,auth) {
-         console.log("AuthCache.set",remote,auth);
+    set: function(project,remote,user,auth) {
+         // console.log("AuthCache.set",remote,user,auth);
         authCache[project] = authCache[project]||{};
-        authCache[project][remote] = auth;
+        authCache[project][remote] = authCache[project][remote]||{};
+        authCache[project][remote][user] = auth;
         // console.log(JSON.stringify(authCache,'',4));
     },
-    get: function(project,remote) {
-        console.log("AuthCache.get",remote,authCache[project]&&authCache[project][remote]);
-        if (authCache.hasOwnProperty(project)) {
-            return authCache[project][remote];
+    get: function(project,remote,user) {
+        // console.log("AuthCache.get",remote,user,authCache[project]&&authCache[project][remote]&&authCache[project][remote][user]);
+        if (authCache[project] && authCache[project][remote]) {
+            return authCache[project][remote][user];
         }
         return
     }
