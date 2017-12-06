@@ -171,7 +171,7 @@ RED.utils = (function() {
     }
 
     function formatNumber(element,obj,sourceId,path,cycle,initialFormat) {
-        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || initialFormat || "dec";
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path] && formattedPaths[sourceId][path]['number']) || initialFormat || "dec";
         if (cycle) {
             if (format === 'dec') {
                 if ((obj.toString().length===13) && (obj<=2147483647000)) {
@@ -187,10 +187,12 @@ RED.utils = (function() {
                 format = 'dec';
             }
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['number'] = format;
         } else if (initialFormat !== undefined){
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['number'] = format;
         }
         if (format === 'dec') {
             element.text(""+obj);
@@ -204,7 +206,7 @@ RED.utils = (function() {
     }
 
     function formatBuffer(element,button,sourceId,path,cycle) {
-        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path]) || "raw";
+        var format = (formattedPaths[sourceId] && formattedPaths[sourceId][path] && formattedPaths[sourceId][path]['buffer']) || "raw";
         if (cycle) {
             if (format === 'raw') {
                 format = 'string';
@@ -212,7 +214,8 @@ RED.utils = (function() {
                 format = 'raw';
             }
             formattedPaths[sourceId] = formattedPaths[sourceId]||{};
-            formattedPaths[sourceId][path] = format;
+            formattedPaths[sourceId][path] = formattedPaths[sourceId][path]||{};
+            formattedPaths[sourceId][path]['buffer'] = format;
         }
         if (format === 'raw') {
             button.text('raw');
@@ -689,16 +692,21 @@ RED.utils = (function() {
         return result;
     }
 
-    function getNodeIcon(def,node) {
-        if (def.category === 'config') {
-            return "icons/node-red/cog.png"
-        } else if (node && node.type === 'tab') {
-            return "icons/node-red/subflow.png"
-        } else if (node && node.type === 'unknown') {
-            return "icons/node-red/alert.png"
-        } else if (node && node.type === 'subflow') {
-            return "icons/node-red/subflow.png"
+    function separateIconPath(icon) {
+        var result = {module: "", file: ""};
+        if (icon) {
+            var index = icon.indexOf('/');
+            if (index !== -1) {
+                result.module = icon.slice(0, index);
+                result.file = icon.slice(index + 1);
+            } else {
+                result.file = icon;
+            }
         }
+        return result;
+    }
+
+    function getDefaultNodeIcon(def,node) {
         var icon_url;
         if (typeof def.icon === "function") {
             try {
@@ -710,7 +718,34 @@ RED.utils = (function() {
         } else {
             icon_url = def.icon;
         }
-        return "icons/"+def.set.module+"/"+icon_url;
+
+        var iconPath = separateIconPath(icon_url);
+        if (!iconPath.module) {
+            iconPath.module = def.set.module;
+        }
+        return iconPath;
+    }
+
+    function getNodeIcon(def,node) {
+        if (def.category === 'config') {
+            return "icons/node-red/cog.png"
+        } else if (node && node.type === 'tab') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.type === 'unknown') {
+            return "icons/node-red/alert.png"
+        } else if (node && node.type === 'subflow') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.icon) {
+            var iconPath = separateIconPath(node.icon);
+            var iconSets = RED.nodes.getIconSets();
+            var iconFileList = iconSets[iconPath.module];
+            if (iconFileList && iconFileList.indexOf(iconPath.file) !== -1) {
+                return "icons/" + node.icon;
+            }
+        }
+
+        var iconPath = getDefaultNodeIcon(def, node);
+        return "icons/"+iconPath.module+"/"+iconPath.file;
     }
 
     function getNodeLabel(node,defaultLabel) {
@@ -735,6 +770,8 @@ RED.utils = (function() {
         getMessageProperty: getMessageProperty,
         normalisePropertyExpression: normalisePropertyExpression,
         validatePropertyExpression: validatePropertyExpression,
+        separateIconPath: separateIconPath,
+        getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
     }

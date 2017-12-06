@@ -76,11 +76,15 @@ describe('exec node', function() {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal("echo");
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",0);
 
                         msg = messages[1];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal("ECHO");
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",0);
 
                         msg = messages[2];
                         msg.should.have.property("payload");
@@ -88,7 +92,8 @@ describe('exec node', function() {
 
                         child_process.exec.restore();
                         done();
-                    } catch(err) {
+                    }
+                    catch(err) {
                         child_process.exec.restore();
                         done(err);
                     }
@@ -136,20 +141,23 @@ describe('exec node', function() {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal("echo and more");
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",0);
 
                         msg = messages[1];
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal("ECHO AND MORE");
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",0);
                         child_process.exec.restore();
                         done();
-                    } catch(err) {
+                    }
+                    catch(err) {
                         child_process.exec.restore();
                         done(err);
                     }
                 };
-
-
                 n2.on("input", function(msg) {
                     messages[0] = msg;
                     completeTest();
@@ -169,7 +177,7 @@ describe('exec node', function() {
                 function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
-                    arg3("error",new Buffer([0x01,0x02,0x03,0x88]));
+                    arg3("error",new Buffer([0x01,0x02,0x03,0x88]),new Buffer([0x01,0x02,0x03,0x88]));
                 });
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -199,32 +207,10 @@ describe('exec node', function() {
                 // Although Windows timeout command is equivalent to sleep, this cannot be used because it promptly outputs a message.
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"0.3", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            } else {
+            }
+            else {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"0.3", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            }
-            helper.load(execNode, flow, function() {
-                var n1 = helper.getNode("n1");
-                var n2 = helper.getNode("n2");
-                var n3 = helper.getNode("n3");
-                var n4 = helper.getNode("n4");
-                n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("signal","SIGTERM");
-                    done();
-                });
-                n1.receive({});
-            });
-        });
-
-        it('should be able to kill a long running command', function(done) {
-            var flow;
-            if (osType === "Windows_NT") {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
-                            {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            } else {
-                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
-                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
             }
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -236,9 +222,42 @@ describe('exec node', function() {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("signal","SIGTERM");
                         done();
-                    } catch(err) {
-                        done(err);
                     }
+                    catch(err) { done(err); }
+                });
+                n1.receive({});
+            });
+        });
+
+        it('should be able to kill a long running command', function(done) {
+            var flow;
+            if (osType === "Windows_NT") {
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping", addpay:false, append:"192.0.2.0 -n 1 -w 1000 > NUL", timer:"2", oldrc:"false"},
+                            {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            }
+            else {
+                flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"sleep", addpay:false, append:"1", timer:"2", oldrc:"false"},
+                        {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
+            }
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",null);
+                        msg.rc.should.have.property("signal","SIGTERM");
+                    } catch(err) { done(err); }
+                });
+                n4.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("signal","SIGTERM");
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 setTimeout(function() {
                     n1.receive({kill:""});
@@ -262,14 +281,19 @@ describe('exec node', function() {
                 var n2 = helper.getNode("n2");
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",null);
+                        msg.rc.should.have.property("signal","SIGINT");
+                    } catch(err) { done(err); }
+                });
                 n4.on("input", function(msg) {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("signal",sig);
                         done();
-                    } catch(err) {
-                        done(err);
-                    }
+                    } catch(err) { done(err); }
                 });
                 setTimeout(function() {
                     n1.receive({kill:"SIGINT"});
@@ -277,7 +301,6 @@ describe('exec node', function() {
                 n1.receive({});
             });
         });
-
 
         it('should return the rc for a failing command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:"", oldrc:"false"},
@@ -305,6 +328,9 @@ describe('exec node', function() {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal("error");
+                        msg.should.have.property("rc");
+                        msg.rc.should.have.property("code",1);
+                        msg.rc.should.have.property("message",undefined);
 
                         msg = messages[1];
                         msg.should.have.property("payload");
@@ -317,7 +343,8 @@ describe('exec node', function() {
 
                         child_process.exec.restore();
                         done();
-                    } catch(err) {
+                    }
+                    catch(err) {
                         child_process.exec.restore();
                         done(err);
                     }
@@ -369,9 +396,8 @@ describe('exec node', function() {
                         msg.payload.should.be.a.String();
                         msg.payload.should.equal(expected);
                         done();
-                    } catch(err) {
-                        done(err);
                     }
+                    catch(err) { done(err); }
                 });
                 n1.receive({payload:"hello world"});
             });
@@ -397,10 +423,13 @@ describe('exec node', function() {
                 var n4 = helper.getNode("n4");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal(expected);
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal(expected);
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 n1.receive({payload:12345});
             });
@@ -431,9 +460,8 @@ describe('exec node', function() {
                             msg.payload.length.should.equal(7);
                         }
                         done();
-                    } catch(err) {
-                        done(err);
                     }
+                    catch(err) { done(err); }
                 });
                 n1.receive({payload:new Buffer([0x01,0x02,0x03,0x88])});
             });
@@ -474,11 +502,11 @@ describe('exec node', function() {
                         should.exist(msg.payload);
                         msg.payload.should.have.property("code",0);
                         done();
-                    } catch(err) {
+                    }
+                    catch(err) {
                         done(err);
                     }
                 };
-
 
                 n2.on("input", function(msg) {
                     messages[0] = msg;
@@ -501,10 +529,13 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("code");
-                    msg.payload.code.should.be.below(0);
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code");
+                        msg.payload.code.should.be.below(0);
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 n1.receive({payload:null});
             });
@@ -513,6 +544,7 @@ describe('exec node', function() {
         it('should return an error for a failing command', function(done) {
             var flow;
             var expected;
+            var expectedFound = false;
             if (osType === "Windows_NT") {
                 // Cannot use mkdir because Windows mkdir command automatically creates non-existent directories.
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"ping /foo/bar/doo/dah", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
@@ -521,7 +553,7 @@ describe('exec node', function() {
             } else {
                 flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"mkdir /foo/bar/doo/dah", addpay:false, append:"", useSpawn:"true", oldrc:"false"},
                             {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-                expected = "mkdir: /foo/bar/doo: No such file or directory\n";
+                expected = ' directory';
             }
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -529,14 +561,26 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n3.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.equal(expected);
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        if (msg.payload.indexOf(expected) >= 0) {
+                            // The error text on the stderr stream might get sent in more than one piece.
+                            // We only need to know that it occurred before the return code is sent,
+                            // as checked below in node n4.
+                            expectedFound = true;
+                        }
+                    }
+                    catch(err) { done(err); }
                 });
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("code",1);
-                    done();
+                    try {
+                        expectedFound.should.be.true;
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",1);
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 n1.receive({payload:null});
             });
@@ -557,10 +601,13 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("code",null);
-                    msg.payload.should.have.property("signal","SIGTERM");
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",null);
+                        msg.payload.should.have.property("signal","SIGTERM");
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 n1.receive({});
             });
@@ -581,9 +628,12 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("signal","SIGTERM");
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("signal","SIGTERM");
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 setTimeout(function() {
                     n1.receive({kill:""});
@@ -608,9 +658,12 @@ describe('exec node', function() {
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
                 n4.on("input", function(msg) {
-                    msg.should.have.property("payload");
-                    msg.payload.should.have.property("signal",sig);
-                    done();
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("signal",sig);
+                        done();
+                    }
+                    catch(err) { done(err); }
                 });
                 setTimeout(function() {
                     n1.receive({kill:"SIGINT"});

@@ -148,6 +148,7 @@ module.exports = {
     getNodeConfigs: registry.getNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     getNodeIconPath: registry.getNodeIconPath,
+    getNodeIcons: registry.getNodeIcons,
     getNodeExampleFlows: library.getExampleFlows,
     getNodeExampleFlowPath: library.getExampleFlowPath,
 

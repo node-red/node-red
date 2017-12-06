@@ -14,9 +14,49 @@
  * limitations under the License.
  **/
 RED.notify = (function() {
+
+    /*
+    // Example usage for a modal dialog with buttons
+    var myNotification = RED.notify("This is the message to display",{
+        modal: true,
+        fixed: true,
+        type: 'warning',
+        buttons: [
+            {
+                text: "cancel",
+                click: function(e) {
+                    myNotification.close();
+                }
+            },
+            {
+                text: "okay",
+                class:"primary",
+                click: function(e) {
+                    myNotification.close();
+                }
+            }
+        ]
+    });
+    */
+
     var currentNotifications = [];
     var c = 0;
     return function(msg,type,fixed,timeout) {
+        var options = {};
+        if (type !== null && typeof type === 'object') {
+            options = type;
+            fixed = options.fixed;
+            timeout = options.timeout;
+            type = options.type;
+        }
+
+        if (options.modal) {
+            $("#header-shade").show();
+            $("#editor-shade").show();
+            $("#palette-shade").show();
+            $(".sidebar-shade").show();
+        }
+
         if (currentNotifications.length > 4) {
             var ll = currentNotifications.length;
             for (var i = 0;ll > 4 && i<currentNotifications.length;i+=1) {
@@ -41,6 +81,17 @@ RED.notify = (function() {
         } else {
             $(n).append(msg);
         }
+        if (options.buttons) {
+            var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(n)
+            options.buttons.forEach(function(buttonDef) {
+                var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                if (buttonDef.class) {
+                    b.addClass(buttonDef.class);
+                }
+            })
+        }
+
+
         $("#notifications").append(n);
         $(n).slideDown(300);
         n.close = (function() {
@@ -50,6 +101,12 @@ RED.notify = (function() {
                 $(nn).slideUp(300, function() {
                     nn.parentNode.removeChild(nn);
                 });
+                if (options.modal) {
+                    $("#header-shade").hide();
+                    $("#editor-shade").hide();
+                    $("#palette-shade").hide();
+                    $(".sidebar-shade").hide();
+                }
             };
         })();
 
@@ -78,7 +135,7 @@ RED.notify = (function() {
                     window.clearTimeout(nn.timeoutid);
                 };
             })());
-            n.timeoutid = window.setTimeout(n.close,timeout||3000);
+            n.timeoutid = window.setTimeout(n.close,timeout||5000);
         }
         currentNotifications.push(n);
         c+=1;

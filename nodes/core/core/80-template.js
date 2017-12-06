@@ -17,14 +17,17 @@
 module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
+    var yaml = require("js-yaml");
+
 
     /**
      * Custom Mustache Context capable to resolve message property and node
      * flow and global context
      */
-    function NodeContext(msg, nodeContext,parent) {
+    function NodeContext(msg, nodeContext, parent, escapeStrings) {
         this.msgContext = new mustache.Context(msg,parent);
         this.nodeContext = nodeContext;
+        this.escapeStrings = escapeStrings;
     }
 
     NodeContext.prototype = new mustache.Context();
@@ -34,6 +37,14 @@ module.exports = function(RED) {
         try {
             var value = this.msgContext.lookup(name);
             if (value !== undefined) {
+                if (this.escapeStrings && typeof value === "string") {
+                    value = value.replace(/\\/g, "\\\\");
+                    value = value.replace(/\n/g, "\\n");
+                    value = value.replace(/\t/g, "\\t");
+                    value = value.replace(/\r/g, "\\r");
+                    value = value.replace(/\f/g, "\\f");
+                    value = value.replace(/[\b]/g, "\\b");
+                }
                 return value;
             }
 
@@ -72,13 +83,30 @@ module.exports = function(RED) {
         node.on("input", function(msg) {
             try {
                 var value;
+                /***
+                * Allow template contents to be defined externally
+                * through inbound msg.template IFF node.template empty
+                */
+                if (msg.hasOwnProperty("template")) {
+                    if (node.template == "" || node.template === null) {
+                        node.template = msg.template;
+                    }
+                }
+
                 if (node.syntax === "mustache") {
-                    value = mustache.render(node.template,new NodeContext(msg, node.context()));
+                    if (node.outputFormat === "json") {
+                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, true));
+                    } else {
+                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, false));
+                    }
                 } else {
                     value = node.template;
                 }
                 if (node.outputFormat === "json") {
                     value = JSON.parse(value);
+                }
+                if (node.outputFormat === "yaml") {
+                    value = yaml.load(value);
                 }
 
                 if (node.fieldType === 'msg') {

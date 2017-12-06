@@ -137,7 +137,8 @@
             "empty": "Existing __type__ file is empty",
             "invalid": "Existing __type__ file is not valid json",
             "restore": "Restoring __type__ file backup : __path__",
-            "restore-fail": "Restoring __type__ file backup failed : __message__"
+            "restore-fail": "Restoring __type__ file backup failed : __message__",
+            "fsync-fail": "Flushing file __path__ to disk failed : __message__"
         }
     }
 }

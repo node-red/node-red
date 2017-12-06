@@ -87,9 +87,11 @@ function login(req,res) {
                 "prompts":[{id:"username",type:"text",label:"user.username"},{id:"password",type:"password",label:"user.password"}]
             }
         } else if (settings.adminAuth.type === "strategy") {
+
+            var urlPrefix = (settings.httpAdminRoot==='/')?"":settings.httpAdminRoot;
             response = {
                 "type":"strategy",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/strategy"}]
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: urlPrefix + "auth/strategy"}]
             }
             if (settings.adminAuth.strategy.icon) {
                 response.prompts[0].icon = settings.adminAuth.strategy.icon;
@@ -186,12 +188,12 @@ module.exports = {
 
         adminApp.get('/auth/strategy', passport.authenticate(strategy.name));
         adminApp.get('/auth/strategy/callback',
-            passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
+            passport.authenticate(strategy.name, {session:false, failureRedirect: settings.httpAdminRoot }),
             function(req, res) {
                 var tokens = req.user.tokens;
                 delete req.user.tokens;
                 // Successful authentication, redirect home.
-                res.redirect('/?access_token='+tokens.accessToken);
+                res.redirect(settings.httpAdminRoot + '?access_token='+tokens.accessToken);
             }
         );
 

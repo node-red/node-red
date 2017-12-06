@@ -71,6 +71,7 @@ module.exports = {
     getNodeConfigs: registry.getAllNodeConfigs,
     getNodeConfig: registry.getNodeConfig,
     getNodeIconPath: registry.getNodeIconPath,
+    getNodeIcons: registry.getNodeIcons,
 
     enableNode: enableNodeSet,
     disableNode: registry.disableNodeSet,

@@ -72,15 +72,18 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
+                                    /* istanbul ignore else */
                                     if (tmpwarn === true) { // just warn about missing template once
                                         node.warn(RED._("csv.errors.obj_csv"));
                                         tmpwarn = false;
                                     }
                                     ou = "";
                                     for (var p in msg.payload[0]) {
+                                        /* istanbul ignore else */
                                         if (msg.payload[0].hasOwnProperty(p)) {
+                                            /* istanbul ignore else */
                                             if (typeof msg.payload[0][p] !== "object") {
-                                                var q = msg.payload[0][p];
+                                                var q = "" + msg.payload[0][p];
                                                 if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                     q = q.replace(/"/g, '""');
                                                     ou += node.quo + q + node.quo + node.sep;
@@ -100,9 +103,8 @@ module.exports = function(RED) {
                                             ou += node.sep;
                                         }
                                         else {
-                                            // aaargh - resorting to eval here - but fairly contained front and back.
-                                            var p = RED.util.ensureString(eval("msg.payload[s]."+node.template[t]));
-
+                                            var p = RED.util.ensureString(RED.util.getMessageProperty(msg,"payload["+s+"]['"+node.template[t]+"']"));
+                                            /* istanbul ignore else */
                                             if (p === "undefined") { p = ""; }
                                             if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
                                                 p = p.replace(/"/g, '""');
@@ -134,6 +136,9 @@ module.exports = function(RED) {
                         var line = msg.payload;
                         var tmp = "";
                         var reg = /^[-]?[0-9]*\.?[0-9]+$/;
+                        if (msg.hasOwnProperty("parts")) {
+                            if (msg.parts.index > 0) { first = false; }
+                        }
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
@@ -173,12 +178,7 @@ module.exports = function(RED) {
                                         o[node.template[j]] = k[j];
                                     }
                                     if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                                        if (node.multi === "one") {
-                                            var newMessage = RED.util.cloneMessage(msg);
-                                            newMessage.payload = o;
-                                            node.send(newMessage); // either send
-                                        }
-                                        else { a.push(o); } // or add to the array
+                                        a.push(o); // add to the array
                                     }
                                     j = 0;
                                     k = [""];
@@ -199,17 +199,32 @@ module.exports = function(RED) {
                             o[node.template[j]] = k[j];
                         }
                         if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                            if (node.multi === "one") {
-                                var newMessage = RED.util.cloneMessage(msg);
-                                newMessage.payload = o;
-                                node.send(newMessage); // either send
-                            }
-                            else { a.push(o); } // or add to the aray
+                            a.push(o); // add to the aray
                         }
                         if (node.multi !== "one") {
                             msg.payload = a;
                             node.send(msg); // finally send the array
                         }
+            			else {
+                            var has_parts = msg.hasOwnProperty("parts");
+            			    var len = a.length;
+            			    for (var i = 0; i < len; i++) {
+                                var newMessage = RED.util.cloneMessage(msg);
+                                newMessage.payload = a[i];
+                                if (!has_parts) {
+                				    newMessage.parts = {
+                    				    id: msg._msgid,
+                    				    index: i,
+                    				    count: len
+                    				};
+                                }
+                                else if (node.hdrin) { // if we removed the header line then shift the counts by 1
+                                    newMessage.parts.index -= 1;
+                                    newMessage.parts.count -= 1;
+                                }
+                                node.send(newMessage);
+            			    }
+            			}
                     }
                     catch(e) { node.error(e,msg); }
                 }

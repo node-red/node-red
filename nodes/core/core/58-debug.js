@@ -138,7 +138,7 @@ module.exports = function(RED) {
                                 value = value.substring(0,debuglength)+"...";
                             }
                         } else if (value && value.constructor) {
-                            if (value.constructor.name === "Buffer") {
+                            if (value.type === "Buffer") {
                                 value.__encoded__ = true;
                                 value.length = value.data.length;
                                 if (value.length > debuglength) {
