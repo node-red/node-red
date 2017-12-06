@@ -36,10 +36,10 @@ describe('storage/localfilesystem/library', function() {
             localfilesystemLibrary.getLibraryEntry('object','').then(function(flows) {
                 flows.should.eql([]);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -49,10 +49,10 @@ describe('storage/localfilesystem/library', function() {
             localfilesystemLibrary.getLibraryEntry('object','/').then(function(flows) {
                 flows.should.eql([]);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -61,11 +61,11 @@ describe('storage/localfilesystem/library', function() {
         localfilesystemLibrary.init({userDir:userDir}).then(function() {
             localfilesystemLibrary.getLibraryEntry('object','A/B').then(function(flows) {
                 should.fail(null,null,"non-existent flow");
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 should.exist(err);
                 done();
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -100,16 +100,16 @@ describe('storage/localfilesystem/library', function() {
                     localfilesystemLibrary.getLibraryEntry('object','B/C').then(function(flows) {
                         flows.should.eql([]);
                         done();
-                    }).otherwise(function(err) {
+                    }).catch(function(err) {
                         done(err);
                     });
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -120,7 +120,7 @@ describe('storage/localfilesystem/library', function() {
             localfilesystemLibrary.getLibraryEntry('flows','B/flow').then(function(flows) {
                 flows.should.eql("Hi");
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -133,10 +133,10 @@ describe('storage/localfilesystem/library', function() {
             localfilesystemLibrary.getLibraryEntry('object','B/file2.js').then(function(body) {
                 body.should.eql("// not a metaline \n\n Hi");
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -154,20 +154,20 @@ describe('storage/localfilesystem/library', function() {
                             localfilesystemLibrary.getLibraryEntry('functions',ft).then(function(body) {
                                 body.should.eql("// another non meta line\n\n Hi There");
                                 done();
-                            }).otherwise(function(err) {
+                            }).catch(function(err) {
                                 done(err);
                             });
-                        }).otherwise(function(err) {
+                        }).catch(function(err) {
                             done(err);
                         })
                     }, 50);
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -185,20 +185,20 @@ describe('storage/localfilesystem/library', function() {
                             localfilesystemLibrary.getLibraryEntry('flows',ft+".json").then(function(body) {
                                 body.should.eql("Hi");
                                 done();
-                            }).otherwise(function(err) {
+                            }).catch(function(err) {
                                 done(err);
                             });
-                        }).otherwise(function(err) {
+                        }).catch(function(err) {
                             done(err);
                         })
                     }, 50);
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
