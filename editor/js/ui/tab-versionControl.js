@@ -571,9 +571,6 @@ RED.sidebar.versionControl = (function() {
         $('<div class="sidebar-version-control-slide-box-header"></div>').text("Change local branch").appendTo(localBranchBox);
 
         var localBranchList = utils.createBranchList({
-            current: function() {
-                return  RED.projects.getActiveProject().git.branches.local
-            },
             placeholder: "Find or create a branch",
             container: localBranchBox,
             onselect: function(body) {
@@ -711,9 +708,6 @@ RED.sidebar.versionControl = (function() {
 
         var remoteBranchSubRow = $('<div style="height: 0;overflow:hidden; transition: height 0.2s ease-in-out;"></div>').hide().appendTo(remoteBranchRow);
         var remoteBranchList = utils.createBranchList({
-            current: function() {
-                return  RED.projects.getActiveProject().git.branches.remote
-            },
             placeholder: "Find or create a remote branch",
             currentLabel: "upstream",
             remote: function() {

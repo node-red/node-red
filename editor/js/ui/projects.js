@@ -581,7 +581,7 @@ RED.projects = (function() {
                         }
                     }
                 ]
-                
+
             }
         }
     }
@@ -852,7 +852,6 @@ RED.projects = (function() {
         var branchFilterTerm = "";
         var branchFilterCreateItem;
         var branches = [];
-        var currentBranch;
         var branchPrefix = "";
         var container = $('<div class="projects-branch-list">').appendTo(options.container);
 
@@ -882,15 +881,15 @@ RED.projects = (function() {
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
                 var container = $('<div class="sidebar-version-control-branch-list-entry">').appendTo(row);
-                if (typeof entry !== "string") {
+                if (!entry.hasOwnProperty('commit')) {
                     branchFilterCreateItem = container;
                     $('<i class="fa fa-code-fork"></i>').appendTo(container);
                     $('<span>').text("Create branch:").appendTo(container);
                     $('<div class="sidebar-version-control-branch-list-entry-create-name" style="margin-left: 10px;">').text(entry.name).appendTo(container);
                 } else {
                     $('<i class="fa fa-code-fork"></i>').appendTo(container);
-                    $('<span>').text(entry).appendTo(container);
-                    if (currentBranch === entry) {
+                    $('<span>').text(entry.name).appendTo(container);
+                    if (entry.current) {
                         container.addClass("selected");
                         $('<span class="current"></span>').text(options.currentLabel||"current").appendTo(container);
                     }
@@ -901,7 +900,7 @@ RED.projects = (function() {
                         return;
                     }
                     var body = {};
-                    if (typeof entry !== "string") {
+                    if (!entry.hasOwnProperty('commit')) {
                         body.name = branchFilter.val();
                         body.create = true;
                         if (options.remote) {
@@ -911,7 +910,7 @@ RED.projects = (function() {
                         if ($(this).hasClass('selected')) {
                             body.current = true;
                         }
-                        body.name = entry;
+                        body.name = entry.name;
                     }
                     if (options.onselect) {
                         options.onselect(body);
@@ -919,7 +918,7 @@ RED.projects = (function() {
                 });
             },
             filter: function(data) {
-                var isCreateEntry = (typeof data !=="string");
+                var isCreateEntry = (!data.hasOwnProperty('commit'));
                 return (
                             isCreateEntry &&
                             (
@@ -929,7 +928,7 @@ RED.projects = (function() {
                      ) ||
                      (
                          !isCreateEntry &&
-                         data.indexOf(branchFilterTerm) !== -1
+                         data.name.indexOf(branchFilterTerm) !== -1
                      );
             }
         });
@@ -939,13 +938,11 @@ RED.projects = (function() {
                 branchList.editableList('empty');
                 var start = Date.now();
                 var spinner = addSpinnerOverlay(container).addClass("projects-dialog-spinner-contain");
-                currentBranch = options.current();
                 if (options.remote) {
                     branchPrefix = options.remote()+"/";
                 } else {
                     branchPrefix = "";
                 }
-
 
                 sendRequest({
                     url: url,
@@ -972,7 +969,7 @@ RED.projects = (function() {
                     }
                 })
             },
-            addItem: function(data) { branchList.editableList('addItem',data) },
+            // addItem: function(data) { branchList.editableList('addItem',data) },
             filter: function() { branchList.editableList('filter') },
             focus: function() { branchFilter.focus() }
         }

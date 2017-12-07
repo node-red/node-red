@@ -272,17 +272,35 @@ function getRemotes(cwd) {
 }
 
 function getBranches(cwd, remote) {
-    var args = ['branch','--no-color'];
+    var args = ['branch','-vv','--no-color'];
     if (remote) {
         args.push('-r');
     }
+    //TODO: parse out ahead/behind status (currently m[5]  vvv  )
+    var branchRE = /^([ \*] )(\S+) +(\S+)(?: \[(\S+?)(?:: (.*))?\])? (.*)$/;
     return runGitCommand(args,cwd).then(function(output) {
         var branches = [];
         var lines = output.split("\n");
-        branches = lines.map(function(l) { return l.substring(2)})
-                        .filter(function(l) {
-                            return !/HEAD ->/.test(l) && (l.length > 0)
-                        });
+        branches = lines.map(function(l) {
+            var m = branchRE.exec(l);
+            var branch = null;
+            if (m) {
+                branch = {
+                    name: m[2],
+                    remote: m[4],
+                    status: m[5],
+                    commit: {
+                        sha: m[3],
+                        subject: m[6]
+                    }
+                }
+                if (m[1] === '* ') {
+                    branch.current = true;
+                }
+            }
+            return branch;
+        }).filter(function(v) { return !!v && v.commit.sha !== '->' });
+
         return {branches:branches};
     })
 }
