@@ -699,27 +699,19 @@ function createProject(user, metadata) {
 }
 
 function deleteProject(user, name) {
-    return when.promise(function(resolve,reject) {
-        checkProjectExists(name).then(function() {
-            if (currentProject && currentProject.name === name) {
-                var e = new Error("NLS: Can't delete the active project");
-                e.code = "cannot_delete_active_project";
-                return reject(e);
-            }
-            else {
-                return deleteProjectDirectory(name).then(function() {
-                    var projects = settings.get('projects');
-                    delete projects.projects[name];
-                    return settings.set('projects', projects);
-                })
-                .then(function() {
-                    return resolve();
-                })
-                .catch(function(err) {
-                    return reject(err);
-                });
-            }
-        });
+    return checkProjectExists(name).then(function() {
+        if (currentProject && currentProject.name === name) {
+            var e = new Error("NLS: Can't delete the active project");
+            e.code = "cannot_delete_active_project";
+            throw e;
+        }
+        else {
+            return deleteProjectDirectory(name).then(function() {
+                var projects = settings.get('projects');
+                delete projects.projects[name];
+                return settings.set('projects', projects);
+            });
+        }
     });
 }
 

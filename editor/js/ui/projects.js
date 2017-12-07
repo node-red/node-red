@@ -506,7 +506,7 @@ RED.projects = (function() {
                         dblclick: function() {
                             $("#projects-dialog-open").click();
                         },
-                        clickHook: function() {
+                        select: function() {
                             $("#projects-dialog-open").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
                         }
                     })
@@ -548,7 +548,7 @@ RED.projects = (function() {
                         dblclick: function() {
                             $("#projects-dialog-delete").click();
                         },
-                        clickHook: function() {
+                        select: function() {
                             $("#projects-dialog-delete").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
                         }
                     })
@@ -670,9 +670,6 @@ RED.projects = (function() {
                 row.click(function(evt) {
                     $('.projects-dialog-project-list-entry').removeClass('selected');
                     header.addClass('selected');
-                    if (options.clickHook) {
-                        options.clickHook();
-                    }
                     selectedProject = entry;
                     if (options.select) {
                         options.select(entry);
