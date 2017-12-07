@@ -505,6 +505,9 @@ RED.projects = (function() {
                         canSelectActive: false,
                         dblclick: function() {
                             $("#projects-dialog-open").click();
+                        },
+                        select: function() {
+                            $("#projects-dialog-open").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
                         }
                     })
                 },
@@ -536,6 +539,49 @@ RED.projects = (function() {
                         }
                     }
                 ]
+            },
+
+            'delete': {
+                content: function() {
+                    return createProjectList({
+                        canSelectActive: false,
+                        dblclick: function() {
+                            $("#projects-dialog-delete").click();
+                        },
+                        select: function() {
+                            $("#projects-dialog-delete").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
+                        }
+                    })
+                },
+                buttons: [
+                    {
+                        // id: "clipboard-dialog-cancel",
+                        text: RED._("common.label.cancel"),
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        id: "projects-dialog-delete",
+                        text: "Delete project", // TODO: nls
+                        class: "primary disabled",
+                        disabled: true,
+                        click: function() {
+                            deleteProject(selectedProject.name,function(err,data) {
+                                if (err) {
+                                    if (err.error === 'credentials_load_failed') {
+                                        dialog.dialog( "close" );
+                                    } else {
+                                        console.log("unexpected_error",err)
+                                    }
+                                } else {
+                                    dialog.dialog( "close" );
+                                }
+                            })
+                        }
+                    }
+                ]
+                
             }
         }
     }
@@ -563,6 +609,23 @@ RED.projects = (function() {
         },{active:true}).always(function() {
             RED.deploy.setDeployInflight(false);
         })
+    }
+
+    function deleteProject(name,done) {
+        sendRequest({
+            url: "projects/"+name,
+            type: "DELETE",
+            responses: {
+                200: function(data) {
+                    done(null,data);
+                },
+                400: {
+                    'unexpected_error': function(error) {
+                        done(error,null);
+                    }
+                }
+            }
+        });
     }
 
     function show(s,options) {
@@ -607,7 +670,6 @@ RED.projects = (function() {
                 row.click(function(evt) {
                     $('.projects-dialog-project-list-entry').removeClass('selected');
                     header.addClass('selected');
-                    $("#projects-dialog-open").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
                     selectedProject = entry;
                     if (options.select) {
                         options.select(entry);
@@ -947,6 +1009,7 @@ RED.projects = (function() {
 
         RED.actions.add("core:new-project",RED.projects.newProject);
         RED.actions.add("core:open-project",RED.projects.selectProject);
+        RED.actions.add("core:delete-project",RED.projects.deleteProject);
         var projectsAPI = {
             sendRequest:sendRequest,
             createBranchList:createBranchList,
@@ -989,6 +1052,9 @@ RED.projects = (function() {
         },
         selectProject: function() {
             show('open')
+        },
+        deleteProject: function() {
+            show('delete')
         },
         showCredentialsPrompt: function() { //TODO: rename this function
             RED.projects.settings.show('settings');

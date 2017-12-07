@@ -117,6 +117,13 @@ module.exports = {
 
         // Delete project - tbd
         app.delete("/:id", needsPermission("projects.write"), function(req,res) {
+            runtime.storage.projects.deleteProject(req.user, req.params.id).then(function() {
+                res.status(204).end();
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()})
+            });
         });
 
 
