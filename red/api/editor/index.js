@@ -97,6 +97,10 @@ module.exports = {
             // User Settings
             editorApp.post("/settings/user",needsPermission("settings.write"),info.updateUserSettings,apiUtil.errorHandler);
 
+            // SSH keys
+            var sshkeys = require("./sshkeys");
+            sshkeys.init(runtime);
+            editorApp.use("/settings/user/keys",sshkeys.app());
 
             return editorApp;
         }
