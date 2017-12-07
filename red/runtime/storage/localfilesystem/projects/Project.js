@@ -583,6 +583,11 @@ function createProjectDirectory(project) {
     return fs.ensureDir(projectPath);
 }
 
+function deleteProjectDirectory(project) {
+    var projectPath = fspath.join(projectsDir,project);
+    return fs.remove(projectPath);
+}
+
 function createDefaultProject(user, project) {
     var projectPath = fspath.join(projectsDir,project.name);
     // Create a basic skeleton of a project
@@ -710,6 +715,23 @@ function createProject(user, metadata) {
     })
 }
 
+function deleteProject(user, name) {
+    return checkProjectExists(name).then(function() {
+        if (currentProject && currentProject.name === name) {
+            var e = new Error("NLS: Can't delete the active project");
+            e.code = "cannot_delete_active_project";
+            throw e;
+        }
+        else {
+            return deleteProjectDirectory(name).then(function() {
+                var projects = settings.get('projects');
+                delete projects.projects[name];
+                return settings.set('projects', projects);
+            });
+        }
+    });
+}
+
 var currentProject;
 
 function getProject(name) {
@@ -749,6 +771,7 @@ module.exports = {
     init: init,
     get: getProject,
     create: createProject,
+    delete: deleteProject,
     list: listProjects
 
 }

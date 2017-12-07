@@ -141,6 +141,10 @@ function getProject(user, name) {
     });
 }
 
+function deleteProject(user, name) {
+    return Projects.delete(user, name);
+}
+
 function checkActiveProject(project) {
     if (!activeProject || activeProject.name !== project) {
         //TODO: throw better err
@@ -398,6 +402,7 @@ module.exports = {
     getActiveProject: getActiveProject,
     setActiveProject: setActiveProject,
     getProject: getProject,
+    deleteProject: deleteProject,
     createProject: createProject,
     updateProject: updateProject,
     getFiles: getFiles,
