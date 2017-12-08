@@ -115,7 +115,7 @@ module.exports = {
             })
         });
 
-        // Delete project - tbd
+        // Delete project
         app.delete("/:id", needsPermission("projects.write"), function(req,res) {
             runtime.storage.projects.deleteProject(req.user, req.params.id).then(function() {
                 res.status(204).end();
@@ -373,6 +373,23 @@ module.exports = {
             })
         });
 
+        // Delete a local branch - ?force=true
+        app.delete("/:id/branches/:branchName", needsPermission("projects.write"), function(req, res) {
+            var projectName = req.params.id;
+            var branchName = req.params.branchName;
+            var force = !!req.query.force;
+            runtime.storage.projects.deleteBranch(req.user, projectName, branchName, false, force).then(function(data) {
+                res.status(204).end();
+            })
+            .catch(function(err) {
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
+            });
+        });
+
         // Get a list of remote branches
         app.get("/:id/branches/remote", needsPermission("projects.read"), function(req, res) {
             var projectName = req.params.id;
@@ -380,7 +397,6 @@ module.exports = {
                 res.json(data);
             })
             .catch(function(err) {
-                console.log(err.stack);
                 if (err.code) {
                     res.status(400).json({error:err.code, message: err.message});
                 } else {

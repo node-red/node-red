@@ -55,10 +55,9 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_local_overwrite";
                 } else if (/CONFLICT/.test(err.stdout)) {
                     err.code = "git_pull_merge_conflict";
+                } else if (/not fully merged/.test(stderr)) {
+                    err.code = "git_delete_branch_unmerged";
                 }
-
-
-
                 return reject(err);
             }
             resolve(stdout);
@@ -276,8 +275,7 @@ function getBranches(cwd, remote) {
     if (remote) {
         args.push('-r');
     }
-    //TODO: parse out ahead/behind status (currently m[5]  vvv  )
-    var branchRE = /^([ \*] )(\S+) +(\S+)(?: \[(\S+?)(?:: (.*))?\])? (.*)$/;
+    var branchRE = /^([ \*] )(\S+) +(\S+)(?: \[(\S+?)(?:: (?:ahead (\d+)(?:, )?)?(?:behind (\d+))?)?\])? (.*)$/;
     return runGitCommand(args,cwd).then(function(output) {
         var branches = [];
         var lines = output.split("\n");
@@ -288,10 +286,13 @@ function getBranches(cwd, remote) {
                 branch = {
                     name: m[2],
                     remote: m[4],
-                    status: m[5],
+                    status: {
+                        ahead: m[5]||0,
+                        behind: m[6]||0,
+                    },
                     commit: {
                         sha: m[3],
-                        subject: m[6]
+                        subject: m[7]
                     }
                 }
                 if (m[1] === '* ') {
@@ -515,6 +516,19 @@ module.exports = {
         }
         args.push(branchName);
         return runGitCommand(args,cwd);
+    },
+    deleteBranch: function(cwd, branchName, isRemote, force) {
+        if (isRemote) {
+            throw new Error("Deleting remote branches not supported");
+        }
+        var args = ['branch'];
+        if (force) {
+            args.push('-D');
+        } else {
+            args.push('-d');
+        }
+        args.push(branchName);
+        return runGitCommand(args, cwd);
     },
     getBranchStatus: getBranchStatus,
     addRemote: addRemote,

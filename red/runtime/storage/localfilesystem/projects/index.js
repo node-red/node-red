@@ -212,6 +212,12 @@ function getBranches(user, project,isRemote) {
     checkActiveProject(project);
     return activeProject.getBranches(user, isRemote);
 }
+
+function deleteBranch(user, project, branch, isRemote, force) {
+    checkActiveProject(project);
+    return activeProject.deleteBranch(user, branch, isRemote, force);
+}
+
 function setBranch(user, project,branchName,isCreate) {
     checkActiveProject(project);
     return activeProject.setBranch(branchName,isCreate).then(function() {
@@ -419,6 +425,7 @@ module.exports = {
     resolveMerge: resolveMerge,
     abortMerge: abortMerge,
     getBranches: getBranches,
+    deleteBranch: deleteBranch,
     setBranch: setBranch,
     getBranchStatus:getBranchStatus,
 

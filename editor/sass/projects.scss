@@ -676,3 +676,44 @@
     }
 }
 */
+
+.projects-dialog-branch-list {
+    .red-ui-editableList-container li:last-child {
+        border-bottom: none;
+    }
+}
+
+.projects-dialog-branch-list-entry {
+    span {
+        display: inline-block;
+    }
+    span:first-child {
+        text-align: center;
+        min-width: 30px;
+    }
+    .branch-name {
+        min-width: 150px;
+    }
+    .branch-remote-name {
+        color: #aaa;
+        font-size: 0.9em;
+        min-width: 150px;
+    }
+    .branch-remote-status {
+        color: #aaa;
+        font-size: 0.9em;
+    }
+    .commit {
+        color: #aaa;
+        font-size: 0.9em;
+        padding: 2px 5px;
+
+    }
+
+    .projects-dialog-branch-list-entry-tools {
+        float: right;
+        margin-right: 20px;
+        font-size: 0.9em;
+        color: #999;
+    }
+}

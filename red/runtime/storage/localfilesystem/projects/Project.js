@@ -234,7 +234,7 @@ Project.prototype.update = function (user, data) {
         if (data.git.hasOwnProperty('remotes')) {
             var remoteNames = Object.keys(data.git.remotes);
             var remotesChanged = false;
-            var modifyRemotesPromise = when.resolve();
+            var modifyRemotesPromise = Promise.resolve();
             remoteNames.forEach(function(name) {
                 if (data.git.remotes[name].removed) {
                     remotesChanged = true;
@@ -348,7 +348,7 @@ Project.prototype.status = function(user) {
             }
         });
     } else {
-        fetchPromise = when.resolve();
+        fetchPromise = Promise.resolve();
     }
 
     var completeStatus = function(fetchError) {
@@ -461,18 +461,23 @@ Project.prototype.getBranches = function (user, isRemote) {
     if (isRemote) {
         fetchPromise = self.fetch(user);
     } else {
-        fetchPromise = when.resolve();
+        fetchPromise = Promise.resolve();
     }
     return fetchPromise.then(function() {
         return gitTools.getBranches(self.path,isRemote);
     });
 };
 
+Project.prototype.deleteBranch = function (user, branch, isRemote, force) {
+    // TODO: isRemote==true support
+    // TODO: make sure we don't try to delete active branch
+    return gitTools.deleteBranch(this.path,branch,isRemote, force);
+};
+
 Project.prototype.fetch = function(user,remoteName) {
     var username;
     if (!user) {
         username = "_";
-        console.log(new Error().stack);
     } else {
         username = user.username;
     }
@@ -484,7 +489,7 @@ Project.prototype.fetch = function(user,remoteName) {
         })
     } else {
         var remotes = Object.keys(this.remotes);
-        var promise = when.resolve();
+        var promise = Promise.resolve();
         remotes.forEach(function(remote) {
             promise = promise.then(function() {
                 return gitTools.fetch(project.path,remote,authCache.get(project.name,project.remotes[remote].fetch,username))
@@ -661,7 +666,7 @@ function createProject(user, metadata) {
     }
 
     var project = metadata.name;
-    return when.promise(function(resolve,reject) {
+    return new Promise(function(resolve,reject) {
         var projectPath = fspath.join(projectsDir,project);
         fs.stat(projectPath, function(err,stat) {
             if (!err) {
