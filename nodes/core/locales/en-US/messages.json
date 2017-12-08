@@ -548,6 +548,9 @@
             "false":"is false",
             "null":"is null",
             "nnull":"is not null",
+            "head":"head",
+            "tail":"tail",
+            "pos":"position between",
             "else":"otherwise"
         },
         "errors": {
