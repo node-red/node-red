@@ -279,6 +279,21 @@ describe("red/util", function() {
             var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
             result.should.eql("123");
         });
+        it('returns local property',function() {
+            var result = util.evaluateNodeProperty('foo.bar','local',{
+                context:function() { return {
+                    get: function(k) {
+                        var ctx = {foo: {bar: 123}};
+                        if (k === 'foo.bar') {
+                            return ctx.foo.bar;
+                        } else {
+                            return ctx.foo.baz;
+                        }
+                    }
+                }}
+            },{});
+            result.should.eql(123);
+        });
         it('returns flow property',function() {
             var result = util.evaluateNodeProperty('foo.bar','flow',{
                 context:function() { return {
@@ -306,6 +321,10 @@ describe("red/util", function() {
                 }}
             },{});
             result.should.eql("123");
+        });
+        it('evaluates jsonata expression',function() {
+            var result = util.evaluateNodeProperty('$number(payload)','jsonata',{},{payload:"123"});
+            result.should.eql(123);
         });
     });
 
