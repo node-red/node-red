@@ -19,11 +19,19 @@ var should = require("should");
 var fs = require('fs-extra');
 
 var helper = require("../editor_helper");
-var events = require("../../../red/runtime/events.js");
+var editWindow = require('../pageobjects/workspace/editWindow_page');
+var debugTab = require('../pageobjects/workspace/debugTab_page');
+var workspace = require('../pageobjects/workspace/workspace_page');
 
+var nodeWidth = 200;
 
 describe('Node-RED main page', function() {
+    beforeEach(function() {
+        workspace.deleteAllNodes();
+    });
+
     before(function() {
+        browser.windowHandleMaximize();
         browser.call(function () {
             return when.promise(function(resolve, reject) {
                 helper.startServer(function() {
@@ -50,37 +58,35 @@ describe('Node-RED main page', function() {
     });
 
     it('should output a timestamp', function() {
-        browser.moveToObject('#palette_node_inject');
-        browser.buttonDown();
-        browser.moveToObject('#palette_node_inject', 300, 50);
-        browser.buttonUp();
+        var injectNode = workspace.addNode("inject");
+        var debugNode = workspace.addNode("debug", nodeWidth);
+        injectNode.connect(debugNode);
 
-        browser.moveToObject('#palette_node_debug');
-        browser.buttonDown();
-        browser.moveToObject('#palette_node_debug', 300, -50);
-        browser.buttonUp();
+        workspace.deploy();
 
-        browser.moveToObject('.port_output');
-        browser.buttonDown();
-        browser.moveToObject('.port_input');
-        browser.buttonUp();
+        debugTab.open();
+        debugTab.clearMessage();
+        injectNode.clickLeftButton();
+        debugTab.getMessage().should.within(1500000000000, 3000000000000);
+    });
 
-        browser.click('#btn-deploy');
-        browser.call(function () {
-            return when.promise(function(resolve, reject) {
-                events.on("runtime-event", function(event) {
-                    if (event.id === 'runtime-deploy') {
-                        resolve();
-                    }
-                });
-            });
-        });
-        // need additional wait to click on workspace.
-        browser.pause(500);
+    it('should set a message property to a fixed value', function() {
+        var injectNode = workspace.addNode("inject");
+        var changeNode = workspace.addNode("change", nodeWidth);
+        var debugNode = workspace.addNode("debug", nodeWidth * 2);
 
-        browser.click('#red-ui-tab-debug');
-        browser.click('.node_left_button');
-        browser.waitForExist('.debug-message-type-number');
-        browser.getText('.debug-message-type-number').should.within(1500000000000, 3000000000000);
+        changeNode.edit();
+        browser.setValue('.node-input-rule-property-value', 'Hello World!');
+        editWindow.clickOk();
+
+        injectNode.connect(changeNode);
+        changeNode.connect(debugNode);
+
+        workspace.deploy();
+
+        debugTab.open();
+        debugTab.clearMessage();
+        injectNode.clickLeftButton();
+        debugTab.getMessage().should.be.equal('"Hello World!"');
     });
 });
