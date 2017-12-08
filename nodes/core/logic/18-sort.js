@@ -57,6 +57,7 @@ module.exports = function(RED) {
         var node = this;
         var pending = get_context_val(node, 'pending', {})
         var pending_count = 0;
+        var pending_id = 0;
         var order = n.order || "ascending";
         var as_num = n.as_num || false;
         var key_is_payload = (n.keyType === 'payload');
@@ -134,6 +135,32 @@ module.exports = function(RED) {
             return false;
         }
 
+        function clear_pending() {
+            for(var key in pending) {
+                node.log(RED._("sort.clear"), pending[key].msgs[0]);
+                delete pending[key];
+            }
+            pending_count = 0;
+        }
+
+        function remove_oldest_pending() {
+            var oldest = undefined;
+            var oldest_key = undefined;
+            for(var key in pending) {
+                var item = pending[key];
+                if((oldest === undefined) ||
+                   (oldest.seq_no > item.seq_no)) {
+                    oldest = item;
+                    oldest_key = key;
+                }
+            }
+            if(oldest !== undefined) {
+                delete pending[oldest_key];
+                return oldest.msgs.length;
+            }
+            return 0;
+        }
+        
         function process_msg(msg) {
             if (!msg.hasOwnProperty("parts")) {
                 if (sort_payload(msg)) {
@@ -149,7 +176,8 @@ module.exports = function(RED) {
             if (!pending.hasOwnProperty(gid)) {
                 pending[gid] = {
                     count: undefined,
-                    msgs: []
+                    msgs: [],
+                    seq_no: pending_id++
                 };
             }
             var group = pending[gid];
@@ -166,15 +194,18 @@ module.exports = function(RED) {
             }
             var max_msgs = max_kept_msgs_count(node);
             if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                pending = {};
-                pending_count = 0;
-                node.error(RED._("sort.too-many"),msg);
+                pending_count -= remove_oldest_pending();
+                node.error(RED._("sort.too-many"), msg);
             }
         }
-
+        
         this.on("input", function(msg) {
             process_msg(msg);
         });
+
+        this.on("close", function() {
+            clear_pending();
+        })
     }
 
     RED.nodes.registerType("sort", SortNode);
