@@ -534,7 +534,8 @@
     "switch": {
         "label": {
             "property": "Property",
-            "rule": "rule"
+            "rule": "rule",
+            "repair" :  "repair seuqnece"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -550,7 +551,8 @@
             "nnull":"is not null",
             "head":"head",
             "tail":"tail",
-            "pos":"position between",
+            "index":"pos. between",
+            "exp":"JSONata exp",
             "else":"otherwise"
         },
         "errors": {

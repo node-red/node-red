@@ -33,6 +33,10 @@
             <option value="false" data-i18n="switch.stopfirst"></option>
         </select>
     </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-repair" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto;" for="node-input-repair"><span data-i18n="switch.label.repair"></span></label></input>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="switch">
@@ -64,7 +68,8 @@
         {v:"nnull",t:"switch.rules.nnull",kind:'V'},
 	{v:"head",t:"switch.rules.head",kind:'S'},
 	{v:"tail",t:"switch.rules.tail",kind:'S'},
-	{v:"pos",t:"switch.rules.pos",kind:'S'},
+	{v:"index",t:"switch.rules.index",kind:'S'},
+	{v:"jsonata",t:"switch.rules.exp",kind:'O'},
         {v:"else",t:"switch.rules.else",kind:'O'}
     ];
 
@@ -91,6 +96,7 @@
             propertyType: { value:"msg" },
             rules: {value:[{t:"eq", v:"", vt:"str"}]},
             checkall: {value:"true", required:true},
+            repair: {value:true},
             outputs: {value:1}
         },
         inputs: 1,
@@ -105,7 +111,8 @@
                         break;
                     }
                 }
-                if (rule.t === 'btwn') {
+                if ((rule.t === 'btwn') || (rule.t === 'index')) {
+                    console.log(`; ${label}/${JSON.stringify(rule)}`);
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
                 } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);
@@ -132,6 +139,8 @@
                 var selectField = rule.find("select");
                 var type = selectField.val()||"";
                 var valueField = rule.find(".node-input-rule-value");
+		var numField = rule.find(".node-input-rule-num-value");
+		var expField = rule.find(".node-input-rule-exp-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
                 var selectWidth;
@@ -143,9 +152,13 @@
                     selectWidth = 120;
                 }
                 selectField.width(selectWidth);
-                if (type === "btwn") {
+                if ((type === "btwn") || (type === "index")) {
                     btwnField1.typedInput("width",(newWidth-selectWidth-70));
                     btwnField2.typedInput("width",(newWidth-selectWidth-70));
+                } else if ((type === "head") || (type === "tail")) {
+                    numField.typedInput("width",(newWidth-selectWidth-70));
+                } else if (type === "jsonata") {
+                    expField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
@@ -189,6 +202,8 @@
                         }
                     }
                     var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata']});
+                    var expValueField = $('<input/>',{class:"node-input-rule-exp-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'jsonata',types:['jsonata']});
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                     var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
@@ -199,11 +214,27 @@
                     selectField.change(function() {
                         resizeRule(container);
                         var type = selectField.val();
-                        if (type === "btwn") {
+                        if ((type === "btwn") || (type === "index")) {
                             valueField.typedInput('hide');
+			    expValueField.typedInput('hide');
+			    numValueField.typedInput('hide');
                             btwnValueField.typedInput('show');
+                        } else if ((type === "head") || (type === "tail")) {
+			    btwnValueField.typedInput('hide');
+			    btwnValue2Field.typedInput('hide');
+			    expValueField.typedInput('hide');
+			    numValueField.typedInput('show');
+                            valueField.typedInput('hide');
+                        } else if (type === "jsonata") {
+			    btwnValueField.typedInput('hide');
+			    btwnValue2Field.typedInput('hide');
+			    expValueField.typedInput('show');
+			    numValueField.typedInput('hide');
+                            valueField.typedInput('hide');
                         } else {
                             btwnValueField.typedInput('hide');
+			    expValueField.typedInput('hide');
+			    numValueField.typedInput('hide');
                             if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                                 valueField.typedInput('hide');
                             } else {
@@ -213,7 +244,7 @@
                         if (type === "regex") {
                             row2.show();
                             row3.hide();
-                        } else if (type === "btwn") {
+                        } else if ((type === "btwn") || (type === "index")) {
                             row2.hide();
                             row3.show();
                             btwnValue2Field.typedInput('show');
@@ -223,11 +254,17 @@
                         }
                     });
                     selectField.val(rule.t);
-                    if (rule.t == "btwn") {
+                    if ((rule.t == "btwn") || (rule.t == "index")) {
                         btwnValueField.typedInput('value',rule.v);
                         btwnValueField.typedInput('type',rule.vt||'num');
                         btwnValue2Field.typedInput('value',rule.v2);
                         btwnValue2Field.typedInput('type',rule.v2t||'num');
+                    } else if ((rule.t === "head") || (rule.t === "tail")) {
+                        numValueField.typedInput('value',rule.v);
+                        numValueField.typedInput('type',rule.vt||'num');
+                    } else if (rule.t === "jsonata") {
+                        expValueField.typedInput('value',rule.v);
+                        expValueField.typedInput('type',rule.vt||'jsonata');
                     } else if (typeof rule.v != "undefined") {
                         valueField.typedInput('value',rule.v);
                         valueField.typedInput('type',rule.vt||'str');
@@ -289,11 +326,17 @@
                 var type = rule.find("select").val();
                 var r = {t:type};
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
-                    if (type === "btwn") {
+                    if ((type === "btwn") || (type === "index")) {
                         r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
                         r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
                         r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
+		    } else if ((type === "head") || (type === "tail")) {
+                        r.v = rule.find(".node-input-rule-num-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-num-value").typedInput('type');
+		    } else if (type === "jsonata") {
+                        r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');
                     } else {
                         r.v = rule.find(".node-input-rule-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-value").typedInput('type');
