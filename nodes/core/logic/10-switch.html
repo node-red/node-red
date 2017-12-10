@@ -69,7 +69,7 @@
 	{v:"head",t:"switch.rules.head",kind:'S'},
 	{v:"tail",t:"switch.rules.tail",kind:'S'},
 	{v:"index",t:"switch.rules.index",kind:'S'},
-	{v:"jsonata",t:"switch.rules.exp",kind:'O'},
+	{v:"jsonata_exp",t:"switch.rules.exp",kind:'O'},
         {v:"else",t:"switch.rules.else",kind:'O'}
     ];
 
@@ -157,7 +157,7 @@
                     btwnField2.typedInput("width",(newWidth-selectWidth-70));
                 } else if ((type === "head") || (type === "tail")) {
                     numField.typedInput("width",(newWidth-selectWidth-70));
-                } else if (type === "jsonata") {
+                } else if (type === "jsonata_exp") {
                     expField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
@@ -225,7 +225,7 @@
 			    expValueField.typedInput('hide');
 			    numValueField.typedInput('show');
                             valueField.typedInput('hide');
-                        } else if (type === "jsonata") {
+                        } else if (type === "jsonata_exp") {
 			    btwnValueField.typedInput('hide');
 			    btwnValue2Field.typedInput('hide');
 			    expValueField.typedInput('show');
@@ -262,7 +262,7 @@
                     } else if ((rule.t === "head") || (rule.t === "tail")) {
                         numValueField.typedInput('value',rule.v);
                         numValueField.typedInput('type',rule.vt||'num');
-                    } else if (rule.t === "jsonata") {
+                    } else if (rule.t === "jsonata_exp") {
                         expValueField.typedInput('value',rule.v);
                         expValueField.typedInput('type',rule.vt||'jsonata');
                     } else if (typeof rule.v != "undefined") {
@@ -334,7 +334,7 @@
 		    } else if ((type === "head") || (type === "tail")) {
                         r.v = rule.find(".node-input-rule-num-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-num-value").typedInput('type');
-		    } else if (type === "jsonata") {
+		    } else if (type === "jsonata_exp") {
                         r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');
                     } else {
