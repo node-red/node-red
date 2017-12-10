@@ -158,7 +158,10 @@
     top: -1px;
     bottom: -1px;
 }
-
+#full-shade {
+    @include shade;
+    z-index: 15;
+}
 
 .dialog-form,#dialog-form, #node-config-dialog-edit-form {
     height: 100%;
