@@ -329,6 +329,14 @@ Project.prototype.getFile = function (filePath,treeish) {
         return fs.readFile(fspath.join(this.path,filePath),"utf8");
     }
 };
+Project.prototype.revertFile = function (filePath) {
+    var self = this;
+    return gitTools.revertFile(this.path, filePath).then(function() {
+        return self.load();
+    });
+};
+
+
 
 Project.prototype.status = function(user) {
     var self = this;

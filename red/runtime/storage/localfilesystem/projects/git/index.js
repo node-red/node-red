@@ -421,6 +421,10 @@ module.exports = {
             return status.files;
         })
     },
+    revertFile: function(cwd, filePath) {
+        var args = ["checkout",filePath];
+        return runGitCommand(args,cwd);
+    },
     stageFile: function(cwd,file) {
         var args = ["add"];
         if (Array.isArray(file)) {

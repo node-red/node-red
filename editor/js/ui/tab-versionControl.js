@@ -39,7 +39,82 @@ RED.sidebar.versionControl = (function() {
 
     var isMerging;
 
-    // TODO: DRY projectSummary.js
+    function viewFileDiff(entry,state) {
+        var activeProject = RED.projects.getActiveProject();
+        var diffTarget = (state === 'staged')?"index":"tree";
+        utils.sendRequest({
+            url: "projects/"+activeProject.name+"/diff/"+diffTarget+"/"+encodeURIComponent(entry.file),
+            type: "GET",
+            responses: {
+                0: function(error) {
+                    console.log(error);
+                    // done(error,null);
+                },
+                200: function(data) {
+                    if (mergeConflictNotification) {
+                        mergeConflictNotification.close();
+                        mergeConflictNotification = null;
+                    }
+                    var title;
+                    if (state === 'unstaged') {
+                        title = 'Unstaged changes : '+entry.file
+                    } else if (state === 'staged') {
+                        title = 'Staged changes : '+entry.file
+                    } else {
+                        title = 'Resolve conflicts : '+entry.file
+                    }
+                    var options = {
+                        diff: data.diff,
+                        title: title,
+                        unmerged: state === 'unmerged',
+                        project: activeProject
+                    }
+                    if (state == 'unstaged') {
+                        options.oldRevTitle = entry.indexStatus === " "?"HEAD":"Staged";
+                        options.newRevTitle = "Unstaged";
+                        options.oldRev = entry.indexStatus === " "?"@":":0";
+                        options.newRev = "_";
+                    } else if (state === 'staged') {
+                        options.oldRevTitle = "HEAD";
+                        options.newRevTitle = "Staged";
+                        options.oldRev = "@";
+                        options.newRev = ":0";
+                    } else {
+                        options.onresolve = function(resolution) {
+                            utils.sendRequest({
+                                url: "projects/"+activeProject.name+"/resolve/"+encodeURIComponent(entry.file),
+                                type: "POST",
+                                responses: {
+                                    0: function(error) {
+                                        console.log(error);
+                                        // done(error,null);
+                                    },
+                                    200: function(data) {
+                                        refresh(true);
+                                    },
+                                    400: {
+                                        'unexpected_error': function(error) {
+                                            console.log(error);
+                                            // done(error,null);
+                                        }
+                                    },
+                                }
+                            },{resolutions:resolution.resolutions[entry.file]});
+                        }
+                    }
+                    options.oncancel = showMergeConflictNotification;
+                    RED.diff.showUnifiedDiff(options);
+                    // console.log(data.diff);
+                },
+                400: {
+                    'unexpected_error': function(error) {
+                        console.log(error);
+                        // done(error,null);
+                    }
+                }
+            }
+        })
+    }
 
     function createChangeEntry(row, entry, status, state) {
         row.addClass("sidebar-version-control-change-entry");
@@ -52,88 +127,67 @@ RED.sidebar.versionControl = (function() {
 
 
         var icon = $('<i class=""></i>').appendTo(container);
-        var label = $('<span>').appendTo(container);
+        var entryLink = $('<a href="#">')
+            .appendTo(container)
+            .click(function(e) {
+                e.preventDefault();
+                viewFileDiff(entry,state);
+            });
+        var label = $('<span>').appendTo(entryLink);
 
-        var bg = $('<div class="button-group"></div>').appendTo(row);
-        var viewDiffButton = $('<button class="editor-button editor-button-small"><i class="fa fa-'+(state==='unmerged'?'columns':'eye')+'"></i></button>')
-            .appendTo(bg)
-            .click(function(evt) {
-                evt.preventDefault();
-                var activeProject = RED.projects.getActiveProject();
-                var diffTarget = (state === 'staged')?"index":"tree";
-                utils.sendRequest({
-                    url: "projects/"+activeProject.name+"/diff/"+diffTarget+"/"+encodeURIComponent(entry.file),
-                    type: "GET",
-                    responses: {
-                        0: function(error) {
-                            console.log(error);
-                            // done(error,null);
-                        },
-                        200: function(data) {
-                            if (mergeConflictNotification) {
-                                mergeConflictNotification.close();
-                                mergeConflictNotification = null;
-                            }
-                            var title;
-                            if (state === 'unstaged') {
-                                title = 'Unstaged changes : '+entry.file
-                            } else if (state === 'staged') {
-                                title = 'Staged changes : '+entry.file
-                            } else {
-                                title = 'Resolve conflicts : '+entry.file
-                            }
-                            var options = {
-                                diff: data.diff,
-                                title: title,
-                                unmerged: state === 'unmerged',
-                                project: activeProject
-                            }
-                            if (state == 'unstaged') {
-                                options.oldRevTitle = entry.indexStatus === " "?"HEAD":"Staged";
-                                options.newRevTitle = "Unstaged";
-                                options.oldRev = entry.indexStatus === " "?"@":":0";
-                                options.newRev = "_";
-                            } else if (state === 'staged') {
-                                options.oldRevTitle = "HEAD";
-                                options.newRevTitle = "Staged";
-                                options.oldRev = "@";
-                                options.newRev = ":0";
-                            } else {
-                                options.onresolve = function(resolution) {
-                                    utils.sendRequest({
-                                        url: "projects/"+activeProject.name+"/resolve/"+encodeURIComponent(entry.file),
-                                        type: "POST",
+        var entryTools = $('<div class="sidebar-version-control-change-entry-tools">').appendTo(row);
+        var bg;
+        var revertButton;
+        if (state === 'unstaged') {
+            bg = $('<span class="button-group" style="margin-right: 5px;"></span>').appendTo(entryTools);
+            revertButton = $('<button class="editor-button editor-button-small"><i class="fa fa-reply"></i></button>')
+                .appendTo(bg)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    var spinner = utils.addSpinnerOverlay(container).addClass('projects-dialog-spinner-contain');
+                    var notification = RED.notify("Are you sure you want to revert the changes to '"+entry.file+"'? This cannot be undone.", {
+                        type: "warning",
+                        modal: true,
+                        fixed: true,
+                        buttons: [
+                            {
+                                text: RED._("common.label.cancel"),
+                                click: function() {
+                                    spinner.remove();
+                                    notification.close();
+                                }
+                            },{
+                                text: 'Revert changes',
+                                click: function() {
+                                    notification.close();
+                                    var activeProject = RED.projects.getActiveProject();
+                                    var url = "projects/"+activeProject.name+"/files/_/"+entry.file;
+                                    var options = {
+                                        url: url,
+                                        type: "DELETE",
                                         responses: {
-                                            0: function(error) {
-                                                console.log(error);
-                                                // done(error,null);
-                                            },
                                             200: function(data) {
-                                                refresh(true);
+                                                spinner.remove();
                                             },
                                             400: {
                                                 'unexpected_error': function(error) {
+                                                    spinner.remove();
                                                     console.log(error);
                                                     // done(error,null);
                                                 }
-                                            },
+                                            }
                                         }
-                                    },{resolutions:resolution.resolutions[entry.file]});
+                                    }
+                                    utils.sendRequest(options);
                                 }
                             }
-                            options.oncancel = showMergeConflictNotification;
-                            RED.diff.showUnifiedDiff(options);
-                            // console.log(data.diff);
-                        },
-                        400: {
-                            'unexpected_error': function(error) {
-                                console.log(error);
-                                // done(error,null);
-                            }
-                        }
-                    }
-                })
-            })
+
+                        ]
+                    })
+
+                });
+        }
+        bg = $('<span class="button-group"></span>').appendTo(entryTools);
         if (state !== 'unmerged') {
             $('<button class="editor-button editor-button-small"><i class="fa fa-'+((state==='unstaged')?"plus":"minus")+'"></i></button>')
                 .appendTo(bg)
@@ -203,11 +257,10 @@ RED.sidebar.versionControl = (function() {
                 delete entry.spinner;
             }
 
-            viewDiffButton.attr("disabled",(status === 'D' || status === '?'));
-            viewDiffButton.find("i")
-                .toggleClass('fa-eye',!(status === 'D' || status === '?'))
-                .toggleClass('fa-eye-slash',(status === 'D' || status === '?'))
-
+            if (revertButton) {
+                revertButton.toggle(status !== '?');
+            }
+            entryLink.toggleClass("disabled",(status === 'D' || status === '?'));
         }
         entry["update"+((state==='unstaged')?"Unstaged":"Staged")](entry, status);
     }

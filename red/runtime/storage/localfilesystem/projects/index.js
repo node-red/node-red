@@ -173,7 +173,7 @@ function getFileDiff(user, project,file,type) {
 }
 function getCommits(user, project,options) {
     checkActiveProject(project);
-        return activeProject.getCommits(options);
+    return activeProject.getCommits(options);
 }
 function getCommit(user, project,sha) {
     checkActiveProject(project);
@@ -183,6 +183,12 @@ function getCommit(user, project,sha) {
 function getFile(user, project,filePath,sha) {
     checkActiveProject(project);
     return activeProject.getFile(filePath,sha);
+}
+function revertFile(user, project,filePath) {
+    checkActiveProject(project);
+    return activeProject.revertFile(filePath).then(function() {
+        return reloadActiveProject("revert");
+    })
 }
 function push(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
@@ -413,6 +419,7 @@ module.exports = {
     updateProject: updateProject,
     getFiles: getFiles,
     getFile: getFile,
+    revertFile: revertFile,
     stageFile: stageFile,
     unstageFile: unstageFile,
     commit: commit,

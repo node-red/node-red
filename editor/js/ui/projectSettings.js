@@ -134,6 +134,7 @@ RED.projects.settings = (function() {
                         },
                         200: function(data) {
                             done(null,data);
+                            RED.sidebar.versionControl.refresh(true);
                         },
                         400: {
                             'unexpected_error': function(error) {
@@ -197,6 +198,7 @@ RED.projects.settings = (function() {
                             done(error,null);
                         },
                         200: function(data) {
+                            RED.sidebar.versionControl.refresh(true);
                             done(null,data);
                         },
                         400: {
@@ -326,6 +328,7 @@ RED.projects.settings = (function() {
                                 done(error,null);
                             },
                             200: function(data) {
+                                RED.sidebar.versionControl.refresh(true);
                                 done(null,data);
                             },
                             400: {
@@ -900,6 +903,7 @@ RED.projects.settings = (function() {
                         },
                         200: function(data) {
                             activeProject = data;
+                            RED.sidebar.versionControl.refresh(true);
                             updateForm();
                             done();
                         },

@@ -170,6 +170,22 @@ module.exports = {
             })
         });
 
+        // Revert a file
+        app.delete("/:id/files/_/*", needsPermission("projects.write"), function(req,res) {
+            var projectId = req.params.id;
+            var filePath = req.params[0];
+
+            runtime.storage.projects.revertFile(req.user, projectId,filePath).then(function() {
+                res.status(204).end();
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            })
+        });
+
+
+
         // Stage a file
         app.post("/:id/stage/*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;

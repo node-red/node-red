@@ -444,7 +444,13 @@
     span {
         margin: 0 6px;
     }
-    .button-group {
+    a {
+        color: currentColor;
+        &.disabled {
+            pointer-events: none;
+        }
+    }
+    .sidebar-version-control-change-entry-tools {
         position: absolute;
         top: 4px;
         right: 4px;
@@ -455,7 +461,7 @@
     }
 
     &:hover {
-        .button-group {
+        .sidebar-version-control-change-entry-tools {
             display: block;
         }
     }

@@ -72,8 +72,9 @@
                                         "abort-merge":"Git merge aborted",
                                         "loaded":"Project '"+msg.project+"' loaded",
                                         "updated":"Project '"+msg.project+"' updated",
-                                        "pull":"Project '"+msg.project+"' reloaded"
-                                    }[msg.action]
+                                        "pull":"Project '"+msg.project+"' reloaded",
+                                        "revert": "Project '"+msg.project+"' reloaded"
+                                    }[msg.action];
                                     RED.notify(message);
                                     RED.sidebar.info.refresh()
                                 });
