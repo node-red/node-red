@@ -1678,9 +1678,10 @@ RED.diff = (function() {
 
     function createUnifiedDiffTable(files,commitOptions) {
         var diffPanel = $('<div></div>');
+        console.log(files);
         files.forEach(function(file) {
             var hunks = file.hunks;
-
+            var isBinary = file.binary;
             var codeTable = $("<table>").appendTo(diffPanel);
             $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
             var codeBody = $('<tbody>').appendTo(codeTable);
@@ -1744,142 +1745,148 @@ RED.diff = (function() {
                 })
             }
 
+            if (isBinary) {
+                var diffBinaryRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                var binaryContent = $('<td colspan="3"></td>').appendTo(diffBinaryRow);
+                $('<span></span>').text("Cannot show binary file contents").appendTo(binaryContent);
 
-            hunks.forEach(function(hunk) {
-                var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
-                var content = $('<td colspan="3"></td>').appendTo(diffRow);
-                var label = $('<span></span>').text(hunk.header).appendTo(content);
-                var isConflict = hunk.conflict;
-                var localLine = hunk.localStartLine;
-                var remoteLine = hunk.remoteStartLine;
-                if (isConflict) {
-                    unresolvedConflicts++;
-                }
-
-                hunk.lines.forEach(function(lineText,lineNumber) {
-                    // if (lineText[0] === '\\' || lineText === "") {
-                    //     // Comment line - bail out of this hunk
-                    //     break;
-                    // }
-
-                    var actualLineNumber = hunk.diffStart + lineNumber;
-                    var isMergeHeader = isConflict && /^..(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
-                    var diffRow = $('<tr>').appendTo(codeBody);
-                    var localLineNo = $('<td class="lineno">').appendTo(diffRow);
-                    var remoteLineNo;
-                    if (!isMergeHeader) {
-                        remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
-                    } else {
-                        localLineNo.attr('colspan',2);
-                    }
-                    var line = $('<td class="linetext">').appendTo(diffRow);
-                    var prefixStart = 0;
-                    var prefixEnd = 1;
+            } else {
+                hunks.forEach(function(hunk) {
+                    var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                    var content = $('<td colspan="3"></td>').appendTo(diffRow);
+                    var label = $('<span></span>').text(hunk.header).appendTo(content);
+                    var isConflict = hunk.conflict;
+                    var localLine = hunk.localStartLine;
+                    var remoteLine = hunk.remoteStartLine;
                     if (isConflict) {
-                        prefixEnd = 2;
+                        unresolvedConflicts++;
                     }
-                    if (!isMergeHeader) {
-                        var changeMarker = lineText[0];
-                        if (isConflict && !commitOptions.unmerged && changeMarker === ' ') {
-                            changeMarker = lineText[1];
-                        }
-                        $('<span class="prefix">').text(changeMarker).appendTo(line);
-                        var handledlLine = false;
-                        if (isConflict && commitOptions.unmerged) {
-                            $('<span class="prefix">').text(lineText[1]).appendTo(line);
-                            if (lineText[0] === '+') {
-                                localLineNo.text(localLine++);
-                                handledlLine = true;
-                            }
-                            if (lineText[1] === '+') {
-                                remoteLineNo.text(remoteLine++);
-                                handledlLine = true;
-                            }
+
+                    hunk.lines.forEach(function(lineText,lineNumber) {
+                        // if (lineText[0] === '\\' || lineText === "") {
+                        //     // Comment line - bail out of this hunk
+                        //     break;
+                        // }
+
+                        var actualLineNumber = hunk.diffStart + lineNumber;
+                        var isMergeHeader = isConflict && /^..(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
+                        var diffRow = $('<tr>').appendTo(codeBody);
+                        var localLineNo = $('<td class="lineno">').appendTo(diffRow);
+                        var remoteLineNo;
+                        if (!isMergeHeader) {
+                            remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
                         } else {
-                            if (lineText[0] === '+' || (isConflict && lineText[1] === '+')) {
-                                localLineNo.addClass("added");
-                                remoteLineNo.addClass("added");
-                                line.addClass("added");
-                                remoteLineNo.text(remoteLine++);
-                                handledlLine = true;
-                            } else if (lineText[0] === '-' || (isConflict && lineText[1] === '-')) {
-                                localLineNo.addClass("removed");
-                                remoteLineNo.addClass("removed");
-                                line.addClass("removed");
-                                localLineNo.text(localLine++);
-                                handledlLine = true;
-                            }
+                            localLineNo.attr('colspan',2);
                         }
-                        if (!handledlLine) {
-                            line.addClass("unchanged");
-                            if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
-                                localLineNo.text(localLine++);
-                            }
-                            if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
-                                remoteLineNo.text(remoteLine++);
-                            }
+                        var line = $('<td class="linetext">').appendTo(diffRow);
+                        var prefixStart = 0;
+                        var prefixEnd = 1;
+                        if (isConflict) {
+                            prefixEnd = 2;
                         }
-                        $('<span>').text(lineText.substring(prefixEnd)).appendTo(line);
-                    } else {
-                        diffRow.addClass("mergeHeader");
-                        var isSeparator = /^..(=======$)/.test(lineText);
-                        if (!isSeparator) {
-                            var isOurs = /^..<<<<<<</.test(lineText);
-                            if (isOurs) {
-                                $('<span>').text("<<<<<<< Local Changes").appendTo(line);
-                                hunk.localChangeStart = actualLineNumber;
+                        if (!isMergeHeader) {
+                            var changeMarker = lineText[0];
+                            if (isConflict && !commitOptions.unmerged && changeMarker === ' ') {
+                                changeMarker = lineText[1];
+                            }
+                            $('<span class="prefix">').text(changeMarker).appendTo(line);
+                            var handledlLine = false;
+                            if (isConflict && commitOptions.unmerged) {
+                                $('<span class="prefix">').text(lineText[1]).appendTo(line);
+                                if (lineText[0] === '+') {
+                                    localLineNo.text(localLine++);
+                                    handledlLine = true;
+                                }
+                                if (lineText[1] === '+') {
+                                    remoteLineNo.text(remoteLine++);
+                                    handledlLine = true;
+                                }
                             } else {
-                                hunk.remoteChangeEnd = actualLineNumber;
-                                $('<span>').text(">>>>>>> Remote Changes").appendTo(line);
-
+                                if (lineText[0] === '+' || (isConflict && lineText[1] === '+')) {
+                                    localLineNo.addClass("added");
+                                    remoteLineNo.addClass("added");
+                                    line.addClass("added");
+                                    remoteLineNo.text(remoteLine++);
+                                    handledlLine = true;
+                                } else if (lineText[0] === '-' || (isConflict && lineText[1] === '-')) {
+                                    localLineNo.addClass("removed");
+                                    remoteLineNo.addClass("removed");
+                                    line.addClass("removed");
+                                    localLineNo.text(localLine++);
+                                    handledlLine = true;
+                                }
                             }
-                            diffRow.addClass("mergeHeader-"+(isOurs?"ours":"theirs"));
-                            $('<button class="editor-button editor-button-small" style="float: right; margin-right: 20px;"><i class="fa fa-angle-double-'+(isOurs?"down":"up")+'"></i> use '+(isOurs?"local":"remote")+' changes</button>')
-                                .appendTo(line)
-                                .click(function(evt) {
-                                    evt.preventDefault();
-                                    resolvedConflicts++;
-                                    var addedRows;
-                                    var midRow;
-                                    if (isOurs) {
-                                        addedRows = diffRow.nextUntil(".mergeHeader-separator");
-                                        midRow = addedRows.last().next();
-                                        midRow.nextUntil(".mergeHeader").remove();
-                                        midRow.next().remove();
-                                    } else {
-                                        addedRows = diffRow.prevUntil(".mergeHeader-separator");
-                                        midRow = addedRows.last().prev();
-                                        midRow.prevUntil(".mergeHeader").remove();
-                                        midRow.prev().remove();
-                                    }
-                                    midRow.remove();
-                                    diffRow.remove();
-                                    addedRows.find(".linetext").addClass('added');
-                                    conflictHeader.empty();
-                                    $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
-
-                                    conflictResolutions[file.file] = conflictResolutions[file.file] || {};
-                                    conflictResolutions[file.file][hunk.localChangeStart] = {
-                                        changeStart: hunk.localChangeStart,
-                                        separator: hunk.changeSeparator,
-                                        changeEnd: hunk.remoteChangeEnd,
-                                        selection: isOurs?"A":"B"
-                                    }
-                                    if (commitOptions.resolveConflict) {
-                                        commitOptions.resolveConflict({
-                                            conflicts: unresolvedConflicts,
-                                            resolved: resolvedConflicts,
-                                            resolutions: conflictResolutions
-                                        });
-                                    }
-                                })
+                            if (!handledlLine) {
+                                line.addClass("unchanged");
+                                if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                    localLineNo.text(localLine++);
+                                }
+                                if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                    remoteLineNo.text(remoteLine++);
+                                }
+                            }
+                            $('<span>').text(lineText.substring(prefixEnd)).appendTo(line);
                         } else {
-                            hunk.changeSeparator = actualLineNumber;
-                            diffRow.addClass("mergeHeader-separator");
+                            diffRow.addClass("mergeHeader");
+                            var isSeparator = /^..(=======$)/.test(lineText);
+                            if (!isSeparator) {
+                                var isOurs = /^..<<<<<<</.test(lineText);
+                                if (isOurs) {
+                                    $('<span>').text("<<<<<<< Local Changes").appendTo(line);
+                                    hunk.localChangeStart = actualLineNumber;
+                                } else {
+                                    hunk.remoteChangeEnd = actualLineNumber;
+                                    $('<span>').text(">>>>>>> Remote Changes").appendTo(line);
+
+                                }
+                                diffRow.addClass("mergeHeader-"+(isOurs?"ours":"theirs"));
+                                $('<button class="editor-button editor-button-small" style="float: right; margin-right: 20px;"><i class="fa fa-angle-double-'+(isOurs?"down":"up")+'"></i> use '+(isOurs?"local":"remote")+' changes</button>')
+                                    .appendTo(line)
+                                    .click(function(evt) {
+                                        evt.preventDefault();
+                                        resolvedConflicts++;
+                                        var addedRows;
+                                        var midRow;
+                                        if (isOurs) {
+                                            addedRows = diffRow.nextUntil(".mergeHeader-separator");
+                                            midRow = addedRows.last().next();
+                                            midRow.nextUntil(".mergeHeader").remove();
+                                            midRow.next().remove();
+                                        } else {
+                                            addedRows = diffRow.prevUntil(".mergeHeader-separator");
+                                            midRow = addedRows.last().prev();
+                                            midRow.prevUntil(".mergeHeader").remove();
+                                            midRow.prev().remove();
+                                        }
+                                        midRow.remove();
+                                        diffRow.remove();
+                                        addedRows.find(".linetext").addClass('added');
+                                        conflictHeader.empty();
+                                        $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
+
+                                        conflictResolutions[file.file] = conflictResolutions[file.file] || {};
+                                        conflictResolutions[file.file][hunk.localChangeStart] = {
+                                            changeStart: hunk.localChangeStart,
+                                            separator: hunk.changeSeparator,
+                                            changeEnd: hunk.remoteChangeEnd,
+                                            selection: isOurs?"A":"B"
+                                        }
+                                        if (commitOptions.resolveConflict) {
+                                            commitOptions.resolveConflict({
+                                                conflicts: unresolvedConflicts,
+                                                resolved: resolvedConflicts,
+                                                resolutions: conflictResolutions
+                                            });
+                                        }
+                                    })
+                            } else {
+                                hunk.changeSeparator = actualLineNumber;
+                                diffRow.addClass("mergeHeader-separator");
+                            }
                         }
-                    }
+                    });
                 });
-            });
+            }
             if (commitOptions.unmerged) {
                 conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
             }
@@ -2041,7 +2048,9 @@ RED.diff = (function() {
         } else {
             lines = diff.split("\n");
         }
+        var diffHeader = /^diff --git a\/(.*) b\/(.*)$/;
         var fileHeader = /^\+\+\+ b\/(.*)\t?/;
+        var binaryFile = /^Binary files /;
         var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
         var conflictHunkHeader = /^@+ -((\d+)(,(\d+))?) -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @+/;
         var files = [];
@@ -2050,15 +2059,20 @@ RED.diff = (function() {
         var currentHunk;
         for (var i=0;i<lines.length;i++) {
             var line = lines[i];
-            if (/^diff/.test(line)) {
+            var diffLine = diffHeader.exec(line);
+            if (diffLine) {
                 if (currentHunk) {
                     currentFile.hunks.push(currentHunk);
                     files.push(currentFile);
                 }
                 currentHunk = null;
                 currentFile = {
-                    file: null,
+                    file: diffLine[1],
                     hunks: []
+                }
+            } else if (binaryFile.test(line)) {
+                if (currentFile) {
+                    currentFile.binary = true;
                 }
             } else {
                 var fileLine = fileHeader.exec(line);
@@ -2106,8 +2120,8 @@ RED.diff = (function() {
         }
         if (currentHunk) {
             currentFile.hunks.push(currentHunk);
-            files.push(currentFile);
         }
+        files.push(currentFile);
         return files;
     }
 
