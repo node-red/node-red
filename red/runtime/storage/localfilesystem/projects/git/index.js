@@ -22,6 +22,7 @@ var clone = require('clone');
 var path = require("path");
 
 var gitCommand = "git";
+var gitVersion;
 var log;
 
 function runGitCommand(args,cwd,env) {
@@ -334,6 +335,15 @@ function removeRemote(cwd,name) {
 module.exports = {
     init: function(_settings,_runtime) {
         log = _runtime.log
+        return new Promise(function(resolve,reject) {
+            runGitCommand(["--version"]).then(function(output) {
+                var m = / (\d\S+)/.exec(output);
+                gitVersion = m[1];
+                resolve(gitVersion);
+            }).catch(function(err) {
+                resolve(null);
+            });
+        });
     },
     initRepo: function(cwd) {
         return runGitCommand(["init"],cwd);

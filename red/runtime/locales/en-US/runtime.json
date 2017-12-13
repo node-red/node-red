@@ -133,13 +133,19 @@
         "localfilesystem": {
             "user-dir": "User directory : __path__",
             "flows-file": "Flows file     : __path__",
-            "changing-project": "Setting active project : __project__",
-            "active-project": "Active project : __project__",
             "create": "Creating new __type__ file",
             "empty": "Existing __type__ file is empty",
             "invalid": "Existing __type__ file is not valid json",
             "restore": "Restoring __type__ file backup : __path__",
-            "restore-fail": "Restoring __type__ file backup failed : __message__"
+            "restore-fail": "Restoring __type__ file backup failed : __message__",
+            "projects": {
+                "changing-project": "Setting active project : __project__",
+                "active-project": "Active project : __project__",
+                "no-active-project": "No active project : using default flows file",
+                "disabled": "Projects disabled : editorTheme.projects.enabled=false",
+                "git-not-found": "Projects disabled : git command not found",
+                "git-version-old": "Projects disabled : git __version__ too old"
+            }
         }
     }
 }

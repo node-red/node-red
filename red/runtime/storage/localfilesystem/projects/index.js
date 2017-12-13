@@ -29,6 +29,9 @@ var Projects = require("./Project");
 var settings;
 var runtime;
 
+var projectsEnabled;
+var projectLogMessages = [];
+
 var projectsDir;
 var activeProject
 
@@ -36,11 +39,15 @@ function init(_settings, _runtime) {
     settings = _settings;
     runtime = _runtime;
     log = runtime.log;
-    gitTools.init(_settings, _runtime);
 
-    Projects.init(settings,runtime);
-
-    projectsDir = fspath.join(settings.userDir,"projects");
+    try {
+        if (settings.editorTheme.projects.enabled === false) {
+            projectLogMessages.push(log._("storage.localfilesystem.projects.disabled"))
+            projectsEnabled = false;
+        }
+    } catch(err) {
+        projectsEnabled = true;
+    }
 
     if (settings.flowFile) {
         flowsFile = settings.flowFile;
@@ -73,27 +80,39 @@ function init(_settings, _runtime) {
     credentialsFile = fspath.join(settings.userDir,ffBase+"_cred"+ffExt);
     credentialsFileBackup = getBackupFilename(credentialsFile)
 
-    if (!settings.readOnly) {
-        return fs.ensureDir(projectsDir)
-             //TODO: this is accessing settings from storage directly as settings
-             //      has not yet been initialised. That isn't ideal - can this be deferred?
-            .then(storageSettings.getSettings)
-            .then(function(globalSettings) {
-                if (!globalSettings.projects) {
-                    // TODO: Migration Case
-                    console.log("TODO: Migration from single file to project");
-                    globalSettings.projects = {
-                        activeProject: "",
-                        projects: {}
-                    }
-                    return storageSettings.saveSettings(globalSettings);
-                } else {
-                    activeProject = globalSettings.projects.activeProject;
+    var setupProjectsPromise;
+
+    if (projectsEnabled) {
+        return gitTools.init(_settings, _runtime).then(function(gitVersion) {
+            if (!gitVersion) {
+                projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
+                projectsEnabled = false;
+            } else {
+                Projects.init(settings,runtime);
+                projectsDir = fspath.join(settings.userDir,"projects");
+                if (!settings.readOnly) {
+                    return fs.ensureDir(projectsDir)
+                    //TODO: this is accessing settings from storage directly as settings
+                    //      has not yet been initialised. That isn't ideal - can this be deferred?
+                    .then(storageSettings.getSettings)
+                    .then(function(globalSettings) {
+                        if (!globalSettings.projects) {
+                            // TODO: Migration Case
+                            console.log("TODO: Migration from single file to project");
+                            globalSettings.projects = {
+                                activeProject: "",
+                                projects: {}
+                            }
+                            return storageSettings.saveSettings(globalSettings);
+                        } else {
+                            activeProject = globalSettings.projects.activeProject;
+                        }
+                    });
                 }
-            });
-    } else {
-        return when.resolve();
+            }
+        });
     }
+    return Promise.resolve();
 }
 
 function getUserGitSettings(user) {
@@ -263,9 +282,8 @@ function setActiveProject(user, projectName) {
         var globalProjectSettings = settings.get("projects");
         globalProjectSettings.activeProject = project.name;
         return settings.set("projects",globalProjectSettings).then(function() {
-            log.info(log._("storage.localfilesystem.changing-project",{project:activeProject||"none"}));
+            log.info(log._("storage.localfilesystem.projects.changing-project",{project:activeProject||"none"}));
             log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
-
             // console.log("Updated file targets to");
             // console.log(flowsFullPath)
             // console.log(credentialsFile)
@@ -346,11 +364,16 @@ function getFlows() {
         log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
         if (activeProject) {
             return loadProject(activeProject).then(function() {
-                log.info(log._("storage.localfilesystem.active-project",{project:activeProject.name||"none"}));
+                log.info(log._("storage.localfilesystem.projects.active-project",{project:activeProject.name||"none"}));
                 log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
                 return getFlows();
             });
         } else {
+            if (projectsEnabled) {
+                log.warn(log._("storage.localfilesystem.projects.no-active-project"))
+            } else {
+                projectLogMessages.forEach(log.warn);
+            }
             log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
         }
     }

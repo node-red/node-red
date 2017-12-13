@@ -31,7 +31,6 @@ module.exports = {
 
         // List all projects
         app.get("/", needsPermission("projects.read"), function(req,res) {
-            console.log(req.user);
             runtime.storage.projects.listProjects(req.user, req.user).then(function(list) {
                 var active = runtime.storage.projects.getActiveProject(req.user);
                 var response = {
