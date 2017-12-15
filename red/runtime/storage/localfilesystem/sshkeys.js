@@ -84,11 +84,28 @@ function getSSHKey(username, name) {
 }
 
 function generateSSHKey(username, email, name, data) {
-    var sshKeyFileBasename = username + '_' + name;
-    var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
-    return generateSSHKeyPair(privateKeyFilePath, email, data.password, data.size)
-        .then(function() {
-            return name;
+    return checkExistSSHKeyFiles(username, name)
+        .then(function(result) {
+            if ( result ) {
+                throw new Error('Some SSH Keyfile exists');
+            }
+            else {
+                var sshKeyFileBasename = username + '_' + name;
+                var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
+                return generateSSHKeyPair(privateKeyFilePath, email, data.password, data.size)
+                    .then(function() {
+                        return name;
+                    });
+            }
+        })
+        .then(function(keyfile_name) {
+            return checkSSHKeyFileAndGetPublicKeyFileName(username, name)
+                .then(function() {
+                    return keyfile_name;
+                })
+                .catch(function() {
+                    throw new Error('Failed to generate ssh key files');
+                });
         });
 }
 
@@ -99,16 +116,32 @@ function deleteSSHKey(username, name) {
     });
 }
 
-function checkSSHKeyFileAndGetPublicKeyFileName(username, name) {
+function checkExistSSHKeyFiles(username, name) {
     var sshKeyFileBasename = username + '_' + name;
     var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
     var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
-    return when.all([
+    return Promise.race([
         fs.access(privateKeyFilePath, (fs.constants || fs).R_OK),
         fs.access(publicKeyFilePath , (fs.constants || fs).R_OK)
     ])
     .then(function() {
-        return when.resolve(publicKeyFilePath);
+        return true;
+    })
+    .catch(function() {
+        return false;
+    });
+}
+
+function checkSSHKeyFileAndGetPublicKeyFileName(username, name) {
+    var sshKeyFileBasename = username + '_' + name;
+    var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
+    var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
+    return Promise.all([
+        fs.access(privateKeyFilePath, (fs.constants || fs).R_OK),
+        fs.access(publicKeyFilePath , (fs.constants || fs).R_OK)
+    ])
+    .then(function() {
+        return publicKeyFilePath;
     });
 }
 
@@ -116,17 +149,17 @@ function deleteSSHKeyFiles(username, name) {
     var sshKeyFileBasename = username + '_' + name;
     var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
     var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
-    return when.all([
+    return Promise.all([
         fs.remove(privateKeyFilePath),
         fs.remove(publicKeyFilePath)
     ])
     .then(function(retArray) {
-        return when.resolve(true);
+        return true;
     });
 }
 
 function generateSSHKeyPair(privateKeyPath, comment, password, size) {
-    return when.promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         keygen({
             location: privateKeyPath,
             comment: comment,

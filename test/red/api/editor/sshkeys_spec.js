@@ -330,7 +330,7 @@ describe("api/editor/sshkeys", function() {
             if (err) {
                 return done(err);
             }
-            res.body.should.be.true();
+            res.body.should.be.deepEqual({});
             done();
         });
     });
