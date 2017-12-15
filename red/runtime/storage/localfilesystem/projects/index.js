@@ -134,7 +134,7 @@ function getProject(user, name) {
     return Projects.get(name).then(function(project) {
         var result = project.toJSON();
         var projectSettings = settings.get("projects").projects;
-        if (projectSettings[name].git && projectSettings[name].git.user[username]) {
+        if (projectSettings[name] && projectSettings[name].git && projectSettings[name].git.user[username]) {
             result.git.user = projectSettings[name].git.user[username];
         }
         return result;

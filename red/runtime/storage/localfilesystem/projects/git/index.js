@@ -18,6 +18,7 @@ var when = require('when');
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 var authResponseServer = require('./authServer').ResponseServer;
+var sshResponseServer = require('./authServer').ResponseSSHServer;
 var clone = require('clone');
 var path = require("path");
 
@@ -41,6 +42,11 @@ function runGitCommand(args,cwd,env) {
         });
 
         child.on('close', function(code) {
+            console.log("===============================================================");
+            console.log("stdout:", stdout);
+            console.log("===============================================================");
+            console.log("stderr:", stderr);
+            console.log("===============================================================");
             if (code !== 0) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
@@ -49,6 +55,8 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_auth_failed";
                 } else if(/HTTP Basic: Access denied/.test(stderr)) {
                     err.code = "git_auth_failed";
+                } else if(/Permission denied \(publickey\)/.test(stderr)) {
+                    err.code = "git_auth_failed";
                 } else if(/Connection refused/.test(stderr)) {
                     err.code = "git_connection_failed";
                 } else if (/commit your changes or stash/.test(stderr)) {
@@ -56,9 +64,10 @@ function runGitCommand(args,cwd,env) {
                 } else if (/CONFLICT/.test(err.stdout)) {
                     err.code = "git_pull_merge_conflict";
                 }
-
-
-
+                console.log("===============================================================");
+                console.log('err:', err);
+                console.log("===============================================================");
+                
                 return reject(err);
             }
             resolve(stdout);
@@ -72,6 +81,22 @@ function runGitCommandWithAuth(args,cwd,auth) {
         commandEnv.NODE_RED_GIT_NODE_PATH = process.execPath;
         commandEnv.NODE_RED_GIT_SOCK_PATH = rs.path;
         commandEnv.NODE_RED_GIT_ASKPASS_PATH = path.join(__dirname,"authWriter.js");
+        return runGitCommand(args,cwd,commandEnv).finally(function() {
+            rs.close();
+        });
+    })
+}
+
+function runGitCommandWithSSHCommand(args,cwd,auth) {
+    return sshResponseServer(auth).then(function(rs) {
+        var commandEnv = clone(process.env);
+        commandEnv.SSH_ASKPASS = path.join(__dirname,"node-red-ask-pass.sh");
+        commandEnv.DISPLAY = "dummy:0";
+        commandEnv.NODE_RED_GIT_NODE_PATH = process.execPath;
+        commandEnv.NODE_RED_GIT_SOCK_PATH = rs.path;
+        commandEnv.NODE_RED_GIT_ASKPASS_PATH = path.join(__dirname,"authWriter.js");
+        commandEnv.GIT_SSH_COMMAND = "ssh -i " + auth.key_path + " -F /dev/null";
+        // console.log('commandEnv:', commandEnv);
         return runGitCommand(args,cwd,commandEnv).finally(function() {
             rs.close();
         });
@@ -331,7 +356,12 @@ module.exports = {
         }
         var promise;
         if (auth) {
-            promise = runGitCommandWithAuth(args,cwd,auth);
+            if ( auth.key_path ) {
+                promise = runGitCommandWithSSHCommand(args,cwd,auth);
+            }
+            else {
+                promise = runGitCommandWithAuth(args,cwd,auth);
+            }
         } else {
             promise = runGitCommand(args,cwd)
         }
@@ -362,7 +392,12 @@ module.exports = {
         args.push("--porcelain");
         var promise;
         if (auth) {
-            promise = runGitCommandWithAuth(args,cwd,auth);
+            if ( auth.key_path ) {
+                promise = runGitCommandWithSSHCommand(args,cwd,auth);
+            }
+            else {
+                promise = runGitCommandWithAuth(args,cwd,auth);
+            }
         } else {
             promise = runGitCommand(args,cwd)
         }
@@ -387,7 +422,12 @@ module.exports = {
         }
         args.push(".");
         if (auth) {
-            return runGitCommandWithAuth(args,cwd,auth);
+            if ( auth.key_path ) {
+                return runGitCommandWithSSHCommand(args,cwd,auth);
+            }
+            else {
+                return runGitCommandWithAuth(args,cwd,auth);
+            }
         } else {
             return runGitCommand(args,cwd);
         }
@@ -442,7 +482,12 @@ module.exports = {
     fetch: function(cwd,remote,auth) {
         var args = ["fetch",remote];
         if (auth) {
-            return runGitCommandWithAuth(args,cwd,auth);
+            if ( auth.key_path ) {
+                return runGitCommandWithSSHCommand(args,cwd,auth);
+            }
+            else {
+                return runGitCommandWithAuth(args,cwd,auth);
+            }
         } else {
             return runGitCommand(args,cwd);
         }
