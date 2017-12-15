@@ -82,7 +82,7 @@ module.exports = {
             var username = getUsername(req.user);
             console.log('req.body:', req.body);
             if ( req.body && req.body.name ) {
-                runtime.storage.sshkeys.generateSSHKey(username, "", req.body.name, req.body)
+                runtime.storage.sshkeys.generateSSHKey(username, req.body.email || "", req.body.name, req.body)
                 .then(function(name) {
                     console.log('generate key --- success  name:', name);
                     res.json({
