@@ -23,6 +23,7 @@ var clone = require('clone');
 var path = require("path");
 
 var gitCommand = "git";
+var gitVersion;
 var log;
 
 function runGitCommand(args,cwd,env) {
@@ -63,11 +64,9 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_local_overwrite";
                 } else if (/CONFLICT/.test(err.stdout)) {
                     err.code = "git_pull_merge_conflict";
+                } else if (/not fully merged/.test(stderr)) {
+                    err.code = "git_delete_branch_unmerged";
                 }
-                console.log("===============================================================");
-                console.log('err:', err);
-                console.log("===============================================================");
-                
                 return reject(err);
             }
             resolve(stdout);
@@ -297,17 +296,37 @@ function getRemotes(cwd) {
 }
 
 function getBranches(cwd, remote) {
-    var args = ['branch','--no-color'];
+    var args = ['branch','-vv','--no-color'];
     if (remote) {
         args.push('-r');
     }
+    var branchRE = /^([ \*] )(\S+) +(\S+)(?: \[(\S+?)(?:: (?:ahead (\d+)(?:, )?)?(?:behind (\d+))?)?\])? (.*)$/;
     return runGitCommand(args,cwd).then(function(output) {
         var branches = [];
         var lines = output.split("\n");
-        branches = lines.map(function(l) { return l.substring(2)})
-                        .filter(function(l) {
-                            return !/HEAD ->/.test(l) && (l.length > 0)
-                        });
+        branches = lines.map(function(l) {
+            var m = branchRE.exec(l);
+            var branch = null;
+            if (m) {
+                branch = {
+                    name: m[2],
+                    remote: m[4],
+                    status: {
+                        ahead: m[5]||0,
+                        behind: m[6]||0,
+                    },
+                    commit: {
+                        sha: m[3],
+                        subject: m[7]
+                    }
+                }
+                if (m[1] === '* ') {
+                    branch.current = true;
+                }
+            }
+            return branch;
+        }).filter(function(v) { return !!v && v.commit.sha !== '->' });
+
         return {branches:branches};
     })
 }
@@ -340,6 +359,15 @@ function removeRemote(cwd,name) {
 module.exports = {
     init: function(_settings,_runtime) {
         log = _runtime.log
+        return new Promise(function(resolve,reject) {
+            runGitCommand(["--version"]).then(function(output) {
+                var m = / (\d\S+)/.exec(output);
+                gitVersion = m[1];
+                resolve(gitVersion);
+            }).catch(function(err) {
+                resolve(null);
+            });
+        });
     },
     initRepo: function(cwd) {
         return runGitCommand(["init"],cwd);
@@ -442,6 +470,10 @@ module.exports = {
             return status.files;
         })
     },
+    revertFile: function(cwd, filePath) {
+        var args = ["checkout",filePath];
+        return runGitCommand(args,cwd);
+    },
     stageFile: function(cwd,file) {
         var args = ["add"];
         if (Array.isArray(file)) {
@@ -542,6 +574,19 @@ module.exports = {
         }
         args.push(branchName);
         return runGitCommand(args,cwd);
+    },
+    deleteBranch: function(cwd, branchName, isRemote, force) {
+        if (isRemote) {
+            throw new Error("Deleting remote branches not supported");
+        }
+        var args = ['branch'];
+        if (force) {
+            args.push('-D');
+        } else {
+            args.push('-d');
+        }
+        args.push(branchName);
+        return runGitCommand(args, cwd);
     },
     getBranchStatus: getBranchStatus,
     addRemote: addRemote,

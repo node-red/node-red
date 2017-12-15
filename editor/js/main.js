@@ -43,9 +43,13 @@
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
                 loadFlows(function() {
-                    RED.projects.refresh(function() {
+                    if (RED.settings.theme("projects.enabled",true)) {
+                        RED.projects.refresh(function() {
+                            RED.sidebar.info.refresh()
+                        });
+                    } else {
                         RED.sidebar.info.refresh()
-                    });
+                    }
 
                     var persistentNotifications = {};
                     RED.comms.subscribe("notification/#",function(topic,msg) {
@@ -65,15 +69,15 @@
                             RED.view.redraw(true);
                             RED.projects.refresh(function() {
                                 loadFlows(function() {
-                                    console.log(msg);
                                     var project = RED.projects.getActiveProject();
                                     var message = {
                                         "change-branch":"Change to local branch '"+project.git.branches.local+"'",
                                         "abort-merge":"Git merge aborted",
                                         "loaded":"Project '"+msg.project+"' loaded",
                                         "updated":"Project '"+msg.project+"' updated",
-                                        "pull":"Project '"+msg.project+"' reloaded"
-                                    }[msg.action]
+                                        "pull":"Project '"+msg.project+"' reloaded",
+                                        "revert": "Project '"+msg.project+"' reloaded"
+                                    }[msg.action];
                                     RED.notify(message);
                                     RED.sidebar.info.refresh()
                                 });
@@ -213,12 +217,13 @@
 
     function loadEditor() {
         var menuOptions = [];
-
-        menuOptions.push({id:"menu-item-projects-menu",label:"NLS: Projects",options:[
-            {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
-            {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"},
-            {id:"menu-item-projects-delete",label:"Delete...",disabled:false,onselect:"core:delete-project"},
-        ]});
+        if (RED.settings.theme("projects.enabled",true)) {
+            menuOptions.push({id:"menu-item-projects-menu",label:"NLS: Projects",options:[
+                {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
+                {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"},
+                {id:"menu-item-projects-delete",label:"Delete...",disabled:false,onselect:"core:delete-project"},
+            ]});
+        }
 
 
         menuOptions.push({id:"menu-item-view-menu",label:RED._("menu.label.view.view"),options:[
@@ -283,10 +288,18 @@
         RED.palette.init();
         if (RED.settings.theme('palette.editable') !== false) {
             RED.palette.editor.init();
+        } else {
+            console.log("Palette editor disabled");
         }
 
         RED.sidebar.init();
-        RED.projects.init();
+
+        if (RED.settings.theme("projects.enabled",true)) {
+            RED.projects.init();
+        } else {
+            console.log("Palette editor disabled");
+        }
+
         RED.subflow.init();
         RED.workspaces.init();
         RED.clipboard.init();

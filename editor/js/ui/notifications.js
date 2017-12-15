@@ -26,10 +26,7 @@ RED.notify = (function() {
         }
 
         if (options.modal) {
-            $("#header-shade").show();
-            $("#editor-shade").show();
-            $("#palette-shade").show();
-            $(".sidebar-shade").show();
+            $("#full-shade").show();
         }
 
         if (currentNotifications.length > 4) {
@@ -77,10 +74,7 @@ RED.notify = (function() {
                     nn.parentNode.removeChild(nn);
                 });
                 if (options.modal) {
-                    $("#header-shade").hide();
-                    $("#editor-shade").hide();
-                    $("#palette-shade").hide();
-                    $(".sidebar-shade").hide();
+                    $("#full-shade").hide();
                 }
             };
         })();

@@ -54,8 +54,10 @@ var storageModuleInterface = {
             } catch (e) {
                 return when.reject(e);
             }
-            if (storageModule.projects) {
-                storageModuleInterface.projects = storageModule.projects;
+            if (runtime.settings.hasOwnProperty("editorTheme") && runtime.settings.editorTheme.hasOwnProperty("projects")) {
+                if (storageModule.projects) {
+                    storageModuleInterface.projects = storageModule.projects;
+                }
             }
             if (storageModule.sshkeys) {
                 storageModuleInterface.sshkeys = storageModule.sshkeys;

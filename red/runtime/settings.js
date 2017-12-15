@@ -56,7 +56,7 @@ var persistentSettings = {
         return storage.getSettings().then(function(_settings) {
             globalSettings = _settings;
             if (globalSettings) {
-                userSettings = globalSettings.users || {};                
+                userSettings = globalSettings.users || {};
             }
             else {
                 userSettings = {};
@@ -177,11 +177,9 @@ var persistentSettings = {
         userSettings[username] = settings;
         try {
             assert.deepEqual(current,settings);
-            console.log("skip the save");
             return when.resolve();
         } catch(err) {
             globalSettings.users = userSettings;
-            console.log("saving");
             return storage.saveSettings(globalSettings);
         }
     }

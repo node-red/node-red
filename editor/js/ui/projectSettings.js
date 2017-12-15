@@ -134,6 +134,7 @@ RED.projects.settings = (function() {
                         },
                         200: function(data) {
                             done(null,data);
+                            RED.sidebar.versionControl.refresh(true);
                         },
                         400: {
                             'unexpected_error': function(error) {
@@ -197,6 +198,7 @@ RED.projects.settings = (function() {
                             done(error,null);
                         },
                         200: function(data) {
+                            RED.sidebar.versionControl.refresh(true);
                             done(null,data);
                         },
                         400: {
@@ -326,6 +328,7 @@ RED.projects.settings = (function() {
                                 done(error,null);
                             },
                             200: function(data) {
+                                RED.sidebar.versionControl.refresh(true);
                                 done(null,data);
                             },
                             400: {
@@ -900,6 +903,7 @@ RED.projects.settings = (function() {
                         },
                         200: function(data) {
                             activeProject = data;
+                            RED.sidebar.versionControl.refresh(true);
                             updateForm();
                             done();
                         },
@@ -947,8 +951,132 @@ RED.projects.settings = (function() {
         updateForm();
     }
 
+    function createLocalBranchListSection(activeProject,pane) {
+        var localBranchContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
+        $('<h4></h4>').text("Branches").appendTo(localBranchContainer);
+
+        var row = $('<div class="user-settings-row projects-dialog-branch-list"></div>').appendTo(localBranchContainer);
+
+
+        var branchList = $('<ol>').appendTo(row).editableList({
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(row,index,entry) {
+                var container = $('<div class="projects-dialog-branch-list-entry">').appendTo(row);
+                $('<span><i class="fa fa-code-fork"></i></span>').appendTo(container);
+                $('<span class="branch-name">').text(entry.name).appendTo(container);
+                // if (entry.commit) {
+                //     $('<span class="commit">').text(entry.commit.sha).appendTo(container);
+                // }
+
+                if (entry.remote) {
+                    $('<span class="branch-remote-name">').text(entry.remote||"").appendTo(container);
+                    if (entry.status.ahead+entry.status.behind > 0) {
+                        $('<span class="branch-remote-status">'+
+                            '<i class="fa fa-long-arrow-up"></i> <span>'+entry.status.ahead+'</span> '+
+                            '<i class="fa fa-long-arrow-down"></i> <span>'+entry.status.behind+'</span>'+
+                            '</span>').appendTo(container);
+                    }
+                }
+
+                var tools = $('<span class="projects-dialog-branch-list-entry-tools">').appendTo(container);
+                if (entry.current) {
+                    tools.text('current');
+                } else {
+                    $('<button class="editor-button editor-button-small">delete</button>')
+                        .appendTo(tools)
+                        .click(function(e) {
+                            e.preventDefault();
+                            var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
+                            var notification = RED.notify("Are you sure you want to delete the local branch '"+entry.name+"'? This cannot be undone.", {
+                                type: "warning",
+                                modal: true,
+                                fixed: true,
+                                buttons: [
+                                    {
+                                        text: RED._("common.label.cancel"),
+                                        click: function() {
+                                            spinner.remove();
+                                            notification.close();
+                                        }
+                                    },{
+                                        text: 'Delete branch',
+                                        click: function() {
+                                            notification.close();
+                                            var url = "projects/"+activeProject.name+"/branches/"+entry.name;
+                                            var options = {
+                                                url: url,
+                                                type: "DELETE",
+                                                responses: {
+                                                    200: function(data) {
+                                                        row.fadeOut(200,function() {
+                                                            branchList.editableList('removeItem',entry);
+                                                            spinner.remove();
+                                                        });
+                                                    },
+                                                    400: {
+                                                        'git_delete_branch_unmerged': function(error) {
+                                                            notification = RED.notify("The local branch '"+entry.name+"' has unmerged changes that will be lost. Are you sure you want to delete it?", {
+                                                                type: "warning",
+                                                                modal: true,
+                                                                fixed: true,
+                                                                buttons: [
+                                                                    {
+                                                                        text: RED._("common.label.cancel"),
+                                                                        click: function() {
+                                                                            spinner.remove();
+                                                                            notification.close();
+                                                                        }
+                                                                    },{
+                                                                        text: 'Delete unmerged branch',
+                                                                        click: function() {
+                                                                            options.url += "?force=true";
+                                                                            notification.close();
+                                                                            utils.sendRequest(options);
+                                                                        }
+                                                                    }
+                                                                ]
+                                                            });
+                                                        },
+                                                        'unexpected_error': function(error) {
+                                                            console.log(error);
+                                                            spinner.remove();
+                                                        }
+                                                    },
+                                                }
+                                            }
+                                            utils.sendRequest(options);
+                                        }
+                                    }
+
+                                ]
+                            })
+                        })
+                }
+
+            }
+        });
+        $.getJSON("projects/"+activeProject.name+"/branches",function(result) {
+            if (result.branches) {
+                result.branches.sort(function(A,B) {
+                    if (A.current) { return -1 }
+                    if (B.current) { return 1 }
+                    return A.name.localeCompare(B.name);
+                });
+                result.branches.forEach(function(branch) {
+                    branchList.editableList('addItem',branch);
+                })
+            }
+        })
+    }
     function createRemoteRepositorySection(activeProject,pane) {
-        var title = $('<h3></h3>').text("Version Control").appendTo(pane);
+        $('<h3></h3>').text("Version Control").appendTo(pane);
+
+        createLocalBranchListSection(activeProject,pane);
+
+        var repoContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
+        var title = $('<h4></h4>').text("Git remotes").appendTo(repoContainer);
+
         var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
             .appendTo(title)
             .click(function(evt) {
@@ -958,9 +1086,9 @@ RED.projects.settings = (function() {
                 $('.projects-dialog-remote-list-entry-delete').show();
                 remoteListAddButton.show();
             });
-        
-        var repoContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        var grTitle = $('<h4></h4>').text("Git remotes").appendTo(repoContainer);
+
+
+
 
         row = $('<div class="user-settings-row projects-dialog-remote-list"></div>').appendTo(repoContainer);
         var remotesList = $('<ol>').appendTo(row);

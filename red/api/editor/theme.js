@@ -182,6 +182,12 @@ module.exports = {
         if (theme.hasOwnProperty("palette")) {
             themeSettings.palette = theme.palette;
         }
+
+        if (theme.hasOwnProperty("projects")) {
+            themeSettings.projects = theme.projects;
+        }
+
+
         return themeApp;
     },
     context: function() {
