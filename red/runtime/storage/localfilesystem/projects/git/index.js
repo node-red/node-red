@@ -43,11 +43,6 @@ function runGitCommand(args,cwd,env) {
         });
 
         child.on('close', function(code) {
-            console.log("===============================================================");
-            console.log("stdout:", stdout);
-            console.log("===============================================================");
-            console.log("stderr:", stderr);
-            console.log("===============================================================");
             if (code !== 0) {
                 var err = new Error(stderr);
                 err.stdout = stdout;

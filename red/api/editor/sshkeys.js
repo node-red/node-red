@@ -60,7 +60,7 @@ module.exports = {
         // Get SSH key detail
         app.get("/:id", needsPermission("settings.read"), function(req,res) {
             var username = getUsername(req.user);
-            console.log('username:', username);
+            // console.log('username:', username);
             runtime.storage.sshkeys.getSSHKey(username, req.params.id)
             .then(function(data) {
                 res.json({
@@ -80,11 +80,11 @@ module.exports = {
         // Generate a SSH key
         app.post("/", needsPermission("settings.write"), function(req,res) {
             var username = getUsername(req.user);
-            console.log('req.body:', req.body);
+            // console.log('req.body:', req.body);
             if ( req.body && req.body.name ) {
                 runtime.storage.sshkeys.generateSSHKey(username, req.body.email || "", req.body.name, req.body)
                 .then(function(name) {
-                    console.log('generate key --- success  name:', name);
+                    // console.log('generate key --- success  name:', name);
                     res.json({
                         name: name
                     });
