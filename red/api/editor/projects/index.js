@@ -27,6 +27,14 @@ module.exports = {
     app: function() {
         var app = express();
 
+        app.use(function(req,res,next) {
+            if (!runtime.storage.projects) {
+                res.status(404).end();
+            } else {
+                next();
+            }
+        });
+
         // Projects
 
         // List all projects

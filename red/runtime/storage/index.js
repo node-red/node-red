@@ -54,8 +54,12 @@ var storageModuleInterface = {
             } catch (e) {
                 return when.reject(e);
             }
-            if (runtime.settings.hasOwnProperty("editorTheme") && runtime.settings.editorTheme.hasOwnProperty("projects")) {
-                if (storageModule.projects) {
+            if (!!storageModule.projects) {
+                var projectsEnabled = true;
+                if (runtime.settings.hasOwnProperty("editorTheme") && runtime.settings.editorTheme.hasOwnProperty("projects")) {
+                    projectsEnabled = runtime.settings.editorTheme.projects.enabled !== false;
+                }
+                if (projectsEnabled) {
                     storageModuleInterface.projects = storageModule.projects;
                 }
             }

@@ -29,7 +29,7 @@ var Projects = require("./Project");
 var settings;
 var runtime;
 
-var projectsEnabled;
+var projectsEnabled = true;
 var projectLogMessages = [];
 
 var projectsDir;
@@ -96,16 +96,20 @@ function init(_settings, _runtime) {
                     //      has not yet been initialised. That isn't ideal - can this be deferred?
                     .then(storageSettings.getSettings)
                     .then(function(globalSettings) {
+                        var saveSettings = false;
                         if (!globalSettings.projects) {
-                            // TODO: Migration Case
-                            console.log("TODO: Migration from single file to project");
                             globalSettings.projects = {
-                                activeProject: "",
                                 projects: {}
                             }
-                            return storageSettings.saveSettings(globalSettings);
+                            saveSettings = true;
                         } else {
                             activeProject = globalSettings.projects.activeProject;
+                        }
+                        if (!activeProject) {
+                            projectLogMessages.push(log._("storage.localfilesystem.no-active-project"))
+                        }
+                        if (saveSettings) {
+                            return storageSettings.saveSettings(globalSettings);
                         }
                     });
                 }
@@ -151,12 +155,7 @@ function getProject(user, name) {
         username = user.username;
     }
     return Projects.get(name).then(function(project) {
-        var result = project.toJSON();
-        var projectSettings = settings.get("projects").projects;
-        if (projectSettings[name].git && projectSettings[name].git.user[username]) {
-            result.git.user = projectSettings[name].git.user[username];
-        }
-        return result;
+        return project.toJSON();
     });
 }
 
