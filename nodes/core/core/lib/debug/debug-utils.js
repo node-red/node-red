@@ -218,9 +218,7 @@ RED.debug = (function() {
 
         toolbar.find("#debug-tab-clear").click(function(e) {
             e.preventDefault();
-            $(".debug-message").remove();
-            messageCount = 0;
-            config.clear();
+            clearMessageList();
         });
 
 
@@ -508,10 +506,16 @@ RED.debug = (function() {
         }
     }
 
+    function clearMessageList() {
+        $(".debug-message").remove();
+        // messageCount = 0;
+        config.clear();
+    }
+
     return {
         init: init,
         refreshMessageList:refreshMessageList,
         handleDebugMessage: handleDebugMessage,
-
+        clearMessageList: clearMessageList,
     }
 })();
