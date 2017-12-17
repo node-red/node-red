@@ -728,8 +728,6 @@ RED.projects = (function() {
         return container;
     }
 
-    // var selectedSSHKey = null;
-    // var sshkeyList = null;
     $.fn.isVisible = function() {
         return $.expr.filters.visible(this[0]);
     }
@@ -774,7 +772,6 @@ RED.projects = (function() {
         });
         $.getJSON("settings/user/keys", function(data) {
             data.keys.forEach(function(key) {
-                console.log('key:', key);
                 if ( sshkeyList ) {
                     sshkeyList.editableList('addItem',key);
                 }
@@ -788,7 +785,6 @@ RED.projects = (function() {
             $.data(container[0], 'selected', null);
             $.data(container[0], 'sshkeys', sshkeyList);
         }
-        console.log('container.sshkeys:', container.data('sshkeys'));
         return container;
     }
     function getSelectedSSHKey(container) {
@@ -801,16 +797,12 @@ RED.projects = (function() {
         }
     }
     function refreshSSHKeyList(container) {
-        console.log('refreshSSHKeyList');
         var sshkeyList = $.data(container[0], 'sshkeys');
-        console.log(' ---> container:', container);
-        console.log(' ---> container.sshkeyList:', sshkeyList);
         if ( container && sshkeyList ) {
             sshkeyList.empty();
             $.getJSON("settings/user/keys", function(data) {
                 var keyList = $.data(container[0], 'sshkeys');
                 data.keys.forEach(function(key) {
-                    console.log('key:', key);
                     if ( keyList ) {
                         keyList.editableList('addItem',key);
                     }

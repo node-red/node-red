@@ -53,15 +53,55 @@ RED.projects.userSettings = (function() {
         var sshkeyListOptions = {
             height: "300px",
             deleteAction: function(entry, header) {
-                sendSSHKeyManagementAPI("DELETE_KEY", entry.name, function(data) {
-                    hideSSHKeyGenerateForm();
-                    utils.refreshSSHKeyList(sshkeysList);
+                var spinner = utils.addSpinnerOverlay(header).addClass('projects-dialog-spinner-contain');
+                var notification = RED.notify("Are you sure you want to delete the SSH Keys '"+entry.name+"'? This cannot be undone.", {
+                    type: 'warning',
+                    modal: true,
+                    fixed: true,
+                    buttons: [
+                        {
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                spinner.remove();
+                                notification.close();
+                            }
+                        },
+                        {
+                            text: "Delete SSH Keys",
+                            click: function() {
+                                notification.close();
+                                sendSSHKeyManagementAPI("DELETE_KEY", entry.name, null, function(data) {
+                                    spinner.remove();
+                                    hideSSHKeyGenerateForm();
+                                    utils.refreshSSHKeyList(sshkeysList);
+                                }, function(err) {
+                                    spinner.remove();
+                                    console.log('Delete error! error:', err);
+                                    notification = RED.notify("Failed to delete the SSH Keys '"+entry.name+"'.", {
+                                        type: "error",
+                                        modal: true,
+                                        fixed: false
+                                    });
+                                });
+                            }
+                        }
+                    ]
                 });
             },
             selectAction: function(entry, header) {
-                sendSSHKeyManagementAPI("GET_KEY_DETAIL", entry.name, function(data) {
+                var spinner = utils.addSpinnerOverlay(header).addClass('projects-dialog-spinner-contain');
+                sendSSHKeyManagementAPI("GET_KEY_DETAIL", entry.name, null, function(data) {
+                    spinner.remove();
                     setDialogContext(entry.name, data.publickey);
                     dialog.dialog("open");
+                }, function(err) {
+                    console.log('Get SSH Key detail error! error:', err);
+                    spinner.remove();
+                    notification = RED.notify("Failed to get the SSH Key detail '"+entry.name+"'.", {
+                        type: "error",
+                        modal: true,
+                        fixed: false
+                    });
                 });    
             }
         };
@@ -134,7 +174,8 @@ RED.projects.userSettings = (function() {
                             email: gitEmailInput.val(),
                             password: sshkeyPassphraseInput.val(),
                             size: 4096
-                        }, 
+                        },
+                        gitconfigContainer,
                         function() {
                             hideSSHKeyGenerateForm();
                             utils.refreshSSHKeyList(sshkeysList);
@@ -154,7 +195,7 @@ RED.projects.userSettings = (function() {
             });
     }
 
-    function sendSSHKeyManagementAPI(type, param, successCallback, failCallback) {
+    function sendSSHKeyManagementAPI(type, param, overlay, successCallback, failCallback) {
         var url;
         var method;
         var payload;
@@ -180,10 +221,13 @@ RED.projects.userSettings = (function() {
             console.error('Unexpected type....');
             return;
         }
-        var spinner = utils.addSpinnerOverlay(gitconfigContainer);
+        // var spinner = utils.addSpinnerOverlay(gitconfigContainer);
+        var spinner = overlay ? utils.addSpinnerOverlay(overlay) : null;
         
         var done = function(err) {
-            spinner.remove();
+            if ( spinner ) {
+                spinner.remove();
+            }
             if (err) {
                 console.log(err);
                 return;
