@@ -68,11 +68,9 @@ module.exports = {
             editorApp.use("/",ui.editorResources);
 
             //Projects
-            if (runtime.storage.projects) {
-                var projects = require("./projects");
-                projects.init(runtime);
-                editorApp.use("/projects",projects.app());
-            }
+            var projects = require("./projects");
+            projects.init(runtime);
+            editorApp.use("/projects",projects.app());
 
             // Locales
             var locales = require("./locales");
