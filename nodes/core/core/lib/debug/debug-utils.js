@@ -508,7 +508,6 @@ RED.debug = (function() {
 
     function clearMessageList() {
         $(".debug-message").remove();
-        // messageCount = 0;
         config.clear();
     }
 
