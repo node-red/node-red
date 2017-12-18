@@ -165,7 +165,7 @@ RED.projects = (function() {
                                     }
                                 }
                             }
-
+                            
                             $("#projects-dialog-create").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
                         }
 
@@ -417,15 +417,22 @@ RED.projects = (function() {
                                     var repoUrl = projectRepoInput.val();
                                     var metaData = {};
                                     if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repoUrl)) {
-                                        projectData.git = {
-                                            remotes: {
-                                                'origin': {
-                                                    url: repoUrl,
-                                                    key_file: getSelectedSSHKey(projectRepoSSHKeySelect).name,
-                                                    passphrase: projectRepoPassphrase.val()
+                                        var selected = getSelectedSSHKey(projectRepoSSHKeySelect);
+                                        if ( selected && selected.name ) {
+                                            projectData.git = {
+                                                remotes: {
+                                                    'origin': {
+                                                        url: repoUrl,
+                                                        key_file: selected.name,
+                                                        passphrase: projectRepoPassphrase.val()
+                                                    }
                                                 }
-                                            }
-                                        };
+                                            };    
+                                        }
+                                        else {
+                                            console.log("Error! Can't get selected SSH key path.");
+                                            return;
+                                        }
                                     }
                                     else {
                                         projectData.git = {
@@ -735,10 +742,8 @@ RED.projects = (function() {
         options = options || {};
         var minHeight = "33px";
         var maxHeight = options.height || "120px";
-        // var container = $('<div></div>',{style:"min-height: "+height+"; height: "+height+";"});
         var container = $('<div></div>',{style:"max-height: "+maxHeight+";"});
         
-        // var sshkeyList = $('<ol>',{class:"projects-dialog-sshkey-list", style:"height:"+height}).appendTo(container).editableList({
         var sshkeyList = $('<ol>',{class:"projects-dialog-sshkey-list", style:"max-height:"+maxHeight+";min-height:"+minHeight+";"}).appendTo(container).editableList({
             addButton: false,
             scrollOnAdd: false,
