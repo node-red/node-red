@@ -37,29 +37,13 @@ describe("api/editor/sshkeys", function() {
     var isStarted = true;
     var errors = [];
     var session_data = {};
-    // before(function() {
-    //     mockList.forEach(function(m) {
-    //         sinon.stub(require("../../../../../red/api/editor/"+m),"init",function(){});
-    //     });
-    //     sinon.stub(require("../../../../../red/api/editor/theme"),"app",function(){ return express()});
-    // });
-    // after(function() {
-    //     mockList.forEach(function(m) {
-    //         require("../../../../../red/api/editor/"+m).init.restore();
-    //     })
-    //     require("../../../../../red/api/editor/theme").app.restore();
-    // });
+
     var mockRuntime = {
         settings:{
             httpNodeRoot: true,
             httpAdminRoot: true,
             disableEditor: false,
             exportNodeSettings:function(){},
-            // adminAuth: {
-            //     default: {
-            //         permissions: ['*']
-            //     }
-            // },
             storage: {
                 getSessions: function(){
                     return when.resolve(session_data);
@@ -92,7 +76,6 @@ describe("api/editor/sshkeys", function() {
         app.use(editorApi.init({},mockRuntime));
     });
     after(function() {
-        // fs.removeSync()
     })
 
     beforeEach(function() {
@@ -170,7 +153,6 @@ describe("api/editor/sshkeys", function() {
 
     it('GET /settings/user/keys --- return Unexpected Error', function(done) {
         var errInstance = new Error("Messages.....");
-        // errInstance.code = "test_code";
         mockRuntime.storage.sshkeys.listSSHKeys.returns(Promise.reject(errInstance));
         request(app)
         .get("/settings/user/keys")
@@ -227,7 +209,6 @@ describe("api/editor/sshkeys", function() {
     it('GET /settings/user/keys/<key_file_name> --- return Unexpected Error', function(done) {
         var key_file_name = "test_key";
         var errInstance = new Error("Messages.....");
-        // errInstance.code = "test_code";
         mockRuntime.storage.sshkeys.getSSHKey.returns(Promise.reject(errInstance));
         request(app)
         .get("/settings/user/keys/" + key_file_name)
@@ -264,7 +245,6 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.storage.sshkeys.generateSSHKey.returns(Promise.resolve(key_file_name));
         request(app)
         .post("/settings/user/keys")
-        // .send({ name: key_file_name })
         .expect(400)
         .end(function(err,res) {
             if (err) {
@@ -302,7 +282,6 @@ describe("api/editor/sshkeys", function() {
     it('POST /settings/user/keys --- return Unexpected error', function(done) {
         var key_file_name = "test_key";
         var errInstance = new Error("Messages.....");
-        // errInstance.code = "test_code";
         mockRuntime.storage.sshkeys.generateSSHKey.returns(Promise.reject(errInstance));
         request(app)
         .post("/settings/user/keys")
@@ -358,7 +337,6 @@ describe("api/editor/sshkeys", function() {
     it('DELETE /settings/user/keys/<key_file_name> --- return Unexpected Error', function(done) {
         var key_file_name = "test_key";
         var errInstance = new Error("Messages.....");
-        // errInstance.code = "test_code";
         mockRuntime.storage.sshkeys.deleteSSHKey.returns(Promise.reject(errInstance));
         request(app)
         .delete("/settings/user/keys/" + key_file_name)

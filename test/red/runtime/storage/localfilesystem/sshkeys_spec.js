@@ -28,7 +28,8 @@ describe("storage/localfilesystem/sshkeys", function() {
     var mockRuntime = {
         log:{
             _:function() { return "placeholder message"},
-            info: function() { }
+            info: function() { },
+            trace: function() { }
         }
     };
     beforeEach(function(done) {
