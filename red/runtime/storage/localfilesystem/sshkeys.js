@@ -83,16 +83,21 @@ function getSSHKey(username, name) {
     });
 }
 
-function generateSSHKey(username, email, name, data) {
+function generateSSHKey(username, options) {
+    options = options || {};
+    var name = options.name || "";
     return checkExistSSHKeyFiles(username, name)
         .then(function(result) {
             if ( result ) {
                 throw new Error('Some SSH Keyfile exists');
             }
             else {
+                var email = options.email || "";
+                var password = options.password || "";
+                var size = options.size || 2048;
                 var sshKeyFileBasename = username + '_' + name;
                 var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
-                return generateSSHKeyPair(privateKeyFilePath, email, data.password, data.size)
+                return generateSSHKeyPair(privateKeyFilePath, email, password, size)
                     .then(function() {
                         return name;
                     });
