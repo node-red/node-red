@@ -198,7 +198,7 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
-            if (udpInputPortsInUse.hasOwnProperty(node.outport)) {
+            if (udpInputPortsInUse.hasOwnProperty(node.outport || node.port)) {
                 delete udpInputPortsInUse[node.outport || node.port];
             }
             try {
