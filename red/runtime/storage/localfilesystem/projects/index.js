@@ -270,6 +270,22 @@ function reloadActiveProject(action) {
 }
 function createProject(user, metadata) {
     // var userSettings = getUserGitSettings(user);
+    if (metadata.files && metadata.files.migrateFiles) {
+        // We expect there to be no active project in this scenario
+        if (activeProject) {
+            throw new Error("Cannot migrate as there is an active project");
+        }
+        var currentEncryptionKey = settings.get('credentialSecret');
+        if (currentEncryptionKey === undefined) {
+            currentEncryptionKey = settings.get('_credentialSecret');
+        }
+        if (!metadata.hasOwnProperty('credentialSecret')) {
+            metadata.credentialSecret = currentEncryptionKey;
+        }
+        metadata.files.flow = flowsFullPath;
+        metadata.files.credentials = credentialsFile;
+        metadata.files.credentialSecret = currentEncryptionKey;
+    }
     return Projects.create(null,metadata).then(function(p) {
         return setActiveProject(user, p.name);
     }).then(function() {
@@ -281,7 +297,7 @@ function setActiveProject(user, projectName) {
         var globalProjectSettings = settings.get("projects");
         globalProjectSettings.activeProject = project.name;
         return settings.set("projects",globalProjectSettings).then(function() {
-            log.info(log._("storage.localfilesystem.projects.changing-project",{project:activeProject||"none"}));
+            log.info(log._("storage.localfilesystem.projects.changing-project",{project:(activeProject&&activeProject.name)||"none"}));
             log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));
             // console.log("Updated file targets to");
             // console.log(flowsFullPath)

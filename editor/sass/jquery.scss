@@ -143,3 +143,10 @@
         outline: none;
     }
 }
+
+
+.ui-widget-overlay {
+    @include shade;
+    z-index: 100;
+    opacity: 1;
+}

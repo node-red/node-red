@@ -897,6 +897,7 @@ RED.sidebar.versionControl = (function() {
                 });
             });
 
+        $('<div class="component-shade sidebar-version-control-shade">').appendTo(sidebarContent);
 
         RED.sidebar.addTab({
             id: "version-control",
@@ -1223,8 +1224,10 @@ RED.sidebar.versionControl = (function() {
                     $("#sidebar-version-control-repo-status-button").hide();
                 }
                 refreshInProgress = false;
+                $('.sidebar-version-control-shade').hide();
             });
         } else {
+            $('.sidebar-version-control-shade').show();
             unstagedChangesList.editableList('empty');
             stagedChangesList.editableList('empty');
             unmergedChangesList.editableList('empty');

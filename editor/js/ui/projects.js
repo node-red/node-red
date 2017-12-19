@@ -22,24 +22,435 @@ RED.projects = (function() {
 
     var screens = {};
     function initScreens() {
+        var migrateProjectHeader = $('<div class="projects-dialog-screen-start-hero"></div>');
+        $('<span><i class="fa fa-files-o fa-2x"></i> &nbsp; &nbsp; <i class="fa fa-long-arrow-right fa-2x"></i> &nbsp; &nbsp; <i class="fa fa-archive fa-2x"></i></span>').appendTo(migrateProjectHeader)
+        $('<hr>').appendTo(migrateProjectHeader);
+
+        var createProjectOptions = {};
+
         screens = {
             'welcome': {
-                content: function() {
+                content: function(options) {
+
                     var container = $('<div class="projects-dialog-screen-start"></div>');
-                    var buttons = $('<div style="margin: 30px"></div>').appendTo(container);
-                    var createNew = $('<button class="editor-button"><i class="fa fa-archive fa-2x"></i><i class="fa fa-plus-circle" style="position:absolute"></i><br/>Create a project</button>').appendTo(buttons);
-                    createNew.click(function(e) {
-                        e.preventDefault();
-                        show('create');
-                    });
-                    var openExisting = $('<button class="editor-button"><i class="fa fa-folder-open-o fa-2x"></i><br/>Open a project</button>').appendTo(buttons);
-                    openExisting.click(function(e) {
-                        e.preventDefault();
-                        show('open')
-                    });
+
+                    migrateProjectHeader.appendTo(container);
+
+                    var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+                    $('<p>').text("Hello! We have introduced 'projects' to Node-RED.").appendTo(body);
+                    $('<p>').text("This is a new way for you to manage your flow files and includes version control of your flows.").appendTo(body);
+                    $('<p>').text("To get started you can create your first project using your current flow files in a few easy steps.").appendTo(body);
+                    $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu option at any time.").appendTo(body);
+
+                    // var buttons = $('<div style="margin: 30px"></div>').appendTo(container);
+                    // var createNew = $('<button class="editor-button"><i class="fa fa-archive fa-2x"></i><i class="fa fa-plus-circle" style="position:absolute"></i><br/>Create a project</button>').appendTo(buttons);
+                    // createNew.click(function(e) {
+                    //     e.preventDefault();
+                    //     show('create');
+                    // });
+                    // var openExisting = $('<button class="editor-button"><i class="fa fa-folder-open-o fa-2x"></i><br/>Open a project</button>').appendTo(buttons);
+                    // openExisting.click(function(e) {
+                    //     e.preventDefault();
+                    //     show('open')
+                    // });
                     return container;
                 },
                 buttons: [
+                    {
+                        // id: "clipboard-dialog-cancel",
+                        text: "Not right now",
+                        click: function() {
+                            createProjectOptions = {};
+                            $( this ).dialog( "close" );
+                        }
+                    },
+                    {
+                        text: "Create your first project", // TODO: nls
+                        class: "primary",
+                        click: function() {
+                            show('git-config');
+                        }
+                    }
+                ]
+            },
+            'git-config': (function() {
+                var gitUsernameInput;
+                var gitEmailInput;
+                return {
+                    content: function(options) {
+
+                        var container = $('<div class="projects-dialog-screen-start"></div>');
+                        migrateProjectHeader.appendTo(container);
+                        var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+
+                        $('<p>').text("Step 1 : Setup your version control client").appendTo(body);
+                        $('<p>').text("Node-RED uses the open source tool Git for version control. It tracks changes to your project files and lets you push them to remote repositories.").appendTo(body);
+                        $('<p>').text("When you commit a set of changes, Git records who made the changes with a username and email address. The Username can be anything you want - it does not need to be your real name.").appendTo(body);
+                        $('<p>').text("If your Git client is already configured, you can skip this step.").appendTo(body);
+
+                        var currentGitSettings = RED.settings.get('git') || {};
+                        currentGitSettings.user = currentGitSettings.user || {};
+
+
+                        var row = $('<div class="form-row"></div>').appendTo(body);
+                        $('<label for="">Username</label>').appendTo(row);
+                        gitUsernameInput = $('<input type="text">').val(currentGitSettings.user.name||"").appendTo(row);
+                        // $('<div style="position:relative;"></div>').text("This does not need to be your real name").appendTo(row);
+
+                        row = $('<div class="form-row"></div>').appendTo(body);
+                        $('<label for="">Email</label>').appendTo(row);
+                        gitEmailInput = $('<input type="text">').val(currentGitSettings.user.email||"").appendTo(row);
+                        // $('<div style="position:relative;"></div>').text("Something something email").appendTo(row);
+                        setTimeout(function() {
+                            gitUsernameInput.focus();
+                        },50);
+                        return container;
+                    },
+                    buttons: [
+                        {
+                            // id: "clipboard-dialog-cancel",
+                            text: "Back",
+                            click: function() {
+                                show('welcome');
+                            }
+                        },
+                        {
+                            text: "Next", // TODO: nls
+                            class: "primary",
+                            click: function() {
+                                var currentGitSettings = RED.settings.get('git') || {};
+                                currentGitSettings.user = currentGitSettings.user || {};
+                                currentGitSettings.user.name = gitUsernameInput.val();
+                                currentGitSettings.user.email = gitEmailInput.val();
+                                RED.settings.set('git', currentGitSettings);
+                                show('project-details');
+                            }
+                        }
+                    ]
+                };
+            })(),
+            'project-details': (function() {
+                var projectNameInput;
+                var projectSummaryInput;
+                return {
+                    content: function(options) {
+
+                        var container = $('<div class="projects-dialog-screen-start"></div>');
+                        migrateProjectHeader.appendTo(container);
+                        var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+
+                        $('<p>').text("Step 2 : Create your project").appendTo(body);
+                        $('<p>').text("A project contains your flow files, a README file, a package.json file and a settings file. It makes it much easier to share your flows with others and to collaborate on them.").appendTo(body);
+                        $('<p>').text("You can create multiple projects and quickly switch between them from the editor.").appendTo(body);
+                        $('<p>').text("To begin, your project needs a name and an optional description.").appendTo(body);
+
+                        var validateForm = function() {
+                            var projectName = projectNameInput.val();
+                            var valid = true;
+                            if (projectNameInputChanged) {
+                                projectNameStatus.empty();
+                                if (!/^[a-zA-Z0-9\-_]+$/.test(projectName)) {
+                                    projectNameInput.addClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-exclamation-triangle"></i>').appendTo(projectNameStatus);
+                                    projectNameValid = false;
+                                    valid = false;
+                                } else {
+                                    projectNameInput.removeClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
+                                    projectNameValid = true;
+                                }
+                                projectNameLastChecked = projectName;
+                            }
+                            valid = projectNameValid;
+                            $("#projects-dialog-create-name").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
+                        }
+
+                        var row = $('<div class="form-row"></div>').appendTo(body);
+                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
+
+                        var subrow = $('<div style="position:relative;"></div>').appendTo(row);
+                        projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').val(createProjectOptions.name||"").appendTo(subrow);
+                        var projectNameStatus = $('<div class="projects-dialog-screen-input-status"></div>').appendTo(subrow);
+
+                        var projectNameInputChanged = false;
+                        var projectNameLastChecked = "";
+                        var projectNameValid;
+                        var checkProjectName;
+                        var autoInsertedName = "";
+
+
+                        projectNameInput.on("change keyup paste",function() {
+                            projectNameInputChanged = (projectNameInput.val() !== projectNameLastChecked);
+                            if (checkProjectName) {
+                                clearTimeout(checkProjectName);
+                            } else if (projectNameInputChanged) {
+                                projectNameStatus.empty();
+                                $('<img src="red/images/spin.svg"/>').appendTo(projectNameStatus);
+                                if (projectNameInput.val() === '') {
+                                    validateForm();
+                                    return;
+                                }
+                            }
+                            checkProjectName = setTimeout(function() {
+                                validateForm();
+                                checkProjectName = null;
+                            },300)
+                        });
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+
+                        // Empty Project
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(body);
+                        $('<label for="projects-dialog-screen-create-project-desc">Description</label>').appendTo(row);
+                        projectSummaryInput = $('<input id="projects-dialog-screen-create-project-desc" type="text">').val(createProjectOptions.summary||"").appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row);
+
+                        setTimeout(function() {
+                            projectNameInput.focus();
+                        },50);
+                        return container;
+                    },
+                    buttons: [
+                        {
+                            text: "Back",
+                            click: function() {
+                                show('git-config');
+                            }
+                        },
+                        {
+                            id: "projects-dialog-create-name",
+                            disabled: true,
+                            text: "Next", // TODO: nls
+                            class: "primary disabled",
+                            click: function() {
+                                createProjectOptions.name = projectNameInput.val();
+                                createProjectOptions.summary = projectSummaryInput.val();
+                                createProjectOptions.files = { migrateFiles: true };
+                                show('encryption-config');
+                            }
+                        }
+                    ]
+                };
+            })(),
+
+            'encryption-config': (function() {
+                var emptyProjectCredentialInput;
+                return {
+                    content: function(options) {
+
+                        var container = $('<div class="projects-dialog-screen-start"></div>');
+                        migrateProjectHeader.appendTo(container);
+                        var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+
+                        $('<p>').text("Step 3 : Setup encryption of your credentials file").appendTo(body);
+                        // $('<p>').text("Your flow credentials file can be encrypted to keep its contents secure.").appendTo(body);
+
+                        if (RED.settings.flowEncryptionType === 'disabled') {
+                            $('<p>').text("Your flow credentials file is not currently encrypted.").appendTo(body);
+                            $('<p>').text("That means its contents, such as passwords and access tokens, can be read by anyone with access to the file.").appendTo(body);
+                            $('<p>').text("If you want to store these credentials in a public Git repository, you must encrypt them by providing a secret key phrase.").appendTo(body);
+                        } else {
+                            if (RED.settings.flowEncryptionType === 'user') {
+                                $('<p>').text("Your flow credentials file is currently encrypted using the credentialSecret property from your settings file as the key.").appendTo(body);
+                            } else if (RED.settings.flowEncryptionType === 'system') {
+                                $('<p>').text("Your flow credentials file is currently encrypted using a system-generated secret as the key. You should provide a new secret key for this project.").appendTo(body);
+                            }
+                            $('<p>').text("The secret will be copied into the settings for your new project. You can then manage the secret within the editor.").appendTo(body);
+                        }
+
+                        // var row = $('<div class="form-row"></div>').appendTo(body);
+                        // $('<label for="">Username</label>').appendTo(row);
+                        // var gitUsernameInput = $('<input type="text">').val(currentGitSettings.user.name||"").appendTo(row);
+                        // // $('<div style="position:relative;"></div>').text("This does not need to be your real name").appendTo(row);
+                        //
+                        // row = $('<div class="form-row"></div>').appendTo(body);
+                        // $('<label for="">Email</label>').appendTo(row);
+                        // var gitEmailInput = $('<input type="text">').val(currentGitSettings.user.email||"").appendTo(row);
+                        // // $('<div style="position:relative;"></div>').text("Something something email").appendTo(row);
+
+                        var validateForm = function() {
+                            var valid = true;
+                            var encryptionState = $("input[name=projects-encryption-type]:checked").val();
+                            if (encryptionState === 'enabled') {
+                                var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
+                                if (encryptionKeyType === 'custom') {
+                                    valid = valid && emptyProjectCredentialInput.val()!=='';
+                                }
+                            }
+                            $("#projects-dialog-create-encryption").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
+                        }
+
+
+                        var row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(body);
+                        $('<label>Credentials</label>').appendTo(row);
+
+                        var credentialsBox = $('<div style="width: 550px">').appendTo(row);
+                        var credentialsRightBox = $('<div style="min-height:150px; box-sizing: border-box; float: right; vertical-align: top; width: 331px; margin-left: -1px; padding: 15px; margin-top: -15px; border: 1px solid #ccc; border-radius: 3px;  display: inline-block">').appendTo(credentialsBox);
+                        var credentialsLeftBox = $('<div style="vertical-align: top; width: 220px;  display: inline-block">').appendTo(credentialsBox);
+
+                        var credentialsEnabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid #ccc;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: white;"></div>').appendTo(credentialsLeftBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">Enable encryption</span></label>').appendTo(credentialsEnabledBox);
+                        var credentialsDisabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid white;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: #ccc; "></div>').appendTo(credentialsLeftBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">Disable encryption</span></label>').appendTo(credentialsDisabledBox);
+
+                        credentialsLeftBox.find("input[name=projects-encryption-type]").click(function(e) {
+                            var val = $(this).val();
+                            var toEnable;
+                            var toDisable;
+                            if (val === 'enabled') {
+                                toEnable = credentialsEnabledBox;
+                                toDisable = credentialsDisabledBox;
+                                $(".projects-encryption-enabled-row").show();
+                                $(".projects-encryption-disabled-row").hide();
+                                if ($("input[name=projects-encryption-key]:checked").val() === 'custom') {
+                                    emptyProjectCredentialInput.focus();
+                                }
+
+                            } else {
+                                toDisable = credentialsEnabledBox;
+                                toEnable = credentialsDisabledBox;
+                                $(".projects-encryption-enabled-row").hide();
+                                $(".projects-encryption-disabled-row").show();
+                            }
+
+                            toEnable.css({
+                                borderColor: "#ccc",
+                                borderRightColor: "white"
+                            });
+                            toDisable.css({
+                                borderColor: "white",
+                                borderRightColor: "#ccc"
+                            });
+
+                            validateForm();
+                        })
+
+                        row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        $('<label class="projects-edit-form-inline-label '+((RED.settings.flowEncryptionType !== 'user')?'disabled':'')+'" style="margin-left: 5px"><input '+((RED.settings.flowEncryptionType !== 'user')?'disabled':'')+' type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="default" name="projects-encryption-key"> <span style="vertical-align: middle;">Copy over existing key</span></label>').appendTo(row);
+                        row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="custom" name="projects-encryption-key"> <span style="vertical-align: middle;">Use custom key</span></label>').appendTo(row);
+                        row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        emptyProjectCredentialInput = $('<input disabled type="password" style="margin-left: 25px; width: calc(100% - 30px);"></input>').appendTo(row);
+                        emptyProjectCredentialInput.on("change keyup paste", validateForm);
+
+                        row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
+                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
+
+                        credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
+                            var val = $(this).val();
+                            emptyProjectCredentialInput.attr("disabled",val === 'default');
+                            if (val === "custom") {
+                                emptyProjectCredentialInput.focus();
+                            }
+                            validateForm();
+                        });
+
+                        setTimeout(function() {
+                            credentialsLeftBox.find("input[name=projects-encryption-type][value=enabled]").click();
+                            if (RED.settings.flowEncryptionType !== 'user') {
+                                credentialsRightBox.find("input[name=projects-encryption-key][value=custom]").click();
+                            } else {
+                                credentialsRightBox.find("input[name=projects-encryption-key][value=default]").click();
+                            }
+                            validateForm();
+                        },100);
+
+                        return container;
+                    },
+                    buttons: [
+                        {
+                            // id: "clipboard-dialog-cancel",
+                            text: "Back",
+                            click: function() {
+                                show('project-details');
+                            }
+                        },
+                        {
+                            id: "projects-dialog-create-encryption",
+                            text: "Create project", // TODO: nls
+                            class: "primary disabled",
+                            disabled: true,
+                            click: function() {
+                                var encryptionState = $("input[name=projects-encryption-type]:checked").val();
+                                if (encryptionState === 'enabled') {
+                                    var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
+                                    if (encryptionKeyType === 'custom') {
+                                        createProjectOptions.credentialSecret = emptyProjectCredentialInput.val();
+                                    } else {
+                                        // If 'use existing', leave createProjectOptions.credentialSecret blank
+                                        // - that will trigger it to use the existing key
+                                        // TODO: this option should be disabled if encryption is disabled
+                                    }
+                                } else {
+                                    // Disabled encryption by explicitly setting credSec to false
+                                    createProjectOptions.credentialSecret = false;
+                                }
+
+                                RED.deploy.setDeployInflight(true);
+                                RED.projects.settings.switchProject(createProjectOptions.name);
+
+                                sendRequest({
+                                    url: "projects",
+                                    type: "POST",
+                                    requireCleanWorkspace: true,
+                                    handleAuthFail: false,
+                                    responses: {
+                                        200: function(data) {
+                                            createProjectOptions = {};
+                                            show('create-success');
+                                        },
+                                        400: {
+                                            'project_exists': function(error) {
+                                                console.log("already exists");
+                                            },
+                                            'git_error': function(error) {
+                                                console.log("git error",error);
+                                            },
+                                            'git_connection_failed': function(error) {
+                                                projectRepoInput.addClass("input-error");
+                                            },
+                                            'git_auth_failed': function(error) {
+                                                projectRepoUserInput.addClass("input-error");
+                                                projectRepoPasswordInput.addClass("input-error");
+                                                // getRepoAuthDetails(req);
+                                                console.log("git auth error",error);
+                                            },
+                                            'unexpected_error': function(error) {
+                                                console.log("unexpected_error",error)
+                                            }
+                                        }
+                                    }
+                                },createProjectOptions).always(function() {
+                                    RED.deploy.setDeployInflight(false);
+                                })
+                            }
+                        }
+                    ]
+                }
+            })(),
+            'create-success': {
+                content: function(options) {
+
+                    var container = $('<div class="projects-dialog-screen-start"></div>');
+                    migrateProjectHeader.appendTo(container);
+                    var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+
+                    $('<p>').text("You have successfully created your first project!").appendTo(body);
+                    $('<p>').text("You can now continue to use Node-RED just as you always have.").appendTo(body);
+                    $('<p>').text("The 'info' tab in the sidebar shows you what your current active project is. "+
+                                  "The button next to the name can be used to access the project settings view.").appendTo(body);
+                    $('<p>').text("The new 'history' tab in the sidebar can be used to view files that have changed "+
+                                  "in your project and to commit them. It shows you a complete history of your commits and "+
+                                  "allows you to push your changes to a remote repository.").appendTo(body);
+
+                    return container;
+                },
+                buttons: [
+                    {
+                        text: "Done",
+                        click: function() {
+                            $( this ).dialog( "close" );
+                        }
+                    }
                 ]
             },
             'create': (function() {
@@ -245,6 +656,9 @@ RED.projects = (function() {
                                 toDisable = credentialsDisabledBox;
                                 $(".projects-encryption-enabled-row").show();
                                 $(".projects-encryption-disabled-row").hide();
+                                if ($("input[name=projects-encryption-key]:checked").val() === 'custom') {
+                                    emptyProjectCredentialInput.focus();
+                                }
                             } else {
                                 toDisable = credentialsEnabledBox;
                                 toEnable = credentialsDisabledBox;
@@ -278,6 +692,9 @@ RED.projects = (function() {
                         credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
                             var val = $(this).val();
                             emptyProjectCredentialInput.attr("disabled",val === 'default');
+                            if (val === "custom") {
+                                emptyProjectCredentialInput.focus();
+                            }
                             validateForm();
                         })
 
@@ -633,7 +1050,7 @@ RED.projects = (function() {
             RED.projects.init();
         }
         var screen = screens[s];
-        var container = screen.content();
+        var container = screen.content(options);
 
         dialogBody.empty();
         dialog.dialog('option','buttons',screen.buttons);
@@ -1030,9 +1447,13 @@ RED.projects = (function() {
                     // updateProjectDependencies();
                     RED.sidebar.versionControl.refresh(true);
                     if (done) {
-                        done();
+                        done(activeProject);
                     }
                 });
+            } else {
+                if (done) {
+                    done(null);
+                }
             }
         });
     }
@@ -1045,7 +1466,11 @@ RED.projects = (function() {
             show('welcome');
         },
         newProject: function() {
-            show('create')
+            if (!activeProject) {
+                show('welcome');
+            } else {
+                show('create')
+            }
         },
         selectProject: function() {
             show('open')

@@ -49,6 +49,8 @@ module.exports = {
             safeSettings.editorTheme.palette.editable = false;
         }
 
+        safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();
+
         settings.exportNodeSettings(safeSettings);
         res.json(safeSettings);
     },

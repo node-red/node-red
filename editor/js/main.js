@@ -44,10 +44,21 @@
                 $("#palette-search").removeClass("hide");
                 loadFlows(function() {
                     if (RED.settings.theme("projects.enabled",true)) {
-                        RED.projects.refresh(function() {
+                        RED.projects.refresh(function(activeProject) {
                             RED.sidebar.info.refresh()
+                            if (!activeProject) {
+                                // Projects enabled but no active project
+                                RED.menu.setDisabled('menu-item-projects-open',true);
+                                RED.menu.setDisabled('menu-item-projects-delete',true);
+                                if (activeProject === false) {
+                                    // User previously decline the migration to projects.
+                                } else { // null/undefined
+                                    RED.projects.showStartup();
+                                }
+                            }
                         });
                     } else {
+                        // Projects disabled by the user
                         RED.sidebar.info.refresh()
                     }
 
@@ -218,7 +229,7 @@
     function loadEditor() {
         var menuOptions = [];
         if (RED.settings.theme("projects.enabled",true)) {
-            menuOptions.push({id:"menu-item-projects-menu",label:"NLS: Projects",options:[
+            menuOptions.push({id:"menu-item-projects-menu",label:"Projects",options:[
                 {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
                 {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"},
                 {id:"menu-item-projects-delete",label:"Delete...",disabled:false,onselect:"core:delete-project"},

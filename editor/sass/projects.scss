@@ -107,6 +107,33 @@
 
 }
 .projects-dialog-screen-start {
+    .projects-dialog-screen-start-hero {
+        // background: url(https://nodered.org/images/title-wave.png) no-repeat 0% 100% #8f0000;
+        // background-size: contain;
+        text-align: center;
+        font-size: 2em;
+        padding: 10px;
+        min-height: 60px;
+        color: #555;
+        h1 {
+            text-align: center;
+            color: #f0f0f0;
+            font-size: 2em;
+            font-weight: normal;
+        }
+    }
+    .projects-dialog-screen-start-body {
+        min-height: 400px;
+        line-height: 1.6em;
+        p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        p:first-child {
+            font-weight: 500;
+            font-size: 1.2em;
+        }
+    }
     button.editor-button {
         width: calc(50% - 40px);
         margin: 20px;

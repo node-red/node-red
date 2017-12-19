@@ -27,6 +27,7 @@ var dirty = false;
 
 var removeDefaultKey = false;
 var encryptionEnabled = null;
+var encryptionKeyType; // disabled, system, user, project
 var encryptionAlgorithm = "aes-256-ctr";
 var encryptionKey;
 
@@ -37,6 +38,11 @@ function decryptCredentials(key,credentials) {
     var decipher = crypto.createDecipheriv(encryptionAlgorithm, key, initVector);
     var decrypted = decipher.update(creds, 'base64', 'utf8') + decipher.final('utf8');
     return JSON.parse(decrypted);
+}
+function encryptCredentials(key,credentials) {
+    var initVector = crypto.randomBytes(16);
+    var cipher = crypto.createCipheriv(encryptionAlgorithm, key, initVector);
+    return {"$":initVector.toString('hex') + cipher.update(JSON.stringify(credentials), 'utf8', 'base64') + cipher.final('base64')};
 }
 
 var api = module.exports = {
@@ -55,12 +61,46 @@ var api = module.exports = {
      */
     load: function (credentials) {
         dirty = false;
-        /*
-          - if encryptionEnabled === null, check the current configuration
-        */
         var credentialsEncrypted = credentials.hasOwnProperty("$") && Object.keys(credentials).length === 1;
+
+        // Case 1: Active Project in place
+        //  - use whatever its config says
+
+        // Case 2: _credentialSecret unset, credentialSecret unset
+        //  - generate _credentialSecret and encrypt
+
+        // Case 3: _credentialSecret set, credentialSecret set
+        //  - migrate from _credentialSecret to credentialSecret
+        //  - delete _credentialSecret
+
+        // Case 4: credentialSecret set
+        //  - use it
+
         var setupEncryptionPromise = when.resolve();
-        // if (encryptionEnabled === null) {
+
+        var projectKey = false;
+        var activeProject;
+        encryptionKeyType = "";
+
+        if (runtime.storage && runtime.storage.projects) {
+            // projects enabled
+            activeProject = runtime.storage.projects.getActiveProject();
+            if (activeProject) {
+                projectKey = activeProject.credentialSecret;
+                if (!projectKey) {
+                    log.debug("red/runtime/nodes/credentials.load : using active project key - disabled");
+                    encryptionKeyType = "disabled";
+                    encryptionEnabled = false;
+                } else {
+                    log.debug("red/runtime/nodes/credentials.load : using active project key");
+                    encryptionKeyType = "project";
+                    encryptionKey = crypto.createHash('sha256').update(projectKey).digest();
+                    encryptionEnabled = true;
+                }
+            }
+        }
+
+        if (encryptionKeyType === '') {
             var defaultKey;
             try {
                 defaultKey = settings.get('_credentialSecret');
@@ -68,6 +108,7 @@ var api = module.exports = {
             }
             if (defaultKey) {
                 defaultKey = crypto.createHash('sha256').update(defaultKey).digest();
+                encryptionKeyType = "system";
             }
             var userKey;
             try {
@@ -76,34 +117,13 @@ var api = module.exports = {
                 userKey = false;
             }
 
-            var projectKey = false;
-            var activeProject;
-            if (runtime.storage && runtime.storage.projects) {
-                // projects enabled
-                activeProject = runtime.storage.projects.getActiveProject();
-                if (activeProject) {
-                    projectKey = activeProject.credentialSecret;
-                }
-            }
-
-            if (projectKey) {
-                log.debug("red/runtime/nodes/credentials.load : using active project key - ignoring user provided key");
-                userKey = projectKey;
-            }
-
-            //TODO: Need to consider the various migration scenarios from no-project to project
-            // - _credentialSecret exists, projectKey exists
-            // - _credentialSecret does not exist, projectKey exists
-            // - userKey exists, projectKey exists
             if (userKey === false) {
+                encryptionKeyType = "disabled";
                 log.debug("red/runtime/nodes/credentials.load : user disabled encryption");
                 // User has disabled encryption
                 encryptionEnabled = false;
                 // Check if we have a generated _credSecret to decrypt with and remove
                 if (defaultKey) {
-                    console.log("****************************************************************");
-                    console.log("* Oh oh - default key present. We don't handle this well today *");
-                    console.log("****************************************************************");
                     log.debug("red/runtime/nodes/credentials.load : default key present. Will migrate");
                     if (credentialsEncrypted) {
                         try {
@@ -123,11 +143,14 @@ var api = module.exports = {
                 if (!projectKey) {
                     log.debug("red/runtime/nodes/credentials.load : user provided key");
                 }
+                if (encryptionKeyType !== 'project') {
+                    encryptionKeyType = 'user';
+                }
                 // User has provided own encryption key, get the 32-byte hash of it
                 encryptionKey = crypto.createHash('sha256').update(userKey).digest();
                 encryptionEnabled = true;
 
-                if (defaultKey) {
+                if (encryptionKeyType !== 'project' && defaultKey) {
                     log.debug("red/runtime/nodes/credentials.load : default key present. Will migrate");
                     // User has provided their own key, but we already have a default key
                     // Decrypt using default key
@@ -148,6 +171,9 @@ var api = module.exports = {
             } else {
                 log.debug("red/runtime/nodes/credentials.load : no user key present");
                 // User has not provide their own key
+                if (encryptionKeyType !== 'project') {
+                    encryptionKeyType = 'system';
+                }
                 encryptionKey = defaultKey;
                 encryptionEnabled = true;
                 if (encryptionKey === undefined) {
@@ -169,13 +195,20 @@ var api = module.exports = {
                     log.debug("red/runtime/nodes/credentials.load : using default key");
                 }
             }
-        //}
+        }
+
         if (encryptionEnabled && !dirty) {
             encryptedCredentials = credentials;
         }
+        log.debug("red/runtime/nodes/credentials.load : keyType="+encryptionKeyType);
         return setupEncryptionPromise.then(function() {
             var clearInvalidFlag = false;
             if (credentials.hasOwnProperty("$")) {
+                if (encryptionEnabled === false) {
+                    var error = new Error("Failed to decrypt credentials");
+                    error.code = "credentials_load_failed";
+                    return when.reject(error);
+                }
                 // These are encrypted credentials
                 try {
                     credentialCache = decryptCredentials(encryptionKey,credentials)
@@ -343,9 +376,20 @@ var api = module.exports = {
         return dirty;
     },
     setKey: function(key) {
-        encryptionKey = crypto.createHash('sha256').update(key).digest();
-        encryptionEnabled = true;
-        dirty = true;
+        if (key) {
+            encryptionKey = crypto.createHash('sha256').update(key).digest();
+            encryptionEnabled = true;
+            dirty = true;
+            encryptionKeyType = "project";
+        } else {
+            encryptionKey = null;
+            encryptionEnabled = false;
+            dirty = true;
+            encryptionKeyType = "disabled";
+        }
+    },
+    getKeyType: function() {
+        return encryptionKeyType;
     },
     export: function() {
         var result = credentialCache;
@@ -354,9 +398,7 @@ var api = module.exports = {
             if (dirty) {
                 try {
                     log.debug("red/runtime/nodes/credentials.export : encrypting");
-                    var initVector = crypto.randomBytes(16);
-                    var cipher = crypto.createCipheriv(encryptionAlgorithm, encryptionKey, initVector);
-                    result = {"$":initVector.toString('hex') + cipher.update(JSON.stringify(credentialCache), 'utf8', 'base64') + cipher.final('base64')};
+                    result = encryptCredentials(encryptionKey, credentialCache);
                 } catch(err) {
                     log.warn(log._("nodes.credentials.error-saving",{message:err.toString()}))
                 }

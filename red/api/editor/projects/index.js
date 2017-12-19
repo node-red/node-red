@@ -42,9 +42,11 @@ module.exports = {
             runtime.storage.projects.listProjects(req.user, req.user).then(function(list) {
                 var active = runtime.storage.projects.getActiveProject(req.user);
                 var response = {
-                    active: active.name,
                     projects: list
                 };
+                if (active) {
+                    response.active = active.name;
+                }
                 res.json(response);
             }).catch(function(err) {
                 console.log(err.stack);

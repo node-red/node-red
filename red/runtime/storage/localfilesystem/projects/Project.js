@@ -606,27 +606,53 @@ function createDefaultProject(user, project) {
     // Create a basic skeleton of a project
     return gitTools.initRepo(projectPath).then(function() {
         var promises = [];
+        var files = Object.keys(defaultFileSet);
+        if (project.files) {
+            if (project.files.flow && !/\.\./.test(project.files.flow)) {
+                var flowFilePath;
+                var credsFilePath;
+
+                if (project.files.migrateFiles) {
+                    var baseFlowFileName = fspath.basename(project.files.flow);
+                    var baseCredentialFileName = fspath.basename(project.files.credentials);
+                    files.push(baseFlowFileName);
+                    files.push(baseCredentialFileName);
+                    flowFilePath = fspath.join(projectPath,baseFlowFileName);
+                    credsFilePath = fspath.join(projectPath,baseCredentialFileName);
+                    log.trace("Migrating "+project.files.flow+" to "+flowFilePath);
+                    log.trace("Migrating "+project.files.credentials+" to "+credsFilePath);
+                    promises.push(fs.copy(project.files.flow,flowFilePath));
+                    runtime.nodes.setCredentialSecret(project.credentialSecret);
+                    promises.push(runtime.nodes.exportCredentials().then(function(creds) {
+                        var credentialData;
+                        if (settings.flowFilePretty) {
+                            credentialData = JSON.stringify(creds,null,4);
+                        } else {
+                            credentialData = JSON.stringify(creds);
+                        }
+                        return util.writeFile(credsFilePath,credentialData);
+                    }));
+                    delete project.files.migrateFiles;
+                    project.files.flow = baseFlowFileName;
+                    project.files.credentials = baseCredentialFileName;
+                } else {
+                    project.files.credentials = project.files.credentials || getCredentialsFilename(project.files.flow);
+                    files.push(project.files.flow);
+                    files.push(project.files.credentials);
+                    flowFilePath = fspath.join(projectPath,project.files.flow);
+                    credsFilePath = getCredentialsFilename(flowFilePath);
+                    promises.push(util.writeFile(flowFilePath,"[]"));
+                    promises.push(util.writeFile(credsFilePath,"{}"));
+                }
+            }
+        }
         for (var file in defaultFileSet) {
             if (defaultFileSet.hasOwnProperty(file)) {
                 promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project)));
             }
         }
-        if (project.files) {
-            if (project.files.flow && !/\.\./.test(project.files.flow)) {
-                var flowFilePath = fspath.join(projectPath,project.files.flow);
-                promises.push(util.writeFile(flowFilePath,"[]"));
-                var credsFilePath = getCredentialsFilename(flowFilePath);
-                promises.push(util.writeFile(credsFilePath,"{}"));
-            }
-        }
+
         return when.all(promises).then(function() {
-            var files = Object.keys(defaultFileSet);
-            if (project.files) {
-                if (project.files.flow && !/\.\./.test(project.files.flow)) {
-                    files.push(project.files.flow);
-                    files.push(getCredentialsFilename(flowFilePath))
-                }
-            }
             return gitTools.stageFile(projectPath,files);
         }).then(function() {
             return gitTools.commit(projectPath,"Create project");
