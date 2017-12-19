@@ -205,8 +205,16 @@ var api = module.exports = {
             var clearInvalidFlag = false;
             if (credentials.hasOwnProperty("$")) {
                 if (encryptionEnabled === false) {
+                    // The credentials appear to be encrypted, but our config
+                    //  thinks they are not.
                     var error = new Error("Failed to decrypt credentials");
                     error.code = "credentials_load_failed";
+                    if (activeProject) {
+                        // This is a project with a bad key. Mark it as invalid
+                        // TODO: this delves too deep into Project structure
+                        activeProject.credentialSecretInvalid = true;
+                        return when.reject(error);
+                    }
                     return when.reject(error);
                 }
                 // These are encrypted credentials
@@ -219,7 +227,7 @@ var api = module.exports = {
                     log.warn(log._("nodes.credentials.error",{message:err.toString()}))
                     var error = new Error("Failed to decrypt credentials");
                     error.code = "credentials_load_failed";
-                    if (projectKey) {
+                    if (activeProject) {
                         // This is a project with a bad key. Mark it as invalid
                         // TODO: this delves too deep into Project structure
                         activeProject.credentialSecretInvalid = true;
