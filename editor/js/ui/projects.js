@@ -735,9 +735,6 @@ RED.projects = (function() {
         return container;
     }
 
-    $.fn.isVisible = function() {
-        return $.expr.filters.visible(this[0]);
-    }
     function createSSHKeyList(options) {
         options = options || {};
         var minHeight = "33px";
@@ -765,7 +762,7 @@ RED.projects = (function() {
                 $('<i/>',{class:"fa fa-trash-o"}).appendTo(deleteButton);
                 header.addClass("selectable");
                 row.click(function(evt) {
-                    if ( !deleteButton.isVisible() ) {
+                    if ( !deleteButton.is(":visible") ) {
                         if ( options.selectAction ) {
                             options.selectAction(entry, header);
                         }
