@@ -18,6 +18,7 @@
 var fs = require('fs-extra');
 var when = require('when');
 var fspath = require("path");
+var os = require('os');
 
 var gitTools = require("./git");
 var util = require("../util");
@@ -753,10 +754,20 @@ function createProject(user, metadata) {
                 if (metadata.git && metadata.git.remotes && metadata.git.remotes.origin) {
                     var originRemote = metadata.git.remotes.origin;
                     var auth;
+                    console.log('originRemote:', originRemote);
                     if (originRemote.hasOwnProperty("username") && originRemote.hasOwnProperty("password")) {
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
                                 username: originRemote.username,
                                 password: originRemote.password
+                            }
+                        );
+                        auth = authCache.get(project,originRemote.url,username);
+                    }
+                    else if (originRemote.hasOwnProperty("key_file") && originRemote.hasOwnProperty("passphrase")) {
+                        var key_file_name = (username === '_') ? '.default' + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
+                        authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
+                                key_path: fspath.join(projectsDir, ".sshkeys", key_file_name),
+                                passphrase: originRemote.passphrase
                             }
                         );
                         auth = authCache.get(project,originRemote.url,username);

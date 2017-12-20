@@ -63,6 +63,9 @@ var storageModuleInterface = {
                     storageModuleInterface.projects = storageModule.projects;
                 }
             }
+            if (storageModule.sshkeys) {
+                storageModuleInterface.sshkeys = storageModule.sshkeys;
+            }
             return storageModule.init(runtime.settings,runtime);
         },
         getFlows: function() {

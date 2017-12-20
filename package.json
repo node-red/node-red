@@ -59,6 +59,7 @@
         "raw-body":"2.2.0",
         "semver": "5.3.0",
         "sentiment":"2.1.0",
+        "ssh-keygen":"0.4.1",
         "uglify-js":"3.0.20",
         "when": "3.7.8",
         "ws": "1.1.1",

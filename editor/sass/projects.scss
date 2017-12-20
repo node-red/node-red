@@ -675,6 +675,92 @@
     }
 }
 
+.projects-dialog-sshkey-list {
+    li {
+        padding: 0 !important;
+    }
+    &.projects-dialog-sshkey-list-small {
+        .projects-dialog-sshkey-list-entry {
+            padding: 6px 0;
+            i {
+                font-size: 1em;
+            }
+        }
+        .projects-dialog-sshkey-list-entry-name {
+            font-size: 1em;
+        }
+        .projects-dialog-sshkey-list-entry-current {
+            margin-right: 10px;
+            padding-top: 2px;
+        }
+    }
+}
+.red-ui-editableList-container {
+    .projects-dialog-sshkey-list {
+        li:last-child {
+            border-bottom: 0px none;
+        }
+    }
+}
+.projects-dialog-sshkey-list-entry {
+    padding: 12px 0;
+    border-left: 3px solid #fff;
+    border-right: 3px solid #fff;
+    &.sshkey-list-entry-current {
+        &:not(.selectable) {
+            background: #f9f9f9;
+        }
+        i {
+            color: #999;
+        }
+    }
+    &.selectable {
+        cursor: pointer;
+        &:hover {
+            background: #f3f3f3;
+            border-left-color: #aaa;
+            border-right-color: #aaa;
+        }
+    }
+    i {
+        color: #ccc;
+        font-size: 2em;
+
+    }
+    &.selected {
+        background: #efefef;
+        border-left-color:#999;
+        border-right-color:#999;
+    }
+    span {
+        display: inline-block;
+        vertical-align:middle;
+    }
+    .projects-dialog-sshkey-list-entry-icon {
+         margin: 0 10px 0 5px;
+    }
+    .projects-dialog-sshkey-list-entry-name {
+        font-size: 1.2em;
+    }
+    .projects-dialog-sshkey-list-entry-current {
+        float: right;
+        margin-right: 20px;
+        font-size: 0.9em;
+        color: #999;
+        padding-top: 4px;
+    }
+    .projects-dialog-sshkey-list-button-remove {
+        position: absolute;
+        right: 4px;
+    }
+}
+
+div.projects-dialog-ssh-public-key {
+    pre {
+        word-break: break-all;
+    }
+}
+
 .projects-dialog-list {
     position: relative;
     .red-ui-editableList-container {
