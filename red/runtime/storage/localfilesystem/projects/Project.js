@@ -704,7 +704,7 @@ function createProject(user, metadata) {
                         auth = authCache.get(project,originRemote.url,username);
                     }
                     else if (originRemote.hasOwnProperty("key_file") && originRemote.hasOwnProperty("passphrase")) {
-                        var key_file_name = (username === '_') ? os.hostname() + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
+                        var key_file_name = (username === '_') ? '.default' + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
                                 key_path: fspath.join(projectsDir, ".sshkeys", key_file_name),
                                 passphrase: originRemote.passphrase

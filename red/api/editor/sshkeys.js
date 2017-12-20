@@ -21,7 +21,7 @@ var settings;
 var needsPermission = require("../auth").needsPermission;
 
 function getUsername(userObj) {
-    var username = os.hostname();
+    var username = '.default';
     if ( userObj && userObj.name ) {
         username = userObj.name;
     }

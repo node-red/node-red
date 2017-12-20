@@ -44,7 +44,7 @@ function listSSHKeys(username) {
         var ret = fns.sort()
             .filter(function(fn) {
                 var fullPath = fspath.join(sshkeyDir,fn);
-                if (fn[0] != ".") {
+                if (fn.length > 2 || fn[0] != ".") {
                     var stats = fs.lstatSync(fullPath);
                     if (stats.isFile()) {
                         return fn.startsWith(startStr);
