@@ -16,18 +16,17 @@
 
 RED.projects.userSettings = (function() {
 
-    var gitconfigContainer;
     var gitUsernameInput;
     var gitEmailInput;
 
-    function createRemoteRepositorySection(pane) {
+    function createGitUserSection(pane) {
 
         var currentGitSettings = RED.settings.get('git') || {};
         currentGitSettings.user = currentGitSettings.user || {};
 
         var title = $('<h3></h3>').text("Committer Details").appendTo(pane);
 
-        gitconfigContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
+        var gitconfigContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
         $('<div style="color:#aaa;"></div>').appendTo(gitconfigContainer).text("Leave blank to use system default");
 
         var row = $('<div class="user-settings-row"></div>').appendTo(gitconfigContainer);
@@ -39,161 +38,247 @@ RED.projects.userSettings = (function() {
         $('<label for=""></label>').text('Email').appendTo(row);
         gitEmailInput = $('<input type="text">').appendTo(row);
         gitEmailInput.val(currentGitSettings.user.email||"");
+    }
 
-        var sshkeyTitle = $('<h4></h4>').text("SSH Keys").appendTo(gitconfigContainer);
-        var editSshKeyListButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
-            .appendTo(sshkeyTitle)
+
+    function createSSHKeySection(pane) {
+        var container = $('<div class="user-settings-section"></div>').appendTo(pane);
+        var popover;
+        var title = $('<h4></h4>').text("SSH Keys").appendTo(container);
+
+        var addKeyButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">generate key</button>')
+            .appendTo(title)
             .click(function(evt) {
-                editSshKeyListButton.hide();
-                formButtons.show();
-                sshkeyInputRow.show();
-                $(".projects-dialog-sshkey-list-button-remove").css('display', 'inline-block');
-            });
-        
-        var sshkeyListOptions = {
-            height: "300px",
-            deleteAction: function(entry, header) {
-                var spinner = utils.addSpinnerOverlay(header).addClass('projects-dialog-spinner-contain');
-                var notification = RED.notify("Are you sure you want to delete the SSH Keys '"+entry.name+"'? This cannot be undone.", {
-                    type: 'warning',
-                    modal: true,
-                    fixed: true,
-                    buttons: [
-                        {
-                            text: RED._("common.label.cancel"),
-                            click: function() {
-                                spinner.remove();
-                                notification.close();
-                            }
-                        },
-                        {
-                            text: "Delete SSH Keys",
-                            click: function() {
-                                notification.close();
-                                sendSSHKeyManagementAPI("DELETE_KEY", entry.name, null, function(data) {
-                                    spinner.remove();
-                                    hideSSHKeyGenerateForm();
-                                    utils.refreshSSHKeyList(sshkeysList);
-                                }, function(err) {
-                                    spinner.remove();
-                                    console.log('Delete error! error:', err);
-                                    notification = RED.notify("Failed to delete the SSH Keys '"+entry.name+"'.", {
-                                        type: "error",
-                                        modal: true,
-                                        fixed: false
-                                    });
-                                });
-                            }
-                        }
-                    ]
+                addKeyButton.attr('disabled',true);
+                addKeyDialog.slideDown(200, function() {
+                    // addKeyDialog[0].scrollIntoView();
                 });
-            },
-            selectAction: function(entry, header) {
-                var spinner = utils.addSpinnerOverlay(header).addClass('projects-dialog-spinner-contain');
-                sendSSHKeyManagementAPI("GET_KEY_DETAIL", entry.name, null, function(data) {
-                    spinner.remove();
-                    setDialogContext(entry.name, data.publickey);
-                    dialog.dialog("open");
-                }, function(err) {
-                    console.log('Get SSH Key detail error! error:', err);
-                    spinner.remove();
-                    notification = RED.notify("Failed to get the SSH Key detail '"+entry.name+"'.", {
-                        type: "error",
-                        modal: true,
-                        fixed: false
-                    });
-                });    
+            });
+
+        var validateForm = function() {
+            var validName = /^[a-zA-Z0-9\-_]+$/.test(keyNameInput.val());
+            saveButton.attr('disabled',!validName);
+            keyNameInput.toggleClass('input-error',keyNameInputChanged&&!validName);
+            if (popover) {
+                popover.close();
+                popover = null;
             }
         };
-        var sshkeysListRow = $('<div class="user-settings-row projects-dialog-sshkeylist"></div>').appendTo(gitconfigContainer);
-        var sshkeysList = utils.createSSHKeyList(sshkeyListOptions).appendTo(sshkeysListRow);
 
-        var sshkeyInputRow = $('<div class="user-settings-row"></div>').hide().appendTo(gitconfigContainer);
-        var sshkeyNameLabel = $('<label for=""></label>').text('Key Name').appendTo(sshkeyInputRow);
-        var sshkeyNameInput = $('<input type="text">').appendTo(sshkeyInputRow);
-        var sshkeyPassphraseLabel = $('<label for=""></label>').text('Passphrase').appendTo(sshkeyInputRow);
-        var sshkeyPassphraseInput = $('<input type="password">').appendTo(sshkeyInputRow);
-        var sshkeySamePassphraseLabel = $('<label for=""></label>').text('Same Passphrase').appendTo(sshkeyInputRow);
-        var sshkeySamePassphraseInput = $('<input type="password">').appendTo(sshkeyInputRow);
+        var row = $('<div class="user-settings-row"></div>').appendTo(container);
+        var addKeyDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
+        $('<div class="projects-dialog-list-dialog-header">').text('Generate SSH Key').appendTo(addKeyDialog);
 
-        var formButtonArea = $('<div style="width: 100%; height: 35px;"></div>').appendTo(gitconfigContainer);
-        var formButtons = $('<span class="button-group" style="position: absolute; right: 0px; margin-right: 0px;"></span>')
-            .hide().appendTo(formButtonArea);
-        
-        function hideSSHKeyGenerateForm() {
-            editSshKeyListButton.show();
-            formButtons.hide();
-            sshkeyInputRow.hide();
-            sshkeyNameInput.val("");
-            sshkeyPassphraseInput.val("");
-            sshkeySamePassphraseInput.val("");
-            if ( sshkeyNameInput.hasClass('input-error') ) {
-                sshkeyNameInput.removeClass('input-error');
+        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialog);
+        $('<label for=""></label>').text('Name').appendTo(row);
+        var keyNameInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
+            keyNameInputChanged = true;
+            validateForm();
+        });
+        var keyNameInputChanged = false;
+        $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+
+        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialog);
+        $('<label for=""></label>').text('Passphrase').appendTo(row);
+        passphraseInput = $('<input type="password">').appendTo(row).on("change keyup paste",validateForm);
+        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row).find("small");
+
+        var hideEditForm = function() {
+            addKeyButton.attr('disabled',false);
+            addKeyDialog.hide();
+            keyNameInput.val("");
+            passphraseInput.val("");
+            if (popover) {
+                popover.close();
+                popover = null;
             }
-            if ( sshkeyPassphraseInput.hasClass('input-error') ) {
-                sshkeyPassphraseInput.removeClass('input-error');
-            }
-            if ( sshkeySamePassphraseInput.hasClass('input-error') ) {
-                sshkeySamePassphraseInput.removeClass('input-error');
-            }
-            $(".projects-dialog-sshkey-list-button-remove").hide();
         }
-
+        var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>').appendTo(addKeyDialog);
         $('<button class="editor-button">Cancel</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
-                hideSSHKeyGenerateForm();
+                hideEditForm();
             });
-        var generateButton = $('<button class="editor-button">Generate</button>')
+        var saveButton = $('<button class="editor-button">Generate key</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
-                if ( sshkeyNameInput.hasClass('input-error') ) {
-                    sshkeyNameInput.removeClass('input-error');
+                var spinner = utils.addSpinnerOverlay(addKeyDialog).addClass('projects-dialog-spinner-contain');
+                var payload = {
+                    name: keyNameInput.val(),
+                    comment: gitEmailInput.val(),
+                    password: passphraseInput.val(),
+                    size: 4096
+                };
+                var done = function(err) {
+                    spinner.remove();
+                    if (err) {
+                        return;
+                    }
+                    hideEditForm();
                 }
-                if ( sshkeyPassphraseInput.hasClass('input-error') ) {
-                    sshkeyPassphraseInput.removeClass('input-error');
-                }
-                if ( sshkeySamePassphraseInput.hasClass('input-error') ) {
-                    sshkeySamePassphraseInput.removeClass('input-error');
-                }
-                var valid = true;
-                if ( sshkeyNameInput.val() === "" ) {
-                    sshkeyNameInput.addClass('input-error');
-                    valid = false;
-                }
-                if ( sshkeyPassphraseInput.val() !== sshkeySamePassphraseInput.val() ) {
-                    sshkeySamePassphraseInput.addClass('input-error');
-                    valid = false;
-                }
-                if ( valid ) {
-                    sendSSHKeyManagementAPI("GENERATE_KEY",
-                        {
-                            name: sshkeyNameInput.val(),
-                            email: gitEmailInput.val(),
-                            password: sshkeyPassphraseInput.val(),
-                            size: 4096
+                // console.log(JSON.stringify(payload,null,4));
+                RED.deploy.setDeployInflight(true);
+                utils.sendRequest({
+                    url: "settings/user/keys",
+                    type: "POST",
+                    responses: {
+                        0: function(error) {
+                            done(error);
                         },
-                        gitconfigContainer,
-                        function() {
-                            hideSSHKeyGenerateForm();
-                            utils.refreshSSHKeyList(sshkeysList);
+                        200: function(data) {
+                            refreshSSHKeyList();
+                            done();
                         },
-                        function(err) {
-                            console.log('err message:', err.message);
-                            if ( err.message.includes('Some SSH Keyfile exists') ) {
-                                sshkeyNameInput.addClass('input-error');
+                        400: {
+                            'unexpected_error': function(error) {
+                                console.log(error);
+                                done(error);
                             }
-                            else if ( err.message.includes('Failed to generate ssh key files') ) {
-                                sshkeyPassphraseInput.addClass('input-error');
-                                sshkeySamePassphraseInput.addClass('input-error');
-                            }
-                        }
-                    );
-                }
+                        },
+                    }
+                },payload);
             });
+
+        row = $('<div class="user-settings-row projects-dialog-list"></div>').appendTo(container);
+        var emptyItem = { empty: true };
+        var expandKey = function(container,entry) {
+            var row = $('<div class="projects-dialog-ssh-public-key">',{style:"position:relative"}).appendTo(container);
+            var keyBox = $('<pre>',{style:"min-height: 80px"}).appendTo(row);
+            var spinner = utils.addSpinnerOverlay(keyBox).addClass('projects-dialog-spinner-contain');
+            var options = {
+                url: 'settings/user/keys/'+entry.name,
+                type: "GET",
+                responses: {
+                    200: function(data) {
+                        keyBox.text(data.publickey);
+                        spinner.remove();
+                    },
+                    400: {
+                        'unexpected_error': function(error) {
+                            console.log(error);
+                            spinner.remove();
+                        }
+                    },
+                }
+            }
+            utils.sendRequest(options);
+
+            var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>').appendTo(row);
+            $('<button class="editor-button editor-button-small">Copy to Clipboard</button>')
+                .appendTo(formButtons)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    document.getSelection().selectAllChildren(keyBox[0]);
+                    var ret = document.execCommand('copy');
+                    document.getSelection().empty();
+                });
+
+            return row;
+        }
+        var keyList = $('<ol>').appendTo(row).editableList({
+            height: 'auto',
+            addButton: false,
+            scrollOnAdd: false,
+            addItem: function(row,index,entry) {
+                var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
+
+                if (entry.empty) {
+                    container.addClass('red-ui-search-empty');
+                    container.text("No SSH keys");
+                    return;
+                }
+
+
+                $('<span class="entry-icon"><i class="fa fa-key"></i></span>').appendTo(container);
+                var content = $('<span>').appendTo(container);
+                var topRow = $('<div>').appendTo(content);
+                $('<span class="entry-name">').text(entry.name).appendTo(topRow);
+
+                var tools = $('<span class="button-row entry-tools">').appendTo(container);
+                var expandedRow;
+                $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>')
+                    .appendTo(tools)
+                    .click(function(e) {
+                        if (expandedRow) {
+                            expandedRow.slideUp(200,function() {
+                                expandedRow.remove();
+                                expandedRow = null;
+                            })
+                        } else {
+                            expandedRow = expandKey(container,entry);
+                        }
+                    })
+                $('<button class="editor-button editor-button-small"><i class="fa fa-trash"></i></button>')
+                    .appendTo(tools)
+                    .click(function(e) {
+                        var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
+                        var notification = RED.notify("Are you sure you want to delete the SSH key '"+entry.name+"'? This cannot be undone.", {
+                            type: 'warning',
+                            modal: true,
+                            fixed: true,
+                            buttons: [
+                                {
+                                    text: RED._("common.label.cancel"),
+                                    click: function() {
+                                        spinner.remove();
+                                        notification.close();
+                                    }
+                                },
+                                {
+                                    text: "Delete key",
+                                    click: function() {
+                                        notification.close();
+                                        var url = "settings/user/keys/"+entry.name;
+                                        var options = {
+                                            url: url,
+                                            type: "DELETE",
+                                            responses: {
+                                                200: function(data) {
+                                                    row.fadeOut(200,function() {
+                                                        keyList.editableList('removeItem',entry);
+                                                        setTimeout(spinner.remove, 100);
+                                                        if (keyList.editableList('length') === 0) {
+                                                            keyList.editableList('addItem',emptyItem);
+                                                        }
+                                                    });
+                                                },
+                                                400: {
+                                                    'unexpected_error': function(error) {
+                                                        console.log(error);
+                                                        spinner.remove();
+                                                    }
+                                                },
+                                            }
+                                        }
+                                        utils.sendRequest(options);
+                                    }
+                                }
+                            ]
+                        });
+                    });
+            }
+        });
+
+        var refreshSSHKeyList = function() {
+            $.getJSON("settings/user/keys",function(result) {
+                if (result.keys) {
+                    result.keys.sort(function(A,B) {
+                        return A.name.localeCompare(B.name);
+                    });
+                    keyList.editableList('empty');
+                    result.keys.forEach(function(key) {
+                        keyList.editableList('addItem',key);
+                    })
+                }
+            })
+        }
+        refreshSSHKeyList();
+
     }
+
+
 
     function sendSSHKeyManagementAPI(type, param, overlay, successCallback, failCallback) {
         var url;
@@ -223,7 +308,7 @@ RED.projects.userSettings = (function() {
         }
         // var spinner = utils.addSpinnerOverlay(gitconfigContainer);
         var spinner = overlay ? utils.addSpinnerOverlay(overlay) : null;
-        
+
         var done = function(err) {
             if ( spinner ) {
                 spinner.remove();
@@ -263,7 +348,7 @@ RED.projects.userSettings = (function() {
                     }
                 },
             }
-        },payload);        
+        },payload);
     }
 
     var dialog;
@@ -320,7 +405,9 @@ RED.projects.userSettings = (function() {
 
     function createSettingsPane(activeProject) {
         var pane = $('<div id="user-settings-tab-gitconfig" class="project-settings-tab-pane node-help"></div>');
-        createRemoteRepositorySection(pane);
+        createGitUserSection(pane);
+        createSSHKeySection(pane);
+
         createPublicKeyDialog();
         return pane;
     }

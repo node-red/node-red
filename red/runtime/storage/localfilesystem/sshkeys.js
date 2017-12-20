@@ -28,7 +28,7 @@ function init(_settings, _runtime) {
     settings = _settings;
     runtime = _runtime;
     log = runtime.log;
-    sshkeyDir = fspath.join(settings.userDir, "projects", ".sshkeys");  
+    sshkeyDir = fspath.join(settings.userDir, "projects", ".sshkeys");
     // console.log('sshkeys.init()');
     return createSSHKeyDirectory();
 }
@@ -73,7 +73,7 @@ function listSSHKeys(username) {
                 name: filename
             };
         });
-    });    
+    });
 }
 
 function getSSHKey(username, name) {
@@ -92,12 +92,12 @@ function generateSSHKey(username, options) {
                 throw new Error('Some SSH Keyfile exists');
             }
             else {
-                var email = options.email || "";
+                var comment = options.comment || "";
                 var password = options.password || "";
                 var size = options.size || 2048;
                 var sshKeyFileBasename = username + '_' + name;
                 var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
-                return generateSSHKeyPair(privateKeyFilePath, email, password, size)
+                return generateSSHKeyPair(privateKeyFilePath, comment, password, size)
                     .then(function() {
                         return name;
                     });

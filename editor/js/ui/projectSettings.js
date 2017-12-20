@@ -1088,14 +1088,15 @@ RED.projects.settings = (function() {
             .appendTo(title)
             .click(function(evt) {
                 editRepoButton.attr('disabled',true);
-                addBranchDialog.slideDown(200, function() {
-                    addBranchDialog[0].scrollIntoView();
+                addRemoteDialog.slideDown(200, function() {
+                    addRemoteDialog[0].scrollIntoView();
                 });
             });
 
 
         var emptyItem = { empty: true };
-
+        var row = $('<div class="user-settings-row"></div>').appendTo(repoContainer);
+        var addRemoteDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
         row = $('<div class="user-settings-row projects-dialog-list"></div>').appendTo(repoContainer);
         var remotesList = $('<ol>').appendTo(row);
         remotesList.editableList({
@@ -1192,7 +1193,7 @@ RED.projects.settings = (function() {
             }
         };
         var popover;
-        var addRemoteDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
+
         $('<div class="projects-dialog-list-dialog-header">').text('Add remote').appendTo(addRemoteDialog);
 
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
@@ -1204,7 +1205,7 @@ RED.projects.settings = (function() {
         var remoteNameInputChanged = false;
         $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
-        var fetchLabel = $('<label for=""></label>').text('URL').appendTo(row);
+        $('<label for=""></label>').text('URL').appendTo(row);
         var remoteURLInput = $('<input type="text">').appendTo(row).on("change keyup paste",validateForm);
 
         var hideEditForm = function() {
