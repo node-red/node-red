@@ -584,6 +584,7 @@ RED.projects = (function() {
                             $(".projects-dialog-screen-create-row").hide();
                             $(".projects-dialog-screen-create-row-"+$(this).data('type')).show();
                             validateForm();
+                            projectNameInput.focus();
                         })
 
 
@@ -679,12 +680,12 @@ RED.projects = (function() {
                         })
 
                         row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" checked style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="default" name="projects-encryption-key"> <span style="vertical-align: middle;">Use default key</span></label>').appendTo(row);
-                        row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="custom" name="projects-encryption-key"> <span style="vertical-align: middle;">Use custom key</span></label>').appendTo(row);
-                        row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        emptyProjectCredentialInput = $('<input disabled type="password" style="margin-left: 25px; width: calc(100% - 30px);"></input>').appendTo(row);
+                        $('<label class="projects-edit-form-inline-label">Encryption key</label>').appendTo(row);
+                        // row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
+                        emptyProjectCredentialInput = $('<input type="password"></input>').appendTo(row);
                         emptyProjectCredentialInput.on("change keyup paste", validateForm);
+                        $('<label class="projects-edit-form-sublabel"><small>A phrase to secure your credentials with</small></label>').appendTo(row);
+
 
                         row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
                         $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
@@ -770,6 +771,9 @@ RED.projects = (function() {
 
                         createAsEmpty.click();
 
+                        setTimeout(function() {
+                            projectNameInput.focus();
+                        },50);
                         return container;
                     },
                     buttons: [
@@ -1057,7 +1061,7 @@ RED.projects = (function() {
         dialogBody.append(container);
         dialog.dialog('option','title',screen.title||"");
         dialog.dialog("open");
-        dialog.dialog({position: { 'my': 'center', 'at': 'center', 'of': window }});
+        dialog.dialog({position: { 'my': 'center top', 'at': 'center top+10%', 'of': window }});
     }
 
     var selectedProject = null;
@@ -1179,7 +1183,7 @@ RED.projects = (function() {
                     resultCallbackArgs = {error:responses.statusText};
                     return;
                 } else if (options.handleAuthFail !== false && xhr.responseJSON.error === 'git_auth_failed') {
-                    var url = activeProject.git.remotes.origin.fetch;
+                    var url = activeProject.git.remotes[options.remote||'origin'].fetch;
                     var message = $('<div>'+
                         '<div class="form-row">Authentication required for repository:</div>'+
                         '<div class="form-row"><div style="margin-left: 20px;">'+url+'</div></div>'+

@@ -77,7 +77,7 @@ module.exports = {
             //TODO: validate the payload properly
             if (req.body.active) {
                 var currentProject = runtime.storage.projects.getActiveProject(req.user);
-                if (req.params.id !== currentProject.name) {
+                if (!currentProject || req.params.id !== currentProject.name) {
                     runtime.storage.projects.setActiveProject(req.user, req.params.id).then(function() {
                         res.redirect(303,req.baseUrl + '/');
                     }).catch(function(err) {
@@ -465,8 +465,52 @@ module.exports = {
             })
         });
 
+        // Get a list of remotes
+        app.get("/:id/remotes", needsPermission("projects.read"), function(req, res) {
+            var projectName = req.params.id;
+            runtime.storage.projects.getRemotes(req.user, projectName).then(function(data) {
+                res.json(data);
+            })
+            .catch(function(err) {
+                console.log(err.stack);
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
+            })
+        });
 
+        // Add a remote
+        app.post("/:id/remotes", needsPermission("projects.write"), function(req,res) {
+            var projectName = req.params.id;
+            runtime.storage.projects.addRemote(req.user, projectName, req.body).then(function() {
+                res.redirect(303,req.baseUrl+"/"+projectName+"/remotes");
+            }).catch(function(err) {
+                console.log(err.stack);
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
+            })
+        });
 
+        // Delete a remote
+        app.delete("/:id/remotes/:remoteName", needsPermission("projects.write"), function(req, res) {
+            var projectName = req.params.id;
+            var remoteName = req.params.remoteName;
+            runtime.storage.projects.removeRemote(req.user, projectName, remoteName).then(function(data) {
+                res.redirect(303,req.baseUrl+"/"+projectName+"/remotes");
+            })
+            .catch(function(err) {
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
+            });
+        });
 
         return app;
     }

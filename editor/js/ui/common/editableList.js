@@ -116,6 +116,11 @@
                 this.uiContainer.css("minHeight",minHeight);
                 this.element.css("minHeight",0);
             }
+            var maxHeight = this.element.css("maxHeight");
+            if (maxHeight !== '0px') {
+                this.uiContainer.css("maxHeight",maxHeight);
+                this.element.css("maxHeight",null);
+            }
             if (this.options.height !== 'auto') {
                 this.uiContainer.css("overflow-y","scroll");
                 if (!isNaN(this.options.height)) {

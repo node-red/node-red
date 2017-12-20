@@ -58,6 +58,8 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_pull_merge_conflict";
                 } else if (/not fully merged/.test(stderr)) {
                     err.code = "git_delete_branch_unmerged";
+                } else if (/remote .* already exists/.test(stderr)) {
+                    err.code = "git_remote_already_exists";
                 }
                 return reject(err);
             }

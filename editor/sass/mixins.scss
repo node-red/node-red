@@ -94,6 +94,10 @@
         border-bottom-right-radius: 0;
     }
 
+    .button-row &:not(:first-child) {
+        margin-left: 15px;
+    }
+
     &:focus {
         outline: 1px solid $workspace-button-color-focus-outline;
     }

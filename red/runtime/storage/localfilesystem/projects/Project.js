@@ -117,7 +117,6 @@ Project.prototype.loadRemotes = function() {
     }).then(function() {
         return project.loadBranches();
     }).then(function() {
-
         var allRemotes = Object.keys(project.remotes);
         var match = "";
         allRemotes.forEach(function(remote) {
@@ -519,6 +518,41 @@ Project.prototype.setBranch = function (branchName, isCreate) {
 Project.prototype.getBranchStatus = function (branchName) {
     return gitTools.getBranchStatus(this.path,branchName);
 };
+
+
+
+Project.prototype.getRemotes = function (user) {
+    return gitTools.getRemotes(this.path).then(function(remotes) {
+        var result = [];
+        for (var name in remotes) {
+            if (remotes.hasOwnProperty(name)) {
+                remotes[name].name = name;
+                result.push(remotes[name]);
+            }
+        }
+        return {remotes:result};
+    })
+};
+Project.prototype.addRemote = function(user,remote,options) {
+    var project = this;
+    return gitTools.addRemote(this.path,remote,options).then(function() {
+        return project.loadRemotes()
+    });
+}
+Project.prototype.updateRemote = function(user,remote,options) {
+    // TODO: once the sshkey support is added, move the updating of remotes,
+    // including their auth details, down here.
+}
+Project.prototype.removeRemote = function(user, remote) {
+    // TODO: if this was the last remote using this url, then remove the authCache
+    // details.
+    var project = this;
+    return gitTools.removeRemote(this.path,remote).then(function() {
+        return project.loadRemotes()
+    });
+}
+
+
 Project.prototype.getFlowFile = function() {
     console.log("Project.getFlowFile = ",this.paths.flowFile);
     if (this.paths.flowFile) {

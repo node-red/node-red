@@ -675,78 +675,71 @@
     }
 }
 
-.projects-dialog-remote-list-entry-header {
-    padding: 8px 10px;
-    background: #f6f6f6;
-    margin-bottom: 8px;
-}
-.projects-dialog-remote-list-entry-delete {
-    float: right;
-}
-.projects-dialog-remote-list-entry-copy {
-    float: right;
-}
-
-/*
-.expandable-list-entry {
-    .exandable-list-entry-header {
-        padding: 15px 0;
-        cursor: pointer;
-        &:hover {
-            background: #f3f3f3;
+.projects-dialog-list {
+    position: relative;
+    .red-ui-editableList-container {
+        padding: 1px;
+        background: #f6f6f6;
+        li:last-child {
+            border-bottom: none;
         }
-        i {
-            width: 16px;
-            text-align: center;
-        }
-        .fa-angle-right {
-            color: #333;
-            transition: all 0.2s ease-in-out;
-        }
-    }
-    &.expanded .fa-angle-right {
-        transform: rotate(90deg);
-    }
-}
-*/
-
-.projects-dialog-branch-list {
-    .red-ui-editableList-container li:last-child {
-        border-bottom: none;
     }
 }
 
-.projects-dialog-branch-list-entry {
+.projects-dialog-list-entry {
+    &.red-ui-search-empty {
+        padding: 0;
+    }
+
     span {
         display: inline-block;
     }
-    span:first-child {
+    .entry-icon {
         text-align: center;
         min-width: 30px;
-    }
-    .branch-name {
-        min-width: 150px;
-    }
-    .branch-remote-name {
-        color: #aaa;
-        font-size: 0.9em;
-        min-width: 150px;
-    }
-    .branch-remote-status {
-        color: #aaa;
-        font-size: 0.9em;
-    }
-    .commit {
-        color: #aaa;
-        font-size: 0.9em;
-        padding: 2px 5px;
-
-    }
-
-    .projects-dialog-branch-list-entry-tools {
-        float: right;
-        margin-right: 20px;
-        font-size: 0.9em;
+        vertical-align: top;
         color: #999;
+    }
+    .entry-name {
+        min-width: 250px;
+    }
+    &.current .entry-name {
+        font-weight: bold;
+    }
+    .entry-detail {
+        color: #aaa;
+        font-size: 0.9em;
+    }
+
+    .entry-remote-name {
+        min-width: 250px;
+    }
+
+
+    .entry-tools {
+        float: right;
+        margin-right: 10px;
+    }
+}
+.projects-dialog-list-dialog {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    left: 10px;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid $secondary-border-color;
+    .projects-edit-form-sublabel {
+        margin-top: -8px !important;
+        display: block !important;
+        width: auto !important;
+    }
+
+    .projects-dialog-list-dialog-header {
+        font-weight: bold;
+        background: #f3f3f3;
+        margin-top: 0 !important;
+        padding: 5px 10px;
+        margin-bottom: 10px;
     }
 }

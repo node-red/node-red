@@ -252,6 +252,21 @@ function getBranchStatus(user, project,branchName) {
     checkActiveProject(project);
     return activeProject.getBranchStatus(branchName);
 }
+
+
+function getRemotes(user, project) {
+    checkActiveProject(project);
+    return activeProject.getRemotes(user);
+}
+function addRemote(user, project, options) {
+    checkActiveProject(project);
+    return activeProject.addRemote(user, options.name, options);
+}
+function removeRemote(user, project, remote) {
+    checkActiveProject(project);
+    return activeProject.removeRemote(user, remote);
+}
+
 function getActiveProject(user) {
     return activeProject;
 }
@@ -473,6 +488,9 @@ module.exports = {
     deleteBranch: deleteBranch,
     setBranch: setBranch,
     getBranchStatus:getBranchStatus,
+    getRemotes: getRemotes,
+    addRemote: addRemote,
+    removeRemote: removeRemote,
 
     getFlows: getFlows,
     saveFlows: saveFlows,
