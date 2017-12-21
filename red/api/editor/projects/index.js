@@ -512,6 +512,23 @@ module.exports = {
             });
         });
 
+        // Update a remote
+        app.put("/:id/remotes/:remoteName", needsPermission("projects.write"), function(req,res) {
+            var projectName = req.params.id;
+            var remoteName = req.params.remoteName;
+            runtime.storage.projects.updateRemote(req.user, projectName, remoteName, req.body).then(function(data) {
+                res.status(204).end();
+            })
+            .catch(function(err) {
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
+            });
+
+        });
+
         return app;
     }
 }

@@ -50,15 +50,27 @@ RED.projects.userSettings = (function() {
             .appendTo(title)
             .click(function(evt) {
                 addKeyButton.attr('disabled',true);
-                addKeyDialog.slideDown(200, function() {
-                    // addKeyDialog[0].scrollIntoView();
-                });
+                addKeyDialog.slideDown(200);
+                keyNameInput.focus();
+                saveButton.attr('disabled',true);
             });
 
         var validateForm = function() {
             var validName = /^[a-zA-Z0-9\-_]+$/.test(keyNameInput.val());
-            saveButton.attr('disabled',!validName);
+            var passphrase = passphraseInput.val();
+            var validPassphrase = passphrase.length === 0 || passphrase.length >= 8;
+
+            saveButton.attr('disabled',!validName || !validPassphrase);
             keyNameInput.toggleClass('input-error',keyNameInputChanged&&!validName);
+            passphraseInput.toggleClass('input-error',!validPassphrase);
+            if (!validPassphrase) {
+                passphraseInputSubLabel.text("Passphrase too short");
+            } else if (passphrase.length === 0) {
+                passphraseInputSubLabel.text("Optional");
+            } else {
+                passphraseInputSubLabel.text("");
+            }
+
             if (popover) {
                 popover.close();
                 popover = null;
@@ -68,8 +80,8 @@ RED.projects.userSettings = (function() {
         var row = $('<div class="user-settings-row"></div>').appendTo(container);
         var addKeyDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
         $('<div class="projects-dialog-list-dialog-header">').text('Generate SSH Key').appendTo(addKeyDialog);
-
-        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialog);
+        var addKeyDialogBody = $('<div>').appendTo(addKeyDialog);
+        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
         $('<label for=""></label>').text('Name').appendTo(row);
         var keyNameInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
             keyNameInputChanged = true;
@@ -78,10 +90,10 @@ RED.projects.userSettings = (function() {
         var keyNameInputChanged = false;
         $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
 
-        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialog);
+        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
         $('<label for=""></label>').text('Passphrase').appendTo(row);
         passphraseInput = $('<input type="password">').appendTo(row).on("change keyup paste",validateForm);
-        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row).find("small");
+        var passphraseInputSubLabel = $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row).find("small");
 
         var hideEditForm = function() {
             addKeyButton.attr('disabled',false);
@@ -128,7 +140,7 @@ RED.projects.userSettings = (function() {
                             done(error);
                         },
                         200: function(data) {
-                            refreshSSHKeyList();
+                            refreshSSHKeyList(payload.name);
                             done();
                         },
                         400: {
@@ -166,7 +178,7 @@ RED.projects.userSettings = (function() {
             utils.sendRequest(options);
 
             var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>').appendTo(row);
-            $('<button class="editor-button editor-button-small">Copy to Clipboard</button>')
+            $('<button class="editor-button editor-button-small">Copy to clipboard</button>')
                 .appendTo(formButtons)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -258,10 +270,13 @@ RED.projects.userSettings = (function() {
                             ]
                         });
                     });
+                if (entry.expand) {
+                    expandedRow = expandKey(container,entry);
+                }
             }
         });
 
-        var refreshSSHKeyList = function() {
+        var refreshSSHKeyList = function(justAdded) {
             $.getJSON("settings/user/keys",function(result) {
                 if (result.keys) {
                     result.keys.sort(function(A,B) {
@@ -269,6 +284,9 @@ RED.projects.userSettings = (function() {
                     });
                     keyList.editableList('empty');
                     result.keys.forEach(function(key) {
+                        if (key.name === justAdded) {
+                            key.expand = true;
+                        }
                         keyList.editableList('addItem',key);
                     })
                 }
@@ -278,137 +296,10 @@ RED.projects.userSettings = (function() {
 
     }
 
-
-
-    function sendSSHKeyManagementAPI(type, param, overlay, successCallback, failCallback) {
-        var url;
-        var method;
-        var payload;
-        switch(type) {
-        case 'GET_KEY_LIST':
-            method = 'GET';
-            url    = "settings/user/keys";
-            break;
-        case 'GET_KEY_DETAIL':
-            method = 'GET';
-            url    = "settings/user/keys/" + param;
-            break;
-        case 'GENERATE_KEY':
-            method = 'POST';
-            url    = "settings/user/keys";
-            payload= param;
-            break;
-        case 'DELETE_KEY':
-            method = 'DELETE';
-            url    = "settings/user/keys/" + param;
-            break;
-        default:
-            console.error('Unexpected type....');
-            return;
-        }
-        // var spinner = utils.addSpinnerOverlay(gitconfigContainer);
-        var spinner = overlay ? utils.addSpinnerOverlay(overlay) : null;
-
-        var done = function(err) {
-            if ( spinner ) {
-                spinner.remove();
-            }
-            if (err) {
-                console.log(err);
-                return;
-            }
-        };
-
-        console.log('method:', method);
-        console.log('url:', url);
-
-        utils.sendRequest({
-            url: url,
-            type: method,
-            responses: {
-                0: function(error) {
-                    if ( failCallback ) {
-                        failCallback(error);
-                    }
-                    done(error);
-                },
-                200: function(data) {
-                    if ( successCallback ) {
-                        successCallback(data);
-                    }
-                    done();
-                },
-                400: {
-                    'unexpected_error': function(error) {
-                        console.log(error);
-                        if ( failCallback ) {
-                            failCallback(error);
-                        }
-                        done(error);
-                    }
-                },
-            }
-        },payload);
-    }
-
-    var dialog;
-    var dialogBody;
-    function createPublicKeyDialog() {
-        dialog = $('<div id="projects-dialog" class="hide node-red-dialog projects-edit-form"><form class="form-horizontal"></form></div>')
-            .appendTo("body")
-            .dialog({
-                modal: true,
-                autoOpen: false,
-                width: 600,
-                resize: false,
-                open: function(e) {
-                    $(this).parent().find(".ui-dialog-titlebar-close").hide();
-                },
-                close: function(e) {
-
-                }
-            });
-        dialogBody = dialog.find("form");
-        dialog.dialog('option', 'title', 'SSH public key');
-        dialog.dialog('option', 'buttons', [
-            {
-                text: RED._("common.label.close"),
-                click: function() {
-                    $( this ).dialog( "close" );
-                }
-            },
-            {
-                text: "Copy to Clipboard",
-                click: function() {
-                    var target = document.getElementById('public-key-data');
-                    document.getSelection().selectAllChildren(target);
-                    var ret = document.execCommand('copy');
-                    var msg = ret ? 'successful' : 'unsuccessful';
-                    console.log('Copy text command was ' + msg);
-                    $( this ).dialog("close");
-                }
-            }
-        ]);
-        dialog.dialog({position: { 'my': 'center', 'at': 'center', 'of': window }});
-        var container = $('<div class="projects-dialog-screen-start"></div>');
-        $('<div class="projects-dialog-ssh-public-key-name"></div>').appendTo(container);
-        $('<div class="projects-dialog-ssh-public-key"><pre id="public-key-data"></pre></div>').appendTo(container);
-        dialogBody.append(container);
-    }
-
-    function setDialogContext(name, data) {
-        var title = dialog.find("div.projects-dialog-ssh-public-key-name");
-        title.text(name);
-        var context = dialog.find("div.projects-dialog-ssh-public-key>pre");
-        context.text(data);
-    }
-
     function createSettingsPane(activeProject) {
         var pane = $('<div id="user-settings-tab-gitconfig" class="project-settings-tab-pane node-help"></div>');
         createGitUserSection(pane);
         createSSHKeySection(pane);
-
-        createPublicKeyDialog();
         return pane;
     }
 

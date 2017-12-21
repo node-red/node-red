@@ -266,6 +266,10 @@ function removeRemote(user, project, remote) {
     checkActiveProject(project);
     return activeProject.removeRemote(user, remote);
 }
+function updateRemote(user, project, remote, body) {
+    checkActiveProject(project);
+    return activeProject.updateRemote(user, remote, body);
+}
 
 function getActiveProject(user) {
     return activeProject;
@@ -491,6 +495,7 @@ module.exports = {
     getRemotes: getRemotes,
     addRemote: addRemote,
     removeRemote: removeRemote,
+    updateRemote: updateRemote,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

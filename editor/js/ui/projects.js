@@ -539,9 +539,9 @@ RED.projects = (function() {
                                     $(".projects-dialog-screen-create-row-creds").hide();
                                     $(".projects-dialog-screen-create-row-passphrase").show();
                                     $(".projects-dialog-screen-create-row-sshkey").show();
-                                    if ( !getSelectedSSHKey(projectRepoSSHKeySelect) ) {
-                                        valid = false;
-                                    }
+                                    // if ( !getSelectedSSHKey(projectRepoSSHKeySelect) ) {
+                                    //     valid = false;
+                                    // }
                                 } else if (/^https?:\/\//.test(repo)) {
                                     $(".projects-dialog-screen-create-row-creds").show();
                                     $(".projects-dialog-screen-create-row-passphrase").hide();
@@ -576,7 +576,7 @@ RED.projects = (function() {
                                     }
                                 }
                             }
-                            
+
                             $("#projects-dialog-create").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
                         }
 
@@ -757,14 +757,21 @@ RED.projects = (function() {
                         projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(container);
-                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Private key file</label>').appendTo(row);
-                        projectRepoSSHKeySelect = createSSHKeyList({
-                            height: "120px",
-                            selectAction: function(entry, header) {
-                                $('.projects-dialog-sshkey-list-entry').removeClass('selected');
-                                header.addClass('selected');
+
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Key</label>').appendTo(row);
+                        projectRepoSSHKeySelect = $("<select>").appendTo(row);
+
+                        $.getJSON("settings/user/keys", function(data) {
+                            var count = 0;
+                            data.keys.forEach(function(key) {
+                                projectRepoSSHKeySelect.append($("<option></option>").val(key.name).text(key.name));
+                                count++;
+                            });
+                            if (count === 0) {
+                                // projectRepoSSHKeySelect
                             }
-                        }).appendTo(row);
+                        });
+
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-passphrase"></div>').hide().appendTo(container);
                         $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH key passphrase</label>').appendTo(row);
@@ -838,17 +845,17 @@ RED.projects = (function() {
                                     var repoUrl = projectRepoInput.val();
                                     var metaData = {};
                                     if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repoUrl)) {
-                                        var selected = getSelectedSSHKey(projectRepoSSHKeySelect);
-                                        if ( selected && selected.name ) {
+                                        var selected = projectRepoSSHKeySelect.val();//false;//getSelectedSSHKey(projectRepoSSHKeySelect);
+                                        if ( selected ) {
                                             projectData.git = {
                                                 remotes: {
                                                     'origin': {
                                                         url: repoUrl,
-                                                        key_file: selected.name,
+                                                        key_file: selected,
                                                         passphrase: projectRepoPassphrase.val()
                                                     }
                                                 }
-                                            };    
+                                            };
                                         }
                                         else {
                                             console.log("Error! Can't get selected SSH key path.");
@@ -1156,86 +1163,8 @@ RED.projects = (function() {
         return container;
     }
 
-    function createSSHKeyList(options) {
-        options = options || {};
-        var minHeight = "33px";
-        var maxHeight = options.height || "120px";
-        var container = $('<div></div>',{style:"max-height: "+maxHeight+";"});
-        
-        var sshkeyList = $('<ol>',{class:"projects-dialog-sshkey-list", style:"max-height:"+maxHeight+";min-height:"+minHeight+";"}).appendTo(container).editableList({
-            addButton: false,
-            scrollOnAdd: false,
-            addItem: function(row,index,entry) {
-                var header = $('<div></div>',{class:"projects-dialog-sshkey-list-entry"}).appendTo(row);
-                $('<span class="projects-dialog-sshkey-list-entry-icon"><i class="fa fa-key"></i></span>').appendTo(header);
-                $('<span class="projects-dialog-sshkey-list-entry-name" style=""></span>').text(entry.name).appendTo(header);
-                var deleteButton = $('<span/>',{class:"projects-dialog-sshkey-list-entry-icon projects-dialog-sshkey-list-button-remove editor-button editor-button-small"})
-                    .hide()
-                    .appendTo(header)
-                    .click(function(evt) {
-                        evt.preventDefault();
-                        console.log('deleteButton --- click');
-                        if ( options.deleteAction ) {
-                            options.deleteAction(entry, header);
-                        }
-                        return false;
-                    });
-                $('<i/>',{class:"fa fa-trash-o"}).appendTo(deleteButton);
-                header.addClass("selectable");
-                row.click(function(evt) {
-                    if ( !deleteButton.is(":visible") ) {
-                        if ( options.selectAction ) {
-                            options.selectAction(entry, header);
-                        }
-                        $.data(container[0], 'selected', entry);
-                    }
-                    return false;
-                })
-            }            
-        });
-        $.getJSON("settings/user/keys", function(data) {
-            data.keys.forEach(function(key) {
-                if ( sshkeyList ) {
-                    sshkeyList.editableList('addItem',key);
-                }
-                else {
-                    console.log('[create] Error! selectedSSHKey is not set up.');
-                }
-            });
-        });
-        if ( sshkeyList ) {
-            sshkeyList.addClass("projects-dialog-sshkey-list-small");
-            $.data(container[0], 'selected', null);
-            $.data(container[0], 'sshkeys', sshkeyList);
-        }
-        return container;
-    }
-    function getSelectedSSHKey(container) {
-        var selected = $.data(container[0], 'selected');
-        if ( container && selected ) {
-            return selected;
-        }
-        else {
-            return null;
-        }
-    }
-    function refreshSSHKeyList(container) {
-        var sshkeyList = $.data(container[0], 'sshkeys');
-        if ( container && sshkeyList ) {
-            sshkeyList.empty();
-            $.getJSON("settings/user/keys", function(data) {
-                var keyList = $.data(container[0], 'sshkeys');
-                data.keys.forEach(function(key) {
-                    if ( keyList ) {
-                        keyList.editableList('addItem',key);
-                    }
-                    else {
-                        console.log('[refresh] Error! selectedSSHKey is not set up.');
-                    }
-                });
-            });
-        }
-    }
+
+
 
     function sendRequest(options,body) {
         // dialogBody.hide();
@@ -1306,12 +1235,36 @@ RED.projects = (function() {
                     return;
                 } else if (options.handleAuthFail !== false && xhr.responseJSON.error === 'git_auth_failed') {
                     var url = activeProject.git.remotes[options.remote||'origin'].fetch;
+
                     var message = $('<div>'+
                         '<div class="form-row">Authentication required for repository:</div>'+
                         '<div class="form-row"><div style="margin-left: 20px;">'+url+'</div></div>'+
-                        '<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
-                        '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>'+
                         '</div>');
+
+                    var isSSH = false;
+                    if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(url)) {
+                        isSSH = true;
+                        var row = $('<div class="form-row"></div>').appendTo(message);
+                        $('<label for="projects-user-auth-key">SSH Key</label>').appendTo(row);
+                        var projectRepoSSHKeySelect = $('<select id="projects-user-auth-key">').width('70%').appendTo(row);
+                        $.getJSON("settings/user/keys", function(data) {
+                            var count = 0;
+                            data.keys.forEach(function(key) {
+                                projectRepoSSHKeySelect.append($("<option></option>").val(key.name).text(key.name));
+                                count++;
+                            });
+                            if (count === 0) {
+                                // projectRepoSSHKeySelect
+                            }
+                        });
+                        row = $('<div class="form-row"></div>').appendTo(message);
+                        $('<label for="projects-user-auth-passphrase">Passphrase</label>').appendTo(row);
+                        $('<input id="projects-user-auth-passphrase" type="password"></input>').appendTo(row);
+                    } else {
+                        $('<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
+                          '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
+                    }
+
                     var notification = RED.notify(message,{
                         type:"error",
                         fixed: true,
@@ -1327,14 +1280,15 @@ RED.projects = (function() {
                             },{
                                 text: $('<span><i class="fa fa-refresh"></i> Retry</span>'),
                                 click: function() {
-                                    var username = $('#projects-user-auth-username').val();
-                                    var password = $('#projects-user-auth-password').val();
                                     body = body || {};
-                                    var authBody = {git:{remotes:{}}};
-                                    authBody.git.remotes[options.remote||'origin'] = {
-                                        username: username,
-                                        password: password
-                                    };
+                                    var authBody = {};
+                                    if (isSSH) {
+                                        authBody.keyFile = $('#projects-user-auth-key').val();
+                                        authBody.passphrase = $('#projects-user-auth-passphrase').val();
+                                    } else {
+                                        authBody.username = $('#projects-user-auth-username').val();
+                                        authBody.password = $('#projects-user-auth-password').val();
+                                    }
                                     var done = function(err) {
                                         if (err) {
                                             console.log("Failed to update auth");
@@ -1346,7 +1300,7 @@ RED.projects = (function() {
 
                                     }
                                     sendRequest({
-                                        url: "projects/"+activeProject.name,
+                                        url: "projects/"+activeProject.name+"/remotes/"+(options.remote||'origin'),
                                         type: "PUT",
                                         responses: {
                                             0: function(error) {
@@ -1361,7 +1315,7 @@ RED.projects = (function() {
                                                 }
                                             },
                                         }
-                                    },authBody);
+                                    },{auth:authBody});
                                 }
                             }
                         ]
@@ -1553,9 +1507,7 @@ RED.projects = (function() {
         var projectsAPI = {
             sendRequest:sendRequest,
             createBranchList:createBranchList,
-            addSpinnerOverlay:addSpinnerOverlay,
-            createSSHKeyList:createSSHKeyList,
-            refreshSSHKeyList:refreshSSHKeyList
+            addSpinnerOverlay:addSpinnerOverlay
         };
         RED.projects.settings.init(projectsAPI);
         RED.projects.userSettings.init(projectsAPI);

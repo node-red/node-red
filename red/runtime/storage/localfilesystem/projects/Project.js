@@ -120,12 +120,14 @@ Project.prototype.loadRemotes = function() {
     }).then(function() {
         var allRemotes = Object.keys(project.remotes);
         var match = "";
-        allRemotes.forEach(function(remote) {
-            if (project.branches.remote.indexOf(remote) === 0 && match.length < remote.length) {
-                match = remote;
-            }
-        });
-        project.currentRemote = project.parseRemoteBranch(project.branches.remote).remote;
+        if (project.branches.remote) {
+            allRemotes.forEach(function(remote) {
+                if (project.branches.remote.indexOf(remote) === 0 && match.length < remote.length) {
+                    match = remote;
+                }
+            });
+            project.currentRemote = project.parseRemoteBranch(project.branches.remote).remote;
+        }
     });
 }
 
@@ -541,8 +543,21 @@ Project.prototype.addRemote = function(user,remote,options) {
     });
 }
 Project.prototype.updateRemote = function(user,remote,options) {
-    // TODO: once the sshkey support is added, move the updating of remotes,
-    // including their auth details, down here.
+    var username;
+    if (!user) {
+        username = "_";
+    } else {
+        username = user.username;
+    }
+
+    if (options.auth) {
+        var url = this.remotes[remote].fetch;
+        if (options.auth.keyFile) {
+            options.auth.key_path = fspath.join(projectsDir, ".sshkeys", ((username === '_')?'__default':username) + '_' + options.auth.keyFile);
+        }
+        authCache.set(this.name,url,username,options.auth);
+    }
+    return Promise.resolve();
 }
 Project.prototype.removeRemote = function(user, remote) {
     // TODO: if this was the last remote using this url, then remove the authCache
@@ -764,7 +779,7 @@ function createProject(user, metadata) {
                         auth = authCache.get(project,originRemote.url,username);
                     }
                     else if (originRemote.hasOwnProperty("key_file") && originRemote.hasOwnProperty("passphrase")) {
-                        var key_file_name = (username === '_') ? '.default' + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
+                        var key_file_name = (username === '_') ? '__default' + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
                                 key_path: fspath.join(projectsDir, ".sshkeys", key_file_name),
                                 passphrase: originRemote.passphrase

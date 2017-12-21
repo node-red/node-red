@@ -151,6 +151,18 @@ describe("api/editor/sshkeys", function() {
         });
     });
 
+    it('GET /settings/user/keys/<key_file_name> --- return 404', function(done) {
+        mockRuntime.storage.sshkeys.getSSHKey.returns(Promise.resolve(null));
+        request(app)
+        .get("/settings/user/keys/NOT_REAL")
+        .expect(404)
+        .end(function(err,res) {
+            if (err) {
+                return done(err);
+            }
+            done();
+        });
+    });
     it('GET /settings/user/keys --- return Unexpected Error', function(done) {
         var errInstance = new Error("Messages.....");
         mockRuntime.storage.sshkeys.listSSHKeys.returns(Promise.reject(errInstance));

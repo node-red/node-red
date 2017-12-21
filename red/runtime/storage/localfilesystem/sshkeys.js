@@ -80,6 +80,8 @@ function getSSHKey(username, name) {
     return checkSSHKeyFileAndGetPublicKeyFileName(username, name)
     .then(function(publicSSHKeyPath) {
         return fs.readFile(publicSSHKeyPath, 'utf-8');
+    }).catch(function() {
+        return null;
     });
 }
 
@@ -89,29 +91,32 @@ function generateSSHKey(username, options) {
     return checkExistSSHKeyFiles(username, name)
         .then(function(result) {
             if ( result ) {
-                throw new Error('Some SSH Keyfile exists');
-            }
-            else {
+                var e = new Error("SSH Key name exists");
+                e.code = "key_exists";
+                throw e;
+            } else {
                 var comment = options.comment || "";
                 var password = options.password || "";
+                if (password.length > 0 && password.length < 5) {
+                    var e2 = new Error("SSH Key passphrase too short");
+                    e2.code = "key_passphrase_too_short";
+                    throw e2;
+                }
                 var size = options.size || 2048;
                 var sshKeyFileBasename = username + '_' + name;
                 var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
-                return generateSSHKeyPair(privateKeyFilePath, comment, password, size)
-                    .then(function() {
-                        return name;
-                    });
+                return generateSSHKeyPair(name, privateKeyFilePath, comment, password, size)
             }
         })
-        .then(function(keyfile_name) {
-            return checkSSHKeyFileAndGetPublicKeyFileName(username, name)
-                .then(function() {
-                    return keyfile_name;
-                })
-                .catch(function() {
-                    throw new Error('Failed to generate ssh key files');
-                });
-        });
+        // .then(function(keyfile_name) {
+        //     return checkSSHKeyFileAndGetPublicKeyFileName(username, name)
+        //         .then(function() {
+        //             return keyfile_name;
+        //         })
+        //         .catch(function(err) {
+        //             throw new Error('Failed to generate ssh key files');
+        //         });
+        // });
 }
 
 function deleteSSHKey(username, name) {
@@ -125,7 +130,7 @@ function checkExistSSHKeyFiles(username, name) {
     var sshKeyFileBasename = username + '_' + name;
     var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
     var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
-    return Promise.race([
+    return Promise.all([
         fs.access(privateKeyFilePath, (fs.constants || fs).R_OK),
         fs.access(publicKeyFilePath , (fs.constants || fs).R_OK)
     ])
@@ -157,13 +162,11 @@ function deleteSSHKeyFiles(username, name) {
     return Promise.all([
         fs.remove(privateKeyFilePath),
         fs.remove(publicKeyFilePath)
-    ])
-    .then(function(retArray) {
-        return true;
-    });
+    ]);
 }
 
-function generateSSHKeyPair(privateKeyPath, comment, password, size) {
+function generateSSHKeyPair(name, privateKeyPath, comment, password, size) {
+    log.trace("ssh-keygen["+[name,privateKeyPath,comment,size,"hasPassword?"+!!password].join(",")+"]");
     return new Promise(function(resolve, reject) {
         keygen({
             location: privateKeyPath,
@@ -172,10 +175,11 @@ function generateSSHKeyPair(privateKeyPath, comment, password, size) {
             size: size
         }, function(err, out) {
             if ( err ) {
+                err.code = "key_generation_failed";
                 reject(err);
             }
             else {
-                resolve();
+                resolve(name);
             }
         });
     });

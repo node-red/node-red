@@ -63,12 +63,15 @@ module.exports = {
             // console.log('username:', username);
             runtime.storage.sshkeys.getSSHKey(username, req.params.id)
             .then(function(data) {
-                res.json({
-                    publickey: data
-                });
+                if (data) {
+                    res.json({
+                        publickey: data
+                    });
+                } else {
+                    res.status(404).end();
+                }
             })
             .catch(function(err) {
-                console.log(err.stack);
                 if (err.code) {
                     res.status(400).json({error:err.code, message: err.message});
                 } else {
@@ -90,7 +93,6 @@ module.exports = {
                     });
                 })
                 .catch(function(err) {
-                    console.log(err.stack);
                     if (err.code) {
                         res.status(400).json({error:err.code, message: err.message});
                     } else {
@@ -107,11 +109,10 @@ module.exports = {
         app.delete("/:id", needsPermission("settings.write"), function(req,res) {
             var username = getUsername(req.user);
             runtime.storage.sshkeys.deleteSSHKey(username, req.params.id)
-            .then(function(ret) {
+            .then(function() {
                 res.status(204).end();
             })
             .catch(function(err) {
-                console.log(err.stack);
                 if (err.code) {
                     res.status(400).json({error:err.code, message: err.message});
                 } else {
