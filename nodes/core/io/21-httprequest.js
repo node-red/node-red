@@ -135,7 +135,7 @@ module.exports = function(RED) {
             }
             var payload = null;
 
-            if (typeof msg.payload !== "undefined" && (method == "POST" || method == "PUT" || method == "PATCH" ) ) {
+            if (msg.payload && (method == "POST" || method == "PUT" || method == "PATCH" || method == "PROPPATCH" || method == "PROPFIND" ) ) {
                 if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
                     payload = msg.payload;
                 } else if (typeof msg.payload == "number") {
