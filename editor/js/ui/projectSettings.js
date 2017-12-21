@@ -964,6 +964,11 @@ RED.projects.settings = (function() {
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
                 var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
+                if (entry.empty) {
+                    container.addClass('red-ui-search-empty');
+                    container.text("No branches");
+                    return;
+                }
                 if (entry.current) {
                     container.addClass("current");
                 }
@@ -1064,14 +1069,18 @@ RED.projects.settings = (function() {
 
         $.getJSON("projects/"+activeProject.name+"/branches",function(result) {
             if (result.branches) {
-                result.branches.sort(function(A,B) {
-                    if (A.current) { return -1 }
-                    if (B.current) { return 1 }
-                    return A.name.localeCompare(B.name);
-                });
-                result.branches.forEach(function(branch) {
-                    branchList.editableList('addItem',branch);
-                })
+                if (result.branches.length > 0) {
+                    result.branches.sort(function(A,B) {
+                        if (A.current) { return -1 }
+                        if (B.current) { return 1 }
+                        return A.name.localeCompare(B.name);
+                    });
+                    result.branches.forEach(function(branch) {
+                        branchList.editableList('addItem',branch);
+                    })
+                } else {
+                    branchList.editableList('addItem',{empty:true});
+                }
             }
         })
     }
