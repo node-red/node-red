@@ -184,7 +184,7 @@
             RED.comms.subscribe("debug",this.handleDebugMessage);
 
             this.clearMessageList = function() {
-                RED.debug.clearMessageList();
+                RED.debug.clearMessageList(true);
                 if (subWindow) {
                     try {
                         subWindow.postMessage({event:"projectChange"},"*");

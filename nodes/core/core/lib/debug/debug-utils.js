@@ -218,7 +218,7 @@ RED.debug = (function() {
 
         toolbar.find("#debug-tab-clear").click(function(e) {
             e.preventDefault();
-            clearMessageList();
+            clearMessageList(false);
         });
 
 
@@ -506,10 +506,12 @@ RED.debug = (function() {
         }
     }
 
-    function clearMessageList() {
+    function clearMessageList(clearFilter) {
         $(".debug-message").remove();
         config.clear();
-        clearFilterSettings();
+        if (!!clearFilter) {
+            clearFilterSettings();
+        }
         refreshDebugNodeList();
     }
 
