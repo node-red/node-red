@@ -121,6 +121,12 @@ function Flow(global,flow) {
                 }
             }
         }
+
+        for ( z in catchNodeMap) {
+            catchNodeMap[z].sort(function(a, b) {
+                return a.catchPrecedence - b.catchPrecedence;
+            });
+        }        
     }
 
     this.stop = function(stopList, removedList) {

@@ -21,6 +21,12 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.scope = n.scope;
+
+        if (node.scope == null)  // null = catch all
+            node.catchPrecedence = 10;
+        else 
+            node.catchPrecedence = 5;
+
         this.on("input",function(msg) {
             this.send(msg);
         });
