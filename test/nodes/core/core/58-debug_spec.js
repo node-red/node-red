@@ -37,7 +37,7 @@ describe('debug node', function() {
 
 
     it('should be loaded', function(done) {
-        var flow = [{id:"n1", type:"debug", name: "Debug", complete:"false" }];
+        var flow = [{id:"n1", type:"debug", name:"Debug", complete:"false" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'Debug');
@@ -47,7 +47,7 @@ describe('debug node', function() {
     });
 
     it('should publish on input', function(done) {
-        var flow = [{id:"n1", type:"debug", name: "Debug" }];
+        var flow = [{id:"n1", type:"debug", name:"Debug" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
@@ -92,7 +92,7 @@ describe('debug node', function() {
     });
 
     it('should publish complete message', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "true" }];
+        var flow = [{id:"n1", type:"debug", complete:"true" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
@@ -107,7 +107,7 @@ describe('debug node', function() {
     });
 
     it('should publish other property', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "foo" }];
+        var flow = [{id:"n1", type:"debug", complete:"foo" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
@@ -121,7 +121,7 @@ describe('debug node', function() {
     });
 
     it('should publish multi-level properties', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "foo.bar" }];
+        var flow = [{id:"n1", type:"debug", complete:"foo.bar" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
@@ -139,7 +139,7 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: new Error("oops")});
+                n1.emit("input", {payload:new Error("oops")});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:'{"name":"Error","message":"oops"}',property:"payload",format:"error"}
@@ -153,10 +153,24 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: true});
+                n1.emit("input", {payload:true});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
-                    topic:"debug",data:{id:"n1",msg: 'true',property:"payload",format:"boolean"}
+                    topic:"debug",data:{id:"n1",msg:'true',property:"payload",format:"boolean"}
+                }]);
+            }, done);
+        });
+    });
+
+    it('should publish a NaN', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload:Number.NaN});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:"NaN",property:"payload",format:"number"}
                 }]);
             }, done);
         });
@@ -170,7 +184,7 @@ describe('debug node', function() {
                 n1.emit("input", {});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
-                    topic:"debug",data:{id:"n1",msg: '(undefined)',property:"payload",format:"undefined"}
+                    topic:"debug",data:{id:"n1",msg:'(undefined)',property:"payload",format:"undefined"}
                 }]);
             }, done);
         });
@@ -181,7 +195,7 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: {type:'foo'}});
+                n1.emit("input", {payload:{type:'foo'}});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
@@ -196,11 +210,11 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: [0,1,2,3]});
+                n1.emit("input", {payload:[0,1,2,3]});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
-                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
+                    data:{id:"n1",msg:'[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
                     property:"payload"}
                 }]);
             }, done);
@@ -212,9 +226,9 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                var o = { name: 'bar' };
+                var o = { name:'bar' };
                 o.o = o;
-                n1.emit("input", {payload: o});
+                n1.emit("input", {payload:o});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
@@ -233,14 +247,14 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: Array(1002).join("X")});
+                n1.emit("input", {payload:Array(1002).join("X")});
             }, function(msg) {
                 var a = JSON.parse(msg);
                 a.should.eql([{
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: Array(1001).join("X")+'...',
+                        msg:Array(1001).join("X")+'...',
                         property:"payload",
                         format:"string[1001]"
                     }
@@ -254,15 +268,15 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: new Buffer('HELLO', 'utf8')});
+                n1.emit("input", {payload:new Buffer('HELLO', 'utf8')});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: '48454c4c4f',
+                        msg:'48454c4c4f',
                         property:"payload",
-                        format: "buffer[5]"
+                        format:"buffer[5]"
                     }
                 }]);
             }, done);
@@ -270,7 +284,7 @@ describe('debug node', function() {
     });
 
     it('should publish when active', function(done) {
-        var flow = [{id:"n1", type:"debug", active: false }];
+        var flow = [{id:"n1", type:"debug", active:false }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
@@ -290,7 +304,7 @@ describe('debug node', function() {
     });
 
     it('should not publish when inactive', function(done) {
-        var flow = [{id:"n1", type:"debug", active: true }];
+        var flow = [{id:"n1", type:"debug", active:true }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function(close) {
@@ -315,7 +329,7 @@ describe('debug node', function() {
 
     describe('post', function() {
         it('should return 404 on invalid state', function(done) {
-            var flow = [{id:"n1", type:"debug", active: true }];
+            var flow = [{id:"n1", type:"debug", active:true }];
             helper.load(debugNode, flow, function() {
                 helper.request()
                     .post('/debug/n1/foobar')
