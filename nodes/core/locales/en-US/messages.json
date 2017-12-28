@@ -75,7 +75,8 @@
             "type": "type",
             "selectAll": "select all",
             "sortByLabel": "sort by label",
-            "sortByType": "sort by type"
+            "sortByType": "sort by type",
+            "cancelAdjacentPropagation": "Cancel adjacent propagation"
         },
         "scope": {
             "all": "all nodes",

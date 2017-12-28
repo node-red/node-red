@@ -75,7 +75,8 @@
             "type": "型",
             "selectAll": "全て選択",
             "sortByLabel": "ノード名で並べ替え",
-            "sortByType": "型で並べ替え"
+            "sortByType": "型で並べ替え",
+            "cancelAdjacentPropagation": "隣接伝播をキャンセルする"
         },
         "scope": {
             "all": "全てのノード",

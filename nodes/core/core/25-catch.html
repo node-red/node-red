@@ -23,6 +23,10 @@
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
+    <div class="form-row">
+        <label style="width: auto" for="node-input-cancel-adjacent-propagation"><i class="fa fa-tag"></i> <span data-i18n="catch.label.cancelAdjacentPropagation"></span></label>
+        <input type="checkbox" id="node-input-cancel-adjacent-propagation" checked="unchecked" style="width: 30px; margin: 0 2px 1px 2px;">
+    </div>
 </script>
 <script type="text/x-red" data-help-name="catch">
     <p>Catch errors thrown by nodes on the same tab.</p>
@@ -47,7 +51,10 @@
     <p>If an error is thrown within a subflow, the error will get handled by any
        catch nodes within the subflow. If none exists, the error will be propagated
        up to the tab the subflow instance is on.</p>
-   <p>If the message already has a <code>error</code> property, it is copied to <code>_error</code>.</p>
+    <p>Catch nodes wich "catch all" will receive the message at last.</p>       
+    <p>If "Cancel adjacent propagation" field is checked, the message will not send to
+       the rest of matching catch nodes in the same tab.</p>
+    <p>If the message already has a <code>error</code> property, it is copied to <code>_error</code>.</p>
 </script>
 <style>
 #node-input-catch-target-container {
@@ -88,7 +95,8 @@
         color:"#e49191",
         defaults: {
             name: {value:""},
-            scope: {value:null}
+            scope: {value:null},
+            cancelAdjacentPropagation: {value:false}
         },
         inputs:0,
         outputs:1,
@@ -245,6 +253,7 @@
                 $("#node-input-scope-select").val("target");
             }
             $("#node-input-scope-select").change();
+            $("#node-input-cancel-adjacent-propagation").prop('checked', this.cancelAdjacentPropagation || false);
         },
         oneditsave: function() {
             var scope = $("#node-input-scope-select").val();
@@ -258,7 +267,8 @@
                         node.scope.push($(this).data('node-id'));
                     }
                 });
-            }
+            };
+            this.cancelAdjacentPropagation = $("#node-input-cancel-adjacent-propagation").is(':checked');
         },
         oneditresize: function(size) {
             this.resize();

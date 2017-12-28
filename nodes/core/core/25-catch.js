@@ -22,10 +22,12 @@ module.exports = function(RED) {
         var node = this;
         this.scope = n.scope;
 
-        if (node.scope == null)  // null = catch all
-            node.catchPrecedence = 10;
+        if (this.scope == null)  // null = catch all
+            this.catchPrecedence = 10;
         else 
-            node.catchPrecedence = 5;
+            this.catchPrecedence = 5;
+
+        this.cancelAdjacentPropagation = n.cancelAdjacentPropagation;
 
         this.on("input",function(msg) {
             this.send(msg);
