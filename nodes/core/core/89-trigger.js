@@ -104,6 +104,7 @@ module.exports = function(RED) {
 
                     if (node.duration === 0) { node.topics[topic].tout = 0; }
                     else if (node.loop === true) {
+                        /* istanbul ignore else  */
                         if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
                         /* istanbul ignore else  */
                         if (node.op1type !== "nul") {
@@ -129,16 +130,19 @@ module.exports = function(RED) {
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     /* istanbul ignore else  */
-                    if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
                     if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
+                    /* istanbul ignore else  */
+                    if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
                     node.topics[topic].tout = setTimeout(function() {
                         if (node.op2type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
                             if (node.op2type === "flow" || node.op2type === "global") {
                                 node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                             }
-                            msg2.payload = node.topics[topic].m2;
-                            node.send(msg2);
+                            if (node.topics[topic] !== undefined) {
+                                msg2.payload = node.topics[topic].m2;
+                                node.send(msg2);
+                            }
                         }
                         delete node.topics[topic];
                         node.status({});
