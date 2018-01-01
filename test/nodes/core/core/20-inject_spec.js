@@ -46,20 +46,22 @@ describe('inject node', function() {
 
     it('should inject once with delay', function(done) {
       this.timeout(3000);
+
       var timestamp = new Date();
       timestamp.setSeconds(timestamp.getSeconds() + 1);
+
       helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
-            payload:"",payloadType:"date",
-            once: true, onceDelay: 2000, wires:[["n2"]] },
-            {id:"n2", type:"helper"}],
-          function() {
-            var n2 = helper.getNode("n2");
-            n2.on("input", function(msg) {
-              msg.should.have.property('topic', 't1');
-              // should.be.greaterThan(msg.payload, timestamp.getTime());
-              done();
-            });
-          });
+                  payload:"",payloadType:"date",
+                  once: true, onceDelay: 2000, wires:[["n2"]] },
+                  {id:"n2", type:"helper"}],
+                function() {
+                  var n2 = helper.getNode("n2");
+                  n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 't1');
+                    should(msg.payload).be.greaterThan(timestamp.getTime());
+                    done();
+                  });
+                });
     });
 
     it('should inject repeatedly', function(done) {
