@@ -64,7 +64,8 @@
         "success": "Successfully injected: __label__",
         "errors": {
             "failed": "inject failed, see log for details"
-        }
+        },
+        "onceDelay": "Delay"
     },
     "catch": {
         "catch": "catch all",

@@ -112,7 +112,10 @@
         <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-once" style="width: 70%;" data-i18n="inject.onstart"></label>
     </div>
-
+    <div class="form-row" id="node-onceDelay">
+        <label for="node-input-onceDelay"><i class="fa fa-clock-o"></i> <span data-i18n="inject.onceDelay"></span></label>
+        <input type="text" id="node-input-onceDelay" placeholder="100" style="width:120px">&nbsp;msec.
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -183,7 +186,8 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             payloadType: {value:"date"},
             repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0))) }},
             crontab: {value:""},
-            once: {value:false}
+            once: {value:false},
+            onceDelay: {value:""}
         },
         icon: "inject.png",
         inputs:0,
@@ -272,6 +276,14 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
                     $("#node-input-once").prop('checked', false);
                 }
             });
+
+            $('#node-input-once').change(function () {
+                if ($(this).is(':checked')) {
+                    $('#node-onceDelay').show()
+                } else {
+                    $('#node-onceDelay').hide()
+                }
+            })
 
             $(".inject-time-times").each(function() {
                 for (var i=0; i<24; i++) {
