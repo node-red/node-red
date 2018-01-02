@@ -112,16 +112,17 @@ module.exports = function(RED) {
                     }
                     else {
                         node.topics[topic].tout = setTimeout(function() {
+                            var msg2 = null;
                             if (node.op2type !== "nul") {
-                                var msg2 = RED.util.cloneMessage(msg);
+                                msg2 = RED.util.cloneMessage(msg);
                                 if (node.op2type === "flow" || node.op2type === "global") {
                                     node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                                 }
                                 msg2.payload = node.topics[topic].m2;
-                                node.send(msg2);
                             }
                             delete node.topics[topic];
                             node.status({});
+                            node.send(msg2);
                         }, node.duration);
                     }
                     node.status({fill:"blue",shape:"dot",text:" "});
@@ -130,18 +131,19 @@ module.exports = function(RED) {
                     if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
                     if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
                     node.topics[topic].tout = setTimeout(function() {
+                        var msg2 = null;
                         if (node.op2type !== "nul") {
-                            var msg2 = RED.util.cloneMessage(msg);
                             if (node.op2type === "flow" || node.op2type === "global") {
                                 node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                             }
                             if (node.topics[topic] !== undefined) {
+                                msg2 = RED.util.cloneMessage(msg);
                                 msg2.payload = node.topics[topic].m2;
-                                node.send(msg2);
                             }
                         }
                         delete node.topics[topic];
                         node.status({});
+                        node.send(msg2);
                     }, node.duration);
                 }
                 else {
