@@ -28,7 +28,7 @@ describe('inject node', function() {
         helper.unload();
     });
 
-    it('should inject simple once', function(done) {
+    it('should inject once without onceDelay property', function(done) {
         var timestamp = new Date();
         timestamp.setSeconds(timestamp.getSeconds() + 1);
 
