@@ -183,7 +183,7 @@ module.exports = function(RED) {
             });
         }
         else if (mode === "interval") {
-            var interval = parseInt(n.interval || "0") *1000;
+            var interval = Number(n.interval || "0") *1000;
             var allow_empty_seq = n.allowEmptySequence;
             node.msg_queue = []
             var timer = setInterval(function() {

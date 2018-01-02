@@ -165,6 +165,16 @@ describe('BATCH node', function() {
             check_interval(flow, results, 450, done);
         });
 
+        it('should create seq. with interval (in float)', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 0.5, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            var results = [
+                [0, 1],
+                [2, 3]
+            ];
+            check_interval(flow, results, 225, done);
+        });
+
         it('should create seq. with interval & not send empty seq', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
@@ -189,7 +199,7 @@ describe('BATCH node', function() {
     
     describe('mode: concat', function() {
 
-        it('should concat two seq.', function(done) {
+        it('should concat two seq. (series)', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
@@ -200,6 +210,21 @@ describe('BATCH node', function() {
                 ["TB", 1, 1, 2],
                 ["TA", 2, 0, 2],
                 ["TA", 3, 1, 2]
+            ];
+            check_concat(flow, results, inputs, done);
+        });
+
+        it('should concat two seq. (mixed)', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            var results = [
+                [2, 3, 0, 1]
+            ];
+            var inputs = [
+                ["TA", 2, 0, 2],
+                ["TB", 0, 0, 2],
+                ["TA", 3, 1, 2],
+                ["TB", 1, 1, 2]
             ];
             check_concat(flow, results, inputs, done);
         });
