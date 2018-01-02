@@ -26,16 +26,14 @@ module.exports = function(RED) {
         this.repeat = n.repeat;
         this.crontab = n.crontab;
         this.once = n.once;
-        this.onceDelay = n.onceDelay || 0.1; // seconds
+        this.onceDelay = (n.onceDelay || 0.1) * 1000;
         var node = this;
         this.interval_id = null;
         this.cronjob = null;
 
-        node.factorSecondsToMilliseconds = 1000;
-
         node.repeaterSetup = function () {
           if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {
-            this.repeat = this.repeat * node.factorSecondsToMilliseconds;
+            this.repeat = this.repeat * 1000;
             if (RED.settings.verbose) {
               this.log(RED._("inject.repeat", this));
             }
@@ -54,7 +52,7 @@ module.exports = function(RED) {
             setTimeout( function() {
               node.emit("input",{});
               node.repeaterSetup();
-            }, this.onceDelay * node.factorSecondsToMilliseconds);
+            }, this.onceDelay);
         } else {
           node.repeaterSetup();
         }

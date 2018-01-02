@@ -28,7 +28,7 @@
 
     <div class="form-row" id="node-once">
         <label for="node-input-once">&nbsp;</label>
-        <input type="checkbox" id="node-input-once" style="display:inline-block;width:auto;vertical-align:top;">
+        <input type="checkbox" id="node-input-once" style="display:inline-block;width:15px;vertical-align:baseline;">
         <span data-i18n="inject.onstart"></span>&nbsp;
         <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px">&nbsp;
         <span data-i18n="inject.onceDelay"></span>
@@ -166,7 +166,7 @@ The default payload is a timestamp of the current time in millisecs since Januar
 <p>The node also supports injecting strings, numbers, booleans, JavaScript objects, or flow/global context values.</p>
 <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
 inject at regular intervals or according to a schedule.</p>
-<p>It can also be configured to inject once with a delay each time if the start of flows occurred on deploy.</p>
+<p>It can also be configured to inject once each time the flows are started.</p>
 <p><b>Note</b>: The <i>"Interval between times"</i> and <i>"at a specific time"</i> options use the standard cron system.
 This means that 20 minutes will be at the next hour, 20 minutes past and 40 minutes past - not in 20 minutes time.
 If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
@@ -185,7 +185,7 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0))) }},
             crontab: {value:""},
             once: {value:false},
-            onceDelay: {value:""}
+            onceDelay: {value:0.1}
         },
         icon: "inject.png",
         inputs:0,
