@@ -113,6 +113,30 @@ describe('inject node', function() {
                   });
     });
 
+    it('should inject once with delay of two seconds and repeatedly', function(done) {
+        var timestamp = new Date();
+        timestamp.setSeconds(timestamp.getSeconds() + 1);
+
+        helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
+                        payload:"",payloadType:"date", repeat: 0.2,
+                        once: true, onceDelay: 1.2, wires:[["n2"]] },
+                        {id:"n2", type:"helper"}],
+                    function() {
+                        var n2 = helper.getNode("n2");
+                        var count = 0;
+                        n2.on("input", function(msg) {
+                            msg.should.have.property('topic', 't1');
+                            should(msg.payload).be.greaterThan(timestamp.getTime());
+                            count += 1;
+                            if (count > 2) {
+                                helper.clearFlows().then(function() {
+                                    done();
+                                });
+                            }
+                        });
+                    });
+    });
+
     it('should inject with cron', function(done) {
         helper.load(injectNode, [{id:"n1", type:"inject",
                     payloadType:"date", topic: "t3",
