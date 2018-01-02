@@ -28,7 +28,19 @@ describe('inject node', function() {
         helper.unload();
     });
 
-    it('should inject once without onceDelay property', function(done) {
+    it('should inject once with default delay property', function(done) {
+        helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
+                    payload:"",payloadType:"date",
+                    once: true, wires:[["n2"]] },
+                    {id:"n2", type:"helper"}],
+                  function() {
+                    var n1 = helper.getNode("n1");
+                    n1.should.have.property('onceDelay', 100);
+                    done();
+                  });
+    });
+
+    it('should inject once with default delay', function(done) {
         var timestamp = new Date();
         timestamp.setSeconds(timestamp.getSeconds() + 1);
 
@@ -47,7 +59,19 @@ describe('inject node', function() {
                   });
     });
 
-    it('should inject once with delay of two seconds', function(done) {
+    it('should inject once with 500 msec. delay', function(done) {
+        helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
+                    payload:"",payloadType:"date",
+                    once: true, onceDelay: 0.5, wires:[["n2"]] },
+                    {id:"n2", type:"helper"}],
+                  function() {
+                    var n1 = helper.getNode("n1");
+                    n1.should.have.property('onceDelay', 500);
+                    done();
+                  });
+    });
+
+  it('should inject once with delay of two seconds', function(done) {
         this.timeout(2700); // have to wait for the inject with delay of two seconds
 
         var timestamp = new Date();
