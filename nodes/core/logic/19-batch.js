@@ -62,7 +62,7 @@ module.exports = function(RED) {
                     parts: {
                         id: mid,
                         index: 0,
-                        count: 0
+                        count: 1
                     }
                 };
                 node.send(msg);
@@ -174,7 +174,7 @@ module.exports = function(RED) {
                 queue.push(msg);
                 var len = queue.length;
                 if (len === count) {
-                    send_msgs(queue, msg, is_overwrap);
+                    send_msgs(node, queue, is_overwrap);
                     queue = (overwrap === 0) ? [] :  queue.slice(-overwrap);
                 }
             });
@@ -188,7 +188,7 @@ module.exports = function(RED) {
             node.msg_queue = []
             var timer = setInterval(function() {
                 send_interval(node, allow_empty_seq);
-            }, node.batch_interval);
+            }, interval);
             this.on("input", function(msg) {
                 node.msg_queue.push(msg);
             });
