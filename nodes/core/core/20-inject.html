@@ -275,14 +275,6 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
                 }
             });
 
-            $('#node-input-once').change(function () {
-                if ($(this).is(':checked')) {
-                    $('#node-onceDelay').show()
-                } else {
-                    $('#node-onceDelay').hide()
-                }
-            })
-
             $(".inject-time-times").each(function() {
                 for (var i=0; i<24; i++) {
                     var l = (i<10?"0":"")+i+":00";
