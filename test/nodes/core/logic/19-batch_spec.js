@@ -127,7 +127,7 @@ describe('BATCH node', function() {
 
     describe('mode: count', function() {
 
-        it('should create sequ. with count', function(done) {
+        it('should create seq. with count', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 2, overwrap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
@@ -219,7 +219,6 @@ describe('BATCH node', function() {
             ];
             check_concat(flow, results, inputs, done);
         });
-
 
     });
 
