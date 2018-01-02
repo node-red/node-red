@@ -59,13 +59,13 @@
             "Sunday"
         ],
         "on": "on",
-        "onstart": "Inject once at start?",
+        "onstart": "Inject once after",
+        "onceDelay": "seconds, then",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "errors": {
             "failed": "inject failed, see log for details"
-        },
-        "onceDelay": "Delay"
+        }
     },
     "catch": {
         "catch": "catch all",

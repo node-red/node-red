@@ -28,40 +28,43 @@ describe('inject node', function() {
         helper.unload();
     });
 
-    it('should inject once', function(done) {
+    it('should inject simple once', function(done) {
+        var timestamp = new Date();
+        timestamp.setSeconds(timestamp.getSeconds() + 1);
 
-        helper.load(injectNode, [{id:"n1", type:"inject",
-                    payload:"payload", topic: "t1",
+        helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
+                    payload:"",payloadType:"date",
                     once: true, wires:[["n2"]] },
                    {id:"n2", type:"helper"}],
                   function() {
                       var n2 = helper.getNode("n2");
                       n2.on("input", function(msg) {
                           msg.should.have.property('topic', 't1');
-                          msg.should.have.property('payload', 'payload');
+                          msg.should.have.property('payload');
+                          should(msg.payload).be.lessThan(timestamp.getTime());
                           done();
                       });
                   });
     });
 
-    it('should inject once with delay', function(done) {
-      this.timeout(3000);
+    it('should inject once with delay of two seconds', function(done) {
+        this.timeout(2700); // have to wait for the inject with delay of two seconds
 
-      var timestamp = new Date();
-      timestamp.setSeconds(timestamp.getSeconds() + 1);
+        var timestamp = new Date();
+        timestamp.setSeconds(timestamp.getSeconds() + 1);
 
-      helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
-                  payload:"",payloadType:"date",
-                  once: true, onceDelay: 2000, wires:[["n2"]] },
-                  {id:"n2", type:"helper"}],
-                function() {
-                  var n2 = helper.getNode("n2");
-                  n2.on("input", function(msg) {
-                    msg.should.have.property('topic', 't1');
-                    should(msg.payload).be.greaterThan(timestamp.getTime());
-                    done();
+        helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
+                    payload:"",payloadType:"date",
+                    once: true, onceDelay: 2, wires:[["n2"]] },
+                    {id:"n2", type:"helper"}],
+                  function() {
+                    var n2 = helper.getNode("n2");
+                    n2.on("input", function(msg) {
+                      msg.should.have.property('topic', 't1');
+                      should(msg.payload).be.greaterThan(timestamp.getTime());
+                      done();
+                    });
                   });
-                });
     });
 
     it('should inject repeatedly', function(done) {
