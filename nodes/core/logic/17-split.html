@@ -108,7 +108,7 @@
             arraySplt: {value:1},
             arraySpltType: {value:"len"},
             stream: {value:false},
-            addname: {value:""},
+            addname: {value:""}
         },
         inputs:1,
         outputs:1,
@@ -169,6 +169,8 @@
         <label data-i18n="join.mode.mode"></label>
         <select id="node-input-mode" style="width:200px;">
             <option value="auto" data-i18n="join.mode.auto"></option>
+            <option value="merge" data-i18n="join.mode.merge"></option>
+            <option value="reduce" data-i18n="join.mode.reduce"></option>
             <option value="custom" data-i18n="join.mode.custom"></option>
         </select>
     </div>
@@ -216,6 +218,20 @@
                 </li>
             </ul>
         </div>
+    </div>
+    <div class="node-row-merge">
+        <div class="form-row">
+            <label data-i18n="join.merge.topics-label"></label>
+            <div class="form-row node-input-topics-container-row">
+                <ol id="node-input-topics-container"></ol>
+            </div>
+        </div>
+        <div class="form-row">
+            <input type="checkbox" id="node-input-mergeOnChange" style="margin-left:10px; vertical-align:top; width:auto;">
+            <label for="node-input-mergeOnChange" style="width:auto;" data-i18n="join.merge.on-change"></label>
+        </div>
+    </div>
+    <div class="node-row-reduce">
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -280,7 +296,9 @@
             joinerType: { value:"str"},
             accumulate: { value:"false" },
             timeout: {value:""},
-            count: {value:""}
+            count: {value:""},
+            topics: {value:[]},
+            mergeOnChange: {value:"false"}
         },
         inputs:1,
         outputs:1,
@@ -292,9 +310,37 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            function resizeTopics(topic) {
+                var newWidth = topic.width();
+                topic.find('.red-ui-typedInput').typedInput("width",newWidth-15);
+            }
+            $("#node-input-topics-container").css('min-height','250px').css('min-width','420px').editableList({
+                addItem: function(container,i,opt) {
+                    if (!opt.hasOwnProperty('topic')) {
+                        opt.topic = "";
+                        opt.topic_t = 'str';
+                    }
+                    var row = $('<div/>').appendTo(container);
+                    var valueField = $('<input/>',{class:"node-input-topic-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str', types:['str']});
+                    valueField.typedInput('value', opt.topic);
+                    valueField.typedInput('type', opt.topic_t);
+                    resizeTopics(container);
+                },
+                resizeItem: resizeTopics,
+                sortable: true,
+                removable: true
+            });
+
+            for (var i=0;i<this.topics.length;i++) {
+                var topic = this.topics[i];
+                $("#node-input-topics-container").editableList('addItem', topic);
+            }
+
             $("#node-input-mode").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-custom").toggle(val==='custom');
+                $(".node-row-merge").toggle(val==='merge');
+                $(".node-row-reduce").toggle(val==='reduce');
                 $(".form-tips-auto").toggle(val==='auto');
                 if (val === "auto") {
                     $("#node-input-accumulate").attr('checked', false);
@@ -340,6 +386,28 @@
             if (build !== 'object' && build !== 'merged') {
                 $("#node-input-accumulate").prop("checked",false);
             }
+            var topics = $("#node-input-topics-container").editableList('items');
+            var node = this;
+            node.topics = [];
+            topics.each(function(i) {
+                var topicData = $(this).data('data');
+                var topic = $(this);
+                var vf = topic.find(".node-input-topic-value");
+                var value = vf.typedInput('value');
+                var type = vf.typedInput('type');
+                var r = {topic:value, topic_t:type};
+                node.topics.push(r);
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-topics-container-row)");
+            var height = size.height;
+            for (var i=0;i<rows.size();i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-topics-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-topics-container").editableList('height',height);
         }
     });
 </script>

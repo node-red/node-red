@@ -824,6 +824,8 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
+            "merge":"merge",
+            "reduce":"reduce",
             "custom":"manual"
         },
         "combine":"Combine each",
@@ -845,7 +847,12 @@
         "afterTimeout":"After a timeout following the first message",
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
-        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property.",
+	"merge": {
+	    "topics-label":"Merged Topics",
+	    "topics":"topics",
+            "on-change":"Send merged input on arrival of a new topic"
+	}
     },
     "sort" : {
 	"key-type" : "Key type",

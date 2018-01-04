@@ -232,6 +232,99 @@ module.exports = function(RED) {
     RED.nodes.registerType("split",SplitNode);
 
 
+    function config_val(ctx, name) {
+	let conf_name = "_node_config";
+	let conf = ctx.get(conf_name);
+	if (conf !== undefined) {
+	    return conf[name];
+	}
+	return undefined;
+    }
+
+    var _max_kept_msgs_count = undefined;
+    
+    function max_kept_msgs_count(node) {
+        if (_max_kept_msgs_count === undefined) {
+            var name = "joinMaxKeptMsgsCount";
+            if (RED.settings.hasOwnProperty(name)) {
+                _max_kept_msgs_count = RED.settings[name];
+            }
+            else {
+                _max_kept_msgs_count = 0;
+            }
+        }
+        return _max_kept_msgs_count;
+    }
+
+    function add_to_topic(pending, topic, msg) {
+	if (!pending.hasOwnProperty(topic)) {
+	    pending[topic] = [msg];
+	}
+	else {
+	    pending[topic].push(msg);
+	}
+    }
+
+    function compute_topic_counts(topics) {
+	let counts = {};
+	for (var topic of topics) {
+	    counts[topic] = (counts.hasOwnProperty(topic) ? counts[topic] : 0) +1;
+	}
+	return counts;
+    }
+    
+    function try_merge(node, pending) {
+	let topics = node.topics;
+	if(node.topic_counts == undefined) {
+	    node.topic_counts = compute_topic_counts(topics)
+	}
+	let counts = node.topic_counts;
+	for(var topic of topics) {
+	    if(!pending.hasOwnProperty(topic) ||
+	       (pending[topic].length < counts[topic])) {
+		return;
+	    }
+	}
+	let msgs = [];
+	let vals = [];
+	let new_msg = {payload: vals};
+	for (var topic of topics) {
+	    let pmsgs = pending[topic];
+	    let msg = pmsgs.shift();
+	    let pval = msg.payload;
+	    let val = new_msg[topic];
+	    msgs.push(msg);
+	    vals.push(pval);
+	    if (val instanceof Array) {
+		new_msg[topic].push(pval);
+	    }
+	    else if (val === undefined) {
+		new_msg[topic] = pval;
+	    }
+	    else {
+		new_msg[topic] = [val, pval]
+	    }
+	}
+	node.send(new_msg);
+	node.pending_count -= topics.length;
+    }
+
+    function merge_msg(node, msg) {
+	let topic = msg.topic;
+	if(node.topics.indexOf(topic) >= 0) {
+	    let pending = node.pending;
+	    add_to_topic(pending, topic, msg);
+	    node.pending_count++;
+	    let max_msgs = max_kept_msgs_count(node);
+	    if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
+		node.pending = {};
+		node.pending_count = 0;
+		throw new Error("too many pending messages");
+	    }
+	    try_merge(node, pending);
+	}
+    }
+
     function JoinNode(n) {
         RED.nodes.createNode(this,n);
         this.mode = n.mode||"auto";
@@ -259,6 +352,13 @@ module.exports = function(RED) {
 
         this.build = n.build || "array";
         this.accumulate = n.accumulate || "false";
+
+	this.topics = (n.topics || []).map(function(x) { return x.topic; });
+	this.topic_counts = undefined;
+	this.output = n.output || "stream";
+	this.pending = {};
+	this.pending_count = 0;
+
         //this.topic = n.topic;
         var node = this;
         var inflight = {};
@@ -321,6 +421,10 @@ module.exports = function(RED) {
                     node.warn("Message missing msg.parts property - cannot join in 'auto' mode")
                     return;
                 }
+                if (node.mode === 'merge' && !msg.hasOwnProperty("topic")) {
+		    node.warn("Message missing msg.topic property - cannot join in 'merge' mode");
+		    return;
+                }
 
                 if (node.propertyType == "full") {
                     property = msg;
@@ -351,6 +455,10 @@ module.exports = function(RED) {
                     arrayLen = msg.parts.len;
                     propertyIndex = msg.parts.index;
                 }
+		else if (node.mode === 'merge') {
+		    merge_msg(node, msg);
+		    return;
+		}
                 else {
                     // Use the node configuration to identify all of the group information
                     partId = "_";
