@@ -852,7 +852,17 @@
 	    "topics-label":"Merged Topics",
 	    "topics":"topics",
             "on-change":"Send merged input on arrival of a new topic"
-	}
+	},
+        "reduce": {
+	    "exp": "Reduce exp",
+	    "exp-value": "exp",
+	    "init": "Initial value",
+	    "right": "Reduce Right",
+	    "fixup": "Fixup exp"
+        },
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression: __error__"
+        }
     },
     "sort" : {
 	"key-type" : "Key type",

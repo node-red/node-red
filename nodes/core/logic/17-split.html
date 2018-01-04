@@ -232,6 +232,23 @@
         </div>
     </div>
     <div class="node-row-reduce">
+	<div class="form-row">
+	    <label for="node-input-reduceExp" data-i18n="join.reduce.exp" style="margin-left:10px;"></label>
+	    <input type="text" id="node-input-reduceExp" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+	</div>
+	<div class="form-row">
+	    <label for="node-input-reduceInit" data-i18n="join.reduce.init" style="margin-left:10px;"></label>
+	    <input type="text" id="node-input-reduceInit" data-i18n="[placeholder]join.reduce.init" style="width:65%">
+	    <input type="hidden" id="node-input-reduceInitType">
+	</div>
+	<div class="form-row">
+	    <label for="node-input-reduceFixup" data-i18n="join.reduce.fixup" style="margin-left:10px;"></label>
+	    <input type="text" id="node-input-reduceFixup" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+	</div>
+        <div class="form-row">
+	    <label for="node-input-reduceRight" data-i18n="join.reduce.right" style="margin-left:10px;"/>
+	    <input type="checkbox" id="node-input-reduceRight" style="width:auto;">
+        </div>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -298,7 +315,12 @@
             timeout: {value:""},
             count: {value:""},
             topics: {value:[]},
-            mergeOnChange: {value:"false"}
+            mergeOnChange: {value:false},
+	    reduceRight: {value:false},
+	    reduceExp: {value:undefined},
+	    reduceInit: {value:undefined},
+	    reduceInitType: {value:undefined},
+	    reduceFixup: {value:undefined}
         },
         inputs:1,
         outputs:1,
@@ -331,6 +353,14 @@
                 removable: true
             });
 
+	    $("#node-input-reduceExp").typedInput({'types':['jsonata']});
+	    $("#node-input-reduceInit").typedInput({
+		default: 'num',
+		types:['flow','global','str','num','bool','json','bin','date','jsonata'],
+		typeField: $("#node-input-reduceInitType")
+	    });
+	    $("#node-input-reduceFixup").typedInput({types:['jsonata']});
+
             for (var i=0;i<this.topics.length;i++) {
                 var topic = this.topics[i];
                 $("#node-input-topics-container").editableList('addItem', topic);
@@ -341,7 +371,7 @@
                 $(".node-row-custom").toggle(val==='custom');
                 $(".node-row-merge").toggle(val==='merge');
                 $(".node-row-reduce").toggle(val==='reduce');
-                $(".form-tips-auto").toggle(val==='auto');
+                $(".form-tips-auto").toggle((val==='auto') || (val==='reduce'));
                 if (val === "auto") {
                     $("#node-input-accumulate").attr('checked', false);
                 }

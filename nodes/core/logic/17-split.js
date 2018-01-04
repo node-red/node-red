@@ -325,6 +325,123 @@ module.exports = function(RED) {
 	}
     }
 
+    function apply_r(exp, accum, msg, index, count) {
+	exp.assign("I", index);
+	exp.assign("N", count);
+	exp.assign("A", accum);
+	return RED.util.evaluateJSONataExpression(exp, msg);
+    }
+
+    function apply_f(exp, accum, count) {
+	exp.assign("N", count);
+	exp.assign("A", accum);
+	return RED.util.evaluateJSONataExpression(exp, {});
+    }
+
+    function exp_or_undefined(exp) {
+	if((exp === "") ||
+	   (exp === null)) {
+	    return undefined;
+	}
+	return exp
+    }
+    
+    function reduce_and_send_group(node, group) {
+	let is_right = node.reduce_right;
+	let msgs = is_right ? group.msgs.reverse() : group.msgs;
+	var accum = node.reduce_init;
+	let reduce_exp = node.reduce_exp;
+	let reduce_fixup = node.reduce_fixup;
+	let count = group.count;
+	for(var msg of msgs) {
+	    accum = apply_r(reduce_exp, accum, msg, msg.parts.index, count);
+	}
+	if(reduce_fixup !== undefined) {
+	    accum = apply_f(reduce_fixup, accum, count);
+	}
+	node.send({payload: accum});
+    }
+    
+    function reduce_msg(node, msg) {
+	if(msg.hasOwnProperty('parts')) {
+	    let parts = msg.parts;
+	    let pending = node.pending;
+	    let pending_count = node.pending_count;
+	    let gid = msg.parts.id;
+	    if(!pending.hasOwnProperty(gid)) {
+		let count = undefined;
+		if(parts.hasOwnProperty('count')) {
+		    count = msg.parts.count;
+		}
+		pending[gid] = {
+		    count: count,
+		    msgs: []
+		};
+	    }
+	    let group = pending[gid];
+	    let msgs = group.msgs;
+	    if(parts.hasOwnProperty('count') &&
+	       (group.count === undefined)) {
+		group.count = count;
+	    }
+	    msgs.push(msg);
+	    pending_count++;
+	    if(msgs.length === group.count) {
+		delete pending[gid];
+		try {
+		    pending_count -= msgs.length;
+		    reduce_and_send_group(node, group);
+		} catch(e) {
+                    node.error(RED._("join.errors.invalid-expr",{error:e.message}));		}
+	    }
+	    node.pending_count = pending_count;
+	    let max_msgs = max_kept_msgs_count(node);
+	    if ((max_msgs > 0) && (pending_count > max_msgs)) {
+		node.pending = {};
+		node.pending_count = 0;
+		throw new Error("too many pending messages");
+	    }
+	}
+	else {
+	    node.send(msg);
+	}
+    }
+
+    function eval_exp(node, exp, exp_type) {
+	if(exp_type === "flow") {
+	    return node.context().flow.get(exp);
+	}
+	else if(exp_type === "global") {
+	    return node.context().global.get(exp);
+	}
+	else if(exp_type === "str") {
+	    return exp;
+	}
+	else if(exp_type === "num") {
+	    return Number(exp);
+	}
+	else if(exp_type === "bool") {
+	    if (exp === 'true') {
+		return true;
+	    }
+	    else if (exp === 'false') {
+		return false;
+	    }
+	}
+	else if ((exp_type === "bin") ||
+		 (exp_type === "json")) {
+	    return JSON.parse(exp);
+	}
+	else if(exp_type === "date") {
+	    return Date.now();
+	}
+	else if(exp_type === "jsonata") {
+	    let jexp = RED.util.prepareJSONataExpression(exp, node);
+	    return RED.util.evaluateJSONataExpression(jexp, {});
+	}
+	throw new Error("unexpected initial value type");
+    }
+
     function JoinNode(n) {
         RED.nodes.createNode(this,n);
         this.mode = n.mode||"auto";
@@ -338,6 +455,22 @@ module.exports = function(RED) {
         this.count = Number(n.count || 0);
         this.joiner = n.joiner||"";
         this.joinerType = n.joinerType||"str";
+
+        this.reduce = (this.mode === "reduce");
+        if (this.reduce) {
+	    let exp_init = n.reduceInit;
+	    let exp_init_type = n.reduceInitType;
+	    let exp_reduce = n.reduceExp;
+	    let exp_fixup = exp_or_undefined(n.reduceFixup);
+	    this.reduce_right = n.reduceRight;
+	    try {
+		this.reduce_init = eval_exp(this, exp_init, exp_init_type);
+		this.reduce_exp = RED.util.prepareJSONataExpression(exp_reduce, this);
+		this.reduce_fixup = (exp_fixup !== undefined) ? RED.util.prepareJSONataExpression(exp_fixup, this) : undefined;
+	    } catch(e) {
+                this.error(RED._("join.errors.invalid-expr",{error:e.message}));
+	    }
+        }
 
         if (this.joinerType === "str") {
             this.joiner = this.joiner.replace(/\\n/g,"\n").replace(/\\r/g,"\r").replace(/\\t/g,"\t").replace(/\\e/g,"\e").replace(/\\f/g,"\f").replace(/\\0/g,"\0");
@@ -457,6 +590,10 @@ module.exports = function(RED) {
                 }
 		else if (node.mode === 'merge') {
 		    merge_msg(node, msg);
+		    return;
+		}
+		else if (node.mode === 'reduce') {
+		    reduce_msg(node, msg);
 		    return;
 		}
                 else {
