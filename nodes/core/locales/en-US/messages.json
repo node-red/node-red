@@ -860,12 +860,13 @@
         "too-many" : "too many pending messages in sort node"
     },
     "batch" : {
-	"mode" : {
+	"mode": {
 	    "label" : "Mode",
 	    "num-msgs" : "number of messages",
-	    "interval" : "interval in seconds"
+	    "interval" : "interval in seconds",
+            "concat" : "concatenate sequences"
 	},
-	"count" : {
+	"count": {
 	    "label" : "Number of msgs",
 	    "overwrap" : "Overwrap",
 	    "count" : "count"
@@ -873,7 +874,11 @@
 	"interval": {
 	    "label" : "Interval (sec)",
 	    "seconds" : "seconds",
-	    "sec" : "sec"
-	}
+	    "sec" : "sec",
+            "empty" : "send empty message when no message arrives"
+	},
+        "concat": {
+            "topics-label": "Topics"
+        }
     }
 }
