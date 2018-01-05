@@ -48,6 +48,110 @@
     that matches.</p>
     <p>The rules can be evaluated against an individual message property, a flow or global
     context property or the result of a JSONata expression.</p>
+    <p>If <b>repair sequence</b> checkbox is selected, <code>msg.parts</code> property of incoming messages are passed through.  Otherwise, <code>msg.parts</code> property are reconstructed for each port to make forks of valid sequences.</p>
+    <h3>Rules</h3>
+    <p>Routing rules are categorized into three:</p>
+    <dl>
+	<dt>value rules</dt>
+	<dd>
+	    <table>
+		<tr>
+		    <th>operator</th>
+		    <th>description</th>
+		</tr>
+		<tr>
+		    <td><b>==</b></td>
+		    <td>property value is equals to specified value</td>
+		</tr>
+		<tr>
+		    <td><b>!=</b></td>
+		    <td>property value is not equals to specified value</td>
+		</tr>
+		<tr>
+		    <td><b>&lt;</b></td>
+		    <td>property value is less than specified value</td>
+		</tr>
+		<tr>
+		    <td><b>&lt;=</b></td>
+		    <td>property value is less than or equals to specified value</td>
+		</tr>
+		<tr>
+		    <td><b>&gt;</b></td>
+		    <td>property value is greater than specified value</td>
+		</tr>
+		<tr>
+		    <td><b>&gt;=</b></td>
+		    <td>property value is greater than or equals to specified value</td>
+		</tr>
+		<tr>
+		    <td><b>is between</b></td>
+		    <td>property value is between specified values</td>
+		</tr>
+		<tr>
+		    <td><b>contains</b></td>
+		    <td>property string value contains specified string value</td>
+		</tr>
+		<tr>
+		    <td><b>matches regex</b></td>
+		    <td>property string value matches specified regex</td>
+		</tr>
+		<tr>
+		    <td><b>is true</b></td>
+		    <td>property value is true</td>
+		</tr>
+		<tr>
+		    <td><b>is false</b></td>
+		    <td>property value is false</td>
+		</tr>
+		<tr>
+		    <td><b>is null</b></td>
+		    <td>property value is null</td>
+		</tr>
+		<tr>
+		    <td><b>is not null</b></td>
+		    <td>property value is not null</td>
+		</tr>
+	    </table>
+	</dd>
+	<dt>sequence rules</dt>
+	<dd>
+	    <table>
+		<tr>
+		    <th>operator</th>
+		    <th>description</th>
+		</tr>
+		<tr>
+		    <td><b>head</b></td>
+		    <td>message is included in the first specified number of messages in a sequence</td>
+		</tr>
+		<tr>
+		    <td><b>tail</b></td>
+		    <td>message is included in the last specified number of messages in a sequence</td>
+		</tr>
+		<tr>
+		    <td><b>pos. between</b></td>
+		    <td>message is included between specified positions in a sequence</td>
+		</tr>
+	    </table>
+	</dd>
+	<dt>other rules</dt>
+	<dd>
+	    <table>
+		<tr>
+		    <th>operator</th>
+		    <th>description</th>
+		</tr>
+		<tr>
+		    <td><b>JSONata exp</b></td>
+		    <td>specified JSONata expression evaluate to true. In JSONata expression, $I represents <code>msg.parts.index</code> and $N represents <code>msg.parts.count</code> respectively if exists.</td>
+		</tr>
+		<tr>
+		    <td><b>otherwise</b></td>
+		    <td>no matching rule found</td>
+		</tr>
+	    </table>
+	</dd>
+    </dl>
 </script>
 
 <script type="text/javascript">
