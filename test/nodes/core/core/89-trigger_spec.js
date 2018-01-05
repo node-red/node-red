@@ -282,7 +282,7 @@ describe('trigger node', function() {
             n1.emit("input", {payload:1,topic:"A"});
             n1.emit("input", {payload:2,topic:"B"});
             n1.emit("input", {payload:3,topic:"C"});
-            setTimeout( function() { n1.emit("input", {payload:2,topic:"B"})}, 25 );
+            setTimeout( function() { n1.emit("input", {payload:2,topic:"B"})}, 20 );
         });
     });
 

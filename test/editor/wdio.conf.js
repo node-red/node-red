@@ -63,7 +63,7 @@ exports.config = {
         browserName: 'chrome',
         chromeOptions: {
             // Runs tests without opening a broser.
-            args: ['--headless', '--disable-gpu'],
+            args: ['--headless', '--disable-gpu', 'window-size=1920,1080'],
             // Runs tests with opening a broser.
             // args: ['--disable-gpu'],
         },
