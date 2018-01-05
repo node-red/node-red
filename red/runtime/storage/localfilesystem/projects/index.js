@@ -23,6 +23,7 @@ var crypto = require('crypto');
 var storageSettings = require("../settings");
 var util = require("../util");
 var gitTools = require("./git");
+var sshTools = require("./ssh");
 
 var Projects = require("./Project");
 
@@ -89,6 +90,7 @@ function init(_settings, _runtime) {
                 projectsEnabled = false;
             } else {
                 Projects.init(settings,runtime);
+                sshTools.init(settings,runtime);
                 projectsDir = fspath.join(settings.userDir,"projects");
                 if (!settings.readOnly) {
                     return fs.ensureDir(projectsDir)

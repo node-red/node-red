@@ -29,6 +29,7 @@ describe("storage/localfilesystem/sshkeys", function() {
         log:{
             _:function() { return "placeholder message"},
             info: function() { },
+            log: function() { },
             trace: function() { }
         }
     };
@@ -61,7 +62,6 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 sshkeys.listSSHKeys(username).then(function(retObj) {
-                    console.log('retObj:', retObj);
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(0);
                     done();
                 }).catch(function(err) {
@@ -246,7 +246,31 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
-            email: 'test@test.com',
+            name: 'test-key01'
+        };
+        localfilesystem.init(mockSettings, mockRuntime).then(function() {
+            sshkeys.init(mockSettings, mockRuntime).then(function() {
+                sshkeys.generateSSHKey(username, options).then(function(retObj) {
+                    retObj.should.be.equal(options.name);
+                    fs.existsSync(path.join(sshkeyDirPath,username+'_'+options.name)).should.be.true();
+                    fs.existsSync(path.join(sshkeyDirPath,username+'_'+options.name+'.pub')).should.be.true();
+                    done();
+                }).catch(function(err) {
+                    done(err);
+                });
+            }).catch(function(err) {
+                done(err);
+            });
+        }).catch(function(err) {
+            done(err);
+        });
+    });
+
+    it('should generate sshkey file with only comment data', function(done) {
+        var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
+        var username = 'test';
+        var options = {
+            comment: 'test@test.com',
             name: 'test-key01'
         };
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
@@ -271,7 +295,7 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
-            email: 'test@test.com',
+            comment: 'test@test.com',
             name: 'test-key01',
             password: 'testtest'
         };
@@ -297,7 +321,7 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
-            email: 'test@test.com',
+            comment: 'test@test.com',
             name: 'test-key01',
             size: 4096
         };
@@ -324,7 +348,7 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
-            email: 'test@test.com',
+            comment: 'test@test.com',
             name: 'test-key01',
             password: 'testtest',
             size: 4096
@@ -352,19 +376,52 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
-            email: 'test@test.com',
+            comment: 'test@test.com',
             name: 'test-key01',
-            size: 3333
+            size: 1023
         };
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 sshkeys.generateSSHKey(username, options).then(function(retObj) {
-                    retObj.should.be.equal(options.name);
-                    fs.existsSync(path.join(sshkeyDirPath,username+'_'+options.name)).should.be.true();
-                    fs.existsSync(path.join(sshkeyDirPath,username+'_'+options.name+'.pub')).should.be.true();
-                    done();
+                    done(new Error('Does NOT throw error!'));
                 }).catch(function(err) {
-                    done(err);
+                    try {
+                        err.should.have.have.property('code', 'key_length_too_short');
+                        done();
+                    }
+                    catch (error) {
+                        done(error);
+                    }
+                });
+            }).catch(function(err) {
+                done(err);
+            });
+        }).catch(function(err) {
+            done(err);
+        });
+    });
+
+    it('should not generate sshkey file with illegal password', function(done) {
+        this.timeout(5000);
+        var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
+        var username = 'test';
+        var options = {
+            comment: 'test@test.com',
+            name: 'test-key01',
+            password: 'aa'
+        };
+        localfilesystem.init(mockSettings, mockRuntime).then(function() {
+            sshkeys.init(mockSettings, mockRuntime).then(function() {
+                sshkeys.generateSSHKey(username, options).then(function(retObj) {
+                    done(new Error('Does NOT throw error!'));
+                }).catch(function(err) {
+                    try {
+                        err.should.have.have.property('code', 'key_passphrase_too_short');
+                        done();
+                    }
+                    catch (error) {
+                        done(error);
+                    }
                 });
             }).catch(function(err) {
                 done(err);
