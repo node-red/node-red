@@ -183,6 +183,18 @@
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
 
+            this.clearMessageList = function() {
+                RED.debug.clearMessageList(true);
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"projectChange"},"*");
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            };
+            RED.events.on("project:change", this.clearMessageList);
+
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
                 subWindow = window.open(document.location.toString().replace(/[?#].*$/,"")+"debug/view/view.html"+document.location.search,"nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");

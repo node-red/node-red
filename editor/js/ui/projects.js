@@ -910,7 +910,9 @@ RED.projects = (function() {
                                                 }
                                             }
                                         }
-                                    },projectData).always(function() {
+                                    },projectData).then(function() {
+                                        RED.events.emit("project:change", {name:name});
+                                    }).always(function() {
                                         RED.deploy.setDeployInflight(false);
                                     })
 
@@ -1075,7 +1077,9 @@ RED.projects = (function() {
                     }
                 },
             }
-        },{active:true}).always(function() {
+        },{active:true}).then(function() {
+            RED.events.emit("project:change", {name:name});
+        }).always(function() {
             RED.deploy.setDeployInflight(false);
         })
     }

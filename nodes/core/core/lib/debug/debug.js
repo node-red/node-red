@@ -24,6 +24,8 @@ $(function() {
                 RED.debug.handleDebugMessage(evt.data.msg);
             } else if (evt.data.event === "workspaceChange") {
                 RED.debug.refreshMessageList(evt.data.activeWorkspace);
+            } else if (evt.data.event === "projectChange") {
+                RED.debug.clearMessageList(true);
             }
         },false);
     })

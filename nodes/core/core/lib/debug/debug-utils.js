@@ -68,7 +68,7 @@ RED.debug = (function() {
         // var filterTypeRow = $('<div class="debug-filter-row"></div>').appendTo(filterDialog);
         // $('<select><option>Show all debug nodes</option><option>Show selected debug nodes</option><option>Show current flow only</option></select>').appendTo(filterTypeRow);
 
-        var debugNodeListRow = $('<div class="debug-filter-row hide"></div>').appendTo(filterDialog);
+        var debugNodeListRow = $('<div class="debug-filter-row hide" id="debug-filter-node-list-row"></div>').appendTo(filterDialog);
         var flowCheckboxes = {};
         var debugNodeListHeader = $('<div><span data-i18n="node-red:debug.sidebar.debugNodes"></span><span></span></div>');
         var headerCheckbox = $('<input type="checkbox">').appendTo(debugNodeListHeader.find("span")[1]).checkboxSet();
@@ -218,9 +218,7 @@ RED.debug = (function() {
 
         toolbar.find("#debug-tab-clear").click(function(e) {
             e.preventDefault();
-            $(".debug-message").remove();
-            messageCount = 0;
-            config.clear();
+            clearMessageList(false);
         });
 
 
@@ -508,10 +506,28 @@ RED.debug = (function() {
         }
     }
 
+    function clearMessageList(clearFilter) {
+        $(".debug-message").remove();
+        config.clear();
+        if (!!clearFilter) {
+            clearFilterSettings();
+        }
+        refreshDebugNodeList();
+    }
+
+    function clearFilterSettings() {
+        filteredNodes = {};
+        filterType = 'filterAll';
+        $('.debug-tab-filter-option').removeClass('selected');
+        $('#debug-tab-filterAll').addClass('selected');
+        $('#debug-tab-filter span').text(RED._('node-red:debug.sidebar.filterAll'));
+        $('#debug-filter-node-list-row').slideUp();
+    }
+
     return {
         init: init,
         refreshMessageList:refreshMessageList,
         handleDebugMessage: handleDebugMessage,
-
+        clearMessageList: clearMessageList,
     }
 })();
