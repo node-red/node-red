@@ -824,8 +824,8 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
-            "merge":"merge",
-            "reduce":"reduce",
+            "merge":"merge sequence",
+            "reduce":"reduce sequence",
             "custom":"manual"
         },
         "combine":"Combine each",
@@ -851,7 +851,7 @@
 	"merge": {
 	    "topics-label":"Merged Topics",
 	    "topics":"topics",
-            "on-change":"Send merged input on arrival of a new topic"
+            "on-change":"Send merged message on arrival of a new topic"
 	},
         "reduce": {
 	    "exp": "Reduce exp",
