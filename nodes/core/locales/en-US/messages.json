@@ -870,7 +870,8 @@
 	"count": {
 	    "label" : "Number of msgs",
 	    "overwrap" : "Overwrap",
-	    "count" : "count"
+	    "count" : "count",
+            "invalid" : "Invalid count and overwrap"
 	},
 	"interval": {
 	    "label" : "Interval (sec)",
@@ -880,6 +881,9 @@
 	},
         "concat": {
             "topics-label": "Topics"
-        }
+        },
+        "too-many" : "too many pending messages in batch node",
+        "unexpected" : "unexpected mode",
+        "no-parts" : "no parts property in message"
     }
 }

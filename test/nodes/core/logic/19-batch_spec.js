@@ -28,6 +28,7 @@ describe('BATCH node', function() {
 
     afterEach(function() {
         helper.unload();
+        RED.settings.batchMaxKeptMsgsCount = 0;
     });
 
     it('should be loaded with defaults', function(done) {
@@ -54,37 +55,47 @@ describe('BATCH node', function() {
         var ix1 = 0; // loc. in seq
         var seq = undefined;
         n2.on("input", function(msg) {
-            if (seq === undefined) {
-                seq = results[ix0];
-            }
-            var val = seq[ix1];
-            msg.should.have.property("payload", val);
-            if (id === undefined) {
-                id = msg.parts.id;
-            }
-            check_parts(msg, id, ix1, seq.length);
-            ix1++;
-            if (ix1 === seq.length) {
-                ix0++;
-                ix1 = 0;
-                seq = undefined;
-                id = undefined;
-                if (ix0 === results.length) {
-                    done();
+            try {
+                if (seq === undefined) {
+                    seq = results[ix0];
                 }
+                var val = seq[ix1];
+                msg.should.have.property("payload", val);
+                if (id === undefined) {
+                    id = msg.parts.id;
+                }
+                check_parts(msg, id, ix1, seq.length);
+                ix1++;
+                if (ix1 === seq.length) {
+                    ix0++;
+                    ix1 = 0;
+                    seq = undefined;
+                    id = undefined;
+                    if (ix0 === results.length) {
+                        done();
+                    }
+                }
+            }
+            catch (e) {
+                done(e);
             }
         });
     }
     
     function check_count(flow, results, done) {
-        helper.load(batchNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            check_data(n1, n2, results, done);
-            for(var i = 0; i < 6; i++) {
-                n1.receive({payload: i});
-            }
-        });
+        try {
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                check_data(n1, n2, results, done);
+                for(var i = 0; i < 6; i++) {
+                    n1.receive({payload: i});
+                }
+            });
+        }
+        catch (e) {
+            done(e);
+        }
     }
 
     function delayed_send(receiver, index, count, delay) {
@@ -106,23 +117,28 @@ describe('BATCH node', function() {
     }
 
     function check_concat(flow, results, inputs, done) {
-        helper.load(batchNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            check_data(n1, n2, results, done);
-            for(var data of inputs) {
-                var msg = {
-                    topic: data[0],
-                    payload: data[1],
-                    parts: {
-                        id: data[0],
-                        index: data[2],
-                        count: data[3]
-                    }
-                };
-                n1.receive(msg);
-            }
-        });
+        try {
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                check_data(n1, n2, results, done);
+                for(var data of inputs) {
+                    var msg = {
+                        topic: data[0],
+                        payload: data[1],
+                        parts: {
+                            id: data[0],
+                            index: data[2],
+                            count: data[3]
+                        }
+                    };
+                    n1.receive(msg);
+                }
+            });
+        }
+        catch (e) {
+            done(e);
+        }
     }
 
     describe('mode: count', function() {
@@ -138,7 +154,6 @@ describe('BATCH node', function() {
             check_count(flow, results, done);
         });
         
-        
         it('should create seq. with count and overwrap', function(done) {
             var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 3, overwrap: 2, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
@@ -151,6 +166,29 @@ describe('BATCH node', function() {
             check_count(flow, results, done);
         });
        
+        it('should handle too many pending messages', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 5, overwrap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                RED.settings.batchMaxKeptMsgsCount = 2;
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "batch";
+                    });
+                    var evt = logEvents[0][0];
+                    evt.should.have.property('id', "n1");
+                    evt.should.have.property('type', "batch");
+                    evt.should.have.property('msg', "batch.too-many");
+                    done();
+                }, 150);
+                for(var i = 0; i < 3; i++) {
+                    n1.receive({payload: i});
+                }
+            });
+        });
+
     });
     
     describe('mode: interval', function() {
@@ -193,6 +231,29 @@ describe('BATCH node', function() {
                 [null], [0], [1], [2], [null], [3]
             ];
             check_interval(flow, results, 1300, done);
+        });
+
+        it('should handle too many pending messages', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                RED.settings.batchMaxKeptMsgsCount = 2;
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "batch";
+                    });
+                    var evt = logEvents[0][0];
+                    evt.should.have.property('id', "n1");
+                    evt.should.have.property('type', "batch");
+                    evt.should.have.property('msg', "batch.too-many");
+                    done();
+                }, 150);
+                for(var i = 0; i < 3; i++) {
+                    n1.receive({payload: i});
+                }
+            });
         });
 
     });
@@ -243,6 +304,33 @@ describe('BATCH node', function() {
                 ["TA", 3, 1, 2]
             ];
             check_concat(flow, results, inputs, done);
+        });
+
+        it('should handle too many pending messages', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(batchNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                RED.settings.batchMaxKeptMsgsCount = 2;
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "batch";
+                    });
+                    var evt = logEvents[0][0];
+                    evt.should.have.property('id', "n1");
+                    evt.should.have.property('type', "batch");
+                    evt.should.have.property('msg', "batch.too-many");
+                    done();
+                }, 150);
+                var C = 3;
+                for(var i = 0; i < C; i++) {
+                    var parts_a = {index:i, count:C, id:"A"};
+                    var parts_b = {index:i, count:C, id:"B"};
+                    n1.receive({payload: i, topic: "TA", parts:parts_a});
+                    n1.receive({payload: i, topic: "TB", parts:parts_b});
+                }
+            });
         });
 
     });

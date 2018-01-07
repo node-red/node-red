@@ -49,10 +49,10 @@ module.exports = function(RED) {
     }
     
     function send_interval(node, allow_empty_seq) {
-        let msgs = node.msg_queue;
+        let msgs = node.pending;
         if (msgs.length > 0) {
             send_msgs(node, msgs, false);
-            node.msg_queue = [];
+            node.pending = [];
         }
         else {
             if (allow_empty_seq) {
@@ -142,6 +142,13 @@ module.exports = function(RED) {
     function concat_msg(node, msg) {
         var topic = msg.topic;
         if(node.topics.indexOf(topic) >= 0) {
+            if (!msg.hasOwnProperty("parts") ||
+                !msg.parts.hasOwnProperty("id") ||
+                !msg.parts.hasOwnProperty("index") ||
+                !msg.parts.hasOwnProperty("count")) {
+                node.error(RED._("batch.no-parts"), msg);
+                return;
+            }
             var gid = msg.parts.id;
             var pending = node.pending;
             add_to_topic_group(pending, topic, gid, msg);
@@ -150,7 +157,7 @@ module.exports = function(RED) {
             if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
                 node.pending = {};
                 node.pending_count = 0;
-                throw new Error("too many pending messages");
+                node.error(RED._("batch.too-many"), msg);
             }
             try_concat(node, pending);
         }
@@ -161,40 +168,60 @@ module.exports = function(RED) {
         var node = this;
         var mode = n.mode || "count";
 
+        node.pending_count = 0;
         if (mode === "count") {
             var count = Number(n.count || 1);
             var overwrap = Number(n.overwrap || 0);
             var is_overwrap = (overwrap > 0);
             if (count <= overwrap) {
-                this.error("Invalid count and overwrap");
+                node.error(RED._("batch.count.invalid"));
                 return;
             }
-            var queue = [];
+            node.pending = [];
             this.on("input", function(msg) {
+                var queue = node.pending;
                 queue.push(msg);
-                var len = queue.length;
-                if (len === count) {
+                node.pending_count++;
+                if (queue.length === count) {
                     send_msgs(node, queue, is_overwrap);
-                    queue = (overwrap === 0) ? [] :  queue.slice(-overwrap);
+                    node.pending =
+                        (overwrap === 0) ? [] : queue.slice(-overwrap);
+                    node.pending_count = 0;
+                }
+                var max_msgs = max_kept_msgs_count(node);
+                if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
+                    node.pending = [];
+                    node.pending_count = 0;
+                    node.error(RED._("batch.too-many"), msg);
                 }
             });
             this.on("close", function() {
-                queue = [];
+                node.pending_count = 0;
+                node.pending = [];
             });
         }
         else if (mode === "interval") {
             var interval = Number(n.interval || "0") *1000;
             var allow_empty_seq = n.allowEmptySequence;
-            node.msg_queue = []
+            node.pending = []
             var timer = setInterval(function() {
                 send_interval(node, allow_empty_seq);
+                node.pending_count = 0;
             }, interval);
             this.on("input", function(msg) {
-                node.msg_queue.push(msg);
+                node.pending.push(msg);
+                node.pending_count++;
+                var max_msgs = max_kept_msgs_count(node);
+                if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
+                    node.pending = [];
+                    node.pending_count = 0;
+                    node.error(RED._("batch.too-many"), msg);
+                }
             });
             this.on("close", function() {
                 clearInterval(timer);
-                node.msg_queue = [];
+                node.pending = [];
+                node.pending_count = 0;
             });
         }
         else if(mode === "concat") {
@@ -202,7 +229,6 @@ module.exports = function(RED) {
                 return x.topic;
             });
             node.pending = {};
-            node.pending_count = 0;
             this.on("input", function(msg) {
                 concat_msg(node, msg);
             });
@@ -212,7 +238,7 @@ module.exports = function(RED) {
             });
         }
         else {
-            node.error("unexpected mode");
+            node.error(RED._("batch.unexpected"));
         }
     }
     RED.nodes.registerType("batch", BatchNode);
