@@ -17,5 +17,3 @@ node_modules
 public
 locales/zz-ZZ
 nodes/core/locales/zz-ZZ
-package.json.bak
-package-lock.json
