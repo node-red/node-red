@@ -232,22 +232,22 @@
         </div>
     </div>
     <div class="node-row-reduce">
-	<div class="form-row">
-	    <label for="node-input-reduceExp" data-i18n="join.reduce.exp" style="margin-left:10px;"></label>
-	    <input type="text" id="node-input-reduceExp" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
-	</div>
-	<div class="form-row">
-	    <label for="node-input-reduceInit" data-i18n="join.reduce.init" style="margin-left:10px;"></label>
-	    <input type="text" id="node-input-reduceInit" data-i18n="[placeholder]join.reduce.init" style="width:65%">
-	    <input type="hidden" id="node-input-reduceInitType">
-	</div>
-	<div class="form-row">
-	    <label for="node-input-reduceFixup" data-i18n="join.reduce.fixup" style="margin-left:10px;"></label>
-	    <input type="text" id="node-input-reduceFixup" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
-	</div>
         <div class="form-row">
-	    <label for="node-input-reduceRight" data-i18n="join.reduce.right" style="margin-left:10px;"/>
-	    <input type="checkbox" id="node-input-reduceRight" style="width:auto;">
+            <label for="node-input-reduceExp" data-i18n="join.reduce.exp" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceExp" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+        </div>
+        <div class="form-row">
+            <label for="node-input-reduceInit" data-i18n="join.reduce.init" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceInit" data-i18n="[placeholder]join.reduce.init" style="width:65%">
+            <input type="hidden" id="node-input-reduceInitType">
+        </div>
+        <div class="form-row">
+            <label for="node-input-reduceFixup" data-i18n="join.reduce.fixup" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceFixup" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+        </div>
+        <div class="form-row">
+            <label for="node-input-reduceRight" data-i18n="join.reduce.right" style="margin-left:10px;"/>
+            <input type="checkbox" id="node-input-reduceRight" style="width:auto;">
         </div>
     </div>
     <div class="form-row">
@@ -260,14 +260,14 @@
 <script type="text/x-red" data-help-name="join">
     <p>Joins sequences of messages into a single message.  This node provides four mode for message combination:</p>
     <dl>
-	<dt>automatic</dt>
-	<dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
-	<dt>merge sequence</dt>
-	<dd>It will merge incoming messages into single message using <code>topic</code> property.</dd>
-	<dt>reduce sequence</dt>
-	<dd>When paired with the <b>split</b> node, it will reduce the message sequence into single message.</dd>
-	<dt>manual</dt>
-	<dd>It will join sequences of messages in a variety of ways.</dd>
+        <dt>automatic</dt>
+        <dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
+        <dt>merge sequence</dt>
+        <dd>It will merge incoming messages into single message using <code>topic</code> property.</dd>
+        <dt>reduce sequence</dt>
+        <dd>When paired with the <b>split</b> node, it will reduce the message sequence into single message.</dd>
+        <dt>manual</dt>
+        <dd>It will join sequences of messages in a variety of ways.</dd>
     </dl>
     <h3>Inputs</h3>
     <dl class="message-properties">
@@ -304,34 +304,34 @@
     <h4>Reduce Sequence mode</h4>
     <p>When configured to join in reduce sequence mode, following values can be specified:</p>
     <dl class="message-properties">
-	<dt>Reduce exp</dt>
-	<dd>JSONata expression for reducing message group.  This expression represents the accumulated result.  In the expression, following special variables can be used:
-	    <ul>
-		<li><code>$A</code> accumulated value, </li>
-		<li><code>$I</code> index of the message in a group, </li>
-		<li><code>$N</code> number of messages of a group.</li>
-	    </ul>
-	</dd>
-	<dt>Initial value</dt>
-	<dd>
-	    initial value of reduction.
-	</dd>
-	<dt>Fixup exp</dt>
-	<dd>
-	    JSONata expression applied after reduction of a message group completed.  In the expression, following special variables can be used:
-	    <ul>
-		<li><code>$I</code> index of the message in a group, </li>
-		<li><code>$N</code> number of messages of a group.</li>
-	    </ul>
-	</dd>
-	<p>Order of reduction on a message group can be specified by checkbox (<b>Reduce Right</b>).</p>
+        <dt>Reduce exp</dt>
+        <dd>JSONata expression for reducing message group.  This expression represents the accumulated result.  In the expression, following special variables can be used:
+            <ul>
+                <li><code>$A</code> accumulated value, </li>
+                <li><code>$I</code> index of the message in a group, </li>
+                <li><code>$N</code> number of messages of a group.</li>
+            </ul>
+        </dd>
+        <dt>Initial value</dt>
+        <dd>
+            initial value of reduction.
+        </dd>
+        <dt>Fixup exp</dt>
+        <dd>
+            JSONata expression applied after reduction of a message group completed.  In the expression, following special variables can be used:
+            <ul>
+                <li><code>$I</code> index of the message in a group, </li>
+                <li><code>$N</code> number of messages of a group.</li>
+            </ul>
+        </dd>
+        <p>Order of reduction on a message group can be specified by checkbox (<b>Reduce Right</b>).</p>
     </dl>
     <p><b>Example:</b> Join node outputs an average for each input message group with the following setting:
-	<ul>
-	    <li><b>Reduce exp</b>: <code>$A+payload</code></li>
-	    <li><b>Initial value</b>: <code>0</code></li>
-	    <li><b>Fixup exp</b>: <code>$A/$N</code></li>
-	</ul>
+        <ul>
+            <li><b>Reduce exp</b>: <code>$A+payload</code></li>
+            <li><b>Initial value</b>: <code>0</code></li>
+            <li><b>Fixup exp</b>: <code>$A/$N</code></li>
+        </ul>
     </p>
 
     <h4>Manual mode</h4>
@@ -373,11 +373,11 @@
             count: {value:""},
             topics: {value:[]},
             mergeOnChange: {value:false},
-	    reduceRight: {value:false},
-	    reduceExp: {value:undefined},
-	    reduceInit: {value:undefined},
-	    reduceInitType: {value:undefined},
-	    reduceFixup: {value:undefined}
+            reduceRight: {value:false},
+            reduceExp: {value:undefined},
+            reduceInit: {value:undefined},
+            reduceInitType: {value:undefined},
+            reduceFixup: {value:undefined}
         },
         inputs:1,
         outputs:1,
@@ -410,13 +410,13 @@
                 removable: true
             });
 
-	    $("#node-input-reduceExp").typedInput({'types':['jsonata']});
-	    $("#node-input-reduceInit").typedInput({
-		default: 'num',
-		types:['flow','global','str','num','bool','json','bin','date','jsonata'],
-		typeField: $("#node-input-reduceInitType")
-	    });
-	    $("#node-input-reduceFixup").typedInput({types:['jsonata']});
+            $("#node-input-reduceExp").typedInput({'types':['jsonata']});
+            $("#node-input-reduceInit").typedInput({
+                default: 'num',
+                types:['flow','global','str','num','bool','json','bin','date','jsonata'],
+                typeField: $("#node-input-reduceInitType")
+            });
+            $("#node-input-reduceFixup").typedInput({types:['jsonata']});
 
             for (var i=0;i<this.topics.length;i++) {
                 var topic = this.topics[i];

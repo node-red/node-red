@@ -1036,5 +1036,3 @@ describe('JOIN node', function() {
     });
 
 });
-
-
