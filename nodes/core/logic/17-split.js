@@ -353,11 +353,19 @@ module.exports = function(RED) {
     
     function reduce_and_send_group(node, group) {
         var is_right = node.reduce_right;
-        var msgs = is_right ? group.msgs.reverse() : group.msgs;
+        var flag = is_right ? -1 : 1;
+        var msgs = group.msgs;
         var accum = node.reduce_init;
         var reduce_exp = node.reduce_exp;
         var reduce_fixup = node.reduce_fixup;
         var count = group.count;
+        msgs.sort(function(x,y) {
+            var ix = x.parts.index;
+            var iy = y.parts.index;
+            if (ix < iy) return -flag;
+            if (ix > iy) return flag;
+            return 0;
+        });
         for(var msg of msgs) {
             accum = apply_r(reduce_exp, accum, msg, msg.parts.index, count);
         }
