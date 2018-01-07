@@ -174,7 +174,7 @@ module.exports = function(RED) {
             }
             done();
         };
-console.log(this.brokerurl);
+
         this.connect = function () {
             if (!node.connected && !node.connecting) {
                 node.connecting = true;
