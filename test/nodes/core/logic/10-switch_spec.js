@@ -18,6 +18,7 @@ var should = require("should");
 
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
 var helper = require("../../helper.js");
+var RED = require("../../../../red/red.js");
 
 describe('switch Node', function() {
 
@@ -28,6 +29,7 @@ describe('switch Node', function() {
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
+        RED.settings.switchMaxKeptMsgsCount = 0;
     });
 
     it('should be loaded with some defaults', function(done) {
@@ -681,5 +683,31 @@ describe('switch Node', function() {
         });
     });
 
+    it('should handle too many pending messages', function(done) {
+        var flow = [{id:"n1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"tail","v":2}],
+                     checkall:true,repair:false,
+                     outputs:3,wires:[["n2"]]},
+                    {id:"n2", type:"helper", wires:[]}
+                   ];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.switchMaxKeptMsgsCount = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "switch";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "switch");
+                evt.should.have.property('msg', "switch.errors.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
     
 });

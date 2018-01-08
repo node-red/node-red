@@ -49,6 +49,21 @@ module.exports = function(RED) {
         'else': function(a) { return a === true; }
     };
 
+    var _max_kept_msgs_count = undefined;
+    
+    function max_kept_msgs_count(node) {
+        if (_max_kept_msgs_count === undefined) {
+            var name = "switchMaxKeptMsgsCount";
+            if (RED.settings.hasOwnProperty(name)) {
+                _max_kept_msgs_count = RED.settings[name];
+            }
+            else {
+                _max_kept_msgs_count = 0;
+            }
+        }
+        return _max_kept_msgs_count;
+    }
+
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
         this.rules = n.rules || [];
@@ -133,6 +148,12 @@ module.exports = function(RED) {
             }
             var group = pending_in[id];
             group.msgs.push(msg);
+            pending_count++;
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                clear_pending();
+                node.error(RED._("switch.errors.too-many"), msg);
+            }
             if (parts.hasOwnProperty("count")) {
                 group.count = parts.count;
             }
@@ -211,10 +232,17 @@ module.exports = function(RED) {
             var group = pending_out[gid];
             var onwards = group.onwards;
             onwards.push(onward);
+            pending_count++;
             if (send_ok) {
                 send_group(onwards, onward.length, msg);
+                pending_count -= onward.length;
                 delete pending_out[gid];
                 delete received[gid];
+            }
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                clear_pending();
+                node.error(RED._("switch.errors.too-many"), msg);
             }
         }
 

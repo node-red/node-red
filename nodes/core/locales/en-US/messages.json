@@ -556,7 +556,8 @@
             "else":"otherwise"
         },
         "errors": {
-            "invalid-expr": "Invalid JSONata expression: __error__"
+            "invalid-expr": "Invalid JSONata expression: __error__",
+            "too-many" : "too many pending messages in switch node"
         }
     },
     "change": {
