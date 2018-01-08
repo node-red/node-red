@@ -42,17 +42,6 @@ RED.projects = (function() {
                     $('<p>').text("To get started you can create your first project using your current flow files in a few easy steps.").appendTo(body);
                     $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu option at any time.").appendTo(body);
 
-                    // var buttons = $('<div style="margin: 30px"></div>').appendTo(container);
-                    // var createNew = $('<button class="editor-button"><i class="fa fa-archive fa-2x"></i><i class="fa fa-plus-circle" style="position:absolute"></i><br/>Create a project</button>').appendTo(buttons);
-                    // createNew.click(function(e) {
-                    //     e.preventDefault();
-                    //     show('create');
-                    // });
-                    // var openExisting = $('<button class="editor-button"><i class="fa fa-folder-open-o fa-2x"></i><br/>Open a project</button>').appendTo(buttons);
-                    // openExisting.click(function(e) {
-                    //     e.preventDefault();
-                    //     show('open')
-                    // });
                     return container;
                 },
                 buttons: [
@@ -1075,87 +1064,96 @@ RED.projects = (function() {
                     ]
                 }
             })(),
-            'open': {
-                content: function() {
-                    return createProjectList({
-                        canSelectActive: false,
-                        dblclick: function() {
-                            $("#projects-dialog-open").click();
-                        },
-                        select: function() {
-                            $("#projects-dialog-open").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
-                        }
-                    })
-                },
-                buttons: [
-                    {
-                        // id: "clipboard-dialog-cancel",
-                        text: RED._("common.label.cancel"),
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
+            'open': (function() {
+                var selectedProject;
+                return {
+                    title: "Open a project", // TODO: NLS
+                    content: function() {
+                        return createProjectList({
+                            canSelectActive: false,
+                            dblclick: function(project) {
+                                selectedProject = project;
+                                $("#projects-dialog-open").click();
+                            },
+                            select: function(project) {
+                                selectedProject = project;
+                                $("#projects-dialog-open").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
+                            }
+                        })
                     },
-                    {
-                        id: "projects-dialog-open",
-                        text: "Open project", // TODO: nls
-                        class: "primary disabled",
-                        disabled: true,
-                        click: function() {
-                            dialog.dialog( "close" );
-                            switchProject(selectedProject.name,function(err,data) {
-                                if (err) {
-                                    if (err.error !== 'credentials_load_failed') {
-                                        console.log("unexpected_error",err)
+                    buttons: [
+                        {
+                            // id: "clipboard-dialog-cancel",
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                $( this ).dialog( "close" );
+                            }
+                        },
+                        {
+                            id: "projects-dialog-open",
+                            text: "Open project", // TODO: nls
+                            class: "primary disabled",
+                            disabled: true,
+                            click: function() {
+                                dialog.dialog( "close" );
+                                switchProject(selectedProject.name,function(err,data) {
+                                    if (err) {
+                                        if (err.error !== 'credentials_load_failed') {
+                                            console.log("unexpected_error",err)
+                                        }
                                     }
-                                }
-                            })
+                                })
+                            }
                         }
-                    }
-                ]
-            },
-
-            'delete': {
-                content: function() {
-                    return createProjectList({
-                        canSelectActive: false,
-                        dblclick: function() {
-                            $("#projects-dialog-delete").click();
-                        },
-                        select: function() {
-                            $("#projects-dialog-delete").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
-                        }
-                    })
-                },
-                buttons: [
-                    {
-                        // id: "clipboard-dialog-cancel",
-                        text: RED._("common.label.cancel"),
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
+                    ]
+                }
+            })(),
+            'delete': (function() {
+                var selectedProject;
+                return {
+                    content: function() {
+                        return createProjectList({
+                            canSelectActive: false,
+                            dblclick: function(project) {
+                                selectedProject = project;
+                                $("#projects-dialog-delete").click();
+                            },
+                            select: function(project) {
+                                selectedProject = project;
+                                $("#projects-dialog-delete").prop('disabled',false).removeClass('disabled ui-button-disabled ui-state-disabled');
+                            }
+                        })
                     },
-                    {
-                        id: "projects-dialog-delete",
-                        text: "Delete project", // TODO: nls
-                        class: "primary disabled",
-                        disabled: true,
-                        click: function() {
-                            deleteProject(selectedProject.name,function(err,data) {
-                                if (err) {
-                                    if (err.error === 'credentials_load_failed') {
-                                        dialog.dialog( "close" );
+                    buttons: [
+                        {
+                            // id: "clipboard-dialog-cancel",
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                $( this ).dialog( "close" );
+                            }
+                        },
+                        {
+                            id: "projects-dialog-delete",
+                            text: "Delete project", // TODO: nls
+                            class: "primary disabled",
+                            disabled: true,
+                            click: function() {
+                                deleteProject(selectedProject.name,function(err,data) {
+                                    if (err) {
+                                        if (err.error === 'credentials_load_failed') {
+                                            dialog.dialog( "close" );
+                                        } else {
+                                            console.log("unexpected_error",err)
+                                        }
                                     } else {
-                                        console.log("unexpected_error",err)
+                                        dialog.dialog( "close" );
                                     }
-                                } else {
-                                    dialog.dialog( "close" );
-                                }
-                            })
+                                })
+                            }
                         }
-                    }
-                ]
-
-            }
+                    ]
+                }
+            })()
         }
     }
 
@@ -1222,15 +1220,107 @@ RED.projects = (function() {
         dialog.dialog({position: { 'my': 'center top', 'at': 'center top+10%', 'of': window }});
     }
 
-    var selectedProject = null;
-
     function createProjectList(options) {
         options = options||{};
         var height = options.height || "300px";
-        selectedProject = null;
-        var container = $('<div></div>',{style:"min-height: "+height+"; height: "+height+";"});
+        var container = $('<div></div>',{class:"projects-dialog-project-list-container" });
+        var filterTerm = "";
 
-        var list = $('<ol>',{class:"projects-dialog-project-list", style:"height:"+height}).appendTo(container).editableList({
+        var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(container);
+        var searchInput = $('<input type="text" placeholder="search your projects">').appendTo(searchDiv).searchBox({
+            //data-i18n="[placeholder]menu.label.searchInput"
+            delay: 200,
+            change: function() {
+                filterTerm = $(this).val();
+                list.editableList('filter');
+                if (selectedListItem && !selectedListItem.is(":visible")) {
+                    selectedListItem.children().children().removeClass('selected');
+                    selectedListItem = list.children(":visible").first();
+                    selectedListItem.children().children().addClass('selected');
+                    if (options.select) {
+                        options.select(selectedListItem.children().data('data'));
+                    }
+                }
+                ensureSelectedIsVisible();
+            }
+        });
+        var selectedListItem;
+
+        searchInput.on('keydown',function(evt) {
+            if (evt.keyCode === 40) {
+                evt.preventDefault();
+                // Down
+                var next = selectedListItem;
+                if (selectedListItem) {
+                    do {
+                        next = next.next();
+                    } while(next.length !== 0 && !next.is(":visible"));
+                    if (next.length === 0) {
+                        return;
+                    }
+                    selectedListItem.children().children().removeClass('selected');
+                } else {
+                    next = list.children(":visible").first();
+                }
+                selectedListItem = next;
+                selectedListItem.children().children().addClass('selected');
+                if (options.select) {
+                    options.select(selectedListItem.children().data('data'));
+                }
+                ensureSelectedIsVisible();
+            } else if (evt.keyCode === 38) {
+                evt.preventDefault();
+                // Up
+                var prev = selectedListItem;
+                if (selectedListItem) {
+                    do {
+                        prev = prev.prev();
+                    } while(prev.length !== 0 && !prev.is(":visible"));
+                    if (prev.length === 0) {
+                        return;
+                    }
+                    selectedListItem.children().children().removeClass('selected');
+                } else {
+                    prev = list.children(":visible").first();
+                }
+                selectedListItem = prev;
+                selectedListItem.children().children().addClass('selected');
+                if (options.select) {
+                    options.select(selectedListItem.children().data('data'));
+                }
+                ensureSelectedIsVisible();
+            } else if (evt.keyCode === 13) {
+                evt.preventDefault();
+                // Enter
+                if (selectedListItem) {
+                    if (options.dblclick) {
+                        options.dblclick(selectedListItem.children().data('data'));
+                    }
+                }
+            }
+        });
+
+        searchInput.i18n();
+
+        var ensureSelectedIsVisible = function() {
+            var selectedEntry = list.find(".projects-dialog-project-list-entry.selected").parent().parent();
+            if (selectedEntry.length === 1) {
+                var scrollWindow = listContainer;
+                var scrollHeight = scrollWindow.height();
+                var scrollOffset = scrollWindow.scrollTop();
+                var y = selectedEntry.position().top;
+                var h = selectedEntry.height();
+                if (y > scrollHeight) {
+                    scrollWindow.animate({scrollTop: '-='+(scrollHeight-y+10)},50);
+                } else if (y-h<0) {
+                    scrollWindow.animate({scrollTop: '+='+(y-h-10)},50);
+                }
+            }
+        }
+
+        var listContainer = $('<div></div>',{class:"projects-dialog-project-list-inner-container" }).appendTo(container);
+
+        var list = $('<ol>',{class:"projects-dialog-project-list"}).appendTo(listContainer).editableList({
             addButton: false,
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
@@ -1249,17 +1339,23 @@ RED.projects = (function() {
                 row.click(function(evt) {
                     $('.projects-dialog-project-list-entry').removeClass('selected');
                     header.addClass('selected');
-                    selectedProject = entry;
+                    selectedListItem = row.parent();
                     if (options.select) {
                         options.select(entry);
                     }
+                    ensureSelectedIsVisible();
+                    searchInput.focus();
                 })
                 if (options.dblclick) {
                     row.dblclick(function(evt) {
                         evt.preventDefault();
-                        options.dblclick();
+                        options.dblclick(entry);
                     })
                 }
+            },
+            filter: function(data) {
+                if (filterTerm === "") { return true; }
+                return data.name.toLowerCase().indexOf(filterTerm) !== -1;
             }
         });
         if (options.small) {

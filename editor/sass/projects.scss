@@ -166,6 +166,17 @@
 .projects-dialog-screen-secret {
     min-height: auto;
 }
+.projects-dialog-project-list-container {
+    border: 1px solid $secondary-border-color;
+    border-radius: 2px;
+}
+.projects-dialog-project-list-inner-container {
+    height: 300px;
+    overflow-y: scroll;
+    .red-ui-editableList-border {
+        border: none;
+    }
+}
 .projects-dialog-project-list {
     li {
         padding: 0 !important;
