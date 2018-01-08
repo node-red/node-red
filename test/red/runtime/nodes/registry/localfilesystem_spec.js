@@ -155,14 +155,38 @@ describe("red/nodes/registry/localfilesystem",function() {
             localfilesystem.init({
                 i18n:{registerMessageCatalog:function(){}},
                 events:{emit:function(eventName,dir){
-                    eventName.should.equal("node-icon-dir");
-                    dir.name.should.equal("node-red");
-                    dir.icons.should.be.an.Array();
-                    if (count++ === 1) {
+                    if (count === 0) {
+                        eventName.should.equal("node-icon-dir");
+                        dir.name.should.equal("node-red");
+                        dir.icons.should.be.an.Array();
+                        count = 1;
+                    } else if (count === 1) {
                         done();
                     }
                 }},
                 settings:{coreNodesDir:resourcesDir}
+            });
+            localfilesystem.getNodeFiles(true);
+        });
+        it("scans icons dir in library",function(done) {
+            var count = 0;
+            localfilesystem.init({
+                i18n:{registerMessageCatalog:function(){}},
+                events:{emit:function(eventName,dir){
+                    eventName.should.equal("node-icon-dir");
+                    if (count === 0) {
+                        dir.name.should.equal("node-red");
+                        dir.icons.should.be.an.Array();
+                        count = 1;
+                    } else if (count === 1) {
+                        dir.name.should.equal("Library");
+                        dir.icons.should.be.an.Array();
+                        dir.icons.length.should.equal(1);
+                        dir.icons[0].should.be.equal("test_icon.png");
+                        done();
+                    }
+                }},
+                settings:{userDir:userDir}
             });
             localfilesystem.getNodeFiles(true);
         });

@@ -232,6 +232,12 @@ function getNodeFiles(disableNodePathScan) {
     }
 
     if (settings.userDir) {
+        dir = path.join(settings.userDir,"lib","icons");
+        iconList = scanIconDir(dir);
+        if (iconList.length > 0) {
+            events.emit("node-icon-dir",{name:'Library',path:dir,icons:iconList});
+        }
+
         dir = path.join(settings.userDir,"nodes");
         nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir));
     }
