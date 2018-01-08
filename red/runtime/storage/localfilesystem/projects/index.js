@@ -107,6 +107,13 @@ function init(_settings, _runtime) {
                         } else {
                             activeProject = globalSettings.projects.activeProject;
                         }
+                        if (settings.flowFile) {
+                            if (globalSettings.projects.projects.hasOwnProperty(settings.flowFile)) {
+                                activeProject = settings.flowFile;
+                                globalSettings.projects.activeProject = settings.flowFile;
+                                saveSettings = true;
+                            }
+                        }
                         if (!activeProject) {
                             projectLogMessages.push(log._("storage.localfilesystem.no-active-project"))
                         }
