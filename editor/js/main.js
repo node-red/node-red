@@ -97,17 +97,50 @@
                         }
                         if (msg.text) {
                             var text = RED._(msg.text,{default:msg.text});
+                            var options = {
+                                type: msg.type,
+                                fixed: msg.timeout === undefined,
+                                timeout: msg.timeout
+                            }
                             if (notificationId === "runtime-state") {
                                 if (msg.error === "credentials_load_failed") {
-                                    // TODO: NLS
-                                    text += '<p><a href="#" onclick="RED.projects.showCredentialsPrompt(); return false;">'+'Setup credentials'+'</a></p>';
+                                    options.buttons = [
+                                        {
+                                            text: "Setup credentials",
+                                            click: function() {
+                                                RED.projects.showCredentialsPrompt();
+                                            }
+                                        }
+                                    ]
                                 } else if (msg.error === "missing_flow_file") {
-                                    // TODO: NLS
-                                    text += '<p><a href="#" onclick="RED.projects.showFilesPrompt(); return false;">'+'Setup project files'+'</a></p>';
+                                    options.buttons = [
+                                        {
+                                            text: "Setup project files",
+                                            click: function() {
+                                                persistentNotifications[notificationId].close();
+                                                RED.projects.showFilesPrompt();
+                                            }
+                                        }
+                                    ]
+                                } else if (msg.error === "project_empty") {
+                                    options.buttons = [
+                                        {
+                                            text: "No thanks",
+                                            click: function() {
+                                                persistentNotifications[notificationId].close();
+                                            }
+                                        },                                        {
+                                            text: "Create default project files",
+                                            click: function() {
+                                                persistentNotifications[notificationId].close();
+                                                RED.projects.createDefaultFileSet();
+                                            }
+                                        }
+                                    ]
                                 }
                             }
                             if (!persistentNotifications.hasOwnProperty(notificationId)) {
-                                persistentNotifications[notificationId] = RED.notify(text,msg.type,msg.timeout === undefined,msg.timeout);
+                                persistentNotifications[notificationId] = RED.notify(text,options);
                             } else {
                                 persistentNotifications[notificationId].update(text,msg.timeout);
                             }

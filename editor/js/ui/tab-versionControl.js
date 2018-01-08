@@ -1191,7 +1191,7 @@ RED.sidebar.versionControl = (function() {
                 var commitsBehind = result.commits.behind || 0;
 
                 if (activeProject.git.hasOwnProperty('remotes')) {
-                    if (result.branches.hasOwnProperty("remoteError")) {
+                    if (result.branches.hasOwnProperty("remoteError") && result.branches.remoteError.code !== 'git_remote_gone') {
                         $("#sidebar-version-control-repo-status-auth-issue").show();
                         $("#sidebar-version-control-repo-status-stats").hide();
                         $('#sidebar-version-control-repo-branch').attr('disabled',true);

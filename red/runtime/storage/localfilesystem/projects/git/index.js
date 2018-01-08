@@ -121,20 +121,17 @@ function getBranchInfo(localRepo) {
     return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
         var lines = output.split("\n");
         var unknownDirs = [];
-        var branchLineRE = /^## (.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/m;
+        var branchLineRE = /^## (No commits yet on )?(.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/m;
         var m = branchLineRE.exec(output);
         var result = {}; //commits:{}};
         if (m) {
-            result.local = m[1];
-            if (m[3]) {
-                result.remote = m[3];
+            if (m[1]) {
+                result.empty = true;
             }
-            // if (m[6] !== undefined) {
-            //     result.commits.ahead = parseInt(m[6]);
-            // }
-            // if (m[8] !== undefined) {
-            //     result.commits.behind = parseInt(m[8]);
-            // }
+            result.local = m[2];
+            if (m[4]) {
+                result.remote = m[4];
+            }
         }
         return result;
     });
@@ -177,7 +174,7 @@ function getStatus(localRepo) {
             return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
                 var lines = output.split("\n");
                 var unknownDirs = [];
-                var branchLineRE = /^## (.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/;
+                var branchLineRE = /^## (.+?)(?:$|\.\.\.(.+?)(?:$| \[(?:(?:ahead (\d+)(?:,\s*)?)?(?:behind (\d+))?|(gone))\]))/;
                 lines.forEach(function(line) {
                     if (line==="") {
                         return;
@@ -186,16 +183,22 @@ function getStatus(localRepo) {
                         var m = branchLineRE.exec(line);
                         if (m) {
                             result.branches.local = m[1];
-                            if (m[3]) {
-                                result.branches.remote = m[3];
+                            if (m[2]) {
+                                result.branches.remote = m[2];
                                 result.commits.ahead = 0;
                                 result.commits.behind = 0;
                             }
-                            if (m[6] !== undefined) {
-                                result.commits.ahead = parseInt(m[6]);
+                            if (m[3] !== undefined) {
+                                result.commits.ahead = parseInt(m[3]);
                             }
-                            if (m[8] !== undefined) {
-                                result.commits.behind = parseInt(m[8]);
+                            if (m[4] !== undefined) {
+                                result.commits.behind = parseInt(m[4]);
+                            }
+                            if (m[5] !== undefined) {
+                                result.commits.ahead = result.commits.total;
+                                result.branches.remoteError = {
+                                    code: "git_remote_gone"
+                                }
                             }
                         }
                         return;

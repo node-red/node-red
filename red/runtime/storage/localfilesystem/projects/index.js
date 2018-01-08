@@ -303,8 +303,15 @@ function createProject(user, metadata) {
         if (!metadata.hasOwnProperty('credentialSecret')) {
             metadata.credentialSecret = currentEncryptionKey;
         }
-        metadata.files.flow = flowsFullPath;
-        metadata.files.credentials = credentialsFile;
+        if (!metadata.files.flow) {
+            metadata.files.flow = fspath.basename(flowsFullPath);
+        }
+        if (!metadata.files.credentials) {
+            metadata.files.credentials = fspath.basename(credentialsFile);
+        }
+
+        metadata.files.oldFlow = flowsFullPath;
+        metadata.files.oldCredentials = credentialsFile;
         metadata.files.credentialSecret = currentEncryptionKey;
     }
     return Projects.create(null,metadata).then(function(p) {
@@ -325,6 +332,21 @@ function setActiveProject(user, projectName) {
             // console.log(credentialsFile)
             return reloadActiveProject("loaded");
         })
+    });
+}
+
+function initialiseProject(user, project, data) {
+    if (!activeProject || activeProject.name !== project) {
+        // TODO standardise
+        throw new Error("Cannot initialise inactive project");
+    }
+    return activeProject.initialise(user,data).then(function(result) {
+        flowsFullPath = activeProject.getFlowFile();
+        flowsFileBackup = activeProject.getFlowFileBackup();
+        credentialsFile = activeProject.getCredentialsFile();
+        credentialsFileBackup = activeProject.getCredentialsFileBackup();
+        runtime.nodes.setCredentialSecret(activeProject.credentialSecret);
+        return reloadActiveProject("updated");
     });
 }
 function updateProject(user, project, data) {
@@ -414,9 +436,16 @@ function getFlows() {
         }
     }
     if (activeProject) {
+        var error;
+        if (activeProject.isEmpty()) {
+            log.warn("Project repository is empty");
+            error = new Error("Project repository is empty");
+            error.code = "project_empty";
+            return when.reject(error);
+        }
         if (!activeProject.getFlowFile()) {
-            log.warn("NLS: project has no flow file");
-            var error = new Error("NLS: project has no flow file");
+            log.warn("Project has no flow file");
+            error = new Error("Project has no flow file");
             error.code = "missing_flow_file";
             return when.reject(error);
         }
@@ -466,6 +495,16 @@ function saveCredentials(credentials) {
     return util.writeFile(credentialsFile, credentialData);
 }
 
+function getFlowFilename() {
+    if (flowsFullPath) {
+        return fspath.basename(flowsFullPath);
+    }
+}
+function getCredentialsFilename() {
+    if (flowsFullPath) {
+        return fspath.basename(credentialsFile);
+    }
+}
 
 module.exports = {
     init: init,
@@ -475,6 +514,7 @@ module.exports = {
     getProject: getProject,
     deleteProject: deleteProject,
     createProject: createProject,
+    initialiseProject: initialiseProject,
     updateProject: updateProject,
     getFiles: getFiles,
     getFile: getFile,
@@ -498,6 +538,8 @@ module.exports = {
     addRemote: addRemote,
     removeRemote: removeRemote,
     updateRemote: updateRemote,
+    getFlowFilename: getFlowFilename,
+    getCredentialsFilename: getCredentialsFilename,
 
     getFlows: getFlows,
     saveFlows: saveFlows,

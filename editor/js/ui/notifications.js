@@ -69,6 +69,10 @@ RED.notify = (function() {
         n.close = (function() {
             var nn = n;
             return function() {
+                if (nn.closed) {
+                    return;
+                }
+                nn.closed = true;
                 currentNotifications.splice(currentNotifications.indexOf(nn),1);
                 $(nn).slideUp(300, function() {
                     nn.parentNode.removeChild(nn);

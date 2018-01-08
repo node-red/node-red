@@ -48,6 +48,16 @@ module.exports = {
             safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
             safeSettings.editorTheme.palette.editable = false;
         }
+        if (runtime.storage.projects) {
+            var activeProject = runtime.storage.projects.getActiveProject();
+            if (activeProject) {
+                safeSettings.project = activeProject;
+            }
+            safeSettings.files = {
+                flow: runtime.storage.projects.getFlowFilename(),
+                credentials: runtime.storage.projects.getCredentialsFilename()
+            }
+        }
 
         safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();
 

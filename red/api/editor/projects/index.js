@@ -90,6 +90,17 @@ module.exports = {
                 } else {
                     res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }
+            } else if (req.body.initialise) {
+                // Initialised set when creating default files for an empty repo
+                runtime.storage.projects.initialiseProject(req.user, req.params.id, req.body).then(function() {
+                    res.redirect(303,req.baseUrl + '/'+ req.params.id);
+                }).catch(function(err) {
+                    if (err.code) {
+                        res.status(400).json({error:err.code, message: err.message});
+                    } else {
+                        res.status(400).json({error:"unexpected_error", message:err.toString()});
+                    }
+                })
             } else if (req.body.hasOwnProperty('credentialSecret') ||
                        req.body.hasOwnProperty('description') ||
                        req.body.hasOwnProperty('dependencies')||
@@ -145,8 +156,11 @@ module.exports = {
                     res.status(404).end();
                 }
             }).catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
             })
         });
 
@@ -154,12 +168,15 @@ module.exports = {
         // Project file listing
         app.get("/:id/files", needsPermission("projects.read"), function(req,res) {
             runtime.storage.projects.getFiles(req.user, req.params.id).then(function(data) {
-                console.log("TODO: REMOVE /:id/files as /:id/status is better!")
+                // console.log("TODO: REMOVE /:id/files as /:id/status is better!")
                 res.json(data);
             })
             .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
             })
         });
 

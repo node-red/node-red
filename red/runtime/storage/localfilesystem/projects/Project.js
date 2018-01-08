@@ -36,6 +36,7 @@ function Project(name) {
     this.name = name;
     this.path = fspath.join(projectsDir,name);
     this.paths = {};
+    this.files = {};
     this.auth = {origin:{}};
 
     this.missingFiles = [];
@@ -111,6 +112,44 @@ Project.prototype.load = function () {
     });
 };
 
+Project.prototype.initialise = function(user,data) {
+    var project = this;
+    if (!this.empty) {
+        throw new Error("Cannot initialise non-empty project");
+    }
+    var files = Object.keys(defaultFileSet);
+    var promises = [];
+
+    if (data.hasOwnProperty('credentialSecret')) {
+        var projects = settings.get('projects');
+        projects.projects[project.name] = projects.projects[project.name] || {};
+        projects.projects[project.name].credentialSecret = data.credentialSecret;
+        promises.push(settings.set('projects',projects));
+    }
+
+    project.files.flow = data.files.flow;
+    project.files.credentials = data.files.credentials;
+    var flowFilePath = fspath.join(project.path,project.files.flow);
+    var credsFilePath = getCredentialsFilename(flowFilePath);
+    promises.push(util.writeFile(flowFilePath,"[]"));
+    promises.push(util.writeFile(credsFilePath,"{}"));
+    files.push(project.files.flow);
+    files.push(project.files.credentials);
+    for (var file in defaultFileSet) {
+        if (defaultFileSet.hasOwnProperty(file)) {
+            promises.push(util.writeFile(fspath.join(project.path,file),defaultFileSet[file](project)));
+        }
+    }
+
+    return when.all(promises).then(function() {
+        return gitTools.stageFile(project.path,files);
+    }).then(function() {
+        return gitTools.commit(project.path,"Create project files");
+    }).then(function() {
+        return project.load()
+    })
+}
+
 Project.prototype.loadRemotes = function() {
     var project = this;
     return gitTools.getRemotes(project.path).then(function(remotes) {
@@ -154,8 +193,15 @@ Project.prototype.loadBranches = function() {
     var project = this;
     return gitTools.getBranchInfo(project.path).then(function(branches) {
         project.branches = branches;
+        project.empty = project.branches.empty;
+        delete project.branches.empty;
     });
 }
+
+Project.prototype.isEmpty = function () {
+    return this.empty;
+};
+
 Project.prototype.update = function (user, data) {
     var username;
     if (!user) {
@@ -297,7 +343,12 @@ Project.prototype.update = function (user, data) {
 };
 
 Project.prototype.getFiles = function () {
-    return gitTools.getFiles(this.path);
+    return gitTools.getFiles(this.path).catch(function(err) {
+        if (/ambiguous argument/.test(err.message)) {
+            return {};
+        }
+        throw err;
+    });
 };
 Project.prototype.stageFile = function(file) {
     return gitTools.stageFile(this.path,file);
@@ -319,7 +370,16 @@ Project.prototype.getFileDiff = function(file,type) {
     return gitTools.getFileDiff(this.path,file,type);
 }
 Project.prototype.getCommits = function(options) {
-    return gitTools.getCommits(this.path,options);
+    return gitTools.getCommits(this.path,options).catch(function(err) {
+        if (/ambiguous argument/.test(err.message) || /does not have any commits yet/.test(err.message)) {
+            return {
+                count:0,
+                commits:[],
+                total: 0
+            }
+        }
+        throw err;
+    })
 }
 Project.prototype.getCommit = function(sha) {
     return gitTools.getCommit(this.path,sha);
@@ -373,20 +433,29 @@ Project.prototype.status = function(user) {
             }
             self.branches.local = result.branches.local;
             self.branches.remote = result.branches.remote;
-            if (fetchError) {
+            if (fetchError && !/ambiguous argument/.test(fetchError.message)) {
                 result.branches.remoteError = {
                     remote: fetchError.remote,
                     code: fetchError.code
                 }
             }
             return result;
+        }).catch(function(err) {
+            if (/ambiguous argument/.test(err.message)) {
+                return {
+                    files:{},
+                    commits:{total:0},
+                    branches:{}
+                };
+            }
+            throw err;
         });
     }
     return fetchPromise.then(completeStatus).catch(function(e) {
-        if (e.code !== 'git_auth_failed') {
-            console.log("Fetch failed");
-            console.log(e);
-        }
+        // if (e.code !== 'git_auth_failed') {
+        //     console.log("Fetch failed");
+        //     console.log(e);
+        // }
         return completeStatus(e);
     })
 };
@@ -600,6 +669,7 @@ Project.prototype.toJSON = function () {
         summary: this.package.description,
         description: this.description,
         dependencies: this.package.dependencies||{},
+        empty: this.empty,
         settings: {
             credentialsEncrypted: (typeof this.credentialSecret === "string"),
             credentialSecretInvalid: this.credentialSecretInvalid
@@ -663,15 +733,15 @@ function createDefaultProject(user, project) {
                 var credsFilePath;
 
                 if (project.files.migrateFiles) {
-                    var baseFlowFileName = fspath.basename(project.files.flow);
-                    var baseCredentialFileName = fspath.basename(project.files.credentials);
+                    var baseFlowFileName = project.files.flow || fspath.basename(project.files.oldFlow);
+                    var baseCredentialFileName = project.files.credentials || fspath.basename(project.files.oldCredentials);
                     files.push(baseFlowFileName);
                     files.push(baseCredentialFileName);
                     flowFilePath = fspath.join(projectPath,baseFlowFileName);
                     credsFilePath = fspath.join(projectPath,baseCredentialFileName);
-                    log.trace("Migrating "+project.files.flow+" to "+flowFilePath);
-                    log.trace("Migrating "+project.files.credentials+" to "+credsFilePath);
-                    promises.push(fs.copy(project.files.flow,flowFilePath));
+                    log.trace("Migrating "+project.files.oldFlow+" to "+flowFilePath);
+                    log.trace("Migrating "+project.files.oldCredentials+" to "+credsFilePath);
+                    promises.push(fs.copy(project.files.oldFlow,flowFilePath));
                     runtime.nodes.setCredentialSecret(project.credentialSecret);
                     promises.push(runtime.nodes.exportCredentials().then(function(creds) {
                         var credentialData;
@@ -769,7 +839,6 @@ function createProject(user, metadata) {
                 if (metadata.git && metadata.git.remotes && metadata.git.remotes.origin) {
                     var originRemote = metadata.git.remotes.origin;
                     var auth;
-                    console.log('originRemote:', originRemote);
                     if (originRemote.hasOwnProperty("username") && originRemote.hasOwnProperty("password")) {
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
                                 username: originRemote.username,
@@ -799,7 +868,18 @@ function createProject(user, metadata) {
                         //     console.log("checkProjectFiles");
                         //     console.log(results);
                         // });
-
+                        // return gitTools.getFiles(projectPath).then(function() {
+                        //     // It wasn't an empty repository.
+                        //     // TODO: check for required files -  checkProjectFiles
+                        //
+                        // }).catch(function(err) {
+                        //     if (/ambiguous argument/.test(err.message)) {
+                        //         // Empty repository
+                        //         err.code = "project_empty";
+                        //         err.message = "Project is empty";
+                        //     }
+                        //     throw err;
+                        // });
                         resolve(getProject(project));
                     }).catch(function(error) {
                         fs.remove(projectPath,function() {

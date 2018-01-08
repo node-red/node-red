@@ -160,7 +160,7 @@
 }
 #full-shade {
     @include shade;
-    z-index: 101;
+    z-index: 15;
 }
 
 .dialog-form,#dialog-form, #node-config-dialog-edit-form {
