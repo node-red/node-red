@@ -18,6 +18,7 @@ var should = require("should");
 var splitNode = require("../../../../nodes/core/logic/17-split.js");
 var joinNode = require("../../../../nodes/core/logic/17-split.js");
 var helper = require("../../helper.js");
+var RED = require("../../../../red/red.js");
 
 describe('SPLIT node', function() {
 
@@ -269,6 +270,7 @@ describe('JOIN node', function() {
 
     afterEach(function() {
         helper.unload();
+        RED.settings.joinMaxKeptMsgsCount = 0;
     });
 
     it('should be loaded', function(done) {
@@ -1032,6 +1034,60 @@ describe('JOIN node', function() {
             n1.receive({payload:'2', parts:{index:1, count:4, id:222}});
             n1.receive({payload:'4', parts:{index:3, count:4, id:222}});
             n1.receive({payload:'1', parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should handle too many pending messages for merge mode', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TA"}, {topic:"TB"}],
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.joinMaxKeptMsgsCount = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "join";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "join");
+                evt.should.have.property('msg', "join.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TB"});
+            n1.receive({payload:"d", topic:"TA"});
+        });
+    });
+
+    it('should handle too many pending messages for reduce mode', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.joinMaxKeptMsgsCount = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "join";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "join");
+                evt.should.have.property('msg', "join.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
         });
     });
 

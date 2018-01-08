@@ -324,7 +324,7 @@ module.exports = function(RED) {
             if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
                 node.pending = {};
                 node.pending_count = 0;
-                throw new Error("too many pending messages");
+                node.error(RED._("join.too-many"), msg);
             }
             try_merge(node, pending);
         }
@@ -412,7 +412,7 @@ module.exports = function(RED) {
             if ((max_msgs > 0) && (pending_count > max_msgs)) {
                 node.pending = {};
                 node.pending_count = 0;
-                throw new Error("too many pending messages");
+                node.error(RED._("join.too-many"), msg);
             }
         }
         else {
