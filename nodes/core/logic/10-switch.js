@@ -201,7 +201,7 @@ module.exports = function(RED) {
                 var onward = onwards[i];
                 for (var j = 0; j < port_count; j++) {
                     var msg = onward[j];
-                    if (msg !== null) {
+                    if (msg) {
                         var new_msg = RED.util.cloneMessage(msg);
                         var parts = new_msg.parts;
                         parts.id = ids[j];
