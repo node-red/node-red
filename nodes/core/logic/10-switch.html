@@ -52,105 +52,105 @@
     <h3>Rules</h3>
     <p>Routing rules are categorized into three:</p>
     <dl>
-	<dt>value rules</dt>
-	<dd>
-	    <table>
-		<tr>
-		    <th>operator</th>
-		    <th>description</th>
-		</tr>
-		<tr>
-		    <td><b>==</b></td>
-		    <td>property value is equals to specified value</td>
-		</tr>
-		<tr>
-		    <td><b>!=</b></td>
-		    <td>property value is not equals to specified value</td>
-		</tr>
-		<tr>
-		    <td><b>&lt;</b></td>
-		    <td>property value is less than specified value</td>
-		</tr>
-		<tr>
-		    <td><b>&lt;=</b></td>
-		    <td>property value is less than or equals to specified value</td>
-		</tr>
-		<tr>
-		    <td><b>&gt;</b></td>
-		    <td>property value is greater than specified value</td>
-		</tr>
-		<tr>
-		    <td><b>&gt;=</b></td>
-		    <td>property value is greater than or equals to specified value</td>
-		</tr>
-		<tr>
-		    <td><b>is between</b></td>
-		    <td>property value is between specified values</td>
-		</tr>
-		<tr>
-		    <td><b>contains</b></td>
-		    <td>property string value contains specified string value</td>
-		</tr>
-		<tr>
-		    <td><b>matches regex</b></td>
-		    <td>property string value matches specified regex</td>
-		</tr>
-		<tr>
-		    <td><b>is true</b></td>
-		    <td>property value is true</td>
-		</tr>
-		<tr>
-		    <td><b>is false</b></td>
-		    <td>property value is false</td>
-		</tr>
-		<tr>
-		    <td><b>is null</b></td>
-		    <td>property value is null</td>
-		</tr>
-		<tr>
-		    <td><b>is not null</b></td>
-		    <td>property value is not null</td>
-		</tr>
-	    </table>
-	</dd>
-	<dt>sequence rules</dt>
-	<dd>
-	    <table>
-		<tr>
-		    <th>operator</th>
-		    <th>description</th>
-		</tr>
-		<tr>
-		    <td><b>head</b></td>
-		    <td>message is included in the first specified number of messages in a sequence</td>
-		</tr>
-		<tr>
-		    <td><b>tail</b></td>
-		    <td>message is included in the last specified number of messages in a sequence</td>
-		</tr>
-		<tr>
-		    <td><b>pos. between</b></td>
-		    <td>message is included between specified positions in a sequence</td>
-		</tr>
-	    </table>
-	</dd>
-	<dt>other rules</dt>
-	<dd>
-	    <table>
-		<tr>
-		    <th>operator</th>
-		    <th>description</th>
-		</tr>
-		<tr>
-		    <td><b>JSONata exp</b></td>
-		    <td>specified JSONata expression evaluate to true. In JSONata expression, $I represents <code>msg.parts.index</code> and $N represents <code>msg.parts.count</code> respectively if exists.</td>
-		</tr>
-		<tr>
-		    <td><b>otherwise</b></td>
-		    <td>no matching rule found</td>
-		</tr>
-	    </table>
-	</dd>
+        <dt>value rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>==</b></td>
+                    <td>property value is equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>!=</b></td>
+                    <td>property value is not equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&lt;</b></td>
+                    <td>property value is less than specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&lt;=</b></td>
+                    <td>property value is less than or equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&gt;</b></td>
+                    <td>property value is greater than specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&gt;=</b></td>
+                    <td>property value is greater than or equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>is between</b></td>
+                    <td>property value is between specified values</td>
+                </tr>
+                <tr>
+                    <td><b>contains</b></td>
+                    <td>property string value contains specified string value</td>
+                </tr>
+                <tr>
+                    <td><b>matches regex</b></td>
+                    <td>property string value matches specified regex</td>
+                </tr>
+                <tr>
+                    <td><b>is true</b></td>
+                    <td>property value is true</td>
+                </tr>
+                <tr>
+                    <td><b>is false</b></td>
+                    <td>property value is false</td>
+                </tr>
+                <tr>
+                    <td><b>is null</b></td>
+                    <td>property value is null</td>
+                </tr>
+                <tr>
+                    <td><b>is not null</b></td>
+                    <td>property value is not null</td>
+                </tr>
+            </table>
+        </dd>
+        <dt>sequence rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>head</b></td>
+                    <td>message is included in the first specified number of messages in a sequence</td>
+                </tr>
+                <tr>
+                    <td><b>tail</b></td>
+                    <td>message is included in the last specified number of messages in a sequence</td>
+                </tr>
+                <tr>
+                    <td><b>pos. between</b></td>
+                    <td>message is included between specified positions in a sequence</td>
+                </tr>
+            </table>
+        </dd>
+        <dt>other rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>JSONata exp</b></td>
+                    <td>specified JSONata expression evaluate to true. In JSONata expression, $I represents <code>msg.parts.index</code> and $N represents <code>msg.parts.count</code> respectively if exists.</td>
+                </tr>
+                <tr>
+                    <td><b>otherwise</b></td>
+                    <td>no matching rule found</td>
+                </tr>
+            </table>
+        </dd>
     </dl>
 </script>
 
@@ -170,10 +170,10 @@
         {v:"false",t:"switch.rules.false",kind:'V'},
         {v:"null",t:"switch.rules.null",kind:'V'},
         {v:"nnull",t:"switch.rules.nnull",kind:'V'},
-	{v:"head",t:"switch.rules.head",kind:'S'},
-	{v:"tail",t:"switch.rules.tail",kind:'S'},
-	{v:"index",t:"switch.rules.index",kind:'S'},
-	{v:"jsonata_exp",t:"switch.rules.exp",kind:'O'},
+        {v:"head",t:"switch.rules.head",kind:'S'},
+        {v:"tail",t:"switch.rules.tail",kind:'S'},
+        {v:"index",t:"switch.rules.index",kind:'S'},
+        {v:"jsonata_exp",t:"switch.rules.exp",kind:'O'},
         {v:"else",t:"switch.rules.else",kind:'O'}
     ];
 
@@ -243,8 +243,8 @@
                 var selectField = rule.find("select");
                 var type = selectField.val()||"";
                 var valueField = rule.find(".node-input-rule-value");
-		var numField = rule.find(".node-input-rule-num-value");
-		var expField = rule.find(".node-input-rule-exp-value");
+                var numField = rule.find(".node-input-rule-num-value");
+                var expField = rule.find(".node-input-rule-exp-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
                 var selectWidth;
@@ -320,25 +320,25 @@
                         var type = selectField.val();
                         if ((type === "btwn") || (type === "index")) {
                             valueField.typedInput('hide');
-			    expValueField.typedInput('hide');
-			    numValueField.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('hide');
                             btwnValueField.typedInput('show');
                         } else if ((type === "head") || (type === "tail")) {
-			    btwnValueField.typedInput('hide');
-			    btwnValue2Field.typedInput('hide');
-			    expValueField.typedInput('hide');
-			    numValueField.typedInput('show');
+                            btwnValueField.typedInput('hide');
+                            btwnValue2Field.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('show');
                             valueField.typedInput('hide');
                         } else if (type === "jsonata_exp") {
-			    btwnValueField.typedInput('hide');
-			    btwnValue2Field.typedInput('hide');
-			    expValueField.typedInput('show');
-			    numValueField.typedInput('hide');
+                            btwnValueField.typedInput('hide');
+                            btwnValue2Field.typedInput('hide');
+                            expValueField.typedInput('show');
+                            numValueField.typedInput('hide');
                             valueField.typedInput('hide');
                         } else {
                             btwnValueField.typedInput('hide');
-			    expValueField.typedInput('hide');
-			    numValueField.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('hide');
                             if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                                 valueField.typedInput('hide');
                             } else {
@@ -435,10 +435,10 @@
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
                         r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
                         r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
-		    } else if ((type === "head") || (type === "tail")) {
+                    } else if ((type === "head") || (type === "tail")) {
                         r.v = rule.find(".node-input-rule-num-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-num-value").typedInput('type');
-		    } else if (type === "jsonata_exp") {
+                    } else if (type === "jsonata_exp") {
                         r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');
                     } else {
