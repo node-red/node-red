@@ -1067,7 +1067,7 @@ RED.projects = (function() {
             'open': (function() {
                 var selectedProject;
                 return {
-                    title: "Open a project", // TODO: NLS
+                    title: "Select a project to open", // TODO: NLS
                     content: function() {
                         return createProjectList({
                             canSelectActive: false,
@@ -1111,6 +1111,7 @@ RED.projects = (function() {
             'delete': (function() {
                 var selectedProject;
                 return {
+                    title: "Select a project to delete", // TODO: NLS
                     content: function() {
                         return createProjectList({
                             canSelectActive: false,

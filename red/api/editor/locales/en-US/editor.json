@@ -85,9 +85,9 @@
             "nodeActionDisabled": "node actions disabled within subflow",
             "missing-types": "Flows stopped due to missing node types. Check logs for details.",
             "restartRequired": "Node-RED must be restarted to enable upgraded modules",
-            "credentials_load_failed": "Flows stopped due to missing or invalid credentialSecret",
-            "missing_flow_file": "Could not find the project flow file",
-            "project_empty": "<p>The project repository is empty.</p><p>Do you want to create a default set of project files?<br/>Otherwise, you will have to manually add files to the project outside of the editor.</p>"
+            "credentials_load_failed": "<p>Flows stopped due to missing or invalid credentialSecret.</p>",
+            "missing_flow_file": "<p>Project flow file not found.</p><p>The project is not configured with a flow file.</p>",
+            "project_empty": "<p>The project is empty.</p><p>Do you want to create a default set of project files?<br/>Otherwise, you will have to manually add files to the project outside of the editor.</p>"
         },
 
         "error": "<strong>Error</strong>: __message__",

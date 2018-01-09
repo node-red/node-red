@@ -34,6 +34,10 @@
     border-left-width: 16px;
     overflow: hidden;
 }
+.notification p:first-child {
+    font-size: 1.1em;
+    font-weight: 500;
+}
 .notification a {
     text-decoration: none;
     &:hover {

@@ -155,7 +155,8 @@ Project.prototype.loadRemotes = function() {
     return gitTools.getRemotes(project.path).then(function(remotes) {
         project.remotes = remotes;
     }).then(function() {
-        return project.loadBranches();
+        project.branches = {};
+        return project.status();
     }).then(function() {
         var allRemotes = Object.keys(project.remotes);
         var match = "";
@@ -188,15 +189,6 @@ Project.prototype.parseRemoteBranch = function (remoteBranch) {
     }
 
 };
-
-Project.prototype.loadBranches = function() {
-    var project = this;
-    return gitTools.getBranchInfo(project.path).then(function(branches) {
-        project.branches = branches;
-        project.empty = project.branches.empty;
-        delete project.branches.empty;
-    });
-}
 
 Project.prototype.isEmpty = function () {
     return this.empty;
@@ -438,6 +430,37 @@ Project.prototype.status = function(user) {
                     remote: fetchError.remote,
                     code: fetchError.code
                 }
+            }
+            if (result.commits.total === 0 && Object.keys(result.files).length === 0) {
+                if (!self.empty) {
+                    runtime.events.emit("runtime-event",{
+                        id:"runtime-state",
+                        payload:{
+                            type:"warning",
+                            error:"project_empty",
+                            text:"notification.warnings.project_empty"},
+                            retain:true
+                        }
+                    );
+                }
+                self.empty = true;
+            } else {
+                if (self.empty) {
+                    if (self.paths.flowFile) {
+                        runtime.events.emit("runtime-event",{id:"runtime-state",retain:true});
+                    } else {
+                        runtime.events.emit("runtime-event",{
+                            id:"runtime-state",
+                            payload:{
+                                type:"warning",
+                                error:"missing_flow_file",
+                                text:"notification.warnings.missing_flow_file"},
+                                retain:true
+                            }
+                        );
+                    }
+                }
+                delete self.empty;
             }
             return result;
         }).catch(function(err) {

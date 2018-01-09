@@ -55,7 +55,7 @@ RED.sidebar.info = (function() {
         });
         nodeSection.expand();
         infoSection = sections.add({
-            title: RED._("sidebar.info.help"),
+            title: RED._("sidebar.info.nodeHelp"),
             collapsible: true
         });
         infoSection.expand();

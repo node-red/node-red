@@ -85,11 +85,26 @@ RED.notify = (function() {
 
         n.update = (function() {
             var nn = n;
-            return function(msg,timeout) {
+            return function(msg,options) {
                 if (typeof msg === "string") {
                     nn.innerHTML = msg;
                 } else {
                     $(nn).empty().append(msg);
+                }
+                var timeout;
+                if (typeof options === 'number') {
+                    timeout = options;
+                } else if (options !== undefined) {
+                    timeout = options.timeout;
+                    if (options.buttons) {
+                        var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(nn)
+                        options.buttons.forEach(function(buttonDef) {
+                            var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                            if (buttonDef.class) {
+                                b.addClass(buttonDef.class);
+                            }
+                        })
+                    }
                 }
                 if (timeout !== undefined && timeout > 0) {
                     window.clearTimeout(nn.timeoutid);
@@ -97,6 +112,7 @@ RED.notify = (function() {
                 } else {
                     window.clearTimeout(nn.timeoutid);
                 }
+
             }
         })();
 

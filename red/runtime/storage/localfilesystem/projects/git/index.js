@@ -117,25 +117,28 @@ function parseFilenames(name) {
     }
     return result;
 }
-function getBranchInfo(localRepo) {
-    return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
-        var lines = output.split("\n");
-        var unknownDirs = [];
-        var branchLineRE = /^## (No commits yet on )?(.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/m;
-        var m = branchLineRE.exec(output);
-        var result = {}; //commits:{}};
-        if (m) {
-            if (m[1]) {
-                result.empty = true;
-            }
-            result.local = m[2];
-            if (m[4]) {
-                result.remote = m[4];
-            }
-        }
-        return result;
-    });
-}
+// function getBranchInfo(localRepo) {
+//     return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
+//         var lines = output.split("\n");
+//         var unknownDirs = [];
+//         var branchLineRE = /^## (No commits yet on )?(.+?)($|\.\.\.(.+?)($| \[(ahead (\d+))?.*?(behind (\d+))?\]))/m;
+//         console.log(output);
+//         console.log(lines);
+//         var m = branchLineRE.exec(output);
+//         console.log(m);
+//         var result = {}; //commits:{}};
+//         if (m) {
+//             if (m[1]) {
+//                 result.empty = true;
+//             }
+//             result.local = m[2];
+//             if (m[4]) {
+//                 result.remote = m[4];
+//             }
+//         }
+//         return result;
+//     });
+// }
 function getStatus(localRepo) {
     // parseFilename('"test with space"');
     // parseFilename('"test with space" -> knownFile.txt');
@@ -147,6 +150,12 @@ function getStatus(localRepo) {
     }
     return runGitCommand(['rev-list', 'HEAD', '--count'],localRepo).then(function(count) {
         result.commits.total = parseInt(count);
+    }).catch(function(err) {
+        if (/ambiguous argument/.test(err.message)) {
+            result.commits.total = 0;
+        } else {
+            throw err;
+        }
     }).then(function() {
         return runGitCommand(["ls-files","--cached","--others","--exclude-standard"],localRepo).then(function(output) {
             var lines = output.split("\n");
@@ -174,7 +183,7 @@ function getStatus(localRepo) {
             return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
                 var lines = output.split("\n");
                 var unknownDirs = [];
-                var branchLineRE = /^## (.+?)(?:$|\.\.\.(.+?)(?:$| \[(?:(?:ahead (\d+)(?:,\s*)?)?(?:behind (\d+))?|(gone))\]))/;
+                var branchLineRE = /^## (?:No commits yet on )?(.+?)(?:$|\.\.\.(.+?)(?:$| \[(?:(?:ahead (\d+)(?:,\s*)?)?(?:behind (\d+))?|(gone))\]))/;
                 lines.forEach(function(line) {
                     if (line==="") {
                         return;
@@ -566,7 +575,7 @@ module.exports = {
         })
     },
     getBranches: getBranches,
-    getBranchInfo: getBranchInfo,
+    // getBranchInfo: getBranchInfo,
     checkoutBranch: function(cwd, branchName, isCreate) {
         var args = ['checkout'];
         if (isCreate) {

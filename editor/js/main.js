@@ -118,6 +118,7 @@
                                             text: "Setup project files",
                                             click: function() {
                                                 persistentNotifications[notificationId].close();
+                                                delete persistentNotifications[notificationId];
                                                 RED.projects.showFilesPrompt();
                                             }
                                         }
@@ -128,11 +129,13 @@
                                             text: "No thanks",
                                             click: function() {
                                                 persistentNotifications[notificationId].close();
+                                                delete persistentNotifications[notificationId];
                                             }
                                         },                                        {
                                             text: "Create default project files",
                                             click: function() {
                                                 persistentNotifications[notificationId].close();
+                                                delete persistentNotifications[notificationId];
                                                 RED.projects.createDefaultFileSet();
                                             }
                                         }
@@ -142,7 +145,7 @@
                             if (!persistentNotifications.hasOwnProperty(notificationId)) {
                                 persistentNotifications[notificationId] = RED.notify(text,options);
                             } else {
-                                persistentNotifications[notificationId].update(text,msg.timeout);
+                                persistentNotifications[notificationId].update(text,options);
                             }
                         } else if (persistentNotifications.hasOwnProperty(notificationId)) {
                             persistentNotifications[notificationId].close();
