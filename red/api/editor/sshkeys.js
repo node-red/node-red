@@ -84,7 +84,7 @@ module.exports = {
         app.post("/", needsPermission("settings.write"), function(req,res) {
             var username = getUsername(req.user);
             // console.log('req.body:', req.body);
-            if ( req.body && req.body.name ) {
+            if ( req.body && req.body.name && /^[a-zA-Z0-9\-_]+$/.test(req.body.name)) {
                 runtime.storage.sshkeys.generateSSHKey(username, req.body)
                 .then(function(name) {
                     // console.log('generate key --- success  name:', name);

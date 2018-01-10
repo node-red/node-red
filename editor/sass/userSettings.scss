@@ -73,7 +73,11 @@
         display: table;
         clear: both;
     }
-    .uneditable-input, input {
+    .uneditable-input, input, textarea {
         width: calc(100% - 150px);
+    }
+    textarea {
+        resize: none;
+        height: 10em;
     }
 }

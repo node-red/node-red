@@ -33,15 +33,20 @@ describe("storage/localfilesystem/sshkeys", function() {
             trace: function() { }
         }
     };
+    var oldHOME;
+
     beforeEach(function(done) {
+        oldHOME = process.env.HOME;
+        process.env.HOME = "/tmp/doesnt/exist";
         fs.remove(userDir,function(err) {
             fs.mkdir(userDir,done);
         });
     });
     afterEach(function(done) {
+        process.env.HOME = oldHOME;
         fs.remove(userDir,done);
     });
-    
+
     it('should create sshkey directory when sshkey initializes', function(done) {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
@@ -82,8 +87,8 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 for(var filename of filenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");
                 }
                 sshkeys.listSSHKeys(username).then(function(retObj) {
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(filenameList.length);
@@ -110,11 +115,11 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 for(var filename of filenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");
                 }
                 for(var filename of onlyPrivateKeyFilenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
                 }
                 sshkeys.listSSHKeys(username).then(function(retObj) {
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(filenameList.length);
@@ -144,11 +149,11 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 for(var filename of filenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");
                 }
                 for(var filename of directoryList) {
-                    fs.ensureDirSync(path.join(sshkeyDirPath,filename));        
+                    fs.ensureDirSync(path.join(sshkeyDirPath,filename));
                 }
                 sshkeys.listSSHKeys(username).then(function(retObj) {
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(filenameList.length);
@@ -179,12 +184,12 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 for(var filename of filenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");
                 }
                 for(var filename of otherUserFilenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename+".pub"),"","utf8");
                 }
                 sshkeys.listSSHKeys(username).then(function(retObj) {
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(filenameList.length);
@@ -215,12 +220,12 @@ describe("storage/localfilesystem/sshkeys", function() {
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
                 for(var filename of filenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),"","utf8");
                 }
                 for(var filename of otherUserFilenameList) {
-                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename),"","utf8");        
-                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename+".pub"),"","utf8");        
+                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename),"","utf8");
+                    fs.writeFileSync(path.join(sshkeyDirPath,otherUsername+"_"+filename+".pub"),"","utf8");
                 }
                 sshkeys.listSSHKeys(username).then(function(retObj) {
                     retObj.should.be.instanceOf(Array).and.have.lengthOf(filenameList.length);
@@ -438,8 +443,8 @@ describe("storage/localfilesystem/sshkeys", function() {
         var fileContent = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQD3a+sgtgzSbbliWxmOq5p6+H/mE+0gjWfLWrkIVmHENd1mifV4uCmIHAR2NfuadUYMQ3+bQ90kpmmEKTMYPsyentsKpHQZxTzG7wOCAIpJnbPTHDMxEJhVTaAwEjbVyMSIzTTPfnhoavWIBu0+uMgKDDlBm+RjlgkFlyhXyCN6UwFrIUUMH6Gw+eQHLiooKIl8ce7uDxIlt+9b7hFCU+sQ3kvuse239DZluu6+8buMWqJvrEHgzS9adRFKku8nSPAEPYn85vDi7OgVAcLQufknNgs47KHBAx9h04LeSrFJ/P5J1b//ItRpMOIme+O9d1BR46puzhvUaCHLdvO9czj+OmW+dIm+QIk6lZIOOMnppG72kZxtLfeKT16ur+2FbwAdL9ItBp4BI/YTlBPoa5mLMxpuWfmX1qHntvtGc9wEwS1P7YFfmF3XiK5apxalzrn0Qlr5UmDNbVIqJb1OlbC0w03Z0oktti1xT+R2DGOLWM4lBbpXDHV1BhQ7oYOvbUD8Cnof55lTP0WHHsOHlQc/BGDti1XA9aBX/OzVyzBUYEf0pkimsD0RYo6aqt7QwehJYdlz9x1NBguBffT0s4NhNb9IWr+ASnFPvNl2sw4XH/8U0J0q8ZkMpKkbLM1Zdp1Fv00GF0f5UNRokai6uM3w/ccantJ3WvZ6GtctqytWrw== \n";
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
-                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),fileContent,"utf8");        
+                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),fileContent,"utf8");
                 sshkeys.getSSHKey(username, filename).then(function(retObj) {
                     retObj.should.be.equal(fileContent);
                     done();
@@ -461,10 +466,9 @@ describe("storage/localfilesystem/sshkeys", function() {
         var fileContent = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQD3a+sgtgzSbbliWxmOq5p6+H/mE+0gjWfLWrkIVmHENd1mifV4uCmIHAR2NfuadUYMQ3+bQ90kpmmEKTMYPsyentsKpHQZxTzG7wOCAIpJnbPTHDMxEJhVTaAwEjbVyMSIzTTPfnhoavWIBu0+uMgKDDlBm+RjlgkFlyhXyCN6UwFrIUUMH6Gw+eQHLiooKIl8ce7uDxIlt+9b7hFCU+sQ3kvuse239DZluu6+8buMWqJvrEHgzS9adRFKku8nSPAEPYn85vDi7OgVAcLQufknNgs47KHBAx9h04LeSrFJ/P5J1b//ItRpMOIme+O9d1BR46puzhvUaCHLdvO9czj+OmW+dIm+QIk6lZIOOMnppG72kZxtLfeKT16ur+2FbwAdL9ItBp4BI/YTlBPoa5mLMxpuWfmX1qHntvtGc9wEwS1P7YFfmF3XiK5apxalzrn0Qlr5UmDNbVIqJb1OlbC0w03Z0oktti1xT+R2DGOLWM4lBbpXDHV1BhQ7oYOvbUD8Cnof55lTP0WHHsOHlQc/BGDti1XA9aBX/OzVyzBUYEf0pkimsD0RYo6aqt7QwehJYdlz9x1NBguBffT0s4NhNb9IWr+ASnFPvNl2sw4XH/8U0J0q8ZkMpKkbLM1Zdp1Fv00GF0f5UNRokai6uM3w/ccantJ3WvZ6GtctqytWrw== \n";
         localfilesystem.init(mockSettings, mockRuntime).then(function() {
             sshkeys.init(mockSettings, mockRuntime).then(function() {
-                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");        
-                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),fileContent,"utf8");        
-                sshkeys.deleteSSHKey(username, filename).then(function(retObj) {
-                    retObj.should.be.true();
+                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename),"","utf8");
+                fs.writeFileSync(path.join(sshkeyDirPath,username+"_"+filename+".pub"),fileContent,"utf8");
+                sshkeys.deleteSSHKey(username, filename).then(function() {
                     fs.existsSync(path.join(sshkeyDirPath,username+'_'+filename)).should.be.false();
                     fs.existsSync(path.join(sshkeyDirPath,username+'_'+filename+'.pub')).should.be.false();
                     done();

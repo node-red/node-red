@@ -780,6 +780,15 @@ div.projects-dialog-ssh-public-key {
     }
 }
 
+.projects-dialog-ssh-key-list {
+    li {
+        cursor: pointer;
+    }
+    li:hover {
+        background: #f3f3f3;
+    }
+}
+
 .projects-dialog-list {
     position: relative;
     .red-ui-editableList-container {

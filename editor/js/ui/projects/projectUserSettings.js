@@ -44,32 +44,44 @@ RED.projects.userSettings = (function() {
     function createSSHKeySection(pane) {
         var container = $('<div class="user-settings-section"></div>').appendTo(pane);
         var popover;
-        var title = $('<h4></h4>').text("SSH Keys").appendTo(container);
+        var title = $('<h3></h3>').text("SSH Keys").appendTo(container);
+        var subtitle = $('<div style="color:#aaa;"></div>').appendTo(container).text("Allows you to create secure connections to remote git repositories.");
 
-        var addKeyButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">generate key</button>')
-            .appendTo(title)
+        var addKeyButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">add key</button>')
+            .appendTo(subtitle)
             .click(function(evt) {
                 addKeyButton.attr('disabled',true);
+                saveButton.attr('disabled',true);
+                // bg.children().removeClass("selected");
+                // addLocalButton.click();
                 addKeyDialog.slideDown(200);
                 keyNameInput.focus();
-                saveButton.attr('disabled',true);
             });
 
         var validateForm = function() {
-            var validName = /^[a-zA-Z0-9\-_]+$/.test(keyNameInput.val());
-            var passphrase = passphraseInput.val();
-            var validPassphrase = passphrase.length === 0 || passphrase.length >= 8;
+            var valid = /^[a-zA-Z0-9\-_]+$/.test(keyNameInput.val());
+            keyNameInput.toggleClass('input-error',keyNameInputChanged&&!valid);
 
-            saveButton.attr('disabled',!validName || !validPassphrase);
-            keyNameInput.toggleClass('input-error',keyNameInputChanged&&!validName);
-            passphraseInput.toggleClass('input-error',!validPassphrase);
-            if (!validPassphrase) {
-                passphraseInputSubLabel.text("Passphrase too short");
-            } else if (passphrase.length === 0) {
-                passphraseInputSubLabel.text("Optional");
-            } else {
-                passphraseInputSubLabel.text("");
-            }
+            // var selectedButton = bg.find(".selected");
+            // if (selectedButton[0] === addLocalButton[0]) {
+            //     valid = valid && localPublicKeyPathInput.val().length > 0 && localPrivateKeyPathInput.val().length > 0;
+            // } else if (selectedButton[0] === uploadButton[0]) {
+            //     valid = valid && publicKeyInput.val().length > 0 && privateKeyInput.val().length > 0;
+            // } else if (selectedButton[0] === generateButton[0]) {
+                var passphrase = passphraseInput.val();
+                var validPassphrase = passphrase.length === 0 || passphrase.length >= 8;
+                passphraseInput.toggleClass('input-error',!validPassphrase);
+                if (!validPassphrase) {
+                    passphraseInputSubLabel.text("Passphrase too short");
+                } else if (passphrase.length === 0) {
+                    passphraseInputSubLabel.text("Optional");
+                } else {
+                    passphraseInputSubLabel.text("");
+                }
+                valid = valid && validPassphrase;
+            // }
+
+            saveButton.attr('disabled',!valid);
 
             if (popover) {
                 popover.close();
@@ -79,27 +91,88 @@ RED.projects.userSettings = (function() {
 
         var row = $('<div class="user-settings-row"></div>').appendTo(container);
         var addKeyDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
-        $('<div class="projects-dialog-list-dialog-header">').text('Generate SSH Key').appendTo(addKeyDialog);
+        $('<div class="projects-dialog-list-dialog-header">').text('Add SSH Key').appendTo(addKeyDialog);
         var addKeyDialogBody = $('<div>').appendTo(addKeyDialog);
+
+        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
+        $('<div style="color:#aaa;"></div>').appendTo(row).text("Generate a new public/private key pair");
+        // var bg = $('<div></div>',{class:"button-group", style:"text-align: center"}).appendTo(row);
+        // var addLocalButton = $('<button class="editor-button toggle selected">use local key</button>').appendTo(bg);
+        // var uploadButton = $('<button class="editor-button toggle">upload key</button>').appendTo(bg);
+        // var generateButton = $('<button class="editor-button toggle">generate key</button>').appendTo(bg);
+        // bg.children().click(function(e) {
+        //     e.preventDefault();
+        //     if ($(this).hasClass("selected")) {
+        //         return;
+        //     }
+        //     bg.children().removeClass("selected");
+        //     $(this).addClass("selected");
+        //     if (this === addLocalButton[0]) {
+        //         addLocalKeyPane.show();
+        //         generateKeyPane.hide();
+        //         uploadKeyPane.hide();
+        //     } else if (this === uploadButton[0]) {
+        //         addLocalKeyPane.hide();
+        //         generateKeyPane.hide();
+        //         uploadKeyPane.show();
+        //     } else if (this === generateButton[0]){
+        //         addLocalKeyPane.hide();
+        //         generateKeyPane.show();
+        //         uploadKeyPane.hide();
+        //     }
+        //     validateForm();
+        // })
+
+
         row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
         $('<label for=""></label>').text('Name').appendTo(row);
+        var keyNameInputChanged = false;
         var keyNameInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
             keyNameInputChanged = true;
             validateForm();
         });
-        var keyNameInputChanged = false;
         $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
 
-        row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
+        var generateKeyPane = $('<div>').appendTo(addKeyDialogBody);
+        row = $('<div class="user-settings-row"></div>').appendTo(generateKeyPane);
         $('<label for=""></label>').text('Passphrase').appendTo(row);
-        passphraseInput = $('<input type="password">').appendTo(row).on("change keyup paste",validateForm);
+        var passphraseInput = $('<input type="password">').appendTo(row).on("change keyup paste",validateForm);
         var passphraseInputSubLabel = $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row).find("small");
+
+        // var addLocalKeyPane = $('<div>').hide().appendTo(addKeyDialogBody);
+        // row = $('<div class="user-settings-row"></div>').appendTo(addLocalKeyPane);
+        // $('<label for=""></label>').text('Public key').appendTo(row);
+        // var localPublicKeyPathInput = $('<input type="text">').appendTo(row).on("change keyup paste",validateForm);
+        // $('<label class="projects-edit-form-sublabel"><small>Public key file path, for example: ~/.ssh/id_rsa.pub</small></label>').appendTo(row).find("small");
+        // row = $('<div class="user-settings-row"></div>').appendTo(addLocalKeyPane);
+        // $('<label for=""></label>').text('Private key').appendTo(row);
+        // var localPrivateKeyPathInput = $('<input type="text">').appendTo(row).on("change keyup paste",validateForm);
+        // $('<label class="projects-edit-form-sublabel"><small>Private key file path, for example: ~/.ssh/id_rsa</small></label>').appendTo(row).find("small");
+        //
+        // var uploadKeyPane = $('<div>').hide().appendTo(addKeyDialogBody);
+        // row = $('<div class="user-settings-row"></div>').appendTo(uploadKeyPane);
+        // $('<label for=""></label>').text('Public key').appendTo(row);
+        // var publicKeyInput = $('<textarea>').appendTo(row).on("change keyup paste",validateForm);
+        // $('<label class="projects-edit-form-sublabel"><small>Paste in public key contents, for example: ~/.ssh/id_rsa.pub</small></label>').appendTo(row).find("small");
+        // row = $('<div class="user-settings-row"></div>').appendTo(uploadKeyPane);
+        // $('<label for=""></label>').text('Private key').appendTo(row);
+        // var privateKeyInput = $('<textarea>').appendTo(row).on("change keyup paste",validateForm);
+        // $('<label class="projects-edit-form-sublabel"><small>Paste in private key contents, for example: ~/.ssh/id_rsa</small></label>').appendTo(row).find("small");
+
+
+
 
         var hideEditForm = function() {
             addKeyButton.attr('disabled',false);
             addKeyDialog.hide();
+
             keyNameInput.val("");
+            keyNameInputChanged = false;
             passphraseInput.val("");
+            // localPublicKeyPathInput.val("");
+            // localPrivateKeyPathInput.val("");
+            // publicKeyInput.val("");
+            // privateKeyInput.val("");
             if (popover) {
                 popover.close();
                 popover = null;
@@ -118,11 +191,24 @@ RED.projects.userSettings = (function() {
                 evt.preventDefault();
                 var spinner = utils.addSpinnerOverlay(addKeyDialog).addClass('projects-dialog-spinner-contain');
                 var payload = {
-                    name: keyNameInput.val(),
-                    comment: gitEmailInput.val(),
-                    password: passphraseInput.val(),
-                    size: 4096
+                    name: keyNameInput.val()
                 };
+
+                var selectedButton = bg.find(".selected");
+                if (selectedButton[0] === addLocalButton[0]) {
+                    payload.type = "local";
+                    payload.publicKeyPath = localPublicKeyPathInput.val();
+                    payload.privateKeyPath = localPrivateKeyPathInput.val();
+                } else if (selectedButton[0] === uploadButton[0]) {
+                    payload.type = "upload";
+                    payload.publicKey = publicKeyInput.val();
+                    payload.privateKey = privateKeyInput.val();
+                } else if (selectedButton[0] === generateButton[0]) {
+                    payload.type = "generate";
+                    payload.comment = gitEmailInput.val();
+                    payload.password = passphraseInput.val();
+                    payload.size = 4096;
+                }
                 var done = function(err) {
                     spinner.remove();
                     if (err) {
@@ -181,6 +267,7 @@ RED.projects.userSettings = (function() {
             $('<button class="editor-button editor-button-small">Copy to clipboard</button>')
                 .appendTo(formButtons)
                 .click(function(evt) {
+                    evt.stopPropagation();
                     evt.preventDefault();
                     document.getSelection().selectAllChildren(keyBox[0]);
                     var ret = document.execCommand('copy');
@@ -189,7 +276,7 @@ RED.projects.userSettings = (function() {
 
             return row;
         }
-        var keyList = $('<ol>').appendTo(row).editableList({
+        var keyList = $('<ol class="projects-dialog-ssh-key-list">').appendTo(row).editableList({
             height: 'auto',
             addButton: false,
             scrollOnAdd: false,
@@ -210,66 +297,67 @@ RED.projects.userSettings = (function() {
 
                 var tools = $('<span class="button-row entry-tools">').appendTo(container);
                 var expandedRow;
-                $('<button class="editor-button editor-button-small"><i class="fa fa-eye"></i></button>')
-                    .appendTo(tools)
-                    .click(function(e) {
-                        if (expandedRow) {
-                            expandedRow.slideUp(200,function() {
-                                expandedRow.remove();
-                                expandedRow = null;
-                            })
-                        } else {
-                            expandedRow = expandKey(container,entry);
-                        }
+                row.click(function(e) {
+                    if (expandedRow) {
+                        expandedRow.slideUp(200,function() {
+                            expandedRow.remove();
+                            expandedRow = null;
+                        })
+                    } else {
+                        expandedRow = expandKey(container,entry);
+                    }
                     })
-                $('<button class="editor-button editor-button-small"><i class="fa fa-trash"></i></button>')
-                    .appendTo(tools)
-                    .click(function(e) {
-                        var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
-                        var notification = RED.notify("Are you sure you want to delete the SSH key '"+entry.name+"'? This cannot be undone.", {
-                            type: 'warning',
-                            modal: true,
-                            fixed: true,
-                            buttons: [
-                                {
-                                    text: RED._("common.label.cancel"),
-                                    click: function() {
-                                        spinner.remove();
-                                        notification.close();
-                                    }
-                                },
-                                {
-                                    text: "Delete key",
-                                    click: function() {
-                                        notification.close();
-                                        var url = "settings/user/keys/"+entry.name;
-                                        var options = {
-                                            url: url,
-                                            type: "DELETE",
-                                            responses: {
-                                                200: function(data) {
-                                                    row.fadeOut(200,function() {
-                                                        keyList.editableList('removeItem',entry);
-                                                        setTimeout(spinner.remove, 100);
-                                                        if (keyList.editableList('length') === 0) {
-                                                            keyList.editableList('addItem',emptyItem);
-                                                        }
-                                                    });
-                                                },
-                                                400: {
-                                                    'unexpected_error': function(error) {
-                                                        console.log(error);
-                                                        spinner.remove();
-                                                    }
-                                                },
-                                            }
+                if (!entry.system) {
+                    $('<button class="editor-button editor-button-small"><i class="fa fa-trash"></i></button>')
+                        .appendTo(tools)
+                        .click(function(e) {
+                            e.stopPropagation();
+                            var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
+                            var notification = RED.notify("Are you sure you want to delete the SSH key '"+entry.name+"'? This cannot be undone.", {
+                                type: 'warning',
+                                modal: true,
+                                fixed: true,
+                                buttons: [
+                                    {
+                                        text: RED._("common.label.cancel"),
+                                        click: function() {
+                                            spinner.remove();
+                                            notification.close();
                                         }
-                                        utils.sendRequest(options);
+                                    },
+                                    {
+                                        text: "Delete key",
+                                        click: function() {
+                                            notification.close();
+                                            var url = "settings/user/keys/"+entry.name;
+                                            var options = {
+                                                url: url,
+                                                type: "DELETE",
+                                                responses: {
+                                                    200: function(data) {
+                                                        row.fadeOut(200,function() {
+                                                            keyList.editableList('removeItem',entry);
+                                                            setTimeout(spinner.remove, 100);
+                                                            if (keyList.editableList('length') === 0) {
+                                                                keyList.editableList('addItem',emptyItem);
+                                                            }
+                                                        });
+                                                    },
+                                                    400: {
+                                                        'unexpected_error': function(error) {
+                                                            console.log(error);
+                                                            spinner.remove();
+                                                        }
+                                                    },
+                                                }
+                                            }
+                                            utils.sendRequest(options);
+                                        }
                                     }
-                                }
-                            ]
+                                ]
+                            });
                         });
-                    });
+                }
                 if (entry.expand) {
                     expandedRow = expandKey(container,entry);
                 }
@@ -288,7 +376,11 @@ RED.projects.userSettings = (function() {
                             key.expand = true;
                         }
                         keyList.editableList('addItem',key);
-                    })
+                    });
+                    if (keyList.editableList('length') === 0) {
+                        keyList.editableList('addItem',emptyItem);
+                    }
+
                 }
             })
         }

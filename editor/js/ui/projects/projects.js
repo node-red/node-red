@@ -1232,10 +1232,16 @@ RED.projects = (function() {
             //data-i18n="[placeholder]menu.label.searchInput"
             delay: 200,
             change: function() {
-                filterTerm = $(this).val();
+                filterTerm = $(this).val().toLowerCase();
                 list.editableList('filter');
                 if (selectedListItem && !selectedListItem.is(":visible")) {
                     selectedListItem.children().children().removeClass('selected');
+                    selectedListItem = list.children(":visible").first();
+                    selectedListItem.children().children().addClass('selected');
+                    if (options.select) {
+                        options.select(selectedListItem.children().data('data'));
+                    }
+                } else {
                     selectedListItem = list.children(":visible").first();
                     selectedListItem.children().children().addClass('selected');
                     if (options.select) {

@@ -23,12 +23,14 @@ var settings;
 var runtime;
 var log;
 var sshkeyDir;
+var userSSHKeyDir;
 
 function init(_settings, _runtime) {
     settings = _settings;
     runtime = _runtime;
     log = runtime.log;
     sshkeyDir = fspath.join(settings.userDir, "projects", ".sshkeys");
+    userSSHKeyDir = fspath.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH, ".ssh");
     // console.log('sshkeys.init()');
     return createSSHKeyDirectory();
 }
@@ -38,12 +40,23 @@ function createSSHKeyDirectory() {
 }
 
 function listSSHKeys(username) {
-    var startStr = username + '_';
-    // console.log('sshkeyDir:', sshkeyDir);
-    return fs.readdir(sshkeyDir).then(function(fns) {
+    return listSSHKeysInDir(sshkeyDir,username + '_').then(function(customKeys) {
+        return listSSHKeysInDir(userSSHKeyDir).then(function(existingKeys) {
+            existingKeys.forEach(function(k){
+                k.system = true;
+                customKeys.push(k);
+            })
+            return customKeys;
+        });
+    });
+}
+
+function listSSHKeysInDir(dir,startStr) {
+    startStr = startStr || "";
+    return fs.readdir(dir).then(function(fns) {
         var ret = fns.sort()
             .filter(function(fn) {
-                var fullPath = fspath.join(sshkeyDir,fn);
+                var fullPath = fspath.join(dir,fn);
                 if (fn.length > 2 || fn[0] != ".") {
                     var stats = fs.lstatSync(fullPath);
                     if (stats.isFile()) {
@@ -73,6 +86,10 @@ function listSSHKeys(username) {
                 name: filename
             };
         });
+    }).then(function(result) {
+        return result;
+    }).catch(function() {
+        return []
     });
 }
 
@@ -81,7 +98,13 @@ function getSSHKey(username, name) {
     .then(function(publicSSHKeyPath) {
         return fs.readFile(publicSSHKeyPath, 'utf-8');
     }).catch(function() {
-        return null;
+        var privateKeyPath = fspath.join(userSSHKeyDir,name);
+        var publicKeyPath = privateKeyPath+".pub";
+        return checkFilePairExist(privateKeyPath,publicKeyPath).then(function() {
+            return fs.readFile(publicKeyPath, 'utf-8');
+        }).catch(function() {
+            return null
+        });
     });
 }
 
@@ -116,29 +139,29 @@ function checkExistSSHKeyFiles(username, name) {
     var sshKeyFileBasename = username + '_' + name;
     var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
     var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
-    return Promise.all([
-        fs.access(privateKeyFilePath, (fs.constants || fs).R_OK),
-        fs.access(publicKeyFilePath , (fs.constants || fs).R_OK)
-    ])
-    .then(function() {
-        return true;
-    })
-    .catch(function() {
-        return false;
-    });
+    return checkFilePairExist(privateKeyFilePath,publicKeyFilePath)
+        .then(function() {
+            return true;
+        })
+        .catch(function() {
+            return false;
+        });
 }
 
 function checkSSHKeyFileAndGetPublicKeyFileName(username, name) {
     var sshKeyFileBasename = username + '_' + name;
     var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
     var publicKeyFilePath  = fspath.join(sshkeyDir, sshKeyFileBasename + '.pub');
+    return checkFilePairExist(privateKeyFilePath,publicKeyFilePath).then(function() {
+        return publicKeyFilePath;
+    });
+}
+
+function checkFilePairExist(privateKeyFilePath,publicKeyFilePath) {
     return Promise.all([
         fs.access(privateKeyFilePath, (fs.constants || fs).R_OK),
         fs.access(publicKeyFilePath , (fs.constants || fs).R_OK)
     ])
-    .then(function() {
-        return publicKeyFilePath;
-    });
 }
 
 function deleteSSHKeyFiles(username, name) {
@@ -149,9 +172,6 @@ function deleteSSHKeyFiles(username, name) {
         fs.remove(privateKeyFilePath),
         fs.remove(publicKeyFilePath)
     ])
-    .then(function() {
-        return true;
-    });
 }
 
 function generateSSHKeyPair(name, privateKeyPath, comment, password, size) {

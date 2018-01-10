@@ -949,7 +949,9 @@ function getProject(name) {
 function listProjects() {
     return fs.readdir(projectsDir).then(function(fns) {
         var dirs = [];
-        fns.sort().filter(function(fn) {
+        fns.sort(function(A,B) {
+            return A.toLowerCase().localeCompare(B.toLowerCase());
+        }).filter(function(fn) {
             var fullPath = fspath.join(projectsDir,fn);
             if (fn[0] != ".") {
                 var stats = fs.lstatSync(fullPath);
