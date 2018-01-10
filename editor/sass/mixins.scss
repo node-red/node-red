@@ -67,10 +67,11 @@
         background: $workspace-button-background-active;
         text-decoration: none;
     }
-    &.selected:not(.disabled):not(:disabled) {
-        color: $workspace-button-color-selected !important;
-        background: $workspace-button-background-active;
-    }
+    // &.selected:not(.disabled):not(:disabled) {
+    //     color: $workspace-button-color-selected !important;
+    //     background: $workspace-button-background-active;
+    //     background: #9f9;
+    // }
     .button-group &:not(:first-child) {
         border-left: none;
         border-top-left-radius: 0;

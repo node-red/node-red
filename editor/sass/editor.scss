@@ -219,7 +219,6 @@
     border-radius: 2px;
     padding: 0 10px;
     white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
     &.toggle {
         @include workspace-button-toggle;
