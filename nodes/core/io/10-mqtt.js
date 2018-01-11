@@ -90,23 +90,27 @@ module.exports = function(RED) {
 
         // Create the URL to pass in to the MQTT.js library
         if (this.brokerurl === "") {
-            if (this.usews) {
-                if (this.usetls) {
-                    this.brokerurl="wss://";
-                } else {
-                    this.brokerurl="ws://";
-				}
+            // if the broker may be ws:// or wss:// or even tcp://
+            if (this.broker.indexOf("://") > -1) {
+                this.brokerurl = this.broker;
             } else {
+                // construct the std mqtt:// url
                 if (this.usetls) {
                     this.brokerurl="mqtts://";
                 } else {
-                     this.brokerurl="mqtt://";
+                    this.brokerurl="mqtt://";
                 }
-            }
-            if (this.broker !== "") {
-                this.brokerurl = this.brokerurl+this.broker+":"+this.port;
-            } else {
-                this.brokerurl = this.brokerurl+"localhost:1883";
+                if (this.broker !== "") {
+                    this.brokerurl = this.brokerurl+this.broker+":";
+                    // port now defaults to 1883 if unset.
+                    if (!this.port){
+                        this.brokerurl = this.brokerurl+"1883";
+                    } else {
+                        this.brokerurl = this.brokerurl+this.port;
+                    }
+                } else {
+                    this.brokerurl = this.brokerurl+"localhost:1883";
+                }
             }
         }
 
