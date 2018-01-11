@@ -47,7 +47,7 @@ RED.projects.userSettings = (function() {
         var title = $('<h3></h3>').text("SSH Keys").appendTo(container);
         var subtitle = $('<div style="color:#aaa;"></div>').appendTo(container).text("Allows you to create secure connections to remote git repositories.");
 
-        var addKeyButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">add key</button>')
+        var addKeyButton = $('<button id="user-settings-gitconfig-add-key" class="editor-button editor-button-small" style="float: right; margin-right: 10px;">add key</button>')
             .appendTo(subtitle)
             .click(function(evt) {
                 addKeyButton.attr('disabled',true);
@@ -410,7 +410,6 @@ RED.projects.userSettings = (function() {
                 RED.settings.set('git', currentGitSettings);
             }
         });
-
     }
 
     return {

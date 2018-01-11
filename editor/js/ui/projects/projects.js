@@ -869,7 +869,13 @@ RED.projects = (function() {
                                 count++;
                             });
                             if (count === 0) {
-                                // projectRepoSSHKeySelect
+                                projectRepoSSHKeySelect.addClass("input-error");
+                                projectRepoSSHKeySelect.attr("disabled",true);
+                                sshwarningRow.show();
+                            } else {
+                                projectRepoSSHKeySelect.removeClass("input-error");
+                                projectRepoSSHKeySelect.attr("disabled",false);
+                                sshwarningRow.hide();
                             }
                         });
 
@@ -877,6 +883,18 @@ RED.projects = (function() {
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
                         $('<label for="projects-dialog-screen-create-project-repo-passphrase">Passphrase</label>').appendTo(subrow);
                         projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password"></input>').appendTo(subrow);
+
+                        var sshwarningRow = $('<div style="padding: 20px"></div>').hide().appendTo(row);
+                        $('<div class="form-row"><i class="fa fa-warning"></i> Before you can clone a repository over ssh you must add an SSH key to access it.</div>').appendTo(sshwarningRow);
+                        subrow = $('<div style="text-align: center">').appendTo(sshwarningRow);
+                        $('<button class="editor-button">Add an ssh key</button>').appendTo(subrow).click(function(e) {
+                            e.preventDefault();
+                            $('#projects-dialog-cancel').click();
+                            RED.userSettings.show('gitconfig');
+                            setTimeout(function() {
+                                $("#user-settings-gitconfig-add-key").click();
+                            },500);
+                        });
 
                         // // Secret - clone
                         // row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
@@ -892,7 +910,7 @@ RED.projects = (function() {
                     },
                     buttons: [
                         {
-                            // id: "clipboard-dialog-cancel",
+                            id: "projects-dialog-cancel",
                             text: RED._("common.label.cancel"),
                             click: function() {
                                 $( this ).dialog( "close" );
