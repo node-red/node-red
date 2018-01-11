@@ -232,7 +232,7 @@ module.exports = function(RED) {
             this.on("input", function(msg) {
                 concat_msg(node, msg);
             });
-            this.on("close", function(msg) {
+            this.on("close", function() {
                 node.pending = {};
                 node.pending_count = 0;
             });
@@ -241,5 +241,6 @@ module.exports = function(RED) {
             node.error(RED._("batch.unexpected"));
         }
     }
+
     RED.nodes.registerType("batch", BatchNode);
 }
