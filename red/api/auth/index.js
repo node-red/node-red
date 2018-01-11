@@ -150,14 +150,19 @@ module.exports = {
     login: login,
     revoke: revoke,
     genericStrategy: function(adminApp,strategy) {
-        var session = require('express-session');
-        var crypto = require("crypto");
+        var crypto = require("crypto")
+        var session = require('express-session')
+        var MemoryStore = require('memorystore')(session)
+
         adminApp.use(session({
-            // As the session is only used across the life-span of an auth
-            // hand-shake, we can use a instance specific random string
-            secret: crypto.randomBytes(20).toString('hex'),
-            resave: false,
-            saveUninitialized:false
+          // As the session is only used across the life-span of an auth
+          // hand-shake, we can use a instance specific random string
+          secret: crypto.randomBytes(20).toString('hex'),
+          resave: false,
+          saveUninitialized: false,
+          store: new MemoryStore({
+            checkPeriod: 86400000 // prune expired entries every 24h
+          })
         }));
         //TODO: all passport references ought to be in ./auth
         adminApp.use(passport.initialize());
