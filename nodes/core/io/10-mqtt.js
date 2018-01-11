@@ -36,6 +36,7 @@ module.exports = function(RED) {
         this.port = n.port;
         this.clientid = n.clientid;
         this.usetls = n.usetls;
+        this.usews = n.usews;
         this.verifyservercert = n.verifyservercert;
         this.compatmode = n.compatmode;
         this.keepalive = n.keepalive;
@@ -69,6 +70,9 @@ module.exports = function(RED) {
         if (typeof this.usetls === 'undefined') {
             this.usetls = false;
         }
+        if (typeof this.usews === 'undefined') {
+            this.usews = false;
+        }
         if (typeof this.compatmode === 'undefined') {
             this.compatmode = true;
         }
@@ -86,10 +90,18 @@ module.exports = function(RED) {
 
         // Create the URL to pass in to the MQTT.js library
         if (this.brokerurl === "") {
-            if (this.usetls) {
-                this.brokerurl="mqtts://";
+            if (this.usews) {
+                if (this.usetls) {
+                    this.brokerurl="wss://";
+                } else {
+                    this.brokerurl="ws://";
+				}
             } else {
-                this.brokerurl="mqtt://";
+                if (this.usetls) {
+                    this.brokerurl="mqtts://";
+                } else {
+                     this.brokerurl="mqtt://";
+                }
             }
             if (this.broker !== "") {
                 this.brokerurl = this.brokerurl+this.broker+":"+this.port;

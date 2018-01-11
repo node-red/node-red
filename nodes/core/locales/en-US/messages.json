@@ -314,6 +314,7 @@
             "keepalive": "Keep alive time (s)",
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
+            "use-ws": "Enable MQTT over WebSocket connection",
             "tls-config":"TLS Configuration",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"

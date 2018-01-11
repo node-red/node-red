@@ -188,6 +188,10 @@
                 </div>
             </div>
             <div class="form-row">
+                <input type="checkbox" id="node-config-input-usews" style="display: inline-block; width: auto; vertical-align: top;">
+                <label for="node-config-input-usews" style="width: auto;" data-i18n="mqtt.label.use-ws"></label>
+            </div>
+            <div class="form-row">
                 <label for="node-config-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="mqtt.label.clientid"></span></label>
                 <input type="text" id="node-config-input-clientid" data-i18n="[placeholder]mqtt.placeholder.clientid">
             </div>
@@ -283,6 +287,7 @@
                     }
                 }},
             usetls: {value: false},
+            usews: {value: false},
             verifyservercert: { value: false},
             compatmode: { value: true},
             keepalive: {value:60,validate:RED.validators.number()},
@@ -343,6 +348,10 @@
             if (typeof this.usetls === 'undefined') {
                 this.usetls = false;
                 $("#node-config-input-usetls").prop("checked",false);
+            }
+            if (typeof this.usews === 'undefined') {
+                this.usews = false;
+                $("#node-config-input-usews").prop('checked', false);
             }
             if (typeof this.compatmode === 'undefined') {
                 this.compatmode = true;
