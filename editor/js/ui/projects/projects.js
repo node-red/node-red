@@ -941,7 +941,7 @@ RED.projects = (function() {
                                                 remotes: {
                                                     'origin': {
                                                         url: repoUrl,
-                                                        key_file: selected,
+                                                        keyFile: selected,
                                                         passphrase: projectRepoPassphrase.val()
                                                     }
                                                 }

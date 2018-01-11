@@ -186,10 +186,28 @@ function generateSSHKeyPair(name, privateKeyPath, comment, password, size) {
             });
 }
 
+function getPrivateKeyPath(username, name) {
+    var sshKeyFileBasename = username + '_' + name;
+    var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
+    try {
+        fs.accessSync(privateKeyFilePath, (fs.constants || fs).R_OK);
+        return privateKeyFilePath;
+    } catch(err) {
+        privateKeyFilePath = fspath.join(userSSHKeyDir,name);
+        try {
+            fs.accessSync(privateKeyFilePath, (fs.constants || fs).R_OK);
+            return privateKeyFilePath;
+        } catch(err2) {
+            return null;
+        }
+    }
+}
+
 module.exports = {
     init: init,
     listSSHKeys: listSSHKeys,
     getSSHKey: getSSHKey,
+    getPrivateKeyPath: getPrivateKeyPath,
     generateSSHKey: generateSSHKey,
     deleteSSHKey: deleteSSHKey
 };

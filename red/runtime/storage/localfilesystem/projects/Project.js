@@ -23,7 +23,7 @@ var os = require('os');
 var gitTools = require("./git");
 var util = require("../util");
 var defaultFileSet = require("./defaultFileSet");
-
+var sshKeys = require("../sshkeys");
 var settings;
 var runtime;
 var log;
@@ -645,7 +645,7 @@ Project.prototype.updateRemote = function(user,remote,options) {
     if (options.auth) {
         var url = this.remotes[remote].fetch;
         if (options.auth.keyFile) {
-            options.auth.key_path = fspath.join(projectsDir, ".sshkeys", ((username === '_')?'__default':username) + '_' + options.auth.keyFile);
+            options.auth.key_path = sshKeys.getPrivateKeyPath(username, options.auth.keyFile);
         }
         authCache.set(this.name,url,username,options.auth);
     }
@@ -870,10 +870,9 @@ function createProject(user, metadata) {
                         );
                         auth = authCache.get(project,originRemote.url,username);
                     }
-                    else if (originRemote.hasOwnProperty("key_file") && originRemote.hasOwnProperty("passphrase")) {
-                        var key_file_name = (username === '_') ? '__default' + '_' + originRemote.key_file : username + '_' + originRemote.key_file;
+                    else if (originRemote.hasOwnProperty("keyFile") && originRemote.hasOwnProperty("passphrase")) {
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
-                                key_path: fspath.join(projectsDir, ".sshkeys", key_file_name),
+                                key_path: sshKeys.getPrivateKeyPath(username, originRemote.keyFile),
                                 passphrase: originRemote.passphrase
                             }
                         );

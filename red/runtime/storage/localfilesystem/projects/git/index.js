@@ -444,6 +444,8 @@ module.exports = {
                     err.code = 'git_push_failed';
                 }
                 throw err;
+            } else {
+                throw err;
             }
         });
     },
