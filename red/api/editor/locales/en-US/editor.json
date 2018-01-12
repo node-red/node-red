@@ -76,7 +76,12 @@
         "password": "Password",
         "login": "Login",
         "loginFailed": "Login failed",
-        "notAuthorized": "Not authorized"
+        "notAuthorized": "Not authorized",
+        "errors": {
+            "settings": "You must be logged in to access settings",
+            "deploy": "You must be logged in to deploy changes",
+            "notAuthorized": "You must be logged in to perform this action"
+        }
     },
     "notification": {
         "warning": "<strong>Warning</strong>: __message__",

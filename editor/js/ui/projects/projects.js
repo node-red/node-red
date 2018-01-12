@@ -1753,6 +1753,10 @@ RED.projects = (function() {
         } else if (!activeProject.empty) {
             throw new Error("Cannot create default file set on a non-empty project");
         }
+        if (!RED.user.hasPermission("projects.write")) {
+            RED.notify(RED._("user.errors.notAuthorized"),"error");
+            return;
+        }
         createProjectOptions = {};
         show('default-files',{existingProject: true});
         // var payload = {
@@ -1805,11 +1809,18 @@ RED.projects = (function() {
 
     return {
         init: init,
-        _show: show,
         showStartup: function() {
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             show('welcome');
         },
         newProject: function() {
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             if (!activeProject) {
                 show('welcome');
             } else {
@@ -1817,15 +1828,31 @@ RED.projects = (function() {
             }
         },
         selectProject: function() {
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             show('open')
         },
         deleteProject: function() {
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             show('delete')
         },
         showCredentialsPrompt: function() { //TODO: rename this function
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             RED.projects.settings.show('settings');
         },
         showFilesPrompt: function() { //TODO: rename this function
+            if (!RED.user.hasPermission("projects.write")) {
+                RED.notify(RED._("user.errors.notAuthorized"),"error");
+                return;
+            }
             RED.projects.settings.show('settings');
         },
         createDefaultFileSet: createDefaultFileSet,

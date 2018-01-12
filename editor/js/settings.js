@@ -63,7 +63,7 @@ RED.settings = (function () {
         if (!hasLocalStorage()) {
             return;
         }
-        if (key === "auth_tokens") {
+        if (key === "auth-tokens") {
             localStorage.removeItem(key);
         } else {
             delete userSettings[key];
@@ -161,23 +161,25 @@ RED.settings = (function () {
     }
 
     function saveUserSettings() {
-        if (pendingSave) {
-            clearTimeout(pendingSave);
+        if (RED.user.hasPermission("settings.write")) {
+            if (pendingSave) {
+                clearTimeout(pendingSave);
+            }
+            pendingSave = setTimeout(function() {
+                pendingSave = null;
+                $.ajax({
+                    method: 'POST',
+                    contentType: 'application/json',
+                    url: 'settings/user',
+                    data: JSON.stringify(userSettings),
+                    success: function (data) {
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        console.log("Unexpected error saving user settings:",jqXHR.status,textStatus);
+                    }
+                });
+            },300);
         }
-        pendingSave = setTimeout(function() {
-            pendingSave = null;
-            $.ajax({
-                method: 'POST',
-                contentType: 'application/json',
-                url: 'settings/user',
-                data: JSON.stringify(userSettings),
-                success: function (data) {
-                },
-                error: function(jqXHR,textStatus,errorThrown) {
-                    console.log("Unexpected error saving user settings:",jqXHR.status,textStatus);
-                }
-            });
-        },300);
     }
 
     function theme(property,defaultValue) {

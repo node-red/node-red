@@ -104,42 +104,48 @@
                             }
                             if (notificationId === "runtime-state") {
                                 if (msg.error === "credentials_load_failed") {
-                                    options.buttons = [
-                                        {
-                                            text: "Setup credentials",
-                                            click: function() {
-                                                RED.projects.showCredentialsPrompt();
+                                    if (RED.user.hasPermission("projects.write")) {
+                                        options.buttons = [
+                                            {
+                                                text: "Setup credentials",
+                                                click: function() {
+                                                    RED.projects.showCredentialsPrompt();
+                                                }
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 } else if (msg.error === "missing_flow_file") {
-                                    options.buttons = [
-                                        {
-                                            text: "Setup project files",
-                                            click: function() {
-                                                persistentNotifications[notificationId].close();
-                                                delete persistentNotifications[notificationId];
-                                                RED.projects.showFilesPrompt();
+                                    if (RED.user.hasPermission("projects.write")) {
+                                        options.buttons = [
+                                            {
+                                                text: "Setup project files",
+                                                click: function() {
+                                                    persistentNotifications[notificationId].close();
+                                                    delete persistentNotifications[notificationId];
+                                                    RED.projects.showFilesPrompt();
+                                                }
                                             }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 } else if (msg.error === "project_empty") {
-                                    options.buttons = [
-                                        {
-                                            text: "No thanks",
-                                            click: function() {
-                                                persistentNotifications[notificationId].close();
-                                                delete persistentNotifications[notificationId];
+                                    if (RED.user.hasPermission("projects.write")) {
+                                        options.buttons = [
+                                            {
+                                                text: "No thanks",
+                                                click: function() {
+                                                    persistentNotifications[notificationId].close();
+                                                    delete persistentNotifications[notificationId];
+                                                }
+                                            },                                        {
+                                                text: "Create default project files",
+                                                click: function() {
+                                                    persistentNotifications[notificationId].close();
+                                                    delete persistentNotifications[notificationId];
+                                                    RED.projects.createDefaultFileSet();
+                                                }
                                             }
-                                        },                                        {
-                                            text: "Create default project files",
-                                            click: function() {
-                                                persistentNotifications[notificationId].close();
-                                                delete persistentNotifications[notificationId];
-                                                RED.projects.createDefaultFileSet();
-                                            }
-                                        }
-                                    ]
+                                        ]
+                                    }
                                 }
                             }
                             if (!persistentNotifications.hasOwnProperty(notificationId)) {

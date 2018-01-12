@@ -29,6 +29,10 @@ RED.userSettings = (function() {
         if (settingsVisible) {
             return;
         }
+        if (!RED.user.hasPermission("settings.write")) {
+            RED.notify(RED._("user.errors.settings"),"error");
+            return;
+        }
         settingsVisible = true;
         var tabContainer;
 

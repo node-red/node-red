@@ -283,7 +283,10 @@ RED.sidebar.versionControl = (function() {
                     refreshFiles(result);
                 });
             }
-        })
+        });
+        RED.events.on("login",function() {
+            refresh(true);
+        });
         sidebarContent = $('<div>', {class:"sidebar-version-control"});
         var stackContainer = $("<div>",{class:"sidebar-version-control-stack"}).appendTo(sidebarContent);
         sections = RED.stack.create({
@@ -1175,6 +1178,10 @@ RED.sidebar.versionControl = (function() {
             stagedChangesList.editableList('empty');
             unmergedChangesList.editableList('empty');
         }
+        if (!RED.user.hasPermission("projects.write")) {
+            return;
+        }
+
 
         refreshInProgress = true;
         refreshLocalCommits();

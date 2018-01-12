@@ -40,6 +40,11 @@ RED.projects.settings = (function() {
         if (settingsVisible) {
             return;
         }
+        if (!RED.user.hasPermission("projects.write")) {
+            RED.notify(RED._("user.errors.notAuthorized"),"error");
+            return;
+        }
+
         settingsVisible = true;
         var tabContainer;
 
@@ -226,12 +231,14 @@ RED.projects.settings = (function() {
         var summary = $('<div style="position: relative">').appendTo(pane);
         var summaryContent = $('<div></div>',{style:"color: #999"}).appendTo(summary);
         updateProjectSummary(activeProject.summary, summaryContent);
-        $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
-            .prependTo(summary)
-            .click(function(evt) {
-                evt.preventDefault();
-                editSummary(activeProject, activeProject.summary, summaryContent);
-            });
+        if (RED.user.hasPermission("projects.write")) {
+            $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+                .prependTo(summary)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    editSummary(activeProject, activeProject.summary, summaryContent);
+                });
+        }
         $('<hr>').appendTo(pane);
 
         var description = $('<div class="node-help" style="position: relative"></div>').appendTo(pane);
@@ -239,13 +246,14 @@ RED.projects.settings = (function() {
 
         updateProjectDescription(activeProject, descriptionContent);
 
-        $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
-            .prependTo(description)
-            .click(function(evt) {
-                evt.preventDefault();
-                editDescription(activeProject, descriptionContent);
-            });
-
+        if (RED.user.hasPermission("projects.write")) {
+            $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+                .prependTo(description)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    editDescription(activeProject, descriptionContent);
+                });
+        }
         return pane;
     }
     function updateProjectDependencies(activeProject,depsList) {
@@ -349,12 +357,14 @@ RED.projects.settings = (function() {
 
     function createDependenciesPane(activeProject) {
         var pane = $('<div id="project-settings-tab-deps" class="project-settings-tab-pane node-help"></div>');
-        $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">edit</button>')
-            .appendTo(pane)
-            .click(function(evt) {
-                evt.preventDefault();
-                editDependencies(activeProject,null,pane,depsList)
-            });
+        if (RED.user.hasPermission("projects.write")) {
+            $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">edit</button>')
+                .appendTo(pane)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    editDependencies(activeProject,null,pane,depsList)
+                });
+        }
         var depsList = $("<ol>",{style:"position: absolute;top: 60px;bottom: 20px;left: 20px;right: 20px;"}).appendTo(pane);
         depsList.editableList({
             addButton: false,
@@ -368,28 +378,30 @@ RED.projects.settings = (function() {
                         row.parent().addClass("palette-module-section");
                     }
                     headerRow.text(entry.label);
-                    if (entry.index === 1) {
-                        var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
-                            evt.preventDefault();
-                            var deps = $.extend(true, {}, activeProject.dependencies);
-                            for (var m in modulesInUse) {
-                                if (modulesInUse.hasOwnProperty(m) && !modulesInUse[m].known) {
-                                    deps[m] = modulesInUse[m].version;
+                    if (RED.user.hasPermission("projects.write")) {
+                        if (entry.index === 1) {
+                            var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
+                                evt.preventDefault();
+                                var deps = $.extend(true, {}, activeProject.dependencies);
+                                for (var m in modulesInUse) {
+                                    if (modulesInUse.hasOwnProperty(m) && !modulesInUse[m].known) {
+                                        deps[m] = modulesInUse[m].version;
+                                    }
                                 }
-                            }
-                            editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
-                        });
-                    } else if (entry.index === 3) {
-                        var removeButton = $('<button class="editor-button editor-button-small palette-module-button">remove from project</button>').appendTo(headerRow).click(function(evt) {
-                            evt.preventDefault();
-                            var deps = $.extend(true, {}, activeProject.dependencies);
-                            for (var m in activeProject.dependencies) {
-                                if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
-                                    delete deps[m];
+                                editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                            });
+                        } else if (entry.index === 3) {
+                            var removeButton = $('<button class="editor-button editor-button-small palette-module-button">remove from project</button>').appendTo(headerRow).click(function(evt) {
+                                evt.preventDefault();
+                                var deps = $.extend(true, {}, activeProject.dependencies);
+                                for (var m in activeProject.dependencies) {
+                                    if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
+                                        delete deps[m];
+                                    }
                                 }
-                            }
-                            editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
-                        });
+                                editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                            });
+                        }
                     }
                 } else {
                     headerRow.addClass("palette-module-header");
@@ -630,26 +642,27 @@ RED.projects.settings = (function() {
     function createFilesSection(activeProject,pane) {
         var title = $('<h3></h3>').text("Files").appendTo(pane);
         var filesContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
-            .appendTo(title)
-            .click(function(evt) {
-                evt.preventDefault();
-                formButtons.show();
-                editFilesButton.hide();
-                flowFileLabelText.hide();
-                flowFileInput.show();
-                flowFileInputSearch.show();
-                credFileLabel.hide();
-                credFileInput.show();
-                flowFileInput.focus();
-                // credentialStateLabel.parent().hide();
-                credentialStateLabel.addClass("uneditable-input");
-                $(".user-settings-row-credentials").show();
-                credentialStateLabel.css('height','auto');
-                credentialFormRows.hide();
-                credentialSecretButtons.show();
-            });
-
+        if (RED.user.hasPermission("projects.write")) {
+            var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+                .appendTo(title)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    formButtons.show();
+                    editFilesButton.hide();
+                    flowFileLabelText.hide();
+                    flowFileInput.show();
+                    flowFileInputSearch.show();
+                    credFileLabel.hide();
+                    credFileInput.show();
+                    flowFileInput.focus();
+                    // credentialStateLabel.parent().hide();
+                    credentialStateLabel.addClass("uneditable-input");
+                    $(".user-settings-row-credentials").show();
+                    credentialStateLabel.css('height','auto');
+                    credentialFormRows.hide();
+                    credentialSecretButtons.show();
+                });
+        }
         var row;
 
         // Flow files

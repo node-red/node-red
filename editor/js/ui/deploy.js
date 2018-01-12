@@ -286,6 +286,10 @@ RED.deploy = (function() {
 
     function save(skipValidation,force) {
         if (!$("#btn-deploy").hasClass("disabled")) {
+            if (!RED.user.hasPermission("flows.write")) {
+                RED.notify(RED._("user.errors.deploy"),"error");
+                return;
+            }
             if (!skipValidation) {
                 var hasUnknown = false;
                 var hasInvalid = false;
