@@ -300,6 +300,9 @@ module.exports = function(RED) {
                 }
                 RED.util.setMessageProperty(group.msg,node.property,group.payload.join(groupJoinChar));
             } else {
+                if (node.propertyType === 'full') {
+                    group.msg = RED.util.cloneMessage(group.msg);
+                }
                 RED.util.setMessageProperty(group.msg,node.property,group.payload);
             }
             if (group.msg.hasOwnProperty('parts') && group.msg.parts.hasOwnProperty('parts')) {
@@ -438,7 +441,7 @@ module.exports = function(RED) {
                         }
                     } else {
                         for (propertyKey in property) {
-                            if (property.hasOwnProperty(propertyKey)) {
+                            if (property.hasOwnProperty(propertyKey) && propertyKey !== '_msgid') {
                                 group.payload[propertyKey] = property[propertyKey];
                             }
                         }

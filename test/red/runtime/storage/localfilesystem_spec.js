@@ -17,8 +17,10 @@
 var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
+var sinon = require('sinon');
 
 var localfilesystem = require("../../../../red/runtime/storage/localfilesystem");
+var log = require("../../../../red/runtime/log");
 
 describe('LocalFileSystem', function() {
     var userDir = path.join(__dirname,".testUserHome");
@@ -271,6 +273,45 @@ describe('LocalFileSystem', function() {
                 }).otherwise(function(err) {
                     done(err);
                 });
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should fsync the flows file',function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+            sinon.spy(fs,"fsync");
+            localfilesystem.saveFlows(testFlow).then(function() {
+                fs.fsync.callCount.should.eql(1);
+                fs.fsync.restore();
+                done();
+            }).otherwise(function(err) {
+                done(err);
+            });
+        }).otherwise(function(err) {
+            done(err);
+        });
+    });
+
+    it('should log fsync errors and continue',function(done) {
+        var flowFile = 'test.json';
+        var flowFilePath = path.join(userDir,flowFile);
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+            sinon.stub(fs,"fsync", function(fd, cb) {
+                cb(new Error());
+            });
+            sinon.spy(log,"warn");
+            localfilesystem.saveFlows(testFlow).then(function() {
+                log.warn.callCount.should.eql(1);
+                log.warn.restore();               
+                fs.fsync.callCount.should.eql(1);
+                fs.fsync.restore();
+                done();
             }).otherwise(function(err) {
                 done(err);
             });

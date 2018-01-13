@@ -105,7 +105,10 @@ module.exports = function(RED) {
         }
         else if (node.pauseType === "delayv") {
             node.on("input", function(msg) {
-                var delayvar = Number(msg.delay || 0);
+                var delayvar = Number(node.timeout);
+                if (msg.hasOwnProperty("delay") && !isNaN(parseFloat(msg.delay))) {
+                    delayvar = parseFloat(msg.delay);
+                }
                 if (delayvar < 0) { delayvar = 0; }
                 var id = setTimeout(function() {
                     node.idList.splice(node.idList.indexOf(id),1);
@@ -113,7 +116,7 @@ module.exports = function(RED) {
                     node.send(msg);
                 }, delayvar);
                 node.idList.push(id);
-                if ((delayvar >= 1) && (node.idList.length !== 0)) {
+                if ((delayvar >= 0) && (node.idList.length !== 0)) {
                     node.status({fill:"blue",shape:"dot",text:delayvar/1000+"s"});
                 }
                 if (msg.hasOwnProperty("reset")) { clearDelayList(); }

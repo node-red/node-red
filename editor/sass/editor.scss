@@ -320,6 +320,13 @@
     input {
         width: calc(100% - 100px);
     }
+    #node-settings-icon-module {
+        width: calc(55% - 50px);
+    }
+    #node-settings-icon-file {
+        width: calc(45% - 55px);
+        margin-left: 5px;
+    }
 }
 .node-label-form-none {
     span {

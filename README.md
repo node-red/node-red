@@ -14,7 +14,7 @@ A visual tool for wiring the Internet of Things.
 Check out http://nodered.org/docs/getting-started/ for full instructions on getting
 started.
 
-1. `sudo npm install -g node-red`
+1. `sudo npm install -g --unsafe-perm node-red`
 2. `node-red`
 3. Open <http://localhost:1880>
 

@@ -255,16 +255,19 @@ RED.typeSearch = (function() {
         var commonCount = 0;
         var item;
         for(i=0;i<common.length;i++) {
-            item = {
-                type: common[i],
-                common: true,
-                def: RED.nodes.getType(common[i])
-            };
-            item.label = getTypeLabel(item.type,item.def);
-            if (i === common.length-1) {
-                item.separator = true;
+            var itemDef = RED.nodes.getType(common[i]);
+            if (itemDef) {
+                item = {
+                    type: common[i],
+                    common: true,
+                    def: itemDef
+                };
+                item.label = getTypeLabel(item.type,item.def);
+                if (i === common.length-1) {
+                    item.separator = true;
+                }
+                searchResults.editableList('addItem', item);
             }
-            searchResults.editableList('addItem', item);
         }
         for(i=0;i<Math.min(5,recentlyUsed.length);i++) {
             item = {

@@ -218,6 +218,20 @@ describe('debug node', function() {
         });
     });
 
+    it('should publish a number', function(done) {
+        var flow = [{id:"n1", type:"debug", console:"true" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: 7});
+            }, function(msg) {
+                JSON.parse(msg).should.eql({
+                    topic:"debug",data:{id:"n1",msg:"7",property:"payload",format:"number"}
+                });
+            }, done);
+        });
+    });
+
     it('should publish with no payload', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
@@ -242,6 +256,20 @@ describe('debug node', function() {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:'(undefined)',property:"payload",format:"null"}
                 }]);
+            }, done);
+        });
+    });
+
+    it('should publish a null', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: null});
+            }, function(msg) {
+                JSON.parse(msg).should.eql({
+                    topic:"debug",data:{id:"n1",msg:'(undefined)',property:"payload",format:"null"}
+                });
             }, done);
         });
     });
@@ -478,6 +506,130 @@ describe('debug node', function() {
             }, function(msg) {
                 var a = JSON.parse(msg);
                 a[0].should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            foo:{
+                                type: "Buffer",
+                                data: Array(1000).fill(88),
+                                __encoded__: true,
+                                length: 1001
+                            }
+                        },null," "),
+                        property:"payload",
+                        format:"Object"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a long string in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Array(1002).join("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:'{\n "foo": "'+Array(1001).join("X")+'..."\n}',
+                        property:"payload",
+                        format:"Object"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a large array', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: Array(1001).fill("X")});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            __encoded__: true,
+                            type: "array",
+                            data: Array(1000).fill("X"),
+                            length: 1001
+                        },null," "),                  
+                        property:"payload",
+                        format:"array[1001]"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a large array in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Array(1001).fill("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            foo:{
+                                __encoded__: true,
+                                type: "array",
+                                data: Array(1000).fill("X"),
+                                length: 1001
+                            }
+                        },null," "),
+                        property:"payload",
+                        format:"Object"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a large buffer', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: Buffer(501).fill("\"")});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg: Array(1001).join("2"),
+                        property:"payload",
+                        format:"buffer[501]"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a large buffer in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Buffer(1001).fill("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql({
                     topic:"debug",
                     data:{
                         id:"n1",

@@ -31,6 +31,11 @@ module.exports = function(RED) {
                 try {
                     var $ = cheerio.load(msg.payload);
                     var pay = [];
+		    var count = 0;
+                    $(tag).each(function() {
+			count++;
+		    });
+		    var index = 0;
                     $(tag).each(function() {
                         if (node.as === "multi") {
                             var pay2 = null;
@@ -41,6 +46,13 @@ module.exports = function(RED) {
                             /* istanbul ignore else */
                             if (pay2) {
                                 msg.payload = pay2;
+				msg.parts = {
+				    id: msg._msgid,
+				    index: index,
+				    count: count,
+                                    type: "string",
+                                    ch: ""
+				};
                                 node.send(msg);
                             }
                         }
@@ -50,6 +62,7 @@ module.exports = function(RED) {
                             if (node.ret === "attr") { pay.push( this.attribs ); }
                             //if (node.ret === "val")  { pay.push( $(this).val() ); }
                         }
+			index++;
                     });
                     if ((node.as === "single") && (pay.length !== 0)) {
                         msg.payload = pay;

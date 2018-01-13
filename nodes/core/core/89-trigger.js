@@ -19,6 +19,7 @@ module.exports = function(RED) {
     var mustache = require("mustache");
     function TriggerNode(n) {
         RED.nodes.createNode(this,n);
+        this.bytopic = n.bytopic || "all";
         this.op1 = n.op1 || "1";
         this.op2 = n.op2 || "0";
         this.op1type = n.op1type || "str";
@@ -47,7 +48,7 @@ module.exports = function(RED) {
         this.extend = n.extend || "false";
         this.units = n.units || "ms";
         this.reset = n.reset || '';
-        this.duration = parseInt(n.duration);
+        this.duration = parseFloat(n.duration);
         if (isNaN(this.duration)) {
             this.duration = 250;
         }
@@ -65,29 +66,32 @@ module.exports = function(RED) {
         this.op2Templated = (this.op2type === 'str' && this.op2.indexOf("{{") != -1);
         if ((this.op1type === "num") && (!isNaN(this.op1))) { this.op1 = Number(this.op1); }
         if ((this.op2type === "num") && (!isNaN(this.op2))) { this.op2 = Number(this.op2); }
-        if (this.op1 == "null") { this.op1 = null; }
-        if (this.op2 == "null") { this.op2 = null; }
+        //if (this.op1 == "null") { this.op1 = null; }
+        //if (this.op2 == "null") { this.op2 = null; }
         //try { this.op1 = JSON.parse(this.op1); }
         //catch(e) { this.op1 = this.op1; }
         //try { this.op2 = JSON.parse(this.op2); }
         //catch(e) { this.op2 = this.op2; }
 
         var node = this;
-        var tout = null;
-        var m2;
+        node.topics = {};
+
         this.on("input", function(msg) {
+            var topic = msg.topic || "_none";
+            if (node.bytopic === "all") { topic = "_none"; }
+            node.topics[topic] = node.topics[topic] || {};
             if (msg.hasOwnProperty("reset") || ((node.reset !== '') && (msg.payload == node.reset)) ) {
-                if (node.loop === true) { clearInterval(tout); }
-                else { clearTimeout(tout); }
-                tout = null;
+                if (node.loop === true) { clearInterval(node.topics[topic].tout); }
+                else { clearTimeout(node.topics[topic].tout); }
+                delete node.topics[topic];
                 node.status({});
             }
             else {
-                if (((!tout) && (tout !== 0)) || (node.loop === true)) {
-                    if (node.op2type === "pay" || node.op2type === "payl") { m2 = msg.payload; }
-                    else if (node.op2Templated) { m2 = mustache.render(node.op2,msg); }
+                if (((!node.topics[topic].tout) && (node.topics[topic].tout !== 0)) || (node.loop === true)) {
+                    if (node.op2type === "pay" || node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
+                    else if (node.op2Templated) { node.topics[topic].m2 = mustache.render(node.op2,msg); }
                     else if (node.op2type !== "nul") {
-                        m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
+                        node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                     }
 
                     if (node.op1type === "pay") { }
@@ -96,58 +100,64 @@ module.exports = function(RED) {
                         msg.payload = RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg);
                     }
 
-                    if (node.op1type !== "nul") { node.send(msg); }
+                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
 
-                    if (node.duration === 0) { tout = 0; }
+                    if (node.duration === 0) { node.topics[topic].tout = 0; }
                     else if (node.loop === true) {
-                        if (tout) { clearInterval(tout); }
+                        if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
                         if (node.op1type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
-                            tout = setInterval(function() { node.send(msg2); },node.duration);
+                            node.topics[topic].tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); }, node.duration);
                         }
                     }
                     else {
-                        tout = setTimeout(function() {
+                        node.topics[topic].tout = setTimeout(function() {
+                            var msg2 = null;
                             if (node.op2type !== "nul") {
-                                var msg2 = RED.util.cloneMessage(msg);
+                                msg2 = RED.util.cloneMessage(msg);
                                 if (node.op2type === "flow" || node.op2type === "global") {
-                                    m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
+                                    node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                                 }
-                                msg2.payload = m2;
-                                node.send(msg2);
+                                msg2.payload = node.topics[topic].m2;
                             }
-                            tout = null;
+                            delete node.topics[topic];
                             node.status({});
-                        },node.duration);
+                            node.send(msg2);
+                        }, node.duration);
                     }
                     node.status({fill:"blue",shape:"dot",text:" "});
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
-                    if (tout) { clearTimeout(tout); }
-                    if (node.op2type === "payl") { m2 = msg.payload; }
-                    tout = setTimeout(function() {
+                    if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
+                    if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
+                    node.topics[topic].tout = setTimeout(function() {
+                        var msg2 = null;
                         if (node.op2type !== "nul") {
-                            var msg2 = RED.util.cloneMessage(msg);
                             if (node.op2type === "flow" || node.op2type === "global") {
-                                m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
+                                node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                             }
-                            msg2.payload = m2;
-                            node.send(msg2);
+                            if (node.topics[topic] !== undefined) {
+                                msg2 = RED.util.cloneMessage(msg);
+                                msg2.payload = node.topics[topic].m2;
+                            }
                         }
-                        tout = null;
+                        delete node.topics[topic];
                         node.status({});
-                    },node.duration);
+                        node.send(msg2);
+                    }, node.duration);
                 }
                 else {
-                    if (node.op2type === "payl") { m2 = msg.payload; }
+                    if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
                 }
             }
         });
         this.on("close", function() {
-            if (tout) {
-                if (node.loop === true) { clearInterval(tout); }
-                else { clearTimeout(tout); }
-                tout = null;
+            for (var t in node.topics) {
+                if (node.topics[t]) {
+                    if (node.loop === true) { clearInterval(node.topics[t].tout); }
+                    else { clearTimeout(node.topics[t].tout); }
+                    delete node.topics[t];
+                }
             }
             node.status({});
         });

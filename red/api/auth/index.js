@@ -87,9 +87,11 @@ function login(req,res) {
                 "prompts":[{id:"username",type:"text",label:"user.username"},{id:"password",type:"password",label:"user.password"}]
             }
         } else if (settings.adminAuth.type === "strategy") {
+
+            var urlPrefix = (settings.httpAdminRoot==='/')?"":settings.httpAdminRoot;
             response = {
                 "type":"strategy",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url:"/auth/strategy"}]
+                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: urlPrefix + "auth/strategy"}]
             }
             if (settings.adminAuth.strategy.icon) {
                 response.prompts[0].icon = settings.adminAuth.strategy.icon;
@@ -148,14 +150,19 @@ module.exports = {
     login: login,
     revoke: revoke,
     genericStrategy: function(adminApp,strategy) {
-        var session = require('express-session');
-        var crypto = require("crypto");
+        var crypto = require("crypto")
+        var session = require('express-session')
+        var MemoryStore = require('memorystore')(session)
+
         adminApp.use(session({
-            // As the session is only used across the life-span of an auth
-            // hand-shake, we can use a instance specific random string
-            secret: crypto.randomBytes(20).toString('hex'),
-            resave: false,
-            saveUninitialized:false
+          // As the session is only used across the life-span of an auth
+          // hand-shake, we can use a instance specific random string
+          secret: crypto.randomBytes(20).toString('hex'),
+          resave: false,
+          saveUninitialized: false,
+          store: new MemoryStore({
+            checkPeriod: 86400000 // prune expired entries every 24h
+          })
         }));
         //TODO: all passport references ought to be in ./auth
         adminApp.use(passport.initialize());
@@ -186,12 +193,12 @@ module.exports = {
 
         adminApp.get('/auth/strategy', passport.authenticate(strategy.name));
         adminApp.get('/auth/strategy/callback',
-            passport.authenticate(strategy.name, {session:false, failureRedirect: '/' }),
+            passport.authenticate(strategy.name, {session:false, failureRedirect: settings.httpAdminRoot }),
             function(req, res) {
                 var tokens = req.user.tokens;
                 delete req.user.tokens;
                 // Successful authentication, redirect home.
-                res.redirect('/?access_token='+tokens.accessToken);
+                res.redirect(settings.httpAdminRoot + '?access_token='+tokens.accessToken);
             }
         );
 

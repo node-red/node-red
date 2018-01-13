@@ -1,0 +1,23 @@
+{
+    "info": {
+        "tip0" : "您可以用 {{core:delete-selection}} 删除选择的节点或链接。",
+        "tip1" : "{{core:search}} 可以在流程内搜索节点。",
+        "tip2": "{{core:toggle-sidebar}} 可以显示或隐藏边栏。",
+        "tip3": "您可以在 {{core:manage-palette}} 中管理节点的控制面板。",
+        "tip4": "边栏中会列出流程中所有的配置节点。您可以通过菜单或者 {{core:show-config-tab}} 来访问这些节点。",
+        "tip5": "您可以在设定中选择显示或隐藏这些提示。",
+        "tip6": "您可以用[left] [up] [down] [right]键来移动被选中的节点。按住[shift]可以更快地移动节点。",
+        "tip7": "把节点拖到连接上可以向连接中插入节点。",
+        "tip8": "您可以用 {{core:show-export-dialog}} 来导出被选中的节点或标签页中的流程。",
+        "tip9": "您可以将流程的json文件拖入编辑框或 {{core:show-import-dialog}} 来导入流程。",
+        "tip10": "按住[shift]后单击并拖动节点可以将该节点的多个连接一并移动到其他节点的端口。",
+        "tip11": "{{core:show-info-tab}} 可以显示「信息」标签页。 {{core:show-debug-tab}} 可以显示「调试」标签页。",
+        "tip12": "按住[ctrl]的同时点击工作界面可以在节点的对话栏中快速添加节点。",
+        "tip13": "按住[ctrl]的同时点击节点的端口或后续节点可以快速连接多个节点。",
+        "tip14": "按住[shift]的同时点击节点会选中所有被连接的节点。",
+        "tip15": "按住[ctrl]的同时点击节点可以在选中或取消选中节点。",
+        "tip16": "{{core:show-previous-tab}} 和 {{core:show-next-tab}} 可以切换标签页。",
+        "tip17": "您可以在节点的属性配置画面中通过 {{core:confirm-edit-tray}} 来更改设置，或者用 {{core:cancel-edit-tray}} 来取消更改。",
+        "tip18": "您可以通过点击 {{core:edit-selected-node}} 来显示被选中节点的属性设置画面。"
+    }
+}
