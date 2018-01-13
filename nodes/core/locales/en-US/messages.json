@@ -551,7 +551,7 @@
             "nnull":"is not null",
             "head":"head",
             "tail":"tail",
-            "index":"pos. between",
+            "index":"is between",
             "exp":"JSONata exp",
             "else":"otherwise"
         },
