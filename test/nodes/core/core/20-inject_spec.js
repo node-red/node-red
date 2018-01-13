@@ -51,10 +51,14 @@ describe('inject node', function() {
                   function() {
                       var n2 = helper.getNode("n2");
                       n2.on("input", function(msg) {
-                          msg.should.have.property('topic', 't1');
-                          msg.should.have.property('payload');
-                          should(msg.payload).be.lessThan(timestamp.getTime());
-                          done();
+                          try {
+                              msg.should.have.property('topic', 't1');
+                              msg.should.have.property('payload');
+                              should(msg.payload).be.lessThan(timestamp.getTime());
+                              done();
+                          } catch(err) {
+                              done(err);
+                          }
                       });
                   });
     });
