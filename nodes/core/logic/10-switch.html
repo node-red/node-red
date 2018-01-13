@@ -48,7 +48,6 @@
     that matches.</p>
     <p>The rules can be evaluated against an individual message property, a flow or global
     context property or the result of a JSONata expression.</p>
-    <p>If <b>repair sequence</b> checkbox is selected, <code>msg.parts</code> property of incoming messages are passed through.  Otherwise, <code>msg.parts</code> property are reconstructed for each port to make forks of valid sequences.</p>
     <h3>Rules</h3>
     <p>Routing rules are categorized into three:</p>
     <dl>
@@ -152,6 +151,9 @@
             </table>
         </dd>
     </dl>
+
+    <h3>Repair Sequence</h3>
+    <p>If <b>repair sequence (reconstruct parts property of outgoing messages)</b> checkbox is selected, <code>msg.parts</code> property are reconstructed for each port to make forks of valid sequences.  Otherwise, <code>msg.parts</code> property of incoming messages are passed through.</p>
 </script>
 
 <script type="text/javascript">
@@ -200,7 +202,7 @@
             propertyType: { value:"msg" },
             rules: {value:[{t:"eq", v:"", vt:"str"}]},
             checkall: {value:"true", required:true},
-            repair: {value:true},
+            repair: {value:false},
             outputs: {value:1}
         },
         inputs: 1,
