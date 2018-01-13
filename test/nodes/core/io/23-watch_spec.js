@@ -34,10 +34,10 @@ describe('watch Node', function() {
         count++;
         return {
             dirToWatch:dirToWatch,
-            file0ToWatch:path.join(dirToWatch, "file0.txt");,
-            file1ToWatch:path.join(dirToWatch, "file1.txt");,
-            subDirToWatch:path.join(dirToWatch, "subdir");,
-            file2ToWatch:path.join(subDirToWatch, "file2.txt");
+            file0ToWatch:path.join(dirToWatch, "file0.txt"),
+            file1ToWatch:path.join(dirToWatch, "file1.txt"),
+            subDirToWatch:path.join(dirToWatch, "subdir"),
+            file2ToWatch:path.join(subDirToWatch, "file2.txt")
         }
     }
 
