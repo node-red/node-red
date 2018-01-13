@@ -880,7 +880,8 @@
             "empty" : "send empty message when no message arrives"
 	},
         "concat": {
-            "topics-label": "Topics"
+            "topics-label": "Topics",
+            "topic" : "topic"
         },
         "too-many" : "too many pending messages in batch node",
         "unexpected" : "unexpected mode",

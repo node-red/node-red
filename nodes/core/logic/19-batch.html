@@ -96,7 +96,7 @@
             overwrap: {value:0},
             interval: {value:10},
 	    allowEmptySequence: {value:false},
-            topics: {value:[]}
+            topics: {value:[{topic:""}]}
         },
         inputs:1,
         outputs:1,
@@ -108,6 +108,9 @@
             return this.name ? "node_label_italic" : "";
         },
         oneditprepare: function() {
+            var node = this;
+            var topic_str = node._("batch.concat.topic");
+            
             function resizeTopics(topic) {
                 var newWidth = topic.width();
                 topic.find('.red-ui-typedInput')
@@ -120,7 +123,6 @@
                     addItem: function(container, i, opt) {
                         if (!opt.hasOwnProperty('topic')) {
                             opt.topic = "";
-			    opt.topic_t = 'str';
                         }
                         var row = $('<div/>').appendTo(container);
                         var valueField = $('<input/>',{
@@ -130,19 +132,14 @@
                         }).appendTo(row)
                           .typedInput({default:'str', types:['str']});
 		        valueField.typedInput('value', opt.topic);
-		        valueField.typedInput('type', opt.topic_t);
+		        valueField.typedInput('type', 'str');
+                        valueField.attr('placeholder', topic_str);
 		        resizeTopics(container);
                     },
 		    resizeItem: resizeTopics,
                     sortable: true,
                     removable: true
                 });
-
-            for (var i = 0; i < this.topics.length; i++) {
-                var topic = this.topics[i];
-                $("#node-input-topics-container")
-                    .editableList('addItem', topic);
-            }
 
             $("#node-input-count").spinner({
             });
@@ -156,6 +153,15 @@
                 $(".node-row-msg-overwrap").toggle(val==="count");
                 $(".node-row-msg-interval").toggle(val==="interval");
                 $(".node-row-msg-concat").toggle(val==="concat");
+                if (val==="concat") {
+                    var topics = node.topics;
+                    var container = $("#node-input-topics-container");
+                    container.editableList('empty');
+                    for (var i = 0; i < topics.length; i++) {
+                        var topic = topics[i];
+                        container.editableList('addItem', topic);
+                    }
+                }
             });
         },
         oneditsave: function() {
@@ -168,7 +174,7 @@
 		var vf = topic.find(".node-input-topic-value");
 		var value = vf.typedInput('value');
 		var type = vf.typedInput('type');
-                var r = {topic:value, topic_t:type};
+                var r = {topic:value};
                 node.topics.push(r);
             });
         },
