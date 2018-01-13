@@ -978,6 +978,8 @@ RED.editor = (function() {
                                                 if (outputsChanged) {
                                                     changed = true;
                                                 }
+                                            } else {
+                                                newValue = parseInt(newValue);
                                             }
                                         }
                                         if (editing_node[d] != newValue) {
