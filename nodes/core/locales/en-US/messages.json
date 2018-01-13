@@ -103,9 +103,13 @@
         "output": "Output",
         "msgprop": "message property",
         "msgobj": "complete msg object",
-        "to": "to",
+        "to": "To",
         "debtab": "debug tab",
         "tabcon": "debug tab and console",
+        "toSidebar": "debug window",
+        "toConsole": "system console",
+        "toStatus": "node status (32 characters)",
+        "severity": "Level",
         "notification": {
             "activated": "Successfully activated: __label__",
             "deactivated": "Successfully deactivated: __label__"
