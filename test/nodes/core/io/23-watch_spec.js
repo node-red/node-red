@@ -29,19 +29,15 @@ describe('watch Node', function() {
     var count = 0;
 
     function prepareDir() {
-        dirToWatch = path.join(baseDir, "base"+count);
-        file0ToWatch = path.join(dirToWatch, "file0.txt");
-        file1ToWatch = path.join(dirToWatch, "file1.txt");
-        subDirToWatch = path.join(dirToWatch, "subdir");
-        file2ToWatch = path.join(subDirToWatch, "file2.txt");
+        var dirToWatch = path.join(baseDir, "base"+count);
         fs.mkdirSync(dirToWatch);
         count++;
         return {
             dirToWatch:dirToWatch,
-            file0ToWatch:file0ToWatch,
-            file1ToWatch:file1ToWatch,
-            subDirToWatch:subDirToWatch,
-            file2ToWatch:file2ToWatch
+            file0ToWatch:path.join(dirToWatch, "file0.txt");,
+            file1ToWatch:path.join(dirToWatch, "file1.txt");,
+            subDirToWatch:path.join(dirToWatch, "subdir");,
+            file2ToWatch:path.join(subDirToWatch, "file2.txt");
         }
     }
 
