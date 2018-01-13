@@ -149,13 +149,15 @@
             "upload": "Upload",
             "cert": "Certificate",
             "key": "Private Key",
+            "passphrase": "Passphrase",
             "ca": "CA Certificate",
             "verify-server-cert":"Verify server certificate"
         },
         "placeholder": {
             "cert":"path to certificate (PEM format)",
             "key":"path to private key (PEM format)",
-            "ca":"path to CA certificate (PEM format)"
+            "ca":"path to CA certificate (PEM format)",
+            "passphrase":"private key passphrase (optional)"
         },
         "error": {
             "missing-file": "No certificate/key file provided"
