@@ -852,6 +852,7 @@
 	"merge": {
 	    "topics-label":"Merged Topics",
 	    "topics":"topics",
+            "topic" : "topic",
             "on-change":"Send merged message on arrival of a new topic"
 	},
         "reduce": {
