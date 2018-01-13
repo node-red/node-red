@@ -169,9 +169,9 @@
         <label data-i18n="join.mode.mode"></label>
         <select id="node-input-mode" style="width:200px;">
             <option value="auto" data-i18n="join.mode.auto"></option>
+            <option value="custom" data-i18n="join.mode.custom"></option>
             <option value="merge" data-i18n="join.mode.merge"></option>
             <option value="reduce" data-i18n="join.mode.reduce"></option>
-            <option value="custom" data-i18n="join.mode.custom"></option>
         </select>
     </div>
     <div class="node-row-custom">
@@ -262,12 +262,12 @@
     <dl>
         <dt>automatic</dt>
         <dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
+        <dt>manual</dt>
+        <dd>It will join sequences of messages in a variety of ways.</dd>
         <dt>merge sequence</dt>
         <dd>It will merge incoming messages into single message using <code>topic</code> property.</dd>
         <dt>reduce sequence</dt>
         <dd>When paired with the <b>split</b> node, it will reduce the message sequence into single message.</dd>
-        <dt>manual</dt>
-        <dd>It will join sequences of messages in a variety of ways.</dd>
     </dl>
     <h3>Inputs</h3>
     <dl class="message-properties">
@@ -292,6 +292,23 @@
 
     <h4>Automatic mode</h4>
     <p>When configured to join in manual mode, the node is able to join sequences of messages using <code>parts</code> property of incoming messages.</p>
+
+    <h4>Manual mode</h4>
+    <p>When configured to join in manual mode, the node is able to join sequences
+     of messages in a variety of ways.</p>
+    <ul>
+        <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
+        <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
+        <li>a <b>key/value object</b> - created by using a property of each message to determine the key under which
+        the required value is stored.</li>
+        <li>a <b>merged object</b> - created by merging the property of each message under a single object.</li>
+    </ul>
+    <p>The other properties of the output message are taken from the last message received before the result is sent.</p>
+    <p>A <i>count</i> can be set for how many messages should be received before generating the output message.
+    For object outputs, once this count has been reached, the node can be configured to send a message for each subsequent message
+    received.</p>
+    <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
+    <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
 
     <h4>Merge Sequence mode</h4>
     <p>When configured to join in merge mode, the join node can create a message based on <code>topic</code> value.</p>
@@ -333,23 +350,6 @@
             <li><b>Fixup exp</b>: <code>$A/$N</code></li>
         </ul>
     </p>
-
-    <h4>Manual mode</h4>
-    <p>When configured to join in manual mode, the node is able to join sequences
-     of messages in a variety of ways.</p>
-    <ul>
-        <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
-        <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
-        <li>a <b>key/value object</b> - created by using a property of each message to determine the key under which
-        the required value is stored.</li>
-        <li>a <b>merged object</b> - created by merging the property of each message under a single object.</li>
-    </ul>
-    <p>The other properties of the output message are taken from the last message received before the result is sent.</p>
-    <p>A <i>count</i> can be set for how many messages should be received before generating the output message.
-    For object outputs, once this count has been reached, the node can be configured to send a message for each subsequent message
-    received.</p>
-    <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
-    <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
 
     <h4>Note:</h4>
     <p>This node internally keeps messages for its operation.  In order to prevent unexpected memory usage, maximum number of messages kept can be specified by <code>joinMaxKeptMsgsCount</code> property in <b>settings.js</b>.</p>
