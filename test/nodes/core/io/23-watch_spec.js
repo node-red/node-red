@@ -78,6 +78,11 @@ describe('watch Node', function() {
                         return;
                     }
                     processed[file] = true;
+                    if (file === 'subdir') {
+                        // On OSX, we get a change event on subdir when a file inside changes.
+                        // On Travis, we don't. *sigh*
+                        return;
+                    }
                     (file in results).should.be.true();
 
                     var result = results[file];
@@ -198,12 +203,6 @@ describe('watch Node', function() {
                      wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
         var results = {
-            'subdir': {
-                payload: files.subDirToWatch,
-                topic: files.dirToWatch,
-                file: 'subdir',
-                type: 'directory'
-            },
             'file2.txt': {
                 payload: files.file2ToWatch,
                 type: 'file'//,
