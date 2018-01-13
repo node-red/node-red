@@ -859,7 +859,7 @@
 	    "exp": "Reduce exp",
 	    "exp-value": "exp",
 	    "init": "Initial value",
-	    "right": "Reduce Right",
+	    "right": "Evaluate in reverse order (right to left)",
 	    "fixup": "Fixup exp"
         },
         "errors": {

@@ -246,8 +246,9 @@
             <input type="text" id="node-input-reduceFixup" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
         </div>
         <div class="form-row">
-            <label for="node-input-reduceRight" data-i18n="join.reduce.right" style="margin-left:10px;"/>
-            <input type="checkbox" id="node-input-reduceRight" style="width:auto;">
+	    <label>&nbsp;</label>
+            <input type="checkbox" id="node-input-reduceRight" style="display:inline-block; width:auto; vertical-align:top; margin-left:10px;">
+            <label for="node-input-reduceRight" style="width:70%;" data-i18n="join.reduce.right" style="margin-left:10px;"/>
         </div>
     </div>
     <div class="form-row">
@@ -341,7 +342,7 @@
                 <li><code>$N</code> number of messages of a group.</li>
             </ul>
         </dd>
-        <p>Order of reduction on a message group can be specified by checkbox (<b>Reduce Right</b>).</p>
+        <p>Order of reduction on a message group can be specified by checkbox (<b>Evaluate in reverse order (right to left)</b>).</p>
     </dl>
     <p><b>Example:</b> Join node outputs an average for each input message group with the following setting:
         <ul>
