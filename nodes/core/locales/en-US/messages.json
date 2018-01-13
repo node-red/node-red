@@ -536,7 +536,7 @@
         "label": {
             "property": "Property",
             "rule": "rule",
-            "repair" :  "repair seqnece (reconstruct parts property of outgoing messages)"
+            "repair" :  "repair sequence (reconstruct parts property of outgoing messages)"
         },
         "and": "and",
         "checkall": "checking all rules",
