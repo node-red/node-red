@@ -441,13 +441,38 @@
                     }
                 }
                 else if (val === "reduce") {
-                    $("#node-input-reduceExp").typedInput({'types':['jsonata']});
+                    var jsonata_or_empty = {
+                        value: "jsonata",
+                        label: "expression",
+                        icon: "red/images/typedInput/expr.png",
+                        validate: function(v) {
+                            try{
+                                if(v !== "") {
+                                    jsonata(v);
+                                }
+                                return true;
+                            }
+                            catch(e){
+                                return false;
+                            }
+                        },
+                        expand:function() {
+                            var that = this;
+                            RED.editor.editExpression({
+                                value: this.value().replace(/\t/g,"\n"),
+                                complete: function(v) {
+                                    that.value(v.replace(/\n/g,"\t"));
+                                }
+                            })
+                        }
+                    };
+                    $("#node-input-reduceExp").typedInput({types:[jsonata_or_empty]});
                     $("#node-input-reduceInit").typedInput({
                         default: 'num',
                         types:['flow','global','str','num','bool','json','bin','date','jsonata'],
                         typeField: $("#node-input-reduceInitType")
                     });
-                    $("#node-input-reduceFixup").typedInput({types:['jsonata']});
+                    $("#node-input-reduceFixup").typedInput({types:[jsonata_or_empty]});
                 }
             });
 
