@@ -49,9 +49,12 @@ module.exports = function(RED) {
             else if (msg.hasOwnProperty("payload") && (typeof msg.payload !== "undefined")) {
                 var dir = path.dirname(filename);
                 if (node.createDir) {
-                    fs.ensureDir(dir, function(err) {
-                        if (err) { node.error(RED._("file.errors.createfail",{error:err.toString()}),msg); }
-                    });
+                    try {
+                        fs.ensureDirSync(dir);
+                    } catch(err) {
+                        node.error(RED._("file.errors.createfail",{error:err.toString()}),msg);
+                        return;
+                    }
                 }
 
                 var data = msg.payload;
@@ -60,11 +63,11 @@ module.exports = function(RED) {
                 }
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
-                if ((this.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
+                if ((node.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
                 node.data.push(Buffer.from(data));
 
                 while (node.data.length > 0) {
-                    if (this.overwriteFile === "true") {
+                    if (node.overwriteFile === "true") {
                         node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
                         node.wstream.on("error", function(err) {
                             node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);

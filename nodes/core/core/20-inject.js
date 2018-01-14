@@ -49,7 +49,7 @@ module.exports = function(RED) {
         };
 
         if (this.once) {
-            setTimeout( function() {
+            this.onceTimeout = setTimeout( function() {
               node.emit("input",{});
               node.repeaterSetup();
             }, this.onceDelay);
@@ -80,6 +80,9 @@ module.exports = function(RED) {
     RED.nodes.registerType("inject",InjectNode);
 
     InjectNode.prototype.close = function() {
+        if (this.onceTimeout) {
+            clearTimeout(this.onceTimeout);
+        }
         if (this.interval_id != null) {
             clearInterval(this.interval_id);
             if (RED.settings.verbose) { this.log(RED._("inject.stopped")); }

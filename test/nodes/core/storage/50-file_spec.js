@@ -36,6 +36,7 @@ describe('file Nodes', function() {
         });
 
         afterEach(function(done) {
+            fs.removeSync(path.join(resourcesDir,"file-out-node"));
             helper.unload().then(function() {
                 //fs.unlinkSync(fileToTest);
                 helper.stopServer(done);
@@ -368,7 +369,7 @@ describe('file Nodes', function() {
 
         it('should fail to create a new directory if not asked to do so (append)', function(done) {
             // Stub file write so we can make writes fail
-            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false}];
@@ -394,7 +395,7 @@ describe('file Nodes', function() {
 
         it('should try to create a new directory if asked to do so (append)', function(done) {
             // Stub file write so we can make writes fail
-            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false, "createDir":true}];
             helper.load(fileNode, flow, function() {
@@ -405,9 +406,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }
@@ -419,7 +418,7 @@ describe('file Nodes', function() {
 
         it('should fail to create a new directory if not asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
-            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":false, "overwriteFile":true}];
@@ -445,7 +444,7 @@ describe('file Nodes', function() {
 
         it('should try to create a new directory if asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
-            var fileToTest2 = path.join(resourcesDir,"a","50-file-test-file.txt");
+            var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":true, "createDir":true}];
@@ -457,9 +456,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }

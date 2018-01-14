@@ -101,6 +101,8 @@ describe('websocket Node', function() {
             helper.load(websocketNode, flow, function() {
                 createClient("n1").then(function(sock) {
                     done();
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -113,6 +115,8 @@ describe('websocket Node', function() {
                         done();
                     });
                     helper.clearFlows();
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -129,6 +133,8 @@ describe('websocket Node', function() {
                         done();
                     });
                     sock.send("hello");
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -145,6 +151,8 @@ describe('websocket Node', function() {
                         msg.should.have.property("text", "hello");
                         done();
                     });
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -161,6 +169,8 @@ describe('websocket Node', function() {
                         msg.should.have.property("payload", "hello");
                         done();
                     });
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -179,6 +189,8 @@ describe('websocket Node', function() {
                     helper.getNode("n2").send({
                         payload: "hello"
                     });
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -197,6 +209,8 @@ describe('websocket Node', function() {
                     helper.getNode("n3").send({
                         text: "hello"
                     });
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -216,6 +230,8 @@ describe('websocket Node', function() {
                         done();
                     },100);
                     helper.getNode("n2").send({topic: "hello"});
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -232,6 +248,8 @@ describe('websocket Node', function() {
                         done();
                     });
                     sock.send("hello");
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -248,6 +266,8 @@ describe('websocket Node', function() {
                         done();
                     });
                     sock.send('{"text":"hello"}');
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });
@@ -272,10 +292,11 @@ describe('websocket Node', function() {
                     helper.getNode("n3").send({
                         payload: "hello"
                     });
-                });
-
-                when.all([def1.promise, def2.promise]).then(function() {
-                    done();
+                    return when.all([def1.promise, def2.promise]).then(function() {
+                        done();
+                    });
+                }).catch(function(err) {
+                    done(err);
                 });
             });
         });

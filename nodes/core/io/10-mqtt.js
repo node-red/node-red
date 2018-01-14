@@ -291,7 +291,9 @@ module.exports = function(RED) {
 
         this.publish = function (msg) {
             if (node.connected) {
-                if (!Buffer.isBuffer(msg.payload)) {
+                if (msg.payload === null || msg.payload === undefined) {
+                    msg.payload = "";
+                } else if (!Buffer.isBuffer(msg.payload)) {
                     if (typeof msg.payload === "object") {
                         msg.payload = JSON.stringify(msg.payload);
                     } else if (typeof msg.payload !== "string") {

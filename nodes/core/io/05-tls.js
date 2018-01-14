@@ -77,7 +77,8 @@ module.exports = function(RED) {
         credentials: {
             certdata: {type:"text"},
             keydata: {type:"text"},
-            cadata: {type:"text"}
+            cadata: {type:"text"},
+            passphrase: {type:"password"}
         },
         settings: {
             tlsConfigDisableLocalFiles: {
@@ -97,6 +98,9 @@ module.exports = function(RED) {
             }
             if (this.ca) {
                 opts.ca = this.ca;
+            }
+            if (this.credentials && this.credentials.passphrase) {
+                opts.passphrase = this.credentials.passphrase;
             }
             opts.rejectUnauthorized = this.verifyservercert;
         }
