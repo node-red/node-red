@@ -618,6 +618,8 @@
             "c2o": "CSV to Object options",
             "o2c": "Object to CSV options",
             "input": "Input",
+            "skip-s": "Skip first",
+            "skip-e": "lines",
             "firstrow": "first row contains column names",
             "output": "Output",
             "includerow": "include column name row",
