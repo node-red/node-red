@@ -51,6 +51,10 @@
        between the two. This can be used, for example, with the <code>HTTP In</code>
        node to ensure the payload is a parsed object even if an incoming request
        did not set its content-type correctly for the HTTP In node to do the conversion.</p>
+    <p>If the node is configured to ensure the property is encoded as a String and it
+       receives a String, no further checks will be made of the property. It will
+       not check the String is valid JSON nor will it reformat it if the format option
+       is selected.</p>
 
 </script>
 
