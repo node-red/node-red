@@ -220,7 +220,9 @@ module.exports = function(RED) {
                             }
                         }
                     } else if (node.connecting) {
-                        node.log(RED._("mqtt.state.connect-failed",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
+                        if(!node.client.reconnecting) {
+                            node.log(RED._("mqtt.state.connect-failed",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
+                        }
                     }
                 });
 
