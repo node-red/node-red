@@ -380,9 +380,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }
@@ -405,9 +403,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.appendfail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }
@@ -431,9 +427,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }
@@ -457,9 +451,7 @@ describe('file Nodes', function() {
                             return evt[0].type == "file";
                         });
                         //console.log(logEvents);
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("file.errors.writefail");
+                        logEvents.should.have.length(0);
                         done();
                     }
                     catch(e) { done(e); }
