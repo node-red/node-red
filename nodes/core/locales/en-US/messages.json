@@ -674,7 +674,14 @@
         },
         "label": {
             "o2j": "Object to JSON options",
-            "pretty": "Format JSON string"
+            "pretty": "Format JSON string",
+            "action": "Action",
+            "property": "Property",
+            "actions": {
+                "toggle": "Convert between JSON String & Object",
+                "str":"Always convert to JSON String",
+                "obj":"Always convert to JavaScript Object"
+            }
         }
     },
     "yaml": {
