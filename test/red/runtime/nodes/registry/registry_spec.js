@@ -72,7 +72,15 @@ describe("red/nodes/registry/registry",function() {
         config: "configC",
         types: [ "test-c","test-d"]
     };
-
+    var testNodeSet3 = {
+        id: "test-module-2/test-name-3",
+        module: "test-module-2",
+        name: "test-name-3",
+        enabled: true,
+        loaded: false,
+        config: "configB",
+        types: [ "test-a","test-e"]
+    };
 
 
 
@@ -198,7 +206,39 @@ describe("red/nodes/registry/registry",function() {
            typeRegistry.addNodeSet("test-module/test-name-2",testNodeSet2WithError, "0.0.1");
 
            should.not.exist(typeRegistry.getTypeId("test-c"));
-         });
+       });
+
+       it('doesnt add node set if type already exists', function() {
+           typeRegistry.init(settings);
+           typeRegistry.getNodeList().should.have.lengthOf(0);
+           typeRegistry.getModuleList().should.eql({});
+
+           should.not.exist(typeRegistry.getTypeId("test-e"));
+
+           typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
+           typeRegistry.getNodeList().should.have.lengthOf(1);
+           should.exist(typeRegistry.getTypeId("test-a"));
+           typeRegistry.addNodeSet(testNodeSet3.id,testNodeSet3, "0.0.1");
+           typeRegistry.getNodeList().should.have.lengthOf(2);
+
+           // testNodeSet3 registers a duplicate test-a and unique test-e
+           // as test-a is a duplicate, test-e should not get registered
+           should.not.exist(typeRegistry.getTypeId("test-e"));
+
+           var testNodeSet3Result = typeRegistry.getNodeList()[1];
+           should.exist(testNodeSet3Result.err);
+           testNodeSet3Result.err.code.should.equal("type_already_registered");
+           testNodeSet3Result.err.details.type.should.equal("test-a");
+           testNodeSet3Result.err.details.moduleA.should.equal("test-module");
+           testNodeSet3Result.err.details.moduleB.should.equal("test-module-2");
+
+           //
+           // typeRegistry.addNodeSet("test-module/test-name-2",testNodeSet2WithError, "0.0.1");
+           //
+           // should.not.exist(typeRegistry.getTypeId("test-c"));
+       });
+
+
     });
 
     describe("#enableNodeSet", function() {
@@ -334,7 +374,7 @@ describe("red/nodes/registry/registry",function() {
                 enabled: true,
                 loaded: false,
                 config: "configB",
-                types: [ "test-a","test-b"]
+                types: [ "test-c","test-d"]
             }, "0.0.1");
             typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('configBHEtest-name-2LP');
             typeRegistry.getAllNodeConfigs().should.eql('configAHEtest-nameLPconfigBHEtest-name-2LP');
