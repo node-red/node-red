@@ -546,6 +546,9 @@ RED.view = (function() {
                 RED.typeSearch.show({
                     x:d3.event.clientX-mainPos.left-node_width/2,
                     y:d3.event.clientY-mainPos.top-node_height/2,
+                    cancel: function() {
+                        resetMouseVars();
+                    },
                     add: function(type) {
                         var result = addNode(type);
                         if (!result) {
@@ -683,7 +686,7 @@ RED.view = (function() {
         var mousePos;
         if (mouse_mode == RED.state.JOINING || mouse_mode === RED.state.QUICK_JOINING) {
             // update drag line
-            if (drag_lines.length === 0) {
+            if (drag_lines.length === 0 && mousedown_port_type !== null) {
                 if (d3.event.shiftKey) {
                     // Get all the wires we need to detach.
                     var links = [];
@@ -1347,7 +1350,7 @@ RED.view = (function() {
         mouseup_node = null;
         mousedown_link = null;
         mouse_mode = 0;
-        mousedown_port_type = PORT_TYPE_OUTPUT;
+        mousedown_port_type = null;
         activeSpliceLink = null;
         spliceActive = false;
         d3.select(".link_splice").classed("link_splice",false);

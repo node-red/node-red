@@ -20,6 +20,7 @@
         "errors-help": "Run with -v for details",
         "missing-modules": "Missing node modules:",
         "node-version-mismatch": "Node module cannot be loaded on this version. Requires: __version__ ",
+        "type-already-registered": "'__type__' already registered by module __module__",
         "removing-modules": "Removing modules from config",
         "added-types": "Added node types:",
         "removed-types": "Removed node types:",
@@ -138,6 +139,7 @@
             "invalid": "Existing __type__ file is not valid json",
             "restore": "Restoring __type__ file backup : __path__",
             "restore-fail": "Restoring __type__ file backup failed : __message__",
+            "fsync-fail": "Flushing file __path__ to disk failed : __message__",
             "projects": {
                 "changing-project": "Setting active project : __project__",
                 "active-project": "Active project : __project__",

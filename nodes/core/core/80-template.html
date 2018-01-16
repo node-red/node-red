@@ -42,6 +42,7 @@
         <select id="node-input-output" style="width:180px;">
             <option value="str" data-i18n="template.label.plain"></option>
             <option value="json" data-i18n="template.label.json"></option>
+            <option value="yaml" data-i18n="template.label.yaml"></option>
         </select>
     </div>
 
@@ -53,6 +54,9 @@
     <dl class="message-properties">
         <dt>msg <span class="property-type">object</span></dt>
         <dd>A msg object containing information to populate the template.</dd>
+        <dt class="optional">template <span class="property-type">string</span></dt>
+        <dd>A template to be populated from msg.payload. If not configured in the edit panel,
+         this can be set as a property of msg.</dd>
     </dl>
     <h3>Outputs</h3>
     <dl class="message-properties">
@@ -96,6 +100,9 @@
         icon: "template.png",
         label: function() {
             return this.name;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
             var that = this;

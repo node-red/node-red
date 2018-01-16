@@ -218,9 +218,10 @@
         "editConfig": "Edit __type__ config node",
         "addNewType": "Add new __type__...",
         "nodeProperties": "node properties",
-        "portLabels": "port labels",
+        "portLabels": "node settings",
         "labelInputs": "Inputs",
         "labelOutputs": "Outputs",
+        "settingIcon": "Icon",
         "noDefaultLabel": "none",
         "defaultLabel": "use default label",
         "errors": {
@@ -450,8 +451,10 @@
     },
     "expressionEditor": {
         "functions": "Functions",
+        "functionReference": "Function reference",
         "insert": "Insert",
         "title": "JSONata Expression editor",
+        "test": "Test",
         "data": "Example message",
         "result": "Result",
         "format": "format expression",

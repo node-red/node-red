@@ -37,9 +37,40 @@ describe('template node', function() {
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'payload=foo');
+                msg.should.have.property('template', '{{payload}}');
                 done();
             });
-            n1.receive({payload:"foo",topic: "bar"});
+            n1.receive({payload:"foo",topic: "bar", template: "{{payload}}"});
+        });
+    });
+
+    it('should modify template from msg.template', function(done) {
+        var flow = [{id:"n1", type:"template", field:"template", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                msg.should.have.property('template', 'payload=foo');
+                done();
+            });
+            n1.receive({payload:"foo", topic: "bar", template: "payload={{payload}}"});
+        });
+    });
+
+    it('should modify payload from msg.template', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'topic=bar');
+                msg.should.have.property('template', 'topic={{topic}}');
+                done();
+            });
+            n1.receive({payload:"foo", topic: "bar", template: "topic={{topic}}"});
         });
     });
 
@@ -88,6 +119,18 @@ describe('template node', function() {
         });
     });
 
+    it('should handle escape characters in Mustache format and JSON output mode', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", syntax:"mustache", template:"{\"data\":\"{{payload}}\"}", output:"json", wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.payload.should.have.property('data', 'line\t1\nline\\2\r\nline\b3\f');
+                done();
+            });
+            n1.receive({payload:"line\t1\nline\\2\r\nline\b3\f"});
+        });
+    });
 
     it('should modify payload in plain text mode', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", syntax:"plain", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];

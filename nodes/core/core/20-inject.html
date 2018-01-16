@@ -26,6 +26,14 @@
         <input type="text" id="node-input-topic">
     </div>
 
+    <div class="form-row" id="node-once">
+        <label for="node-input-once">&nbsp;</label>
+        <input type="checkbox" id="node-input-once" style="display:inline-block;width:15px;vertical-align:baseline;">
+        <span data-i18n="inject.onstart"></span>&nbsp;
+        <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px">&nbsp;
+        <span data-i18n="inject.onceDelay"></span>
+    </div>
+
     <div class="form-row">
         <label for=""><i class="fa fa-repeat"></i> <span data-i18n="inject.label.repeat"></span></label>
         <select id="inject-time-type-select">
@@ -106,13 +114,6 @@
             </div>
         </div>
     </div>
-
-    <div class="form-row" id="node-once">
-        <label>&nbsp;</label>
-        <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-input-once" style="width: 70%;" data-i18n="inject.onstart"></label>
-    </div>
-
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -181,9 +182,10 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             topic: {value:""},
             payload: {value:"", validate: RED.validators.typedInput("payloadType")},
             payloadType: {value:"date"},
-            repeat: {value:""},
+            repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0))) }},
             crontab: {value:""},
-            once: {value:false}
+            once: {value:false},
+            onceDelay: {value:0.1}
         },
         icon: "inject.png",
         inputs:0,

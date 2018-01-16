@@ -47,6 +47,10 @@ module.exports = {
     // The maximum length, in characters, of any message sent to the debug sidebar tab
     debugMaxLength: 1000,
 
+    // The maximum number of messages kept internally in sort node.
+    // Zero or undefined value means not restricting number of messages.
+    //sortMaxKeptMsgsCount: 0,
+    
     // To disable the option for using local files for storing keys and certificates in the TLS configuration
     //  node, set this to true
     //tlsConfigDisableLocalFiles: true,
@@ -78,7 +82,7 @@ module.exports = {
     //nodesDir: '/home/nol/.node-red/nodes',
 
     // By default, the Node-RED UI is available at http://localhost:1880/
-    // The following property can be used to specifiy a different root path.
+    // The following property can be used to specify a different root path.
     // If set to false, this is disabled.
     //httpAdminRoot: '/admin',
 

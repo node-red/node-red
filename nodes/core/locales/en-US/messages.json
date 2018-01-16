@@ -59,7 +59,8 @@
             "Sunday"
         ],
         "on": "on",
-        "onstart": "Inject once at start?",
+        "onstart": "Inject once after",
+        "onceDelay": "seconds, then",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "errors": {
@@ -102,9 +103,13 @@
         "output": "Output",
         "msgprop": "message property",
         "msgobj": "complete msg object",
-        "to": "to",
+        "to": "To",
         "debtab": "debug tab",
         "tabcon": "debug tab and console",
+        "toSidebar": "debug window",
+        "toConsole": "system console",
+        "toStatus": "node status (32 characters)",
+        "severity": "Level",
         "notification": {
             "activated": "Successfully activated: __label__",
             "deactivated": "Successfully deactivated: __label__"
@@ -144,13 +149,15 @@
             "upload": "Upload",
             "cert": "Certificate",
             "key": "Private Key",
+            "passphrase": "Passphrase",
             "ca": "CA Certificate",
             "verify-server-cert":"Verify server certificate"
         },
         "placeholder": {
             "cert":"path to certificate (PEM format)",
             "key":"path to private key (PEM format)",
-            "ca":"path to CA certificate (PEM format)"
+            "ca":"path to CA certificate (PEM format)",
+            "passphrase":"private key passphrase (optional)"
         },
         "error": {
             "missing-file": "No certificate/key file provided"
@@ -195,6 +202,7 @@
             "mustache": "Mustache template",
             "plain": "Plain text",
             "json": "Parsed JSON",
+            "yaml": "Parsed YAML",
             "none": "none"
         },
         "templatevalue": "This is the payload: {{payload}} !"
@@ -204,7 +212,7 @@
         "for": "For",
         "delaymsg": "Delay each message",
         "delayfixed": "Fixed delay",
-        "delayvarmsg": "Set delay with msg.delay",
+        "delayvarmsg": "Override delay with msg.delay",
         "randomdelay": "Random delay",
         "limitrate": "Rate Limit",
         "limitall": "All messages",
@@ -270,6 +278,9 @@
         "wait-reset": "wait to be reset",
         "wait-for": "wait for",
         "wait-loop": "resend it every",
+        "for": "Handling",
+        "bytopics": "each msg.topic independently",
+        "alltopics": "all messages",
         "duration": {
             "ms": "Milliseconds",
             "s": "Seconds",
@@ -607,6 +618,8 @@
             "c2o": "CSV to Object options",
             "o2c": "Object to CSV options",
             "input": "Input",
+            "skip-s": "Skip first",
+            "skip-e": "lines",
             "firstrow": "first row contains column names",
             "output": "Output",
             "includerow": "include column name row",
@@ -661,7 +674,14 @@
         },
         "label": {
             "o2j": "Object to JSON options",
-            "pretty": "Format JSON string"
+            "pretty": "Format JSON string",
+            "action": "Action",
+            "property": "Property",
+            "actions": {
+                "toggle": "Convert between JSON String & Object",
+                "str":"Always convert to JSON String",
+                "obj":"Always convert to JavaScript Object"
+            }
         }
     },
     "yaml": {
@@ -842,5 +862,18 @@
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
         "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+    },
+    "sort" : {
+	"key-type" : "Key type",
+	"payload" : "payload or element",
+	"exp" : "expression",
+	"key-exp" : "Key exp.",
+	"order" : "Order",
+	"ascending" : "ascending",
+	"descending" : "descending",
+	"as-number" : "as number",
+        "invalid-exp" : "invalid JSONata expression in sort node",
+        "too-many" : "too many pending messages in sort node",
+        "clear" : "clear pending message in sort node"
     }
 }

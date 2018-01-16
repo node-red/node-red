@@ -61,7 +61,7 @@ function init(_server,_runtime) {
             }
             adminApp.post("/auth/revoke",auth.needsPermission(""),auth.revoke,apiUtil.errorHandler);
         }
-        
+
         // Editor
         if (!settings.disableEditor) {
             editor = require("./editor");

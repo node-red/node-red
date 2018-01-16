@@ -5,7 +5,7 @@ module.exports = function(RED) {
     var events = require("events");
     var path = require("path");
     var safeJSONStringify = require("json-stringify-safe");
-    var debuglength = RED.settings.debugMaxLength||1000;
+    var debuglength = RED.settings.debugMaxLength || 1000;
     var useColors = RED.settings.debugUseColors || false;
     util.inspect.styles.boolean = "red";
 
@@ -13,26 +13,49 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         this.name = n.name;
         this.complete = (n.complete||"payload").toString();
-
-        if (this.complete === "false") {
-            this.complete = "payload";
-        }
-
-        this.console = n.console;
+        if (this.complete === "false") { this.complete = "payload"; }
+        this.console = ""+(n.console || false);
+        this.tostatus = n.tostatus || false;
+        this.tosidebar = n.tosidebar;
+        if (this.tosidebar === undefined) { this.tosidebar = true; }
+        this.severity = n.severity || 40;
         this.active = (n.active === null || typeof n.active === "undefined") || n.active;
+        this.status({});
+
         var node = this;
+        var levels = {
+            off: 1,
+            fatal: 10,
+            error: 20,
+            warn: 30,
+            info: 40,
+            debug: 50,
+            trace: 60,
+            audit: 98,
+            metric: 99
+        };
+        var colors = {
+            "0": "grey",
+            "10": "grey",
+            "20": "red",
+            "30": "yellow",
+            "40": "grey",
+            "50": "green",
+            "60": "blue"
+        };
 
         this.on("input",function(msg) {
             if (this.complete === "true") {
-            // debug complete msg object
+                // debug complete msg object
                 if (this.console === "true") {
                     node.log("\n"+util.inspect(msg, {colors:useColors, depth:10}));
                 }
-                if (this.active) {
-                    sendDebug({id:node.id,name:node.name,topic:msg.topic,msg:msg,_path:msg._path});
+                if (this.active && this.tosidebar) {
+                    sendDebug({id:node.id, name:node.name, topic:msg.topic, msg:msg, _path:msg._path});
                 }
-            } else {
-            // debug user defined msg property
+            }
+            else {
+                // debug user defined msg property
                 var property = "payload";
                 var output = msg[property];
                 if (this.complete !== "false" && typeof this.complete !== "undefined") {
@@ -53,7 +76,15 @@ module.exports = function(RED) {
                     }
                 }
                 if (this.active) {
-                    sendDebug({id:node.id,z:node.z,name:node.name,topic:msg.topic,property:property,msg:output,_path:msg._path});
+                    if (this.tosidebar == true) {
+                        sendDebug({id:node.id, z:node.z, name:node.name, topic:msg.topic, property:property, msg:output, _path:msg._path});
+                    }
+                    if (this.tostatus === true) {
+                        var st = util.inspect(output);
+                        if (st.length > 32) { st = st.substr(0,32) + "..."; }
+                        node.oldStatus = {fill:colors[node.severity], shape:"dot", text:st};
+                        node.status(node.oldStatus);
+                    }
                 }
             }
         });
@@ -138,7 +169,7 @@ module.exports = function(RED) {
                                 value = value.substring(0,debuglength)+"...";
                             }
                         } else if (value && value.constructor) {
-                            if (value.constructor.name === "Buffer") {
+                            if (value.type === "Buffer") {
                                 value.__encoded__ = true;
                                 value.length = value.data.length;
                                 if (value.length > debuglength) {
@@ -196,9 +227,14 @@ module.exports = function(RED) {
             if (state === "enable") {
                 node.active = true;
                 res.sendStatus(200);
+                if (node.tostatus) { node.status({}); }
             } else if (state === "disable") {
                 node.active = false;
                 res.sendStatus(201);
+                if (node.tostatus && node.hasOwnProperty("oldStatus")) {
+                    node.oldStatus.shape = "ring";
+                    node.status(node.oldStatus);
+                }
             } else {
                 res.sendStatus(404);
             }

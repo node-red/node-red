@@ -102,7 +102,7 @@
         <dt class="optional">delay <span class="property-type">number</span></dt>
         <dd>Sets the delay, in milliseconds, to be applied to the message. This
             option only applies if the node is configured to allow the message to
-            provide the delay interval.</dd>
+            override the configured default delay interval.</dd>
         <dt class="optional">reset</dt>
         <dd>If the received message has this property set to any value, all
             outstanding messages held by the node are cleared without being sent.</dd>
@@ -129,13 +129,13 @@
         defaults: {
             name: {value:""},
             pauseType: {value:"delay", required:true},
-            timeout: {value:"5", required:true, validate:RED.validators.number()},
+            timeout: {value:"5", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
             timeoutUnits: {value:"seconds"},
-            rate: {value:"1", required:true, validate:RED.validators.number()},
+            rate: {value:"1", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
             nbRateUnits: {value:"1", required:false, validate:RED.validators.regex(/\d+|/)},
             rateUnits: {value: "second"},
-            randomFirst: {value:"1", required:true, validate:RED.validators.number()},
-            randomLast: {value:"5", required:true, validate:RED.validators.number()},
+            randomFirst: {value:"1", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            randomLast: {value:"5", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
             randomUnits: {value: "seconds"},
             drop: {value:false}
         },
@@ -260,7 +260,7 @@
                     $("#delay-details-for").show();
                     $("#random-details").hide();
                 } else if (this.value === "delayv") {
-                    $("#delay-details-for").hide();
+                    $("#delay-details-for").show();
                     $("#random-details").hide();
                 } else if (this.value === "random") {
                     $("#delay-details-for").hide();

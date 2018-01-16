@@ -36,6 +36,7 @@ module.exports = function(RED) {
         this.port = n.port;
         this.clientid = n.clientid;
         this.usetls = n.usetls;
+        this.usews = n.usews;
         this.verifyservercert = n.verifyservercert;
         this.compatmode = n.compatmode;
         this.keepalive = n.keepalive;
@@ -69,6 +70,9 @@ module.exports = function(RED) {
         if (typeof this.usetls === 'undefined') {
             this.usetls = false;
         }
+        if (typeof this.usews === 'undefined') {
+            this.usews = false;
+        }
         if (typeof this.compatmode === 'undefined') {
             this.compatmode = true;
         }
@@ -86,15 +90,27 @@ module.exports = function(RED) {
 
         // Create the URL to pass in to the MQTT.js library
         if (this.brokerurl === "") {
-            if (this.usetls) {
-                this.brokerurl="mqtts://";
+            // if the broker may be ws:// or wss:// or even tcp://
+            if (this.broker.indexOf("://") > -1) {
+                this.brokerurl = this.broker;
             } else {
-                this.brokerurl="mqtt://";
-            }
-            if (this.broker !== "") {
-                this.brokerurl = this.brokerurl+this.broker+":"+this.port;
-            } else {
-                this.brokerurl = this.brokerurl+"localhost:1883";
+                // construct the std mqtt:// url
+                if (this.usetls) {
+                    this.brokerurl="mqtts://";
+                } else {
+                    this.brokerurl="mqtt://";
+                }
+                if (this.broker !== "") {
+                    this.brokerurl = this.brokerurl+this.broker+":";
+                    // port now defaults to 1883 if unset.
+                    if (!this.port){
+                        this.brokerurl = this.brokerurl+"1883";
+                    } else {
+                        this.brokerurl = this.brokerurl+this.port;
+                    }
+                } else {
+                    this.brokerurl = this.brokerurl+"localhost:1883";
+                }
             }
         }
 
@@ -278,7 +294,9 @@ module.exports = function(RED) {
 
         this.publish = function (msg) {
             if (node.connected) {
-                if (!Buffer.isBuffer(msg.payload)) {
+                if (msg.payload === null || msg.payload === undefined) {
+                    msg.payload = "";
+                } else if (!Buffer.isBuffer(msg.payload)) {
                     if (typeof msg.payload === "object") {
                         msg.payload = JSON.stringify(msg.payload);
                     } else if (typeof msg.payload !== "string") {

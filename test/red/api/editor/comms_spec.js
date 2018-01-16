@@ -31,6 +31,13 @@ var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port
 
 describe("api/editor/comms", function() {
+
+    beforeEach(function (done) {
+        setTimeout(function() {
+            done();
+        }, 55);
+    });
+
     describe("with default keepalive", function() {
         var server;
         var url;
@@ -72,7 +79,7 @@ describe("api/editor/comms", function() {
                 comms.publish('topic1', 'foo');
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"topic1","data":"foo"}');
+                msg.should.equal('[{"topic":"topic1","data":"foo"}]');
                 ws.close();
                 done();
             });
@@ -85,7 +92,8 @@ describe("api/editor/comms", function() {
                 ws.send('{"subscribe":"topic2"}');
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"topic2","data":"bar"}');
+                console.log(msg);
+                msg.should.equal('[{"topic":"topic2","data":"bar"}]');
                 ws.close();
                 done();
             });
@@ -100,7 +108,8 @@ describe("api/editor/comms", function() {
                 comms.publish('topic3', 'new');
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"topic3","data":"new"}');
+                console.log(msg);
+                msg.should.equal('[{"topic":"topic3","data":"new"}]');
                 ws.close();
                 done();
             });
@@ -115,7 +124,8 @@ describe("api/editor/comms", function() {
                 comms.publish('topic3', 'correct');
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"topic3","data":"correct"}');
+                console.log(msg);
+                msg.should.equal('[{"topic":"topic3","data":"correct"}]');
                 ws.close();
                 done();
             });
@@ -133,7 +143,8 @@ describe("api/editor/comms", function() {
                 comms.publish('topic4', 'bar');
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"topic4","data":"bar"}');
+                console.log(msg);
+                msg.should.equal('[{"topic":"topic4","data":"bar"}]');
                 ws.close();
                 done();
             });
@@ -325,7 +336,7 @@ describe("api/editor/comms", function() {
             var ws = new WebSocket(url);
             var count = 0;
             ws.on('message', function(data) {
-                var msg = JSON.parse(data);
+                var msg = JSON.parse(data)[0];
                 msg.should.have.property('topic','hb');
                 msg.should.have.property('data').be.a.Number();
                 count++;
@@ -346,7 +357,7 @@ describe("api/editor/comms", function() {
                 }, 50);
             });
             ws.on('message', function(data) {
-                var msg = JSON.parse(data);
+                var msg = JSON.parse(data)[0];
                 // It is possible a heartbeat message may arrive - so ignore them
                 if (msg.topic != "hb") {
                     msg.should.have.property('topic', 'foo');
@@ -435,7 +446,7 @@ describe("api/editor/comms", function() {
                     ws.send('{"subscribe":"foo"}');
                     comms.publish('foo', 'correct');
                 } else {
-                    msg.should.equal('{"topic":"foo","data":"correct"}');
+                    msg.should.equal('[{"topic":"foo","data":"correct"}]');
                     ws.close();
                 }
             });
@@ -509,7 +520,7 @@ describe("api/editor/comms", function() {
                 },200);
             });
             ws.on('message', function(msg) {
-                msg.should.equal('{"topic":"foo","data":"correct"}');
+                msg.should.equal('[{"topic":"foo","data":"correct"}]');
                 count++;
                 ws.close();
             });

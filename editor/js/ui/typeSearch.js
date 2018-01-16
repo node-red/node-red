@@ -12,6 +12,7 @@ RED.typeSearch = (function() {
 
     var activeFilter = "";
     var addCallback;
+    var cancelCallback;
 
     var typesUsed = {};
 
@@ -155,11 +156,19 @@ RED.typeSearch = (function() {
                 t = t.parent();
             }
             hide(true);
+            if (cancelCallback) {
+                cancelCallback();
+            }
         }
     }
     function show(opts) {
         if (!visible) {
-            RED.keyboard.add("*","escape",function(){hide()});
+            RED.keyboard.add("*","escape",function(){
+                hide();
+                if (cancelCallback) {
+                    cancelCallback();
+                }
+            });
             if (dialog === null) {
                 createDialog();
             }
@@ -175,6 +184,7 @@ RED.typeSearch = (function() {
         }
         refreshTypeList();
         addCallback = opts.add;
+        closeCallback = opts.close;
         RED.events.emit("type-search:open");
         //shade.show();
         dialog.css({left:opts.x+"px",top:opts.y+"px"}).show();
@@ -255,16 +265,19 @@ RED.typeSearch = (function() {
         var commonCount = 0;
         var item;
         for(i=0;i<common.length;i++) {
-            item = {
-                type: common[i],
-                common: true,
-                def: RED.nodes.getType(common[i])
-            };
-            item.label = getTypeLabel(item.type,item.def);
-            if (i === common.length-1) {
-                item.separator = true;
+            var itemDef = RED.nodes.getType(common[i]);
+            if (itemDef) {
+                item = {
+                    type: common[i],
+                    common: true,
+                    def: itemDef
+                };
+                item.label = getTypeLabel(item.type,item.def);
+                if (i === common.length-1) {
+                    item.separator = true;
+                }
+                searchResults.editableList('addItem', item);
             }
-            searchResults.editableList('addItem', item);
         }
         for(i=0;i<Math.min(5,recentlyUsed.length);i++) {
             item = {

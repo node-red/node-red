@@ -24,7 +24,25 @@
             url: 'nodes',
             success: function(data) {
                 RED.nodes.setNodeList(data);
-                RED.i18n.loadNodeCatalogs(loadNodes);
+                RED.i18n.loadNodeCatalogs(function() {
+                    loadIconList(loadNodes);
+                });
+            }
+        });
+    }
+
+    function loadIconList(done) {
+        $.ajax({
+            headers: {
+                "Accept":"application/json"
+            },
+            cache: false,
+            url: 'icons',
+            success: function(data) {
+                RED.nodes.setIconSets(data);
+                if (done) {
+                    done();
+                }
             }
         });
     }
@@ -95,6 +113,7 @@
                             });
                             return;
                         }
+
                         if (msg.text) {
                             var text = RED._(msg.text,{default:msg.text});
                             var options = {
@@ -192,6 +211,7 @@
                                 typeList = "<ul><li>"+addedTypes.join("</li><li>")+"</li></ul>";
                                 RED.notify(RED._("palette.event.nodeAdded", {count:addedTypes.length})+typeList,"success");
                             }
+                            loadIconList();
                         } else if (topic == "notification/node/removed") {
                             for (i=0;i<msg.length;i++) {
                                 m = msg[i];
@@ -201,6 +221,7 @@
                                     RED.notify(RED._("palette.event.nodeRemoved", {count:m.types.length})+typeList,"success");
                                 }
                             }
+                            loadIconList();
                         } else if (topic == "notification/node/enabled") {
                             if (msg.types) {
                                 info = RED.nodes.getNodeSet(msg.id);

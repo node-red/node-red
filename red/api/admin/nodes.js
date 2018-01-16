@@ -229,6 +229,11 @@ module.exports = {
             log.audit({event: "nodes.module.set",module:mod,enabled:body.enabled,error:err.code||"unexpected_error",message:err.toString()},req);
             res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
         }
+    },
+
+    getIcons: function(req,res) {
+        log.audit({event: "nodes.icons.get"},req);
+        res.json(redNodes.getNodeIcons());
     }
 };
 

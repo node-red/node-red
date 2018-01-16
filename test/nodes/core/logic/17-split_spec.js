@@ -323,6 +323,7 @@ describe('JOIN node', function() {
             n1.receive({payload:"D", parts:{id:1, type:"string", ch:",", index:3, count:4}});
         });
     });
+
     it('should join bits of buffer back together automatically', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], joiner:",", build:"buffer", mode:"auto"},
                     {id:"n2", type:"helper"}];
@@ -422,6 +423,34 @@ describe('JOIN node', function() {
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d"});
             n1.receive({payload:{e:5}, topic:"e"});
+        });
+    });
+
+    it('should merge full msg objects', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:6, build:"merged", mode:"custom", propertyType:"full", property:""},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.have.property("payload",7);
+                    msg.payload.should.have.property("aha",'c');
+                    msg.payload.should.have.property("bar",'b');
+                    msg.payload.should.have.property("bingo",'e');
+                    msg.payload.should.have.property("foo",'d');
+                    msg.payload.should.have.property("topic",'a');
+                    done();
+                }
+                catch(e) { done(e)}
+            });
+            n1.receive({payload:1, topic:"f"});
+            n1.receive({payload:2, topic:"a"});
+            n1.receive({payload:3, foo:"b"});
+            n1.receive({payload:4, bar:"b"});
+            n1.receive({payload:5, aha:"c"});
+            n1.receive({payload:6, foo:"d"});
+            n1.receive({payload:7, bingo:"e"});
         });
     });
 
@@ -556,6 +585,31 @@ describe('JOIN node', function() {
             n1.receive({payload:"NodeRED"});
             n1.receive({payload:"World"});
             n1.receive({payload:'', complete:true});
+        });
+    });
+
+    it('should join complete message objects into an array after a count', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"array", timeout:0, count:3, propertyType:"full",mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.be.an.Object();
+                    msg.payload[0].should.have.property("payload","a");
+                    msg.payload[1].should.be.an.Object();
+                    msg.payload[1].should.have.property("payload","b");
+                    msg.payload[2].should.be.an.Object();
+                    msg.payload[2].should.have.property("payload","c");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a"});
+            n1.receive({payload:"b"});
+            n1.receive({payload:"c"});
         });
     });
 

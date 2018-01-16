@@ -22,6 +22,7 @@ var library = require("./library");
 var info = require("./settings");
 
 var auth = require("../auth");
+var nodes = require("../admin/nodes"); // TODO: move /icons into here
 var needsPermission = auth.needsPermission;
 var runtime;
 var log;
@@ -59,6 +60,8 @@ module.exports = {
                 });
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
+
+            editorApp.get("/icons",needsPermission("nodes.read"),nodes.getIcons,errorHandler);
             editorApp.get("/icons/:module/:icon",ui.icon);
             editorApp.get("/icons/:scope/:module/:icon",ui.icon);
 
@@ -75,7 +78,7 @@ module.exports = {
             // Locales
             var locales = require("./locales");
             locales.init(runtime);
-            editorApp.get('/locales/nodes',locales.getAllNodes,apiUtil.errorHandler);
+            editorApp.get('/locales/nodes',locales.getAllNodes,apiUtil..errorHandler);
             editorApp.get(/locales\/(.+)\/?$/,locales.get,apiUtil.errorHandler);
 
             // Library

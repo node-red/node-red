@@ -50,6 +50,7 @@ describe("api/admin/nodes", function() {
         app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.getSet);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.putModule);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.putSet);
+        app.get("/getIcons",nodes.getIcons);
         app.delete("/nodes/:id",nodes.delete);
         sinon.stub(apiUtil,"determineLangFromHeaders", function() {
             return "en-US";
@@ -810,5 +811,29 @@ describe("api/admin/nodes", function() {
         });
     });
 
-
+    describe('get icons', function() {
+        it('returns icon list', function(done) {
+            debugger;
+            initNodes({
+                nodes:{
+                    getNodeIcons: function() {
+                        return {"module":["1.png","2.png","3.png"]};
+                    }
+                }
+            });
+            request(app)
+                .get('/getIcons')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    console.log(res.body);
+                    res.body.should.have.property("module");
+                    res.body.module.should.be.an.Array();
+                    res.body.module.should.have.lengthOf(3);
+                    done();
+                });
+        });
+    });
 });

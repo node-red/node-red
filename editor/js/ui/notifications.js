@@ -14,6 +14,31 @@
  * limitations under the License.
  **/
 RED.notify = (function() {
+
+    /*
+    // Example usage for a modal dialog with buttons
+    var myNotification = RED.notify("This is the message to display",{
+        modal: true,
+        fixed: true,
+        type: 'warning',
+        buttons: [
+            {
+                text: "cancel",
+                click: function(e) {
+                    myNotification.close();
+                }
+            },
+            {
+                text: "okay",
+                class:"primary",
+                click: function(e) {
+                    myNotification.close();
+                }
+            }
+        ]
+    });
+    */
+
     var currentNotifications = [];
     var c = 0;
     return function(msg,type,fixed,timeout) {

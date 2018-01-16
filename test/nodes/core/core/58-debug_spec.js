@@ -25,13 +25,19 @@ describe('debug node', function() {
         helper.startServer(done);
     });
 
+    beforeEach(function (done) {
+        setTimeout(function() {
+            done();
+        }, 55);
+    });
+
     afterEach(function() {
         helper.unload();
     });
 
 
     it('should be loaded', function(done) {
-        var flow = [{id:"n1", type:"debug", name: "Debug", complete:"false" }];
+        var flow = [{id:"n1", type:"debug", name:"Debug", complete:"false" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'Debug');
@@ -41,31 +47,31 @@ describe('debug node', function() {
     });
 
     it('should publish on input', function(done) {
-        var flow = [{id:"n1", type:"debug", name: "Debug" }];
+        var flow = [{id:"n1", type:"debug", name:"Debug" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",name:"Debug",msg:"test",
                     format:"string[4]",property:"payload"}
-                });
+                }]);
             }, done);
         });
     });
 
     it('should publish to console', function(done) {
-        var flow = [{id:"n1", type:"debug", console: "true"}];
+        var flow = [{id:"n1", type:"debug", console:"true"}];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             var count = 0;
             websocket_test(function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:"test",property:"payload",format:"string[4]"}
-                });
+                }]);
                 count++;
             }, function() {
                 try {
@@ -86,44 +92,72 @@ describe('debug node', function() {
     });
 
     it('should publish complete message', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "true" }];
+        var flow = [{id:"n1", type:"debug", complete:"true" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
                 n1.emit("input", {payload:"test"});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"Object"}
-                });
+                }]);
             }, done);
         });
     });
 
+    it('should publish complete message to console', function(done) {
+        var flow = [{id:"n1", type:"debug", complete:"true", console:"true" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload:"test"});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",
+                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"Object"}
+                }]);
+            }, function() {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "debug";
+                    });
+                    logEvents.should.have.length(1);
+                    var tstmp = logEvents[0][0].timestamp;
+                    logEvents[0][0].should.eql({level:helper.log().INFO, id:"n1",type:"debug",msg:'\n{ payload: \'test\' }',timestamp:tstmp});
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+    });
+
     it('should publish other property', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "foo" }];
+        var flow = [{id:"n1", type:"debug", complete:"foo" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
                 n1.emit("input", {payload:"test", foo:"bar"});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:"bar",property:"foo",format:"string[3]"}
-                });
+                }]);
             }, done);
         });
     });
 
     it('should publish multi-level properties', function(done) {
-        var flow = [{id:"n1", type:"debug", complete: "foo.bar" }];
+        var flow = [{id:"n1", type:"debug", complete:"foo.bar" }];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload:"test", foo: {bar: "bar"}});
+                n1.emit("input", {payload:"test", foo: {bar:"bar"}});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:"bar",property:"foo.bar",format:"string[3]"}
-                });
+                }]);
             }, done);
         });
     });
@@ -135,9 +169,9 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: new Error("oops")});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:'{"name":"Error","message":"oops"}',property:"payload",format:"error"}
-                });
+                }]);
             }, done);
         });
     });
@@ -149,9 +183,37 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: true});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg: 'true',property:"payload",format:"boolean"}
-                });
+                }]);
+            }, done);
+        });
+    });
+
+    it('should publish a number', function(done) {
+        var flow = [{id:"n1", type:"debug", console:"true" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: 7});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:"7",property:"payload",format:"number"}
+                }]);
+            }, done);
+        });
+    });
+
+    it('should publish a NaN', function(done) {
+        var flow = [{id:"n1", type:"debug", console:"true" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: Number.NaN});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:"NaN",property:"payload",format:"number"}
+                }]);
             }, done);
         });
     });
@@ -163,9 +225,23 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
-                    topic:"debug",data:{id:"n1",msg: '(undefined)',property:"payload",format:"undefined"}
-                });
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:'(undefined)',property:"payload",format:"undefined"}
+                }]);
+            }, done);
+        });
+    });
+
+    it('should publish a null', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload:null});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:'(undefined)',property:"payload",format:"null"}
+                }]);
             }, done);
         });
     });
@@ -177,10 +253,10 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: {type:'foo'}});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"Object"}
-                });
+                }]);
             }, done);
         });
     });
@@ -192,11 +268,11 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: [0,1,2,3]});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
                     property:"payload"}
-                });
+                }]);
             }, done);
         });
     });
@@ -210,15 +286,69 @@ describe('debug node', function() {
                 o.o = o;
                 n1.emit("input", {payload: o});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{
                         id:"n1",
                         msg:'{\n "name": "bar",\n "o": "[Circular ~]"\n}',
                         property:"payload",format:"Object"
                     }
-                });
+                }]);
             }, done);
+        });
+    });
+
+    it('should publish an object to console', function(done) {
+        var flow = [{id:"n1", type:"debug", console:"true"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {type:'foo'}});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"Object"}
+                }]);
+            }, function() {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "debug";
+                    });
+                    logEvents.should.have.length(1);
+                    var tstmp = logEvents[0][0].timestamp;
+                    logEvents[0][0].should.eql({level:helper.log().INFO,id:"n1",type:"debug",msg:'\n{ type: \'foo\' }',timestamp:tstmp});
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+    });
+
+    it('should publish a string after a newline to console if the string contains \\n', function(done) {
+        var flow = [{id:"n1", type:"debug", console:"true"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload:"test\ntest"});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",msg:"test\ntest",property:"payload",format:"string[9]"}
+                }]);
+            }, function() {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "debug";
+                    });
+                    logEvents.should.have.length(1);
+                    var tstmp = logEvents[0][0].timestamp;
+                    logEvents[0][0].should.eql({level:helper.log().INFO,id:"n1",type:"debug",msg:"\ntest\ntest",timestamp:tstmp});
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
         });
     });
 
@@ -227,16 +357,140 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: Array(1002).join("X")});
+                n1.emit("input", {payload:Array(1002).join("X")});
             }, function(msg) {
                 var a = JSON.parse(msg);
-                a.should.eql({
+                a.should.eql([{
                     topic:"debug",
                     data:{
                         id:"n1",
                         msg: Array(1001).join("X")+'...',
                         property:"payload",
                         format:"string[1001]"
+                    }
+                }]);
+            }, done);
+        });
+    });
+
+    it('should truncate a long string in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Array(1002).join("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql([{
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:'{\n "foo": "'+Array(1001).join("X")+'..."\n}',
+                        property:"payload",
+                        format:"Object"
+                    }
+                }]);
+            }, done);
+        });
+    });
+
+    it('should truncate a large array', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: Array(1001).fill("X")});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql([{
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            __encoded__: true,
+                            type: "array",
+                            data: Array(1000).fill("X"),
+                            length: 1001
+                        },null," "),
+                        property:"payload",
+                        format:"array[1001]"
+                    }
+                }]);
+            }, done);
+        });
+    });
+
+    it('should truncate a large array in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Array(1001).fill("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a.should.eql([{
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            foo:{
+                                __encoded__: true,
+                                type: "array",
+                                data: Array(1000).fill("X"),
+                                length: 1001
+                            }
+                        },null," "),
+                        property:"payload",
+                        format:"Object"
+                    }
+                }]);
+            }, done);
+        });
+    });
+
+    it('should truncate a large buffer', function(done) {
+        var flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: Buffer(501).fill("\"")});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a[0].should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg: Array(1001).join("2"),
+                        property:"payload",
+                        format:"buffer[501]"
+                    }
+                });
+            }, done);
+        });
+    });
+
+    it('should truncate a large buffer in the object', function(done) {
+        var flow = [{id:"n1", type:"debug"}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {foo: Buffer(1001).fill("X")}});
+            }, function(msg) {
+                var a = JSON.parse(msg);
+                a[0].should.eql({
+                    topic:"debug",
+                    data:{
+                        id:"n1",
+                        msg:JSON.stringify({
+                            foo:{
+                                type: "Buffer",
+                                data: Array(1000).fill(88),
+                                __encoded__: true,
+                                length: 1001
+                            }
+                        },null," "),
+                        property:"payload",
+                        format:"Object"
                     }
                 });
             }, done);
@@ -248,17 +502,17 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: new Buffer('HELLO', 'utf8')});
+                n1.emit("input", {payload: new Buffer.from('HELLO', 'utf8')});
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg: '48454c4c4f',
+                        msg:'48454c4c4f',
                         property:"payload",
-                        format: "buffer[5]"
+                        format:"buffer[5]"
                     }
-                });
+                }]);
             }, done);
         });
     });
@@ -276,9 +530,9 @@ describe('debug node', function() {
                         n1.emit("input", {payload:"message 2"});
                     });
             }, function(msg) {
-                JSON.parse(msg).should.eql({
+                JSON.parse(msg).should.eql([{
                     topic:"debug",data:{id:"n1",msg:"message 2",property:"payload",format:"string[9]"}
-                });
+                }]);
             }, done);
         });
     });
@@ -324,6 +578,18 @@ describe('debug node', function() {
         });
     });
 
+    describe('get', function() {
+        it('should return the view.html', function(done) {
+            var flow = [{id:"n1", type:"debug"}];
+            helper.load(debugNode, flow, function() {
+                helper.request()
+                    .get('/debug/view/view.html')
+                    .expect(200)
+                    .end(done);
+            });
+        });
+    });
+
 });
 
 function websocket_test(open_callback, message_callback, done_callback) {
@@ -331,8 +597,12 @@ function websocket_test(open_callback, message_callback, done_callback) {
     var close_callback = function() { ws.close(); };
     ws.on('open', function() { open_callback(close_callback); });
     ws.on('message', function(msg) {
-        message_callback(msg, close_callback);
-        ws.close();
-        done_callback();
+        try {
+            message_callback(msg, close_callback);
+            ws.close();
+            done_callback();
+        } catch(err) {
+            done_callback(err);
+        }
     });
 }

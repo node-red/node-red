@@ -166,6 +166,10 @@
 
 <script type="text/x-red" data-template-name="mqtt-broker">
     <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row">
         <ul style="background: #fff; min-width: 600px; margin-bottom: 20px;" id="node-config-mqtt-broker-tabs"></ul>
     </div>
     <div id="node-config-mqtt-broker-tabs-content" style="min-height: 170px;">
@@ -256,27 +260,41 @@
 </script>
 
 <script type="text/x-red" data-help-name="mqtt-broker">
-    <p>A minimum MQTT broker connection requires only a broker server address to be added to the default configuration.</p>
-    <p>To secure the connection with SSL/TLS, a TLS Configuration must also be configured and selected.</p>
-    <p>If you create a Client ID it must be unique to the broker you are connecting to.</p>
-    <p>For more information about MQTT see the <a href="http://www.eclipse.org/paho/" target="_blank">Eclipse Paho</a> site.</p>
+    <p>Configuration for a connection to an MQTT broker.</p>
+    <p>This configuration will create a single connection to the broker which can
+       then be reused by <code>MQTT In</code> and <code>MQTT Out</code> nodes.</p>
+    <p>The node will generate a random Client ID if one is not set and the
+       node is configured to use a Clean Session connection. If a Client ID is set,
+       it must be unique to the broker you are connecting to.</p>
+    <h4>Birth Message</h4>
+    <p>This is a message that will be published on the configured topic whenever the
+       connection is established.</p>
+    <h4>Will Message</h4>
+    <p>This is a message that will be published by the broker in the event the node
+       unexpectedly loses its connection.</p>
+    <h4>WebSockets</h4>
+    <p>The node can be configured to use a WebSocket connection. To do so, the Server
+       field should be configured with a full URI for the connection. For example:</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+
 </script>
 
 <script type="text/javascript">
     RED.nodes.registerType('mqtt-broker',{
         category: 'config',
         defaults: {
+            name: {value:""},
             broker: {value:"",required:true},
-            port: {value:1883,required:true,validate:RED.validators.number()},
+            port: {value:1883,required:false,validate:RED.validators.number(true)},
             tls: {type:"tls-config",required: false},
             clientid: {value:"", validate: function(v) {
-                    if ($("#node-config-input-clientid").length) {
-                        // Currently editing the node
-                        return $("#node-config-input-cleansession").is(":checked") || (v||"").length > 0;
-                    } else {
-                        return (this.cleansession===undefined || this.cleansession) || (v||"").length > 0;
-                    }
-                }},
+                if ($("#node-config-input-clientid").length) {
+                    // Currently editing the node
+                    return $("#node-config-input-cleansession").is(":checked") || (v||"").length > 0;
+                } else {
+                    return (this.cleansession===undefined || this.cleansession) || (v||"").length > 0;
+                }
+            }},
             usetls: {value: false},
             verifyservercert: { value: false},
             compatmode: { value: true},
@@ -296,9 +314,18 @@
             password: {type: "password"}
         },
         label: function() {
+            if (this.name) {
+                return this.name;
+            }
             var b = this.broker;
             if (b === "") { b = "undefined"; }
-            return (this.clientid?this.clientid+"@":"")+b+":"+this.port;
+            var lab = "";
+            lab = (this.clientid?this.clientid+"@":"")+b;
+            if (b.indexOf("://") === -1){
+                if (!this.port){ lab = lab + ":1883"; }
+                else { lab = lab + ":" + this.port; }
+            }
+            return lab;
         },
         oneditprepare: function () {
             var tabs = RED.tabs.create({
@@ -374,6 +401,28 @@
             $("#node-config-input-cleansession").on("click",function() {
                 updateClientId();
             });
+
+            function updatePortEntry(){
+                var disabled = $("#node-config-input-port").prop("disabled");
+                if ($("#node-config-input-broker").val().indexOf("://") === -1){
+                    if (disabled){
+                        $("#node-config-input-port").prop("disabled", false);
+                    }
+                }
+                else {
+                    if (!disabled){
+                        $("#node-config-input-port").prop("disabled", true);
+                    }
+                }
+            }
+            $("#node-config-input-broker").change(function() {
+                updatePortEntry();
+            });
+            $("#node-config-input-broker").on( "keyup", function() {
+                updatePortEntry();
+            });
+            setTimeout(updatePortEntry,50);
+
         },
         oneditsave: function() {
             if (!$("#node-config-input-usetls").is(':checked')) {

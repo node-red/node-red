@@ -41,6 +41,11 @@ module.exports = function(grunt) {
             core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
+        webdriver: {
+            all: {
+                configFile: 'test/editor/wdio.conf.js'
+            }
+        },
         mocha_istanbul: {
             options: {
                 globals: ['expect'],
@@ -419,6 +424,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-chmod');
     grunt.loadNpmTasks('grunt-jsonlint');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
+    grunt.loadNpmTasks('grunt-webdriver');
 
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
@@ -477,6 +483,10 @@ module.exports = function(grunt) {
     grunt.registerTask('test-editor',
         'Runs code style check on editor code',
         ['jshint:editor']);
+
+    grunt.registerTask('test-ui',
+        'Builds editor content then runs unit tests on editor ui',
+        ['build','jshint:editor','webdriver:all']);
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',
