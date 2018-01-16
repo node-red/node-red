@@ -29,6 +29,7 @@ var Projects = require("./Project");
 
 var settings;
 var runtime;
+var log;
 
 var projectsEnabled = true;
 var projectLogMessages = [];

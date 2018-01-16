@@ -47,12 +47,15 @@ describe("api/editor/index", function() {
     });
     describe("enables the editor", function() {
         var mockList = [
-            'library','theme','locales','credentials','comms'
+            'library','theme','locales','credentials','comms',"settings"
         ]
         var isStarted = true;
         var errors = [];
         var session_data = {};
         before(function() {
+            sinon.stub(auth,'needsPermission',function(permission) {
+                return function(req,res,next) { next(); }
+            });
             mockList.forEach(function(m) {
                 sinon.stub(require("../../../../red/api/editor/"+m),"init",function(){});
             });
@@ -63,28 +66,10 @@ describe("api/editor/index", function() {
                 require("../../../../red/api/editor/"+m).init.restore();
             })
             require("../../../../red/api/editor/theme").app.restore();
+            auth.needsPermission.restore();
         });
 
         before(function() {
-            auth.init({
-                settings:{
-                    adminAuth: {
-                        default: {
-                            permissions: ['read']
-                        }
-                    },
-                    storage: {
-                        getSessions: function(){
-                            return when.resolve(session_data);
-                        },
-                        setSessions: function(_session) {
-                            session_data = _session;
-                            return when.resolve();
-                        }
-                    },
-                    log:{audit:function(){},error:function(msg){errors.push(msg)}}
-                }
-            });
             app = editorApi.init({},{
                 log:{audit:function(){},error:function(msg){errors.push(msg)}},
                 settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},
@@ -132,14 +117,14 @@ describe("api/editor/index", function() {
                 done();
             });
         });
-        it('GET /settings', function(done) {
-            request(app).get("/settings").expect(200).end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                // permissionChecks.should.have.property('settings.read',1);
-                done();
-            })
-        });
+        // it('GET /settings', function(done) {
+        //     request(app).get("/settings").expect(200).end(function(err,res) {
+        //         if (err) {
+        //             return done(err);
+        //         }
+        //         // permissionChecks.should.have.property('settings.read',1);
+        //         done();
+        //     })
+        // });
     });
 });

@@ -23,7 +23,7 @@ var info = require("./settings");
 
 var auth = require("../auth");
 var nodes = require("../admin/nodes"); // TODO: move /icons into here
-var needsPermission = auth.needsPermission;
+var needsPermission;
 var runtime;
 var log;
 var apiUtil = require("../util");
@@ -41,6 +41,7 @@ module.exports = {
     init: function(server, _runtime) {
         runtime = _runtime;
         log = runtime.log;
+        needsPermission = auth.needsPermission;
         var settings = runtime.settings;
         if (!settings.disableEditor) {
             info.init(runtime);

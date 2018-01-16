@@ -136,7 +136,7 @@ describe("red/nodes/index", function() {
 
             var userDir = path.join(__dirname,".testUserHome");
             before(function(done) {
-                sinon.stub(log,"log");
+                sinon.stub(log,"log",function(){});
                 fs.remove(userDir,function(err) {
                     fs.mkdir(userDir,function() {
                         sinon.stub(index, 'load', function() {
@@ -159,7 +159,7 @@ describe("red/nodes/index", function() {
             });
 
             after(function(done) {
-                fs.remove(userDir,function() {;
+                fs.remove(userDir,function() {
                     runtime.stop().then(function() {
                         index.load.restore();
                         localfilesystem.getCredentials.restore();

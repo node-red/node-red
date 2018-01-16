@@ -26,7 +26,9 @@ describe('storage/localfilesystem', function() {
     var mockRuntime = {
         log:{
             _:function() { return "placeholder message"},
-            info: function() { }
+            info: function() { },
+            warn: function() { },
+            trace: function() {}
         }
     };
     var userDir = path.join(__dirname,".testUserHome");
@@ -290,7 +292,7 @@ describe('storage/localfilesystem', function() {
     it('should fsync the flows file',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
             sinon.spy(fs,"fsync");
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.fsync.callCount.should.eql(1);
@@ -307,7 +309,7 @@ describe('storage/localfilesystem', function() {
     it('should log fsync errors and continue',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
             sinon.stub(fs,"fsync", function(fd, cb) {
                 cb(new Error());
             });

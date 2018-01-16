@@ -73,10 +73,10 @@ describe("api/index", function() {
             });
         });
         after(afterEach);
-        it('exposes the editor',function() {
+        it('exposes the editor',function(done) {
             request(api.adminApp).get("/editor").expect(200).end(done);
         })
-        it('exposes the admin api',function() {
+        it('exposes the admin api',function(done) {
             request(api.adminApp).get("/admin").expect(200).end(done);
         })
         it('exposes the auth api',function(done) {
@@ -92,10 +92,10 @@ describe("api/index", function() {
             });
         });
         after(afterEach);
-        it('does not expose the editor',function() {
+        it('does not expose the editor',function(done) {
             request(api.adminApp).get("/editor").expect(404).end(done);
         })
-        it('exposes the admin api',function() {
+        it('exposes the admin api',function(done) {
             request(api.adminApp).get("/admin").expect(200).end(done);
         })
         it('exposes the auth api',function(done) {
