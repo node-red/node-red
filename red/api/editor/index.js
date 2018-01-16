@@ -61,7 +61,7 @@ module.exports = {
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
 
-            editorApp.get("/icons",needsPermission("nodes.read"),nodes.getIcons,errorHandler);
+            editorApp.get("/icons",needsPermission("nodes.read"),nodes.getIcons,apiUtil.errorHandler);
             editorApp.get("/icons/:module/:icon",ui.icon);
             editorApp.get("/icons/:scope/:module/:icon",ui.icon);
 
@@ -78,7 +78,7 @@ module.exports = {
             // Locales
             var locales = require("./locales");
             locales.init(runtime);
-            editorApp.get('/locales/nodes',locales.getAllNodes,apiUtil..errorHandler);
+            editorApp.get('/locales/nodes',locales.getAllNodes,apiUtil.errorHandler);
             editorApp.get(/locales\/(.+)\/?$/,locales.get,apiUtil.errorHandler);
 
             // Library
