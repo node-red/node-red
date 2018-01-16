@@ -14,17 +14,15 @@
  * limitations under the License.
  **/
 
-var exec = require('child_process').exec;
-var spawn = require('child_process').spawn;
+var child_process = require('child_process');
 
 var sshkeygenCommand = "ssh-keygen";
 
 var log;
 
 function runSshKeygenCommand(args,cwd,env) {
-    // console.log("[run ssh-keygen] args:", args);
     return new Promise(function(resolve, reject) {
-        var child = spawn(sshkeygenCommand, args, {cwd: cwd, detached: true, env: env});
+        var child = child_process.spawn(sshkeygenCommand, args, {cwd: cwd, detached: true, env: env});
         var stdout = "";
         var stderr = "";
 
