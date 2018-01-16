@@ -1,6 +1,10 @@
 
 <script type="text/x-red" data-template-name="range">
     <div class="form-row">
+        <label for="node-input-property"><i class="fa fa-ellipsis-h"></i> <span data-i18n="common.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width:calc(70% - 1px)"/>
+    </div>
+    <div class="form-row">
         <label for="node-input-action"><i class="fa fa-dot-circle-o"></i> <span data-i18n="range.label.action"></span></label>
         <select id="node-input-action" style="width:70%;">
             <option value="scale" data-i18n="range.scale.payload"></option>
@@ -65,6 +69,7 @@
             maxout: {value:"",required:true,validate:RED.validators.number()},
             action: {value:"scale"},
             round: {value:false},
+            property: {value:"payload",required:true},
             name: {value:""}
         },
         inputs: 1,
@@ -75,6 +80,12 @@
         },
         labelStyle: function() {
             return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            if (this.property === undefined) {
+                $("#node-input-property").val("payload");
+            }
+            $("#node-input-property").typedInput({default:'msg',types:['msg']});
         }
     });
 </script>
