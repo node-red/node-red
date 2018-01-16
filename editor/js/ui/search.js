@@ -35,23 +35,34 @@ RED.search = (function() {
         }
         l = l||n.label||n.name||n.id||"";
 
-
         var properties = ['id','type','name','label','info'];
         if (n._def && n._def.defaults) {
             properties = properties.concat(Object.keys(n._def.defaults));
         }
         for (var i=0;i<properties.length;i++) {
             if (n.hasOwnProperty(properties[i])) {
+
                 var v = n[properties[i]];
                 if (typeof v === 'string' || typeof v === 'number') {
                     v = (""+v).toLowerCase();
                     index[v] = index[v] || {};
                     index[v][n.id] = {node:n,label:l};
                 }
+                else if(typeof v === 'object' && Array.isArray(v)) {
+                  v.forEach(function (rule) {
+                    if(typeof rule === 'object') {
+                        var props = Object.keys(rule);
+                        props.forEach(function(prop){
+                          var value = rule[prop];
+                          value = (""+value).toLowerCase();
+                          index[value] = index[value] || {};
+                          index[value][n.id] = {node:n,label:l};
+                        });
+                    }
+                  });
+                }
             }
         }
-
-
     }
     function indexWorkspace() {
         index = {};

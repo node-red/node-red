@@ -125,8 +125,8 @@ module.exports = function(RED) {
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
 
         var sock;
-        if (udpInputPortsInUse[this.outport]) {
-            sock = udpInputPortsInUse[this.outport];
+        if (udpInputPortsInUse[this.outport || this.port]) {
+            sock = udpInputPortsInUse[this.outport || this.port];
         }
         else {
             sock = dgram.createSocket(opts);  // default to udp4
@@ -136,7 +136,7 @@ module.exports = function(RED) {
                 // prevent it going to the global error handler and shutting node-red
                 // down.
             });
-            udpInputPortsInUse[this.outport] = sock;
+            udpInputPortsInUse[this.outport || this.port] = sock;
         }
 
         if (node.multicast != "false") {
@@ -161,7 +161,7 @@ module.exports = function(RED) {
                     node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                 }
             });
-        } else if ((node.outport !== "") && (!udpInputPortsInUse[this.outport])) {
+        } else if ((node.outport !== "") && (!udpInputPortsInUse[node.outport])) {
             sock.bind(node.outport);
             node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
         } else {
@@ -198,8 +198,8 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
-            if (udpInputPortsInUse.hasOwnProperty(node.outport)) {
-                delete udpInputPortsInUse[node.outport];
+            if (udpInputPortsInUse.hasOwnProperty(node.outport || node.port)) {
+                delete udpInputPortsInUse[node.outport || node.port];
             }
             try {
                 sock.close();
