@@ -17,6 +17,9 @@
 var authCache = {}
 
 module.exports = {
+    init: function() {
+        authCache = {};
+    },
     clear: function(project,remote, user) {
         if (user && remote && authCache[project] && authCache[project][remote]) {
             delete authCache[project][remote][user];

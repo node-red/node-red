@@ -968,6 +968,7 @@ function init(_settings, _runtime) {
     runtime = _runtime;
     log = runtime.log;
     projectsDir = fspath.join(settings.userDir,"projects");
+    authCache.init();
 }
 
 module.exports = {

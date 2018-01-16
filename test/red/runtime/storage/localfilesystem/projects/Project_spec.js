@@ -14,6 +14,6 @@
  * limitations under the License.
  **/
 
-describe("storage/localfilesystem/projects/git/index", function() {
+describe("storage/localfilesystem/projects/Project", function() {
     it.skip("NEEDS TESTS WRITING",function() {});
 })

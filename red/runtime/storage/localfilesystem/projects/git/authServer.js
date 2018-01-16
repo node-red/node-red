@@ -36,7 +36,7 @@ function getListenPath() {
 
 var ResponseServer = function(auth) {
     return new Promise(function(resolve, reject) {
-        server = net.createServer(function(connection) {
+        var server = net.createServer(function(connection) {
             connection.setEncoding('utf8');
             var parts = [];
             connection.on('data', function(data) {
@@ -81,7 +81,7 @@ var ResponseServer = function(auth) {
 
 var ResponseSSHServer = function(auth) {
     return new Promise(function(resolve, reject) {
-        server = net.createServer(function(connection) {
+        var server = net.createServer(function(connection) {
             connection.setEncoding('utf8');
             var parts = [];
             connection.on('data', function(data) {
@@ -93,6 +93,7 @@ var ResponseSSHServer = function(auth) {
                     console.log("LINE:",line);
                     parts = [];
                     if (line==='The') {
+                        // TODO: document these exchanges!
                         connection.end('yes');
                         // server.close();
                     } else if (line === 'Enter') {
