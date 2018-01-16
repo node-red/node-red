@@ -48,6 +48,19 @@ RED.search = (function() {
                     index[v] = index[v] || {};
                     index[v][n.id] = {node:n,label:l};
                 }
+                else if(typeof v === 'object' && Array.isArray(v)) {
+                    v.forEach(function (rule) {
+                    if(typeof rule === 'object') {
+                       var props = Object.keys(rule);
+                       props.forEach(function(prop){
+                            var value = rule[prop];
+                            value = (""+value).toLowerCase();
+                            index[value] = index[value] || {};
+                            index[value][n.id] = {node:n,label:l};
+                        });
+                    }
+                });
+            }
             }
         }
 
