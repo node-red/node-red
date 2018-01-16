@@ -80,7 +80,7 @@ module.exports = function(RED) {
             var topic = msg.topic || "_none";
             if (node.bytopic === "all") { topic = "_none"; }
             node.topics[topic] = node.topics[topic] || {};
-            if (msg.hasOwnProperty("reset") || ((node.reset !== '') && msg.payload && msg.payload.toString && (msg.payload.toString() == node.reset)) ) {
+            if (msg.hasOwnProperty("reset") || ((node.reset !== '') && msg.hasOwnProperty("payload") && (msg.payload !== null) && msg.payload.toString && (msg.payload.toString() == node.reset)) ) {
                 if (node.loop === true) { clearInterval(node.topics[topic].tout); }
                 else { clearTimeout(node.topics[topic].tout); }
                 delete node.topics[topic];
