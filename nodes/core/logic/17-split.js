@@ -232,6 +232,229 @@ module.exports = function(RED) {
     RED.nodes.registerType("split",SplitNode);
 
 
+    var _max_kept_msgs_count = undefined;
+    
+    function max_kept_msgs_count(node) {
+        if (_max_kept_msgs_count === undefined) {
+            var name = "joinMaxKeptMsgsCount";
+            if (RED.settings.hasOwnProperty(name)) {
+                _max_kept_msgs_count = RED.settings[name];
+            }
+            else {
+                _max_kept_msgs_count = 0;
+            }
+        }
+        return _max_kept_msgs_count;
+    }
+
+    function add_to_topic(node, pending, topic, msg) {
+        var merge_on_change = node.merge_on_change;
+        if (!pending.hasOwnProperty(topic)) {
+            pending[topic] = [];
+        }
+        var topics = pending[topic];
+        topics.push(msg);
+        if (merge_on_change) {
+            var counts = node.topic_counts;
+            if (topics.length > counts[topic]) {
+                topics.shift();
+                node.pending_count--;
+            }
+        }
+    }
+
+    function compute_topic_counts(topics) {
+        var counts = {};
+        for (var topic of topics) {
+            counts[topic] = (counts.hasOwnProperty(topic) ? counts[topic] : 0) +1;
+        }
+        return counts;
+    }
+    
+    function try_merge(node, pending, merge_on_change) {
+        var topics = node.topics;
+        var counts = node.topic_counts;
+        for(var topic of topics) {
+            if(!pending.hasOwnProperty(topic) ||
+               (pending[topic].length < counts[topic])) {
+                return;
+            }
+        }
+        var merge_on_change = node.merge_on_change;
+        var msgs = [];
+        var vals = [];
+        var new_msg = {payload: vals};
+        for (var topic of topics) {
+            var pmsgs = pending[topic];
+            var msg = pmsgs.shift();
+            if (merge_on_change) {
+                pmsgs.push(msg);
+            }
+            var pval = msg.payload;
+            var val = new_msg[topic];
+            msgs.push(msg);
+            vals.push(pval);
+            if (val instanceof Array) {
+                new_msg[topic].push(pval);
+            }
+            else if (val === undefined) {
+                new_msg[topic] = pval;
+            }
+            else {
+                new_msg[topic] = [val, pval]
+            }
+        }
+        node.send(new_msg);
+        if (!merge_on_change) {
+            node.pending_count -= topics.length;
+        }
+    }
+
+    function merge_msg(node, msg) {
+        var topics = node.topics;
+        var topic = msg.topic;
+        if(node.topics.indexOf(topic) >= 0) {
+            var pending = node.pending;
+            if(node.topic_counts == undefined) {
+                node.topic_counts = compute_topic_counts(topics)
+            }
+            add_to_topic(node, pending, topic, msg);
+            node.pending_count++;
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (node.pending_count > max_msgs)) {
+                node.pending = {};
+                node.pending_count = 0;
+                node.error(RED._("join.too-many"), msg);
+            }
+            try_merge(node, pending);
+        }
+    }
+
+    function apply_r(exp, accum, msg, index, count) {
+        exp.assign("I", index);
+        exp.assign("N", count);
+        exp.assign("A", accum);
+        return RED.util.evaluateJSONataExpression(exp, msg);
+    }
+
+    function apply_f(exp, accum, count) {
+        exp.assign("N", count);
+        exp.assign("A", accum);
+        return RED.util.evaluateJSONataExpression(exp, {});
+    }
+
+    function exp_or_undefined(exp) {
+        if((exp === "") ||
+           (exp === null)) {
+            return undefined;
+        }
+        return exp
+    }
+    
+    function reduce_and_send_group(node, group) {
+        var is_right = node.reduce_right;
+        var flag = is_right ? -1 : 1;
+        var msgs = group.msgs;
+        var accum = node.reduce_init;
+        var reduce_exp = node.reduce_exp;
+        var reduce_fixup = node.reduce_fixup;
+        var count = group.count;
+        msgs.sort(function(x,y) {
+            var ix = x.parts.index;
+            var iy = y.parts.index;
+            if (ix < iy) return -flag;
+            if (ix > iy) return flag;
+            return 0;
+        });
+        for(var msg of msgs) {
+            accum = apply_r(reduce_exp, accum, msg, msg.parts.index, count);
+        }
+        if(reduce_fixup !== undefined) {
+            accum = apply_f(reduce_fixup, accum, count);
+        }
+        node.send({payload: accum});
+    }
+    
+    function reduce_msg(node, msg) {
+        if(msg.hasOwnProperty('parts')) {
+            var parts = msg.parts;
+            var pending = node.pending;
+            var pending_count = node.pending_count;
+            var gid = msg.parts.id;
+            if(!pending.hasOwnProperty(gid)) {
+                var count = undefined;
+                if(parts.hasOwnProperty('count')) {
+                    count = msg.parts.count;
+                }
+                pending[gid] = {
+                    count: count,
+                    msgs: []
+                };
+            }
+            var group = pending[gid];
+            var msgs = group.msgs;
+            if(parts.hasOwnProperty('count') &&
+               (group.count === undefined)) {
+                group.count = count;
+            }
+            msgs.push(msg);
+            pending_count++;
+            if(msgs.length === group.count) {
+                delete pending[gid];
+                try {
+                    pending_count -= msgs.length;
+                    reduce_and_send_group(node, group);
+                } catch(e) {
+                    node.error(RED._("join.errors.invalid-expr",{error:e.message}));            }
+            }
+            node.pending_count = pending_count;
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                node.pending = {};
+                node.pending_count = 0;
+                node.error(RED._("join.too-many"), msg);
+            }
+        }
+        else {
+            node.send(msg);
+        }
+    }
+
+    function eval_exp(node, exp, exp_type) {
+        if(exp_type === "flow") {
+            return node.context().flow.get(exp);
+        }
+        else if(exp_type === "global") {
+            return node.context().global.get(exp);
+        }
+        else if(exp_type === "str") {
+            return exp;
+        }
+        else if(exp_type === "num") {
+            return Number(exp);
+        }
+        else if(exp_type === "bool") {
+            if (exp === 'true') {
+                return true;
+            }
+            else if (exp === 'false') {
+                return false;
+            }
+        }
+        else if ((exp_type === "bin") ||
+                 (exp_type === "json")) {
+            return JSON.parse(exp);
+        }
+        else if(exp_type === "date") {
+            return Date.now();
+        }
+        else if(exp_type === "jsonata") {
+            var jexp = RED.util.prepareJSONataExpression(exp, node);
+            return RED.util.evaluateJSONataExpression(jexp, {});
+        }
+        throw new Error("unexpected initial value type");
+    }
+
     function JoinNode(n) {
         RED.nodes.createNode(this,n);
         this.mode = n.mode||"auto";
@@ -246,6 +469,22 @@ module.exports = function(RED) {
         this.joiner = n.joiner||"";
         this.joinerType = n.joinerType||"str";
 
+        this.reduce = (this.mode === "reduce");
+        if (this.reduce) {
+            var exp_init = n.reduceInit;
+            var exp_init_type = n.reduceInitType;
+            var exp_reduce = n.reduceExp;
+            var exp_fixup = exp_or_undefined(n.reduceFixup);
+            this.reduce_right = n.reduceRight;
+            try {
+                this.reduce_init = eval_exp(this, exp_init, exp_init_type);
+                this.reduce_exp = RED.util.prepareJSONataExpression(exp_reduce, this);
+                this.reduce_fixup = (exp_fixup !== undefined) ? RED.util.prepareJSONataExpression(exp_fixup, this) : undefined;
+            } catch(e) {
+                this.error(RED._("join.errors.invalid-expr",{error:e.message}));
+            }
+        }
+
         if (this.joinerType === "str") {
             this.joiner = this.joiner.replace(/\\n/g,"\n").replace(/\\r/g,"\r").replace(/\\t/g,"\t").replace(/\\e/g,"\e").replace(/\\f/g,"\f").replace(/\\0/g,"\0");
         } else if (this.joinerType === "bin") {
@@ -259,6 +498,14 @@ module.exports = function(RED) {
 
         this.build = n.build || "array";
         this.accumulate = n.accumulate || "false";
+
+        this.topics = (n.topics || []).map(function(x) { return x.topic; });
+        this.merge_on_change = n.mergeOnChange || false;
+        this.topic_counts = undefined;
+        this.output = n.output || "stream";
+        this.pending = {};
+        this.pending_count = 0;
+
         //this.topic = n.topic;
         var node = this;
         var inflight = {};
@@ -321,6 +568,10 @@ module.exports = function(RED) {
                     node.warn("Message missing msg.parts property - cannot join in 'auto' mode")
                     return;
                 }
+                if (node.mode === 'merge' && !msg.hasOwnProperty("topic")) {
+                    node.warn("Message missing msg.topic property - cannot join in 'merge' mode");
+                    return;
+                }
 
                 if (node.propertyType == "full") {
                     property = msg;
@@ -350,6 +601,14 @@ module.exports = function(RED) {
                     propertyKey = msg.parts.key;
                     arrayLen = msg.parts.len;
                     propertyIndex = msg.parts.index;
+                }
+                else if (node.mode === 'merge') {
+                    merge_msg(node, msg);
+                    return;
+                }
+                else if (node.mode === 'reduce') {
+                    reduce_msg(node, msg);
+                    return;
                 }
                 else {
                     // Use the node configuration to identify all of the group information

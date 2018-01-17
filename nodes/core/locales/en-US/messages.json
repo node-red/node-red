@@ -840,6 +840,8 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
+            "merge":"merge sequence",
+            "reduce":"reduce sequence",
             "custom":"manual"
         },
         "combine":"Combine each",
@@ -861,7 +863,24 @@
         "afterTimeout":"After a timeout following the first message",
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
-        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property.",
+        "too-many" : "too many pending messages in join node",
+	"merge": {
+	    "topics-label":"Merged Topics",
+	    "topics":"topics",
+            "topic" : "topic",
+            "on-change":"Send merged message on arrival of a new topic"
+	},
+        "reduce": {
+	    "exp": "Reduce exp",
+	    "exp-value": "exp",
+	    "init": "Initial value",
+	    "right": "Evaluate in reverse order (right to left)",
+	    "fixup": "Fixup exp"
+        },
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression: __error__"
+        }
     },
     "sort" : {
 	"key-type" : "Key type",

@@ -50,6 +50,7 @@ module.exports = {
     // The maximum number of messages kept internally in nodes.
     // Zero or undefined value means not restricting number of messages.
     //sortMaxKeptMsgsCount: 0,
+    //joinMaxKeptMsgsCount: 0,
     //batchMaxKeptMsgsCount: 0,
     
     // To disable the option for using local files for storing keys and certificates in the TLS configuration
