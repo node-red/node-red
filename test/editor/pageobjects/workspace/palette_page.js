@@ -14,22 +14,20 @@
  * limitations under the License.
  **/
 
-function open() {
-    browser.clickWithWait('#red-ui-tab-debug');
-}
+var idMap = {
+    // input
+    "inject": "#palette_node_inject",
+    // output
+    "debug": "#palette_node_debug",
+    // function
+    "change": "#palette_node_change",
+    "range": "#palette_node_range",
+};
 
-function getMessage(index) {
-    index = index ? index : 1;
-    var debugMessagePath = '//div[@class="debug-content debug-content-list"]/div[contains(@class,"debug-message")][' + index + ']//span[contains(@class, "debug-message-type")]';
-    return browser.getTextWithWait(debugMessagePath);
-}
-
-function clearMessage() {
-    browser.clickWithWait('//a[@id="debug-tab-clear"]');
+function getId(type) {
+    return idMap[type];
 }
 
 module.exports = {
-    open: open,
-    getMessage: getMessage,
-    clearMessage: clearMessage,
+    getId: getId,
 };

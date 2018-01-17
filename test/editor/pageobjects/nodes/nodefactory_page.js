@@ -14,22 +14,26 @@
  * limitations under the License.
  **/
 
-function open() {
-    browser.clickWithWait('#red-ui-tab-debug');
+var injectNode = require('./core/core/20-inject_page');
+var debugNode = require('./core/core/58-debug_page');
+var changeNode = require('./core/logic/15-change_page');
+var rangeNode = require('./core/logic/16-range_page');
+
+var nodeCatalog = {
+    // input
+    "inject": injectNode,
+    // output
+    "debug": debugNode,
+    // function
+    "change": changeNode,
+    "range": rangeNode,
 }
 
-function getMessage(index) {
-    index = index ? index : 1;
-    var debugMessagePath = '//div[@class="debug-content debug-content-list"]/div[contains(@class,"debug-message")][' + index + ']//span[contains(@class, "debug-message-type")]';
-    return browser.getTextWithWait(debugMessagePath);
-}
-
-function clearMessage() {
-    browser.clickWithWait('//a[@id="debug-tab-clear"]');
+function create(type, id) {
+    var node = nodeCatalog[type];
+    return new node(id);
 }
 
 module.exports = {
-    open: open,
-    getMessage: getMessage,
-    clearMessage: clearMessage,
+    create: create,
 };

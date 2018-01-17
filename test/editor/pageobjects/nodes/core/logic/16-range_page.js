@@ -14,11 +14,25 @@
  * limitations under the License.
  **/
 
-function clickOk() {
-    browser.click('#node-dialog-ok');
-    browser.pause(300);
+var util = require("util");
+
+var nodePage = require("../../node_page");
+
+function rangeNode(id) {
+    nodePage.call(this, id);
 }
 
-module.exports = {
-    clickOk: clickOk,
-};
+util.inherits(rangeNode, nodePage);
+
+rangeNode.prototype.setAction = function(value) {
+    browser.selectByValue('#node-input-action', value);
+}
+
+rangeNode.prototype.setRange = function(minin, maxin, minout, maxout) {
+    browser.setValue('#node-input-minin', minin);
+    browser.setValue('#node-input-maxin', maxin);
+    browser.setValue('#node-input-minout', minout);
+    browser.setValue('#node-input-maxout', maxout);
+}
+
+module.exports = rangeNode;
