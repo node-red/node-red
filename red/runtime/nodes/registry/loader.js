@@ -214,15 +214,15 @@ function loadNodeConfig(fileInfo) {
             } else {
                 var types = [];
 
-                var regExp = /<script ([^>]*)data-template-name=['"]([^'"]*)['"]/gi;
+                var regExp = /<script (?:[^>]*)data-template-name\s*=\s*['"]([^'"]*)['"]/gi;
                 var match = null;
 
                 while ((match = regExp.exec(content)) !== null) {
-                    types.push(match[2]);
+                    types.push(match[1]);
                 }
                 node.types = types;
 
-                var langRegExp = /^<script[^>]* data-lang=['"](.+?)['"]/i;
+                var langRegExp = /^<script[^>]* data-lang\s*=\s*['"](.+?)['"]/i;
                 regExp = /(<script[^>]* data-help-name=[\s\S]*?<\/script>)/gi;
                 match = null;
                 var mainContent = "";

@@ -439,7 +439,9 @@ RED.debug = (function() {
             $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
 
-        if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+        if ((format === 'number') && (payload === "NaN")) {
+            payload = Number.NaN;
+        } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
         } else if (/error/i.test(format)) {
             payload = JSON.parse(payload);

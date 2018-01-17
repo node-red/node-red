@@ -15,17 +15,17 @@
  **/
 
 function open() {
-    browser.click('#red-ui-tab-debug');
+    browser.clickWithWait('#red-ui-tab-debug');
 }
 
-function getMessage() {
-    var debugMessagePath = '//div[@class="debug-content debug-content-list"]//span[contains(@class, "debug-message-type")]';
-    browser.waitForExist(debugMessagePath);
-    return browser.getText(debugMessagePath);
+function getMessage(index) {
+    index = index ? index : 1;
+    var debugMessagePath = '//div[@class="debug-content debug-content-list"]/div[contains(@class,"debug-message")][' + index + ']//span[contains(@class, "debug-message-type")]';
+    return browser.getTextWithWait(debugMessagePath);
 }
 
 function clearMessage() {
-    browser.click('//a[@id="debug-tab-clear"]');
+    browser.clickWithWait('//a[@id="debug-tab-clear"]');
 }
 
 module.exports = {

@@ -18,6 +18,7 @@ var should = require("should");
 var splitNode = require("../../../../nodes/core/logic/17-split.js");
 var joinNode = require("../../../../nodes/core/logic/17-split.js");
 var helper = require("../../helper.js");
+var RED = require("../../../../red/red.js");
 
 describe('SPLIT node', function() {
 
@@ -269,6 +270,7 @@ describe('JOIN node', function() {
 
     afterEach(function() {
         helper.unload();
+        RED.settings.joinMaxKeptMsgsCount = 0;
     });
 
     it('should be loaded', function(done) {
@@ -727,6 +729,394 @@ describe('JOIN node', function() {
             });
             s1.receive({payload:[[1,2,3],"a\nb\nc",[7,8,9]]});
         });
-    })
+    });
+
+    it('should merge messages with topics (single)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TB"}],
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("TA");
+                    msg.should.have.property("TB");
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload.length.should.equal(2);
+                    count++;
+                    if (count === 1) {
+                        msg.TA.should.equal("a");
+                        msg.TB.should.equal("b");
+                        msg.payload[0].should.equal("a");
+                        msg.payload[1].should.equal("b");
+                    }
+                    if (count === 2) {
+                        msg.TA.should.equal("d");
+                        msg.TB.should.equal("c");
+                        msg.payload[0].should.equal("d");
+                        msg.payload[1].should.equal("c");
+                        done();
+                    }
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TB"});
+            n1.receive({payload:"d", topic:"TA"});
+        });
+    });
+
+    it('should merge messages with topics (multiple)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TB"}, {topic:"TA"}],
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("TA");
+                    msg.TA.should.be.an.Array();
+                    msg.TA.length.should.equal(2);
+                    msg.should.have.property("TB");
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload.length.should.equal(3);
+                    count++;
+                    if (count === 1) {
+                        msg.TA[0].should.equal("a");
+                        msg.TA[1].should.equal("d");
+                        msg.TB.should.equal("b");
+                        msg.payload[0].should.equal("a");
+                        msg.payload[1].should.equal("b");
+                        msg.payload[2].should.equal("d");
+                    }
+                    if (count === 2) {
+                        msg.TA[0].should.equal("e");
+                        msg.TA[1].should.equal("f");
+                        msg.TB.should.equal("c");
+                        msg.payload[0].should.equal("e");
+                        msg.payload[1].should.equal("c");
+                        msg.payload[2].should.equal("f");
+                        done();
+                    }
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TB"});
+            n1.receive({payload:"d", topic:"TA"});
+            n1.receive({payload:"e", topic:"TA"});
+            n1.receive({payload:"f", topic:"TA"});
+        });
+    });
+
+    it('should merge messages with topics (single, send on new topic)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TB"}],
+                     mergeOnChange:true,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("TA");
+                    msg.should.have.property("TB");
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload.length.should.equal(2);
+                    count++;
+                    if (count === 1) {
+                        msg.TA.should.equal("a");
+                        msg.TB.should.equal("b");
+                        msg.payload[0].should.equal("a");
+                        msg.payload[1].should.equal("b");
+                    }
+                    if (count === 2) {
+                        msg.TA.should.equal("a");
+                        msg.TB.should.equal("c");
+                        msg.payload[0].should.equal("a");
+                        msg.payload[1].should.equal("c");
+                    }
+                    if (count === 3) {
+                        msg.TA.should.equal("d");
+                        msg.TB.should.equal("c");
+                        msg.payload[0].should.equal("d");
+                        msg.payload[1].should.equal("c");
+                        done();
+                    }
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TB"});
+            n1.receive({payload:"d", topic:"TA"});
+        });
+    });
+
+    it('should merge messages with topics (multiple, send on new topic)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TB"}, {topic:"TA"}],
+                     mergeOnChange:true,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("TA");
+                    msg.TA.should.be.an.Array();
+                    msg.TA.length.should.equal(2);
+                    msg.should.have.property("TB");
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload.length.should.equal(3);
+                    count++;
+                    if (count === 1) {
+                        msg.TA[0].should.equal("a");
+                        msg.TA[1].should.equal("c");
+                        msg.TB.should.equal("b");
+                        msg.payload[0].should.equal("a");
+                        msg.payload[1].should.equal("b");
+                        msg.payload[2].should.equal("c");
+                    }
+                    if (count === 2) {
+                        msg.TA[0].should.equal("c");
+                        msg.TA[1].should.equal("d");
+                        msg.TB.should.equal("b");
+                        msg.payload[0].should.equal("c");
+                        msg.payload[1].should.equal("b");
+                        msg.payload[2].should.equal("d");
+                    }
+                    if (count === 3) {
+                        msg.TA[0].should.equal("c");
+                        msg.TA[1].should.equal("d");
+                        msg.TB.should.equal("e");
+                        msg.payload[0].should.equal("c");
+                        msg.payload[1].should.equal("e");
+                        msg.payload[2].should.equal("d");
+                        done();
+                    }
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TA"});
+            n1.receive({payload:"d", topic:"TA"});
+            n1.receive({payload:"e", topic:"TB"});
+        });
+    });
+
+    it('should redece messages', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(10);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages using $I', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+$I",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(6);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages with fixup', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:"$A/$N",
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(2);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:5, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:5, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:5, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:5, id:222}});
+            n1.receive({payload:0, parts:{index:4, count:5, id:222}});
+        });
+    });
+
+    it('should redece messages (left)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"'(' & $A & '+' & payload & ')'",
+                     reduceInit:"0",
+                     reduceInitType:"str",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.String();
+                    msg.payload.should.equal("((((0+1)+2)+3)+4)");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:'3', parts:{index:2, count:4, id:222}});
+            n1.receive({payload:'2', parts:{index:1, count:4, id:222}});
+            n1.receive({payload:'4', parts:{index:3, count:4, id:222}});
+            n1.receive({payload:'1', parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages (right)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:true,
+                     reduceExp:"'(' & $A & '+' & payload & ')'",
+                     reduceInit:"0",
+                     reduceInitType:"str",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.String();
+                    msg.payload.should.equal("((((0+4)+3)+2)+1)");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:'3', parts:{index:2, count:4, id:222}});
+            n1.receive({payload:'2', parts:{index:1, count:4, id:222}});
+            n1.receive({payload:'4', parts:{index:3, count:4, id:222}});
+            n1.receive({payload:'1', parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should handle too many pending messages for merge mode', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"merge",
+                     topics:[{topic:"TA"}, {topic:"TA"}, {topic:"TB"}],
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.joinMaxKeptMsgsCount = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "join";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "join");
+                evt.should.have.property('msg', "join.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:"a", topic:"TA"});
+            n1.receive({payload:"b", topic:"TB"});
+            n1.receive({payload:"c", topic:"TB"});
+            n1.receive({payload:"d", topic:"TA"});
+        });
+    });
+
+    it('should handle too many pending messages for reduce mode', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.joinMaxKeptMsgsCount = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "join";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "join");
+                evt.should.have.property('msg', "join.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
 
 });

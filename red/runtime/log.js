@@ -74,11 +74,11 @@ var consoleLogger = function(msg) {
     if (msg.level == log.METRIC || msg.level == log.AUDIT) {
         util.log("["+levelNames[msg.level]+"] "+JSON.stringify(msg));
     } else {
-        if (verbose && msg.msg.stack) {
+        if (verbose && msg.msg && msg.msg.stack) {
             util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+msg.msg.stack);
         } else {
             var message = msg.msg;
-            if (typeof message === 'object' && message.toString() === '[object Object]' && message.message) {
+            if (typeof message === 'object' && message !== null && message.toString() === '[object Object]' && message.message) {
                 message = message.message;
             }
             util.log("["+levelNames[msg.level]+"] "+(msg.type?"["+msg.type+":"+(msg.name||msg.id)+"] ":"")+message);
