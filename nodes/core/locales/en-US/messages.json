@@ -875,5 +875,32 @@
         "invalid-exp" : "invalid JSONata expression in sort node",
         "too-many" : "too many pending messages in sort node",
         "clear" : "clear pending message in sort node"
+    },
+    "batch" : {
+	"mode": {
+	    "label" : "Mode",
+	    "num-msgs" : "number of messages",
+	    "interval" : "interval in seconds",
+            "concat" : "concatenate sequences"
+	},
+	"count": {
+	    "label" : "Number of msgs",
+	    "overwrap" : "Overwrap",
+	    "count" : "count",
+            "invalid" : "Invalid count and overwrap"
+	},
+	"interval": {
+	    "label" : "Interval (sec)",
+	    "seconds" : "seconds",
+	    "sec" : "sec",
+            "empty" : "send empty message when no message arrives"
+	},
+        "concat": {
+            "topics-label": "Topics",
+            "topic" : "topic"
+        },
+        "too-many" : "too many pending messages in batch node",
+        "unexpected" : "unexpected mode",
+        "no-parts" : "no parts property in message"
     }
 }
