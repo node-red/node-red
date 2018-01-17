@@ -33,6 +33,10 @@
             <option value="false" data-i18n="switch.stopfirst"></option>
         </select>
     </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-input-repair" style="display: inline-block; width: auto; vertical-align: top;">
+        <label style="width: auto;" for="node-input-repair"><span data-i18n="switch.label.repair"></span></label></input>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="switch">
@@ -44,25 +48,138 @@
     that matches.</p>
     <p>The rules can be evaluated against an individual message property, a flow or global
     context property or the result of a JSONata expression.</p>
+    <h3>Rules</h3>
+    <p>Routing rules are categorized into three:</p>
+    <dl>
+        <dt>value rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>==</b></td>
+                    <td>property value is equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>!=</b></td>
+                    <td>property value is not equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&lt;</b></td>
+                    <td>property value is less than specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&lt;=</b></td>
+                    <td>property value is less than or equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&gt;</b></td>
+                    <td>property value is greater than specified value</td>
+                </tr>
+                <tr>
+                    <td><b>&gt;=</b></td>
+                    <td>property value is greater than or equals to specified value</td>
+                </tr>
+                <tr>
+                    <td><b>is between</b></td>
+                    <td>property value is between specified values</td>
+                </tr>
+                <tr>
+                    <td><b>contains</b></td>
+                    <td>property string value contains specified string value</td>
+                </tr>
+                <tr>
+                    <td><b>matches regex</b></td>
+                    <td>property string value matches specified regex</td>
+                </tr>
+                <tr>
+                    <td><b>is true</b></td>
+                    <td>property value is true</td>
+                </tr>
+                <tr>
+                    <td><b>is false</b></td>
+                    <td>property value is false</td>
+                </tr>
+                <tr>
+                    <td><b>is null</b></td>
+                    <td>property value is null</td>
+                </tr>
+                <tr>
+                    <td><b>is not null</b></td>
+                    <td>property value is not null</td>
+                </tr>
+            </table>
+        </dd>
+        <dt>sequence rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>head</b></td>
+                    <td>message is included in the first specified number of messages in a sequence</td>
+                </tr>
+                <tr>
+                    <td><b>tail</b></td>
+                    <td>message is included in the last specified number of messages in a sequence</td>
+                </tr>
+                <tr>
+                    <td><b>pos. between</b></td>
+                    <td>message is included between specified positions in a sequence</td>
+                </tr>
+            </table>
+        </dd>
+        <dt>other rules</dt>
+        <dd>
+            <table>
+                <tr>
+                    <th>operator</th>
+                    <th>description</th>
+                </tr>
+                <tr>
+                    <td><b>JSONata exp</b></td>
+                    <td>specified JSONata expression evaluate to true. In JSONata expression, $I represents <code>msg.parts.index</code> and $N represents <code>msg.parts.count</code> respectively if exists.</td>
+                </tr>
+                <tr>
+                    <td><b>otherwise</b></td>
+                    <td>no matching rule found</td>
+                </tr>
+            </table>
+        </dd>
+    </dl>
+
+    <h3>Repair Sequence</h3>
+    <p>If <b>repair sequence (reconstruct parts property of outgoing messages)</b> checkbox is selected, <code>msg.parts</code> property are reconstructed for each port to make forks of valid sequences.  Otherwise, <code>msg.parts</code> property of incoming messages are passed through.</p>
+
+    <h3>Note:</h3>
+    <p>This node internally keeps messages for its operation if <b>repair sequence</b> checkbox is ON.  In order to prevent unexpected memory usage, maximum number of messages kept can be specified by <code>switchMaxKeptMsgsCount</code> property in <b>settings.js</b>.</p>
 </script>
 
 <script type="text/javascript">
 (function() {
     var operators = [
-        {v:"eq",t:"=="},
-        {v:"neq",t:"!="},
-        {v:"lt",t:"<"},
-        {v:"lte",t:"<="},
-        {v:"gt",t:">"},
-        {v:"gte",t:">="},
-        {v:"btwn",t:"switch.rules.btwn"},
-        {v:"cont",t:"switch.rules.cont"},
-        {v:"regex",t:"switch.rules.regex"},
-        {v:"true",t:"switch.rules.true"},
-        {v:"false",t:"switch.rules.false"},
-        {v:"null",t:"switch.rules.null"},
-        {v:"nnull",t:"switch.rules.nnull"},
-        {v:"else",t:"switch.rules.else"}
+        {v:"eq",t:"==",kind:'V'},
+        {v:"neq",t:"!=",kind:'V'},
+        {v:"lt",t:"<",kind:'V'},
+        {v:"lte",t:"<=",kind:'V'},
+        {v:"gt",t:">",kind:'V'},
+        {v:"gte",t:">=",kind:'V'},
+        {v:"btwn",t:"switch.rules.btwn",kind:'V'},
+        {v:"cont",t:"switch.rules.cont",kind:'V'},
+        {v:"regex",t:"switch.rules.regex",kind:'V'},
+        {v:"true",t:"switch.rules.true",kind:'V'},
+        {v:"false",t:"switch.rules.false",kind:'V'},
+        {v:"null",t:"switch.rules.null",kind:'V'},
+        {v:"nnull",t:"switch.rules.nnull",kind:'V'},
+        {v:"head",t:"switch.rules.head",kind:'S'},
+        {v:"index",t:"switch.rules.index",kind:'S'},
+        {v:"tail",t:"switch.rules.tail",kind:'S'},
+        {v:"jsonata_exp",t:"switch.rules.exp",kind:'O'},
+        {v:"else",t:"switch.rules.else",kind:'O'}
     ];
 
     function clipValueLength(v) {
@@ -88,6 +205,7 @@
             propertyType: { value:"msg" },
             rules: {value:[{t:"eq", v:"", vt:"str"}]},
             checkall: {value:"true", required:true},
+            repair: {value:false},
             outputs: {value:1}
         },
         inputs: 1,
@@ -102,7 +220,8 @@
                         break;
                     }
                 }
-                if (rule.t === 'btwn') {
+                if ((rule.t === 'btwn') || (rule.t === 'index')) {
+                    console.log(`; ${label}/${JSON.stringify(rule)}`);
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
                 } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);
@@ -132,6 +251,8 @@
                 var selectField = rule.find("select");
                 var type = selectField.val()||"";
                 var valueField = rule.find(".node-input-rule-value");
+                var numField = rule.find(".node-input-rule-num-value");
+                var expField = rule.find(".node-input-rule-exp-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
                 var btwnField2 = rule.find(".node-input-rule-btwn-value2");
                 var selectWidth;
@@ -143,9 +264,13 @@
                     selectWidth = 120;
                 }
                 selectField.width(selectWidth);
-                if (type === "btwn") {
+                if ((type === "btwn") || (type === "index")) {
                     btwnField1.typedInput("width",(newWidth-selectWidth-70));
                     btwnField2.typedInput("width",(newWidth-selectWidth-70));
+                } else if ((type === "head") || (type === "tail")) {
+                    numField.typedInput("width",(newWidth-selectWidth-70));
+                } else if (type === "jsonata_exp") {
+                    expField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
@@ -171,10 +296,26 @@
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
                     var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);
                     var selectField = $('<select/>',{style:"width:120px; margin-left: 5px; text-align: center;"}).appendTo(row);
+                    var group0 = $('<optgroup/>', { label: "value rules" }).appendTo(selectField);
                     for (var d in operators) {
-                        selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
+                        if(operators[d].kind === 'V') {
+                            group0.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
+                        }
+                    }
+                    var group1 = $('<optgroup/>', { label: "sequence rules" }).appendTo(selectField);
+                    for (var d in operators) {
+                        if(operators[d].kind === 'S') {
+                            group1.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
+                        }
+                    }
+                    for (var d in operators) {
+                        if(operators[d].kind === 'O') {
+                            selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
+                        }
                     }
                     var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata']});
+                    var expValueField = $('<input/>',{class:"node-input-rule-exp-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'jsonata',types:['jsonata']});
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                     var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
@@ -185,11 +326,27 @@
                     selectField.change(function() {
                         resizeRule(container);
                         var type = selectField.val();
-                        if (type === "btwn") {
+                        if ((type === "btwn") || (type === "index")) {
                             valueField.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('hide');
                             btwnValueField.typedInput('show');
+                        } else if ((type === "head") || (type === "tail")) {
+                            btwnValueField.typedInput('hide');
+                            btwnValue2Field.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('show');
+                            valueField.typedInput('hide');
+                        } else if (type === "jsonata_exp") {
+                            btwnValueField.typedInput('hide');
+                            btwnValue2Field.typedInput('hide');
+                            expValueField.typedInput('show');
+                            numValueField.typedInput('hide');
+                            valueField.typedInput('hide');
                         } else {
                             btwnValueField.typedInput('hide');
+                            expValueField.typedInput('hide');
+                            numValueField.typedInput('hide');
                             if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                                 valueField.typedInput('hide');
                             } else {
@@ -199,7 +356,7 @@
                         if (type === "regex") {
                             row2.show();
                             row3.hide();
-                        } else if (type === "btwn") {
+                        } else if ((type === "btwn") || (type === "index")) {
                             row2.hide();
                             row3.show();
                             btwnValue2Field.typedInput('show');
@@ -209,11 +366,17 @@
                         }
                     });
                     selectField.val(rule.t);
-                    if (rule.t == "btwn") {
+                    if ((rule.t == "btwn") || (rule.t == "index")) {
                         btwnValueField.typedInput('value',rule.v);
                         btwnValueField.typedInput('type',rule.vt||'num');
                         btwnValue2Field.typedInput('value',rule.v2);
                         btwnValue2Field.typedInput('type',rule.v2t||'num');
+                    } else if ((rule.t === "head") || (rule.t === "tail")) {
+                        numValueField.typedInput('value',rule.v);
+                        numValueField.typedInput('type',rule.vt||'num');
+                    } else if (rule.t === "jsonata_exp") {
+                        expValueField.typedInput('value',rule.v);
+                        expValueField.typedInput('type',rule.vt||'jsonata');
                     } else if (typeof rule.v != "undefined") {
                         valueField.typedInput('value',rule.v);
                         valueField.typedInput('type',rule.vt||'str');
@@ -275,11 +438,17 @@
                 var type = rule.find("select").val();
                 var r = {t:type};
                 if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
-                    if (type === "btwn") {
+                    if ((type === "btwn") || (type === "index")) {
                         r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
                         r.v2 = rule.find(".node-input-rule-btwn-value2").typedInput('value');
                         r.v2t = rule.find(".node-input-rule-btwn-value2").typedInput('type');
+                    } else if ((type === "head") || (type === "tail")) {
+                        r.v = rule.find(".node-input-rule-num-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-num-value").typedInput('type');
+                    } else if (type === "jsonata_exp") {
+                        r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
+                        r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');
                     } else {
                         r.v = rule.find(".node-input-rule-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-value").typedInput('type');
