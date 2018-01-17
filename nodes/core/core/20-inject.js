@@ -27,9 +27,14 @@ module.exports = function(RED) {
         this.crontab = n.crontab;
         this.once = n.once;
         this.onceDelay = (n.onceDelay || 0.1) * 1000;
-        var node = this;
         this.interval_id = null;
         this.cronjob = null;
+        var node = this;
+
+        if (node.repeat > 2147483) {
+            node.error(RED._("inject.errors.toolong", this));
+            delete node.repeat;
+        }
 
         node.repeaterSetup = function () {
           if (this.repeat && !isNaN(this.repeat) && this.repeat > 0) {

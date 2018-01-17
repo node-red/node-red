@@ -170,6 +170,8 @@ The default payload is a timestamp of the current time in millisecs since Januar
 <p>By default, the node is triggered manually by clicking on its button within the editor. It can also be set to
 inject at regular intervals or according to a schedule.</p>
 <p>It can also be configured to inject once each time the flows are started.</p>
+<p>The maximum <i>Interval</i> that can be specified is about 596 hours / 24 days. However if you are looking at intervals
+greater than one day you should consider using a scheduler node that can cope with power outages and restarts.</p>
 <p><b>Note</b>: The <i>"Interval between times"</i> and <i>"at a specific time"</i> options use the standard cron system.
 This means that 20 minutes will be at the next hour, 20 minutes past and 40 minutes past - not in 20 minutes time.
 If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
@@ -185,7 +187,7 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             topic: {value:""},
             payload: {value:"", validate: RED.validators.typedInput("payloadType")},
             payloadType: {value:"date"},
-            repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0))) }},
+            repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0) && (v <= 2147483))) }},
             crontab: {value:""},
             once: {value:false},
             onceDelay: {value:0.1}
