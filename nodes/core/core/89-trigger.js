@@ -80,7 +80,7 @@ module.exports = function(RED) {
             var topic = msg.topic || "_none";
             if (node.bytopic === "all") { topic = "_none"; }
             node.topics[topic] = node.topics[topic] || {};
-            if (msg.hasOwnProperty("reset") || ((node.reset !== '') && (msg.payload == node.reset)) ) {
+            if (msg.hasOwnProperty("reset") || ((node.reset !== '') && msg.hasOwnProperty("payload") && (msg.payload !== null) && msg.payload.toString && (msg.payload.toString() == node.reset)) ) {
                 if (node.loop === true) { clearInterval(node.topics[topic].tout); }
                 else { clearTimeout(node.topics[topic].tout); }
                 delete node.topics[topic];
@@ -104,7 +104,9 @@ module.exports = function(RED) {
 
                     if (node.duration === 0) { node.topics[topic].tout = 0; }
                     else if (node.loop === true) {
+                        /* istanbul ignore else  */
                         if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
+                        /* istanbul ignore else  */
                         if (node.op1type !== "nul") {
                             var msg2 = RED.util.cloneMessage(msg);
                             node.topics[topic].tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); }, node.duration);
@@ -128,7 +130,9 @@ module.exports = function(RED) {
                     node.status({fill:"blue",shape:"dot",text:" "});
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
+                    /* istanbul ignore else  */
                     if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
+                    /* istanbul ignore else  */
                     if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
                     node.topics[topic].tout = setTimeout(function() {
                         var msg2 = null;
@@ -153,6 +157,7 @@ module.exports = function(RED) {
         });
         this.on("close", function() {
             for (var t in node.topics) {
+                /* istanbul ignore else  */
                 if (node.topics[t]) {
                     if (node.loop === true) { clearInterval(node.topics[t].tout); }
                     else { clearTimeout(node.topics[t].tout); }
