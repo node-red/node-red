@@ -14,22 +14,14 @@
  * limitations under the License.
  **/
 
-function open() {
-    browser.clickWithWait('#red-ui-tab-debug');
+var util = require("util");
+
+var nodePage = require("../../node_page");
+
+function debugNode(id) {
+    nodePage.call(this, id);
 }
 
-function getMessage(index) {
-    index = index ? index : 1;
-    var debugMessagePath = '//div[@class="debug-content debug-content-list"]/div[contains(@class,"debug-message")][' + index + ']//span[contains(@class, "debug-message-type")]';
-    return browser.getTextWithWait(debugMessagePath);
-}
+util.inherits(debugNode, nodePage);
 
-function clearMessage() {
-    browser.clickWithWait('//a[@id="debug-tab-clear"]');
-}
-
-module.exports = {
-    open: open,
-    getMessage: getMessage,
-    clearMessage: clearMessage,
-};
+module.exports = debugNode;

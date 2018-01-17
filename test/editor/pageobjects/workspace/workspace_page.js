@@ -14,26 +14,25 @@
  * limitations under the License.
  **/
 
- var when = require('when');
+ var when = require("when");
 
 var events = require("../../../../red/runtime/events.js");
 
-var node = require('./node_page');
-
-var palette = {
-    "inject": "#palette_node_inject",
-    "debug": "#palette_node_debug",
-    "change": "#palette_node_change",
-};
+var palette = require("./palette_page");
+var nodeFactory = require("../nodes/nodefactory_page");
 
 function addNode(type, x, y) {
     var offsetX = x ? x : 0;
     var offsetY = y ? y : 0;
-    browser.moveToObject(palette[type]);
+    browser.moveToObject(palette.getId(type));
     browser.buttonDown();
     browser.moveToObject("#palette-search", offsetX + 300, offsetY + 100); // adjust to the top-left corner of workspace.
     browser.buttonUp();
-    return new node(type);
+    // Last node is the one that has been created right now.
+    var nodeElement = browser.elements('//*[@class="node nodegroup"][last()]');
+    var nodeId = nodeElement.getAttribute('id');
+    var node = nodeFactory.create(type, nodeId);
+    return node;
 }
 
 function deleteAllNodes() {
@@ -49,10 +48,10 @@ function deploy() {
                     resolve();
                 }
             });
-            browser.click('#btn-deploy');
+            browser.clickWithWait('#btn-deploy');
         });
     });
-    browser.pause(500); // Necessary for headless mode.
+    browser.waitForText('#btn-deploy', 2000);
 }
 
 module.exports = {

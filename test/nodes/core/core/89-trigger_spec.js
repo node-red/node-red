@@ -609,7 +609,66 @@ describe('trigger node', function() {
             n1.emit("input", {payload:null});   // trigger
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:"foo"});  // don't clear the blockage
             n1.emit("input", {payload:"boo"});  // clear the blockage
+            n1.emit("input", {payload:null});   // trigger
+        });
+    });
+
+    it('should be able to set infinite timeout, and clear timeout by boolean true', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"true", duration:"0", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    msg.should.have.a.property("payload", "1");
+                }
+                catch(err) { done(err); }
+            });
+            setTimeout( function() {
+                if (c === 2) { done(); }
+                else {
+                    done(new Error("Too many messages received"));
+                }
+            },20);
+            n1.emit("input", {payload:null});   // trigger
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:false});  // don't clear the blockage
+            n1.emit("input", {payload:true});  // clear the blockage
+            n1.emit("input", {payload:null});   // trigger
+        });
+    });
+
+    it('should be able to set infinite timeout, and clear timeout by boolean false', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", reset:"false", duration:"0", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    msg.should.have.a.property("payload", "1");
+                }
+                catch(err) { done(err); }
+            });
+            setTimeout( function() {
+                if (c === 2) { done(); }
+                else {
+                    done(new Error("Too many messages received"));
+                }
+            },20);
+            n1.emit("input", {payload:null});   // trigger
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:null});   // blocked
+            n1.emit("input", {payload:"foo"});  // don't clear the blockage
+            n1.emit("input", {payload:false});  // clear the blockage
             n1.emit("input", {payload:null});   // trigger
         });
     });

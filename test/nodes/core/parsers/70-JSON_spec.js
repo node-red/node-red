@@ -28,17 +28,8 @@ describe('JSON node', function() {
         helper.unload();
     });
 
-    it('should be loaded', function(done) {
-        var flow = [{id:"jsonNode1", type:"json", name: "jsonNode" }];
-        helper.load(jsonNode, flow, function() {
-            var jsonNode1 = helper.getNode("jsonNode1");
-            jsonNode1.should.have.property('name', 'jsonNode');
-            done();
-        });
-    });
-
     it('should convert a valid json string to a javascript object', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             var jn1 = helper.getNode("jn1");
@@ -56,7 +47,7 @@ describe('JSON node', function() {
     });
 
     it('should convert a javascript object to a json string', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             var jn1 = helper.getNode("jn1");
@@ -71,7 +62,7 @@ describe('JSON node', function() {
     });
 
     it('should convert a array to a json string', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             var jn1 = helper.getNode("jn1");
@@ -86,7 +77,7 @@ describe('JSON node', function() {
     });
 
     it('should log an error if asked to parse an invalid json string', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             try {
@@ -108,7 +99,7 @@ describe('JSON node', function() {
     });
 
     it('should log an error if asked to parse something thats not json or js', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             var jn1 = helper.getNode("jn1");
@@ -137,7 +128,7 @@ describe('JSON node', function() {
     });
 
     it('should pass straight through if no payload set', function(done) {
-        var flow = [{id:"jn1",type:"json",wires:[["jn2"]],func:"return msg;"},
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
         helper.load(jsonNode, flow, function() {
             var jn1 = helper.getNode("jn1");
@@ -151,4 +142,105 @@ describe('JSON node', function() {
         });
     });
 
+    it('should ensure the result is a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            var count = 0;
+            jn2.on("input", function(msg) {
+                try {
+                    should.equal(msg.payload, '{"employees":[{"firstName":"John","lastName":"Smith"}]}');
+                    count++;
+                    if (count === 2) {
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
+            jn1.receive({payload:obj,topic: "bar"});
+            jn1.receive({payload:JSON.stringify(obj),topic: "bar"});
+        });
+    });
+
+    it('should ensure the result is a JS Object', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"obj",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            var count = 0;
+            jn2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', 'bar');
+                    msg.payload.should.have.property('employees');
+                    msg.payload.employees[0].should.have.property('firstName', 'John');
+                    msg.payload.employees[0].should.have.property('lastName', 'Smith');
+                    count++;
+                    if (count === 2) {
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
+            jn1.receive({payload:obj,topic: "bar"});
+            jn1.receive({payload:JSON.stringify(obj),topic: "bar"});
+        });
+    });
+
+    it('should handle any msg property - receive existing string', function(done) {
+        var flow = [{id:"jn1",type:"json",property:"one.two",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('one');
+                    msg.one.should.have.property('two');
+                    msg.one.two.should.have.property('employees');
+                    msg.one.two.employees[0].should.have.property('firstName', 'John');
+                    msg.one.two.employees[0].should.have.property('lastName', 'Smith');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var jsonString = '{"employees":[{"firstName":"John", "lastName":"Smith"}]}';
+            jn1.receive({payload:"",one:{two:jsonString},topic: "bar"});
+
+            var logEvents = helper.log().args.filter(function(evt) {
+                return evt[0].type == "json";
+            });
+        });
+    });
+
+    it('should handle any msg property - receive existing obj', function(done) {
+        var flow = [{id:"jn1",type:"json",property:"one.two",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                try {
+                    should.equal(msg.one.two, '{"employees":[{"firstName":"John","lastName":"Smith"}]}');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var jsonString = '{"employees":[{"firstName":"John", "lastName":"Smith"}]}';
+            jn1.receive({payload:"",one:{two:JSON.parse(jsonString)},topic: "bar"});
+
+            var logEvents = helper.log().args.filter(function(evt) {
+                return evt[0].type == "json";
+            });
+        });
+    });
 });

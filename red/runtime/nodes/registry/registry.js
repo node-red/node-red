@@ -69,7 +69,7 @@ function filterNodeInfo(n) {
         r.module = n.module;
     }
     if (n.hasOwnProperty("err")) {
-        r.err = n.err.toString();
+        r.err = n.err;
     }
     return r;
 }
@@ -184,8 +184,22 @@ function loadNodeConfigs() {
 function addNodeSet(id,set,version) {
     if (!set.err) {
         set.types.forEach(function(t) {
-            nodeTypeToId[t] = id;
+            if (nodeTypeToId.hasOwnProperty(t)) {
+                set.err = new Error("Type already registered");
+                set.err.code = "type_already_registered";
+                set.err.details = {
+                    type: t,
+                    moduleA: getNodeInfo(t).module,
+                    moduleB: set.module
+                }
+
+            }
         });
+        if (!set.err) {
+            set.types.forEach(function(t) {
+                nodeTypeToId[t] = id;
+            });
+        }
     }
     moduleNodes[set.module] = moduleNodes[set.module]||[];
     moduleNodes[set.module].push(set.name);
