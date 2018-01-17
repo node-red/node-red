@@ -27,6 +27,7 @@ describe('SORT node', function() {
 
     afterEach(function() {
         helper.unload();
+        RED.settings.maxKeptMsgsCount = 0;
     });
 
     it('should be loaded', function(done) {
@@ -188,7 +189,7 @@ describe('SORT node', function() {
                     {id:"n2", type:"helper"}];
         helper.load(sortNode, flow, function() {
             var n1 = helper.getNode("n1");
-            RED.settings.sortMaxKeptMsgsCount = 2;
+            RED.settings.maxKeptMsgsCount = 2;
             setTimeout(function() {
                 var logEvents = helper.log().args.filter(function (evt) {
                     return evt[0].type == "sort";

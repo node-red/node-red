@@ -53,7 +53,7 @@ module.exports = function(RED) {
     
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
-            var name = "switchMaxKeptMsgsCount";
+            var name = "maxKeptMsgsCount";
             if (RED.settings.hasOwnProperty(name)) {
                 _max_kept_msgs_count = RED.settings[name];
             }
