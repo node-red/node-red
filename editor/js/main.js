@@ -122,12 +122,25 @@
                                 timeout: msg.timeout
                             }
                             if (notificationId === "runtime-state") {
-                                if (msg.error === "credentials_load_failed") {
+                                if (msg.error === "missing-types") {
+                                    text+="<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
+                                    options.buttons = [
+                                        {
+                                            text: "Close",
+                                            click: function() {
+                                                persistentNotifications[notificationId].close();
+                                                delete persistentNotifications[notificationId];
+                                            }
+                                        }
+                                    ]
+                                } else if (msg.error === "credentials_load_failed") {
                                     if (RED.user.hasPermission("projects.write")) {
                                         options.buttons = [
                                             {
                                                 text: "Setup credentials",
                                                 click: function() {
+                                                    persistentNotifications[notificationId].close();
+                                                    delete persistentNotifications[notificationId];
                                                     RED.projects.showCredentialsPrompt();
                                                 }
                                             }

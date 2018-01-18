@@ -23,7 +23,7 @@ var crypto = require('crypto');
 var storageSettings = require("../settings");
 var util = require("../util");
 var gitTools = require("./git");
-var sshTools = require("./ssh");
+var sshTools = require("./sshKeygen");
 
 var Projects = require("./Project");
 

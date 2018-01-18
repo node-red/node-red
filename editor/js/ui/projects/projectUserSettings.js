@@ -194,21 +194,21 @@ RED.projects.userSettings = (function() {
                     name: keyNameInput.val()
                 };
 
-                var selectedButton = bg.find(".selected");
-                if (selectedButton[0] === addLocalButton[0]) {
-                    payload.type = "local";
-                    payload.publicKeyPath = localPublicKeyPathInput.val();
-                    payload.privateKeyPath = localPrivateKeyPathInput.val();
-                } else if (selectedButton[0] === uploadButton[0]) {
-                    payload.type = "upload";
-                    payload.publicKey = publicKeyInput.val();
-                    payload.privateKey = privateKeyInput.val();
-                } else if (selectedButton[0] === generateButton[0]) {
+                // var selectedButton = bg.find(".selected");
+                // if (selectedButton[0] === addLocalButton[0]) {
+                //     payload.type = "local";
+                //     payload.publicKeyPath = localPublicKeyPathInput.val();
+                //     payload.privateKeyPath = localPrivateKeyPathInput.val();
+                // } else if (selectedButton[0] === uploadButton[0]) {
+                //     payload.type = "upload";
+                //     payload.publicKey = publicKeyInput.val();
+                //     payload.privateKey = privateKeyInput.val();
+                // } else if (selectedButton[0] === generateButton[0]) {
                     payload.type = "generate";
                     payload.comment = gitEmailInput.val();
                     payload.password = passphraseInput.val();
                     payload.size = 4096;
-                }
+                // }
                 var done = function(err) {
                     spinner.remove();
                     if (err) {

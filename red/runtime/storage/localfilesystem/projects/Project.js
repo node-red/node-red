@@ -32,6 +32,15 @@ var projectsDir;
 
 var authCache = require("./git/authCache");
 
+// TODO: DRY - red/api/editor/sshkeys !
+function getSSHKeyUsername(userObj) {
+    var username = '__default';
+    if ( userObj && userObj.name ) {
+        username = userObj.name;
+    }
+    return username;
+}
+
 function Project(name) {
     this.name = name;
     this.path = fspath.join(projectsDir,name);
@@ -645,7 +654,7 @@ Project.prototype.updateRemote = function(user,remote,options) {
     if (options.auth) {
         var url = this.remotes[remote].fetch;
         if (options.auth.keyFile) {
-            options.auth.key_path = sshKeys.getPrivateKeyPath(username, options.auth.keyFile);
+            options.auth.key_path = sshKeys.getPrivateKeyPath(getSSHKeyUsername(user), options.auth.keyFile);
         }
         authCache.set(this.name,url,username,options.auth);
     }
@@ -662,7 +671,7 @@ Project.prototype.removeRemote = function(user, remote) {
 
 
 Project.prototype.getFlowFile = function() {
-    console.log("Project.getFlowFile = ",this.paths.flowFile);
+    // console.log("Project.getFlowFile = ",this.paths.flowFile);
     if (this.paths.flowFile) {
         return fspath.join(this.path,this.paths.flowFile);
     } else {
@@ -674,7 +683,7 @@ Project.prototype.getFlowFileBackup = function() {
     return getBackupFilename(this.getFlowFile());
 }
 Project.prototype.getCredentialsFile = function() {
-    console.log("Project.getCredentialsFile = ",this.paths.credentialsFile);
+    // console.log("Project.getCredentialsFile = ",this.paths.credentialsFile);
     if (this.paths.credentialsFile) {
         return fspath.join(this.path,this.paths.credentialsFile);
     } else {
@@ -872,7 +881,7 @@ function createProject(user, metadata) {
                     }
                     else if (originRemote.hasOwnProperty("keyFile") && originRemote.hasOwnProperty("passphrase")) {
                         authCache.set(project,originRemote.url,username,{ // TODO: hardcoded remote name
-                                key_path: sshKeys.getPrivateKeyPath(username, originRemote.keyFile),
+                                key_path: sshKeys.getPrivateKeyPath(getSSHKeyUsername(user), originRemote.keyFile),
                                 passphrase: originRemote.passphrase
                             }
                         );

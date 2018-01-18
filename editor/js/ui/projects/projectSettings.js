@@ -956,8 +956,8 @@ RED.projects.settings = (function() {
                 credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-unlock");
                 credentialStateLabel.find(".user-settings-credentials-state").text("Encryption disabled");
             }
-            credentialSecretResetButton.toggleClass('disabled',!activeProject.settings.credentialsEncrypted);
-            credentialSecretResetButton.prop('disabled',!activeProject.settings.credentialsEncrypted);
+            credentialSecretResetButton.toggleClass('disabled',!activeProject.settings.credentialSecretInvalid && !activeProject.settings.credentialsEncrypted);
+            credentialSecretResetButton.prop('disabled',!activeProject.settings.credentialSecretInvalid && !activeProject.settings.credentialsEncrypted);
         }
 
         checkFiles();

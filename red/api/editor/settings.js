@@ -17,11 +17,13 @@ var theme = require("../editor/theme");
 var util = require('util');
 var runtime;
 var settings;
+var log;
 
 module.exports = {
     init: function(_runtime) {
         runtime = _runtime;
         settings = runtime.settings;
+        log = runtime.log;
     },
     runtimeSettings: function(req,res) {
         var safeSettings = {

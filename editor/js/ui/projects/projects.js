@@ -847,7 +847,13 @@ RED.projects = (function() {
                             validateForm();
                         });
 
-                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone projects-dialog-screen-create-row-creds"></div>').hide().appendTo(container);
+
+                        var cloneAuthRows = $('<div class="hide projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').hide().appendTo(container);
+                        row = $('<div class="form-row projects-dialog-screen-create-row-auth-error"></div>').hide().appendTo(cloneAuthRows);
+                        $('<div><i class="fa fa-warning"></i> Authentication failed</div>').appendTo(row);
+
+                        // Repo credentials - username/password ----------------
+                        row = $('<div class="hide form-row projects-dialog-screen-create-row-creds"></div>').hide().appendTo(cloneAuthRows);
 
                         var subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
                         $('<label for="projects-dialog-screen-create-project-repo-user">Username</label>').appendTo(subrow);
@@ -857,7 +863,11 @@ RED.projects = (function() {
                         $('<label for="projects-dialog-screen-create-project-repo-pass">Password</label>').appendTo(subrow);
                         projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
 
-                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(container);
+
+                        // -----------------------------------------------------
+
+                        // Repo credentials - key/passphrase -------------------
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(cloneAuthRows);
                         subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
                         $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Key</label>').appendTo(subrow);
                         projectRepoSSHKeySelect = $("<select>",{style:"width: 100%"}).appendTo(subrow);
@@ -878,13 +888,12 @@ RED.projects = (function() {
                                 sshwarningRow.hide();
                             }
                         });
-
-
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
                         $('<label for="projects-dialog-screen-create-project-repo-passphrase">Passphrase</label>').appendTo(subrow);
                         projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password"></input>').appendTo(subrow);
 
-                        var sshwarningRow = $('<div style="padding: 20px"></div>').hide().appendTo(row);
+                        subrow = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').appendTo(cloneAuthRows);
+                        var sshwarningRow = $('<div class="projects-dialog-screen-create-row-auth-error-no-keys"></div>').hide().appendTo(subrow);
                         $('<div class="form-row"><i class="fa fa-warning"></i> Before you can clone a repository over ssh you must add an SSH key to access it.</div>').appendTo(sshwarningRow);
                         subrow = $('<div style="text-align: center">').appendTo(sshwarningRow);
                         $('<button class="editor-button">Add an ssh key</button>').appendTo(subrow).click(function(e) {
@@ -895,6 +904,8 @@ RED.projects = (function() {
                                 $("#user-settings-gitconfig-add-key").click();
                             },500);
                         });
+                        // -----------------------------------------------------
+
 
                         // // Secret - clone
                         // row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
@@ -989,7 +1000,6 @@ RED.projects = (function() {
                                 sendRequest({
                                         url: "projects",
                                         type: "POST",
-                                        requireCleanWorkspace: true,
                                         handleAuthFail: false,
                                         responses: {
                                             200: function(data) {
@@ -1006,14 +1016,19 @@ RED.projects = (function() {
                                                     projectRepoInput.addClass("input-error");
                                                 },
                                                 'git_auth_failed': function(error) {
+                                                    $(".projects-dialog-screen-create-row-auth-error").show();
+
                                                     projectRepoUserInput.addClass("input-error");
                                                     projectRepoPasswordInput.addClass("input-error");
                                                     // getRepoAuthDetails(req);
                                                     projectRepoSSHKeySelect.addClass("input-error");
                                                     projectRepoPassphrase.addClass("input-error");
-                                                    console.log("git auth error",error);
                                                 },
                                                 'project_empty': function(error) {
+                                                    // This is handled via a runtime notification.
+                                                    dialog.dialog("close");
+                                                },
+                                                'credentials_load_failed': function(error) {
                                                     // This is handled via a runtime notification.
                                                     dialog.dialog("close");
                                                 },
@@ -1396,14 +1411,9 @@ RED.projects = (function() {
 
 
 
-
-    function sendRequest(options,body) {
-        // dialogBody.hide();
-        console.log(options.url,body);
-
-        if (options.requireCleanWorkspace && RED.nodes.dirty()) {
-            var message = 'You have undeployed changes that will be lost. Do you want to continue?';
-            var alwaysCallback;
+    function requireCleanWorkspace(done) {
+        if (RED.nodes.dirty()) {
+            var message = '<p>You have undeployed changes that will be lost.</p><p>Do you want to continue?</p>';
             var cleanNotification = RED.notify(message,{
                 type:"info",
                 fixed: true,
@@ -1415,29 +1425,57 @@ RED.projects = (function() {
                         text: RED._("common.label.cancel"),
                         click: function() {
                             cleanNotification.close();
-                            if (options.cancel) {
-                                options.cancel();
-                            }
-                            if (alwaysCallback) {
-                                alwaysCallback();
-                            }
+                            done(true);
                         }
                     },{
                         text: 'Continue',
                         click: function() {
                             cleanNotification.close();
-                            delete options.requireCleanWorkspace;
-                            sendRequest(options,body).always(function() {
-                                if (alwaysCallback) {
-                                    alwaysCallback();
-                                }
-
-                            })
+                            done(false);
                         }
                     }
                 ]
             });
+
+        }
+    }
+
+    function sendRequest(options,body) {
+        // dialogBody.hide();
+        console.log(options.url,body);
+
+        if (options.requireCleanWorkspace && RED.nodes.dirty()) {
+            var thenCallback;
+            var alwaysCallback;
+            requireCleanWorkspace(function(cancelled) {
+                if (cancelled) {
+                    if (options.cancel) {
+                        options.cancel();
+                        if (alwaysCallback) {
+                            alwaysCallback();
+                        }
+                    }
+                } else {
+                    delete options.requireCleanWorkspace;
+                    sendRequest(options,body).then(function() {
+                        if (thenCallback) {
+                            thenCallback();
+                        }
+                    }).always(function() {
+                        if (alwaysCallback) {
+                            alwaysCallback();
+                        }
+
+                    })
+                }
+            })
+            // What follows is a very hacky Promise-like api thats good enough
+            // for our needs.
             return {
+                then: function(done) {
+                    thenCallback = done;
+                    return { always: function(done) { alwaysCallback = done; }}
+                 },
                 always: function(done) { alwaysCallback = done; }
             }
         }
@@ -1806,6 +1844,13 @@ RED.projects = (function() {
     }
 
 
+    function showNewProjectScreen() {
+        if (!activeProject) {
+            show('welcome');
+        } else {
+            show('create')
+        }
+    }
 
     return {
         init: init,
@@ -1821,10 +1866,15 @@ RED.projects = (function() {
                 RED.notify(RED._("user.errors.notAuthorized"),"error");
                 return;
             }
-            if (!activeProject) {
-                show('welcome');
+
+            if (RED.nodes.dirty()) {
+                return requireCleanWorkspace(function(cancelled) {
+                    if (!cancelled) {
+                        showNewProjectScreen();
+                    }
+                })
             } else {
-                show('create')
+                showNewProjectScreen();
             }
         },
         selectProject: function() {

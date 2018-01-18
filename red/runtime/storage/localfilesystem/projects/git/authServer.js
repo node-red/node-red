@@ -45,7 +45,7 @@ var ResponseServer = function(auth) {
                     parts.push(data.substring(0, m));
                     data = data.substring(m);
                     var line = parts.join("");
-                    console.log("LINE:",line);
+                    // console.log("LINE:",line);
                     parts = [];
                     if (line==='Username') {
                         connection.end(auth.username);
@@ -90,7 +90,6 @@ var ResponseSSHServer = function(auth) {
                     parts.push(data.substring(0, m));
                     data = data.substring(m);
                     var line = parts.join("");
-                    console.log("LINE:",line);
                     parts = [];
                     if (line==='The') {
                         // TODO: document these exchanges!

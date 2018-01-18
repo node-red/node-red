@@ -19,7 +19,7 @@ var sinon = require("sinon");
 var child_process = require('child_process');
 var EventEmitter = require("events");
 
-var ssh = require("../../../../../../red/runtime/storage/localfilesystem/projects/ssh")
+var ssh = require("../../../../../../red/runtime/storage/localfilesystem/projects/sshKeygen")
 
 describe("localfilesystem/projects/ssh", function() {
 
