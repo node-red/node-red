@@ -23,7 +23,7 @@ var crypto = require('crypto');
 var storageSettings = require("../settings");
 var util = require("../util");
 var gitTools = require("./git");
-var sshTools = require("./sshKeygen");
+var sshTools = require("./ssh");
 
 var Projects = require("./Project");
 
@@ -85,45 +85,47 @@ function init(_settings, _runtime) {
     var setupProjectsPromise;
 
     if (projectsEnabled) {
-        return gitTools.init(_settings, _runtime).then(function(gitVersion) {
-            if (!gitVersion) {
-                projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
-                projectsEnabled = false;
-            } else {
-                Projects.init(settings,runtime);
-                sshTools.init(settings,runtime);
-                projectsDir = fspath.join(settings.userDir,"projects");
-                if (!settings.readOnly) {
-                    return fs.ensureDir(projectsDir)
-                    //TODO: this is accessing settings from storage directly as settings
-                    //      has not yet been initialised. That isn't ideal - can this be deferred?
-                    .then(storageSettings.getSettings)
-                    .then(function(globalSettings) {
-                        var saveSettings = false;
-                        if (!globalSettings.projects) {
-                            globalSettings.projects = {
-                                projects: {}
-                            }
-                            saveSettings = true;
-                        } else {
-                            activeProject = globalSettings.projects.activeProject;
-                        }
-                        if (settings.flowFile) {
-                            if (globalSettings.projects.projects.hasOwnProperty(settings.flowFile)) {
-                                activeProject = settings.flowFile;
-                                globalSettings.projects.activeProject = settings.flowFile;
+        return sshTools.init(settings,runtime).then(function() {
+            gitTools.init(_settings, _runtime).then(function(gitVersion) {
+                if (!gitVersion) {
+                    projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
+                    projectsEnabled = false;
+                } else {
+                    Projects.init(settings,runtime);
+                    sshTools.init(settings,runtime);
+                    projectsDir = fspath.join(settings.userDir,"projects");
+                    if (!settings.readOnly) {
+                        return fs.ensureDir(projectsDir)
+                        //TODO: this is accessing settings from storage directly as settings
+                        //      has not yet been initialised. That isn't ideal - can this be deferred?
+                        .then(storageSettings.getSettings)
+                        .then(function(globalSettings) {
+                            var saveSettings = false;
+                            if (!globalSettings.projects) {
+                                globalSettings.projects = {
+                                    projects: {}
+                                }
                                 saveSettings = true;
+                            } else {
+                                activeProject = globalSettings.projects.activeProject;
                             }
-                        }
-                        if (!activeProject) {
-                            projectLogMessages.push(log._("storage.localfilesystem.no-active-project"))
-                        }
-                        if (saveSettings) {
-                            return storageSettings.saveSettings(globalSettings);
-                        }
-                    });
+                            if (settings.flowFile) {
+                                if (globalSettings.projects.projects.hasOwnProperty(settings.flowFile)) {
+                                    activeProject = settings.flowFile;
+                                    globalSettings.projects.activeProject = settings.flowFile;
+                                    saveSettings = true;
+                                }
+                            }
+                            if (!activeProject) {
+                                projectLogMessages.push(log._("storage.localfilesystem.no-active-project"))
+                            }
+                            if (saveSettings) {
+                                return storageSettings.saveSettings(globalSettings);
+                            }
+                        });
+                    }
                 }
-            }
+            });
         });
     }
     return Promise.resolve();
@@ -552,6 +554,8 @@ module.exports = {
     getFlows: getFlows,
     saveFlows: saveFlows,
     getCredentials: getCredentials,
-    saveCredentials: saveCredentials
+    saveCredentials: saveCredentials,
+
+    ssh: sshTools
 
 };

@@ -23,7 +23,7 @@ var os = require('os');
 var gitTools = require("./git");
 var util = require("../util");
 var defaultFileSet = require("./defaultFileSet");
-var sshKeys = require("../sshkeys");
+var sshKeys = require("./ssh");
 var settings;
 var runtime;
 var log;

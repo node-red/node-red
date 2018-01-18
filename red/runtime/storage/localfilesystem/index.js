@@ -24,7 +24,6 @@ var library = require("./library");
 var sessions = require("./sessions");
 var runtimeSettings = require("./settings");
 var projects = require("./projects");
-var sshkeys = require("./sshkeys");
 
 var initialFlowLoadComplete = false;
 var settings;
@@ -61,7 +60,6 @@ var localfilesystem = {
         runtimeSettings.init(settings);
         promises.push(library.init(settings));
         promises.push(projects.init(settings, runtime));
-        promises.push(sshkeys.init(settings, runtime));
 
         var packageFile = fspath.join(settings.userDir,"package.json");
         var packagePromise = when.resolve();
@@ -96,8 +94,7 @@ var localfilesystem = {
     saveSessions: sessions.saveSessions,
     getLibraryEntry: library.getLibraryEntry,
     saveLibraryEntry: library.saveLibraryEntry,
-    projects: projects,
-    sshkeys: sshkeys
+    projects: projects
 };
 
 module.exports = localfilesystem;

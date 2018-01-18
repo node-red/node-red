@@ -19,9 +19,9 @@ var sinon = require("sinon");
 var child_process = require('child_process');
 var EventEmitter = require("events");
 
-var ssh = require("../../../../../../red/runtime/storage/localfilesystem/projects/sshKeygen")
+var keygen = require("../../../../../../../red/runtime/storage/localfilesystem/projects/ssh/keygen")
 
-describe("localfilesystem/projects/ssh", function() {
+describe("localfilesystem/projects/ssh/keygen", function() {
 
     afterEach(function() {
         child_process.spawn.restore();
@@ -46,7 +46,7 @@ describe("localfilesystem/projects/ssh", function() {
             return e;
         });
 
-        ssh.generateKey({
+        keygen.generateKey({
             size: 123,
             location: 'location',
             comment: 'comment',
@@ -79,7 +79,7 @@ describe("localfilesystem/projects/ssh", function() {
             return e;
         });
 
-        ssh.generateKey({
+        keygen.generateKey({
             size: 123,
             location: 'location',
             comment: 'comment',
@@ -112,7 +112,7 @@ describe("localfilesystem/projects/ssh", function() {
             return e;
         });
 
-        ssh.generateKey({
+        keygen.generateKey({
             size: 123,
             location: 'location',
             comment: 'comment',

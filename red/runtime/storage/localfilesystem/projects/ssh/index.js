@@ -17,7 +17,7 @@
 var fs = require('fs-extra');
 var when = require('when');
 var fspath = require("path");
-var sshTools = require("./projects/ssh");
+var keygen = require("./keygen");
 
 var settings;
 var runtime;
@@ -32,10 +32,6 @@ function init(_settings, _runtime) {
     sshkeyDir = fspath.join(settings.userDir, "projects", ".sshkeys");
     userSSHKeyDir = fspath.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH, ".ssh");
     // console.log('sshkeys.init()');
-    return createSSHKeyDirectory();
-}
-
-function createSSHKeyDirectory() {
     return fs.ensureDir(sshkeyDir);
 }
 
@@ -176,7 +172,7 @@ function deleteSSHKeyFiles(username, name) {
 
 function generateSSHKeyPair(name, privateKeyPath, comment, password, size) {
     log.trace("ssh-keygen["+[name,privateKeyPath,comment,size,"hasPassword?"+!!password].join(",")+"]");
-    return sshTools.generateKey({location: privateKeyPath, comment: comment, password: password, size: size})
+    return keygen.generateKey({location: privateKeyPath, comment: comment, password: password, size: size})
             .then(function(stdout) {
                 return name;
             })

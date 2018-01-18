@@ -41,7 +41,7 @@ module.exports = {
         // List all SSH keys
         app.get("/", needsPermission("settings.read"), function(req,res) {
             var username = getUsername(req.user);
-            runtime.storage.sshkeys.listSSHKeys(username)
+            runtime.storage.projects.ssh.listSSHKeys(username)
             .then(function(list) {
                 res.json({
                     keys: list
@@ -61,7 +61,7 @@ module.exports = {
         app.get("/:id", needsPermission("settings.read"), function(req,res) {
             var username = getUsername(req.user);
             // console.log('username:', username);
-            runtime.storage.sshkeys.getSSHKey(username, req.params.id)
+            runtime.storage.projects.ssh.getSSHKey(username, req.params.id)
             .then(function(data) {
                 if (data) {
                     res.json({
@@ -85,7 +85,7 @@ module.exports = {
             var username = getUsername(req.user);
             // console.log('req.body:', req.body);
             if ( req.body && req.body.name && /^[a-zA-Z0-9\-_]+$/.test(req.body.name)) {
-                runtime.storage.sshkeys.generateSSHKey(username, req.body)
+                runtime.storage.projects.ssh.generateSSHKey(username, req.body)
                 .then(function(name) {
                     // console.log('generate key --- success  name:', name);
                     res.json({
@@ -108,7 +108,7 @@ module.exports = {
         // Delete a SSH key
         app.delete("/:id", needsPermission("settings.write"), function(req,res) {
             var username = getUsername(req.user);
-            runtime.storage.sshkeys.deleteSSHKey(username, req.params.id)
+            runtime.storage.projects.ssh.deleteSSHKey(username, req.params.id)
             .then(function() {
                 res.status(204).end();
             })

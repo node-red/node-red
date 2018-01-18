@@ -292,13 +292,14 @@ describe('storage/localfilesystem', function() {
     it('should fsync the flows file',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({editorTheme:{projects:{enabled:false}},userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
             sinon.spy(fs,"fsync");
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.fsync.callCount.should.eql(1);
                 fs.fsync.restore();
                 done();
             }).otherwise(function(err) {
+                fs.fsync.restore();
                 done(err);
             });
         }).otherwise(function(err) {
