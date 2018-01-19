@@ -33,6 +33,9 @@ function runSshKeygenCommand(args,cwd,env) {
             stderr += data;
         });
         child.on('close', function(code, signal) {
+            console.log(code);
+            console.log(stdout);
+            console.log(stderr);
             if (code !== 0) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
