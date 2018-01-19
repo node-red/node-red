@@ -19,7 +19,7 @@ var path = require('path');
 
 var sshkeys = require("../../../../../../../red/runtime/storage/localfilesystem/projects/ssh");
 
-describe("storage/localfilesystem/sshkeys", function() {
+describe("storage/localfilesystem/projects/ssh", function() {
     var userDir = path.join(__dirname,".testSSHKeyUserHome");
     var mockSettings = {
         userDir: userDir
@@ -50,7 +50,7 @@ describe("storage/localfilesystem/sshkeys", function() {
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         sshkeys.init(mockSettings, mockRuntime).then(function() {
             var ret = fs.existsSync(sshkeyDirPath);
-            fs.existsSync(sshkeyDirPath).should.be.true();
+            ret.should.be.true();
             done();
         }).catch(function(err) {
             done(err);
@@ -219,6 +219,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should generate sshkey file with empty data', function(done) {
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -239,6 +240,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should generate sshkey file with only comment data', function(done) {
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -261,6 +263,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should generate sshkey file with password data', function(done) {
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -284,6 +287,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should generate sshkey file with size data', function(done) {
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -307,7 +311,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should generate sshkey file with password & size data', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -332,7 +336,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should not generate sshkey file with illegal size data', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -346,7 +350,7 @@ describe("storage/localfilesystem/sshkeys", function() {
                 done(new Error('Does NOT throw error!'));
             }).catch(function(err) {
                 try {
-                    err.should.have.have.property('code', 'key_length_too_short');
+                    err.should.have.property('code', 'key_length_too_short');
                     done();
                 }
                 catch (error) {
@@ -359,7 +363,7 @@ describe("storage/localfilesystem/sshkeys", function() {
     });
 
     it('should not generate sshkey file with illegal password', function(done) {
-        this.timeout(5000);
+        this.timeout(10000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -373,7 +377,7 @@ describe("storage/localfilesystem/sshkeys", function() {
                 done(new Error('Does NOT throw error!'));
             }).catch(function(err) {
                 try {
-                    err.should.have.have.property('code', 'key_passphrase_too_short');
+                    err.should.have.property('code', 'key_passphrase_too_short');
                     done();
                 }
                 catch (error) {
