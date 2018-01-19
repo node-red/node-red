@@ -33,14 +33,14 @@ function runSshKeygenCommand(args,cwd,env) {
             stderr += data;
         });
         child.on('close', function(code, signal) {
-            console.log(code);
-            console.log(stdout);
-            console.log(stderr);
+            // console.log(code);
+            // console.log(stdout);
+            // console.log(stderr);
             if (code !== 0) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
                 err.stderr = stderr;
-                if (/passphrase is too short/.test(stderr)) {
+                if (/short/.test(stderr)) {
                     err.code = "key_passphrase_too_short";
                 } else if(/Key must at least be 1024 bits/.test(stderr)) {
                     err.code = "key_length_too_short";
@@ -60,7 +60,13 @@ function init(_settings, _runtime) {
 
 function generateKey(options) {
     var args = ['-q', '-t', 'rsa'];
+    var err;
     if (options.size) {
+        if (options.size < 1024) {
+            err = new Error("key_length_too_short");
+            err.code = "key_length_too_short";
+            throw err;
+        }
         args.push('-b', options.size);
     }
     if (options.location) {
@@ -69,7 +75,16 @@ function generateKey(options) {
     if (options.comment) {
         args.push('-C', options.comment);
     }
-    args.push('-N', options.password||'');
+    if (options.password) {
+        if (options.password.length < 5) {
+            err = new Error("key_passphrase_too_short");
+            err.code = "key_passphrase_too_short";
+            throw err;
+        }
+        args.push('-N', options.password||'');
+    } else {
+        args.push('-N', '');
+    }
 
     return runSshKeygenCommand(args,__dirname);
 }
