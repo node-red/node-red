@@ -170,7 +170,7 @@ RED.editor = (function() {
                 }
             }
         }
-        if (!node._def.defaults.hasOwnProperty("icon") && node.icon) {
+        if (node._def.hasOwnProperty("defaults") && !node._def.defaults.hasOwnProperty("icon") && node.icon) {
             var iconPath = RED.utils.separateIconPath(node.icon);
             var iconSets = RED.nodes.getIconSets();
             var iconFileList = iconSets[iconPath.module];
