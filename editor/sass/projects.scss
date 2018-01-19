@@ -177,6 +177,7 @@
 .projects-dialog-project-list-inner-container {
     height: 300px;
     overflow-y: scroll;
+    position:relative;
     .red-ui-editableList-border {
         border: none;
     }
@@ -185,22 +186,6 @@
     li {
         padding: 0 !important;
     }
-    &.projects-dialog-project-list-small {
-        .projects-dialog-project-list-entry {
-            padding: 6px 0;
-            i {
-                font-size: 1em;
-            }
-        }
-        .projects-dialog-project-list-entry-name {
-            font-size: 1em;
-        }
-        .projects-dialog-project-list-entry-current {
-            margin-right: 10px;
-            padding-top: 2px;
-        }
-    }
-
 }
 .projects-dialog-project-list-entry {
     padding: 12px 0;
@@ -222,10 +207,12 @@
             // border-right-color: #aaa;
         }
     }
-    i {
-        color: #ccc;
-        font-size: 2em;
+    .projects-dialog-project-list-entry-icon {
+        i {
+            color: #ccc;
+            font-size: 2em;
 
+        }
     }
     &.selected {
         background: #efefef;
@@ -248,6 +235,18 @@
         font-size: 0.9em;
         color: #999;
         padding-top: 4px;
+    }
+    .projects-dialog-project-list-entry-tools {
+        position: absolute;
+        top: 16px;
+        right: 30px;
+        display: none;
+        color: #999;
+    }
+    &:hover {
+        .projects-dialog-project-list-entry-tools {
+            display: block;
+        }
     }
 }
 .projects-dialog-screen-create-type.editor-button.toggle.selected:not(.disabled):not(:disabled) {
