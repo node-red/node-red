@@ -27,7 +27,7 @@ describe('SORT node', function() {
 
     afterEach(function() {
         helper.unload();
-        RED.settings.maxKeptMsgsCount = 2;
+        RED.settings.maxKeptMsgsCount = 0;
     });
 
     it('should be loaded', function(done) {
