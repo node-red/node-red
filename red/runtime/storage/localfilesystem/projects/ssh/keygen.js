@@ -28,6 +28,13 @@ function runSshKeygenCommand(args,cwd,env) {
             var stdout = "";
             var stderr = "";
 
+            var watchdog = setTimeout(function() {
+                console.log("TIMEOUT");
+                console.log("stdout",stdout);
+                console.log("stderr",stderr);
+                child.kill();
+            },6000);
+
             child.stdout.on('data', function(data) {
                 stdout += data;
             });
@@ -35,6 +42,7 @@ function runSshKeygenCommand(args,cwd,env) {
                 stderr += data;
             });
             child.on('close', function(code, signal) {
+                clearTimeout(watchdog);
                 console.log("sshKeyGen closed",code);
                 console.log("sshKeyGen",stdout);
                 console.log("sshKeyGen",stderr);
