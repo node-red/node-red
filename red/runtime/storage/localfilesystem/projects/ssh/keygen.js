@@ -22,32 +22,41 @@ var log;
 
 function runSshKeygenCommand(args,cwd,env) {
     return new Promise(function(resolve, reject) {
-        var child = child_process.spawn(sshkeygenCommand, args, {cwd: cwd, detached: true, env: env});
-        var stdout = "";
-        var stderr = "";
+        console.log("Spawning command",args);
+        try {
+            var child = child_process.spawn(sshkeygenCommand, args, {cwd: cwd, detached: true, env: env});
+            var stdout = "";
+            var stderr = "";
 
-        child.stdout.on('data', function(data) {
-            stdout += data;
-        });
-        child.stderr.on('data', function(data) {
-            stderr += data;
-        });
-        child.on('close', function(code, signal) {
-            if (code !== 0) {
-                var err = new Error(stderr);
-                err.stdout = stdout;
-                err.stderr = stderr;
-                if (/passphrase is too short/.test(stderr)) {
-                    err.code = "key_passphrase_too_short";
-                } else if(/Key must at least be 1024 bits/.test(stderr)) {
-                    err.code = "key_length_too_short";
+            child.stdout.on('data', function(data) {
+                stdout += data;
+            });
+            child.stderr.on('data', function(data) {
+                stderr += data;
+            });
+            child.on('close', function(code, signal) {
+                console.log("sshKeyGen closed",code);
+                console.log("sshKeyGen",stdout);
+                console.log("sshKeyGen",stderr);
+                if (code !== 0) {
+                    var err = new Error(stderr);
+                    err.stdout = stdout;
+                    err.stderr = stderr;
+                    if (/passphrase is too short/.test(stderr)) {
+                        err.code = "key_passphrase_too_short";
+                    } else if(/Key must at least be 1024 bits/.test(stderr)) {
+                        err.code = "key_length_too_short";
+                    }
+                    reject(err);
                 }
-                reject(err);
-            }
-            else {
-                resolve(stdout);
-            }
-        });
+                else {
+                    resolve(stdout);
+                }
+            });
+        } catch(err) {
+            console.log("Threw error",err);
+            reject(err);
+        }
     });
 }
 
