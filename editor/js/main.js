@@ -119,7 +119,8 @@
                             var options = {
                                 type: msg.type,
                                 fixed: msg.timeout === undefined,
-                                timeout: msg.timeout
+                                timeout: msg.timeout,
+                                id: notificationId
                             }
                             if (notificationId === "runtime-state") {
                                 if (msg.error === "missing-types") {
@@ -128,8 +129,7 @@
                                         {
                                             text: "Close",
                                             click: function() {
-                                                persistentNotifications[notificationId].close();
-                                                delete persistentNotifications[notificationId];
+                                                persistentNotifications[notificationId].hideNotification();
                                             }
                                         }
                                     ]
@@ -139,8 +139,7 @@
                                             {
                                                 text: "Setup credentials",
                                                 click: function() {
-                                                    persistentNotifications[notificationId].close();
-                                                    delete persistentNotifications[notificationId];
+                                                    persistentNotifications[notificationId].hideNotification();
                                                     RED.projects.showCredentialsPrompt();
                                                 }
                                             }
@@ -152,8 +151,7 @@
                                             {
                                                 text: "Setup project files",
                                                 click: function() {
-                                                    persistentNotifications[notificationId].close();
-                                                    delete persistentNotifications[notificationId];
+                                                    persistentNotifications[notificationId].hideNotification();
                                                     RED.projects.showFilesPrompt();
                                                 }
                                             }
@@ -165,14 +163,12 @@
                                             {
                                                 text: "No thanks",
                                                 click: function() {
-                                                    persistentNotifications[notificationId].close();
-                                                    delete persistentNotifications[notificationId];
+                                                    persistentNotifications[notificationId].hideNotification();
                                                 }
                                             },                                        {
                                                 text: "Create default project files",
                                                 click: function() {
-                                                    persistentNotifications[notificationId].close();
-                                                    delete persistentNotifications[notificationId];
+                                                    persistentNotifications[notificationId].hideNotification();
                                                     RED.projects.createDefaultFileSet();
                                                 }
                                             }
@@ -397,6 +393,7 @@
         RED.menu.init({id:"btn-sidemenu",options: menuOptions});
 
         RED.deploy.init(RED.settings.theme("deployButton",null));
+        RED.notifications.init();
 
         RED.actions.add("core:show-about", showAbout);
         RED.nodes.init();
