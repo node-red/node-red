@@ -431,6 +431,9 @@
                 if (val === "auto") {
                     $("#node-input-accumulate").attr('checked', false);
                 }
+                else if (val === "custom") {
+                    $("#node-input-build").change();
+                }
                 else if (val === "merge") {
                     var topics = node.topics;
                     var container = $("#node-input-topics-container");
@@ -484,6 +487,7 @@
                 $(".node-row-trigger").toggle(val!=='auto');
                 if (val === 'string' || val==='buffer') {
                     $("#node-input-property").typedInput('types',['msg']);
+                    $("#node-input-joiner").typedInput("show");
                 } else {
                     $("#node-input-property").typedInput('types',['msg', {value:"full",label:"complete message",hasValue:false}]);
                 }
