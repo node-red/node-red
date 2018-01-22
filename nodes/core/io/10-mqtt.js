@@ -136,7 +136,7 @@ module.exports = function(RED) {
                 tlsNode.addTLSOptions(this.options);
             }
         }
-        console.log(this.brokerurl,this.options);
+        // console.log(this.brokerurl,this.options);
 
         // If there's no rejectUnauthorized already, then this could be an
         // old config where this option was provided on the broker node and
@@ -182,7 +182,6 @@ module.exports = function(RED) {
         };
 
         this.connect = function () {
-            console.log("CONNECT");
             if (!node.connected && !node.connecting) {
                 node.connecting = true;
                 node.client = mqtt.connect(node.brokerurl ,node.options);
