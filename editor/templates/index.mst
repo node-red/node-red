@@ -82,31 +82,6 @@
 <div id="notifications"></div>
 <div id="dropTarget"><div data-i18n="[append]workspace.dropFlowHere"><br/><i class="fa fa-download"></i></div></div>
 
-<div id="node-dialog-confirm-deploy" class="hide">
-    <form class="form-horizontal">
-        <div id="node-dialog-confirm-deploy-config" class="node-dialog-confirm-row" data-i18n="[prepend]deploy.confirm.improperlyConfigured;[append]deploy.confirm.confirm">
-            <ul id="node-dialog-confirm-deploy-invalid-list"></ul>
-        </div>
-        <div id="node-dialog-confirm-deploy-unknown" class="node-dialog-confirm-row" data-i18n="[prepend]deploy.confirm.unknown;[append]deploy.confirm.confirm">
-            <ul id="node-dialog-confirm-deploy-unknown-list"></ul>
-        </div>
-        <div id="node-dialog-confirm-deploy-conflict" class="node-dialog-confirm-row">
-            <div style="margin-left: 40px; margin-bottom: 10px;">
-                <span data-i18n="deploy.confirm.conflict"></span>
-            </div>
-            <div id="node-dialog-confirm-deploy-conflict-checking" class="node-dialog-confirm-conflict-row">
-                <img src="red/images/spin.svg"/><div data-i18n="deploy.confirm.conflictChecking"></div>
-            </div>
-            <div id="node-dialog-confirm-deploy-conflict-auto-merge" class="node-dialog-confirm-conflict-row">
-                <i style="color: #3a3;" class="fa fa-check"></i><div data-i18n="deploy.confirm.conflictAutoMerge"></div>
-            </div>
-            <div id="node-dialog-confirm-deploy-conflict-manual-merge" class="node-dialog-confirm-conflict-row">
-                <i style="color: #999;" class="fa fa-exclamation"></i><div data-i18n="deploy.confirm.conflictManualMerge"></div>
-            </div>
-        </div>
-    </form>
-</div>
-
 <div id="node-dialog-library-save-confirm" class="hide">
     <form class="form-horizontal">
         <div style="text-align: center; padding-top: 30px;" id="node-dialog-library-save-content">

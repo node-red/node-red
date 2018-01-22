@@ -97,113 +97,6 @@ RED.deploy = (function() {
 
         RED.actions.add("core:deploy-flows",save);
 
-        $( "#node-dialog-confirm-deploy" ).dialog({
-                title: RED._('deploy.confirm.button.confirm'),
-                modal: true,
-                autoOpen: false,
-                width: 550,
-                height: "auto",
-                buttons: [
-                    {
-                        text: RED._("common.label.cancel"),
-                        click: function() {
-                            $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        id: "node-dialog-confirm-deploy-review",
-                        text: RED._("deploy.confirm.button.review"),
-                        class: "primary disabled",
-                        click: function() {
-                            if (!$("#node-dialog-confirm-deploy-review").hasClass('disabled')) {
-                                RED.diff.showRemoteDiff();
-                                $( this ).dialog( "close" );
-                            }
-                        }
-                    },
-                    {
-                        id: "node-dialog-confirm-deploy-merge",
-                        text: RED._("deploy.confirm.button.merge"),
-                        class: "primary disabled",
-                        click: function() {
-                            RED.diff.mergeDiff(currentDiff);
-                            $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        id: "node-dialog-confirm-deploy-deploy",
-                        text: RED._("deploy.confirm.button.confirm"),
-                        class: "primary",
-                        click: function() {
-
-                            var ignoreChecked = $( "#node-dialog-confirm-deploy-hide" ).prop("checked");
-                            if (ignoreChecked) {
-                                ignoreDeployWarnings[$( "#node-dialog-confirm-deploy-type" ).val()] = true;
-                            }
-                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
-                            $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        id: "node-dialog-confirm-deploy-overwrite",
-                        text: RED._("deploy.confirm.button.overwrite"),
-                        class: "primary",
-                        click: function() {
-                            save(true,/conflict/.test($("#node-dialog-confirm-deploy-type" ).val()));
-                            $( this ).dialog( "close" );
-                        }
-                    }
-                ],
-                create: function() {
-                    $("#node-dialog-confirm-deploy").parent().find("div.ui-dialog-buttonpane")
-                        .prepend('<div style="height:0; vertical-align: middle; display:inline-block; margin-top: 13px; float:left;">'+
-                                   '<input style="vertical-align:top;" type="checkbox" id="node-dialog-confirm-deploy-hide"> '+
-                                   '<label style="display:inline;" for="node-dialog-confirm-deploy-hide" data-i18n="deploy.confirm.doNotWarn"></label>'+
-                                   '<input type="hidden" id="node-dialog-confirm-deploy-type">'+
-                                   '</div>');
-                },
-                open: function() {
-                    var deployType = $("#node-dialog-confirm-deploy-type" ).val();
-                    if (/conflict/.test(deployType)) {
-                        $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.review'));
-                        $("#node-dialog-confirm-deploy-deploy").hide();
-                        $("#node-dialog-confirm-deploy-review").addClass('disabled').show();
-                        $("#node-dialog-confirm-deploy-merge").addClass('disabled').show();
-                        $("#node-dialog-confirm-deploy-overwrite").toggle(deployType === "deploy-conflict");
-                        currentDiff = null;
-                        $("#node-dialog-confirm-deploy-conflict-checking").show();
-                        $("#node-dialog-confirm-deploy-conflict-auto-merge").hide();
-                        $("#node-dialog-confirm-deploy-conflict-manual-merge").hide();
-
-                        var now = Date.now();
-                        RED.diff.getRemoteDiff(function(diff) {
-                            var ellapsed = Math.max(1000 - (Date.now()-now), 0);
-                            currentDiff = diff;
-                            setTimeout(function() {
-                                $("#node-dialog-confirm-deploy-conflict-checking").hide();
-                                var d = Object.keys(diff.conflicts);
-                                if (d.length === 0) {
-                                    $("#node-dialog-confirm-deploy-conflict-auto-merge").show();
-                                    $("#node-dialog-confirm-deploy-merge").removeClass('disabled')
-                                } else {
-                                    $("#node-dialog-confirm-deploy-conflict-manual-merge").show();
-                                }
-                                $("#node-dialog-confirm-deploy-review").removeClass('disabled')
-                            },ellapsed);
-                        })
-
-
-                        $("#node-dialog-confirm-deploy-hide").parent().hide();
-                    } else {
-                        $( "#node-dialog-confirm-deploy" ).dialog('option','title', RED._('deploy.confirm.button.confirm'));
-                        $("#node-dialog-confirm-deploy-deploy").show();
-                        $("#node-dialog-confirm-deploy-overwrite").hide();
-                        $("#node-dialog-confirm-deploy-review").hide();
-                        $("#node-dialog-confirm-deploy-merge").hide();
-                        $("#node-dialog-confirm-deploy-hide").parent().show();
-                    }
-                }
-        });
 
         RED.events.on('nodes:change',function(state) {
             if (state.dirty) {
@@ -224,8 +117,9 @@ RED.deploy = (function() {
                 if (currentRev === null || deployInflight || currentRev === msg.revision) {
                     return;
                 }
-                var message = $('<div>').text(RED._('deploy.confirm.backgroundUpdate'));
+                var message = $('<p>').text(RED._('deploy.confirm.backgroundUpdate'));
                 activeNotifyMessage = RED.notify(message,{
+                    modal: true,
                     fixed: true,
                     buttons: [
                         {
@@ -276,14 +170,93 @@ RED.deploy = (function() {
     }
 
     function resolveConflict(currentNodes, activeDeploy) {
-        $( "#node-dialog-confirm-deploy-config" ).hide();
-        $( "#node-dialog-confirm-deploy-unknown" ).hide();
-        $( "#node-dialog-confirm-deploy-unused" ).hide();
-        $( "#node-dialog-confirm-deploy-conflict" ).show();
-        $( "#node-dialog-confirm-deploy-type" ).val(activeDeploy?"deploy-conflict":"background-conflict");
-        $( "#node-dialog-confirm-deploy" ).dialog( "open" );
-    }
+        var message = $('<div>');
+        $('<p data-i18n="deploy.confirm.conflict"></p>').appendTo(message);
+        var conflictCheck = $('<div id="node-dialog-confirm-deploy-conflict-checking" class="node-dialog-confirm-conflict-row">'+
+            '<img src="red/images/spin.svg"/><div data-i18n="deploy.confirm.conflictChecking"></div>'+
+        '</div>').appendTo(message);
+        var conflictAutoMerge = $('<div class="node-dialog-confirm-conflict-row">'+
+            '<i style="color: #3a3;" class="fa fa-check"></i><div data-i18n="deploy.confirm.conflictAutoMerge"></div>'+
+            '</div>').hide().appendTo(message);
+        var conflictManualMerge = $('<div id="node-dialog-confirm-deploy-conflict-manual-merge" class="node-dialog-confirm-conflict-row">'+
+            '<i style="color: #999;" class="fa fa-exclamation"></i><div data-i18n="deploy.confirm.conflictManualMerge"></div>'+
+            '</div>').hide().appendTo(message);
 
+        message.i18n();
+        currentDiff = null;
+        var buttons = [
+            {
+                text: RED._("common.label.cancel"),
+                click: function() {
+                    conflictNotification.close();
+                }
+            },
+            {
+                id: "node-dialog-confirm-deploy-review",
+                text: RED._("deploy.confirm.button.review"),
+                class: "primary disabled",
+                click: function() {
+                    if (!$("#node-dialog-confirm-deploy-review").hasClass('disabled')) {
+                        RED.diff.showRemoteDiff();
+                        conflictNotification.close();
+                    }
+                }
+            },
+            {
+                id: "node-dialog-confirm-deploy-merge",
+                text: RED._("deploy.confirm.button.merge"),
+                class: "primary disabled",
+                click: function() {
+                    if (!$("#node-dialog-confirm-deploy-merge").hasClass('disabled')) {
+                        RED.diff.mergeDiff(currentDiff);
+                        conflictNotification.close();
+                    }
+                }
+            }
+        ];
+        if (activeDeploy) {
+            buttons.push({
+                id: "node-dialog-confirm-deploy-overwrite",
+                text: RED._("deploy.confirm.button.overwrite"),
+                class: "primary",
+                click: function() {
+                    save(true,activeDeploy);
+                    conflictNotification.close();
+                }
+            })
+        }
+        var conflictNotification = RED.notify(message,{
+            modal: true,
+            fixed: true,
+            width: 600,
+            buttons: buttons
+        });
+
+        var now = Date.now();
+        RED.diff.getRemoteDiff(function(diff) {
+            var ellapsed = Math.max(1000 - (Date.now()-now), 0);
+            currentDiff = diff;
+            setTimeout(function() {
+                conflictCheck.hide();
+                var d = Object.keys(diff.conflicts);
+                if (d.length === 0) {
+                    conflictAutoMerge.show();
+                    $("#node-dialog-confirm-deploy-merge").removeClass('disabled')
+                } else {
+                    conflictManualMerge.show();
+                }
+                $("#node-dialog-confirm-deploy-review").removeClass('disabled')
+            },ellapsed);
+        })
+    }
+    function cropList(list) {
+        if (list.length > 5) {
+            var remainder = list.length - 5;
+            list = list.slice(0,5);
+            list.push(RED._("deploy.confirm.plusNMore",{count:remainder}));
+        }
+        return list;
+    }
     function save(skipValidation,force) {
         if (!$("#btn-deploy").hasClass("disabled")) {
             if (!RED.user.hasPermission("flows.write")) {
@@ -319,39 +292,62 @@ RED.deploy = (function() {
                     }
                 });
 
-                $( "#node-dialog-confirm-deploy-config" ).hide();
-                $( "#node-dialog-confirm-deploy-unknown" ).hide();
-                $( "#node-dialog-confirm-deploy-unused" ).hide();
-                $( "#node-dialog-confirm-deploy-conflict" ).hide();
-
                 var showWarning = false;
-
+                var notificationMessage;
+                var notificationButtons = [];
+                var notification;
                 if (hasUnknown && !ignoreDeployWarnings.unknown) {
                     showWarning = true;
-                    $( "#node-dialog-confirm-deploy-type" ).val("unknown");
-                    $( "#node-dialog-confirm-deploy-unknown" ).show();
-                    $( "#node-dialog-confirm-deploy-unknown-list" )
-                        .html("<li>"+unknownNodes.join("</li><li>")+"</li>");
+                    notificationMessage = "<p>"+RED._('deploy.confirm.unknown')+"</p>"+
+                        '<ul class="node-dialog-configm-deploy-list"><li>'+cropList(unknownNodes).join("</li><li>")+"</li></ul><p>"+
+                        RED._('deploy.confirm.confirm')+
+                        "</p>";
+
+                    notificationButtons= [
+                        {
+                            id: "node-dialog-confirm-deploy-deploy",
+                            text: RED._("deploy.confirm.button.confirm"),
+                            class: "primary",
+                            click: function() {
+                                save(true);
+                                notification.close();
+                            }
+                        }
+                    ];
                 } else if (hasInvalid && !ignoreDeployWarnings.invalid) {
                     showWarning = true;
-                    $( "#node-dialog-confirm-deploy-type" ).val("invalid");
-                    $( "#node-dialog-confirm-deploy-config" ).show();
                     invalidNodes.sort(sortNodeInfo);
-                    $( "#node-dialog-confirm-deploy-invalid-list" )
-                        .html("<li>"+invalidNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
 
-                } else if (hasUnusedConfig && !ignoreDeployWarnings.unusedConfig) {
-                    // showWarning = true;
-                    // $( "#node-dialog-confirm-deploy-type" ).val("unusedConfig");
-                    // $( "#node-dialog-confirm-deploy-unused" ).show();
-                    //
-                    // unusedConfigNodes.sort(sortNodeInfo);
-                    // $( "#node-dialog-confirm-deploy-unused-list" )
-                    //     .html("<li>"+unusedConfigNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"}).join("</li><li>")+"</li>");
+                    notificationMessage = "<p>"+RED._('deploy.confirm.improperlyConfigured')+"</p>"+
+                        '<ul class="node-dialog-configm-deploy-list"><li>'+cropList(invalidNodes.map(function(A) { return (A.tab?"["+A.tab+"] ":"")+A.label+" ("+A.type+")"})).join("</li><li>")+"</li></ul><p>"+
+                        RED._('deploy.confirm.confirm')+
+                        "</p>";
+                    notificationButtons= [
+                        {
+                            id: "node-dialog-confirm-deploy-deploy",
+                            text: RED._("deploy.confirm.button.confirm"),
+                            class: "primary",
+                            click: function() {
+                                save(true);
+                                notification.close();
+                            }
+                        }
+                    ];
                 }
                 if (showWarning) {
-                    $( "#node-dialog-confirm-deploy-hide" ).prop("checked",false);
-                    $( "#node-dialog-confirm-deploy" ).dialog( "open" );
+                    notificationButtons.unshift(
+                        {
+                            text: RED._("common.label.cancel"),
+                            click: function() {
+                                notification.close();
+                            }
+                        }
+                    );
+                    notification = RED.notify(notificationMessage,{
+                        modal: true,
+                        fixed: true,
+                        buttons:notificationButtons
+                    });
                     return;
                 }
             }
@@ -391,7 +387,7 @@ RED.deploy = (function() {
                     '<p>'+RED._("deploy.successfulDeploy")+'</p>'+
                     '<p>'+RED._("deploy.unusedConfigNodes")+' <a href="#" onclick="RED.sidebar.config.show(true); return false;">'+RED._("deploy.unusedConfigNodesLink")+'</a></p>',"success",false,6000);
                 } else {
-                    RED.notify(RED._("deploy.successfulDeploy"),"success");
+                    RED.notify('<p>'+RED._("deploy.successfulDeploy")+'</p>',"success");
                 }
                 RED.nodes.eachNode(function(node) {
                     if (node.changed) {

@@ -74,6 +74,16 @@ RED.notifications = (function() {
         if (type) {
             n.className = "notification notification-"+type;
         }
+        if (options.width) {
+            var parentWidth = $("#notifications").width();
+            if (options.width > parentWidth) {
+                var margin = -(options.width-parentWidth)/2;
+                $(n).css({
+                    width: options.width+"px",
+                    marginLeft: margin+"px"
+                })
+            }
+        }
         n.style.display = "none";
         if (typeof msg === "string") {
             n.innerHTML = msg;
@@ -84,6 +94,9 @@ RED.notifications = (function() {
             var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(n)
             options.buttons.forEach(function(buttonDef) {
                 var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                if (buttonDef.id) {
+                    b.attr('id',buttonDef.id);
+                }
                 if (buttonDef.class) {
                     b.addClass(buttonDef.class);
                 }
@@ -153,6 +166,9 @@ RED.notifications = (function() {
                         var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(nn)
                         options.buttons.forEach(function(buttonDef) {
                             var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                            if (buttonDef.id) {
+                                b.attr('id',buttonDef.id);
+                            }
                             if (buttonDef.class) {
                                 b.addClass(buttonDef.class);
                             }

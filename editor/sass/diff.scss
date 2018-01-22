@@ -515,34 +515,30 @@
 }
 
 
-#node-dialog-confirm-deploy {
-    .node-dialog-confirm-row {
-        text-align: left; padding-top: 10px;
+ul.node-dialog-configm-deploy-list {
+    font-size: 0.9em;
+    width: 400px;
+    margin: 10px auto;
+    text-align: left;
+}
+
+.node-dialog-confirm-conflict-row {
+    img {
+        vertical-align:middle;
+        height: 30px;
+        margin-right: 10px;
     }
-    ul {
-        font-size: 0.9em;
-        width: 400px;
-        margin: 10px auto;
-        text-align: left;
+    i {
+        vertical-align:middle;
+        text-align: center;
+        font-size: 30px;
+        width: 30px;
+        margin-right: 10px;
     }
-    .node-dialog-confirm-conflict-row {
-        img {
-            vertical-align:middle;
-            height: 30px;
-            margin-right: 10px;
-        }
-        i {
-             vertical-align:middle;
-             text-align: center;
-             font-size: 30px;
-             width: 30px;
-             margin-right: 10px;
-        }
-        div {
-            vertical-align: middle;
-            width: calc(100% - 60px);
-            display:inline-block;
-        }
+    div {
+        vertical-align: middle;
+        width: calc(100% - 60px);
+        display:inline-block;
     }
 }
 

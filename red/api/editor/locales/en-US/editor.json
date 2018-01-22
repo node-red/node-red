@@ -166,7 +166,8 @@
             "backgroundUpdate": "The flows on the server have been updated.",
             "conflictChecking": "Checking to see if the changes can be merged automatically",
             "conflictAutoMerge": "The changes include no conflicts and can be merged automatically.",
-            "conflictManualMerge": "The changes include conflicts that must be resolved before they can be deployed."
+            "conflictManualMerge": "The changes include conflicts that must be resolved before they can be deployed.",
+            "plusNMore": "+ __count__ more"
         }
     },
     "diff": {
