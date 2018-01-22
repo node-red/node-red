@@ -14,29 +14,21 @@
  * limitations under the License.
  **/
 
-var icons = {
-    // input
-    "inject": "icons/node-red/inject.png",
-    // output
-    "debug": "icons/node-red/debug.png",
-    // function
-    "change": "icons/node-red/swap.png",
-};
-
-function getIdWithIcon(icon) {
-    //*[name()="image" and @*="icons/node-red/inject.png"]/../..
-    var id = browser.getAttribute('//*[name()="image" and @*="' + icon + '"]/../..', 'id');
-    return id;
-}
-
-function Node(type) {
-    this.id = '//*[@id="' + getIdWithIcon(icons[type]) + '"]';
+function Node(id) {
+    this.id = '//*[@id="' + id + '"]';
 }
 
 Node.prototype.edit = function() {
-    browser.click(this.id);
-    browser.click(this.id);
-    browser.pause(500); // Necessary for headless mode.
+    browser.clickWithWait(this.id);
+    browser.clickWithWait(this.id);
+    // Wait until an edit dialog opens.
+    browser.waitForVisible('#node-dialog-ok', 2000);
+}
+
+Node.prototype.clickOk = function() {
+    browser.clickWithWait('#node-dialog-ok');
+    // Wait untile an edit dialog closes.
+    browser.waitForVisible('#node-dialog-ok', 2000, true);
 }
 
 Node.prototype.connect = function(targetNode) {
@@ -46,7 +38,7 @@ Node.prototype.connect = function(targetNode) {
 }
 
 Node.prototype.clickLeftButton = function() {
-    browser.click(this.id + '/*[@class="node_button node_left_button"]');
+    browser.clickWithWait(this.id + '/*[@class="node_button node_left_button"]');
 }
 
 module.exports = Node;

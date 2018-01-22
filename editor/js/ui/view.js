@@ -81,6 +81,9 @@ RED.view = (function() {
         .style("cursor","crosshair")
         .on("mousedown", function() {
             focusView();
+        })
+        .on("contextmenu", function(){
+            d3.event.preventDefault();
         });
 
     var vis = outer
@@ -1392,7 +1395,7 @@ RED.view = (function() {
 
     function portMouseUp(d,portType,portIndex) {
         var i;
-        if (mouse_mode === RED.state.QUICK_JOINING) {
+        if (mouse_mode === RED.state.QUICK_JOINING && drag_lines.length > 0) {
             if (drag_lines[0].node===d) {
                 return
             }

@@ -541,7 +541,8 @@
     "switch": {
         "label": {
             "property": "Property",
-            "rule": "rule"
+            "rule": "rule",
+            "repair" :  "repair sequence (reconstruct parts property of outgoing messages)"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -555,10 +556,15 @@
             "false":"is false",
             "null":"is null",
             "nnull":"is not null",
+            "head":"head",
+            "tail":"tail",
+            "index":"is between",
+            "exp":"JSONata exp",
             "else":"otherwise"
         },
         "errors": {
-            "invalid-expr": "Invalid JSONata expression: __error__"
+            "invalid-expr": "Invalid JSONata expression: __error__",
+            "too-many" : "too many pending messages in switch node"
         }
     },
     "change": {
@@ -840,6 +846,8 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
+            "merge":"merge sequence",
+            "reduce":"reduce sequence",
             "custom":"manual"
         },
         "combine":"Combine each",
@@ -861,19 +869,63 @@
         "afterTimeout":"After a timeout following the first message",
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
-        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property.",
+        "too-many" : "too many pending messages in join node",
+        "merge": {
+            "topics-label":"Merged Topics",
+            "topics":"topics",
+            "topic" : "topic",
+            "on-change":"Send merged message on arrival of a new topic"
+        },
+        "reduce": {
+            "exp": "Reduce exp",
+            "exp-value": "exp",
+            "init": "Initial value",
+            "right": "Evaluate in reverse order (right to left)",
+            "fixup": "Fixup exp"
+        },
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression: __error__"
+        }
     },
     "sort" : {
-	"key-type" : "Key type",
-	"payload" : "payload or element",
-	"exp" : "expression",
-	"key-exp" : "Key exp.",
-	"order" : "Order",
-	"ascending" : "ascending",
-	"descending" : "descending",
-	"as-number" : "as number",
+        "target" : "Sort",
+        "seq" : "message sequence",
+        "key" : "Key",
+        "elem" : "element value",
+        "order" : "Order",
+        "ascending" : "ascending",
+        "descending" : "descending",
+        "as-number" : "as number",
         "invalid-exp" : "invalid JSONata expression in sort node",
         "too-many" : "too many pending messages in sort node",
         "clear" : "clear pending message in sort node"
+    },
+    "batch" : {
+        "mode": {
+            "label" : "Mode",
+            "num-msgs" : "number of messages",
+            "interval" : "interval in seconds",
+            "concat" : "concatenate sequences"
+        },
+        "count": {
+            "label" : "Number of msgs",
+            "overwrap" : "Overwrap",
+            "count" : "count",
+            "invalid" : "Invalid count and overwrap"
+        },
+        "interval": {
+            "label" : "Interval (sec)",
+            "seconds" : "seconds",
+            "sec" : "sec",
+            "empty" : "send empty message when no message arrives"
+        },
+        "concat": {
+            "topics-label": "Topics",
+            "topic" : "topic"
+        },
+        "too-many" : "too many pending messages in batch node",
+        "unexpected" : "unexpected mode",
+        "no-parts" : "no parts property in message"
     }
 }
