@@ -221,7 +221,6 @@
                     }
                 }
                 if ((rule.t === 'btwn') || (rule.t === 'index')) {
-                    console.log(`; ${label}/${JSON.stringify(rule)}`);
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
                 } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);
