@@ -1678,7 +1678,6 @@ RED.diff = (function() {
 
     function createUnifiedDiffTable(files,commitOptions) {
         var diffPanel = $('<div></div>');
-        console.log(files);
         files.forEach(function(file) {
             var hunks = file.hunks;
             var isBinary = file.binary;

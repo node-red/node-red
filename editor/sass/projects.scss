@@ -313,7 +313,12 @@
         // border: 1px dashed #bbb;
     }
     .palette-module-unknown {
-        // border: 1px dashed #b72828;
+        border: 1px dashed #aaa;
+        background: #fafafa;
+    }
+    .palette-module-not-installed {
+        border: 1px dashed #b07575;
+        background: #fee;
         i.fa-warning {
             color: #b07575; //#b72828;
         }

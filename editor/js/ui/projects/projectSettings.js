@@ -262,14 +262,16 @@ RED.projects.settings = (function() {
         var totalCount = 0;
         var unknownCount = 0;
         var unusedCount = 0;
+        var notInstalledCount = 0;
 
         for (var m in modulesInUse) {
             if (modulesInUse.hasOwnProperty(m)) {
                 depsList.editableList('addItem',{
-                    module: modulesInUse[m].module,
+                    id: modulesInUse[m].module,
                     version: modulesInUse[m].version,
                     count: modulesInUse[m].count,
-                    known: activeProject.dependencies.hasOwnProperty(m)
+                    known: activeProject.dependencies.hasOwnProperty(m),
+                    installed: true
                 });
                 totalCount++;
                 if (modulesInUse[m].count === 0) {
@@ -284,29 +286,69 @@ RED.projects.settings = (function() {
         if (activeProject.dependencies) {
             for (var m in activeProject.dependencies) {
                 if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
+                    var installed = !!RED.nodes.registry.getModule(m);
                     depsList.editableList('addItem',{
-                        module: m,
+                        id: m,
                         version: activeProject.dependencies[m], //RED.nodes.registry.getModule(module).version,
                         count: 0,
-                        known: true
+                        known: true,
+                        installed: installed
                     });
                     totalCount++;
-                    unusedCount++;
+                    if (installed) {
+                        unusedCount++;
+                    } else {
+                        notInstalledCount++;
+                    }
                 }
             }
         }
-        if (unknownCount > 0) {
-            depsList.editableList('addItem',{index:1, label:"Unlisted dependencies"}); // TODO: nls
-        }
-        if (unusedCount > 0) {
-            depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
-        }
+        // if (notInstalledCount > 0) {
+        //     depsList.editableList('addItem',{index:1, label:"Missing dependencies"}); // TODO: nls
+        // }
+        // if (unknownCount > 0) {
+        //     depsList.editableList('addItem',{index:1, label:"Unlisted dependencies"}); // TODO: nls
+        // }
+        // if (unusedCount > 0) {
+        //     depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
+        // }
         if (totalCount === 0) {
             depsList.editableList('addItem',{index:0, label:"None"}); // TODO: nls
         }
 
     }
 
+    function saveDependencies(depsList,container,dependencies,complete) {
+        var activeProject = RED.projects.getActiveProject();
+        var spinner = utils.addSpinnerOverlay(container).addClass('projects-dialog-spinner-contain');
+        var done = function(err,res) {
+            spinner.remove();
+            if (err) {
+                return complete(err);
+            }
+            activeProject.dependencies = dependencies;
+            RED.sidebar.versionControl.refresh(true);
+            complete();
+        }
+        utils.sendRequest({
+            url: "projects/"+activeProject.name,
+            type: "PUT",
+            responses: {
+                0: function(error) {
+                    done(error,null);
+                },
+                200: function(data) {
+                    RED.sidebar.versionControl.refresh(true);
+                    done(null,data);
+                },
+                400: {
+                    '*': function(error) {
+                        done(error,null);
+                    }
+                },
+            }
+        },{dependencies:dependencies});
+    }
     function editDependencies(activeProject,depsJSON,container,depsList) {
         var json = depsJSON||JSON.stringify(activeProject.dependencies||{},"",4);
         if (json === "{}") {
@@ -319,34 +361,12 @@ RED.projects.settings = (function() {
             complete: function(v) {
                 try {
                     var parsed = JSON.parse(v);
-                    var spinner = utils.addSpinnerOverlay(container);
-
-                    var done = function(err,res) {
+                    saveDependencies(depsList,container,parsed,function(err) {
                         if (err) {
                             return editDependencies(activeProject,v,container,depsList);
                         }
                         activeProject.dependencies = parsed;
                         updateProjectDependencies(activeProject,depsList);
-                    }
-                    utils.sendRequest({
-                        url: "projects/"+activeProject.name,
-                        type: "PUT",
-                        responses: {
-                            0: function(error) {
-                                done(error,null);
-                            },
-                            200: function(data) {
-                                RED.sidebar.versionControl.refresh(true);
-                                done(null,data);
-                            },
-                            400: {
-                                'unexpected_error': function(error) {
-                                    done(error,null);
-                                }
-                            },
-                        }
-                    },{dependencies:parsed}).always(function() {
-                        spinner.remove();
                     });
                 } catch(err) {
                     editDependencies(activeProject,v,container,depsList);
@@ -378,59 +398,119 @@ RED.projects.settings = (function() {
                         row.parent().addClass("palette-module-section");
                     }
                     headerRow.text(entry.label);
-                    if (RED.user.hasPermission("projects.write")) {
-                        if (entry.index === 1) {
-                            var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
-                                evt.preventDefault();
-                                var deps = $.extend(true, {}, activeProject.dependencies);
-                                for (var m in modulesInUse) {
-                                    if (modulesInUse.hasOwnProperty(m) && !modulesInUse[m].known) {
-                                        deps[m] = modulesInUse[m].version;
-                                    }
-                                }
-                                editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
-                            });
-                        } else if (entry.index === 3) {
-                            var removeButton = $('<button class="editor-button editor-button-small palette-module-button">remove from project</button>').appendTo(headerRow).click(function(evt) {
-                                evt.preventDefault();
-                                var deps = $.extend(true, {}, activeProject.dependencies);
-                                for (var m in activeProject.dependencies) {
-                                    if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
-                                        delete deps[m];
-                                    }
-                                }
-                                editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
-                            });
-                        }
-                    }
+                    // if (RED.user.hasPermission("projects.write")) {
+                    //     if (entry.index === 1) {
+                    //         var addButton = $('<button class="editor-button editor-button-small palette-module-button">add to project</button>').appendTo(headerRow).click(function(evt) {
+                    //             evt.preventDefault();
+                    //             var deps = $.extend(true, {}, activeProject.dependencies);
+                    //             for (var m in modulesInUse) {
+                    //                 if (modulesInUse.hasOwnProperty(m) && !modulesInUse[m].known) {
+                    //                     deps[m] = modulesInUse[m].version;
+                    //                 }
+                    //             }
+                    //             editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                    //         });
+                    //     } else if (entry.index === 3) {
+                    //         var removeButton = $('<button class="editor-button editor-button-small palette-module-button">remove from project</button>').appendTo(headerRow).click(function(evt) {
+                    //             evt.preventDefault();
+                    //             var deps = $.extend(true, {}, activeProject.dependencies);
+                    //             for (var m in activeProject.dependencies) {
+                    //                 if (activeProject.dependencies.hasOwnProperty(m) && !modulesInUse.hasOwnProperty(m)) {
+                    //                     delete deps[m];
+                    //                 }
+                    //             }
+                    //             editDependencies(activeProject,JSON.stringify(deps,"",4),pane,depsList);
+                    //         });
+                    //     }
+                    // }
                 } else {
                     headerRow.addClass("palette-module-header");
-                    headerRow.toggleClass("palette-module-unused",entry.count === 0);
+                    if (!entry.installed) {
+                        headerRow.addClass("palette-module-not-installed");
+                    } else if (entry.count === 0) {
+                        headerRow.addClass("palette-module-unused");
+                    } else if (!entry.known) {
+                        headerRow.addClass("palette-module-unknown");
+                    }
+
                     entry.element = headerRow;
                     var titleRow = $('<div class="palette-module-meta palette-module-name"></div>').appendTo(headerRow);
-                    var icon = $('<i class="fa fa-'+(entry.known?'cube':'warning')+'"></i>').appendTo(titleRow);
+                    var iconClass = "fa-cube";
+                    if (!entry.installed) {
+                        iconClass = "fa-warning";
+                    }
+                    var icon = $('<i class="fa '+iconClass+'"></i>').appendTo(titleRow);
                     entry.icon = icon;
-                    $('<span>').html(entry.module).appendTo(titleRow);
+                    $('<span>').html(entry.id).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
                     var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
-                    if (!entry.known) {
-                        headerRow.addClass("palette-module-unknown");
-                    } else if (entry.known && entry.count === 0) {
-
+                    metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
+                    var buttons = $('<div class="palette-module-button-group"></div>').appendTo(metaRow);
+                    if (RED.user.hasPermission("projects.write")) {
+                        if (!entry.installed && RED.settings.theme('palette.editable') !== false) {
+                            $('<a href="#" class="editor-button editor-button-small">install</a>').appendTo(buttons)
+                                .click(function(evt) {
+                                    evt.preventDefault();
+                                    RED.palette.editor.install(entry,row,function(err) {
+                                        if (!err) {
+                                            entry.installed = true;
+                                            var spinner = RED.utils.addSpinnerOverlay(row,true);
+                                            setTimeout(function() {
+                                                depsList.editableList('removeItem',entry);
+                                                refreshModuleInUseCounts();
+                                                entry.count = modulesInUse[entry.id].count;
+                                                depsList.editableList('addItem',entry);
+                                            },500);
+                                        }
+                                    });
+                                })
+                        } else if (entry.known && entry.count === 0) {
+                            $('<a href="#" class="editor-button editor-button-small">remove from project</a>').appendTo(buttons)
+                                .click(function(evt) {
+                                    evt.preventDefault();
+                                    var deps = $.extend(true, {}, activeProject.dependencies);
+                                    delete deps[entry.id];
+                                    saveDependencies(depsList,row,deps,function(err) {
+                                        if (!err) {
+                                            row.fadeOut(200,function() {
+                                                depsList.editableList('removeItem',entry);
+                                            });
+                                        } else {
+                                            console.log(err);
+                                        }
+                                    });
+                                });
+                        } else if (!entry.known) {
+                            $('<a href="#" class="editor-button editor-button-small">add to project</a>').appendTo(buttons)
+                                .click(function(evt) {
+                                    evt.preventDefault();
+                                    var deps = $.extend(true, {}, activeProject.dependencies);
+                                    deps[entry.id] = modulesInUse[entry.id].version;
+                                    saveDependencies(depsList,row,deps,function(err) {
+                                        if (!err) {
+                                            buttons.remove();
+                                            headerRow.removeClass("palette-module-unknown");
+                                        } else {
+                                            console.log(err);
+                                        }
+                                    });
+                                });
+                        }
                     }
                 }
             },
             sort: function(A,B) {
-                if (A.index && B.index) {
-                    return A.index - B.index;
-                }
-                var Acategory = A.index?A.index:(A.known?(A.count>0?0:4):2);
-                var Bcategory = B.index?B.index:(B.known?(B.count>0?0:4):2);
-                if (Acategory === Bcategory) {
-                    return A.module.localeCompare(B.module);
-                } else {
-                    return Acategory - Bcategory;
-                }
+                return A.id.localeCompare(B.id);
+                // if (A.index && B.index) {
+                //     return A.index - B.index;
+                // }
+                // var Acategory = A.index?A.index:(A.known?(A.count>0?0:4):2);
+                // var Bcategory = B.index?B.index:(B.known?(B.count>0?0:4):2);
+                // if (Acategory === Bcategory) {
+                //     return A.id.localeCompare(B.id);
+                // } else {
+                //     return Acategory - Bcategory;
+                // }
             }
         });
 
@@ -1332,8 +1412,30 @@ RED.projects.settings = (function() {
         return pane;
     }
 
-    var popover;
+    function refreshModuleInUseCounts() {
+        modulesInUse = {};
+        RED.nodes.eachNode(_updateModulesInUse);
+        RED.nodes.eachConfig(_updateModulesInUse);
+    }
 
+    function _updateModulesInUse(n) {
+        if (!/^subflow:/.test(n.type)) {
+            var module = RED.nodes.registry.getNodeSetForType(n.type).module;
+            if (module !== 'node-red') {
+                if (!modulesInUse.hasOwnProperty(module)) {
+                    modulesInUse[module] = {
+                        module: module,
+                        version: RED.nodes.registry.getModule(module).version,
+                        count: 0,
+                        known: false
+                    }
+                }
+                modulesInUse[module].count++;
+            }
+        }
+    }
+
+    var popover;
     var utils;
     var modulesInUse = {};
     function init(_utils) {
@@ -1362,22 +1464,7 @@ RED.projects.settings = (function() {
             }
         });
 
-        RED.events.on('nodes:add', function(n) {
-            if (!/^subflow:/.test(n.type)) {
-                var module = RED.nodes.registry.getNodeSetForType(n.type).module;
-                if (module !== 'node-red') {
-                    if (!modulesInUse.hasOwnProperty(module)) {
-                        modulesInUse[module] = {
-                            module: module,
-                            version: RED.nodes.registry.getModule(module).version,
-                            count: 0,
-                            known: false
-                        }
-                    }
-                    modulesInUse[module].count++;
-                }
-            }
-        })
+        RED.events.on('nodes:add', _updateModulesInUse);
         RED.events.on('nodes:remove', function(n) {
             if (!/^subflow:/.test(n.type)) {
                 var module = RED.nodes.registry.getNodeSetForType(n.type).module;

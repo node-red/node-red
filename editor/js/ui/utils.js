@@ -765,6 +765,14 @@ RED.utils = (function() {
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
 
+    function addSpinnerOverlay(container,contain) {
+        var spinner = $('<div class="projects-dialog-spinner "><img src="red/images/spin.svg"/></div>').appendTo(container);
+        if (contain) {
+            spinner.addClass('projects-dialog-spinner-contain');
+        }
+        return spinner;
+    }
+
     return {
         createObjectElement: buildMessageElement,
         getMessageProperty: getMessageProperty,
@@ -774,5 +782,6 @@ RED.utils = (function() {
         getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
+        addSpinnerOverlay: addSpinnerOverlay
     }
 })();

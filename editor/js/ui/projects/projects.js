@@ -920,9 +920,9 @@ RED.projects = (function() {
                         // $('<label>Credentials encryption key</label>').appendTo(row);
                         // projectSecretInput = $('<input type="text"></input>').appendTo(row);
                         switch(options.screen||"empty") {
-                            case "empty": console.log("createasempty"); createAsEmpty.click(); break;
-                            case "open": console.log("opening"); openProject.click(); break;
-                            case "clone": console.log("cloning"); createAsClone.click(); break;
+                            case "empty": createAsEmpty.click(); break;
+                            case "open":  openProject.click(); break;
+                            case "clone": createAsClone.click(); break;
                         }
 
                         setTimeout(function() {
@@ -1096,12 +1096,7 @@ RED.projects = (function() {
                     done(null,data);
                 },
                 400: {
-                    'credentials_load_failed': function(error) {
-                        done(error,null);
-                    },
-                    'unexpected_error': function(error) {
-                        done(error,null);
-                    }
+                    '*': done
                 },
             }
         },{active:true}).then(function() {
@@ -1538,6 +1533,10 @@ RED.projects = (function() {
                     resultCallback = responses[xhr.responseJSON.error];
                     resultCallbackArgs = xhr.responseJSON;
                     return;
+                } else if (responses['*']) {
+                    resultCallback = responses['*'];
+                    resultCallbackArgs = xhr.responseJSON;
+                    return;
                 }
             }
             console.log("Unhandled error response:");
@@ -1815,6 +1814,9 @@ RED.projects = (function() {
                 return;
             }
             RED.projects.settings.show('settings');
+        },
+        showProjectDependencies: function() {
+            RED.projects.settings.show('deps');
         },
         createDefaultFileSet: createDefaultFileSet,
         // showSidebar: showSidebar,

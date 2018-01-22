@@ -76,22 +76,6 @@
         border-bottom: 1px solid $primary-border-color;
         text-align: right;
     }
-    .palette-module-button-group {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        a {
-            margin-left: 5px;
-        }
-    }
-    .palette-module-shade {
-        @include shade;
-        text-align: center;
-        padding-top: 20px;
-    }
-    #palette-module-install-shade {
-        padding-top: 80px;
-    }
     .palette-module-shade-status {
         color: #666;
     }
@@ -229,4 +213,20 @@
     font-size: 0.9em;
     color: #666;
 
+}
+.palette-module-button-group {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    a {
+        margin-left: 5px;
+    }
+}
+.palette-module-shade {
+    @include shade;
+    text-align: center;
+    padding-top: 20px;
+}
+#palette-module-install-shade {
+    padding-top: 80px;
 }
