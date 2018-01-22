@@ -31,7 +31,7 @@ var settings;
 var runtime;
 var log;
 
-var projectsEnabled = true;
+var projectsEnabled = false;
 var projectLogMessages = [];
 
 var projectsDir;
@@ -43,12 +43,15 @@ function init(_settings, _runtime) {
     log = runtime.log;
 
     try {
-        if (settings.editorTheme.projects.enabled === false) {
+        if (settings.editorTheme.projects.enabled === true) {
             projectLogMessages.push(log._("storage.localfilesystem.projects.disabled"))
-            projectsEnabled = false;
+            projectsEnabled = true;
+        } else if (settings.editorTheme.projects.enabled === false) {
+            projectLogMessages.push(log._("storage.localfilesystem.projects.disabled"))
         }
     } catch(err) {
-        projectsEnabled = true;
+        projectLogMessages.push(log._("storage.localfilesystem.projects.disabledNoFlag"))
+        projectsEnabled = false;
     }
 
     if (settings.flowFile) {
