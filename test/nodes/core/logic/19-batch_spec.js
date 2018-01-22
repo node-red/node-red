@@ -28,7 +28,7 @@ describe('BATCH node', function() {
 
     afterEach(function() {
         helper.unload();
-        RED.settings.batchMaxKeptMsgsCount = 0;
+        RED.settings.maxKeptMsgsCount = 0;
     });
 
     it('should be loaded with defaults', function(done) {
@@ -172,7 +172,7 @@ describe('BATCH node', function() {
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.maxKeptMsgsCount = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
@@ -239,7 +239,7 @@ describe('BATCH node', function() {
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.maxKeptMsgsCount = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
@@ -312,7 +312,7 @@ describe('BATCH node', function() {
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.maxKeptMsgsCount = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
