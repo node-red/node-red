@@ -61,7 +61,7 @@
                 $(".palette-scroll").removeClass("hide");
                 $("#palette-search").removeClass("hide");
                 loadFlows(function() {
-                    if (RED.settings.theme("projects.enabled",true)) {
+                    if (RED.settings.theme("projects.enabled",false)) {
                         RED.projects.refresh(function(activeProject) {
                             RED.sidebar.info.refresh()
                             if (!activeProject) {
@@ -317,7 +317,7 @@
 
     function loadEditor() {
         var menuOptions = [];
-        if (RED.settings.theme("projects.enabled",true)) {
+        if (RED.settings.theme("projects.enabled",false)) {
             menuOptions.push({id:"menu-item-projects-menu",label:"Projects",options:[
                 {id:"menu-item-projects-new",label:"New...",disabled:false,onselect:"core:new-project"},
                 {id:"menu-item-projects-open",label:"Open...",disabled:false,onselect:"core:open-project"}
@@ -393,10 +393,10 @@
 
         RED.sidebar.init();
 
-        if (RED.settings.theme("projects.enabled",true)) {
+        if (RED.settings.theme("projects.enabled",false)) {
             RED.projects.init();
         } else {
-            console.log("Palette editor disabled");
+            console.log("Projects disabled");
         }
 
         RED.subflow.init();
