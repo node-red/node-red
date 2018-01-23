@@ -872,7 +872,7 @@ RED.nodes = (function() {
 
                 }
 
-                if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
+                if (!existingConfigNode || existingConfigNode._def.exclusive) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode.z !== n.z) {
                     configNode = {id:n.id, z:n.z, type:n.type, users:[], _config:{}};
                     for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
