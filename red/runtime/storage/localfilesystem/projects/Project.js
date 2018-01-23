@@ -862,6 +862,11 @@ function createProject(user, metadata) {
             }
             createProjectDirectory(project).then(function() {
                 var projects = settings.get('projects');
+                if (!projects) {
+                    projects = {
+                        projects:{}
+                    }
+                }
                 projects.projects[project] = {};
                 if (metadata.hasOwnProperty('credentialSecret')) {
                     projects.projects[project].credentialSecret = metadata.credentialSecret;

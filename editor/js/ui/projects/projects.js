@@ -198,25 +198,27 @@ RED.projects = (function() {
                         },50);
                         return container;
                     },
-                    buttons: [
-                        {
-                            text: "Back",
-                            click: function() {
-                                show('git-config');
+                    buttons: function(options) {
+                        return [
+                            {
+                                text: "Back",
+                                click: function() {
+                                    show('git-config');
+                                }
+                            },
+                            {
+                                id: "projects-dialog-create-name",
+                                disabled: true,
+                                text: "Next", // TODO: nls
+                                class: "primary disabled",
+                                click: function() {
+                                    createProjectOptions.name = projectNameInput.val();
+                                    createProjectOptions.summary = projectSummaryInput.val();
+                                    show('default-files', options);
+                                }
                             }
-                        },
-                        {
-                            id: "projects-dialog-create-name",
-                            disabled: true,
-                            text: "Next", // TODO: nls
-                            class: "primary disabled",
-                            click: function() {
-                                createProjectOptions.name = projectNameInput.val();
-                                createProjectOptions.summary = projectSummaryInput.val();
-                                show('default-files');
-                            }
-                        }
-                    ]
+                        ]
+                    }
                 };
             })(),
             'default-files': (function() {
@@ -341,9 +343,9 @@ RED.projects = (function() {
                                 if (RED.settings.flowEncryptionType === 'user') {
                                     $('<p>').text("Your flow credentials file is currently encrypted using the credentialSecret property from your settings file as the key.").appendTo(body);
                                 } else if (RED.settings.flowEncryptionType === 'system') {
-                                    $('<p>').text("Your flow credentials file is currently encrypted using a system-generated secret as the key. You should provide a new secret key for this project.").appendTo(body);
+                                    $('<p>').text("Your flow credentials file is currently encrypted using a system-generated key. You should provide a new secret key for this project.").appendTo(body);
                                 }
-                                $('<p>').text("The secret will be copied into the settings for your new project. You can then manage the secret within the editor.").appendTo(body);
+                                $('<p>').text("The key will be stored separately from your project files. You will need to provide the key to use this project in another instance of Node-RED.").appendTo(body);
                             }
                         }
 
@@ -523,7 +525,9 @@ RED.projects = (function() {
                                             }
                                         }
                                     },createProjectOptions).always(function() {
-                                        RED.deploy.setDeployInflight(false);
+                                        setTimeout(function() {
+                                            RED.deploy.setDeployInflight(false);
+                                        },500);
                                     })
                                 }
                             }
@@ -1160,12 +1164,12 @@ RED.projects = (function() {
             RED.projects.init();
         }
         var screen = screens[s];
-        var container = screen.content(options);
+        var container = screen.content(options||{});
 
         dialogBody.empty();
         var buttons = screen.buttons;
         if (typeof buttons === 'function') {
-            buttons = buttons(options);
+            buttons = buttons(options||{});
         }
         dialog.dialog('option','buttons',buttons);
         dialogBody.append(container);
