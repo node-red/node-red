@@ -270,7 +270,7 @@ describe('JOIN node', function() {
 
     afterEach(function() {
         helper.unload();
-        RED.settings.maxKeptMsgsCount = 0;
+        RED.settings.nodeMessageBufferMaxLength = 0;
     });
 
     it('should be loaded', function(done) {
@@ -1072,7 +1072,7 @@ describe('JOIN node', function() {
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
-            RED.settings.maxKeptMsgsCount = 2;
+            RED.settings.nodeMessageBufferMaxLength = 2;
             setTimeout(function() {
                 var logEvents = helper.log().args.filter(function (evt) {
                     return evt[0].type == "join";
@@ -1101,7 +1101,7 @@ describe('JOIN node', function() {
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
-            RED.settings.maxKeptMsgsCount = 2;
+            RED.settings.nodeMessageBufferMaxLength = 2;
             setTimeout(function() {
                 var logEvents = helper.log().args.filter(function (evt) {
                     return evt[0].type == "join";

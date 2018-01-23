@@ -29,7 +29,7 @@ describe('switch Node', function() {
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
-        RED.settings.maxKeptMsgsCount = 0;
+        RED.settings.nodeMessageBufferMaxLength = 0;
     });
 
     it('should be loaded with some defaults', function(done) {
@@ -692,7 +692,7 @@ describe('switch Node', function() {
                    ];
         helper.load(switchNode, flow, function() {
             var n1 = helper.getNode("n1");
-            RED.settings.maxKeptMsgsCount = 2;
+            RED.settings.nodeMessageBufferMaxLength = 2;
             setTimeout(function() {
                 var logEvents = helper.log().args.filter(function (evt) {
                     return evt[0].type == "switch";
