@@ -272,10 +272,19 @@ RED.nodes = (function() {
                 if (updatedConfigNode) {
                     RED.workspaces.refresh();
                 }
+                try {
+                    if (node._def.oneditdelete) {
+                        node._def.oneditdelete.call(node);
+                    }
+                } catch(err) {
+                    console.log("oneditdelete",node.id,node.type,err.toString());
+                }
                 RED.events.emit('nodes:remove',node);
             }
         }
         if (node && node._def.onremove) {
+            // Deprecated: never documented but used by some early nodes
+            console.log("Deprecated API warning: node type ",node.type," has an onremove function - should be oneditremove - please report");
             node._def.onremove.call(n);
         }
         return {links:removedLinks,nodes:removedNodes};
