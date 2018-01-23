@@ -264,14 +264,19 @@ RED.projects.userSettings = (function() {
             utils.sendRequest(options);
 
             var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>').appendTo(row);
-            $('<button class="editor-button editor-button-small">Copy to clipboard</button>')
+            $('<button class="editor-button editor-button-small">Copy public key to clipboard</button>')
                 .appendTo(formButtons)
                 .click(function(evt) {
-                    evt.stopPropagation();
-                    evt.preventDefault();
-                    document.getSelection().selectAllChildren(keyBox[0]);
-                    var ret = document.execCommand('copy');
-                    document.getSelection().empty();
+                    try {
+                        evt.stopPropagation();
+                        evt.preventDefault();
+                        document.getSelection().selectAllChildren(keyBox[0]);
+                        var ret = document.execCommand('copy');
+                        document.getSelection().empty();
+                    } catch(err) {
+
+                    }
+
                 });
 
             return row;
@@ -282,22 +287,17 @@ RED.projects.userSettings = (function() {
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
                 var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
-
                 if (entry.empty) {
                     container.addClass('red-ui-search-empty');
                     container.text("No SSH keys");
                     return;
                 }
-
-
-                $('<span class="entry-icon"><i class="fa fa-key"></i></span>').appendTo(container);
-                var content = $('<span>').appendTo(container);
-                var topRow = $('<div>').appendTo(content);
+                var topRow = $('<div class="projects-dialog-ssh-key-header">').appendTo(container);
+                $('<span class="entry-icon"><i class="fa fa-key"></i></span>').appendTo(topRow);
                 $('<span class="entry-name">').text(entry.name).appendTo(topRow);
-
-                var tools = $('<span class="button-row entry-tools">').appendTo(container);
+                var tools = $('<span class="button-row entry-tools">').appendTo(topRow);
                 var expandedRow;
-                row.click(function(e) {
+                topRow.click(function(e) {
                     if (expandedRow) {
                         expandedRow.slideUp(200,function() {
                             expandedRow.remove();

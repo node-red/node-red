@@ -790,10 +790,14 @@ div.projects-dialog-ssh-public-key {
 
 .projects-dialog-ssh-key-list {
     li {
-        cursor: pointer;
+        padding: 0 !important;
     }
-    li:hover {
-        background: #f3f3f3;
+    .projects-dialog-ssh-key-header {
+        padding: 10px 5px;
+        cursor: pointer;
+        &:hover {
+            background: #f3f3f3;
+        }
     }
 }
 
