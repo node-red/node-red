@@ -1385,7 +1385,7 @@ RED.projects = (function() {
 
     function sendRequest(options,body) {
         // dialogBody.hide();
-        console.log(options.url,body);
+        // console.log(options.url,body);
 
         if (options.requireCleanWorkspace && RED.nodes.dirty()) {
             var thenCallback;
