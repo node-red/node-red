@@ -50,10 +50,10 @@ module.exports = function(RED) {
     };
 
     var _max_kept_msgs_count = undefined;
-    
+
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
-            var name = "maxKeptMsgsCount";
+            var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
                 _max_kept_msgs_count = RED.settings[name];
             }
@@ -164,7 +164,7 @@ module.exports = function(RED) {
             pending_count -= group.msgs.length;
             delete pending_in[id];
         }
-        
+
         function add2pending_in(msg) {
             var parts = msg.parts;
             if (parts.hasOwnProperty("id") &&
@@ -182,7 +182,7 @@ module.exports = function(RED) {
                 }
                 return true;
             }
-            return false; 
+            return false;
         }
 
         function send_group(onwards, port_count) {
@@ -226,7 +226,7 @@ module.exports = function(RED) {
 
             if (!(gid in pending_out)) {
                 pending_out[gid] = {
-                    onwards: [] 
+                    onwards: []
                 };
             }
             var group = pending_out[gid];

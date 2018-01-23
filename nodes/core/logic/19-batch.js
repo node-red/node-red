@@ -21,7 +21,7 @@ module.exports = function(RED) {
 
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
-            var name = "maxKeptMsgsCount";
+            var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
                 _max_kept_msgs_count = RED.settings[name];
             }
