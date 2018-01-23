@@ -1,6 +1,10 @@
 
 <script type="text/x-red" data-template-name="xml">
     <div class="form-row">
+        <label for="node-input-property"><i class="fa fa-ellipsis-h"></i> <span data-i18n="node-red:common.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width:70%;"/>
+    </div>
+    <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
     </div>
@@ -58,6 +62,7 @@
         color:"#DEBD5C",
         defaults: {
             name: {value:""},
+            property: {value:"payload",required:true},
             attr: {value:""},
             chr: {value:""}
         },
@@ -69,6 +74,12 @@
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.property === undefined) {
+                $("#node-input-property").val("payload");
+            }
+            $("#node-input-property").typedInput({default:'msg',types:['msg']});
         }
     });
 </script>

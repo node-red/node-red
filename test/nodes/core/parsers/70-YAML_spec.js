@@ -55,6 +55,24 @@ describe('YAML node', function() {
         });
     });
 
+    it('should convert a valid yaml string to a javascript object - using another property', function(done) {
+        var flow = [{id:"yn1",type:"yaml",property:"foo",wires:[["yn2"]],func:"return msg;"},
+                    {id:"yn2", type:"helper"}];
+        helper.load(yamlNode, flow, function() {
+            var yn1 = helper.getNode("yn1");
+            var yn2 = helper.getNode("yn2");
+            yn2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.foo.should.have.property('employees');
+                msg.foo.employees[0].should.have.property('firstName', 'John');
+                msg.foo.employees[0].should.have.property('lastName', 'Smith');
+                done();
+            });
+            var yamlString = "employees:\n  - firstName: John\n    lastName: Smith\n";
+            yn1.receive({foo:yamlString,topic: "bar"});
+        });
+    });
+
     it('should convert a javascript object to a yaml string', function(done) {
         var flow = [{id:"yn1",type:"yaml",wires:[["yn2"]],func:"return msg;"},
                     {id:"yn2", type:"helper"}];
@@ -67,6 +85,21 @@ describe('YAML node', function() {
             });
             var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
             yn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a javascript object to a yaml string - using another property', function(done) {
+        var flow = [{id:"yn1",type:"yaml",property:"foo",wires:[["yn2"]],func:"return msg;"},
+                    {id:"yn2", type:"helper"}];
+        helper.load(yamlNode, flow, function() {
+            var yn1 = helper.getNode("yn1");
+            var yn2 = helper.getNode("yn2");
+            yn2.on("input", function(msg) {
+                should.equal(msg.foo, "employees:\n  - firstName: John\n    lastName: Smith\n");
+                done();
+            });
+            var obj = {employees:[{firstName:"John", lastName:"Smith"}]};
+            yn1.receive({foo:obj});
         });
     });
 
