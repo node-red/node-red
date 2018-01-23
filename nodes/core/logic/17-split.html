@@ -318,10 +318,10 @@
     <p>The node is configured with a list of topic values that represent the order
        messages should be taken from the corresponding sequences.</p>
     <p>For example, if the node is configured with a list of topics "<code>x</code>, <code>x</code>, <code>y</code>",
-       two input messages with topic <code>x</code> and one input message with
+       two input messages from topic <code>x</code> and one input message from
        topic <code>y</code> are merged into a new message in order of arrival.</p>
     <p>The payload of the resulting message is an array containing the payloads of
-       the received the messages.</p>
+       the received messages.</p>
 
     <h4>Reduce Sequence mode</h4>
     <p>When configured to join in reduce mode, an expression is applied to each
@@ -361,6 +361,10 @@
             <li><b>Fix-up expression</b>: <code>$A/$N</code></li>
         </ul>
     </p>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting `maxKeptMsgsCount` can be used to limit how many messages nodes
+       will buffer.</p>
 </script>
 
 <script type="text/javascript">
