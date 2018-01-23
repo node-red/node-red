@@ -889,10 +889,10 @@
         }
     },
     "sort" : {
-        "key-type" : "Key type",
-        "payload" : "payload or element",
-        "exp" : "expression",
-        "key-exp" : "Key exp.",
+        "target" : "Sort",
+        "seq" : "message sequence",
+        "key" : "Key",
+        "elem" : "element value",
         "order" : "Order",
         "ascending" : "ascending",
         "descending" : "descending",
