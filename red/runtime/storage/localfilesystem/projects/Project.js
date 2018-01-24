@@ -741,8 +741,9 @@ function checkProjectExists(project) {
     var projectPath = fspath.join(projectsDir,project);
     return fs.pathExists(projectPath).then(function(exists) {
         if (!exists) {
-            var e = new Error("NLS: project not found");
+            var e = new Error("Project not found: "+project);
             e.code = "project_not_found";
+            e.project = project;
             throw e;
         }
     });

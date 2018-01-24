@@ -78,8 +78,12 @@ function loadFlows() {
         });
     }).catch(function(err) {
         activeConfig = null;
-        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,text:"notification.warnings."+err.code},retain:true});
-        log.warn(log._("nodes.flows.error",{message:err.toString()}));
+        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,project:err.project,text:"notification.warnings."+err.code},retain:true});
+        if (err.code === "project_not_found") {
+            log.warn(log._("storage.localfilesystem.projects.project-not-found",{project:err.project}));
+        } else {
+            log.warn(log._("nodes.flows.error",{message:err.toString()}));
+        }
         throw err;
     });
 }

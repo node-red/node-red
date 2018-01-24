@@ -437,6 +437,8 @@ function getFlows() {
         initialFlowLoadComplete = true;
         log.info(log._("storage.localfilesystem.user-dir",{path:settings.userDir}));
         if (activeProject) {
+            // At this point activeProject will be a string, so go load it and
+            // swap in an instance of Project
             return loadProject(activeProject).then(function() {
                 log.info(log._("storage.localfilesystem.projects.active-project",{project:activeProject.name||"none"}));
                 log.info(log._("storage.localfilesystem.flows-file",{path:flowsFullPath}));

@@ -136,7 +136,7 @@
                             "pull":"Project '"+msg.project+"' reloaded",
                             "revert": "Project '"+msg.project+"' reloaded"
                         }[msg.action];
-                        RED.notify(message);
+                        RED.notify("<p>"+message+"</p>");
                         RED.sidebar.info.refresh()
                     });
                 });
@@ -144,7 +144,8 @@
             }
 
             if (msg.text) {
-                var text = RED._(msg.text,{default:msg.text});
+                msg.default = msg.text;
+                var text = RED._(msg.text,msg);
                 var options = {
                     type: msg.type,
                     fixed: msg.timeout === undefined,
