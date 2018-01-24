@@ -2488,6 +2488,16 @@ RED.editor = (function() {
             var editor = ace.edit(options.id||options.element);
             editor.setTheme("ace/theme/tomorrow");
             var session = editor.getSession();
+            session.on("changeAnnotation", function () {
+                var annotations = session.getAnnotations() || [];
+                var i = annotations.length;
+                var len = annotations.length;
+                while (i--) {
+                    if (/doctype first\. Expected/.test(annotations[i].text)) { annotations.splice(i, 1); }
+                    else if (/Unexpected End of file\. Expected/.test(annotations[i].text)) { annotations.splice(i, 1); }
+                }
+                if (len > annotations.length) { session.setAnnotations(annotations); }
+            });
             if (options.mode) {
                 session.setMode(options.mode);
             }
@@ -2518,7 +2528,7 @@ RED.editor = (function() {
             if (options.globals) {
                 setTimeout(function() {
                     if (!!session.$worker) {
-                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6}]);
+                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6, sub:true, asi:true, maxerr:1000}]);
                     }
                 },100);
             }
