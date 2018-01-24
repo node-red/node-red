@@ -779,6 +779,16 @@ RED.editor = (function() {
                 var fileName = selectIconFile.val();
                 iconFileHidden.val(fileName);
             });
+            var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(iconForm);
+            clear.click(function(evt) {
+                evt.preventDefault();
+                var iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
+                selectIconModule.val(iconPath.module);
+                moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
+                selectIconFile.removeClass("input-error");
+                selectIconFile.val(iconPath.file);
+                iconFileHidden.val(iconPath.file);
+            });
 
             moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, false);
             var iconFileList = iconSets[selectIconModule.val()];

@@ -1,10 +1,6 @@
 
 <script type="text/x-red" data-template-name="json">
     <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
-    </div>
-    <div class="form-row">
         <label for="node-input-action"><span data-i18n="json.label.action"></span></label>
         <select style="width:70%" id="node-input-action">
             <option value=""    data-i18n="json.label.actions.toggle"></option>
@@ -14,11 +10,13 @@
     </div>
     <div class="form-row">
         <label data-i18n="json.label.property"></label>
-        <input type="text" id="node-input-property" style="width: 70%"/>
+        <input type="text" id="node-input-property" style="width:70%;"/>
     </div>
-
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
     <hr align="middle"/>
-
     <div class="form-row node-json-to-json-options">
         <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="json.label.o2j"></span></label>
     </div>
@@ -55,7 +53,6 @@
        receives a String, no further checks will be made of the property. It will
        not check the String is valid JSON nor will it reformat it if the format option
        is selected.</p>
-
 </script>
 
 <script type="text/javascript">
@@ -64,8 +61,8 @@
         color:"#DEBD5C",
         defaults: {
             name: {value:""},
-            property: { value:"payload" },
-            action: { value:"" },
+            property: {value:"payload",required:true},
+            action: {value:""},
             pretty: {value:false}
         },
         inputs:1,

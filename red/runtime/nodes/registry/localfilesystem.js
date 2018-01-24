@@ -115,12 +115,26 @@ function getLocalNodeFiles(dir) {
 
 function scanDirForNodesModules(dir,moduleName) {
     var results = [];
+    var scopeName;
     try {
         var files = fs.readdirSync(dir);
+        if (moduleName) {
+            var m = /^(?:(@[^/]+)[/])?([^@/]+)/.exec(moduleName);
+            if (m) {
+                scopeName = m[1];
+                moduleName = m[2];
+            }
+        }
         for (var i=0;i<files.length;i++) {
             var fn = files[i];
             if (/^@/.test(fn)) {
-                results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                if (scopeName && scopeName === fn) {
+                    // Looking for a specific scope/module
+                    results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                    break;
+                } else {
+                    results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                }
             } else {
                 if (isIncluded(fn) && !isExcluded(fn) && (!moduleName || fn == moduleName)) {
                     var pkgfn = path.join(dir,fn,"package.json");

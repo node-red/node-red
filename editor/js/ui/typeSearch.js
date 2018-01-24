@@ -19,6 +19,7 @@ RED.typeSearch = (function() {
     function search(val) {
         activeFilter = val.toLowerCase();
         var visible = searchResults.editableList('filter');
+        searchResults.editableList('sort');
         setTimeout(function() {
             selected = 0;
             searchResults.children().removeClass('selected');
@@ -100,6 +101,23 @@ RED.typeSearch = (function() {
                     return false;
                 }
                 return (activeFilter==="")||(data.index.indexOf(activeFilter) > -1);
+            },
+            sort: function(A,B) {
+                if (activeFilter === "") {
+                    return A.i - B.i;
+                }
+                var Ai = A.index.indexOf(activeFilter);
+                var Bi = B.index.indexOf(activeFilter);
+                if (Ai === -1) {
+                    return 1;
+                }
+                if (Bi === -1) {
+                    return -1;
+                }
+                if (Ai === Bi) {
+                    return sortTypeLabels(A,B);
+                }
+                return Ai-Bi;
             },
             addItem: function(container,i,object) {
                 var def = object.def;
@@ -225,7 +243,17 @@ RED.typeSearch = (function() {
         }
         return label;
     }
-
+    function sortTypeLabels(a,b) {
+        var al = a.label.toLowerCase();
+        var bl = b.label.toLowerCase();
+        if (al < bl) {
+            return -1;
+        } else if (al === bl) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
     function refreshTypeList() {
         var i;
         searchResults.editableList('empty');
@@ -250,27 +278,19 @@ RED.typeSearch = (function() {
                 items.push({type:t,def: def, label:getTypeLabel(t,def)});
             }
         });
-        items.sort(function(a,b) {
-            var al = a.label.toLowerCase();
-            var bl = b.label.toLowerCase();
-            if (al < bl) {
-                return -1;
-            } else if (al === bl) {
-                return 0;
-            } else {
-                return 1;
-            }
-        })
+        items.sort(sortTypeLabels);
 
         var commonCount = 0;
         var item;
+        var index = 0;
         for(i=0;i<common.length;i++) {
             var itemDef = RED.nodes.getType(common[i]);
             if (itemDef) {
                 item = {
                     type: common[i],
                     common: true,
-                    def: itemDef
+                    def: itemDef,
+                    i: index++
                 };
                 item.label = getTypeLabel(item.type,item.def);
                 if (i === common.length-1) {
@@ -283,7 +303,8 @@ RED.typeSearch = (function() {
             item = {
                 type:recentlyUsed[i],
                 def: RED.nodes.getType(recentlyUsed[i]),
-                recent: true
+                recent: true,
+                i: index++
             };
             item.label = getTypeLabel(item.type,item.def);
             if (i === recentlyUsed.length-1) {
@@ -292,6 +313,7 @@ RED.typeSearch = (function() {
             searchResults.editableList('addItem', item);
         }
         for (i=0;i<items.length;i++) {
+            items[i].i = index++;
             searchResults.editableList('addItem', items[i]);
         }
         setTimeout(function() {

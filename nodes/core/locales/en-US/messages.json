@@ -5,7 +5,8 @@
             "topic": "Topic",
             "name": "Name",
             "username": "Username",
-            "password": "Password"
+            "password": "Password",
+            "property": "Property"
         },
         "status": {
             "connected": "connected",
@@ -542,7 +543,7 @@
         "label": {
             "property": "Property",
             "rule": "rule",
-            "repair" :  "repair sequence (reconstruct parts property of outgoing messages)"
+            "repair" :  "recreate message sequences"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -558,7 +559,7 @@
             "nnull":"is not null",
             "head":"head",
             "tail":"tail",
-            "index":"is between",
+            "index":"index between",
             "exp":"JSONata exp",
             "else":"otherwise"
         },
@@ -608,7 +609,7 @@
             "maxout": "e.g. 255"
         },
         "scale": {
-            "payload": "Scale msg.payload",
+            "payload": "Scale the message property",
             "limit": "Scale and limit to the target range",
             "wrap": "Scale and wrap within the target range"
         },
@@ -846,7 +847,7 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
-            "merge":"merge sequence",
+            "merge":"merge sequences",
             "reduce":"reduce sequence",
             "custom":"manual"
         },
@@ -881,8 +882,8 @@
             "exp": "Reduce exp",
             "exp-value": "exp",
             "init": "Initial value",
-            "right": "Evaluate in reverse order (right to left)",
-            "fixup": "Fixup exp"
+            "right": "Evaluate in reverse order (last to first)",
+            "fixup": "Fix-up exp"
         },
         "errors": {
             "invalid-expr": "Invalid JSONata expression: __error__"
@@ -904,20 +905,19 @@
     "batch" : {
         "mode": {
             "label" : "Mode",
-            "num-msgs" : "number of messages",
-            "interval" : "interval in seconds",
-            "concat" : "concatenate sequences"
+            "num-msgs" : "Group by number of messages",
+            "interval" : "Group by time interval",
+            "concat" : "Concatenate sequences"
         },
         "count": {
-            "label" : "Number of msgs",
-            "overwrap" : "Overwrap",
+            "label" : "Number of messages",
+            "overlap" : "Overlap",
             "count" : "count",
-            "invalid" : "Invalid count and overwrap"
+            "invalid" : "Invalid count and overlap"
         },
         "interval": {
-            "label" : "Interval (sec)",
+            "label" : "Interval",
             "seconds" : "seconds",
-            "sec" : "sec",
             "empty" : "send empty message when no message arrives"
         },
         "concat": {

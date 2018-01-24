@@ -28,7 +28,7 @@ describe('BATCH node', function() {
 
     afterEach(function() {
         helper.unload();
-        RED.settings.batchMaxKeptMsgsCount = 0;
+        RED.settings.nodeMessageBufferMaxLength = 0;
     });
 
     it('should be loaded with defaults', function(done) {
@@ -81,7 +81,7 @@ describe('BATCH node', function() {
             }
         });
     }
-    
+
     function check_count(flow, results, done) {
         try {
             helper.load(batchNode, flow, function() {
@@ -106,13 +106,13 @@ describe('BATCH node', function() {
             }, delay);
         }
     }
-    
+
     function check_interval(flow, results, delay, done) {
         helper.load(batchNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             check_data(n1, n2, results, done);
-            delayed_send(n1, 0, 4, delay); 
+            delayed_send(n1, 0, 4, delay);
         });
     }
 
@@ -144,7 +144,7 @@ describe('BATCH node', function() {
     describe('mode: count', function() {
 
         it('should create seq. with count', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 2, overwrap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 2, overlap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [0, 1],
@@ -153,9 +153,9 @@ describe('BATCH node', function() {
             ];
             check_count(flow, results, done);
         });
-        
-        it('should create seq. with count and overwrap', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 3, overwrap: 2, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+
+        it('should create seq. with count and overlap', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 3, overlap: 2, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [0, 1, 2],
@@ -165,14 +165,14 @@ describe('BATCH node', function() {
             ];
             check_count(flow, results, done);
         });
-       
+
         it('should handle too many pending messages', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 5, overwrap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 5, overlap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.nodeMessageBufferMaxLength = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
@@ -190,11 +190,11 @@ describe('BATCH node', function() {
         });
 
     });
-    
+
     describe('mode: interval', function() {
-        
+
         it('should create seq. with interval', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [0, 1],
@@ -204,7 +204,7 @@ describe('BATCH node', function() {
         });
 
         it('should create seq. with interval (in float)', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 0.5, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overlap: 0, interval: 0.5, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [0, 1],
@@ -214,32 +214,32 @@ describe('BATCH node', function() {
         });
 
         it('should create seq. with interval & not send empty seq', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
-                // 1300, 2600, 3900, 5200, 
+                // 1300, 2600, 3900, 5200,
                 [0], [1], [2], [3]
             ];
             check_interval(flow, results, 1300, done);
         });
 
         it('should create seq. with interval & send empty seq', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: true, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overlap: 0, interval: 1, allowEmptySequence: true, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
-                // 1300, 2600, 3900, 5200, 
+                // 1300, 2600, 3900, 5200,
                 [null], [0], [1], [2], [null], [3]
             ];
             check_interval(flow, results, 1300, done);
         });
 
         it('should handle too many pending messages', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "interval", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.nodeMessageBufferMaxLength = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
@@ -257,11 +257,11 @@ describe('BATCH node', function() {
         });
 
     });
-    
+
     describe('mode: concat', function() {
 
         it('should concat two seq. (series)', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [2, 3, 0, 1]
@@ -276,7 +276,7 @@ describe('BATCH node', function() {
         });
 
         it('should concat two seq. (mixed)', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [2, 3, 0, 1]
@@ -291,7 +291,7 @@ describe('BATCH node', function() {
         });
 
         it('should concat three seq.', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}, {topic: "TC"}], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}, {topic: "TC"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             var results = [
                 [2, 3, 0, 1, 4]
@@ -307,12 +307,12 @@ describe('BATCH node', function() {
         });
 
         it('should handle too many pending messages', function(done) {
-            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overwrap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TB"}], wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(batchNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                RED.settings.batchMaxKeptMsgsCount = 2;
+                RED.settings.nodeMessageBufferMaxLength = 2;
                 setTimeout(function() {
                     var logEvents = helper.log().args.filter(function (evt) {
                         return evt[0].type == "batch";
