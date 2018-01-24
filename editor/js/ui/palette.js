@@ -412,16 +412,17 @@ RED.palette = (function() {
             for (var j=0;j<nodeSet.types.length;j++) {
                 showNodeType(nodeSet.types[j]);
                 var def = RED.nodes.getType(nodeSet.types[j]);
-                if (def.onpaletteadd && typeof def.onpaletteadd === "function") {
+                if (def && def.onpaletteadd && typeof def.onpaletteadd === "function") {
                     def.onpaletteadd.call(def);
                 }
             }
         });
         RED.events.on('registry:node-set-disabled', function(nodeSet) {
+            console.log(nodeSet);
             for (var j=0;j<nodeSet.types.length;j++) {
                 hideNodeType(nodeSet.types[j]);
                 var def = RED.nodes.getType(nodeSet.types[j]);
-                if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                if (def && def.onpaletteremove && typeof def.onpaletteremove === "function") {
                     def.onpaletteremove.call(def);
                 }
             }
@@ -431,7 +432,7 @@ RED.palette = (function() {
                 for (var j=0;j<nodeSet.types.length;j++) {
                     removeNodeType(nodeSet.types[j]);
                     var def = RED.nodes.getType(nodeSet.types[j]);
-                    if (def.onpaletteremove && typeof def.onpaletteremove === "function") {
+                    if (def && def.onpaletteremove && typeof def.onpaletteremove === "function") {
                         def.onpaletteremove.call(def);
                     }
                 }

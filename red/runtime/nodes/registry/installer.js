@@ -29,8 +29,7 @@ var npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 var paletteEditorEnabled = false;
 
 var settings;
-
-var moduleRe = /^[^/]+$/;
+var moduleRe = /^(@[^/]+?[/])?[^/]+?$/;
 var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
 
 function init(_settings) {
