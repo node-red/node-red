@@ -84,7 +84,7 @@ function createNodeApi(node) {
         red.auth = runtime.adminApi.auth;
         red.httpAdmin = runtime.adminApi.adminApp;
         red.httpNode = runtime.nodeApp;
-        red.server = runtime.adminApi.server;
+        red.server = runtime.server;
     } else {
         //TODO: runtime.adminApi is always stubbed if not enabled, so this block
         // is unused - but may be needed for the unit tests
