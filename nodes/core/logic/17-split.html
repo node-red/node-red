@@ -90,11 +90,9 @@
     a message and send each complete segment. If there is a partial segment at the end,
     the node will hold on to it and prepend it to the next message that is received.
     </p>
-    <p>When operating in this mode, the node will not set the `msg.parts.count`
+    <p>When operating in this mode, the node will not set the <code>msg.parts.count</code>
     property as it does not know how many messages to expect in the stream. This
     means it cannot be used with the <b>join</b> node in its automatic mode</p>
-
-
 </script>
 
 <script type="text/javascript">
@@ -170,7 +168,6 @@
         <select id="node-input-mode" style="width:200px;">
             <option value="auto" data-i18n="join.mode.auto"></option>
             <option value="custom" data-i18n="join.mode.custom"></option>
-            <option value="merge" data-i18n="join.mode.merge"></option>
             <option value="reduce" data-i18n="join.mode.reduce"></option>
         </select>
     </div>
@@ -219,18 +216,6 @@
             </ul>
         </div>
     </div>
-    <div class="node-row-merge">
-        <div class="form-row">
-            <label data-i18n="join.merge.topics-label"></label>
-            <div class="form-row node-input-topics-container-row">
-                <ol id="node-input-topics-container"></ol>
-            </div>
-        </div>
-        <div class="form-row">
-            <input type="checkbox" id="node-input-mergeOnChange" style="margin-left:10px; vertical-align:top; width:auto;">
-            <label for="node-input-mergeOnChange" style="width:auto;" data-i18n="join.merge.on-change"></label>
-        </div>
-    </div>
     <div class="node-row-reduce">
         <div class="form-row">
             <label for="node-input-reduceExp" data-i18n="join.reduce.exp" style="margin-left:10px;"></label>
@@ -259,16 +244,15 @@
 </script>
 
 <script type="text/x-red" data-help-name="join">
-    <p>Joins sequences of messages into a single message.  This node provides four mode for message combination:</p>
+    <p>Joins sequences of messages into a single message.</p>
+    <p>There are three modes available:</p>
     <dl>
         <dt>automatic</dt>
         <dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
         <dt>manual</dt>
-        <dd>It will join sequences of messages in a variety of ways.</dd>
-        <dt>merge sequence</dt>
-        <dd>It will merge incoming messages into single message using <code>topic</code> property.</dd>
+        <dd>Join sequences of messages in a variety of ways.</dd>
         <dt>reduce sequence</dt>
-        <dd>When paired with the <b>split</b> node, it will reduce the message sequence into single message.</dd>
+        <dd>Apply an expression against all messages in a sequence to reduce it to a single message.</dd>
     </dl>
     <h3>Inputs</h3>
     <dl class="message-properties">
@@ -292,11 +276,13 @@
     <h3>Details</h3>
 
     <h4>Automatic mode</h4>
-    <p>When configured to join in manual mode, the node is able to join sequences of messages using <code>parts</code> property of incoming messages.</p>
+    <p>Automatic mode uses the <code>parts</code> property of incoming messages to
+       determine how the sequence should be joined. This allows it to automatically
+       reverse the action of a <b>split</b> node.
 
     <h4>Manual mode</h4>
     <p>When configured to join in manual mode, the node is able to join sequences
-     of messages in a variety of ways.</p>
+     of messages into a number of different results:</p>
     <ul>
         <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
         <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
@@ -311,49 +297,48 @@
     <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
     <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
 
-    <h4>Merge Sequence mode</h4>
-    <p>When configured to join in merge mode, the join node can create a message based on <code>topic</code> value.</p>
-    <p>Input messages are merged in order specified by <b>Topics</b> value.
-    <p>For example, if value of <b>Topics</b> is <b>x,x,y</b>, two input messages with topic <b>x</b> and one input message with topic <b>y</b> are merged into a new message in order of arrival.</p>
-    <p>If "Send merged message on arrival of a new topic" check box is selected, the last messages with each topic is kept internally and output message is sent when a message with new topics arrives.</p>
-
-    <p>The merged message contains <code>payload</code> property and properties for each topic.  The <code>payload</code> property represents ordered array of payload value of input messages for each topic.  The property for each topic represents a payload value for single occurrence of topic or array of payload values for multiple occurrences of the topic.</p>
-
     <h4>Reduce Sequence mode</h4>
-    <p>When configured to join in reduce sequence mode, following values can be specified:</p>
+    <p>When configured to join in reduce mode, an expression is applied to each
+       message in a sequence and the result accumulated to produce a single message.</p>
+
     <dl class="message-properties">
-        <dt>Reduce exp</dt>
-        <dd>JSONata expression for reducing message group.  This expression represents the accumulated result.  In the expression, following special variables can be used:
-            <ul>
-                <li><code>$A</code> accumulated value, </li>
-                <li><code>$I</code> index of the message in a group, </li>
-                <li><code>$N</code> number of messages of a group.</li>
-            </ul>
-        </dd>
         <dt>Initial value</dt>
-        <dd>
-            initial value of reduction.
-        </dd>
-        <dt>Fixup exp</dt>
-        <dd>
-            JSONata expression applied after reduction of a message group completed.  In the expression, following special variables can be used:
+        <dd>The initial value of the accumulated value (<code>$A</code>).</dd>
+        <dt>Reduce expression</dt>
+        <dd>A JSONata expression that is called for each message in the sequence.
+            The result is passed to the next call of the expression as the accumulated value.
+            In the expression, the following special variables can be used:
             <ul>
-                <li><code>$A</code> accumulated value, </li>
-                <li><code>$N</code> number of messages of a group.</li>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$I</code>: index of the message in the sequence, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
             </ul>
         </dd>
-        <p>Order of reduction on a message group can be specified by checkbox (<b>Evaluate in reverse order (right to left)</b>).</p>
+        <dt>Fix-up expression</dt>
+        <dd>An optional JSONata expression that is applied after the reduce expression
+            has been applied to all messages in the sequence.
+            In the expression, following special variables can be used:
+            <ul>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
+            </ul>
+        </dd>
+        <p>By default, the reduce expression is applied in order, from the first
+           to the last message of the sequence. It can optionally be applied in
+           reverse order.</p>
     </dl>
-    <p><b>Example:</b> Join node outputs an average for each input message group with the following setting:
+    <p><b>Example:</b> the following settings, given a sequence of numeric values,
+       calculates the average value:
         <ul>
-            <li><b>Reduce exp</b>: <code>$A+payload</code></li>
+            <li><b>Reduce expression</b>: <code>$A+payload</code></li>
             <li><b>Initial value</b>: <code>0</code></li>
-            <li><b>Fixup exp</b>: <code>$A/$N</code></li>
+            <li><b>Fix-up expression</b>: <code>$A/$N</code></li>
         </ul>
     </p>
-
-    <h4>Note:</h4>
-    <p>This node internally keeps messages for its operation.  In order to prevent unexpected memory usage, maximum number of messages kept can be specified by <code>maxKeptMsgsCount</code> property in <b>settings.js</b>.</p>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting `nodeMessageBufferMaxLength` can be used to limit how many messages nodes
+       will buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -372,8 +357,6 @@
             accumulate: { value:"false" },
             timeout: {value:""},
             count: {value:""},
-            topics: {value:[{topic:""}]},
-            mergeOnChange: {value:false},
             reduceRight: {value:false},
             reduceExp: {value:undefined},
             reduceInit: {value:undefined},
@@ -391,41 +374,10 @@
         },
         oneditprepare: function() {
             var node = this;
-            var topic_str = node._("join.merge.topic");
-            
-            function resizeTopics(topic) {
-                var newWidth = topic.width();
-                topic.find('.red-ui-typedInput')
-                     .typedInput("width",newWidth-15);
-            }
-            $("#node-input-topics-container")
-                .css('min-height','250px').css('min-width','420px')
-                .editableList({
-                addItem: function(container,i,opt) {
-                    if (!opt.hasOwnProperty('topic')) {
-                        opt.topic = "";
-                    }
-                    var row = $('<div/>').appendTo(container);
-                    var valueField = $('<input/>',{
-                        class:"node-input-topic-value",
-                        type:"text",
-                        style:"margin-left: 5px;"
-                    }).appendTo(row)
-                      .typedInput({default:'str', types:['str']});
-                    valueField.typedInput('value', opt.topic);
-                    valueField.typedInput('type', 'str');
-                    valueField.attr('placeholder', topic_str);
-                    resizeTopics(container);
-                },
-                resizeItem: resizeTopics,
-                sortable: true,
-                removable: true
-            });
 
             $("#node-input-mode").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-custom").toggle(val==='custom');
-                $(".node-row-merge").toggle(val==='merge');
                 $(".node-row-reduce").toggle(val==='reduce');
                 $(".form-tips-auto").toggle((val==='auto') || (val==='reduce'));
                 if (val === "auto") {
@@ -433,15 +385,6 @@
                 }
                 else if (val === "custom") {
                     $("#node-input-build").change();
-                }
-                else if (val === "merge") {
-                    var topics = node.topics;
-                    var container = $("#node-input-topics-container");
-                    container.editableList('empty');
-                    for (var i=0;i<topics.length;i++) {
-                        var topic = topics[i];
-                        container.editableList('addItem', topic);
-                    }
                 }
                 else if (val === "reduce") {
                     var jsonata_or_empty = {
@@ -519,27 +462,6 @@
             if (build !== 'object' && build !== 'merged') {
                 $("#node-input-accumulate").prop("checked",false);
             }
-            var topics = $("#node-input-topics-container").editableList('items');
-            var node = this;
-            node.topics = [];
-            topics.each(function(i) {
-                var topicData = $(this).data('data');
-                var topic = $(this);
-                var vf = topic.find(".node-input-topic-value");
-                var value = vf.typedInput('value');
-                var r = {topic:value};
-                node.topics.push(r);
-            });
-        },
-        oneditresize: function(size) {
-            var rows = $("#dialog-form>div:not(.node-input-topics-container-row)");
-            var height = size.height;
-            for (var i=0;i<rows.size();i++) {
-                height -= $(rows[i]).outerHeight(true);
-            }
-            var editorRow = $("#dialog-form>div.node-input-topics-container-row");
-            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
-            $("#node-input-topics-container").editableList('height',height);
         }
     });
 </script>
