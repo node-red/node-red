@@ -40,7 +40,19 @@ function getSSHKeyUsername(userObj) {
     }
     return username;
 }
-
+function getGitUser(user) {
+    var username;
+    if (!user) {
+        username = "_";
+    } else {
+        username = user.username;
+    }
+    var userSettings = settings.getUserSettings(username);
+    if (userSettings && userSettings.git) {
+        return userSettings.git.user;
+    }
+    return null;
+}
 function Project(name) {
     this.name = name;
     this.path = fspath.join(projectsDir,name);
@@ -153,7 +165,7 @@ Project.prototype.initialise = function(user,data) {
     return when.all(promises).then(function() {
         return gitTools.stageFile(project.path,files);
     }).then(function() {
-        return gitTools.commit(project.path,"Create project files");
+        return gitTools.commit(project.path,"Create project files",getGitUser(user));
     }).then(function() {
         return project.load()
     })
@@ -358,14 +370,7 @@ Project.prototype.unstageFile = function(file) {
     return gitTools.unstageFile(this.path,file);
 }
 Project.prototype.commit = function(user, options) {
-    var username;
-    if (!user) {
-        username = "_";
-    } else {
-        username = user.username;
-    }
-    var gitUser = this.git.user[username];
-    return gitTools.commit(this.path,options.message,gitUser);
+    return gitTools.commit(this.path,options.message,getGitUser(user));
 }
 Project.prototype.getFileDiff = function(file,type) {
     return gitTools.getFileDiff(this.path,file,type);
@@ -807,7 +812,7 @@ function createDefaultProject(user, project) {
         return when.all(promises).then(function() {
             return gitTools.stageFile(projectPath,files);
         }).then(function() {
-            return gitTools.commit(projectPath,"Create project");
+            return gitTools.commit(projectPath,"Create project",getGitUser(user));
         })
     });
 }
