@@ -369,11 +369,27 @@ module.exports = {
     init: function(_settings,_runtime) {
         log = _runtime.log
         return new Promise(function(resolve,reject) {
-            runGitCommand(["--version"]).then(function(output) {
-                var m = / (\d\S+)/.exec(output);
+            Promise.all([
+                runGitCommand(["--version"]),
+                runGitCommand(["config","--global","user.name"]).catch(err=>""),
+                runGitCommand(["config","--global","user.email"]).catch(err=>"")
+            ]).then(function(output) {
+                var m = / (\d\S+)/.exec(output[0]);
                 gitVersion = m[1];
-                resolve(gitVersion);
+                var globalUserName = output[1].trim();
+                var globalUserEmail = output[2].trim();
+                var result = {
+                    version: gitVersion
+                };
+                if (globalUserName && globalUserEmail) {
+                    result.user = {
+                        name: globalUserName,
+                        email: globalUserEmail
+                    }
+                }
+                resolve(result);
             }).catch(function(err) {
+                console.log(err);
                 resolve(null);
             });
         });

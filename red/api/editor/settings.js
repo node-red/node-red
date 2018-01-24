@@ -59,6 +59,9 @@ module.exports = {
                 flow: runtime.storage.projects.getFlowFilename(),
                 credentials: runtime.storage.projects.getCredentialsFilename()
             }
+            safeSettings.git = {
+                globalUser: runtime.storage.projects.getGlobalGitUser()
+            }
         }
 
         safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();

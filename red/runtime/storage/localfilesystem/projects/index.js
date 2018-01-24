@@ -37,6 +37,8 @@ var projectLogMessages = [];
 var projectsDir;
 var activeProject
 
+var globalGitUser = false;
+
 function init(_settings, _runtime) {
     settings = _settings;
     runtime = _runtime;
@@ -89,11 +91,12 @@ function init(_settings, _runtime) {
 
     if (projectsEnabled) {
         return sshTools.init(settings,runtime).then(function() {
-            gitTools.init(_settings, _runtime).then(function(gitVersion) {
-                if (!gitVersion) {
+            gitTools.init(_settings, _runtime).then(function(gitConfig) {
+                if (!gitConfig) {
                     projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
                     projectsEnabled = false;
                 } else {
+                    globalGitUser = gitConfig.user;
                     Projects.init(settings,runtime);
                     sshTools.init(settings,runtime);
                     projectsDir = fspath.join(settings.userDir,"projects");
@@ -553,7 +556,7 @@ module.exports = {
     updateRemote: updateRemote,
     getFlowFilename: getFlowFilename,
     getCredentialsFilename: getCredentialsFilename,
-
+    getGlobalGitUser: function() { return globalGitUser },
     getFlows: getFlows,
     saveFlows: saveFlows,
     getCredentials: getCredentials,

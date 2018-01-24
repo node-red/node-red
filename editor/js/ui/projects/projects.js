@@ -67,6 +67,22 @@ RED.projects = (function() {
                 var gitEmailInput;
                 return {
                     content: function(options) {
+                        var isGlobalConfig = false;
+                        var existingGitSettings = RED.settings.get('git');
+                        if (existingGitSettings && existingGitSettings.user) {
+                            existingGitSettings = existingGitSettings.user;
+                        } else if (RED.settings.git && RED.settings.git.globalUser) {
+                            isGlobalConfig = true;
+                            existingGitSettings = RED.settings.git.globalUser;
+                        }
+
+                        var validateForm = function() {
+                            var name = gitUsernameInput.val().trim();
+                            var email = gitEmailInput.val().trim();
+                            var valid = name.length > 0 && email.length > 0;
+                            $("#projects-dialog-git-config").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
+
+                        }
 
                         var container = $('<div class="projects-dialog-screen-start"></div>');
                         migrateProjectHeader.appendTo(container);
@@ -75,23 +91,26 @@ RED.projects = (function() {
                         $('<p>').text("Setup your version control client").appendTo(body);
                         $('<p>').text("Node-RED uses the open source tool Git for version control. It tracks changes to your project files and lets you push them to remote repositories.").appendTo(body);
                         $('<p>').text("When you commit a set of changes, Git records who made the changes with a username and email address. The Username can be anything you want - it does not need to be your real name.").appendTo(body);
-                        $('<p>').text("If your Git client is already configured, you can skip this step.").appendTo(body);
 
-                        var currentGitSettings = RED.settings.get('git') || {};
-                        currentGitSettings.user = currentGitSettings.user || {};
-
+                        if (isGlobalConfig) {
+                            $('<p>').text("Your Git client is already configured with the details below.").appendTo(body);
+                        }
+                        $('<p>').text("You can change these settings later under the 'Git config' tab of the settings dialog.").appendTo(body);
 
                         var row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="">Username</label>').appendTo(row);
-                        gitUsernameInput = $('<input type="text">').val(currentGitSettings.user.name||"").appendTo(row);
+                        gitUsernameInput = $('<input type="text">').val(existingGitSettings.name||"").appendTo(row);
                         // $('<div style="position:relative;"></div>').text("This does not need to be your real name").appendTo(row);
+                        gitUsernameInput.on("change keyup paste",validateForm);
 
                         row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="">Email</label>').appendTo(row);
-                        gitEmailInput = $('<input type="text">').val(currentGitSettings.user.email||"").appendTo(row);
+                        gitEmailInput = $('<input type="text">').val(existingGitSettings.email||"").appendTo(row);
+                        gitEmailInput.on("change keyup paste",validateForm);
                         // $('<div style="position:relative;"></div>').text("Something something email").appendTo(row);
                         setTimeout(function() {
                             gitUsernameInput.focus();
+                            validateForm();
                         },50);
                         return container;
                     },
@@ -104,6 +123,7 @@ RED.projects = (function() {
                             }
                         },
                         {
+                            id: "projects-dialog-git-config",
                             text: "Next", // TODO: nls
                             class: "primary",
                             click: function() {
