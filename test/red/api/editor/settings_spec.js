@@ -91,7 +91,8 @@ describe("api/editor/settings", function() {
                     projects: {
                         getActiveProject: () => 'test-active-project',
                         getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file'
+                        getCredentialsFilename:  () => 'test-creds-file',
+                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 }
             });
@@ -106,6 +107,8 @@ describe("api/editor/settings", function() {
                     res.body.should.have.property("files");
                     res.body.files.should.have.property("flow",'test-flow-file');
                     res.body.files.should.have.property("credentials",'test-creds-file');
+                    res.body.should.have.property("git");
+                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
                     done();
                 });
         });
