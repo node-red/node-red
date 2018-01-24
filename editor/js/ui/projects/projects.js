@@ -143,7 +143,20 @@ RED.projects = (function() {
                 var projectSummaryInput;
                 return {
                     content: function(options) {
+                        var projectList = null;
+                        var projectNameValid;
 
+                        var pendingFormValidation = false;
+                        $.getJSON("projects", function(data) {
+                            projectList = {};
+                            data.projects.forEach(function(p) {
+                                projectList[p] = true;
+                                if (pendingFormValidation) {
+                                    pendingFormValidation = false;
+                                    validateForm();
+                                }
+                            })
+                        });
                         var container = $('<div class="projects-dialog-screen-start"></div>');
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
@@ -156,16 +169,27 @@ RED.projects = (function() {
                         var validateForm = function() {
                             var projectName = projectNameInput.val();
                             var valid = true;
-                            var projectNameValid = /^[a-zA-Z0-9\-_]+$/.test(projectName);
                             if (projectNameInputChanged) {
+                                if (projectList === null) {
+                                    pendingFormValidation = true;
+                                    return;
+                                }
                                 projectNameStatus.empty();
-                                if (!projectNameValid) {
+                                if (!/^[a-zA-Z0-9\-_]+$/.test(projectName) || projectList[projectName]) {
                                     projectNameInput.addClass("input-error");
                                     $('<i style="margin-top: 8px;" class="fa fa-exclamation-triangle"></i>').appendTo(projectNameStatus);
+                                    projectNameValid = false;
                                     valid = false;
+                                    if (projectList[projectName]) {
+                                        projectNameSublabel.text("Project already exists");
+                                    } else {
+                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    }
                                 } else {
                                     projectNameInput.removeClass("input-error");
                                     $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
+                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameValid = true;
                                 }
                                 projectNameLastChecked = projectName;
                             }
