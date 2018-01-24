@@ -21,7 +21,7 @@ var sinon = require("sinon");
 var Tokens = require("../../../../red/api/auth/tokens");
 
 
-describe("Tokens", function() {
+describe("api/auth/tokens", function() {
     describe("#init",function() {
         it('loads sessions', function(done) {
             Tokens.init({}).then(done);

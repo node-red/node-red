@@ -22,7 +22,7 @@ var Tokens = require("./tokens");
 var Users = require("./users");
 var permissions = require("./permissions");
 
-var theme = require("../theme");
+var theme = require("../editor/theme");
 
 var settings = null;
 var log = null

@@ -723,7 +723,9 @@ RED.nodes = (function() {
         if (!$.isArray(newNodes)) {
             newNodes = [newNodes];
         }
+        var isInitialLoad = false;
         if (!initialLoad) {
+            isInitialLoad = true;
             initialLoad = JSON.parse(JSON.stringify(newNodes));
         }
         var unknownTypes = [];
@@ -744,7 +746,7 @@ RED.nodes = (function() {
             }
 
         }
-        if (unknownTypes.length > 0) {
+        if (!isInitialLoad && unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
             RED.notify("<strong>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</strong>"+typeList,"error",false,10000);
@@ -1223,12 +1225,13 @@ RED.nodes = (function() {
             RED.workspaces.remove(workspaces[id]);
         });
         defaultWorkspace = null;
-
-        RED.nodes.dirty(true);
+        initialLoad = null;
+        RED.nodes.dirty(false);
         RED.view.redraw(true);
         RED.palette.refresh();
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
+        RED.sidebar.info.refresh();
 
         // var node_defs = {};
         // var nodes = [];

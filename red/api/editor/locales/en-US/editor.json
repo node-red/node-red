@@ -1,0 +1,486 @@
+{
+    "common": {
+        "label": {
+            "name": "Name",
+            "ok": "Ok",
+            "done":"Done",
+            "cancel": "Cancel",
+            "delete": "Delete",
+            "close": "Close",
+            "load": "Load",
+            "save": "Save",
+            "import": "Import",
+            "export": "Export"
+        }
+    },
+    "workspace": {
+        "defaultName": "Flow __number__",
+        "editFlow": "Edit flow: __name__",
+        "confirmDelete": "Confirm delete",
+        "delete": "Are you sure you want to delete '__label__'?",
+        "dropFlowHere": "Drop the flow here",
+        "status": "Status",
+        "enabled": "Enabled",
+        "disabled":"Disabled",
+        "info": "Description",
+        "tip": "Description accepts Markdown and will appear in the Info tab."
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "View",
+                "grid": "Grid",
+                "showGrid": "Show grid",
+                "snapGrid": "Snap to grid",
+                "gridSize": "Grid size",
+                "textDir": "Text Direction",
+                "defaultDir": "Default",
+                "ltr": "Left-to-right",
+                "rtl": "Right-to-left",
+                "auto": "Contextual"
+            },
+            "sidebar": {
+                "show": "Show sidebar"
+            },
+            "settings": "Settings",
+            "userSettings": "User Settings",
+            "nodes": "Nodes",
+            "displayStatus": "Show node status",
+            "displayConfig": "Configuration nodes",
+            "import": "Import",
+            "export": "Export",
+            "search": "Search flows",
+            "searchInput": "search your flows",
+            "clipboard": "Clipboard",
+            "library": "Library",
+            "examples": "Examples",
+            "subflows": "Subflows",
+            "createSubflow": "Create Subflow",
+            "selectionToSubflow": "Selection to Subflow",
+            "flows": "Flows",
+            "add": "Add",
+            "rename": "Rename",
+            "delete": "Delete",
+            "keyboardShortcuts": "Keyboard shortcuts",
+            "login": "Login",
+            "logout": "Logout",
+            "editPalette":"Manage palette",
+            "other": "Other",
+            "showTips": "Show tips",
+            "help": "Node-RED website"
+        }
+    },
+    "user": {
+        "loggedInAs": "Logged in as __name__",
+        "username": "Username",
+        "password": "Password",
+        "login": "Login",
+        "loginFailed": "Login failed",
+        "notAuthorized": "Not authorized",
+        "errors": {
+            "settings": "You must be logged in to access settings",
+            "deploy": "You must be logged in to deploy changes",
+            "notAuthorized": "You must be logged in to perform this action"
+        }
+    },
+    "notification": {
+        "warning": "<strong>Warning</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "node has undeployed changes",
+            "nodeActionDisabled": "node actions disabled within subflow",
+            "missing-types": "<p>Flows stopped due to missing node types.</p>",
+            "restartRequired": "Node-RED must be restarted to enable upgraded modules",
+            "credentials_load_failed": "<p>Flows stopped as the credentials could not be decrypted.</p><p>The flow credential file is encrypted, but the project's encryption key is missing or invalid.</p>",
+            "missing_flow_file": "<p>Project flow file not found.</p><p>The project is not configured with a flow file.</p>",
+            "project_empty": "<p>The project is empty.</p><p>Do you want to create a default set of project files?<br/>Otherwise, you will have to manually add files to the project outside of the editor.</p>",
+            "project_not_found": "<p>Project '__project__' not found.</p>"
+        },
+
+        "error": "<strong>Error</strong>: __message__",
+        "errors": {
+            "lostConnection": "Lost connection to server, reconnecting...",
+            "lostConnectionReconnect": "Lost connection to server, reconnecting in __time__s.",
+            "lostConnectionTry": "Try now",
+            "cannotAddSubflowToItself": "Cannot add subflow to itself",
+            "cannotAddCircularReference": "Cannot add subflow - circular reference detected",
+            "unsupportedVersion": "Using an unsupported version of Node.js<br/>You should upgrade to the latest Node.js LTS release"
+        }
+    },
+    "clipboard": {
+        "nodes": "Nodes",
+        "selectNodes": "Select the text above and copy to the clipboard.",
+        "pasteNodes": "Paste nodes here",
+        "importNodes": "Import nodes",
+        "exportNodes": "Export nodes to clipboard",
+        "importUnrecognised": "Imported unrecognised type:",
+        "importUnrecognised_plural": "Imported unrecognised types:",
+        "nodesExported": "Nodes exported to clipboard",
+        "nodeCopied": "__count__ node copied",
+        "nodeCopied_plural": "__count__ nodes copied",
+        "invalidFlow": "Invalid flow: __message__",
+        "export": {
+            "selected":"selected nodes",
+            "current":"current flow",
+            "all":"all flows",
+            "compact":"compact",
+            "formatted":"formatted",
+            "copy": "Export to clipboard"
+        },
+        "import": {
+            "import": "Import to",
+            "newFlow": "new flow"
+        },
+        "copyMessagePath": "Path copied",
+        "copyMessageValue": "Value copied",
+        "copyMessageValue_truncated": "Truncated value copied"
+    },
+    "deploy": {
+        "deploy": "Deploy",
+        "full": "Full",
+        "fullDesc": "Deploys everything in the workspace",
+        "modifiedFlows": "Modified Flows",
+        "modifiedFlowsDesc": "Only deploys flows that contain changed nodes",
+        "modifiedNodes": "Modified Nodes",
+        "modifiedNodesDesc": "Only deploys nodes that have changed",
+        "successfulDeploy": "Successfully deployed",
+        "deployFailed": "Deploy failed: __message__",
+        "unusedConfigNodes":"You have some unused configuration nodes.",
+        "unusedConfigNodesLink":"Click here to see them",
+        "errors": {
+            "noResponse": "no response from server"
+        },
+        "confirm": {
+            "button": {
+                "ignore": "Ignore",
+                "confirm": "Confirm deploy",
+                "review": "Review changes",
+                "cancel": "Cancel",
+                "merge": "Merge",
+                "overwrite": "Ignore & deploy"
+            },
+            "undeployedChanges": "You have undeployed changes.\n\nLeaving this page will lose these changes.",
+            "improperlyConfigured": "The workspace contains some nodes that are not properly configured:",
+            "unknown": "The workspace contains some unknown node types:",
+            "confirm": "Are you sure you want to deploy?",
+            "doNotWarn": "do not warn about this again",
+            "conflict": "The server is running a more recent set of flows.",
+            "backgroundUpdate": "The flows on the server have been updated.",
+            "conflictChecking": "Checking to see if the changes can be merged automatically",
+            "conflictAutoMerge": "The changes include no conflicts and can be merged automatically.",
+            "conflictManualMerge": "The changes include conflicts that must be resolved before they can be deployed.",
+            "plusNMore": "+ __count__ more"
+        }
+    },
+    "diff": {
+        "unresolvedCount": "__count__ unresolved conflict",
+        "unresolvedCount_plural": "__count__ unresolved conflicts",
+        "globalNodes": "Global nodes",
+        "flowProperties": "Flow Properties",
+        "type": {
+            "added": "added",
+            "changed": "changed",
+            "unchanged": "unchanged",
+            "deleted": "deleted",
+            "flowDeleted": "flow deleted",
+            "flowAdded": "flow added",
+            "movedTo": "moved to __id__",
+            "movedFrom": "moved from __id__"
+        },
+        "nodeCount": "__count__ node",
+        "nodeCount_plural": "__count__ nodes",
+        "local":"Local changes",
+        "remote":"Remote changes"
+
+    },
+    "subflow": {
+        "editSubflow": "Edit flow template: __name__",
+        "edit": "Edit flow template",
+        "subflowInstances": "There is __count__ instance of this subflow template",
+        "subflowInstances_plural": "There are __count__ instances of this subflow template",
+        "editSubflowProperties": "edit properties",
+        "input": "inputs:",
+        "output": "outputs:",
+        "deleteSubflow": "delete subflow",
+        "info": "Description",
+        "format":"markdown format",
+        "errors": {
+            "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",
+            "multipleInputsToSelection": "<strong>Cannot create subflow</strong>: multiple inputs to selection"
+        }
+    },
+    "editor": {
+        "configEdit": "Edit",
+        "configAdd": "Add",
+        "configUpdate": "Update",
+        "configDelete": "Delete",
+        "nodesUse": "__count__ node uses this config",
+        "nodesUse_plural": "__count__ nodes use this config",
+        "addNewConfig": "Add new __type__ config node",
+        "editNode": "Edit __type__ node",
+        "editConfig": "Edit __type__ config node",
+        "addNewType": "Add new __type__...",
+        "nodeProperties": "node properties",
+        "portLabels": "node settings",
+        "labelInputs": "Inputs",
+        "labelOutputs": "Outputs",
+        "settingIcon": "Icon",
+        "noDefaultLabel": "none",
+        "defaultLabel": "use default label",
+        "errors": {
+            "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
+        }
+    },
+    "keyboard": {
+        "title": "Keyboard Shortcuts",
+        "keyboard": "Keyboard",
+        "filterActions": "filter actions",
+        "shortcut": "shortcut",
+        "scope": "scope",
+        "unassigned": "Unassigned",
+        "global": "global",
+        "workspace": "workspace",
+        "selectAll": "Select all nodes",
+        "selectAllConnected": "Select all connected nodes",
+        "addRemoveNode": "Add/remove node from selection",
+        "editSelected": "Edit selected node",
+        "deleteSelected": "Delete selected nodes or link",
+        "importNode": "Import nodes",
+        "exportNode": "Export nodes",
+        "nudgeNode": "Move selected nodes (1px)",
+        "moveNode": "Move selected nodes (20px)",
+        "toggleSidebar": "Toggle sidebar",
+        "copyNode": "Copy selected nodes",
+        "cutNode": "Cut selected nodes",
+        "pasteNode": "Paste nodes",
+        "undoChange": "Undo the last change performed",
+        "searchBox": "Open search box",
+        "managePalette": "Manage palette"
+    },
+    "library": {
+        "openLibrary": "Open Library...",
+        "saveToLibrary": "Save to Library...",
+        "typeLibrary": "__type__ library",
+        "unnamedType": "Unnamed __type__",
+        "exportToLibrary": "Export nodes to library",
+        "dialogSaveOverwrite": "A __libraryType__ called __libraryName__ already exists. Overwrite?",
+        "invalidFilename": "Invalid filename",
+        "savedNodes": "Saved nodes",
+        "savedType": "Saved __type__",
+        "saveFailed": "Save failed: __message__",
+
+        "filename": "Filename",
+        "folder": "Folder",
+        "filenamePlaceholder": "file",
+        "fullFilenamePlaceholder": "a/b/file",
+        "folderPlaceholder": "a/b",
+
+        "breadcrumb": "Library"
+    },
+    "palette": {
+        "noInfo": "no information available",
+        "filter": "filter nodes",
+        "search": "search modules",
+        "label": {
+            "subflows": "subflows",
+            "input": "input",
+            "output": "output",
+            "function": "function",
+            "social": "social",
+            "storage": "storage",
+            "analysis": "analysis",
+            "advanced": "advanced"
+        },
+        "event": {
+            "nodeAdded": "Node added to palette:",
+            "nodeAdded_plural": "Nodes added to palette",
+            "nodeRemoved": "Node removed from palette:",
+            "nodeRemoved_plural": "Nodes removed from palette:",
+            "nodeEnabled": "Node enabled:",
+            "nodeEnabled_plural": "Nodes enabled:",
+            "nodeDisabled": "Node disabled:",
+            "nodeDisabled_plural": "Nodes disabled:",
+            "nodeUpgraded": "Node module __module__ upgraded to version __version__"
+        },
+        "editor": {
+            "title": "Manage palette",
+            "palette": "Palette",
+            "times": {
+                "seconds": "seconds ago",
+                "minutes": "minutes ago",
+                "minutesV": "__count__ minutes ago",
+                "hoursV": "__count__ hour ago",
+                "hoursV_plural": "__count__ hours ago",
+                "daysV": "__count__ day ago",
+                "daysV_plural": "__count__ days ago",
+                "weeksV": "__count__ week ago",
+                "weeksV_plural": "__count__ weeks ago",
+                "monthsV": "__count__ month ago",
+                "monthsV_plural": "__count__ months ago",
+                "yearsV": "__count__ year ago",
+                "yearsV_plural": "__count__ years ago",
+
+                "yearMonthsV": "__y__ year, __count__ month ago",
+                "yearMonthsV_plural": "__y__ year, __count__ months ago",
+                "yearsMonthsV": "__y__ years, __count__ month ago",
+                "yearsMonthsV_plural": "__y__ years, __count__ months ago"
+            },
+            "nodeCount": "__label__ node",
+            "nodeCount_plural": "__label__ nodes",
+            "moduleCount": "__count__ module available",
+            "moduleCount_plural": "__count__ modules available",
+            "inuse": "in use",
+            "enableall": "enable all",
+            "disableall": "disable all",
+            "enable": "enable",
+            "disable": "disable",
+            "remove": "remove",
+            "update": "update to __version__",
+            "updated": "updated",
+            "install": "install",
+            "installed": "installed",
+            "loading": "Loading catalogues...",
+            "tab-nodes": "Nodes",
+            "tab-install": "Install",
+            "sort": "sort:",
+            "sortAZ": "a-z",
+            "sortRecent": "recent",
+            "more": "+ __count__ more",
+            "errors": {
+                "catalogLoadFailed": "<p>Failed to load node catalogue.</p><p>Check the browser console for more information</p>",
+                "installFailed": "<p>Failed to install: __module__</p><p>__message__</p><p>Check the log for more information</p>",
+                "removeFailed": "<p>Failed to remove: __module__</p><p>__message__</p><p>Check the log for more information</p>",
+                "updateFailed": "<p>Failed to update: __module__</p><p>__message__</p><p>Check the log for more information</p>",
+                "enableFailed": "<p>Failed to enable: __module__</p><p>__message__</p><p>Check the log for more information</p>",
+                "disableFailed": "<p>Failed to disable: __module__</p><p>__message__</p><p>Check the log for more information</p>"
+            },
+            "confirm": {
+                "install": {
+                    "body":"<p>Installing '__module__'</p><p>Before installing, please read the node's documentation. Some nodes have dependencies that cannot be automatically resolved and can require a restart of Node-RED.</p>",
+                    "title": "Install nodes"
+                },
+                "remove": {
+                    "body":"<p>Removing '__module__'</p><p>Removing the node will uninstall it from Node-RED. The node may continue to use resources until Node-RED is restarted.</p>",
+                    "title": "Remove nodes"
+                },
+                "update": {
+                    "body":"<p>Updating '__module__'</p><p>Updating the node will require a restart of Node-RED to complete the update. This must be done manually.</p>",
+                    "title": "Update nodes"
+                },
+                "cannotUpdate": {
+                    "body":"An update for this node is available, but it is not installed in a location that the palette manager can update.<br/><br/>Please refer to the documentation for how to update this node."
+                },
+                "button": {
+                    "review": "Open node information",
+                    "install": "Install",
+                    "remove": "Remove",
+                    "update": "Update"
+                }
+            }
+
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "Node information",
+            "tabName": "Name",
+            "label": "info",
+            "node": "Node",
+            "type": "Type",
+            "id": "ID",
+            "status": "Status",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "subflow": "Subflow",
+            "instances": "Instances",
+            "properties": "Properties",
+            "info": "Information",
+            "blank": "blank",
+            "null": "null",
+            "showMore": "show more",
+            "showLess": "show less",
+            "flow": "Flow",
+            "selection":"Selection",
+            "nodes":"__count__ nodes",
+            "flowDesc": "Flow Description",
+            "subflowDesc": "Subflow Description",
+            "nodeHelp": "Node Help",
+            "none":"None",
+            "arrayItems": "__count__ items",
+            "showTips":"You can open the tips from the settings panel"
+        },
+        "config": {
+            "name": "Configuration nodes",
+            "label": "config",
+            "global": "On all flows",
+            "none": "none",
+            "subflows": "subflows",
+            "flows": "flows",
+            "filterUnused":"unused",
+            "filterAll":"all",
+            "filtered": "__count__ hidden"
+        },
+        "palette": {
+            "name": "Palette management",
+            "label": "palette"
+        },
+        "project": {
+            "label": "project",
+            "name": "Project",
+            "description": "Description",
+            "dependencies": "Dependencies",
+            "settings": "Settings",
+            "editDescription": "Edit project description",
+            "editDependencies": "Edit project dependencies"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "string",
+            "num": "number",
+            "re": "regular expression",
+            "bool": "boolean",
+            "json": "JSON",
+            "bin": "buffer",
+            "date": "timestamp"
+        }
+    },
+    "editableList": {
+        "add": "add"
+    },
+    "search": {
+        "empty": "No matches found",
+        "addNode": "add a node..."
+    },
+    "expressionEditor": {
+        "functions": "Functions",
+        "functionReference": "Function reference",
+        "insert": "Insert",
+        "title": "JSONata Expression editor",
+        "test": "Test",
+        "data": "Example message",
+        "result": "Result",
+        "format": "format expression",
+        "compatMode": "Compatibility mode enabled",
+        "compatModeDesc": "<h3>JSONata compatibility mode</h3><p> The current expression appears to still reference <code>msg</code> so will be evaluated in compatibility mode. Please update the expression to not use <code>msg</code> as this mode will be removed in the future.</p><p> When JSONata support was first added to Node-RED, it required the expression to reference the <code>msg</code> object. For example <code>msg.payload</code> would be used to access the payload.</p><p> That is no longer necessary as the expression will be evaluated against the message directly. To access the payload, the expression should be just <code>payload</code>.</p>",
+        "noMatch": "No matching result",
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression:\n  __message__",
+            "invalid-msg": "Invalid example JSON message:\n  __message__",
+            "context-unsupported": "Cannot test context functions\n $flowContext or $globalContext",
+            "eval": "Error evaluating expression:\n  __message__"
+        }
+    },
+    "jsonEditor": {
+        "title": "JSON editor",
+        "format": "format JSON"
+    },
+    "markdownEditor": {
+        "title": "Markdown editor"
+    },
+    "bufferEditor": {
+        "title": "Buffer editor",
+        "modeString": "Handle as UTF-8 String",
+        "modeArray": "Handle as JSON array",
+        "modeDesc":"<h3>Buffer editor</h3><p>The Buffer type is stored as a JSON array of byte values. The editor will attempt to parse the entered value as a JSON array. If it is not valid JSON, it will be treated as a UTF-8 String and converted to an array of the individual character code points.</p><p>For example, a value of <code>Hello World</code> will be converted to the JSON array:<pre>[72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]</pre></p>"
+    }
+}

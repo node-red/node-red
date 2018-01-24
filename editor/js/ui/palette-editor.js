@@ -75,27 +75,21 @@ RED.palette.editor = (function() {
             });
         })
     }
-    function installNodeModule(id,version,shade,callback) {
+    function installNodeModule(id,version,callback) {
         var requestBody = {
             module: id
         };
-        if (callback === undefined) {
-            callback = shade;
-            shade = version;
-        } else {
+        if (version) {
             requestBody.version = version;
         }
-        shade.show();
         $.ajax({
             url:"nodes",
             type: "POST",
             data: JSON.stringify(requestBody),
             contentType: "application/json; charset=utf-8"
         }).done(function(data,textStatus,xhr) {
-            shade.hide();
             callback();
         }).fail(function(xhr,textStatus,err) {
-            shade.hide();
             callback(xhr);
         });
     }
@@ -604,24 +598,7 @@ RED.palette.editor = (function() {
                         if ($(this).hasClass('disabled')) {
                             return;
                         }
-                        $("#palette-module-install-confirm").data('module',entry.name);
-                        $("#palette-module-install-confirm").data('version',loadedIndex[entry.name].version);
-                        $("#palette-module-install-confirm").data('shade',shade);
-
-                        $("#palette-module-install-confirm-body").html(entry.local?
-                            RED._("palette.editor.confirm.update.body"):
-                            RED._("palette.editor.confirm.cannotUpdate.body")
-                        );
-                        $(".palette-module-install-confirm-button-install").hide();
-                        $(".palette-module-install-confirm-button-remove").hide();
-                        if (entry.local) {
-                            $(".palette-module-install-confirm-button-update").show();
-                        } else {
-                            $(".palette-module-install-confirm-button-update").hide();
-                        }
-                        $("#palette-module-install-confirm")
-                            .dialog('option', 'title',RED._("palette.editor.confirm.update.title"))
-                            .dialog('open');
+                        update(entry,loadedIndex[entry.name].version,container,function(err){});
                     })
 
 
@@ -629,16 +606,7 @@ RED.palette.editor = (function() {
                     removeButton.attr('id','up_'+Math.floor(Math.random()*1000000000));
                     removeButton.click(function(evt) {
                         evt.preventDefault();
-
-                        $("#palette-module-install-confirm").data('module',entry.name);
-                        $("#palette-module-install-confirm").data('shade',shade);
-                        $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.remove.body"));
-                        $(".palette-module-install-confirm-button-install").hide();
-                        $(".palette-module-install-confirm-button-remove").show();
-                        $(".palette-module-install-confirm-button-update").hide();
-                        $("#palette-module-install-confirm")
-                            .dialog('option', 'title', RED._("palette.editor.confirm.remove.title"))
-                            .dialog('open');
+                        remove(entry,container,function(err){});
                     })
                     if (!entry.local) {
                         removeButton.hide();
@@ -836,22 +804,11 @@ RED.palette.editor = (function() {
                     $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-                    var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
                     var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
                     installButton.click(function(e) {
                         e.preventDefault();
                         if (!$(this).hasClass('disabled')) {
-                            $("#palette-module-install-confirm").data('module',entry.id);
-                            $("#palette-module-install-confirm").data('version',entry.version);
-                            $("#palette-module-install-confirm").data('url',entry.url);
-                            $("#palette-module-install-confirm").data('shade',shade);
-                            $("#palette-module-install-confirm-body").html(RED._("palette.editor.confirm.install.body"));
-                            $(".palette-module-install-confirm-button-install").show();
-                            $(".palette-module-install-confirm-button-remove").hide();
-                            $(".palette-module-install-confirm-button-update").hide();
-                            $("#palette-module-install-confirm")
-                                .dialog('option', 'title', RED._("palette.editor.confirm.install.title"))
-                                .dialog('open');
+                            install(entry,container,function(xhr) {});
                         }
                     })
                     if (nodeEntries.hasOwnProperty(entry.id)) {
@@ -869,88 +826,126 @@ RED.palette.editor = (function() {
         });
 
         $('<div id="palette-module-install-shade" class="palette-module-shade hide"><div class="palette-module-shade-status"></div><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(installTab);
-
-        $('<div id="palette-module-install-confirm" class="hide"><form class="form-horizontal"><div id="palette-module-install-confirm-body" class="node-dialog-confirm-row"></div></form></div>').appendTo(document.body);
-        $("#palette-module-install-confirm").dialog({
-            title: RED._('palette.editor.confirm.title'),
+    }
+    function update(entry,version,container,done) {
+        if (RED.settings.theme('palette.editable') === false) {
+            done(new Error('Palette not editable'));
+            return;
+        }
+        var notification = RED.notify(RED._("palette.editor.confirm.update.body",{module:entry.name}),{
             modal: true,
-            autoOpen: false,
-            width: 550,
-            height: "auto",
+            fixed: true,
             buttons: [
                 {
                     text: RED._("common.label.cancel"),
                     click: function() {
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    text: RED._("palette.editor.confirm.button.review"),
-                    class: "primary palette-module-install-confirm-button-install",
-                    click: function() {
-                        var url = $(this).data('url');
-                        window.open(url);
-                    }
-                },
-                {
-                    text: RED._("palette.editor.confirm.button.install"),
-                    class: "primary palette-module-install-confirm-button-install",
-                    click: function() {
-                        var id = $(this).data('module');
-                        var version = $(this).data('version');
-                        var shade = $(this).data('shade');
-                        installNodeModule(id,version,shade,function(xhr) {
-                             if (xhr) {
-                                 if (xhr.responseJSON) {
-                                     RED.notify(RED._('palette.editor.errors.installFailed',{module: id,message:xhr.responseJSON.message}));
-                                 }
-                             }
-                        });
-                        $( this ).dialog( "close" );
-                    }
-                },
-                {
-                    text: RED._("palette.editor.confirm.button.remove"),
-                    class: "primary palette-module-install-confirm-button-remove",
-                    click: function() {
-                        var id = $(this).data('module');
-                        var shade = $(this).data('shade');
-                        shade.show();
-                        removeNodeModule(id, function(xhr) {
-                            shade.hide();
-                            if (xhr) {
-                                if (xhr.responseJSON) {
-                                    RED.notify(RED._('palette.editor.errors.removeFailed',{module: id,message:xhr.responseJSON.message}));
-                                }
-                            }
-                        })
-
-                        $( this ).dialog( "close" );
+                        notification.close();
                     }
                 },
                 {
                     text: RED._("palette.editor.confirm.button.update"),
                     class: "primary palette-module-install-confirm-button-update",
                     click: function() {
-                        var id = $(this).data('module');
-                        var version = $(this).data('version');
-                        var shade = $(this).data('shade');
-                        shade.show();
-                        installNodeModule(id,version,shade,function(xhr) {
-                             if (xhr) {
-                                 if (xhr.responseJSON) {
-                                     RED.notify(RED._('palette.editor.errors.updateFailed',{module: id,message:xhr.responseJSON.message}));
-                                 }
-                             }
+                        var spinner = RED.utils.addSpinnerOverlay(container, true);
+                        installNodeModule(entry.name,version,function(xhr) {
+                            spinner.remove();
+                            if (xhr) {
+                                if (xhr.responseJSON) {
+                                    RED.notify(RED._('palette.editor.errors.updateFailed',{module: entry.name,message:xhr.responseJSON.message}));
+                                }
+                            }
+                            done(xhr);
                         });
-                        $( this ).dialog( "close" );
+                        notification.close();
                     }
                 }
             ]
         })
     }
+    function remove(entry,container,done) {
+        if (RED.settings.theme('palette.editable') === false) {
+            done(new Error('Palette not editable'));
+            return;
+        }
+        var notification = RED.notify(RED._("palette.editor.confirm.remove.body",{module:entry.name}),{
+            modal: true,
+            fixed: true,
+            buttons: [
+                {
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        notification.close();
+                    }
+                },
+                {
+                    text: RED._("palette.editor.confirm.button.remove"),
+                    class: "primary palette-module-install-confirm-button-remove",
+                    click: function() {
+                        var spinner = RED.utils.addSpinnerOverlay(container, true);
+                        removeNodeModule(entry.name, function(xhr) {
+                            spinner.remove();
+                            if (xhr) {
+                                if (xhr.responseJSON) {
+                                    RED.notify(RED._('palette.editor.errors.removeFailed',{module: entry.name,message:xhr.responseJSON.message}));
+                                }
+                            }
+                        })
+                        notification.close();
+                    }
+                }
+            ]
+        })
+    }
+    function install(entry,container,done) {
+        if (RED.settings.theme('palette.editable') === false) {
+            done(new Error('Palette not editable'));
+            return;
+        }
+        var buttons = [
+            {
+                text: RED._("common.label.cancel"),
+                click: function() {
+                    notification.close();
+                }
+            }
+        ];
+        if (entry.url) {
+            buttons.push({
+                text: RED._("palette.editor.confirm.button.review"),
+                class: "primary palette-module-install-confirm-button-install",
+                click: function() {
+                    var url = entry.url||"";
+                    window.open(url);
+                }
+            });
+        }
+        buttons.push({
+            text: RED._("palette.editor.confirm.button.install"),
+            class: "primary palette-module-install-confirm-button-install",
+            click: function() {
+                var spinner = RED.utils.addSpinnerOverlay(container, true);
+                installNodeModule(entry.id,entry.version,function(xhr) {
+                    spinner.remove();
+                     if (xhr) {
+                         if (xhr.responseJSON) {
+                             RED.notify(RED._('palette.editor.errors.installFailed',{module: entry.id,message:xhr.responseJSON.message}));
+                         }
+                     }
+                     done(xhr);
+                });
+                notification.close();
+            }
+        });
+
+        var notification = RED.notify(RED._("palette.editor.confirm.install.body",{module:entry.id}),{
+            modal: true,
+            fixed: true,
+            buttons: buttons
+        })
+    }
 
     return {
-        init: init
+        init: init,
+        install: install
     }
 })();

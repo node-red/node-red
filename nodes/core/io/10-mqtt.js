@@ -136,6 +136,8 @@ module.exports = function(RED) {
                 tlsNode.addTLSOptions(this.options);
             }
         }
+        // console.log(this.brokerurl,this.options);
+
         // If there's no rejectUnauthorized already, then this could be an
         // old config where this option was provided on the broker node and
         // not the tls node

@@ -73,15 +73,22 @@ function loadFlows() {
     return storage.getFlows().then(function(config) {
         log.debug("loaded flow revision: "+config.rev);
         return credentials.load(config.credentials).then(function() {
+            events.emit("runtime-event",{id:"runtime-state",retain:true});
             return config;
         });
-    }).otherwise(function(err) {
-        log.warn(log._("nodes.flows.error",{message:err.toString()}));
-        console.log(err.stack);
+    }).catch(function(err) {
+        activeConfig = null;
+        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,project:err.project,text:"notification.warnings."+err.code},retain:true});
+        if (err.code === "project_not_found") {
+            log.warn(log._("storage.localfilesystem.projects.project-not-found",{project:err.project}));
+        } else {
+            log.warn(log._("nodes.flows.error",{message:err.toString()}));
+        }
+        throw err;
     });
 }
-function load() {
-    return setFlows(null,"load",false);
+function load(forceStart) {
+    return setFlows(null,"load",false,forceStart);
 }
 
 /*
@@ -89,7 +96,7 @@ function load() {
  * type - full/nodes/flows/load (default full)
  * muteLog - don't emit the standard log messages (used for individual flow api)
  */
-function setFlows(_config,type,muteLog) {
+function setFlows(_config,type,muteLog,forceStart) {
     type = type||"full";
 
     var configSavePromise = null;
@@ -131,14 +138,14 @@ function setFlows(_config,type,muteLog) {
                 rev:flowRevision
             };
             activeFlowConfig = newFlowConfig;
-            if (started) {
+            if (forceStart || started) {
                 return stop(type,diff,muteLog).then(function() {
                     context.clean(activeFlowConfig);
                     start(type,diff,muteLog).then(function() {
                         events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
                     });
                     return flowRevision;
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                 })
             } else {
                 events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
@@ -251,7 +258,7 @@ function start(type,diff,muteLog) {
             log.info(log._("nodes.flows.missing-type-install-2"));
             log.info("  "+settings.userDir);
         }
-        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",text:"notification.warnings.missing-types"},retain:true});
+        events.emit("runtime-event",{id:"runtime-state",payload:{error:"missing-types", type:"warning",text:"notification.warnings.missing-types",types:activeFlowConfig.missingTypes},retain:true});
         return when.resolve();
     }
     if (!muteLog) {
@@ -323,6 +330,9 @@ function start(type,diff,muteLog) {
 }
 
 function stop(type,diff,muteLog) {
+    if (!started) {
+        return when.resolve();
+    }
     type = type||"full";
     diff = diff||{
         added:[],

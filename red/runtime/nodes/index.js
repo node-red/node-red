@@ -173,5 +173,9 @@ module.exports = {
     addCredentials: credentials.add,
     getCredentials: credentials.get,
     deleteCredentials: credentials.delete,
-    getCredentialDefinition: credentials.getDefinition
+    getCredentialDefinition: credentials.getDefinition,
+    setCredentialSecret: credentials.setKey,
+    clearCredentials: credentials.clear,
+    exportCredentials: credentials.export,
+    getCredentialKeyType: credentials.getKeyType
 };

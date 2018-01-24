@@ -18,6 +18,9 @@
 RED.settings = (function () {
 
     var loadedSettings = {};
+    var userSettings = {};
+    var settingsDirty = false;
+    var pendingSave;
 
     var hasLocalStorage = function () {
         try {
@@ -31,7 +34,12 @@ RED.settings = (function () {
         if (!hasLocalStorage()) {
             return;
         }
-        localStorage.setItem(key, JSON.stringify(value));
+        if (key === "auth-tokens") {
+            localStorage.setItem(key, JSON.stringify(value));
+        } else {
+            userSettings[key] = value;
+            saveUserSettings();
+        }
     };
 
     /**
@@ -44,14 +52,23 @@ RED.settings = (function () {
         if (!hasLocalStorage()) {
             return undefined;
         }
-        return JSON.parse(localStorage.getItem(key));
+        if (key === "auth-tokens") {
+            return JSON.parse(localStorage.getItem(key));
+        } else {
+            return userSettings[key];
+        }
     };
 
     var remove = function (key) {
         if (!hasLocalStorage()) {
             return;
         }
-        localStorage.removeItem(key);
+        if (key === "auth-tokens") {
+            localStorage.removeItem(key);
+        } else {
+            delete userSettings[key];
+            saveUserSettings();
+        }
     };
 
     var setProperties = function(data) {
@@ -67,6 +84,10 @@ RED.settings = (function () {
         }
         loadedSettings = data;
     };
+
+    var setUserSettings = function(data) {
+        userSettings = data;
+    }
 
     var init = function (done) {
         var accessTokenMatch = /[?&]access_token=(.*?)(?:$|&)/.exec(window.location.search);
@@ -106,7 +127,7 @@ RED.settings = (function () {
                     RED.settings.remove("auth-tokens");
                 }
                 console.log("Node-RED: " + data.version);
-                done();
+                loadUserSettings(done);
             },
             error: function(jqXHR,textStatus,errorThrown) {
                 if (jqXHR.status === 401) {
@@ -115,11 +136,51 @@ RED.settings = (function () {
                     }
                     RED.user.login(function() { load(done); });
                 } else {
-                    console.log("Unexpected error:",jqXHR.status,textStatus);
+                    console.log("Unexpected error loading settings:",jqXHR.status,textStatus);
                 }
             }
         });
     };
+
+    function loadUserSettings(done) {
+        $.ajax({
+            headers: {
+                "Accept": "application/json"
+            },
+            dataType: "json",
+            cache: false,
+            url: 'settings/user',
+            success: function (data) {
+                setUserSettings(data);
+                done();
+            },
+            error: function(jqXHR,textStatus,errorThrown) {
+                console.log("Unexpected error loading user settings:",jqXHR.status,textStatus);
+            }
+        });
+    }
+
+    function saveUserSettings() {
+        if (RED.user.hasPermission("settings.write")) {
+            if (pendingSave) {
+                clearTimeout(pendingSave);
+            }
+            pendingSave = setTimeout(function() {
+                pendingSave = null;
+                $.ajax({
+                    method: 'POST',
+                    contentType: 'application/json',
+                    url: 'settings/user',
+                    data: JSON.stringify(userSettings),
+                    success: function (data) {
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        console.log("Unexpected error saving user settings:",jqXHR.status,textStatus);
+                    }
+                });
+            },300);
+        }
+    }
 
     function theme(property,defaultValue) {
         if (!RED.settings.editorTheme) {
@@ -143,10 +204,10 @@ RED.settings = (function () {
     return {
         init: init,
         load: load,
+        loadUserSettings: loadUserSettings,
         set: set,
         get: get,
         remove: remove,
         theme: theme
     }
-})
-();
+})();

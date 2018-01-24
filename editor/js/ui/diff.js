@@ -11,16 +11,19 @@ RED.diff = (function() {
         // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
         RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
 
+
+        RED.actions.add("core:show-test-flow-diff-1",function(){showTestFlowDiff(1)});
+        RED.keyboard.add("*","ctrl-shift-f 1","core:show-test-flow-diff-1");
+
+        RED.actions.add("core:show-test-flow-diff-2",function(){showTestFlowDiff(2)});
+        RED.keyboard.add("*","ctrl-shift-f 2","core:show-test-flow-diff-2");
+        RED.actions.add("core:show-test-flow-diff-3",function(){showTestFlowDiff(3)});
+        RED.keyboard.add("*","ctrl-shift-f 3","core:show-test-flow-diff-3");
+
     }
-
-    function buildDiffPanel(container) {
-        var diffPanel = $('<div id="node-dialog-view-diff"><div id="node-dialog-view-diff-headers"></div><ol id="node-dialog-view-diff-diff"></ol></div>').appendTo(container);
-
-        var toolbar = $('<div class="node-diff-toolbar">'+
-            '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
-            '</div>').prependTo(diffPanel);
-
-        diffList = diffPanel.find("#node-dialog-view-diff-diff").editableList({
+    function createDiffTable(container) {
+        var diffList = $('<ol class="node-dialog-view-diff-diff"></ol>').appendTo(container);
+        diffList.editableList({
             addButton: false,
             scrollOnAdd: false,
             addItem: function(container,i,object) {
@@ -281,7 +284,180 @@ RED.diff = (function() {
                 container.i18n();
             }
         });
-        return diffPanel;
+        return diffList;
+    }
+    function buildDiffPanel(container,diff,options) {
+        var diffPanel = $('<div class="node-dialog-view-diff-panel"></div>').appendTo(container);
+        var diffHeaders = $('<div class="node-dialog-view-diff-headers"></div>').appendTo(diffPanel);
+        if (options.mode === "merge") {
+            diffPanel.addClass("node-dialog-view-diff-panel-merge");
+            var toolbar = $('<div class="node-diff-toolbar">'+
+                '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
+                '</div>').prependTo(diffPanel);
+        }
+        var diffList = createDiffTable(diffPanel);
+
+        var localDiff = diff.localDiff;
+        var remoteDiff = diff.remoteDiff;
+        var conflicts = diff.conflicts;
+
+        var currentConfig = localDiff.currentConfig;
+        var newConfig = localDiff.newConfig;
+
+
+        if (remoteDiff !== undefined) {
+            diffPanel.addClass('node-diff-three-way');
+            var localTitle = options.oldRevTitle || RED._('diff.local');
+            var remoteTitle = options.newRevTitle || RED._('diff.remote');
+            $('<div></div>').text(localTitle).appendTo(diffHeaders);
+            $('<div></div>').text(remoteTitle).appendTo(diffHeaders);
+        } else {
+            diffPanel.removeClass('node-diff-three-way');
+        }
+
+        return {
+            list: diffList,
+            finish: function() {
+                var el = {
+                    diff: localDiff,
+                    def: {
+                        category: 'config',
+                        color: '#f0f0f0'
+                    },
+                    tab: {
+                        n: {},
+                        nodes: currentConfig.globals
+                    },
+                    newTab: {
+                        n: {},
+                        nodes: newConfig.globals
+                    }
+                };
+                if (remoteDiff !== undefined) {
+                    el.remoteTab = {
+                        n:{},
+                        nodes:remoteDiff.newConfig.globals
+                    };
+                    el.remoteDiff = remoteDiff;
+                }
+                diffList.editableList('addItem',el);
+
+                var seenTabs = {};
+
+                currentConfig.tabOrder.forEach(function(tabId) {
+                    var tab = currentConfig.tabs[tabId];
+                    var el = {
+                        diff: localDiff,
+                        def: RED.nodes.getType('tab'),
+                        tab:tab
+                    };
+                    if (newConfig.tabs.hasOwnProperty(tabId)) {
+                        el.newTab = newConfig.tabs[tabId];
+                    }
+                    if (remoteDiff !== undefined) {
+                        el.remoteTab = remoteDiff.newConfig.tabs[tabId];
+                        el.remoteDiff = remoteDiff;
+                    }
+                    seenTabs[tabId] = true;
+                    diffList.editableList('addItem',el)
+                });
+                newConfig.tabOrder.forEach(function(tabId) {
+                    if (!seenTabs[tabId]) {
+                        seenTabs[tabId] = true;
+                        var tab = newConfig.tabs[tabId];
+                        var el = {
+                            diff: localDiff,
+                            def: RED.nodes.getType('tab'),
+                            tab:tab,
+                            newTab: tab
+                        };
+                        if (remoteDiff !== undefined) {
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                });
+                if (remoteDiff !== undefined) {
+                    remoteDiff.newConfig.tabOrder.forEach(function(tabId) {
+                        if (!seenTabs[tabId]) {
+                            var tab = remoteDiff.newConfig.tabs[tabId];
+                            // TODO how to recognise this is a remotely added flow
+                            var el = {
+                                diff: localDiff,
+                                remoteDiff: remoteDiff,
+                                def: RED.nodes.getType('tab'),
+                                tab:tab,
+                                remoteTab:tab
+                            };
+                            diffList.editableList('addItem',el)
+                        }
+                    });
+                }
+                var subflowId;
+                for (subflowId in currentConfig.subflows) {
+                    if (currentConfig.subflows.hasOwnProperty(subflowId)) {
+                        seenTabs[subflowId] = true;
+                        el = {
+                            diff: localDiff,
+                            def: {
+                                defaults:{},
+                                icon:"subflow.png",
+                                category: "subflows",
+                                color: "#da9"
+                            },
+                            tab:currentConfig.subflows[subflowId]
+                        }
+                        if (newConfig.subflows.hasOwnProperty(subflowId)) {
+                            el.newTab = newConfig.subflows[subflowId];
+                        }
+                        if (remoteDiff !== undefined) {
+                            el.remoteTab = remoteDiff.newConfig.subflows[subflowId];
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                }
+                for (subflowId in newConfig.subflows) {
+                    if (newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
+                        seenTabs[subflowId] = true;
+                        el = {
+                            diff: localDiff,
+                            def: {
+                                defaults:{},
+                                icon:"subflow.png",
+                                category: "subflows",
+                                color: "#da9"
+                            },
+                            tab:newConfig.subflows[subflowId],
+                            newTab:newConfig.subflows[subflowId]
+                        }
+                        if (remoteDiff !== undefined) {
+                            el.remoteDiff = remoteDiff;
+                        }
+                        diffList.editableList('addItem',el)
+                    }
+                }
+                if (remoteDiff !== undefined) {
+                    for (subflowId in remoteDiff.newConfig.subflows) {
+                        if (remoteDiff.newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
+                            el = {
+                                diff: localDiff,
+                                remoteDiff: remoteDiff,
+                                def: {
+                                    defaults:{},
+                                    icon:"subflow.png",
+                                    category: "subflows",
+                                    color: "#da9"
+                                },
+                                tab:remoteDiff.newConfig.subflows[subflowId],
+                                remoteTab: remoteDiff.newConfig.subflows[subflowId]
+                            }
+                            diffList.editableList('addItem',el)
+                        }
+                    }
+                }
+            }
+        };
     }
     function formatWireProperty(wires,allNodes) {
         var result = $("<div>",{class:"node-diff-property-wires"})
@@ -794,6 +970,15 @@ RED.diff = (function() {
                     remoteCell.addClass("node-diff-empty");
                 }
             }
+            if (localNode && remoteNode && typeof localNode[d] === "string") {
+                if (/\n/.test(localNode[d]) || /\n/.test(remoteNode[d])) {
+                    $('<button class="editor-button editor-button-small node-diff-text-diff-button"><i class="fa fa-file-o"> <i class="fa fa-caret-left"></i> <i class="fa fa-caret-right"></i> <i class="fa fa-file-o"></i></button>').click(function() {
+                        showTextDiff(localNode[d],remoteNode[d]);
+                    }).appendTo(propertyNameCell);
+                }
+            }
+
+
         });
         return nodePropertiesDiv;
     }
@@ -899,7 +1084,7 @@ RED.diff = (function() {
         if (diff === undefined) {
             getRemoteDiff(showRemoteDiff);
         } else {
-            showDiff(diff);
+            showDiff(diff,{mode:'merge'});
         }
     }
     function parseNodes(nodeList) {
@@ -1036,10 +1221,12 @@ RED.diff = (function() {
         return diff;
     }
 
-    function showDiff(diff) {
+    function showDiff(diff,options) {
         if (diffVisible) {
             return;
         }
+        options = options || {};
+        var mode = options.mode || 'merge';
 
         var localDiff = diff.localDiff;
         var remoteDiff = diff.remoteDiff;
@@ -1047,15 +1234,56 @@ RED.diff = (function() {
         currentDiff = diff;
 
         var trayOptions = {
-            title: "Review Changes", //TODO: nls
+            title: options.title||"Review Changes", //TODO: nls
             width: Infinity,
+            overlay: true,
             buttons: [
                 {
-                    text: RED._("common.label.cancel"),
+                    text: RED._((options.mode === 'merge')?"common.label.cancel":"common.label.close"),
                     click: function() {
                         RED.tray.close();
                     }
-                },
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffTable = buildDiffPanel(trayBody,diff,options);
+                diffTable.list.hide();
+                if (remoteDiff) {
+                    $("#node-diff-view-diff-merge").show();
+                    if (Object.keys(conflicts).length === 0) {
+                        $("#node-diff-view-diff-merge").removeClass('disabled');
+                    } else {
+                        $("#node-diff-view-diff-merge").addClass('disabled');
+                    }
+                } else {
+                    $("#node-diff-view-diff-merge").hide();
+                }
+                refreshConflictHeader();
+                // console.log("--------------");
+                // console.log(localDiff);
+                // console.log(remoteDiff);
+
+                setTimeout(function() {
+                    diffTable.finish();
+                    diffTable.list.show();
+                },300);
+                $("#sidebar-shade").show();
+            },
+            close: function() {
+                diffVisible = false;
+                $("#sidebar-shade").hide();
+
+            },
+            show: function() {
+
+            }
+        }
+        if (options.mode === 'merge') {
+            trayOptions.buttons.push(
                 {
                     id: "node-diff-view-diff-merge",
                     text: RED._("deploy.confirm.button.merge"),
@@ -1068,189 +1296,9 @@ RED.diff = (function() {
                         }
                     }
                 }
-            ],
-            resize: function(dimensions) {
-                // trayWidth = dimensions.width;
-            },
-            open: function(tray) {
-                var trayBody = tray.find('.editor-tray-body');
-                var diffPanel = buildDiffPanel(trayBody);
-                if (remoteDiff) {
-                    $("#node-diff-view-diff-merge").show();
-                    if (Object.keys(conflicts).length === 0) {
-                        $("#node-diff-view-diff-merge").removeClass('disabled');
-                    } else {
-                        $("#node-diff-view-diff-merge").addClass('disabled');
-                    }
-                } else {
-                    $("#node-diff-view-diff-merge").hide();
-                }
-                refreshConflictHeader();
-
-                $("#node-dialog-view-diff-headers").empty();
-                // console.log("--------------");
-                // console.log(localDiff);
-                // console.log(remoteDiff);
-                var currentConfig = localDiff.currentConfig;
-                var newConfig = localDiff.newConfig;
-                conflicts = conflicts || {};
-
-                var el = {
-                    diff: localDiff,
-                    def: {
-                        category: 'config',
-                        color: '#f0f0f0'
-                    },
-                    tab: {
-                        n: {},
-                        nodes: currentConfig.globals
-                    },
-                    newTab: {
-                        n: {},
-                        nodes: newConfig.globals
-                    }
-                };
-
-                if (remoteDiff !== undefined) {
-                    diffPanel.addClass('node-diff-three-way');
-
-                    $('<div data-i18n="diff.local"></div><div data-i18n="diff.remote"></div>').i18n().appendTo("#node-dialog-view-diff-headers");
-                    el.remoteTab = {
-                        n:{},
-                        nodes:remoteDiff.newConfig.globals
-                    };
-                    el.remoteDiff = remoteDiff;
-                } else {
-                    diffPanel.removeClass('node-diff-three-way');
-                }
-
-                diffList.editableList('addItem',el);
-
-                var seenTabs = {};
-
-                currentConfig.tabOrder.forEach(function(tabId) {
-                    var tab = currentConfig.tabs[tabId];
-                    var el = {
-                        diff: localDiff,
-                        def: RED.nodes.getType('tab'),
-                        tab:tab
-                    };
-                    if (newConfig.tabs.hasOwnProperty(tabId)) {
-                        el.newTab = newConfig.tabs[tabId];
-                    }
-                    if (remoteDiff !== undefined) {
-                        el.remoteTab = remoteDiff.newConfig.tabs[tabId];
-                        el.remoteDiff = remoteDiff;
-                    }
-                    seenTabs[tabId] = true;
-                    diffList.editableList('addItem',el)
-                });
-                newConfig.tabOrder.forEach(function(tabId) {
-                    if (!seenTabs[tabId]) {
-                        seenTabs[tabId] = true;
-                        var tab = newConfig.tabs[tabId];
-                        var el = {
-                            diff: localDiff,
-                            def: RED.nodes.getType('tab'),
-                            tab:tab,
-                            newTab: tab
-                        };
-                        if (remoteDiff !== undefined) {
-                            el.remoteDiff = remoteDiff;
-                        }
-                        diffList.editableList('addItem',el)
-                    }
-                });
-                if (remoteDiff !== undefined) {
-                    remoteDiff.newConfig.tabOrder.forEach(function(tabId) {
-                        if (!seenTabs[tabId]) {
-                            var tab = remoteDiff.newConfig.tabs[tabId];
-                            // TODO how to recognise this is a remotely added flow
-                            var el = {
-                                diff: localDiff,
-                                remoteDiff: remoteDiff,
-                                def: RED.nodes.getType('tab'),
-                                tab:tab,
-                                remoteTab:tab
-                            };
-                            diffList.editableList('addItem',el)
-                        }
-                    });
-                }
-                var subflowId;
-                for (subflowId in currentConfig.subflows) {
-                    if (currentConfig.subflows.hasOwnProperty(subflowId)) {
-                        seenTabs[subflowId] = true;
-                        el = {
-                            diff: localDiff,
-                            def: {
-                                defaults:{},
-                                icon:"subflow.png",
-                                category: "subflows",
-                                color: "#da9"
-                            },
-                            tab:currentConfig.subflows[subflowId]
-                        }
-                        if (newConfig.subflows.hasOwnProperty(subflowId)) {
-                            el.newTab = newConfig.subflows[subflowId];
-                        }
-                        if (remoteDiff !== undefined) {
-                            el.remoteTab = remoteDiff.newConfig.subflows[subflowId];
-                            el.remoteDiff = remoteDiff;
-                        }
-                        diffList.editableList('addItem',el)
-                    }
-                }
-                for (subflowId in newConfig.subflows) {
-                    if (newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
-                        seenTabs[subflowId] = true;
-                        el = {
-                            diff: localDiff,
-                            def: {
-                                defaults:{},
-                                icon:"subflow.png",
-                                category: "subflows",
-                                color: "#da9"
-                            },
-                            tab:newConfig.subflows[subflowId],
-                            newTab:newConfig.subflows[subflowId]
-                        }
-                        if (remoteDiff !== undefined) {
-                            el.remoteDiff = remoteDiff;
-                        }
-                        diffList.editableList('addItem',el)
-                    }
-                }
-                if (remoteDiff !== undefined) {
-                    for (subflowId in remoteDiff.newConfig.subflows) {
-                        if (remoteDiff.newConfig.subflows.hasOwnProperty(subflowId) && !seenTabs[subflowId]) {
-                            el = {
-                                diff: localDiff,
-                                remoteDiff: remoteDiff,
-                                def: {
-                                    defaults:{},
-                                    icon:"subflow.png",
-                                    category: "subflows",
-                                    color: "#da9"
-                                },
-                                tab:remoteDiff.newConfig.subflows[subflowId],
-                                remoteTab: remoteDiff.newConfig.subflows[subflowId]
-                            }
-                            diffList.editableList('addItem',el)
-                        }
-                    }
-                }
-                $("#sidebar-shade").show();
-            },
-            close: function() {
-                diffVisible = false;
-                $("#sidebar-shade").hide();
-
-            },
-            show: function() {
-
-            }
+            );
         }
+
         RED.tray.show(trayOptions);
     }
 
@@ -1333,10 +1381,755 @@ RED.diff = (function() {
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
     }
+    function showTestFlowDiff(index) {
+        if (index === 1) {
+            var localFlow = RED.nodes.createCompleteNodeSet();
+            var originalFlow = RED.nodes.originalFlow();
+            showTextDiff(JSON.stringify(localFlow,null,4),JSON.stringify(originalFlow,null,4))
+        } else if (index === 2) {
+            var local = "1\n2\n3\n4\n5\nA\n6\n7\n8\n9\n";
+            var remote = "1\nA\n2\n3\nD\nE\n6\n7\n8\n9\n";
+            showTextDiff(local,remote);
+        } else if (index === 3) {
+            var local =  "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22";
+            var remote = "1\nTWO\nTHREE\nEXTRA\n4\n5\n6\n7\n8\n9\n10\n11\n12\nTHIRTEEN\n14\n15\n16\n17\n18\n19\n20\n21\n22";
+            showTextDiff(local,remote);
+        }
+    }
+
+    function showTextDiff(textA,textB) {
+        var trayOptions = {
+            title: "Compare Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._("common.label.close"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+
+                var codeTable = $("<table>").appendTo(diffPanel);
+                $('<colgroup><col width="50"><col width="50%"><col width="50"><col width="50%"></colgroup>').appendTo(codeTable);
+                var codeBody = $('<tbody>').appendTo(codeTable);
+                var diffSummary = diffText(textA||"",textB||"");
+                var aIndex = 0;
+                var bIndex = 0;
+                var diffLength = Math.max(diffSummary.a.length, diffSummary.b.length);
+
+                var diffLines = [];
+                var diffBlocks = [];
+                var currentBlock;
+                var blockLength = 0;
+                var blockType = 0;
+
+                for (var i=0;i<diffLength;i++) {
+                    var diffLine = diffSummary[i];
+                    var Adiff = (aIndex < diffSummary.a.length)?diffSummary.a[aIndex]:{type:2,line:""};
+                    var Bdiff = (bIndex < diffSummary.b.length)?diffSummary.b[bIndex]:{type:2,line:""};
+                    if (Adiff.type === 0 && Bdiff.type !== 0) {
+                        Adiff = {type:2,line:""};
+                        bIndex++;
+                    } else if (Bdiff.type === 0 && Adiff.type !== 0) {
+                        Bdiff = {type:2,line:""};
+                        aIndex++;
+                    } else {
+                        aIndex++;
+                        bIndex++;
+                    }
+                    diffLines.push({
+                        a: Adiff,
+                        b: Bdiff
+                    });
+                    if (currentBlock === undefined) {
+                        currentBlock = {start:i,end:i};
+                        blockLength = 0;
+                        blockType = (Adiff.type === 0 && Bdiff.type === 0)?0:1;
+                    } else {
+                        if (Adiff.type === 0 && Bdiff.type === 0) {
+                            // Unchanged line
+                            if (blockType === 0) {
+                                // still unchanged - extend the block
+                                currentBlock.end = i;
+                                blockLength++;
+                            } else if (blockType === 1) {
+                                // end of a change
+                                currentBlock.end = i;
+                                blockType = 2;
+                                blockLength = 0;
+                            } else if (blockType === 2) {
+                                // post-change unchanged
+                                currentBlock.end = i;
+                                blockLength++;
+                                if (blockLength === 8) {
+                                    currentBlock.end -= 5; // rollback the end
+                                    diffBlocks.push(currentBlock);
+                                    currentBlock = {start:i-5,end:i-5};
+                                    blockType = 0;
+                                    blockLength = 0;
+                                }
+                            }
+                        } else {
+                            // in a change
+                            currentBlock.end = i;
+                            blockLength++;
+                            if (blockType === 0) {
+                                if (currentBlock.end > 3) {
+                                    currentBlock.end -= 3;
+                                    currentBlock.empty = true;
+                                    diffBlocks.push(currentBlock);
+                                    currentBlock = {start:i-3,end:i-3};
+                                }
+                                blockType = 1;
+                            } else if (blockType === 2) {
+                                // we were in unchanged, but hit a change again
+                                blockType = 1;
+                            }
+                        }
+                    }
+                }
+                if (blockType === 0) {
+                    currentBlock.empty = true;
+                }
+                currentBlock.end = diffLength;
+                diffBlocks.push(currentBlock);
+                // console.table(diffBlocks);
+                var diffRow;
+                for (var b = 0; b<diffBlocks.length; b++) {
+                    currentBlock = diffBlocks[b];
+                    if (currentBlock.empty) {
+                        diffRow = createExpandLine(currentBlock.start,currentBlock.end,diffLines).appendTo(codeBody);
+                    } else {
+                        for (var i=currentBlock.start;i<currentBlock.end;i++) {
+                            var row = createDiffLine(diffLines[i]).appendTo(codeBody);
+                            if (i === currentBlock.start) {
+                                row.addClass("start-block");
+                            } else if (i === currentBlock.end-1) {
+                                row.addClass("end-block");
+                            }
+                        }
+                    }
+                }
+
+            },
+            close: function() {
+                diffVisible = false;
+
+            },
+            show: function() {
+
+            }
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function createExpandLine(start,end,diffLines) {
+        diffRow = $('<tr class="node-text-diff-header node-text-diff-expand">');
+        var content = $('<td colspan="4"> <i class="fa fa-arrows-v"></i> </td>').appendTo(diffRow);
+        var label = $('<span></span>').appendTo(content);
+        if (end < diffLines.length-1) {
+            label.text("@@ -"+(diffLines[end-1].a.i+1)+" +"+(diffLines[end-1].b.i+1));
+        }
+        diffRow.click(function(evt) {
+            // console.log(start,end,diffLines.length);
+            if (end - start > 20) {
+                var startPos = $(this).offset();
+                // console.log(startPos);
+                if (start > 0) {
+                    for (var i=start;i<start+10;i++) {
+                        createDiffLine(diffLines[i]).addClass("unchanged").insertBefore($(this));
+                    }
+                    start += 10;
+                }
+                if (end < diffLines.length-1) {
+                    for (var i=end-1;i>end-11;i--) {
+                        createDiffLine(diffLines[i]).addClass("unchanged").insertAfter($(this));
+                    }
+                    end -= 10;
+                }
+                if (end < diffLines.length-1) {
+                    label.text("@@ -"+(diffLines[end-1].a.i+1)+" +"+(diffLines[end-1].b.i+1));
+                }
+                var endPos = $(this).offset();
+                var delta = endPos.top - startPos.top;
+                $(".node-text-diff").scrollTop($(".node-text-diff").scrollTop() + delta);
+            } else {
+                for (var i=start;i<end;i++) {
+                    createDiffLine(diffLines[i]).addClass("unchanged").insertBefore($(this));
+                }
+                $(this).remove();
+            }
+        });
+        return diffRow;
+    }
+
+    function createDiffLine(diffLine) {
+        var diffRow = $('<tr>');
+        var Adiff = diffLine.a;
+        var Bdiff = diffLine.b;
+        //console.log(diffLine);
+        var cellNo = $('<td class="lineno">').text(Adiff.type === 2?"":Adiff.i).appendTo(diffRow);
+        var cellLine = $('<td class="linetext">').text(Adiff.line).appendTo(diffRow);
+        if (Adiff.type === 2) {
+            cellNo.addClass('blank');
+            cellLine.addClass('blank');
+        } else if (Adiff.type === 4) {
+            cellNo.addClass('added');
+            cellLine.addClass('added');
+        } else if (Adiff.type === 1) {
+            cellNo.addClass('removed');
+            cellLine.addClass('removed');
+        }
+        cellNo = $('<td class="lineno">').text(Bdiff.type === 2?"":Bdiff.i).appendTo(diffRow);
+        cellLine = $('<td class="linetext">').text(Bdiff.line).appendTo(diffRow);
+        if (Bdiff.type === 2) {
+            cellNo.addClass('blank');
+            cellLine.addClass('blank');
+        } else if (Bdiff.type === 4) {
+            cellNo.addClass('added');
+            cellLine.addClass('added');
+        } else if (Bdiff.type === 1) {
+            cellNo.addClass('removed');
+            cellLine.addClass('removed');
+        }
+        return diffRow;
+    }
+
+    function diffText(string1, string2,ignoreWhitespace) {
+        var lines1 = string1.split(/\r?\n/);
+        var lines2 = string2.split(/\r?\n/);
+        var i = lines1.length;
+        var j = lines2.length;
+        var k;
+        var m;
+        var diffSummary = {a:[],b:[]};
+        var diffMap = [];
+        for (k = 0; k < i + 1; k++) {
+            diffMap[k] = [];
+            for (m = 0; m < j + 1; m++) {
+                diffMap[k][m] = 0;
+            }
+        }
+        var c = 0;
+        for (k = i - 1; k >= 0; k--) {
+            for (m = j - 1; m >=0; m--) {
+                c++;
+                if (compareLines(lines1[k],lines2[m],ignoreWhitespace) !== 1) {
+                    diffMap[k][m] = diffMap[k+1][m+1]+1;
+                } else {
+                    diffMap[k][m] = Math.max(diffMap[(k + 1)][m], diffMap[k][(m + 1)]);
+                }
+            }
+        }
+        //console.log(c);
+        k = 0;
+        m = 0;
+
+        while ((k < i) && (m < j)) {
+            var n = compareLines(lines1[k],lines2[m],ignoreWhitespace);
+            if (n !== 1) {
+                var d = 0;
+                if (n===0) {
+                    d = 0;
+                } else if (n==2) {
+                    d = 3;
+                }
+                diffSummary.a.push({i:k+1,j:m+1,line:lines1[k],type:d});
+                diffSummary.b.push({i:m+1,j:k+1,line:lines2[m],type:d});
+                k++;
+                m++;
+            } else if (diffMap[(k + 1)][m] >= diffMap[k][(m + 1)]) {
+                diffSummary.a.push({i:k+1,line:lines1[k],type:1});
+                k++;
+            } else {
+                diffSummary.b.push({i:m+1,line:lines2[m],type:4});
+                m++;
+            }
+        }
+        while ((k < i) || (m < j)) {
+            if (k == i) {
+                diffSummary.b.push({i:m+1,line:lines2[m],type:4});
+                m++;
+            } else if (m == j) {
+                diffSummary.a.push({i:k+1,line:lines1[k],type:1});
+                k++;
+            }
+        }
+        return diffSummary;
+    }
+
+    function compareLines(string1, string2, ignoreWhitespace) {
+        if (ignoreWhitespace) {
+            if (string1 === string2) {
+                return 0;
+            }
+            return string1.trim() === string2.trime() ? 2 : 1;
+        }
+        return string1 === string2 ? 0 : 1;
+    }
+
+    function createUnifiedDiffTable(files,commitOptions) {
+        var diffPanel = $('<div></div>');
+        files.forEach(function(file) {
+            var hunks = file.hunks;
+            var isBinary = file.binary;
+            var codeTable = $("<table>").appendTo(diffPanel);
+            $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
+            var codeBody = $('<tbody>').appendTo(codeTable);
+
+            var diffFileRow = $('<tr class="node-text-diff-file-header">').appendTo(codeBody);
+            var content = $('<td colspan="3"></td>').appendTo(diffFileRow);
+
+            var chevron = $('<i class="node-diff-chevron fa fa-angle-down"></i>').appendTo(content);
+            diffFileRow.click(function(e) {
+                diffFileRow.toggleClass("collapsed");
+                var isCollapsed = diffFileRow.hasClass("collapsed");
+                diffFileRow.nextUntil(".node-text-diff-file-header").toggle(!isCollapsed);
+            })
+            var label = $('<span class="filename"></span>').text(file.file).appendTo(content);
+
+            var conflictHeader;
+            var unresolvedConflicts = 0;
+            var resolvedConflicts = 0;
+            var conflictResolutions = {};
+
+            if (!commitOptions.unmerged && commitOptions.project.files && commitOptions.project.files.flow === file.file) {
+                var tools = $('<span style="float: right;" class="button-group"></span>').appendTo(content);
+                $('<button class="editor-button editor-button-small">show flow diff</button>').appendTo(tools).click(function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var projectName = commitOptions.project.name;
+                    var filename = commitOptions.project.files.flow;
+                    var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
+                    var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
+                    $.when($.getJSON(oldVersionUrl),$.getJSON(newVersionUrl)).done(function(oldVersion,newVersion) {
+                        var oldFlow;
+                        var newFlow;
+                        try {
+                            oldFlow = JSON.parse(oldVersion[0].content||"[]");
+                        } catch(err) {
+                            console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                            console.log(err);
+                            return;
+                        }
+                        try {
+                            newFlow = JSON.parse(newVersion[0].content||"[]");
+                        } catch(err) {
+                            console.log("New Version doesn't contain valid JSON:",newFlow);
+                            console.log(err);
+                            return;
+                        }
+                        var localDiff = generateDiff(oldFlow,oldFlow);
+                        var remoteDiff = generateDiff(oldFlow,newFlow);
+                        var diff = resolveDiffs(localDiff,remoteDiff);
+                        showDiff(diff,{
+                            title: filename,
+                            mode: 'view',
+                            oldRevTitle: commitOptions.oldRevTitle,
+                            newRevTitle: commitOptions.newRevTitle
+                        });
+                        // var flowDiffRow = $("<tr>").insertAfter(diffRow);
+                        // var content = $('<td colspan="3"></td>').appendTo(flowDiffRow);
+                        // currentDiff = diff;
+                        // var diffTable = buildDiffPanel(content,diff,{mode:"view"}).finish();
+                    });
+                })
+            }
+
+            if (isBinary) {
+                var diffBinaryRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                var binaryContent = $('<td colspan="3"></td>').appendTo(diffBinaryRow);
+                $('<span></span>').text("Cannot show binary file contents").appendTo(binaryContent);
+
+            } else {
+                hunks.forEach(function(hunk) {
+                    var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                    var content = $('<td colspan="3"></td>').appendTo(diffRow);
+                    var label = $('<span></span>').text(hunk.header).appendTo(content);
+                    var isConflict = hunk.conflict;
+                    var localLine = hunk.localStartLine;
+                    var remoteLine = hunk.remoteStartLine;
+                    if (isConflict) {
+                        unresolvedConflicts++;
+                    }
+
+                    hunk.lines.forEach(function(lineText,lineNumber) {
+                        // if (lineText[0] === '\\' || lineText === "") {
+                        //     // Comment line - bail out of this hunk
+                        //     break;
+                        // }
+
+                        var actualLineNumber = hunk.diffStart + lineNumber;
+                        var isMergeHeader = isConflict && /^..(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
+                        var diffRow = $('<tr>').appendTo(codeBody);
+                        var localLineNo = $('<td class="lineno">').appendTo(diffRow);
+                        var remoteLineNo;
+                        if (!isMergeHeader) {
+                            remoteLineNo = $('<td class="lineno">').appendTo(diffRow);
+                        } else {
+                            localLineNo.attr('colspan',2);
+                        }
+                        var line = $('<td class="linetext">').appendTo(diffRow);
+                        var prefixStart = 0;
+                        var prefixEnd = 1;
+                        if (isConflict) {
+                            prefixEnd = 2;
+                        }
+                        if (!isMergeHeader) {
+                            var changeMarker = lineText[0];
+                            if (isConflict && !commitOptions.unmerged && changeMarker === ' ') {
+                                changeMarker = lineText[1];
+                            }
+                            $('<span class="prefix">').text(changeMarker).appendTo(line);
+                            var handledlLine = false;
+                            if (isConflict && commitOptions.unmerged) {
+                                $('<span class="prefix">').text(lineText[1]).appendTo(line);
+                                if (lineText[0] === '+') {
+                                    localLineNo.text(localLine++);
+                                    handledlLine = true;
+                                }
+                                if (lineText[1] === '+') {
+                                    remoteLineNo.text(remoteLine++);
+                                    handledlLine = true;
+                                }
+                            } else {
+                                if (lineText[0] === '+' || (isConflict && lineText[1] === '+')) {
+                                    localLineNo.addClass("added");
+                                    remoteLineNo.addClass("added");
+                                    line.addClass("added");
+                                    remoteLineNo.text(remoteLine++);
+                                    handledlLine = true;
+                                } else if (lineText[0] === '-' || (isConflict && lineText[1] === '-')) {
+                                    localLineNo.addClass("removed");
+                                    remoteLineNo.addClass("removed");
+                                    line.addClass("removed");
+                                    localLineNo.text(localLine++);
+                                    handledlLine = true;
+                                }
+                            }
+                            if (!handledlLine) {
+                                line.addClass("unchanged");
+                                if (localLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                    localLineNo.text(localLine++);
+                                }
+                                if (remoteLine > 0 && lineText[0] !== '\\' && lineText !== "") {
+                                    remoteLineNo.text(remoteLine++);
+                                }
+                            }
+                            $('<span>').text(lineText.substring(prefixEnd)).appendTo(line);
+                        } else {
+                            diffRow.addClass("mergeHeader");
+                            var isSeparator = /^..(=======$)/.test(lineText);
+                            if (!isSeparator) {
+                                var isOurs = /^..<<<<<<</.test(lineText);
+                                if (isOurs) {
+                                    $('<span>').text("<<<<<<< Local Changes").appendTo(line);
+                                    hunk.localChangeStart = actualLineNumber;
+                                } else {
+                                    hunk.remoteChangeEnd = actualLineNumber;
+                                    $('<span>').text(">>>>>>> Remote Changes").appendTo(line);
+
+                                }
+                                diffRow.addClass("mergeHeader-"+(isOurs?"ours":"theirs"));
+                                $('<button class="editor-button editor-button-small" style="float: right; margin-right: 20px;"><i class="fa fa-angle-double-'+(isOurs?"down":"up")+'"></i> use '+(isOurs?"local":"remote")+' changes</button>')
+                                    .appendTo(line)
+                                    .click(function(evt) {
+                                        evt.preventDefault();
+                                        resolvedConflicts++;
+                                        var addedRows;
+                                        var midRow;
+                                        if (isOurs) {
+                                            addedRows = diffRow.nextUntil(".mergeHeader-separator");
+                                            midRow = addedRows.last().next();
+                                            midRow.nextUntil(".mergeHeader").remove();
+                                            midRow.next().remove();
+                                        } else {
+                                            addedRows = diffRow.prevUntil(".mergeHeader-separator");
+                                            midRow = addedRows.last().prev();
+                                            midRow.prevUntil(".mergeHeader").remove();
+                                            midRow.prev().remove();
+                                        }
+                                        midRow.remove();
+                                        diffRow.remove();
+                                        addedRows.find(".linetext").addClass('added');
+                                        conflictHeader.empty();
+                                        $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
+
+                                        conflictResolutions[file.file] = conflictResolutions[file.file] || {};
+                                        conflictResolutions[file.file][hunk.localChangeStart] = {
+                                            changeStart: hunk.localChangeStart,
+                                            separator: hunk.changeSeparator,
+                                            changeEnd: hunk.remoteChangeEnd,
+                                            selection: isOurs?"A":"B"
+                                        }
+                                        if (commitOptions.resolveConflict) {
+                                            commitOptions.resolveConflict({
+                                                conflicts: unresolvedConflicts,
+                                                resolved: resolvedConflicts,
+                                                resolutions: conflictResolutions
+                                            });
+                                        }
+                                    })
+                            } else {
+                                hunk.changeSeparator = actualLineNumber;
+                                diffRow.addClass("mergeHeader-separator");
+                            }
+                        }
+                    });
+                });
+            }
+            if (commitOptions.unmerged) {
+                conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
+            }
+        });
+        return diffPanel;
+    }
+
+    function showCommitDiff(options) {
+        var commit = parseCommitDiff(options.commit);
+        var trayOptions = {
+            title: "View Commit Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._("common.label.close"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+
+                var codeTable = $("<table>").appendTo(diffPanel);
+                $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
+                var codeBody = $('<tbody>').appendTo(codeTable);
+
+                var diffRow = $('<tr class="node-text-diff-commit-header">').appendTo(codeBody);
+                var content = $('<td colspan="3"></td>').appendTo(diffRow);
+
+                $("<h3>").text(commit.title).appendTo(content);
+                $('<div class="commit-body"></div>').text(commit.comment).appendTo(content);
+                var summary = $('<div class="commit-summary"></div>').appendTo(content);
+                $('<div style="float: right">').text("Commit "+commit.sha).appendTo(summary);
+                $('<div>').text((commit.authorName||commit.author)+" - "+options.date).appendTo(summary);
+
+                if (commit.files) {
+                    createUnifiedDiffTable(commit.files,options).appendTo(diffPanel);
+                }
+
+
+            },
+            close: function() {
+                diffVisible = false;
+            },
+            show: function() {
+
+            }
+        }
+        RED.tray.show(trayOptions);
+    }
+    function showUnifiedDiff(options) {
+        var diff = options.diff;
+        var title = options.title;
+        var files = parseUnifiedDiff(diff);
+
+        var currentResolution;
+        if (options.unmerged) {
+            options.resolveConflict = function(results) {
+                currentResolution = results;
+                if (results.conflicts === results.resolved) {
+                    $("#node-diff-view-resolve-diff").removeClass('disabled');
+                }
+            }
+        }
+
+
+        var trayOptions = {
+            title: title||"Compare Changes", //TODO: nls
+            width: Infinity,
+            overlay: true,
+            buttons: [
+                {
+                    text: RED._((options.unmerged)?"common.label.cancel":"common.label.close"),
+                    click: function() {
+                        if (options.oncancel) {
+                            options.oncancel();
+                        }
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                // trayWidth = dimensions.width;
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
+                createUnifiedDiffTable(files,options).appendTo(diffPanel);
+            },
+            close: function() {
+                diffVisible = false;
+            },
+            show: function() {
+
+            }
+        }
+        if (options.unmerged) {
+            trayOptions.buttons.push(
+                {
+                    id: "node-diff-view-resolve-diff",
+                    text: "Save conflict resolution",
+                    class: "primary disabled",
+                    click: function() {
+                        if (!$("#node-diff-view-resolve-diff").hasClass('disabled')) {
+                            if (options.onresolve) {
+                                options.onresolve(currentResolution);
+                            }
+                            RED.tray.close();
+                        }
+                    }
+                }
+            );
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function parseCommitDiff(diff) {
+        var result = {};
+        var lines = diff.split("\n");
+        var comment = [];
+        for (var i=0;i<lines.length;i++) {
+            if (/^commit /.test(lines[i])) {
+                result.sha = lines[i].substring(7);
+            } else if (/^Author: /.test(lines[i])) {
+                result.author = lines[i].substring(8);
+                var m = /^(.*) <(.*)>$/.exec(result.author);
+                if (m) {
+                    result.authorName = m[1];
+                    result.authorEmail = m[2];
+                }
+            } else if (/^Date: /.test(lines[i])) {
+                result.date = lines[i].substring(8);
+            } else if (/^    /.test(lines[i])) {
+                if (!result.title) {
+                    result.title = lines[i].substring(4);
+                } else {
+                    if (lines[i].length !== 4 || comment.length > 0) {
+                        comment.push(lines[i].substring(4));
+                    }
+                }
+            } else if (/^diff /.test(lines[i])) {
+                result.files = parseUnifiedDiff(lines.slice(i));
+                break;
+            }
+         }
+         result.comment = comment.join("\n");
+         return result;
+    }
+    function parseUnifiedDiff(diff) {
+        var lines;
+        if (Array.isArray(diff)) {
+            lines = diff;
+        } else {
+            lines = diff.split("\n");
+        }
+        var diffHeader = /^diff --git a\/(.*) b\/(.*)$/;
+        var fileHeader = /^\+\+\+ b\/(.*)\t?/;
+        var binaryFile = /^Binary files /;
+        var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
+        var conflictHunkHeader = /^@+ -((\d+)(,(\d+))?) -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @+/;
+        var files = [];
+        var currentFile;
+        var hunks = [];
+        var currentHunk;
+        for (var i=0;i<lines.length;i++) {
+            var line = lines[i];
+            var diffLine = diffHeader.exec(line);
+            if (diffLine) {
+                if (currentHunk) {
+                    currentFile.hunks.push(currentHunk);
+                    files.push(currentFile);
+                }
+                currentHunk = null;
+                currentFile = {
+                    file: diffLine[1],
+                    hunks: []
+                }
+            } else if (binaryFile.test(line)) {
+                if (currentFile) {
+                    currentFile.binary = true;
+                }
+            } else {
+                var fileLine = fileHeader.exec(line);
+                if (fileLine) {
+                    currentFile.file = fileLine[1];
+                } else {
+                    var hunkLine = hunkHeader.exec(line);
+                    if (hunkLine) {
+                        if (currentHunk) {
+                            currentFile.hunks.push(currentHunk);
+                        }
+                        currentHunk = {
+                            header: line,
+                            localStartLine: hunkLine[2],
+                            localLength: hunkLine[4]||1,
+                            remoteStartLine: hunkLine[6],
+                            remoteLength: hunkLine[8]||1,
+                            lines: [],
+                            conflict: false
+                        }
+                        continue;
+                    }
+                    hunkLine = conflictHunkHeader.exec(line);
+                    if (hunkLine) {
+                        if (currentHunk) {
+                            currentFile.hunks.push(currentHunk);
+                        }
+                        currentHunk = {
+                            header: line,
+                            localStartLine: hunkLine[2],
+                            localLength: hunkLine[4]||1,
+                            remoteStartLine: hunkLine[6],
+                            remoteLength: hunkLine[8]||1,
+                            diffStart: parseInt(hunkLine[10]),
+                            lines: [],
+                            conflict: true
+                        }
+                        continue;
+                    }
+                    if (currentHunk) {
+                        currentHunk.lines.push(line);
+                    }
+                }
+            }
+        }
+        if (currentHunk) {
+            currentFile.hunks.push(currentHunk);
+        }
+        files.push(currentFile);
+        return files;
+    }
+
     return {
         init: init,
         getRemoteDiff: getRemoteDiff,
         showRemoteDiff: showRemoteDiff,
+        showUnifiedDiff: showUnifiedDiff,
+        showCommitDiff: showCommitDiff,
         mergeDiff: mergeDiff
     }
 })();
