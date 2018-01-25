@@ -46,13 +46,6 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
         generated.should.match(/A TEST NAME/);
         generated.should.match(/A TEST SUMMARY/);
     });
-    it('generates settings.json for a project', function() {
-        var generated = defaultFileSet["settings.json"]({
-            name: "A TEST NAME",
-            summary: "A TEST SUMMARY"
-        });
-        generated.length.should.be.greaterThan(0);
-    });
     it('generates .gitignore for a project', function() {
         var generated = defaultFileSet[".gitignore"]({
             name: "A TEST NAME",
@@ -60,9 +53,4 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
         });
         generated.length.should.be.greaterThan(0);
     });
-
-
-
-
-
 });

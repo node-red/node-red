@@ -35,8 +35,13 @@ module.exports = {
         return JSON.stringify(package,"",4);
     },
     "README.md": function(project) {
-        return project.name+"\n"+("=".repeat(project.name.length))+"\n\n"+(project.summary||"A Node-RED Project")+"\n\n";
+        var content = project.name+"\n"+("=".repeat(project.name.length))+"\n\n";
+        if (project.summary) {
+            content += project.summary+"\n\n";
+        }
+        content += "### About\n\nThis is your project's README.md file. It helps users understand what your\nproject does, how to use it and anything else they may need to know.";
+
+        return content;
     },
-    "settings.json": function() { return "{}" },
     ".gitignore": function() { return "*.backup" ;}
 }

@@ -233,7 +233,7 @@ RED.projects.settings = (function() {
         var summaryContent = $('<div></div>',{style:"color: #999"}).appendTo(summary);
         updateProjectSummary(activeProject.summary, summaryContent);
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">edit description</button>')
                 .prependTo(summary)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -248,7 +248,7 @@ RED.projects.settings = (function() {
         updateProjectDescription(activeProject, descriptionContent);
 
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">edit README.md</button>')
                 .prependTo(description)
                 .click(function(evt) {
                     evt.preventDefault();
