@@ -185,8 +185,8 @@
             "movedTo": "__id__ へ移動",
             "movedFrom": "__id__ から移動"
         },
-        "nodeCount": "ノード数 __count__",
-        "nodeCount_plural": "ノード数 __count__",
+        "nodeCount": "__count__ 個のノード",
+        "nodeCount_plural": "__count__ 個のノード",
         "local": "ローカルの変更",
         "remote": "リモートの変更"
     },
