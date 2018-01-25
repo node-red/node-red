@@ -396,7 +396,7 @@
             "url2": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The client can be configured to send or receive the entire message object as a JSON formatted string."
         },
         "errors": {
-            "connect-error": "An error occured on the ws connection: ",
+            "ws-error": "An error occurred on the ws connection (__error__)",
             "send-error": "An error occurred while sending: ",
             "missing-conf": "Missing server configuration"
         }
