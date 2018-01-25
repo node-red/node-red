@@ -206,7 +206,10 @@ module.exports = function(RED) {
             // TODO: nls
             this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
             this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
-            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
+            this.serverConfig.on('closed', function(n) {
+                if (n > 0) { node.status({fill:"green",shape:"dot",text:"connected "+n}); }
+                else { node.status({fill:"red",shape:"ring",text:"disconnected"}); }
+            });
         } else {
             this.error(RED._("websocket.errors.missing-conf"));
         }
@@ -231,7 +234,10 @@ module.exports = function(RED) {
             // TODO: nls
             this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
             this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
-            this.serverConfig.on('closed', function() { node.status({fill:"red",shape:"ring",text:"disconnected"}); });
+            this.serverConfig.on('closed', function(n) {
+                if (n > 0) { node.status({fill:"green",shape:"dot",text:"connected "+n}); }
+                else { node.status({fill:"red",shape:"ring",text:"disconnected"}); }
+            });
         }
         this.on("input", function(msg) {
             var payload;
