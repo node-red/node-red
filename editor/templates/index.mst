@@ -186,8 +186,8 @@
     </div>
 </script>
 <script type="text/x-red" data-template-name="_markdown">
-    <div class="form-row" style="margin-bottom: 3px; text-align: right;">
-        <!--<button id="node-input-json-reformat" class="editor-button editor-button-small"><span data-i18n="jsonEditor.format"></span></button>-->
+    <div class="form-row" id="node-input-markdown-title" style="margin-bottom: 3px; text-align: right;">
+
     </div>
     <div class="form-row node-text-editor-row">
         <div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-markdown"></div>

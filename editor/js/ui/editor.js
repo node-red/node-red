@@ -2260,6 +2260,10 @@ RED.editor = (function() {
                     value: value,
                     mode:"ace/mode/markdown"
                 });
+                if (options.header) {
+                    options.header.appendTo(tray.find('#node-input-markdown-title'));
+                }
+
                 dialogForm.i18n();
             },
             close: function() {

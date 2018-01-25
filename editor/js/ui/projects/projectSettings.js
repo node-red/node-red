@@ -119,6 +119,7 @@ RED.projects.settings = (function() {
     function editDescription(activeProject, container) {
         RED.editor.editMarkdown({
             title: RED._('sidebar.project.editDescription'),
+            header: $('<span><i class="fa fa-book"></i> README.md</span>'),
             value: activeProject.description,
             complete: function(v) {
                 container.empty();
