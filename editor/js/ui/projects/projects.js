@@ -99,13 +99,13 @@ RED.projects = (function() {
 
                         var row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="">Username</label>').appendTo(row);
-                        gitUsernameInput = $('<input type="text">').val(existingGitSettings.name||"").appendTo(row);
+                        gitUsernameInput = $('<input type="text">').val((existingGitSettings&&existingGitSettings.name)||"").appendTo(row);
                         // $('<div style="position:relative;"></div>').text("This does not need to be your real name").appendTo(row);
                         gitUsernameInput.on("change keyup paste",validateForm);
 
                         row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="">Email</label>').appendTo(row);
-                        gitEmailInput = $('<input type="text">').val(existingGitSettings.email||"").appendTo(row);
+                        gitEmailInput = $('<input type="text">').val((existingGitSettings&&existingGitSettings.email)||"").appendTo(row);
                         gitEmailInput.on("change keyup paste",validateForm);
                         // $('<div style="position:relative;"></div>').text("Something something email").appendTo(row);
                         setTimeout(function() {
