@@ -216,6 +216,9 @@ RED.tray = (function() {
         show: function show(options) {
             if (stack.length > 0 && !options.overlay) {
                 var oldTray = stack[stack.length-1];
+                if (options.width === "inherit") {
+                    options.width = oldTray.tray.width();
+                }
                 oldTray.tray.css({
                     right: -(oldTray.tray.width()+10)+"px"
                 });

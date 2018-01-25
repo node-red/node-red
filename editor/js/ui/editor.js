@@ -1825,6 +1825,7 @@ RED.editor = (function() {
 
         var trayOptions = {
             title: getEditStackTitle(),
+            width: "inherit",
             buttons: [
                 {
                     id: "node-dialog-cancel",
@@ -2108,9 +2109,6 @@ RED.editor = (function() {
             },
             show: function() {}
         }
-        if (editTrayWidthCache.hasOwnProperty(type)) {
-            trayOptions.width = editTrayWidthCache[type];
-        }
         RED.tray.show(trayOptions);
     }
 
@@ -2137,6 +2135,7 @@ RED.editor = (function() {
         }
         var trayOptions = {
             title: options.title || getEditStackTitle(),
+            width: "inherit",
             buttons: [
                 {
                     id: "node-dialog-cancel",
@@ -2205,9 +2204,6 @@ RED.editor = (function() {
             },
             show: function() {}
         }
-        if (editTrayWidthCache.hasOwnProperty(type)) {
-            trayOptions.width = editTrayWidthCache[type];
-        }
         RED.tray.show(trayOptions);
     }
 
@@ -2221,6 +2217,7 @@ RED.editor = (function() {
 
         var trayOptions = {
             title: options.title || getEditStackTitle(),
+            width: "inherit",
             buttons: [
                 {
                     id: "node-dialog-cancel",
@@ -2272,9 +2269,6 @@ RED.editor = (function() {
             },
             show: function() {}
         }
-        if (editTrayWidthCache.hasOwnProperty(type)) {
-            trayOptions.width = editTrayWidthCache[type];
-        }
         RED.tray.show(trayOptions);
     }
 
@@ -2317,6 +2311,7 @@ RED.editor = (function() {
 
         var trayOptions = {
             title: getEditStackTitle(),
+            width: "inherit",
             buttons: [
                 {
                     id: "node-dialog-cancel",
@@ -2458,9 +2453,6 @@ RED.editor = (function() {
                 bufferBinEditor.destroy();
             },
             show: function() {}
-        }
-        if (editTrayWidthCache.hasOwnProperty(type)) {
-            trayOptions.width = editTrayWidthCache[type];
         }
         RED.tray.show(trayOptions);
     }
