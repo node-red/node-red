@@ -770,7 +770,7 @@ function createDefaultProject(user, project) {
                 var flowFilePath;
                 var credsFilePath;
 
-                if (project.files.migrateFiles) {
+                if (project.migrateFiles) {
                     var baseFlowFileName = project.files.flow || fspath.basename(project.files.oldFlow);
                     var baseCredentialFileName = project.files.credentials || fspath.basename(project.files.oldCredentials);
                     files.push(baseFlowFileName);
@@ -790,7 +790,7 @@ function createDefaultProject(user, project) {
                         }
                         return util.writeFile(credsFilePath,credentialData);
                     }));
-                    delete project.files.migrateFiles;
+                    delete project.migrateFiles;
                     project.files.flow = baseFlowFileName;
                     project.files.credentials = baseCredentialFileName;
                 } else {

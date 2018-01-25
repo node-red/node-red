@@ -307,7 +307,7 @@ function reloadActiveProject(action) {
 }
 function createProject(user, metadata) {
     // var userSettings = getUserGitSettings(user);
-    if (metadata.files && metadata.files.migrateFiles) {
+    if (metadata.files && metadata.migrateFiles) {
         // We expect there to be no active project in this scenario
         if (activeProject) {
             throw new Error("Cannot migrate as there is an active project");
