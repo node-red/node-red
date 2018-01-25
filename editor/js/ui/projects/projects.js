@@ -545,6 +545,7 @@ RED.projects = (function() {
                                                     $( self ).dialog( "close" );
                                                 } else {
                                                     show('create-success');
+                                                    RED.menu.setDisabled('menu-item-projects-open',false);
                                                 }
                                             },
                                             400: {
