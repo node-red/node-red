@@ -177,6 +177,9 @@ module.exports = function(grunt) {
                     "public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "editor/vendor/jsonata/worker-jsonata.js"
+                    ],
+                    "public/vendor/sockjs/sockjs.min.js": [
+                        "editor/vendor/sockjs/sockjs-1.1.4.min.js"
                     ]
                 }
             }
