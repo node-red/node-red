@@ -184,7 +184,6 @@ module.exports = function(RED) {
         this.connect = function () {
             if (!node.connected && !node.connecting) {
                 node.connecting = true;
-                console.log("going for connect");
                 try {
                     node.client = mqtt.connect(node.brokerurl ,node.options);
                     node.client.setMaxListeners(0);

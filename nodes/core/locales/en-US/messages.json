@@ -400,8 +400,9 @@
         },
         "listenon": "Listen on",
         "connectto": "Connect to",
-        "payload": "Send/Receive payload",
-        "message": "Send/Receive entire message",
+        "sendrec": "Send/Receive",
+        "payload": "payload",
+        "message": "entire message",
         "tip": {
             "path1": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The listener can be configured to send or receive the entire message object as a JSON formatted string.",
             "path2": "This path will be relative to ",
