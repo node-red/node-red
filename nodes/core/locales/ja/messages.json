@@ -5,7 +5,8 @@
             "topic": "トピック",
             "name": "名前",
             "username": "ユーザ名",
-            "password": "パスワード"
+            "password": "パスワード",
+            "property": "プロパティ"
         },
         "status": {
             "connected": "接続済",
@@ -540,7 +541,7 @@
         "label": {
             "property": "プロパティ",
             "rule": "条件",
-            "repair" :  "メッセージ列の補正 (送信メッセージのpartsプロパティを再構成する)"
+            "repair" :  "メッセージ列の補正"
         },
         "and": "～",
         "checkall": "全ての条件を適用",
@@ -556,8 +557,8 @@
             "nnull": "is not null",
             "head":"head",
             "tail":"tail",
-            "index":"is between",
-            "exp":"JSONata exp",
+            "index":"index between",
+            "exp":"JSONata式",
             "else": "その他"
         },
         "errors": {
@@ -879,7 +880,7 @@
 	    "exp": "集約式",
 	    "exp-value": "式",
 	    "init": "初期値",
-	    "right": "評価を逆順に行う (右から左)",
+	    "right": "評価を逆順に行う (最後から最初)",
 	    "fixup": "最終調整式"
         },
         "errors": {
@@ -887,10 +888,10 @@
         }
     },
     "sort" : {
-        "key-type" : "キー種別",
-        "payload" : "ペイロードもしくは要素",
-        "exp" : "式",
-        "key-exp" : "キー参照式",
+        "target" : "対象",
+        "seq" : "メッセージ列",
+        "key" : "キー",
+        "elem" : "要素の値",
         "order" : "順序",
         "ascending" : "昇順",
         "descending" : "降順",
@@ -902,20 +903,19 @@
     "batch" : {
         "mode": {
             "label" : "モード",
-            "num-msgs" : "メッセージ数",
-            "interval" : "間隔(秒)",
+            "num-msgs" : "メッセージ数でグループ化",
+            "interval" : "時間間隔でグループ化",
             "concat" : "列の結合"
         },
         "count": {
             "label" : "メッセージ数",
-            "overwrap" : "オーバラップ",
+            "overlap" : "オーバラップ",
             "count" : "数",
             "invalid" : "メッセージ数とオーバラップ数が不正"
         },
         "interval": {
-            "label" : "間隔(秒)",
-            "seconds" : "秒数",
-            "sec" : "秒",
+            "label" : "時間間隔",
+            "seconds" : "秒",
             "empty" : "メッセージを受信しない場合、空のメッセージを送信"
         },
         "concat": {
