@@ -5,7 +5,8 @@
             "topic": "トピック",
             "name": "名前",
             "username": "ユーザ名",
-            "password": "パスワード"
+            "password": "パスワード",
+            "property": "プロパティ"
         },
         "status": {
             "connected": "接続済",
@@ -59,7 +60,8 @@
             "日曜日"
         ],
         "on": "曜日",
-        "onstart": "Node-RED起動時に実行",
+        "onstart": "Node-RED起動の",
+        "onceDelay": "秒後、以下を行う",
         "tip": "<b>注釈:</b> 「指定した時間間隔、日時」と「指定した日時」はcronを使用します。詳細はノードの「情報」を確認してください。",
         "success": "inject処理を実行しました: __label__",
         "errors": {
@@ -105,6 +107,10 @@
         "to": "出力先",
         "debtab": "デバッグタブ",
         "tabcon": "デバッグタブとコンソール",
+        "toSidebar": "デバッグウィンドウ",
+        "toConsole": "システムコンソール",
+        "toStatus": "ノード状態 (32 文字)",
+        "severity": "Level",
         "notification": {
             "activated": "有効化しました: __label__",
             "deactivated": "無効化しました: __label__"
@@ -144,13 +150,15 @@
             "upload": "ファイル",
             "cert": "証明書",
             "key": "秘密鍵",
+            "passphrase": "パスフレーズ",
             "ca": "CA証明書",
             "verify-server-cert": "サーバ証明書を確認"
         },
         "placeholder": {
             "cert": "証明書(PEM形式)のパス",
             "key": "秘密鍵(PEM形式)のパス",
-            "ca": "CA証明書(PEM形式)のパス"
+            "ca": "CA証明書(PEM形式)のパス",
+            "passphrase":"秘密鍵のパスフレーズ (任意)"
         },
         "error": {
             "missing-file": "証明書と秘密鍵のファイルが設定されていません"
@@ -195,6 +203,7 @@
             "mustache": "Mustacheテンプレート",
             "plain": "平文",
             "json": "JSON",
+            "yaml": "YAML",
             "none": "なし"
         },
         "templatevalue": "This is the payload: {{payload}} !"
@@ -270,6 +279,9 @@
         "wait-reset": "初期化されるまで待機",
         "wait-for": "指定した時間待機",
         "wait-loop": "指定した時間間隔毎に送信を繰り返す",
+        "for": "処理対象",
+        "bytopics": "msg.topic毎",
+        "alltopics": "全メッセージ",
         "duration": {
             "ms": "ミリ秒",
             "s": "秒",
@@ -528,7 +540,8 @@
     "switch": {
         "label": {
             "property": "プロパティ",
-            "rule": "条件"
+            "rule": "条件",
+            "repair" :  "メッセージ列の補正"
         },
         "and": "～",
         "checkall": "全ての条件を適用",
@@ -542,10 +555,15 @@
             "false": "is false",
             "null": "is null",
             "nnull": "is not null",
-            "else": "otherwise"
+            "head":"head",
+            "tail":"tail",
+            "index":"index between",
+            "exp":"JSONata式",
+            "else": "その他"
         },
         "errors": {
-            "invalid-expr": "不正な表現: __error__"
+            "invalid-expr": "不正な表現: __error__",
+            "too-many" : "switchノード内で保持しているメッセージが多すぎます"
         }
     },
     "change": {
@@ -605,6 +623,8 @@
             "c2o": "CSVからオブジェクトへ変換",
             "o2c": "オブジェクトからCSVへ変換",
             "input": "入力",
+            "skip-s": "最初の",
+            "skip-e": "行を無視する",
             "firstrow": "1行目に列名を含む",
             "output": "出力",
             "includerow": "1行目を列名とする",
@@ -659,7 +679,14 @@
         },
         "label": {
             "o2j": "オブジェクトからJSONへ変換",
-            "pretty": "JSON文字列フォーマット"
+            "pretty": "JSON文字列フォーマット",
+            "action": "動作",
+            "property": "プロパティ",
+            "actions": {
+                "toggle": "JSON文字列とオブジェクト間の相互変換",
+                "str":"常にJSON文字列に変換",
+                "obj":"常にJavaScriptオブジェクトに変換"
+            }
         }
     },
     "yaml": {
@@ -818,6 +845,8 @@
         "mode": {
             "mode": "動作",
             "auto": "自動",
+            "merge":"列のマージ",
+            "reduce":"列の集約",
             "custom": "手動"
         },
         "combine": "結合",
@@ -839,6 +868,62 @@
         "afterTimeout": "最初のメッセージ受信からのタイムアウト後",
         "seconds": "秒",
         "complete": "<code>msg.complete</code> プロパティが設定されたメッセージ受信後",
-        "tip": "このモードでは、本ノードが <i>split</i> ノードと組となるか、 <code>msg.parts</code> プロパティが設定されたメッセージを受け取ることが前提となります。"
+        "tip": "このモードでは、本ノードが <i>split</i> ノードと組となるか、 <code>msg.parts</code> プロパティが設定されたメッセージを受け取ることが前提となります。",
+        "too-many" : "joinノード内部で保持しているメッセージが多すぎます",
+        "merge": {
+            "topics-label":"対象トピック",
+            "topics":"トピック",
+            "topic" : "トピック",
+            "on-change":"新規トピックを受け取るとメッセージを送信する"
+        },
+        "reduce": {
+            "exp": "集約式",
+            "exp-value": "式",
+            "init": "初期値",
+            "right": "評価を逆順に行う (最後から最初)",
+            "fixup": "最終調整式"
+        },
+        "errors": {
+            "invalid-expr": "JSONata式が不正: __error__"
+        }
+    },
+    "sort" : {
+        "target" : "対象",
+        "seq" : "メッセージ列",
+        "key" : "キー",
+        "elem" : "要素の値",
+        "order" : "順序",
+        "ascending" : "昇順",
+        "descending" : "降順",
+        "as-number" : "数値として比較",
+        "invalid-exp" : "sortノードで不正なJSONata式が指定されました",
+        "too-many" : "sortノードの未処理メッセージの数が許容数を超えました",
+        "clear" : "sortノードの未処理メッセージを破棄しました"
+    },
+    "batch" : {
+        "mode": {
+            "label" : "モード",
+            "num-msgs" : "メッセージ数でグループ化",
+            "interval" : "時間間隔でグループ化",
+            "concat" : "列の結合"
+        },
+        "count": {
+            "label" : "メッセージ数",
+            "overlap" : "オーバラップ",
+            "count" : "数",
+            "invalid" : "メッセージ数とオーバラップ数が不正"
+        },
+        "interval": {
+            "label" : "時間間隔",
+            "seconds" : "秒",
+            "empty" : "メッセージを受信しない場合、空のメッセージを送信"
+        },
+        "concat": {
+            "topics-label": "トピック",
+            "topic" : "トピック"
+        },
+        "too-many" : "batchノード内で保持しているメッセージが多すぎます",
+        "unexpected" : "想定外のモード",
+        "no-parts" : "メッセージにpartsプロパティがありません"
     }
 }
