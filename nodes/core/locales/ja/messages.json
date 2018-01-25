@@ -870,18 +870,18 @@
         "complete": "<code>msg.complete</code> プロパティが設定されたメッセージ受信後",
         "tip": "このモードでは、本ノードが <i>split</i> ノードと組となるか、 <code>msg.parts</code> プロパティが設定されたメッセージを受け取ることが前提となります。",
         "too-many" : "joinノード内部で保持しているメッセージが多すぎます",
-	"merge": {
-	    "topics-label":"対象トピック",
-	    "topics":"トピック",
+        "merge": {
+            "topics-label":"対象トピック",
+            "topics":"トピック",
             "topic" : "トピック",
             "on-change":"新規トピックを受け取るとメッセージを送信する"
-	},
+        },
         "reduce": {
-	    "exp": "集約式",
-	    "exp-value": "式",
-	    "init": "初期値",
-	    "right": "評価を逆順に行う (最後から最初)",
-	    "fixup": "最終調整式"
+            "exp": "集約式",
+            "exp-value": "式",
+            "init": "初期値",
+            "right": "評価を逆順に行う (最後から最初)",
+            "fixup": "最終調整式"
         },
         "errors": {
             "invalid-expr": "JSONata式が不正: __error__"
