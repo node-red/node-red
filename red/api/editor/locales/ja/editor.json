@@ -76,7 +76,12 @@
         "password": "パスワード",
         "login": "ログイン",
         "loginFailed": "ログインに失敗しました",
-        "notAuthorized": "権限がありません"
+        "notAuthorized": "権限がありません",
+        "errors": {
+            "settings": "設定を参照するには、ログインする必要があります",
+            "deploy": "変更をデプロイするには、ログインする必要があります",
+            "notAuthorized": "本アクションを行うには、ログインする必要があります"
+        }
     },
     "notification": {
         "warning": "<strong>警告</strong>: __message__",
@@ -84,7 +89,11 @@
             "undeployedChanges": "ノードの変更をデプロイしていません",
             "nodeActionDisabled": "ノードのアクションは、サブフロー内で無効になっています",
             "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください。",
-            "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります"
+            "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります",
+            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報は暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "missing_flow_file": "<p>プロジェクトのフローファイルが存在しません</p><p>本プロジェクトにフローファイルが登録されていません</p>",
+            "project_empty": "<p>空のプロジェクトです</p><p>デフォルトのプロジェクトファイルを作成しますか？<br/>作成しない場合、エディタの外でファイルをプロジェクトへ手動で追加する必要があります</p>",
+            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>"
         },
         "error": "<strong>エラー</strong>: __message__",
         "errors": {
@@ -157,7 +166,8 @@
             "backgroundUpdate": "サーバ上のフローが更新されました",
             "conflictChecking": "変更を自動的にマージしてよいか確認してください。",
             "conflictAutoMerge": "変更の衝突がないため、自動的にマージできます。",
-            "conflictManualMerge": "変更に衝突があるため、デプロイ前に解決する必要があります。"
+            "conflictManualMerge": "変更に衝突があるため、デプロイ前に解決する必要があります。",
+            "plusNMore": "さらに __count__ 個"
         }
     },
     "diff": {
@@ -175,8 +185,8 @@
             "movedTo": "__id__ へ移動",
             "movedFrom": "__id__ から移動"
         },
-        "nodeCount": "ノード数 __count__",
-        "nodeCount_plural": "ノード数 __count__",
+        "nodeCount": "__count__ 個のノード",
+        "nodeCount_plural": "__count__ 個のノード",
         "local": "ローカルの変更",
         "remote": "リモートの変更"
     },
@@ -383,7 +393,12 @@
             "showMore": "さらに表示",
             "showLess": "表示を省略",
             "flow": "フロー",
-            "information": "情報",
+            "selection": "選択",
+            "nodes": "__count__ 個のノード",
+            "flowDesc": "フローの詳細",
+            "subflowDesc": "サブフローの詳細",
+            "nodeHelp": "ノードのヘルプ",
+            "none": "なし",
             "arrayItems": "__count__ 要素",
             "showTips": "設定からヒントを表示できます"
         },
@@ -401,6 +416,15 @@
         "palette": {
             "name": "パレットの管理",
             "label": "パレット"
+        },
+        "project": {
+            "label": "プロジェクト",
+            "name": "プロジェクト",
+            "description": "詳細",
+            "dependencies": "依存関係",
+            "settings": "設定",
+            "editDescription": "プロジェクトの詳細を編集",
+            "editDependencies": "プロジェクトの依存関係を編集"
         }
     },
     "typedInput": {
@@ -443,6 +467,9 @@
     "jsonEditor": {
         "title": "JSONエディタ",
         "format": "JSONフォーマット"
+    },
+    "markdownEditor": {
+        "title": "マークダウンエディタ"
     },
     "bufferEditor": {
         "title": "バッファエディタ",
