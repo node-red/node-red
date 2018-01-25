@@ -1811,6 +1811,7 @@ RED.projects = (function() {
 
 
     function showNewProjectScreen() {
+        createProjectOptions = {};
         if (!activeProject) {
             show('welcome');
         } else {

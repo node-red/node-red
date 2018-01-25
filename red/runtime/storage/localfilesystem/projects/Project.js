@@ -685,7 +685,11 @@ Project.prototype.getFlowFile = function() {
 }
 
 Project.prototype.getFlowFileBackup = function() {
-    return getBackupFilename(this.getFlowFile());
+    var flowFile = this.getFlowFile();
+    if (flowFile) {
+        return getBackupFilename(flowFile);
+    }
+    return null;
 }
 Project.prototype.getCredentialsFile = function() {
     // console.log("Project.getCredentialsFile = ",this.paths.credentialsFile);
