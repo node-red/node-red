@@ -201,6 +201,10 @@
                     if (!opt.hasOwnProperty('i')) {
                         opt._i = Math.floor((0x99999-0x10000)*Math.random()).toString(16);
                     }
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
                     var row = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"padding-top: 5px; padding-left: 175px;"}).appendTo(container);
                     var row3 = $('<div/>',{style:"padding-top: 5px; padding-left: 102px;"}).appendTo(container);

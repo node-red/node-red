@@ -98,7 +98,7 @@
 
             function resizeRule(rule) {
                 var newWidth = rule.width();
-                rule.find('.red-ui-typedInput').typedInput("width",newWidth-150);
+                rule.find('.red-ui-typedInput').typedInput("width",newWidth-130);
 
             }
             $('#node-input-rule-container').css('min-height','300px').css('min-width','450px').editableList({
@@ -122,7 +122,10 @@
                     if (rule.t === "move" && !rule.tot) {
                         rule.tot = "msg";
                     }
-
+                    container.css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    });
                     var row1 = $('<div/>').appendTo(container);
                     var row2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);
                     var row3 = $('<div/>',{style:"margin-top:8px;"}).appendTo(container);

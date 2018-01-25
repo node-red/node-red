@@ -248,11 +248,14 @@ msg.cookies = {
             function resizeRule(rule) {
                 var newWidth = rule.width();
                 rule.find('.red-ui-typedInput').typedInput("width",(newWidth-15)/2);
-
             }
             var headerList = $("#node-input-headers-container").css('min-height','150px').css('min-width','450px').editableList({
                 addItem: function(container,i,header) {
-                    var row = $('<div/>').appendTo(container);
+                    var row = $('<div/>').css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    }).appendTo(container);
+
                     var propertyName = $('<input/>',{class:"node-input-header-name",type:"text"})
                         .appendTo(row)
                         .typedInput({types:headerTypes});
