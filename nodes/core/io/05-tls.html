@@ -24,44 +24,48 @@
         <span class="tls-config-input-data">
             <label class="editor-button" for="node-config-input-certfile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
             <input class="hide" type="file" id="node-config-input-certfile">
-            <span id="tls-config-certname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <span id="tls-config-certname" style="width: calc(100% - 280px); overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
             <button class="editor-button editor-button-small" id="tls-config-button-cert-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
         </span>
         <input type="hidden" id="node-config-input-certname">
         <input type="hidden" id="node-config-input-certdata">
-        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-cert" data-i18n="[placeholder]tls.placeholder.cert">
+        <input class="hide tls-config-input-path" style="width: calc(100% - 170px);" type="text" id="node-config-input-cert" data-i18n="[placeholder]tls.placeholder.cert">
     </div>
     <div class="form-row">
         <label style="width: 120px;" for="node-config-input-key"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.key"></span></label>
         <span class="tls-config-input-data">
             <label class="editor-button" for="node-config-input-keyfile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
             <input class="hide" type="file" id="node-config-input-keyfile">
-            <span id="tls-config-keyname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <span id="tls-config-keyname" style="width: calc(100% - 280px); overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
             <button class="editor-button editor-button-small" id="tls-config-button-key-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
         </span>
         <input type="hidden" id="node-config-input-keyname">
         <input type="hidden" id="node-config-input-keydata">
-        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-key" data-i18n="[placeholder]tls.placeholder.key">
+        <input class="hide tls-config-input-path" style="width: calc(100% - 170px);" type="text" id="node-config-input-key" data-i18n="[placeholder]tls.placeholder.key">
+    </div>
+    <div class="form-row">
+        <label style="width: 100px; margin-left: 20px;" for="node-config-input-passphrase"> <span data-i18n="tls.label.passphrase"></span></label>
+        <input type="password" style="width: calc(100% - 170px);" id="node-config-input-passphrase" data-i18n="[placeholder]tls.placeholder.passphrase">
     </div>
     <div class="form-row">
         <label style="width: 120px;" for="node-config-input-ca"><i class="fa fa-file-text-o"></i> <span data-i18n="tls.label.ca"></span></label>
         <span class="tls-config-input-data">
             <label class="editor-button" for="node-config-input-cafile"><i class="fa fa-upload"></i> <span data-i18n="tls.label.upload"></span></label>
             <input class="hide" type="file" title=" " id="node-config-input-cafile">
-            <span id="tls-config-caname" style="width: 180px; overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
+            <span id="tls-config-caname" style="width: calc(100% - 280px); overflow: hidden; line-height:34px; height:34px; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: middle;"> </span>
             <button class="editor-button editor-button-small" id="tls-config-button-ca-clear" style="margin-left: 10px"><i class="fa fa-times"></i></button>
         </span>
         <input type="hidden" id="node-config-input-caname">
         <input type="hidden" id="node-config-input-cadata">
-        <input class="hide tls-config-input-path" style="width: 60%;" type="text" id="node-config-input-ca" data-i18n="[placeholder]tls.placeholder.ca">
+        <input class="hide tls-config-input-path" style="width: calc(100% - 170px);" type="text" id="node-config-input-ca" data-i18n="[placeholder]tls.placeholder.ca">
     </div>
     <div class="form-row">
         <input type="checkbox" id="node-config-input-verifyservercert" style="display: inline-block; width: auto; vertical-align: top;">
-        <label for="node-config-input-verifyservercert" style="width: 70%;" data-i18n="tls.label.verify-server-cert"></label>
+        <label for="node-config-input-verifyservercert" style="width: calc(100% - 170px);" data-i18n="tls.label.verify-server-cert"></label>
     </div>
     <div class="form-row">
         <label style="width: 120px;" for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
-        <input style="width: 60%;" type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
+        <input style="width: calc(100% - 170px);" type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
     </div>
 </script>
 
@@ -97,7 +101,8 @@
         credentials: {
             certdata: {type:"text"},
             keydata: {type:"text"},
-            cadata: {type:"text"}
+            cadata: {type:"text"},
+            passphrase: {type:"password"}
         },
         label: function() {
             return this.name || this._("tls.tls");

@@ -18,6 +18,7 @@ var should = require("should");
 var splitNode = require("../../../../nodes/core/logic/17-split.js");
 var joinNode = require("../../../../nodes/core/logic/17-split.js");
 var helper = require("../../helper.js");
+var RED = require("../../../../red/red.js");
 
 describe('SPLIT node', function() {
 
@@ -269,6 +270,7 @@ describe('JOIN node', function() {
 
     afterEach(function() {
         helper.unload();
+        RED.settings.nodeMessageBufferMaxLength = 0;
     });
 
     it('should be loaded', function(done) {
@@ -323,6 +325,7 @@ describe('JOIN node', function() {
             n1.receive({payload:"D", parts:{id:1, type:"string", ch:",", index:3, count:4}});
         });
     });
+
     it('should join bits of buffer back together automatically', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], joiner:",", build:"buffer", mode:"auto"},
                     {id:"n2", type:"helper"}];
@@ -422,6 +425,34 @@ describe('JOIN node', function() {
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d"});
             n1.receive({payload:{e:5}, topic:"e"});
+        });
+    });
+
+    it('should merge full msg objects', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:6, build:"merged", mode:"custom", propertyType:"full", property:""},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.payload.should.have.property("payload",7);
+                    msg.payload.should.have.property("aha",'c');
+                    msg.payload.should.have.property("bar",'b');
+                    msg.payload.should.have.property("bingo",'e');
+                    msg.payload.should.have.property("foo",'d');
+                    msg.payload.should.have.property("topic",'a');
+                    done();
+                }
+                catch(e) { done(e)}
+            });
+            n1.receive({payload:1, topic:"f"});
+            n1.receive({payload:2, topic:"a"});
+            n1.receive({payload:3, foo:"b"});
+            n1.receive({payload:4, bar:"b"});
+            n1.receive({payload:5, aha:"c"});
+            n1.receive({payload:6, foo:"d"});
+            n1.receive({payload:7, bingo:"e"});
         });
     });
 
@@ -698,6 +729,178 @@ describe('JOIN node', function() {
             });
             s1.receive({payload:[[1,2,3],"a\nb\nc",[7,8,9]]});
         });
-    })
+    });
+
+    it('should redece messages', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(10);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages using $I', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+$I",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(6);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages with fixup', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:"$A/$N",
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(2);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, count:5, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:5, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:5, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:5, id:222}});
+            n1.receive({payload:0, parts:{index:4, count:5, id:222}});
+        });
+    });
+
+    it('should redece messages (left)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"'(' & $A & '+' & payload & ')'",
+                     reduceInit:"0",
+                     reduceInitType:"str",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.String();
+                    msg.payload.should.equal("((((0+1)+2)+3)+4)");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:'3', parts:{index:2, count:4, id:222}});
+            n1.receive({payload:'2', parts:{index:1, count:4, id:222}});
+            n1.receive({payload:'4', parts:{index:3, count:4, id:222}});
+            n1.receive({payload:'1', parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should redece messages (right)', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:true,
+                     reduceExp:"'(' & $A & '+' & payload & ')'",
+                     reduceInit:"0",
+                     reduceInitType:"str",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.String();
+                    msg.payload.should.equal("((((0+4)+3)+2)+1)");
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:'3', parts:{index:2, count:4, id:222}});
+            n1.receive({payload:'2', parts:{index:1, count:4, id:222}});
+            n1.receive({payload:'4', parts:{index:3, count:4, id:222}});
+            n1.receive({payload:'1', parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should handle too many pending messages for reduce mode', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.nodeMessageBufferMaxLength = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "join";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "join");
+                evt.should.have.property('msg', "join.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
 
 });

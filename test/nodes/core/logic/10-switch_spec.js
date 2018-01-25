@@ -18,6 +18,7 @@ var should = require("should");
 
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
 var helper = require("../../helper.js");
+var RED = require("../../../../red/red.js");
 
 describe('switch Node', function() {
 
@@ -28,6 +29,7 @@ describe('switch Node', function() {
     afterEach(function(done) {
         helper.unload();
         helper.stopServer(done);
+        RED.settings.nodeMessageBufferMaxLength = 0;
     });
 
     it('should be loaded with some defaults', function(done) {
@@ -119,6 +121,44 @@ describe('switch Node', function() {
         });
     }
 
+    function customFlowSequenceSwitchTest(flow, seq_in, seq_out, done) {
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var sid = undefined;
+            var count = 0;
+            helperNode1.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload", seq_out[count]);
+                    msg.should.have.property("parts");
+                    var parts = msg.parts;
+                    parts.should.have.property("id");
+                    var id = parts.id;
+                    if (sid === undefined) {
+                        sid = id;
+                    }
+                    else {
+                        id.should.equal(sid);
+                    }
+                    parts.should.have.property("index", count);
+                    parts.should.have.property("count", seq_out.length);
+                    count++;
+                    if (count === seq_out.length) {
+                        done();
+                    }
+                } catch (e) {
+                    done(e);
+                }
+            });
+            var len = seq_in.length;
+            for (var i = 0; i < len; i++) {
+                var parts = {index:i, count:len, id:222};
+                var msg = {payload:seq_in[i], parts:parts};
+                switchNode1.receive(msg);
+            }
+        });
+    }
+    
     it('should check if payload equals given value', function(done) {
         genericSwitchTest("eq", "Hello", true, true, "Hello", done);
     });
@@ -498,4 +538,176 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, true, -5, done);
     });
+
+    it('should take head of message sequence', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"head","v":3}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [0, 1, 2], done);
+    });
+
+    it('should take tail of message sequence', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"tail","v":3}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [2, 3, 4], done);
+    });
+
+    it('should take slice of message sequence', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"index","v":1,"v2":3}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [1,2, 3], done);
+    });
+
+    it('should check JSONata expression is true', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"jsonata_exp","v":"payload%2 = 1","vt":"jsonata"}],
+                     checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowSwitchTest(flow, true, 9, done);
+    });
+
+    it('should repair message sequence', function(done) {
+        var flow = [{id:"n1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"gt","v":0},{"t":"lt","v":0},{"t":"else"}],
+                     checkall:true,repair:true,
+                     outputs:3,wires:[["n2"],["n3"],["n4"]]},
+                    {id:"n2", type:"helper", wires:[]},
+                    {id:"n3", type:"helper", wires:[]},
+                    {id:"n4", type:"helper", wires:[]}
+                   ];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            var n4 = helper.getNode("n4");
+            var data = { "0":1, "1":-2, "2":2, "3":0, "4":-1 };
+            var count = 0;
+            function check_msg(msg, vf) {
+                try {
+                    msg.should.have.property("payload");
+                    var payload = msg.payload;
+                    msg.should.have.property("parts");
+                    vf(payload).should.be.ok;
+                    var parts = msg.parts;
+                    parts.should.have.property("id", 222);
+                    parts.should.have.property("count", 5);
+                    parts.should.have.property("index");
+                    var index = parts.index;
+                    payload.should.equal(data[index]);
+                    count++;
+                    if (count == 5) {
+                        done();
+                    }
+                }
+                catch (e) {
+                    done(e);
+                }
+            }
+            n2.on("input", function(msg) {
+                check_msg(msg, function(x) { return(x < 0); });
+            });
+            n3.on("input", function(msg) {
+                check_msg(msg, function(x) { return(x === 0); });
+            });
+            n4.on("input", function(msg) {
+                check_msg(msg, function(x) { return(x > 0); });
+            });
+            for(var i in data) {
+                n1.receive({payload: data[i], parts:{index:i,count:5,id:222}});
+            }
+        });
+    });
+
+    it('should create message sequence for each port', function(done) {
+        var flow = [{id:"n1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"gt","v":0},{"t":"lt","v":0},{"t":"else"}],
+                     checkall:true,repair:false,
+                     outputs:3,wires:[["n2"],["n3"],["n4"]]},
+                    {id:"n2", type:"helper", wires:[]}, // >0
+                    {id:"n3", type:"helper", wires:[]}, // <0
+                    {id:"n4", type:"helper", wires:[]}  // ==0
+                   ];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            var n4 = helper.getNode("n4");
+            var data = [ 1, -2, 2, 0, -1 ];
+            var vals = [[1, 2], [-2, -1], [0]];
+            var ids = [undefined, undefined, undefined];
+            var counts = [0, 0, 0];
+            var count = 0;
+            function check_msg(msg, ix, vf) {
+                try {
+                    msg.should.have.property("payload");
+                    var payload = msg.payload;
+                    msg.should.have.property("parts");
+                    vf(payload).should.be.ok;
+                    var parts = msg.parts;
+                    var evals = vals[ix];
+                    parts.should.have.property("count", evals.length);
+                    parts.should.have.property("id");
+                    var id = parts.id;
+                    if (ids[ix] === undefined) {
+                        ids[ix] = id;
+                    }
+                    else {
+                        ids[ix].should.equal(id);
+                    }
+                    parts.should.have.property("index");
+                    var index = parts.index;
+                    var eindex = counts[ix];
+                    var eval = evals[eindex];
+                    payload.should.equal(eval);
+                    counts[ix]++;
+                    count++;
+                    if (count == 5) {
+                        done();
+                    }
+                }
+                catch (e) {
+                    done(e);
+                }
+            }
+            n2.on("input", function(msg) {
+                check_msg(msg, 0, function(x) { return(x > 0); });
+            });
+            n3.on("input", function(msg) {
+                check_msg(msg, 1, function(x) { return(x < 0); });
+            });
+            n4.on("input", function(msg) {
+                check_msg(msg, 2, function(x) { return(x === 0); });
+            });
+            for(var i in data) {
+                n1.receive({payload: data[i], parts:{index:i,count:5,id:222}});
+            }
+        });
+    });
+
+    it('should handle too many pending messages', function(done) {
+        var flow = [{id:"n1",type:"switch",name:"switchNode",property:"payload",
+                     rules:[{"t":"tail","v":2}],
+                     checkall:true,repair:false,
+                     outputs:3,wires:[["n2"]]},
+                    {id:"n2", type:"helper", wires:[]}
+                   ];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            RED.settings.nodeMessageBufferMaxLength = 2;
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "switch";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "n1");
+                evt.should.have.property('type', "switch");
+                evt.should.have.property('msg', "switch.errors.too-many");
+                done();
+            }, 150);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+    
 });

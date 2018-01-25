@@ -6,11 +6,22 @@
         <input id="node-input-complete" type="hidden">
     </div>
     <div class="form-row">
-        <label for="node-input-console"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
-        <select type="text" id="node-input-console" style="display: inline-block; width: 250px; vertical-align: top;">
-            <option value="false" data-i18n="debug.debtab"></option>
-            <option value="true" data-i18n="debug.tabcon"></option>
-        </select>
+        <label for="node-input-tosidebar"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
+        <label for="node-input-tosidebar" style="width:70%">
+        <input type="checkbox" id="node-input-tosidebar" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toSidebar"></span>
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-console"> </label>
+        <label for="node-input-console" style="width:70%">
+        <input type="checkbox" id="node-input-console" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toConsole"></span>
+        </label>
+    </div>
+    <div class="form-row" id="node-tostatus-line">
+    <label for="node-input-tostatus"> </label>
+    <label for="node-input-tostatus" style="width:70%">
+        <input type="checkbox" id="node-input-tostatus" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toStatus"></span>
+    </label>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
@@ -26,7 +37,7 @@
     <p>Alongside each message, the debug sidebar includes information about the time the message was received, the node that sent it and the type of the message.
        Clicking on the source node id will reveal that node within the workspace.</p>
     <p>The button on the node can be used to enable or disable its output. It is recommended to disable or remove any Debug nodes that are not being used.</p>
-    <p>The node can also be configured to send all messages to the runtime log.</p>
+    <p>The node can also be configured to send all messages to the runtime log, or to send short (32 characters) to the status text under the debug node.</p>
 </script>
 <script src="debug/view/debug-utils.js"></script>
 
@@ -38,7 +49,9 @@
         defaults: {
             name: {value:""},
             active: {value:true},
-            console: {value:"false"},
+            tosidebar: {value:true},
+            console: {value:false},
+            tostatus: {value:false},
             complete: {value:"false", required:true}
         },
         label: function() {
@@ -100,7 +113,6 @@
             }
         },
         onpaletteadd: function() {
-
             var options = {
                 messageMouseEnter: function(sourceId) {
                     if (sourceId) {
@@ -148,7 +160,7 @@
 
             var that = this;
             RED._debug = function(msg) {
-                that.handleDebugMessage("",{
+                that.handleDebugMessage("", {
                     name:"debug",
                     msg:msg
                 });
@@ -170,7 +182,6 @@
                 var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
                 if (sourceNode) {
                     o._source = {id:sourceNode.id,z:sourceNode.z,name:sourceNode.name};
-
                 }
                 RED.debug.handleDebugMessage(o);
                 if (subWindow) {
@@ -182,6 +193,18 @@
                 }
             };
             RED.comms.subscribe("debug",this.handleDebugMessage);
+
+            this.clearMessageList = function() {
+                RED.debug.clearMessageList(true);
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"projectChange"},"*");
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            };
+            RED.events.on("project:change", this.clearMessageList);
 
             $("#debug-tab-open").click(function(e) {
                 e.preventDefault();
@@ -225,6 +248,15 @@
             delete RED._debug;
         },
         oneditprepare: function() {
+            if (this.tosidebar === undefined) {
+                this.tosidebar = true;
+                $("#node-input-tosidebar").prop('checked', true);
+            }
+            if (typeof this.console === "string") {
+                this.console = (this.console == 'true');
+                $("#node-input-console").prop('checked', this.console);
+                $("#node-input-tosidebar").prop('checked', true);
+            }
             $("#node-input-typed-complete").typedInput({types:['msg', {value:"full",label:RED._("node-red:debug.msgobj"),hasValue:false}]});
             if (this.complete === "true" || this.complete === true) {
                 // show complete message object
@@ -240,6 +272,16 @@
                 ) {
                     $("#node-input-typed-complete").typedInput('value','payload');
                 }
+                if ($("#node-input-typed-complete").typedInput('type') === 'msg') {
+                    $("#node-tostatus-line").show();
+                }
+                else { $("#node-tostatus-line").hide(); }
+            });
+            $("#node-input-complete").on('change',function() {
+                if ($("#node-input-typed-complete").typedInput('type') === 'msg') {
+                    $("#node-tostatus-line").show();
+                }
+                else { $("#node-tostatus-line").hide(); }
             });
         },
         oneditsave: function() {
@@ -250,7 +292,6 @@
                 $("#node-input-complete").val($("#node-input-typed-complete").typedInput('value'));
             }
         }
-
     });
 })();
 </script>

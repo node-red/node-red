@@ -24,6 +24,7 @@ var i18n;
 
 var settings;
 var disableNodePathScan = false;
+var iconFileExtensions = [".png", ".gif"];
 
 function init(runtime) {
     settings = runtime.settings;
@@ -104,7 +105,8 @@ function getLocalNodeFiles(dir) {
             if (!/^(\..*|lib|icons|node_modules|test|locales)$/.test(fn)) {
                 result = result.concat(getLocalNodeFiles(path.join(dir,fn)));
             } else if (fn === "icons") {
-                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn)});
+                var iconList = scanIconDir(path.join(dir,fn));
+                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn),icons:iconList});
             }
         }
     });
@@ -113,12 +115,26 @@ function getLocalNodeFiles(dir) {
 
 function scanDirForNodesModules(dir,moduleName) {
     var results = [];
+    var scopeName;
     try {
         var files = fs.readdirSync(dir);
+        if (moduleName) {
+            var m = /^(?:(@[^/]+)[/])?([^@/]+)/.exec(moduleName);
+            if (m) {
+                scopeName = m[1];
+                moduleName = m[2];
+            }
+        }
         for (var i=0;i<files.length;i++) {
             var fn = files[i];
             if (/^@/.test(fn)) {
-                results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                if (scopeName && scopeName === fn) {
+                    // Looking for a specific scope/module
+                    results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                    break;
+                } else {
+                    results = results.concat(scanDirForNodesModules(path.join(dir,fn),moduleName));
+                }
             } else {
                 if (isIncluded(fn) && !isExcluded(fn) && (!moduleName || fn == moduleName)) {
                     var pkgfn = path.join(dir,fn,"package.json");
@@ -197,7 +213,8 @@ function getModuleNodeFiles(module) {
             if (iconDirs.indexOf(iconDir) == -1) {
                 try {
                     fs.statSync(iconDir);
-                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir});
+                    var iconList = scanIconDir(iconDir);
+                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir,icons:iconList});
                     iconDirs.push(iconDir);
                 } catch(err) {
                 }
@@ -218,6 +235,10 @@ function getNodeFiles(disableNodePathScan) {
     // Find all of the nodes to load
     var nodeFiles = [];
 
+    var dir = path.resolve(__dirname + '/../../../../public/icons');
+    var iconList = scanIconDir(dir);
+    events.emit("node-icon-dir",{name:'node-red',path:dir,icons:iconList});
+
     if (settings.coreNodesDir) {
         nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
         var defaultLocalesPath = path.join(settings.coreNodesDir,"core","locales");
@@ -225,6 +246,12 @@ function getNodeFiles(disableNodePathScan) {
     }
 
     if (settings.userDir) {
+        dir = path.join(settings.userDir,"lib","icons");
+        iconList = scanIconDir(dir);
+        if (iconList.length > 0) {
+            events.emit("node-icon-dir",{name:'Library',path:dir,icons:iconList});
+        }
+
         dir = path.join(settings.userDir,"nodes");
         nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir));
     }
@@ -302,6 +329,20 @@ function getModuleFiles(module) {
     return nodeList;
 }
 
+function scanIconDir(dir) {
+    var iconList = [];
+    try {
+        var files = fs.readdirSync(dir);
+        files.forEach(function(file) {
+            var stats = fs.statSync(path.join(dir, file));
+            if (stats.isFile() && iconFileExtensions.indexOf(path.extname(file)) !== -1) {
+                iconList.push(file);
+            }
+        });
+    } catch(err) {
+    }
+    return iconList;
+}
 
 module.exports = {
     init: init,

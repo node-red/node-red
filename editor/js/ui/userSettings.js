@@ -29,6 +29,10 @@ RED.userSettings = (function() {
         if (settingsVisible) {
             return;
         }
+        if (!RED.user.hasPermission("settings.write")) {
+            RED.notify(RED._("user.errors.settings"),"error");
+            return;
+        }
         settingsVisible = true;
         var tabContainer;
 
@@ -127,10 +131,13 @@ RED.userSettings = (function() {
 
         var pane = $('<div id="user-settings-tab-view" class="node-help"></div>');
 
+        var currentEditorSettings = RED.settings.get('editor') || {};
+        currentEditorSettings.view = currentEditorSettings.view || {};
+
         viewSettings.forEach(function(section) {
             $('<h3></h3>').text(RED._(section.title)).appendTo(pane);
             section.options.forEach(function(opt) {
-                var initialState = RED.settings.get(opt.setting);
+                var initialState = currentEditorSettings.view[opt.setting];
                 var row = $('<div class="user-settings-row"></div>').appendTo(pane);
                 var input;
                 if (opt.toggle) {
@@ -147,7 +154,10 @@ RED.userSettings = (function() {
 
     function setSelected(id, value) {
         var opt = allSettings[id];
-        RED.settings.set(opt.setting,value);
+        var currentEditorSettings = RED.settings.get('editor') || {};
+        currentEditorSettings.view = currentEditorSettings.view || {};
+        currentEditorSettings.view[opt.setting] = value;
+        RED.settings.set('editor', currentEditorSettings);
         var callback = opt.onchange;
         if (typeof callback === 'string') {
             callback = RED.actions.get(callback);
@@ -158,8 +168,9 @@ RED.userSettings = (function() {
     }
     function toggle(id) {
         var opt = allSettings[id];
-        var state = RED.settings.get(opt.setting);
-        setSelected(id,!state);
+        var currentEditorSettings = RED.settings.get('editor') || {};
+        currentEditorSettings.view = currentEditorSettings.view || {};
+        setSelected(id,!currentEditorSettings.view[opt.setting]);
     }
 
 
@@ -185,21 +196,26 @@ RED.userSettings = (function() {
             }
         })
 
+        var currentEditorSettings = RED.settings.get('editor') || {};
+        currentEditorSettings.view = currentEditorSettings.view || {};
+        var editorSettingsChanged = false;
         viewSettings.forEach(function(section) {
             section.options.forEach(function(opt) {
                 if (opt.oldSetting) {
                     var oldValue = RED.settings.get(opt.oldSetting);
                     if (oldValue !== undefined && oldValue !== null) {
-                        RED.settings.set(opt.setting,oldValue);
+                        currentEditorSettings.view[opt.setting] = oldValue;
+                        editorSettingsChanged = true;
                         RED.settings.remove(opt.oldSetting);
                     }
                 }
                 allSettings[opt.setting] = opt;
                 if (opt.onchange) {
-                    var value = RED.settings.get(opt.setting);
-                    if (value === null && opt.hasOwnProperty('default')) {
+                    var value = currentEditorSettings.view[opt.setting];
+                    if ((value === null || value === undefined) && opt.hasOwnProperty('default')) {
                         value = opt.default;
-                        RED.settings.set(opt.setting,value);
+                        currentEditorSettings.view[opt.setting] = value;
+                        editorSettingsChanged = true;
                     }
 
                     var callback = opt.onchange;
@@ -212,6 +228,9 @@ RED.userSettings = (function() {
                 }
             });
         });
+        if (editorSettingsChanged) {
+            RED.settings.set('editor',currentEditorSettings);
+        }
 
     }
     return {

@@ -18,7 +18,7 @@
     <div class="form-row">
         <label data-i18n="trigger.send" for="node-input-op1"></label>
         <input type="hidden" id="node-input-op1type">
-        <input style="width: 70%" type="text" id="node-input-op1">
+        <input style="width: 70%" type="text" id="node-input-op1" placeholder="1">
     </div>
     <div class="form-row">
         <label data-i18n="trigger.then"></label>
@@ -45,7 +45,7 @@
     <div class="form-row node-type-wait">
         <label data-i18n="trigger.then-send"></label>
         <input type="hidden" id="node-input-op2type">
-        <input style="width: 70%" type="text" id="node-input-op2">
+        <input style="width: 70%" type="text" id="node-input-op2" placeholder="0">
     </div>
     <div class="form-row">
         <label data-i18n="trigger.label.reset" style="width:auto"></label>
@@ -56,6 +56,13 @@
         </ul>
     </div>
     <br/>
+    <div class="form-row">
+        <label data-i18n="trigger.for" for="node-input-bytopic"></label>
+        <select id="node-input-bytopic">
+            <option value="all" data-i18n="trigger.alltopics"></option>
+            <option value="topic" data-i18n="trigger.bytopics"></option>
+        </select>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name"></input>
@@ -103,6 +110,7 @@
             extend: {value:"false"},
             units: {value:"ms"},
             reset: {value:""},
+            bytopic: {value: "all"},
             name: {value:""}
         },
         inputs:1,

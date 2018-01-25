@@ -17,7 +17,7 @@
 var should = require("should");
 var Clients = require("../../../../red/api/auth/clients");
 
-describe("Clients", function() {
+describe("api/auth/clients", function() {
     it('finds the known editor client',function(done) {
         Clients.get("node-red-editor").then(function(client) {
             client.should.have.property("id","node-red-editor");
@@ -41,7 +41,6 @@ describe("Clients", function() {
         }).catch(function(err) {
             done(err);
         });
-        
+
     });
 });
-            

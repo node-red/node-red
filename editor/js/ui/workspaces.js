@@ -244,10 +244,16 @@ RED.workspaces = (function() {
                 if (tab.disabled) {
                     $("#red-ui-tab-"+(tab.id.replace(".","-"))).addClass('workspace-disabled');
                 }
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
+                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() <= 1);
+                if (workspace_tabs.count() === 1) {
+                    showWorkspace();
+                }
             },
             onremove: function(tab) {
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
+                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() <= 1);
+                if (workspace_tabs.count() === 0) {
+                    hideWorkspace();
+                }
             },
             onreorder: function(oldOrder, newOrder) {
                 RED.history.push({t:'reorder',order:oldOrder,dirty:RED.nodes.dirty()});
@@ -260,6 +266,16 @@ RED.workspaces = (function() {
                 addWorkspace();
             }
         });
+    }
+    function showWorkspace() {
+        $("#workspace .red-ui-tabs").show()
+        $("#chart").show()
+        $("#workspace-footer").children().show()
+    }
+    function hideWorkspace() {
+        $("#workspace .red-ui-tabs").hide()
+        $("#chart").hide()
+        $("#workspace-footer").children().hide()
     }
 
     function init() {
@@ -280,6 +296,8 @@ RED.workspaces = (function() {
         RED.actions.add("core:add-flow",addWorkspace);
         RED.actions.add("core:edit-flow",editWorkspace);
         RED.actions.add("core:remove-flow",removeWorkspace);
+
+        hideWorkspace();
     }
 
     function editWorkspace(id) {
@@ -293,6 +311,9 @@ RED.workspaces = (function() {
             if (workspace_tabs.contains(ws.id)) {
                 workspace_tabs.removeTab(ws.id);
             }
+        }
+        if (ws.id === activeWorkspace) {
+            activeWorkspace = 0;
         }
     }
 

@@ -5,7 +5,8 @@
             "topic": "Topic",
             "name": "Name",
             "username": "Username",
-            "password": "Password"
+            "password": "Password",
+            "property": "Property"
         },
         "status": {
             "connected": "connected",
@@ -59,7 +60,8 @@
             "Sunday"
         ],
         "on": "on",
-        "onstart": "Inject once at start?",
+        "onstart": "Inject once after",
+        "onceDelay": "seconds, then",
         "tip": "<b>Note:</b> \"interval between times\" and \"at a specific time\" will use cron.<br/>See info box for details.",
         "success": "Successfully injected: __label__",
         "errors": {
@@ -102,9 +104,13 @@
         "output": "Output",
         "msgprop": "message property",
         "msgobj": "complete msg object",
-        "to": "to",
+        "to": "To",
         "debtab": "debug tab",
         "tabcon": "debug tab and console",
+        "toSidebar": "debug window",
+        "toConsole": "system console",
+        "toStatus": "node status (32 characters)",
+        "severity": "Level",
         "notification": {
             "activated": "Successfully activated: __label__",
             "deactivated": "Successfully deactivated: __label__"
@@ -144,13 +150,15 @@
             "upload": "Upload",
             "cert": "Certificate",
             "key": "Private Key",
+            "passphrase": "Passphrase",
             "ca": "CA Certificate",
             "verify-server-cert":"Verify server certificate"
         },
         "placeholder": {
             "cert":"path to certificate (PEM format)",
             "key":"path to private key (PEM format)",
-            "ca":"path to CA certificate (PEM format)"
+            "ca":"path to CA certificate (PEM format)",
+            "passphrase":"private key passphrase (optional)"
         },
         "error": {
             "missing-file": "No certificate/key file provided"
@@ -195,6 +203,7 @@
             "mustache": "Mustache template",
             "plain": "Plain text",
             "json": "Parsed JSON",
+            "yaml": "Parsed YAML",
             "none": "none"
         },
         "templatevalue": "This is the payload: {{payload}} !"
@@ -270,6 +279,9 @@
         "wait-reset": "wait to be reset",
         "wait-for": "wait for",
         "wait-loop": "resend it every",
+        "for": "Handling",
+        "bytopics": "each msg.topic independently",
+        "alltopics": "all messages",
         "duration": {
             "ms": "Milliseconds",
             "s": "Seconds",
@@ -530,7 +542,8 @@
     "switch": {
         "label": {
             "property": "Property",
-            "rule": "rule"
+            "rule": "rule",
+            "repair" :  "recreate message sequences"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -544,10 +557,15 @@
             "false":"is false",
             "null":"is null",
             "nnull":"is not null",
+            "head":"head",
+            "tail":"tail",
+            "index":"index between",
+            "exp":"JSONata exp",
             "else":"otherwise"
         },
         "errors": {
-            "invalid-expr": "Invalid JSONata expression: __error__"
+            "invalid-expr": "Invalid JSONata expression: __error__",
+            "too-many" : "too many pending messages in switch node"
         }
     },
     "change": {
@@ -591,7 +609,7 @@
             "maxout": "e.g. 255"
         },
         "scale": {
-            "payload": "Scale msg.payload",
+            "payload": "Scale the message property",
             "limit": "Scale and limit to the target range",
             "wrap": "Scale and wrap within the target range"
         },
@@ -607,6 +625,8 @@
             "c2o": "CSV to Object options",
             "o2c": "Object to CSV options",
             "input": "Input",
+            "skip-s": "Skip first",
+            "skip-e": "lines",
             "firstrow": "first row contains column names",
             "output": "Output",
             "includerow": "include column name row",
@@ -661,7 +681,14 @@
         },
         "label": {
             "o2j": "Object to JSON options",
-            "pretty": "Format JSON string"
+            "pretty": "Format JSON string",
+            "action": "Action",
+            "property": "Property",
+            "actions": {
+                "toggle": "Convert between JSON String & Object",
+                "str":"Always convert to JSON String",
+                "obj":"Always convert to JavaScript Object"
+            }
         }
     },
     "yaml": {
@@ -820,6 +847,8 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
+            "merge":"merge sequences",
+            "reduce":"reduce sequence",
             "custom":"manual"
         },
         "combine":"Combine each",
@@ -841,6 +870,62 @@
         "afterTimeout":"After a timeout following the first message",
         "seconds":"seconds",
         "complete":"After a message with the <code>msg.complete</code> property set",
-        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property."
+        "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property.",
+        "too-many" : "too many pending messages in join node",
+        "merge": {
+            "topics-label":"Merged Topics",
+            "topics":"topics",
+            "topic" : "topic",
+            "on-change":"Send merged message on arrival of a new topic"
+        },
+        "reduce": {
+            "exp": "Reduce exp",
+            "exp-value": "exp",
+            "init": "Initial value",
+            "right": "Evaluate in reverse order (last to first)",
+            "fixup": "Fix-up exp"
+        },
+        "errors": {
+            "invalid-expr": "Invalid JSONata expression: __error__"
+        }
+    },
+    "sort" : {
+        "target" : "Sort",
+        "seq" : "message sequence",
+        "key" : "Key",
+        "elem" : "element value",
+        "order" : "Order",
+        "ascending" : "ascending",
+        "descending" : "descending",
+        "as-number" : "as number",
+        "invalid-exp" : "invalid JSONata expression in sort node",
+        "too-many" : "too many pending messages in sort node",
+        "clear" : "clear pending message in sort node"
+    },
+    "batch" : {
+        "mode": {
+            "label" : "Mode",
+            "num-msgs" : "Group by number of messages",
+            "interval" : "Group by time interval",
+            "concat" : "Concatenate sequences"
+        },
+        "count": {
+            "label" : "Number of messages",
+            "overlap" : "Overlap",
+            "count" : "count",
+            "invalid" : "Invalid count and overlap"
+        },
+        "interval": {
+            "label" : "Interval",
+            "seconds" : "seconds",
+            "empty" : "send empty message when no message arrives"
+        },
+        "concat": {
+            "topics-label": "Topics",
+            "topic" : "topic"
+        },
+        "too-many" : "too many pending messages in batch node",
+        "unexpected" : "unexpected mode",
+        "no-parts" : "no parts property in message"
     }
 }

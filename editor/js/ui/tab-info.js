@@ -50,13 +50,15 @@ RED.sidebar.info = (function() {
         }).hide();
 
         nodeSection = sections.add({
-            title: RED._("sidebar.info.node"),
-            collapsible: false
+            title: RED._("sidebar.info.info"),
+            collapsible: true
         });
+        nodeSection.expand();
         infoSection = sections.add({
-            title: RED._("sidebar.info.information"),
-            collapsible: false
+            title: RED._("sidebar.info.nodeHelp"),
+            collapsible: true
         });
+        infoSection.expand();
         infoSection.content.css("padding","6px");
         infoSection.container.css("border-bottom","none");
 
@@ -96,23 +98,7 @@ RED.sidebar.info = (function() {
         RED.sidebar.show("info");
     }
 
-    function jsonFilter(key,value) {
-        if (key === "") {
-            return value;
-        }
-        var t = typeof value;
-        if ($.isArray(value)) {
-            return "[array:"+value.length+"]";
-        } else if (t === "object") {
-            return "[object]"
-        } else if (t === "string") {
-            if (value.length > 30) {
-                return value.substring(0,30)+" ...";
-            }
-        }
-        return value;
-    }
-
+    // TODO: DRY - projects.js
     function addTargetToExternalLinks(el) {
         $(el).find("a").each(function(el) {
             var href = $(this).attr('href');
@@ -123,76 +109,42 @@ RED.sidebar.info = (function() {
         return el;
     }
     function refresh(node) {
+        if (node === undefined) {
+            refreshSelection();
+            return;
+        }
         sections.show();
         $(nodeSection.content).empty();
         $(infoSection.content).empty();
 
-        var table = $('<table class="node-info"></table>');
-        var tableBody = $('<tbody>').appendTo(table);
         var propRow;
+
+        var table = $('<table class="node-info"></table>').appendTo(nodeSection.content);
+        var tableBody = $('<tbody>').appendTo(table);
         var subflowNode;
-        if (node.type === "tab") {
-            nodeSection.title.html(RED._("sidebar.info.flow"));
-            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.tabName")+'</td><td></td></tr>').appendTo(tableBody);
-            $(propRow.children()[1]).html('&nbsp;'+(node.label||""))
-            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.id")+"</td><td></td></tr>").appendTo(tableBody);
-            RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
-            $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+        var subflowUserCount;
+
+        var activeProject = RED.projects.getActiveProject();
+        if (activeProject) {
+            propRow = $('<tr class="node-info-node-row"><td>Project</td><td></td></tr>').appendTo(tableBody);
+            $(propRow.children()[1]).text(activeProject.name||"");
+            $('<tr class="node-info-property-expand blank"><td colspan="2"></td></tr>').appendTo(tableBody);
+            $('<button class="editor-button editor-button-small" style="position:absolute;right:2px;"><i class="fa fa-ellipsis-h"></i></button>')
+                .appendTo(propRow.children()[1])
+                .click(function(evt) {
+                    evt.preventDefault();
+                    RED.projects.editProject();
+                });
+        }
+        infoSection.container.show();
+        if (node === null) {
+            return;
+        } else if (Array.isArray(node)) {
+            infoSection.container.hide();
+            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.selection")+"</td><td></td></tr>").appendTo(tableBody);
+            $(propRow.children()[1]).text(RED._("sidebar.info.nodes",{count:node.length}))
         } else {
-            nodeSection.title.html(RED._("sidebar.info.node"));
-            if (node.type !== "subflow" && node.name) {
-                $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td>&nbsp;<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
-            }
-            $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>&nbsp;"+node.type+"</td></tr>").appendTo(tableBody);
-            propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.id")+"</td><td></td></tr>").appendTo(tableBody);
-            RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-
             var m = /^subflow(:(.+))?$/.exec(node.type);
-
-            if (!m && node.type != "subflow" && node.type != "comment") {
-                if (node._def) {
-                    var count = 0;
-                    var defaults = node._def.defaults;
-                    for (var n in defaults) {
-                        if (n != "name" && defaults.hasOwnProperty(n)) {
-                            var val = node[n];
-                            var type = typeof val;
-                            count++;
-                            propRow = $('<tr class="node-info-property-row'+(expandedSections.property?"":" hide")+'"><td>'+n+"</td><td></td></tr>").appendTo(tableBody);
-                            if (defaults[n].type) {
-                                var configNode = RED.nodes.node(val);
-                                if (!configNode) {
-                                    RED.utils.createObjectElement(undefined).appendTo(propRow.children()[1]);
-                                } else {
-                                    var configLabel = RED.utils.getNodeLabel(configNode,val);
-                                    var container = propRow.children()[1];
-
-                                    var div = $('<span>',{class:""}).appendTo(container);
-                                    var nodeDiv = $('<div>',{class:"palette_node palette_node_small"}).appendTo(div);
-                                    var colour = configNode._def.color;
-                                    var icon_url = RED.utils.getNodeIcon(configNode._def);
-                                    nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
-                                    var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
-                                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
-                                    var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).html(configLabel).appendTo(container);
-
-                                    nodeDiv.on('dblclick',function() {
-                                        RED.editor.editConfig("", configNode.type, configNode.id);
-                                    })
-
-                                }
-                            } else {
-                                RED.utils.createObjectElement(val).appendTo(propRow.children()[1]);
-                            }
-                        }
-                    }
-                    if (count > 0) {
-                        $('<tr class="node-info-property-expand blank"><td colspan="2"><a href="#" class=" node-info-property-header'+(expandedSections.property?" expanded":"")+'"><span class="node-info-property-show-more">'+RED._("sidebar.info.showMore")+'</span><span class="node-info-property-show-less">'+RED._("sidebar.info.showLess")+'</span> <i class="fa fa-caret-down"></i></a></td></tr>').appendTo(tableBody);
-                    }
-                }
-            }
-
             if (m) {
                 if (m[2]) {
                     subflowNode = RED.nodes.subflow(m[2]);
@@ -200,49 +152,120 @@ RED.sidebar.info = (function() {
                     subflowNode = node;
                 }
 
-                $('<tr class="blank"><th colspan="2">'+RED._("sidebar.info.subflow")+'</th></tr>').appendTo(tableBody);
-
-                var userCount = 0;
+                subflowUserCount = 0;
                 var subflowType = "subflow:"+subflowNode.id;
                 RED.nodes.eachNode(function(n) {
                     if (n.type === subflowType) {
-                        userCount++;
+                        subflowUserCount++;
                     }
                 });
-                $('<tr class="node-info-subflow-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.name)+'">'+subflowNode.name+'</span></td></tr>').appendTo(tableBody);
-                $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+userCount+'</td></tr>').appendTo(tableBody);
             }
+            if (node.type === "tab" || node.type === "subflow") {
+                propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info."+(node.type==='tab'?'flow':'subflow'))+'</td><td></td></tr>').appendTo(tableBody);
+                RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
+                propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.tabName")+"</td><td></td></tr>").appendTo(tableBody);
+                $(propRow.children()[1]).text(node.label||node.name||"");
+                if (node.type === "tab") {
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
+                    $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+                }
+            } else {
+                propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.node")+"</td><td></td></tr>").appendTo(tableBody);
+                RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
+
+
+                if (node.type !== "subflow" && node.name) {
+                    $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
+                }
+                if (!m) {
+                    $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>"+node.type+"</td></tr>").appendTo(tableBody);
+                }
+
+                if (!m && node.type != "subflow" && node.type != "comment") {
+                    if (node._def) {
+                        var count = 0;
+                        var defaults = node._def.defaults;
+                        for (var n in defaults) {
+                            if (n != "name" && defaults.hasOwnProperty(n)) {
+                                var val = node[n];
+                                var type = typeof val;
+                                count++;
+                                propRow = $('<tr class="node-info-property-row'+(expandedSections.property?"":" hide")+'"><td>'+n+"</td><td></td></tr>").appendTo(tableBody);
+                                if (defaults[n].type) {
+                                    var configNode = RED.nodes.node(val);
+                                    if (!configNode) {
+                                        RED.utils.createObjectElement(undefined).appendTo(propRow.children()[1]);
+                                    } else {
+                                        var configLabel = RED.utils.getNodeLabel(configNode,val);
+                                        var container = propRow.children()[1];
+
+                                        var div = $('<span>',{class:""}).appendTo(container);
+                                        var nodeDiv = $('<div>',{class:"palette_node palette_node_small"}).appendTo(div);
+                                        var colour = configNode._def.color;
+                                        var icon_url = RED.utils.getNodeIcon(configNode._def);
+                                        nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
+                                        var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
+                                        $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
+                                        var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).html(configLabel).appendTo(container);
+
+                                        nodeDiv.on('dblclick',function() {
+                                            RED.editor.editConfig("", configNode.type, configNode.id);
+                                        })
+
+                                    }
+                                } else {
+                                    RED.utils.createObjectElement(val).appendTo(propRow.children()[1]);
+                                }
+                            }
+                        }
+                        if (count > 0) {
+                            $('<tr class="node-info-property-expand blank"><td colspan="2"><a href="#" class=" node-info-property-header'+(expandedSections.property?" expanded":"")+'"><span class="node-info-property-show-more">'+RED._("sidebar.info.showMore")+'</span><span class="node-info-property-show-less">'+RED._("sidebar.info.showLess")+'</span> <i class="fa fa-caret-down"></i></a></td></tr>').appendTo(tableBody);
+                        }
+                    }
+                }
+                if (node.type !== 'tab') {
+                    if (m) {
+                        $('<tr class="blank"><th colspan="2">'+RED._("sidebar.info.subflow")+'</th></tr>').appendTo(tableBody);
+                        $('<tr class="node-info-subflow-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(subflowNode.name)+'">'+subflowNode.name+'</span></td></tr>').appendTo(tableBody);
+                    }
+                }
+            }
+            if (m) {
+                $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+subflowUserCount+'</td></tr>').appendTo(tableBody);
+            }
+
+            var infoText = "";
+            if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
+                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                var helpText = $("script[data-help-name='"+node.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
+                infoText = helpText;
+            } else if (node.type === "tab") {
+                infoSection.title.html(RED._("sidebar.info.flowDesc"));
+                infoText = marked(node.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
+            }
+
+            if (subflowNode) {
+                infoText = infoText + (marked(subflowNode.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>'));
+                infoSection.title.html(RED._("sidebar.info.subflowDesc"));
+            } else if (node._def && node._def.info) {
+                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                var info = node._def.info;
+                var textInfo = (typeof info === "function" ? info.call(node) : info);
+                // TODO: help
+                infoText = infoText + marked(textInfo);
+            }
+            if (infoText) {
+                setInfoText(infoText);
+            }
+
+
+            $(".node-info-property-header").click(function(e) {
+                e.preventDefault();
+                expandedSections["property"] = !expandedSections["property"];
+                $(this).toggleClass("expanded",expandedSections["property"]);
+                $(".node-info-property-row").toggle(expandedSections["property"]);
+            });
         }
-        $(table).appendTo(nodeSection.content);
-
-        var infoText = "";
-
-        if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
-            var helpText = $("script[data-help-name='"+node.type+"']").html()||"";
-            infoText = helpText;
-        } else if (node.type === "tab") {
-            infoText = marked(node.info||"");
-        }
-
-        if (subflowNode) {
-            infoText = infoText + marked(subflowNode.info||"");
-        } else if (node._def && node._def.info) {
-            var info = node._def.info;
-            var textInfo = (typeof info === "function" ? info.call(node) : info);
-            // TODO: help
-            infoText = infoText + marked(textInfo);
-        }
-        if (infoText) {
-            setInfoText(infoText);
-        }
-
-
-        $(".node-info-property-header").click(function(e) {
-            e.preventDefault();
-            expandedSections["property"] = !expandedSections["property"];
-            $(this).toggleClass("expanded",expandedSections["property"]);
-            $(".node-info-property-row").toggle(expandedSections["property"]);
-        });
     }
     function setInfoText(infoText) {
         var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
@@ -342,22 +365,25 @@ RED.sidebar.info = (function() {
     })();
 
     function clear() {
-        sections.hide();
-        //
+        // sections.hide();
+        refresh(null);
     }
 
-    function set(html) {
+    function set(html,title) {
         // tips.stop();
-        sections.show();
-        nodeSection.container.hide();
+        // sections.show();
+        // nodeSection.container.hide();
+        infoSection.title.text(title||"");
+        refresh(null);
         $(infoSection.content).empty();
         setInfoText(html);
         $(".sidebar-node-info-stack").scrollTop(0);
     }
 
-
-
-    RED.events.on("view:selection-changed",function(selection) {
+    function refreshSelection(selection) {
+        if (selection === undefined) {
+            selection = RED.view.selection();
+        }
         if (selection.nodes) {
             if (selection.nodes.length == 1) {
                 var node = selection.nodes[0];
@@ -366,6 +392,8 @@ RED.sidebar.info = (function() {
                 } else {
                     refresh(node);
                 }
+            } else {
+                refresh(selection.nodes);
             }
         } else {
             var activeWS = RED.workspaces.active();
@@ -378,11 +406,15 @@ RED.sidebar.info = (function() {
                 if (workspace && workspace.info) {
                     refresh(workspace);
                 } else {
-                    clear();
+                    refresh(null)
+                    // clear();
                 }
             }
         }
-    });
+    }
+
+
+    RED.events.on("view:selection-changed",refreshSelection);
 
     return {
         init: init,

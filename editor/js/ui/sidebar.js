@@ -35,7 +35,8 @@ RED.sidebar = (function() {
                 tab.onremove.call(tab);
             }
         },
-        minimumActiveTabWidth: 110
+        minimumActiveTabWidth: 70
+        // scrollable: true
     });
 
     var knownTabs = {

@@ -354,10 +354,27 @@
                 return this.element.val();
             } else {
                 if (this.typeMap[this.propertyType].options) {
-                    if (this.typeMap[this.propertyType].options.indexOf(value) === -1) {
-                        value = "";
+                    var validValue = false;
+                    var label;
+                    for (var i=0;i<this.typeMap[this.propertyType].options.length;i++) {
+                        var op = this.typeMap[this.propertyType].options[i];
+                        if (typeof op === "string") {
+                            if (op === value) {
+                                label = value;
+                                validValue = true;
+                                break;
+                            }
+                        } else if (op.value === value) {
+                            label = op.label||op.value;
+                            validValue = true;
+                            break;
+                        }
                     }
-                    this.optionSelectLabel.text(value);
+                    if (!validValue) {
+                        value = "";
+                        label = "";
+                    }
+                    this.optionSelectLabel.text(label);
                 }
                 this.element.val(value);
                 this.element.trigger('change',this.type(),value);
@@ -394,11 +411,31 @@
                                 that.value(v);
                             });
                             var currentVal = this.element.val();
-                            if (opt.options.indexOf(currentVal) !== -1) {
-                                this.optionSelectLabel.text(currentVal);
-                            } else {
-                                this.value(opt.options[0]);
+                            var validValue = false;
+                            var op;
+                            for (var i=0;i<opt.options.length;i++) {
+                                op = opt.options[i];
+                                if (typeof op === "string") {
+                                    if (op === currentVal) {
+                                        this.optionSelectLabel.text(currentVal);
+                                        validValue = true;
+                                        break;
+                                    }
+                                } else if (op.value === currentVal) {
+                                    this.optionSelectLabel.text(op.label||op.value);
+                                    validValue = true;
+                                    break;
+                                }
                             }
+                            if (!validValue) {
+                                op = opt.options[0];
+                                if (typeof op === "string") {
+                                    this.value(op);
+                                } else {
+                                    this.value(op.value);
+                                }
+                            }
+                            console.log(validValue);
                         }
                     } else {
                         if (this.optionMenu) {

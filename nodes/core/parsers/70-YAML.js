@@ -4,20 +4,24 @@ module.exports = function(RED) {
     var yaml = require('js-yaml');
     function YAMLNode(n) {
         RED.nodes.createNode(this,n);
+        this.property = n.property||"payload";
         var node = this;
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("payload")) {
-                if (typeof msg.payload === "string") {
+            var value = RED.util.getMessageProperty(msg,node.property);
+            if (value !== undefined) {
+                if (typeof value === "string") {
                     try {
-                        msg.payload = yaml.load(msg.payload);
+                        value = yaml.load(value);
+                        RED.util.setMessageProperty(msg,node.property,value);
                         node.send(msg);
                     }
                     catch(e) { node.error(e.message,msg); }
                 }
-                else if (typeof msg.payload === "object") {
-                    if (!Buffer.isBuffer(msg.payload)) {
+                else if (typeof value === "object") {
+                    if (!Buffer.isBuffer(value)) {
                         try {
-                            msg.payload = yaml.dump(msg.payload);
+                            value = yaml.dump(value);
+                            RED.util.setMessageProperty(msg,node.property,value);
                             node.send(msg);
                         }
                         catch(e) {

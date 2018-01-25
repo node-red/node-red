@@ -81,6 +81,9 @@ RED.view = (function() {
         .style("cursor","crosshair")
         .on("mousedown", function() {
             focusView();
+        })
+        .on("contextmenu", function(){
+            d3.event.preventDefault();
         });
 
     var vis = outer
@@ -396,10 +399,10 @@ RED.view = (function() {
             }
         });
         $("#chart").focus(function() {
-            $("#workspace-tabs").addClass("workspace-focussed")
+            $("#workspace-tabs").addClass("workspace-focussed");
         });
         $("#chart").blur(function() {
-            $("#workspace-tabs").removeClass("workspace-focussed")
+            $("#workspace-tabs").removeClass("workspace-focussed");
         });
 
         RED.actions.add("core:copy-selection-to-internal-clipboard",copySelection);
@@ -546,6 +549,9 @@ RED.view = (function() {
                 RED.typeSearch.show({
                     x:d3.event.clientX-mainPos.left-node_width/2,
                     y:d3.event.clientY-mainPos.top-node_height/2,
+                    cancel: function() {
+                        resetMouseVars();
+                    },
                     add: function(type) {
                         var result = addNode(type);
                         if (!result) {
@@ -683,7 +689,7 @@ RED.view = (function() {
         var mousePos;
         if (mouse_mode == RED.state.JOINING || mouse_mode === RED.state.QUICK_JOINING) {
             // update drag line
-            if (drag_lines.length === 0) {
+            if (drag_lines.length === 0 && mousedown_port_type !== null) {
                 if (d3.event.shiftKey) {
                     // Get all the wires we need to detach.
                     var links = [];
@@ -1141,7 +1147,6 @@ RED.view = (function() {
                 }
             }
         }
-
         var selectionJSON = activeWorkspace+":"+JSON.stringify(selection,function(key,value) {
             if (key === 'nodes') {
                 return value.map(function(n) { return n.id })
@@ -1348,7 +1353,7 @@ RED.view = (function() {
         mouseup_node = null;
         mousedown_link = null;
         mouse_mode = 0;
-        mousedown_port_type = PORT_TYPE_OUTPUT;
+        mousedown_port_type = null;
         activeSpliceLink = null;
         spliceActive = false;
         d3.select(".link_splice").classed("link_splice",false);
@@ -1390,7 +1395,7 @@ RED.view = (function() {
 
     function portMouseUp(d,portType,portIndex) {
         var i;
-        if (mouse_mode === RED.state.QUICK_JOINING) {
+        if (mouse_mode === RED.state.QUICK_JOINING && drag_lines.length > 0) {
             if (drag_lines[0].node===d) {
                 return
             }
@@ -2767,7 +2772,7 @@ RED.view = (function() {
             if (v === undefined) {
                 return gridSize;
             } else {
-                gridSize = v;
+                gridSize = Math.max(5,v);
                 updateGrid();
             }
         }

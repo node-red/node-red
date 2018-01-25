@@ -24,70 +24,61 @@
  * TODO: Increase the scope of this check
  */
 
-var fs = require("fs");
+var fs = require("fs-extra");
 var should = require("should");
 var path = require('path');
 
 // Directories to check with .js files and _spec.js files respectively
+var rootdir = path.resolve(__dirname, "..");
 var jsdir = path.resolve(__dirname, "../red");
 var testdir = path.resolve(__dirname, "red");
 
-var fs = require('fs');
-var walkDirectory = function(dir, topdir, done) {
-    fs.readdir(dir, function(err, list) {
-        var error;
-        var errReturned = false;
-        if (err) {
-            return done(err);
-        }
-
-        var i = 0;
-        (function next() {
-            var file = list[i++];
-
-            // return error if there are no more files to check and error has not been previously returned to avoid multiple calls to done()
-            if (!file) {
-                if (!errReturned) {
-                    errReturned = true;
-                    return done(error);
-                }
-            } else {
-                file = path.resolve(dir, file);
-                fs.stat(file, function(err, stat) {
-                    if (stat && stat.isDirectory()) {
-                        walkDirectory(file, false, function(err) {
-                            if (!error) {
-                                error = err;
-                            }
-                            next();
-                        });
-                    } else {
-                        if (path.extname(file) === ".js") {
-                            var testFile = file.replace(jsdir, testdir).replace(".js", "_spec.js");
-                            fs.exists(testFile, function (exists) {
-                                try {
-                                    exists.should.equal(true, testFile + " does not exist");
-                                } catch (err) {
-                                    if (!topdir) {
-                                        return done(err);
-                                    } else {
-                                        error = err;
-                                        return;
-                                    }
-                                }
-                            });
+var walkDirectory = function(dir) {
+    var p = fs.readdir(dir);
+    var errors = [];
+    return p.then(function(list) {
+        var promises = [];
+        list.forEach(function(file) {
+            var filePath = path.join(dir,file);
+            promises.push(fs.stat(filePath).then(function(stat){
+                if (stat.isDirectory()) {
+                    return walkDirectory(filePath).then(function(results) {
+                        if (results) {
+                            errors = errors.concat(results);
                         }
-                        next();
-                    }
-                });
-            }
-        })();
+                    });
+                } else if (/\.js$/.test(filePath)) {
+                    var testFile = filePath.replace(jsdir, testdir).replace(".js", "_spec.js");
+                    return fs.exists(testFile).then(function(exists) {
+                        if (!exists) {
+                            errors.push(testFile.substring(rootdir.length+1));
+                        } else {
+                            return fs.stat(testFile).then(function(stat) {
+                                if (stat.size === 0) {
+                                    errors.push("[empty] "+testFile.substring(rootdir.length+1));
+                                }
+                            })
+                        }
+                    });
+                }
+            }));
+        });
+        return Promise.all(promises).then(function() {
+            return errors;
+        })
     });
-};
+}
 
 describe('_spec.js', function() {
     this.timeout(50000); // we might not finish within the Mocha default timeout limit, project will also grow
     it('is checking if all .js files have a corresponding _spec.js test file.', function(done) {
-        walkDirectory(jsdir, true, done);
+        walkDirectory(jsdir).then(function(errors) {
+            if (errors.length > 0) {
+                var error = new Error("Missing/empty _spec files:\n\t"+errors.join("\n\t"));
+                done(error);
+            } else {
+                done();
+            }
+        });
     });
 });

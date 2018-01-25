@@ -40,6 +40,7 @@ RED.nodes = (function() {
         var nodeSets = {};
         var typeToId = {};
         var nodeDefinitions = {};
+        var iconSets = {};
 
         nodeDefinitions['tab'] = {
             defaults: {
@@ -170,6 +171,12 @@ RED.nodes = (function() {
             },
             getNodeType: function(nt) {
                 return nodeDefinitions[nt];
+            },
+            setIconSets: function(sets) {
+                iconSets = sets;
+            },
+            getIconSets: function() {
+                return iconSets;
             }
         };
         return exports;
@@ -265,10 +272,19 @@ RED.nodes = (function() {
                 if (updatedConfigNode) {
                     RED.workspaces.refresh();
                 }
+                try {
+                    if (node._def.oneditdelete) {
+                        node._def.oneditdelete.call(node);
+                    }
+                } catch(err) {
+                    console.log("oneditdelete",node.id,node.type,err.toString());
+                }
                 RED.events.emit('nodes:remove',node);
             }
         }
         if (node && node._def.onremove) {
+            // Deprecated: never documented but used by some early nodes
+            console.log("Deprecated API warning: node type ",node.type," has an onremove function - should be oneditremove - please report");
             node._def.onremove.call(n);
         }
         return {links:removedLinks,nodes:removedNodes};
@@ -484,6 +500,12 @@ RED.nodes = (function() {
             }
             if (n.outputs > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
                 node.outputLabels = n.outputLabels.slice();
+            }
+            if (!n._def.defaults.hasOwnProperty("icon") && n.icon) {
+                var defIcon = RED.utils.getDefaultNodeIcon(n._def, n);
+                if (n.icon !== defIcon.module+"/"+defIcon.file) {
+                    node.icon = n.icon;
+                }
             }
         }
         return node;
@@ -701,7 +723,9 @@ RED.nodes = (function() {
         if (!$.isArray(newNodes)) {
             newNodes = [newNodes];
         }
+        var isInitialLoad = false;
         if (!initialLoad) {
+            isInitialLoad = true;
             initialLoad = JSON.parse(JSON.stringify(newNodes));
         }
         var unknownTypes = [];
@@ -722,7 +746,7 @@ RED.nodes = (function() {
             }
 
         }
-        if (unknownTypes.length > 0) {
+        if (!isInitialLoad && unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
             RED.notify("<strong>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</strong>"+typeList,"error",false,10000);
@@ -915,6 +939,7 @@ RED.nodes = (function() {
                         wires:n.wires,
                         inputLabels: n.inputLabels,
                         outputLabels: n.outputLabels,
+                        icon: n.icon,
                         changed:false,
                         _config:{}
                     };
@@ -1200,12 +1225,13 @@ RED.nodes = (function() {
             RED.workspaces.remove(workspaces[id]);
         });
         defaultWorkspace = null;
-
-        RED.nodes.dirty(true);
+        initialLoad = null;
+        RED.nodes.dirty(false);
         RED.view.redraw(true);
         RED.palette.refresh();
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
+        RED.sidebar.info.refresh();
 
         // var node_defs = {};
         // var nodes = [];
@@ -1271,6 +1297,9 @@ RED.nodes = (function() {
         removeNodeSet: registry.removeNodeSet,
         enableNodeSet: registry.enableNodeSet,
         disableNodeSet: registry.disableNodeSet,
+
+        setIconSets: registry.setIconSets,
+        getIconSets: registry.getIconSets,
 
         registerType: registry.registerNodeType,
         getType: registry.getNodeType,

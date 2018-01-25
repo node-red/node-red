@@ -90,11 +90,9 @@
     a message and send each complete segment. If there is a partial segment at the end,
     the node will hold on to it and prepend it to the next message that is received.
     </p>
-    <p>When operating in this mode, the node will not set the `msg.parts.count`
+    <p>When operating in this mode, the node will not set the <code>msg.parts.count</code>
     property as it does not know how many messages to expect in the stream. This
     means it cannot be used with the <b>join</b> node in its automatic mode</p>
-
-
 </script>
 
 <script type="text/javascript">
@@ -108,7 +106,7 @@
             arraySplt: {value:1},
             arraySpltType: {value:"len"},
             stream: {value:false},
-            addname: {value:""},
+            addname: {value:""}
         },
         inputs:1,
         outputs:1,
@@ -170,6 +168,7 @@
         <select id="node-input-mode" style="width:200px;">
             <option value="auto" data-i18n="join.mode.auto"></option>
             <option value="custom" data-i18n="join.mode.custom"></option>
+            <option value="reduce" data-i18n="join.mode.reduce"></option>
         </select>
     </div>
     <div class="node-row-custom">
@@ -217,6 +216,26 @@
             </ul>
         </div>
     </div>
+    <div class="node-row-reduce">
+        <div class="form-row">
+            <label for="node-input-reduceExp" data-i18n="join.reduce.exp" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceExp" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+        </div>
+        <div class="form-row">
+            <label for="node-input-reduceInit" data-i18n="join.reduce.init" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceInit" data-i18n="[placeholder]join.reduce.init" style="width:65%">
+            <input type="hidden" id="node-input-reduceInitType">
+        </div>
+        <div class="form-row">
+            <label for="node-input-reduceFixup" data-i18n="join.reduce.fixup" style="margin-left:10px;"></label>
+            <input type="text" id="node-input-reduceFixup" data-i18n="[placeholder]join.reduce.exp-value" style="width:65%">
+        </div>
+        <div class="form-row">
+            <label>&nbsp;</label>
+            <input type="checkbox" id="node-input-reduceRight" style="display:inline-block; width:auto; vertical-align:top; margin-left:10px;">
+            <label for="node-input-reduceRight" style="width:70%;" data-i18n="join.reduce.right" style="margin-left:10px;"/>
+        </div>
+    </div>
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
@@ -226,8 +245,15 @@
 
 <script type="text/x-red" data-help-name="join">
     <p>Joins sequences of messages into a single message.</p>
-    <p>When paired with the <b>split</b> node, it will automatically join the messages
-    to reverse the split that was performed.</p>
+    <p>There are three modes available:</p>
+    <dl>
+        <dt>automatic</dt>
+        <dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
+        <dt>manual</dt>
+        <dd>Join sequences of messages in a variety of ways.</dd>
+        <dt>reduce sequence</dt>
+        <dd>Apply an expression against all messages in a sequence to reduce it to a single message.</dd>
+    </dl>
     <h3>Inputs</h3>
     <dl class="message-properties">
         <dt class="optional">parts<span class="property-type">object</span></dt>
@@ -248,8 +274,15 @@
         <dd>If set, the node will send its output message in its current state.</dd>
     </dl>
     <h3>Details</h3>
+
+    <h4>Automatic mode</h4>
+    <p>Automatic mode uses the <code>parts</code> property of incoming messages to
+       determine how the sequence should be joined. This allows it to automatically
+       reverse the action of a <b>split</b> node.
+
+    <h4>Manual mode</h4>
     <p>When configured to join in manual mode, the node is able to join sequences
-     of messages in a variety of ways.</p>
+     of messages into a number of different results:</p>
     <ul>
         <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
         <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
@@ -263,6 +296,49 @@
     received.</p>
     <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
     <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
+
+    <h4>Reduce Sequence mode</h4>
+    <p>When configured to join in reduce mode, an expression is applied to each
+       message in a sequence and the result accumulated to produce a single message.</p>
+
+    <dl class="message-properties">
+        <dt>Initial value</dt>
+        <dd>The initial value of the accumulated value (<code>$A</code>).</dd>
+        <dt>Reduce expression</dt>
+        <dd>A JSONata expression that is called for each message in the sequence.
+            The result is passed to the next call of the expression as the accumulated value.
+            In the expression, the following special variables can be used:
+            <ul>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$I</code>: index of the message in the sequence, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
+            </ul>
+        </dd>
+        <dt>Fix-up expression</dt>
+        <dd>An optional JSONata expression that is applied after the reduce expression
+            has been applied to all messages in the sequence.
+            In the expression, following special variables can be used:
+            <ul>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
+            </ul>
+        </dd>
+        <p>By default, the reduce expression is applied in order, from the first
+           to the last message of the sequence. It can optionally be applied in
+           reverse order.</p>
+    </dl>
+    <p><b>Example:</b> the following settings, given a sequence of numeric values,
+       calculates the average value:
+        <ul>
+            <li><b>Reduce expression</b>: <code>$A+payload</code></li>
+            <li><b>Initial value</b>: <code>0</code></li>
+            <li><b>Fix-up expression</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting `nodeMessageBufferMaxLength` can be used to limit how many messages nodes
+       will buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -280,7 +356,12 @@
             joinerType: { value:"str"},
             accumulate: { value:"false" },
             timeout: {value:""},
-            count: {value:""}
+            count: {value:""},
+            reduceRight: {value:false},
+            reduceExp: {value:undefined},
+            reduceInit: {value:undefined},
+            reduceInitType: {value:undefined},
+            reduceFixup: {value:undefined}
         },
         inputs:1,
         outputs:1,
@@ -292,12 +373,52 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            var node = this;
+
             $("#node-input-mode").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-custom").toggle(val==='custom');
-                $(".form-tips-auto").toggle(val==='auto');
+                $(".node-row-reduce").toggle(val==='reduce');
+                $(".form-tips-auto").toggle((val==='auto') || (val==='reduce'));
                 if (val === "auto") {
                     $("#node-input-accumulate").attr('checked', false);
+                }
+                else if (val === "custom") {
+                    $("#node-input-build").change();
+                }
+                else if (val === "reduce") {
+                    var jsonata_or_empty = {
+                        value: "jsonata",
+                        label: "expression",
+                        icon: "red/images/typedInput/expr.png",
+                        validate: function(v) {
+                            try{
+                                if(v !== "") {
+                                    jsonata(v);
+                                }
+                                return true;
+                            }
+                            catch(e){
+                                return false;
+                            }
+                        },
+                        expand:function() {
+                            var that = this;
+                            RED.editor.editExpression({
+                                value: this.value().replace(/\t/g,"\n"),
+                                complete: function(v) {
+                                    that.value(v.replace(/\n/g,"\t"));
+                                }
+                            })
+                        }
+                    };
+                    $("#node-input-reduceExp").typedInput({types:[jsonata_or_empty]});
+                    $("#node-input-reduceInit").typedInput({
+                        default: 'num',
+                        types:['flow','global','str','num','bool','json','bin','date','jsonata'],
+                        typeField: $("#node-input-reduceInitType")
+                    });
+                    $("#node-input-reduceFixup").typedInput({types:[jsonata_or_empty]});
                 }
             });
 
@@ -309,6 +430,7 @@
                 $(".node-row-trigger").toggle(val!=='auto');
                 if (val === 'string' || val==='buffer') {
                     $("#node-input-property").typedInput('types',['msg']);
+                    $("#node-input-joiner").typedInput("show");
                 } else {
                     $("#node-input-property").typedInput('types',['msg', {value:"full",label:"complete message",hasValue:false}]);
                 }

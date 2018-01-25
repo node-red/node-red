@@ -188,6 +188,7 @@ RED.user = (function() {
                         RED.settings.load(function() {
                             RED.notify(RED._("user.loggedInAs",{name:RED.settings.user.username}),"success");
                             updateUserMenu();
+                            RED.events.emit("login",RED.settings.user.username);
                         });
                     });
                 }
@@ -230,10 +231,66 @@ RED.user = (function() {
         }
 
     }
+
+    var readRE = /^((.+)\.)?read$/
+    var writeRE = /^((.+)\.)?write$/
+
+    function hasPermission(permission) {
+        if (permission === "") {
+            return true;
+        }
+        if (!RED.settings.user) {
+            return true;
+        }
+        return checkPermission(RED.settings.user.permissions||"",permission);
+    }
+    function checkPermission(userScope,permission) {
+        if (permission === "") {
+            return true;
+        }
+        var i;
+
+        if (Array.isArray(permission)) {
+            // Multiple permissions requested - check each one
+            for (i=0;i<permission.length;i++) {
+                if (!checkPermission(userScope,permission[i])) {
+                    return false;
+                }
+            }
+            // All permissions check out
+            return true;
+        }
+
+        if (Array.isArray(userScope)) {
+            if (userScope.length === 0) {
+                return false;
+            }
+            for (i=0;i<userScope.length;i++) {
+                if (checkPermission(userScope[i],permission)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (userScope === "*" || userScope === permission) {
+            return true;
+        }
+
+        if (userScope === "read" || userScope === "*.read") {
+            return readRE.test(permission);
+        } else if (userScope === "write" || userScope === "*.write") {
+            return writeRE.test(permission);
+        }
+        return false;
+    }
+
+
     return {
         init: init,
         login: login,
-        logout: logout
+        logout: logout,
+        hasPermission: hasPermission
     }
 
 })();

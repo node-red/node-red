@@ -29,8 +29,7 @@ var npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 var paletteEditorEnabled = false;
 
 var settings;
-
-var moduleRe = /^[^/]+$/;
+var moduleRe = /^(@[^/]+?[/])?[^/]+?$/;
 var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
 
 function init(_settings) {
@@ -71,7 +70,6 @@ function checkExistingModule(module,version) {
     }
     return false;
 }
-
 function installModule(module,version) {
     //TODO: ensure module is 'safe'
     return when.promise(function(resolve,reject) {
@@ -99,44 +97,52 @@ function installModule(module,version) {
         }
 
         var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var child = child_process.execFile(npmCommand,['install','--save','--save-prefix="~"','--production',installName],
-            {
-                cwd: installDir
-            },
-            function(err, stdin, stdout) {
-                if (err) {
-                    var e;
-                    var lookFor404 = new RegExp(" 404 .*"+module+"$","m");
-                    var lookForVersionNotFound = new RegExp("version not found: "+module+"@"+version,"m");
-                    if (lookFor404.test(stdout)) {
-                        log.warn(log._("server.install.install-failed-not-found",{name:module}));
-                        e = new Error("Module not found");
-                        e.code = 404;
-                        reject(e);
-                    } else if (isUpgrade && lookForVersionNotFound.test(stdout)) {
-                        log.warn(log._("server.install.upgrade-failed-not-found",{name:module}));
-                        e = new Error("Module not found");
-                        e.code = 404;
-                        reject(e);
-                    } else {
-                        log.warn(log._("server.install.install-failed-long",{name:module}));
-                        log.warn("------------------------------------------");
-                        log.warn(err.toString());
-                        log.warn("------------------------------------------");
-                        reject(new Error(log._("server.install.install-failed")));
-                    }
+        var args = ['install','--save','--save-prefix="~"','--production',installName];
+        log.trace(npmCommand + JSON.stringify(args));
+        var child = child_process.spawn(npmCommand,args,{
+            cwd: installDir,
+            shell: true
+        });
+        var output = "";
+        child.stdout.on('data', (data) => {
+            output += data;
+        });
+        child.stderr.on('data', (data) => {
+            output += data;
+        });
+        child.on('close', (code) => {
+            if (code !== 0) {
+                var e;
+                var lookFor404 = new RegExp(" 404 .*"+module,"m");
+                var lookForVersionNotFound = new RegExp("version not found: "+module+"@"+version,"m");
+                if (lookFor404.test(output)) {
+                    log.warn(log._("server.install.install-failed-not-found",{name:module}));
+                    e = new Error("Module not found");
+                    e.code = 404;
+                    reject(e);
+                } else if (isUpgrade && lookForVersionNotFound.test(output)) {
+                    log.warn(log._("server.install.upgrade-failed-not-found",{name:module}));
+                    e = new Error("Module not found");
+                    e.code = 404;
+                    reject(e);
                 } else {
-                    if (!isUpgrade) {
-                        log.info(log._("server.install.installed",{name:module}));
-                        resolve(require("./index").addModule(module).then(reportAddedModules));
-                    } else {
-                        log.info(log._("server.install.upgraded",{name:module, version:version}));
-                        events.emit("runtime-event",{id:"restart-required",payload:{type:"warning",text:"notification.warnings.restartRequired"},retain:true});
-                        resolve(require("./registry").setModulePendingUpdated(module,version));
-                    }
+                    log.warn(log._("server.install.install-failed-long",{name:module}));
+                    log.warn("------------------------------------------");
+                    log.warn(output);
+                    log.warn("------------------------------------------");
+                    reject(new Error(log._("server.install.install-failed")));
+                }
+            } else {
+                if (!isUpgrade) {
+                    log.info(log._("server.install.installed",{name:module}));
+                    resolve(require("./index").addModule(module).then(reportAddedModules));
+                } else {
+                    log.info(log._("server.install.upgraded",{name:module, version:version}));
+                    events.emit("runtime-event",{id:"restart-required",payload:{type:"warning",text:"notification.warnings.restartRequired"},retain:true});
+                    resolve(require("./registry").setModulePendingUpdated(module,version));
                 }
             }
-        );
+        });
     });
 }
 
@@ -186,7 +192,11 @@ function uninstallModule(module) {
 
         var list = registry.removeModule(module);
         log.info(log._("server.install.uninstalling",{name:module}));
-        var child = child_process.execFile(npmCommand,['remove','--save',module],
+
+        var args = ['remove','--save',module];
+        log.trace(npmCommand + JSON.stringify(args));
+
+        var child = child_process.execFile(npmCommand,args,
             {
                 cwd: installDir
             },

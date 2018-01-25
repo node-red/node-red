@@ -1,0 +1,480 @@
+{
+    "common": {
+        "label": {
+            "name": "名前",
+            "ok": "OK",
+            "done": "完了",
+            "cancel": "中止",
+            "delete": "削除",
+            "close": "閉じる",
+            "load": "読み込み",
+            "save": "保存",
+            "import": "読み込み",
+            "export": "書き出し"
+        }
+    },
+    "workspace": {
+        "defaultName": "フロー __number__",
+        "editFlow": "フローを編集: __name__",
+        "confirmDelete": "削除の確認",
+        "delete": "本当に '__label__' を削除しますか？",
+        "dropFlowHere": "ここにフローをドロップしてください",
+        "status": "状態",
+        "enabled": "有効",
+        "disabled": "無効",
+        "info": "詳細",
+        "tip": "マークダウン形式で記述した「詳細」は「情報タブ」に表示されます。"
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "表示",
+                "grid": "グリッド",
+                "showGrid": "グリッドを表示",
+                "snapGrid": "ノードの配置を補助",
+                "gridSize": "グリッドの大きさ",
+                "textDir": "テキストの方向",
+                "defaultDir": "標準",
+                "ltr": "左から右",
+                "rtl": "右から左",
+                "auto": "文脈"
+            },
+            "sidebar": {
+                "show": "サイドバーを表示"
+            },
+            "settings": "設定",
+            "userSettings": "ユーザ設定",
+            "nodes": "ノード",
+            "displayStatus": "ノードの状態を表示",
+            "displayConfig": "ノードの設定",
+            "import": "読み込み",
+            "export": "書き出し",
+            "search": "ノードを検索",
+            "searchInput": "ノードを検索",
+            "clipboard": "クリップボード",
+            "library": "ライブラリ",
+            "examples": "サンプル",
+            "subflows": "サブフロー",
+            "createSubflow": "サブフローを作成",
+            "selectionToSubflow": "選択部分をサブフロー化",
+            "flows": "フロー",
+            "add": "フローを新規追加",
+            "rename": "フロー名を変更",
+            "delete": "フローを削除",
+            "keyboardShortcuts": "ショートカットキーの説明",
+            "login": "ログイン",
+            "logout": "ログアウト",
+            "editPalette": "パレットの管理",
+            "other": "その他",
+            "showTips": "ヒントを表示",
+            "help": "Node-REDウェブサイト"
+        }
+    },
+    "user": {
+        "loggedInAs": "__name__ としてログインしました",
+        "username": "ユーザ名",
+        "password": "パスワード",
+        "login": "ログイン",
+        "loginFailed": "ログインに失敗しました",
+        "notAuthorized": "権限がありません",
+        "errors": {
+            "settings": "設定を参照するには、ログインする必要があります",
+            "deploy": "変更をデプロイするには、ログインする必要があります",
+            "notAuthorized": "本アクションを行うには、ログインする必要があります"
+        }
+    },
+    "notification": {
+        "warning": "<strong>警告</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "ノードの変更をデプロイしていません",
+            "nodeActionDisabled": "ノードのアクションは、サブフロー内で無効になっています",
+            "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください。",
+            "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります",
+            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報は暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "missing_flow_file": "<p>プロジェクトのフローファイルが存在しません</p><p>本プロジェクトにフローファイルが登録されていません</p>",
+            "project_empty": "<p>空のプロジェクトです</p><p>デフォルトのプロジェクトファイルを作成しますか？<br/>作成しない場合、エディタの外でファイルをプロジェクトへ手動で追加する必要があります</p>",
+            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>"
+        },
+        "error": "<strong>エラー</strong>: __message__",
+        "errors": {
+            "lostConnection": "サーバとの接続が切断されました: 再接続しています",
+            "lostConnectionReconnect": "サーバとの接続が切断されました:  __time__ 秒後に再接続します",
+            "lostConnectionTry": "すぐに接続",
+            "cannotAddSubflowToItself": "サブフロー自身を追加できません",
+            "cannotAddCircularReference": "循環参照を検出したため、サブフローを追加できません",
+            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。"
+        }
+    },
+    "clipboard": {
+        "nodes": "ノード",
+        "selectNodes": "上のテキストを選択し、クリップボードへコピーしてください",
+        "pasteNodes": "JSON形式のフローデータを貼り付けてください",
+        "importNodes": "フローをクリップボートから読み込み",
+        "exportNodes": "フローをクリップボードへ書き出し",
+        "importUnrecognised": "認識できない型が読み込まれました:",
+        "importUnrecognised_plural": "認識できない型が読み込まれました:",
+        "nodesExported": "クリップボードへフローを書き出しました",
+        "nodeCopied": "__count__ 個のノードをコピーしました",
+        "nodeCopied_plural": "__count__ 個のノードをコピーしました",
+        "invalidFlow": "不正なフロー: __message__",
+        "export": {
+            "selected": "選択したフロー",
+            "current": "現在のタブ",
+            "all": "全てのタブ",
+            "compact": "インデントのないJSONフォーマット",
+            "formatted": "インデント付きのJSONフォーマット",
+            "copy": "書き出し"
+        },
+        "import": {
+            "import": "読み込み先",
+            "newFlow": "新規のタブ"
+        },
+        "copyMessagePath": "パスをコピーしました",
+        "copyMessageValue": "値をコピーしました",
+        "copyMessageValue_truncated": "切り捨てられた値をコピーしました"
+    },
+    "deploy": {
+        "deploy": "デプロイ",
+        "full": "全て",
+        "fullDesc": "ワークスペースを全てデプロイ",
+        "modifiedFlows": "変更したフロー",
+        "modifiedFlowsDesc": "変更したノードを含むフローのみデプロイ",
+        "modifiedNodes": "変更したノード",
+        "modifiedNodesDesc": "変更したノードのみデプロイ",
+        "successfulDeploy": "デプロイが成功しました",
+        "deployFailed": "デプロイが失敗しました: __message__",
+        "unusedConfigNodes": "使われていない「ノードの設定」があります。",
+        "unusedConfigNodesLink": "設定を参照する",
+        "errors": {
+            "noResponse": "サーバの応答がありません"
+        },
+        "confirm": {
+            "button": {
+                "ignore": "無視",
+                "confirm": "デプロイの確認",
+                "review": "差分を確認",
+                "cancel": "中止",
+                "merge": "変更をマージ",
+                "overwrite": "無視してデプロイ"
+            },
+            "undeployedChanges": "デプロイしていない変更があります。このページを抜けると変更が削除されます。",
+            "improperlyConfigured": "以下のノードは、正しくプロパティが設定されていません:",
+            "unknown": "ワークスペースに未知の型のノードがあります。",
+            "confirm": "このままデプロイしても良いですか？",
+            "doNotWarn": "この警告を再度表示しない",
+            "conflict": "フローを編集している間に、他のブラウザがフローをデプロイしました。デプロイを継続すると、他のブラウザがデプロイしたフローが削除されます。",
+            "backgroundUpdate": "サーバ上のフローが更新されました",
+            "conflictChecking": "変更を自動的にマージしてよいか確認してください。",
+            "conflictAutoMerge": "変更の衝突がないため、自動的にマージできます。",
+            "conflictManualMerge": "変更に衝突があるため、デプロイ前に解決する必要があります。",
+            "plusNMore": "さらに __count__ 個"
+        }
+    },
+    "diff": {
+        "unresolvedCount": "未解決の衝突 __count__",
+        "unresolvedCount_plural": "未解決の衝突 __count__",
+        "globalNodes": "グローバルノード",
+        "flowProperties": "フロープロパティ",
+        "type": {
+            "added": "追加",
+            "changed": "変更",
+            "unchanged": "変更なし",
+            "deleted": "削除",
+            "flowDeleted": "削除されたフロー",
+            "flowAdded": "追加されたフロー",
+            "movedTo": "__id__ へ移動",
+            "movedFrom": "__id__ から移動"
+        },
+        "nodeCount": "__count__ 個のノード",
+        "nodeCount_plural": "__count__ 個のノード",
+        "local": "ローカルの変更",
+        "remote": "リモートの変更"
+    },
+    "subflow": {
+        "editSubflow": "フローのテンプレートを編集: __name__",
+        "edit": "フローのテンプレートを編集",
+        "subflowInstances": "このサブフローのテンプレートのインスタンスが __count__ 個存在します",
+        "subflowInstances_plural": "このサブフローのテンプレートのインスタンスが __count__ 個存在します",
+        "editSubflowProperties": "プロパティを編集",
+        "input": "入力:",
+        "output": "出力:",
+        "deleteSubflow": "サブフローを削除",
+        "info": "詳細",
+        "format": "マークダウン形式",
+        "errors": {
+            "noNodesSelected": "<strong>サブフローを作成できません</strong>: ノードが選択されていません",
+            "multipleInputsToSelection": "<strong>サブフローを作成できません</strong>: 複数の入力が選択されています"
+        }
+    },
+    "editor": {
+        "configEdit": "編集",
+        "configAdd": "追加",
+        "configUpdate": "更新",
+        "configDelete": "削除",
+        "nodesUse": "__count__ 個のノードが、この設定を使用しています",
+        "nodesUse_plural": "__count__ 個のノードが、この設定を使用しています",
+        "addNewConfig": "新規に __type__ ノードの設定を追加",
+        "editNode": "__type__ ノードを編集",
+        "editConfig": "__type__ ノードの設定を編集",
+        "addNewType": "新規に __type__ を追加...",
+        "nodeProperties": "プロパティ",
+        "portLabels": "設定",
+        "labelInputs": "入力",
+        "labelOutputs": "出力",
+        "settingIcon": "アイコン",
+        "noDefaultLabel": "なし",
+        "defaultLabel": "既定の名前を使用",
+        "errors": {
+            "scopeChange": "スコープの変更は、他のフローで使われているノードを無効にします"
+        }
+    },
+    "keyboard": {
+        "title": "キーボードショートカット",
+        "keyboard": "キーボード",
+        "filterActions": "動作を検索",
+        "shortcut": "ショートカット",
+        "scope": "範囲",
+        "unassigned": "未割当",
+        "global": "グローバル",
+        "workspace": "ワークスペース",
+        "selectAll": "全てのノードを選択",
+        "selectAllConnected": "接続された全てのノードを選択",
+        "addRemoveNode": "ノードの選択、選択解除",
+        "editSelected": "選択したノードを編集",
+        "deleteSelected": "選択したノードや接続を削除",
+        "importNode": "フローの読み込み",
+        "exportNode": "フローの書き出し",
+        "nudgeNode": "選択したノードを移動(移動量小)",
+        "moveNode": "選択したノードを移動(移動量大)",
+        "toggleSidebar": "サイドバーの表示非表示",
+        "copyNode": "選択したノードをコピー",
+        "cutNode": "選択したノードを切り取り",
+        "pasteNode": "ノードを貼り付け",
+        "undoChange": "変更操作を戻す",
+        "searchBox": "ノードを検索",
+        "managePalette": "パレットの管理"
+    },
+    "library": {
+        "openLibrary": "ライブラリを開く",
+        "saveToLibrary": "ライブラリへ保存",
+        "typeLibrary": "__type__ ライブラリ",
+        "unnamedType": "名前なし __type__",
+        "exportToLibrary": "ライブラリへフローを書き出す",
+        "dialogSaveOverwrite": "__libraryName__ という __libraryType__ は既に存在しています 上書きしますか？",
+        "invalidFilename": "不正なファイル名",
+        "savedNodes": "フローを保存しました",
+        "savedType": "__type__ を保存しました",
+        "saveFailed": "保存に失敗しました: __message__",
+        "filename": "ファイル名",
+        "folder": "フォルダ",
+        "filenamePlaceholder": "ファイル",
+        "fullFilenamePlaceholder": "a/b/file",
+        "folderPlaceholder": "a/b",
+        "breadcrumb": "ライブラリ"
+    },
+    "palette": {
+        "noInfo": "情報がありません",
+        "filter": "ノードを検索",
+        "search": "ノードを検索",
+        "label": {
+            "subflows": "サブフロー",
+            "input": "入力",
+            "output": "出力",
+            "function": "機能",
+            "social": "ソーシャル",
+            "storage": "ストレージ",
+            "analysis": "分析",
+            "advanced": "その他"
+        },
+        "event": {
+            "nodeAdded": "ノードをパレットへ追加しました:",
+            "nodeAdded_plural": "ノードをパレットへ追加しました",
+            "nodeRemoved": "ノードをパレットから削除しました:",
+            "nodeRemoved_plural": "ノードをパレットから削除しました:",
+            "nodeEnabled": "ノードを有効化しました:",
+            "nodeEnabled_plural": "ノードを有効化しました:",
+            "nodeDisabled": "ノードを無効化しました:",
+            "nodeDisabled_plural": "ノードを無効化しました:",
+            "nodeUpgraded": "ノードモジュール __module__ をバージョン __version__ へ更新しました"
+        },
+        "editor": {
+            "title": "パレットの管理",
+            "palette": "パレット",
+            "times": {
+                "seconds": "秒前",
+                "minutes": "分前",
+                "minutesV": "__count__ 分前",
+                "hoursV": "__count__ 時間前",
+                "hoursV_plural": "__count__ 時間前",
+                "daysV": "__count__ 日前",
+                "daysV_plural": "__count__ 日前",
+                "weeksV": "__count__ 週間前",
+                "weeksV_plural": "__count__ 週間前",
+                "monthsV": "__count__ ヵ月前",
+                "monthsV_plural": "__count__ ヵ月前",
+                "yearsV": "__count__ 年前",
+                "yearsV_plural": "__count__ 年前",
+                "yearMonthsV": "__y__ 年 __count__ ヵ月前",
+                "yearMonthsV_plural": "__y__ 年 __count__ ヵ月前",
+                "yearsMonthsV": "__y__ 年 __count__ ヵ月前",
+                "yearsMonthsV_plural": "__y__ 年 __count__ ヵ月前"
+            },
+            "nodeCount": "__label__ 個のノード",
+            "nodeCount_plural": "__label__ 個のノード",
+            "moduleCount": "__count__ 個のモジュール",
+            "moduleCount_plural": "__count__ 個のモジュール",
+            "inuse": "使用中",
+            "enableall": "全て有効化",
+            "disableall": "全て無効化",
+            "enable": "有効化",
+            "disable": "無効化",
+            "remove": "削除",
+            "update": "__version__ へ更新",
+            "updated": "更新済",
+            "install": "ノードを追加",
+            "installed": "追加しました",
+            "loading": "カタログを読み込み中",
+            "tab-nodes": "現在のノード",
+            "tab-install": "ノードを追加",
+            "sort": "並べ替え:",
+            "sortAZ": "辞書順",
+            "sortRecent": "日付順",
+            "more": "+ さらに __count__ 個",
+            "errors": {
+                "catalogLoadFailed": "ノードのカタログの読み込みに失敗しました。<br>詳細はブラウザのコンソールを確認してください。",
+                "installFailed": "追加処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "removeFailed": "削除処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "updateFailed": "更新処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "enableFailed": "有効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。",
+                "disableFailed": "無効化処理が失敗しました: __module__<br>__message__<br>詳細はログを確認してください。"
+            },
+            "confirm": {
+                "install": {
+                    "body": "ノードを追加する前に、ドキュメントを確認してください。ノードによっては、モジュールの依存関係を自動的に解決できない場合や、Node-REDの再起動が必要となる場合があります。",
+                    "title": "ノードを追加"
+                },
+                "remove": {
+                    "body": "Node-REDからノードを削除します。ノードはNode-REDが再起動されるまで、リソースを使い続けます。",
+                    "title": "ノードを削除"
+                },
+                "update": {
+                    "body": "更新を完了するには手動でNode-REDを再起動する必要があります。",
+                    "title": "ノードの更新"
+                },
+                "cannotUpdate": {
+                    "body": "ノードの更新があります。「パレットの管理」の画面では更新されません。ドキュメントを参照し、ノードの更新手順を確認してください。"
+                },
+                "button": {
+                    "review": "ノードの情報を参照",
+                    "install": "追加",
+                    "remove": "削除",
+                    "update": "更新"
+                }
+            }
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "ノードの情報を表示",
+            "tabName": "名前",
+            "label": "情報",
+            "node": "ノード",
+            "type": "型",
+            "id": "ID",
+            "status": "状態",
+            "enabled": "有効",
+            "disabled": "無効",
+            "subflow": "サブフロー",
+            "instances": "インスタンス",
+            "properties": "プロパティ",
+            "info": "情報",
+            "blank": "ブランク",
+            "null": "ヌル",
+            "showMore": "さらに表示",
+            "showLess": "表示を省略",
+            "flow": "フロー",
+            "selection": "選択",
+            "nodes": "__count__ 個のノード",
+            "flowDesc": "フローの詳細",
+            "subflowDesc": "サブフローの詳細",
+            "nodeHelp": "ノードのヘルプ",
+            "none": "なし",
+            "arrayItems": "__count__ 要素",
+            "showTips": "設定からヒントを表示できます"
+        },
+        "config": {
+            "name": "ノードの設定を表示",
+            "label": "ノードの設定",
+            "global": "全てのフロー上",
+            "none": "なし",
+            "subflows": "サブフロー",
+            "flows": "フロー",
+            "filterUnused": "未使用",
+            "filterAll": "全て",
+            "filtered": "__count__ 個が無効"
+        },
+        "palette": {
+            "name": "パレットの管理",
+            "label": "パレット"
+        },
+        "project": {
+            "label": "プロジェクト",
+            "name": "プロジェクト",
+            "description": "詳細",
+            "dependencies": "依存関係",
+            "settings": "設定",
+            "editDescription": "プロジェクトの詳細を編集",
+            "editDependencies": "プロジェクトの依存関係を編集"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "文字列",
+            "num": "数値",
+            "re": "正規表現",
+            "bool": "真偽",
+            "json": "JSON",
+            "bin": "バッファ",
+            "date": "日時"
+        }
+    },
+    "editableList": {
+        "add": "追加"
+    },
+    "search": {
+        "empty": "一致したものが見つかりませんでした",
+        "addNode": "ノードを追加..."
+    },
+    "expressionEditor": {
+        "functions": "関数",
+        "functionReference": "関数リファレンス",
+        "insert": "挿入",
+        "title": "JSONata式エディタ",
+        "test": "テスト",
+        "data": "メッセージ例",
+        "result": "結果",
+        "format": "整形",
+        "compatMode": "互換モードが有効になっています",
+        "compatModeDesc": "<h3>JSONata互換モード</h3><p> 入力された式では <code>msg</code> を参照しているため、互換モードで評価します。このモードは将来廃止予定のため、式で <code>msg</code> を使わないよう修正してください。</p><p> JSONataをNode-REDで最初にサポートした際には、 <code>msg</code> オブジェクトの参照が必要でした。例えば <code>msg.payload</code> がペイロードを参照するために使われていました。</p><p> 直接メッセージに対して式を評価するようになったため、この形式は使えなくなります。ペイロードを参照するには、単に <code>payload</code> にしてください。</p>",
+        "noMatch": "一致した結果なし",
+        "errors": {
+            "invalid-expr": "不正なJSONata式:\n  __message__",
+            "invalid-msg": "不正なJSONメッセージ例:\n  __message__",
+            "context-unsupported": "$flowContext や $globalContextの\nコンテキスト機能をテストできません",
+            "eval": "表現評価エラー:\n  __message__"
+        }
+    },
+    "jsonEditor": {
+        "title": "JSONエディタ",
+        "format": "JSONフォーマット"
+    },
+    "markdownEditor": {
+        "title": "マークダウンエディタ"
+    },
+    "bufferEditor": {
+        "title": "バッファエディタ",
+        "modeString": "UTF-8文字列として処理",
+        "modeArray": "JSON配列として処理",
+        "modeDesc": "<h3>バッファエディタ</h3><p>バッファ型は、バイト値から成るJSON配列として格納されます。このエディタは、入力値をJSON配列として構文解析します。もし不正なJSON配列の場合、UTF-8文字列として扱い、各文字コード番号から成る配列へ変換します。</p><p>例えば、 <code>Hello World</code> という値を、以下のJSON配列へ変換します。<pre>[72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]</pre></p>"
+    }
+}

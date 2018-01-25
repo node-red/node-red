@@ -196,6 +196,10 @@ module.exports = function(RED) {
             }
             if (tlsNode) {
                 tlsNode.addTLSOptions(opts);
+            } else {
+                if (msg.hasOwnProperty('rejectUnauthorized')) {
+                    opts.rejectUnauthorized = msg.rejectUnauthorized;
+                }
             }
             var req = ((/^https/.test(urltotest))?https:http).request(opts,function(res) {
                 // Force NodeJs to return a Buffer (instead of a string)
