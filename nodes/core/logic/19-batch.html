@@ -18,7 +18,7 @@
 
 <script type="text/x-red" data-template-name="batch">
     <div class="form-row">
-        <label for="node-input-mode"><i class="fa fa-dot-circle-o"></i> <span data-i18n="batch.mode.label"></span></label>
+        <label for="node-input-mode"><span data-i18n="batch.mode.label"></span></label>
         <select type="text" id="node-input-mode" style="width: 300px;">
             <option value="count" data-i18n="batch.mode.num-msgs"></option>
             <option value="interval" data-i18n="batch.mode.interval"></option>
@@ -28,26 +28,26 @@
 
     <div class="node-row-msg-count">
         <div class="form-row node-row-count">
-            <label for="node-input-count" data-i18n="batch.count.label"></label>
-            <input type="text" id="node-input-count" data-i18n="[placeholder]batch.count.count" style="width: 50px;">
+            <label style="margin-left: 10px; width: 175px;" for="node-input-count" data-i18n="batch.count.label"></label>
+            <input type="text" id="node-input-count" style="width: 50px;">
         </div>
     </div>
-  
-    <div class="node-row-msg-overwrap">
-        <div class="form-row node-row-overwrap">
-            <label for="node-input-count" data-i18n="batch.count.overwrap"></label>
-            <input type="text" id="node-input-overwrap" data-i18n="[placeholder]batch.count.count" style="width: 50px;">
+
+    <div class="node-row-msg-overlap">
+        <div class="form-row node-row-overlap">
+            <label style="margin-left: 10px; width: 175px;" for="node-input-overlap" data-i18n="batch.count.overlap"></label>
+            <input type="text" id="node-input-overlap" style="width: 50px;">
         </div>
     </div>
 
     <div class="node-row-msg-interval">
         <div class="form-row node-row-interval">
-            <label for="node-input-interval"> <span data-i18n="batch.interval.label"></span></label>
-            <input type="text" id="node-input-interval" data-i18n="[placeholder]batch.interval.seconds" style="width: 50px;">
-            <span data-i18n="batch.interval.sec"></span>
+            <label style="margin-left: 10px; width: 175px;" for="node-input-interval"> <span data-i18n="batch.interval.label"></span></label>
+            <input type="text" id="node-input-interval" style="width: 50px;">
+            <span data-i18n="batch.interval.seconds"></span>
         </div>
         <div class="form-row">
-            <input type="checkbox" id="node-input-allowEmptySequence" style="margin-left:10px; vertical-align:top; width:auto;">
+            <input type="checkbox" id="node-input-allowEmptySequence" style="margin-left:20px; margin-right: 10px; vertical-align:top; width:auto;">
             <label for="node-input-allowEmptySequence" style="width:auto;" data-i18n="batch.interval.empty"></label>
 	</div>
     </div>
@@ -60,29 +60,40 @@
             </div>
         </div>
     </div>
-    
+
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
         <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
     </div>
-  
+
 </script>
 
 <script type="text/x-red" data-help-name="batch">
-    <p>A function that divides input messages into multiple sequences of messages or concatenates multiple sequences of messages into a single messages sequence.</p>
+    <p>Creates sequences of messages based on various rules.</p>
     <h3>Details</h3>
-    <h4>group by number of messages</h4>
-    <p>groups incoming messages into sequences of messages with specified counts.  The output message group can be overwrapped.</p>
-    <h4>group by interval in seconds</h4>
-    <p>groups incoming messages received withn specified interval into sequences of messages.  </p>
-    <h4>concatenate message groups</h4>
-    <p>creates a message sequence based on <code>topic</code> value of incoming message sequences.</p>
-    <p>Target and order of concatenated sequences are specified by <code>Topics</code> value.  Selection of concatenated message groups is based on arrival of first message of the group.</p>
-    <p><b>Note:</b> This node internally keeps messages for its operation.  In order to prevent unexpected memory usage, maximum number of messages kept can be specified.  Default is no limit on number of messages.
-        <ul>
-            <li><code>batchMaxKeptMsgsCount</code> property set in <b>settings.js</b>.</li>
-        </ul>
-    </p>
+    <p>There are three modes for creating message sequences:</p>
+    <dl>
+        <dt>Number of messages</dt>
+        <dd>groups messages into sequences of a given length. The <b>overlap</b>
+        option specifies how many messages and the end of one sequence should be
+        repeated at the start of the next sequence.</dd>
+
+        <dt>Time interval</dt>
+        <dd>groups messages that arrive within the specified interval. If no messages
+            arrive within the interval, the node can optionally send on an empty message.</dd>
+
+        <dt>Concatenate Sequences</dt>
+        <dd>creates a message sequence by concatenating incoming sequences. Each sequence
+            must have a <code>msg.topic</code> property to identify it. The node is
+            configured with a list of <code>topic</code> values to identify the order
+            sequences are concatenated.
+            </dd>
+        </dd>
+    </dl>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting `nodeMessageBufferMaxLength` can be used to limit how many messages nodes
+       will buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -93,9 +104,9 @@
             name: {value:""},
             mode: {value:"count"},
             count: {value:10},
-            overwrap: {value:0},
+            overlap: {value:0},
             interval: {value:10},
-	    allowEmptySequence: {value:false},
+            allowEmptySequence: {value:false},
             topics: {value:[{topic:""}]}
         },
         inputs:1,
@@ -110,7 +121,7 @@
         oneditprepare: function() {
             var node = this;
             var topic_str = node._("batch.concat.topic");
-            
+
             function resizeTopics(topic) {
                 var newWidth = topic.width();
                 topic.find('.red-ui-typedInput')
@@ -130,27 +141,27 @@
                             type:"text",
                             style:"margin-left: 5px;"
                         }).appendTo(row)
-                          .typedInput({default:'str', types:['str']});
-		        valueField.typedInput('value', opt.topic);
-		        valueField.typedInput('type', 'str');
+                        .typedInput({default:'str', types:['str']});
+                        valueField.typedInput('value', opt.topic);
+                        valueField.typedInput('type', 'str');
                         valueField.attr('placeholder', topic_str);
-		        resizeTopics(container);
+                        resizeTopics(container);
                     },
-		    resizeItem: resizeTopics,
+                    resizeItem: resizeTopics,
                     sortable: true,
                     removable: true
                 });
 
             $("#node-input-count").spinner({
             });
-            $("#node-input-overwrap").spinner({
+            $("#node-input-overlap").spinner({
             });
             $("#node-input-interval").spinner({
             });
             $("#node-input-mode").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-msg-count").toggle(val==="count");
-                $(".node-row-msg-overwrap").toggle(val==="count");
+                $(".node-row-msg-overlap").toggle(val==="count");
                 $(".node-row-msg-interval").toggle(val==="interval");
                 $(".node-row-msg-concat").toggle(val==="concat");
                 if (val==="concat") {
@@ -171,9 +182,9 @@
             topics.each(function(i) {
                 var topicData = $(this).data('data');
                 var topic = $(this);
-		var vf = topic.find(".node-input-topic-value");
-		var value = vf.typedInput('value');
-		var type = vf.typedInput('type');
+                var vf = topic.find(".node-input-topic-value");
+                var value = vf.typedInput('value');
+                var type = vf.typedInput('type');
                 var r = {topic:value};
                 node.topics.push(r);
             });

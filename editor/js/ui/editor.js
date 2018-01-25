@@ -170,7 +170,7 @@ RED.editor = (function() {
                 }
             }
         }
-        if (!node._def.defaults.hasOwnProperty("icon") && node.icon) {
+        if (node._def.hasOwnProperty("defaults") && !node._def.defaults.hasOwnProperty("icon") && node.icon) {
             var iconPath = RED.utils.separateIconPath(node.icon);
             var iconSets = RED.nodes.getIconSets();
             var iconFileList = iconSets[iconPath.module];
@@ -517,13 +517,16 @@ RED.editor = (function() {
 
     function getEditStackTitle() {
         var title = '<ul class="editor-tray-breadcrumbs">';
-        for (var i=0;i<editStack.length;i++) {
+        var label;
+        for (var i=editStack.length-1;i<editStack.length;i++) {
             var node = editStack[i];
-            var label = node.type;
+            label = node.type;
             if (node.type === '_expression') {
                 label = RED._("expressionEditor.title");
             } else if (node.type === '_json') {
                 label = RED._("jsonEditor.title");
+            } else if (node.type === '_markdown') {
+                label = RED._("markdownEditor.title");
             } else if (node.type === '_buffer') {
                 label = RED._("bufferEditor.title");
             } else if (node.type === 'subflow') {
@@ -550,7 +553,7 @@ RED.editor = (function() {
             title += '<li>'+label+'</li>';
         }
         title += '</ul>';
-        return title;
+        return label;
     }
 
     function buildEditForm(container,formId,type,ns) {
@@ -775,6 +778,16 @@ RED.editor = (function() {
                 selectIconFile.removeClass("input-error");
                 var fileName = selectIconFile.val();
                 iconFileHidden.val(fileName);
+            });
+            var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(iconForm);
+            clear.click(function(evt) {
+                evt.preventDefault();
+                var iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
+                selectIconModule.val(iconPath.module);
+                moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
+                selectIconFile.removeClass("input-error");
+                selectIconFile.val(iconPath.file);
+                iconFileHidden.val(iconPath.file);
             });
 
             moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, false);
@@ -2109,9 +2122,105 @@ RED.editor = (function() {
         editStack.push({type:type});
         RED.view.state(RED.state.EDITING);
         var expressionEditor;
+        var changeTimer;
+
+        var checkValid = function() {
+            var v = expressionEditor.getValue();
+            try {
+                JSON.parse(v);
+                $("#node-dialog-ok").removeClass('disabled');
+                return true;
+            } catch(err) {
+                $("#node-dialog-ok").addClass('disabled');
+                return false;
+            }
+        }
+        var trayOptions = {
+            title: options.title || getEditStackTitle(),
+            buttons: [
+                {
+                    id: "node-dialog-cancel",
+                    text: RED._("common.label.cancel"),
+                    click: function() {
+                        RED.tray.close();
+                    }
+                },
+                {
+                    id: "node-dialog-ok",
+                    text: RED._("common.label.done"),
+                    class: "primary",
+                    click: function() {
+                        if (options.requireValid && !checkValid()) {
+                            return;
+                        }
+                        onComplete(expressionEditor.getValue());
+                        RED.tray.close();
+                    }
+                }
+            ],
+            resize: function(dimensions) {
+                editTrayWidthCache[type] = dimensions.width;
+
+                var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+                var editorRow = $("#dialog-form>div.node-text-editor-row");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.size();i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
+                $(".node-text-editor").css("height",height+"px");
+                expressionEditor.resize();
+            },
+            open: function(tray) {
+                var trayBody = tray.find('.editor-tray-body');
+                var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
+                expressionEditor = RED.editor.createEditor({
+                    id: 'node-input-json',
+                    value: "",
+                    mode:"ace/mode/json"
+                });
+                expressionEditor.getSession().setValue(value||"",-1);
+                if (options.requireValid) {
+                    expressionEditor.getSession().on('change', function() {
+                        clearTimeout(changeTimer);
+                        changeTimer = setTimeout(checkValid,200);
+                    });
+                    checkValid();
+                }
+                $("#node-input-json-reformat").click(function(evt) {
+                    evt.preventDefault();
+                    var v = expressionEditor.getValue()||"";
+                    try {
+                        v = JSON.stringify(JSON.parse(v),null,4);
+                    } catch(err) {
+                        // TODO: do an optimistic auto-format
+                    }
+                    expressionEditor.getSession().setValue(v||"",-1);
+                });
+                dialogForm.i18n();
+            },
+            close: function() {
+                editStack.pop();
+                expressionEditor.destroy();
+            },
+            show: function() {}
+        }
+        if (editTrayWidthCache.hasOwnProperty(type)) {
+            trayOptions.width = editTrayWidthCache[type];
+        }
+        RED.tray.show(trayOptions);
+    }
+
+    function editMarkdown(options) {
+        var value = options.value;
+        var onComplete = options.complete;
+        var type = "_markdown"
+        editStack.push({type:type});
+        RED.view.state(RED.state.EDITING);
+        var expressionEditor;
 
         var trayOptions = {
-            title: getEditStackTitle(),
+            title: options.title || getEditStackTitle(),
             buttons: [
                 {
                     id: "node-dialog-cancel",
@@ -2147,20 +2256,9 @@ RED.editor = (function() {
                 var trayBody = tray.find('.editor-tray-body');
                 var dialogForm = buildEditForm(tray.find('.editor-tray-body'),'dialog-form',type,'editor');
                 expressionEditor = RED.editor.createEditor({
-                    id: 'node-input-json',
-                    value: "",
-                    mode:"ace/mode/json"
-                });
-                expressionEditor.getSession().setValue(value||"",-1);
-                $("#node-input-json-reformat").click(function(evt) {
-                    evt.preventDefault();
-                    var v = expressionEditor.getValue()||"";
-                    try {
-                        v = JSON.stringify(JSON.parse(v),null,4);
-                    } catch(err) {
-                        // TODO: do an optimistic auto-format
-                    }
-                    expressionEditor.getSession().setValue(v||"",-1);
+                    id: 'node-input-markdown',
+                    value: value,
+                    mode:"ace/mode/markdown"
                 });
                 dialogForm.i18n();
             },
@@ -2380,15 +2478,26 @@ RED.editor = (function() {
         editSubflow: showEditSubflowDialog,
         editExpression: editExpression,
         editJSON: editJSON,
+        editMarkdown: editMarkdown,
         editBuffer: editBuffer,
         validateNode: validateNode,
         updateNodeProperties: updateNodeProperties, // TODO: only exposed for edit-undo
 
 
         createEditor: function(options) {
-            var editor = ace.edit(options.id);
+            var editor = ace.edit(options.id||options.element);
             editor.setTheme("ace/theme/tomorrow");
             var session = editor.getSession();
+            session.on("changeAnnotation", function () {
+                var annotations = session.getAnnotations() || [];
+                var i = annotations.length;
+                var len = annotations.length;
+                while (i--) {
+                    if (/doctype first\. Expected/.test(annotations[i].text)) { annotations.splice(i, 1); }
+                    else if (/Unexpected End of file\. Expected/.test(annotations[i].text)) { annotations.splice(i, 1); }
+                }
+                if (len > annotations.length) { session.setAnnotations(annotations); }
+            });
             if (options.mode) {
                 session.setMode(options.mode);
             }
@@ -2419,7 +2528,7 @@ RED.editor = (function() {
             if (options.globals) {
                 setTimeout(function() {
                     if (!!session.$worker) {
-                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6}]);
+                        session.$worker.send("setOptions", [{globals: options.globals, esversion:6, sub:true, asi:true, maxerr:1000}]);
                     }
                 },100);
             }

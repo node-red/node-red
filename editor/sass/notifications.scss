@@ -15,7 +15,7 @@
  **/
 
 #notifications {
-    z-index: 10000;
+    z-index: 100;
     width: 500px;
     margin-left: -250px;
     left: 50%;
@@ -33,6 +33,10 @@
     border: 1px solid #325C80;
     border-left-width: 16px;
     overflow: hidden;
+}
+.notification p:first-child {
+    font-size: 1.1em;
+    font-weight: 400;
 }
 .notification a {
     text-decoration: none;

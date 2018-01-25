@@ -399,10 +399,10 @@ RED.view = (function() {
             }
         });
         $("#chart").focus(function() {
-            $("#workspace-tabs").addClass("workspace-focussed")
+            $("#workspace-tabs").addClass("workspace-focussed");
         });
         $("#chart").blur(function() {
-            $("#workspace-tabs").removeClass("workspace-focussed")
+            $("#workspace-tabs").removeClass("workspace-focussed");
         });
 
         RED.actions.add("core:copy-selection-to-internal-clipboard",copySelection);
@@ -1147,7 +1147,6 @@ RED.view = (function() {
                 }
             }
         }
-
         var selectionJSON = activeWorkspace+":"+JSON.stringify(selection,function(key,value) {
             if (key === 'nodes') {
                 return value.map(function(n) { return n.id })
@@ -2773,7 +2772,7 @@ RED.view = (function() {
             if (v === undefined) {
                 return gridSize;
             } else {
-                gridSize = v;
+                gridSize = Math.max(5,v);
                 updateGrid();
             }
         }

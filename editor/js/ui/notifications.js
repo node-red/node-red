@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-RED.notify = (function() {
+RED.notifications = (function() {
 
     /*
     // Example usage for a modal dialog with buttons
@@ -39,9 +39,11 @@ RED.notify = (function() {
     });
     */
 
+    var persistentNotifications = {};
+
     var currentNotifications = [];
     var c = 0;
-    return function(msg,type,fixed,timeout) {
+    function notify(msg,type,fixed,timeout) {
         var options = {};
         if (type !== null && typeof type === 'object') {
             options = type;
@@ -51,10 +53,7 @@ RED.notify = (function() {
         }
 
         if (options.modal) {
-            $("#header-shade").show();
-            $("#editor-shade").show();
-            $("#palette-shade").show();
-            $(".sidebar-shade").show();
+            $("#full-shade").show();
         }
 
         if (currentNotifications.length > 4) {
@@ -75,6 +74,16 @@ RED.notify = (function() {
         if (type) {
             n.className = "notification notification-"+type;
         }
+        if (options.width) {
+            var parentWidth = $("#notifications").width();
+            if (options.width > parentWidth) {
+                var margin = -(options.width-parentWidth)/2;
+                $(n).css({
+                    width: options.width+"px",
+                    marginLeft: margin+"px"
+                })
+            }
+        }
         n.style.display = "none";
         if (typeof msg === "string") {
             n.innerHTML = msg;
@@ -85,6 +94,9 @@ RED.notify = (function() {
             var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(n)
             options.buttons.forEach(function(buttonDef) {
                 var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                if (buttonDef.id) {
+                    b.attr('id',buttonDef.id);
+                }
                 if (buttonDef.class) {
                     b.addClass(buttonDef.class);
                 }
@@ -97,26 +109,71 @@ RED.notify = (function() {
         n.close = (function() {
             var nn = n;
             return function() {
+                if (nn.closed) {
+                    return;
+                }
+                nn.closed = true;
                 currentNotifications.splice(currentNotifications.indexOf(nn),1);
+                if (options.id) {
+                    delete persistentNotifications[options.id];
+                    if (Object.keys(persistentNotifications).length === 0) {
+                        notificationButtonWrapper.hide();
+                    }
+                }
                 $(nn).slideUp(300, function() {
                     nn.parentNode.removeChild(nn);
                 });
                 if (options.modal) {
-                    $("#header-shade").hide();
-                    $("#editor-shade").hide();
-                    $("#palette-shade").hide();
-                    $(".sidebar-shade").hide();
+                    $("#full-shade").hide();
                 }
             };
+        })();
+        n.hideNotification = (function() {
+            var nn = n;
+            return function() {
+                if (nn.closed) {
+                    return
+                }
+                nn.hidden = true;
+                $(nn).slideUp(300);
+            }
+        })();
+        n.showNotification = (function() {
+            var nn = n;
+            return function() {
+                if (nn.closed || !nn.hidden) {
+                    return
+                }
+                nn.hidden = false;
+                $(nn).slideDown(300);
+            }
         })();
 
         n.update = (function() {
             var nn = n;
-            return function(msg,timeout) {
+            return function(msg,options) {
                 if (typeof msg === "string") {
                     nn.innerHTML = msg;
                 } else {
                     $(nn).empty().append(msg);
+                }
+                var timeout;
+                if (typeof options === 'number') {
+                    timeout = options;
+                } else if (options !== undefined) {
+                    timeout = options.timeout;
+                    if (options.buttons) {
+                        var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(nn)
+                        options.buttons.forEach(function(buttonDef) {
+                            var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                            if (buttonDef.id) {
+                                b.attr('id',buttonDef.id);
+                            }
+                            if (buttonDef.class) {
+                                b.addClass(buttonDef.class);
+                            }
+                        })
+                    }
                 }
                 if (timeout !== undefined && timeout > 0) {
                     window.clearTimeout(nn.timeoutid);
@@ -124,6 +181,10 @@ RED.notify = (function() {
                 } else {
                     window.clearTimeout(nn.timeoutid);
                 }
+                if (nn.hidden) {
+                    nn.showNotification();
+                }
+
             }
         })();
 
@@ -138,7 +199,45 @@ RED.notify = (function() {
             n.timeoutid = window.setTimeout(n.close,timeout||5000);
         }
         currentNotifications.push(n);
+        if (options.id) {
+            persistentNotifications[options.id] = n;
+            notificationButtonWrapper.show();
+        }
         c+=1;
         return n;
+    }
+
+    RED.notify = notify;
+
+
+    function hidePersistent() {
+        for(var i in persistentNotifications) {
+            if (persistentNotifications.hasOwnProperty(i)) {
+                persistentNotifications[i].hideNotification();
+            }
+        }
+    }
+    function showPersistent() {
+        for(var i in persistentNotifications) {
+            if (persistentNotifications.hasOwnProperty(i)) {
+                persistentNotifications[i].showNotification();
+            }
+        }
+    }
+
+    var notificationButtonWrapper;
+
+    return {
+        init: function() {
+            notificationButtonWrapper = $('<li>'+
+                '<a id="btn-notifications" class="button" href="#">'+
+                '<i class="fa fa-warning"></i>'+
+                '</a>'+
+                '</li>').prependTo(".header-toolbar").hide();
+            $('#btn-notifications').click(function() {
+                showPersistent();
+            })
+        },
+        notify: notify
     }
 })();

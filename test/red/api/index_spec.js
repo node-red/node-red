@@ -23,164 +23,83 @@ var fs = require("fs");
 var path = require("path");
 var api = require("../../../red/api");
 
-describe("api index", function() {
-    var app;
+var apiUtil = require("../../../red/api/util");
+var apiAuth = require("../../../red/api/auth");
+var apiEditor = require("../../../red/api/editor");
+var apiAdmin = require("../../../red/api/admin");
 
-    describe("disables editor", function() {
+
+describe("api/index", function() {
+    var beforeEach = function() {
+        sinon.stub(apiUtil,"init",function(){});
+        sinon.stub(apiAuth,"init",function(){});
+        sinon.stub(apiEditor,"init",function(){
+            var app = express();
+            app.get("/editor",function(req,res) { res.status(200).end(); });
+            return app;
+        });
+        sinon.stub(apiAdmin,"init",function(){
+            var app = express();
+            app.get("/admin",function(req,res) { res.status(200).end(); });
+            return app;
+        });
+        sinon.stub(apiAuth,"login",function(req,res){
+            res.status(200).end();
+        });
+    };
+    var afterEach = function() {
+        apiUtil.init.restore();
+        apiAuth.init.restore();
+        apiAuth.login.restore();
+        apiEditor.init.restore();
+        apiAdmin.init.restore();
+    };
+
+    beforeEach(beforeEach);
+    afterEach(afterEach);
+
+    it("does not setup admin api if httpAdminRoot is false", function(done) {
+        api.init({},{
+            settings: { httpAdminRoot: false }
+        });
+        should.not.exist(api.adminApp);
+        done();
+    });
+    describe('initalises admin api without adminAuth', function(done) {
         before(function() {
+            beforeEach();
             api.init({},{
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:true, exportNodeSettings: function() {}},
-                events: {on:function(){},removeListener: function(){}},
-                log: {info:function(){},_:function(){}},
-                nodes: {paletteEditorEnabled: function(){return true}}
+                settings: { }
             });
-            app = api.adminApp;
         });
-
-        it('does not serve the editor', function(done) {
-            request(app)
-                .get("/")
-                .expect(404,done)
-        });
-        it('does not serve icons', function(done) {
-            request(app)
-                .get("/icons/default.png")
-                .expect(404,done)
-        });
-        it('serves settings', function(done) {
-            request(app)
-                .get("/settings")
-                .expect(200,done)
-        });
+        after(afterEach);
+        it('exposes the editor',function(done) {
+            request(api.adminApp).get("/editor").expect(200).end(done);
+        })
+        it('exposes the admin api',function(done) {
+            request(api.adminApp).get("/admin").expect(200).end(done);
+        })
+        it('exposes the auth api',function(done) {
+            request(api.adminApp).get("/auth/login").expect(200).end(done);
+        })
     });
 
-    describe("can serve auth", function() {
-        var mockList = [
-            'ui','nodes','flows','library','info','locales','credentials'
-        ]
+    describe('initalises admin api without editor', function(done) {
         before(function() {
-            mockList.forEach(function(m) {
-                sinon.stub(require("../../../red/api/"+m),"init",function(){});
-            });
-        });
-        after(function() {
-            mockList.forEach(function(m) {
-                require("../../../red/api/"+m).init.restore();
-            })
-        });
-        before(function() {
+            beforeEach();
             api.init({},{
-                settings:{httpNodeRoot:true, httpAdminRoot: true, adminAuth:{type: "credentials",users:[],default:{permissions:"read"}}},
-                storage:{getSessions:function(){return when.resolve({})}},
-                events:{on:function(){},removeListener:function(){}}
-            });
-            app = api.adminApp;
-        });
-
-        it('it now serves auth', function(done) {
-            request(app)
-                .get("/auth/login")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) { return done(err); }
-                    res.body.type.should.equal("credentials");
-                    done();
-                });
-        });
-    });
-
-    describe("editor warns if runtime not started", function() {
-        var mockList = [
-            'nodes','flows','library','info','theme','locales','credentials'
-        ]
-        before(function() {
-            mockList.forEach(function(m) {
-                sinon.stub(require("../../../red/api/"+m),"init",function(){});
+                settings: { disableEditor: true }
             });
         });
-        after(function() {
-            mockList.forEach(function(m) {
-                require("../../../red/api/"+m).init.restore();
-            })
-        });
-
-        it('serves the editor', function(done) {
-            var errorLog = sinon.spy();
-            api.init({},{
-                log:{audit:function(){},error:errorLog},
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
-                events:{on:function(){},removeListener:function(){}},
-                isStarted: function() { return false; } // <-----
-            });
-            app = api.adminApp;
-            request(app)
-                .get("/")
-                .expect(503)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.text.should.eql("Not started");
-                    errorLog.calledOnce.should.be.true();
-                    done();
-                });
-        });
-
-    });
-
-    describe("enables editor", function() {
-
-        var mockList = [
-            'nodes','flows','library','info','theme','locales','credentials'
-        ]
-        before(function() {
-            mockList.forEach(function(m) {
-                sinon.stub(require("../../../red/api/"+m),"init",function(){});
-            });
-        });
-        after(function() {
-            mockList.forEach(function(m) {
-                require("../../../red/api/"+m).init.restore();
-            })
-        });
-
-        before(function() {
-            api.init({},{
-                log:{audit:function(){}},
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false},
-                events:{on:function(){},removeListener:function(){}},
-                isStarted: function() { return true; }
-            });
-            app = api.adminApp;
-        });
-        it('serves the editor', function(done) {
-            request(app)
-                .get("/")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    // Index page should probably mention Node-RED somewhere
-                    res.text.indexOf("Node-RED").should.not.eql(-1);
-                    done();
-                });
-        });
-        it('serves icons', function(done) {
-            request(app)
-                .get("/icons/inject.png")
-                .expect("Content-Type", /image\/png/)
-                .expect(200,done)
-        });
-        it('serves settings', function(done) {
-            request(app)
-                .get("/settings")
-                .expect(200,done)
-        });
-        it('handles page not there', function(done) {
-            request(app)
-                .get("/foo")
-                .expect(404,done)
-        });
+        after(afterEach);
+        it('does not expose the editor',function(done) {
+            request(api.adminApp).get("/editor").expect(404).end(done);
+        })
+        it('exposes the admin api',function(done) {
+            request(api.adminApp).get("/admin").expect(200).end(done);
+        })
+        it('exposes the auth api',function(done) {
+            request(api.adminApp).get("/auth/login").expect(200).end(done)
+        })
     });
 });

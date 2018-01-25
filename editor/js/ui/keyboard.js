@@ -57,8 +57,24 @@ RED.keyboard = (function() {
         173:189
     }
 
+    function migrateOldKeymap() {
+        if ('localStorage' in window && window['localStorage'] !== null) {
+            var oldKeyMap = localStorage.getItem("keymap");
+            if (oldKeyMap !== null) {
+                localStorage.removeItem("keymap");
+                var currentEditorSettings = RED.settings.get('editor') || {};
+                currentEditorSettings.keymap  = JSON.parse(oldKeyMap);
+                RED.settings.set('editor',currentEditorSettings);
+            }
+        }
+    }
     function init() {
-        var userKeymap = RED.settings.get('keymap') || {};
+        // Migrate from pre-0.18
+        migrateOldKeymap();
+
+        var currentEditorSettings = RED.settings.get('editor') || {};
+        var userKeymap = currentEditorSettings.keymap || {};
+
         $.getJSON("red/keymap.json",function(data) {
             for (var scope in data) {
                 if (data.hasOwnProperty(scope)) {
@@ -67,12 +83,12 @@ RED.keyboard = (function() {
                         if (keys.hasOwnProperty(key)) {
                             if (!userKeymap.hasOwnProperty(keys[key])) {
                                 addHandler(scope,key,keys[key],false);
-                                defaultKeyMap[keys[key]] = {
-                                    scope:scope,
-                                    key:key,
-                                    user:false
-                                };
                             }
+                            defaultKeyMap[keys[key]] = {
+                                scope:scope,
+                                key:key,
+                                user:false
+                            };
                         }
                     }
                 }
@@ -369,8 +385,11 @@ RED.keyboard = (function() {
                 container.removeClass('keyboard-shortcut-entry-expanded');
                 var shortcut = RED.keyboard.getShortcut(object.id);
                 var userKeymap = RED.settings.get('keymap') || {};
-                delete userKeymap[object.id];
-                RED.settings.set('keymap',userKeymap);
+
+                var currentEditorSettings = RED.settings.get('editor') || {};
+                var userKeymap = currentEditorSettings.keymap || {};
+                userKeymap[object.id] = null;
+                RED.settings.set('editor',currentEditorSettings);
 
                 var obj = {
                     id:object.id,
@@ -419,9 +438,11 @@ RED.keyboard = (function() {
                             object.scope = scope;
                             RED.keyboard.add(object.scope,object.key,object.id,true);
                         }
-                        var userKeymap = RED.settings.get('keymap') || {};
+
+                        var currentEditorSettings = RED.settings.get('editor') || {};
+                        var userKeymap = currentEditorSettings.keymap || {};
                         userKeymap[object.id] = RED.keyboard.getShortcut(object.id);
-                        RED.settings.set('keymap',userKeymap);
+                        RED.settings.set('editor',currentEditorSettings);
                     }
                 }
             }

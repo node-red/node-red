@@ -5,7 +5,8 @@
             "topic": "Topic",
             "name": "Name",
             "username": "Username",
-            "password": "Password"
+            "password": "Password",
+            "property": "Property"
         },
         "status": {
             "connected": "connected",
@@ -542,7 +543,7 @@
         "label": {
             "property": "Property",
             "rule": "rule",
-            "repair" :  "repair sequence (reconstruct parts property of outgoing messages)"
+            "repair" :  "recreate message sequences"
         },
         "and": "and",
         "checkall": "checking all rules",
@@ -558,7 +559,7 @@
             "nnull":"is not null",
             "head":"head",
             "tail":"tail",
-            "index":"is between",
+            "index":"index between",
             "exp":"JSONata exp",
             "else":"otherwise"
         },
@@ -608,7 +609,7 @@
             "maxout": "e.g. 255"
         },
         "scale": {
-            "payload": "Scale msg.payload",
+            "payload": "Scale the message property",
             "limit": "Scale and limit to the target range",
             "wrap": "Scale and wrap within the target range"
         },
@@ -846,7 +847,7 @@
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
-            "merge":"merge sequence",
+            "merge":"merge sequences",
             "reduce":"reduce sequence",
             "custom":"manual"
         },
@@ -871,55 +872,54 @@
         "complete":"After a message with the <code>msg.complete</code> property set",
         "tip":"This mode assumes this node is either paired with a <i>split</i> node or the received messages will have a properly configured <code>msg.parts</code> property.",
         "too-many" : "too many pending messages in join node",
-	"merge": {
-	    "topics-label":"Merged Topics",
-	    "topics":"topics",
+        "merge": {
+            "topics-label":"Merged Topics",
+            "topics":"topics",
             "topic" : "topic",
             "on-change":"Send merged message on arrival of a new topic"
-	},
+        },
         "reduce": {
-	    "exp": "Reduce exp",
-	    "exp-value": "exp",
-	    "init": "Initial value",
-	    "right": "Evaluate in reverse order (right to left)",
-	    "fixup": "Fixup exp"
+            "exp": "Reduce exp",
+            "exp-value": "exp",
+            "init": "Initial value",
+            "right": "Evaluate in reverse order (last to first)",
+            "fixup": "Fix-up exp"
         },
         "errors": {
             "invalid-expr": "Invalid JSONata expression: __error__"
         }
     },
     "sort" : {
-	"key-type" : "Key type",
-	"payload" : "payload or element",
-	"exp" : "expression",
-	"key-exp" : "Key exp.",
-	"order" : "Order",
-	"ascending" : "ascending",
-	"descending" : "descending",
-	"as-number" : "as number",
+        "target" : "Sort",
+        "seq" : "message sequence",
+        "key" : "Key",
+        "elem" : "element value",
+        "order" : "Order",
+        "ascending" : "ascending",
+        "descending" : "descending",
+        "as-number" : "as number",
         "invalid-exp" : "invalid JSONata expression in sort node",
         "too-many" : "too many pending messages in sort node",
         "clear" : "clear pending message in sort node"
     },
     "batch" : {
-	"mode": {
-	    "label" : "Mode",
-	    "num-msgs" : "number of messages",
-	    "interval" : "interval in seconds",
-            "concat" : "concatenate sequences"
-	},
-	"count": {
-	    "label" : "Number of msgs",
-	    "overwrap" : "Overwrap",
-	    "count" : "count",
-            "invalid" : "Invalid count and overwrap"
-	},
-	"interval": {
-	    "label" : "Interval (sec)",
-	    "seconds" : "seconds",
-	    "sec" : "sec",
+        "mode": {
+            "label" : "Mode",
+            "num-msgs" : "Group by number of messages",
+            "interval" : "Group by time interval",
+            "concat" : "Concatenate sequences"
+        },
+        "count": {
+            "label" : "Number of messages",
+            "overlap" : "Overlap",
+            "count" : "count",
+            "invalid" : "Invalid count and overlap"
+        },
+        "interval": {
+            "label" : "Interval",
+            "seconds" : "seconds",
             "empty" : "send empty message when no message arrives"
-	},
+        },
         "concat": {
             "topics-label": "Topics",
             "topic" : "topic"

@@ -21,7 +21,7 @@ module.exports = function(RED) {
 
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
-            var name = "sortMaxKeptMsgsCount";
+            var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
                 _max_kept_msgs_count = RED.settings[name];
             }
@@ -60,11 +60,15 @@ module.exports = function(RED) {
         var pending_id = 0;
         var order = n.order || "ascending";
         var as_num = n.as_num || false;
-        var key_is_payload = (n.keyType === 'payload');
-        var key_exp = undefined;
-        if (!key_is_payload) {
+        var target_prop = n.target || "payload";
+        var target_is_prop = (n.targetType === 'msg');
+        var key_is_exp = target_is_prop ? (n.msgKeyType === "jsonata") : (n.seqKeyType === "jsonata");
+        var key_prop = n.seqKey || "payload";
+        var key_exp = target_is_prop ? n.msgKey : n.seqKey;
+
+        if (key_is_exp) {
             try {
-                key_exp = RED.util.prepareJSONataExpression(n.key, this);
+                key_exp = RED.util.prepareJSONataExpression(key_exp, this);
             }
             catch (e) {
                 node.error(RED._("sort.invalid-exp"));
@@ -87,10 +91,12 @@ module.exports = function(RED) {
         }
 
         function send_group(group) {
-            var key = key_is_payload
-                ? function(msg) { return msg.payload; }
-                : function(msg) {
+            var key = key_is_exp
+                ? function(msg) {
                     return eval_jsonata(node, key_exp, msg);
+                }
+                : function(msg) {
+                    return RED.util.getMessageProperty(msg, key_prop);
                 };
             var comp = gen_comp(key);
             var msgs = group.msgs;
@@ -108,16 +114,16 @@ module.exports = function(RED) {
         }
 
         function sort_payload(msg) {
-            var payload = msg.payload;
-            if (Array.isArray(payload)) {
-                var key = key_is_payload
-                    ? function(elem) { return elem; }
-                    : function(elem) {
+            var data = RED.util.getMessageProperty(msg, target_prop);
+            if (Array.isArray(data)) {
+                var key = key_is_exp
+                    ? function(elem) {
                         return eval_jsonata(node, key_exp, elem);
-                    };
+                    }
+                    : function(elem) { return elem; };
                 var comp = gen_comp(key);
                 try {
-                    payload.sort(comp);
+                    data.sort(comp);
                 }
                 catch (e) {
                     return false;
@@ -162,7 +168,7 @@ module.exports = function(RED) {
         }
         
         function process_msg(msg) {
-            if (!msg.hasOwnProperty("parts")) {
+            if (target_is_prop) {
                 if (sort_payload(msg)) {
                     node.send(msg);
                 }

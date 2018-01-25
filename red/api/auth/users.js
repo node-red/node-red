@@ -14,13 +14,12 @@
 * limitations under the License.
 **/
 
-var when = require("when");
 var util = require("util");
+var clone = require("clone");
 var bcrypt;
 try { bcrypt = require('bcrypt'); }
 catch(e) { bcrypt = require('bcryptjs'); }
 var users = {};
-var passwords = {};
 var defaultUser = null;
 
 function authenticate() {
@@ -28,31 +27,33 @@ function authenticate() {
     if (typeof username !== 'string') {
         username = username.username;
     }
-    var user = users[username];
-    if (user) {
-        if (arguments.length === 2) {
-            // Username/password authentication
-            var password = arguments[1];
-            return when.promise(function(resolve,reject) {
-                bcrypt.compare(password, passwords[username], function(err, res) {
-                    resolve(res?user:null);
+    const args = Array.from(arguments);
+    return api.get(username).then(function(user) {
+        if (user) {
+            if (args.length === 2) {
+                // Username/password authentication
+                var password = args[1];
+                return new Promise(function(resolve,reject) {
+                    bcrypt.compare(password, user.password, function(err, res) {
+                        resolve(res?cleanUser(user):null);
+                    });
                 });
-            });
-        } else {
-            // Try to extract common profile information
-            if (arguments[0].hasOwnProperty('photos') && arguments[0].photos.length > 0) {
-                user.image = arguments[0].photos[0].value;
+            } else {
+                // Try to extract common profile information
+                if (args[0].hasOwnProperty('photos') && args[0].photos.length > 0) {
+                    user.image = args[0].photos[0].value;
+                }
+                return cleanUser(user);
             }
-            return when.resolve(user);
         }
-    }
-    return when.resolve(null);
+        return null;
+    });
 }
 function get(username) {
-    return when.resolve(users[username]);
+    return Promise.resolve(users[username]);
 }
 function getDefaultUser() {
-    return when.resolve(null);
+    return Promise.resolve(null);
 }
 
 var api = {
@@ -63,7 +64,6 @@ var api = {
 
 function init(config) {
     users = {};
-    passwords = {};
     defaultUser = null;
     if (config.type == "credentials" || config.type == "strategy") {
         if (config.users) {
@@ -77,11 +77,7 @@ function init(config) {
                 }
                 for (var i=0;i<us.length;i++) {
                     var u = us[i];
-                    users[u.username] = {
-                        "username":u.username,
-                        "permissions":u.permissions
-                    };
-                    passwords[u.username] = u.password;
+                    users[u.username] = clone(u);
                 }
             }
         }
@@ -96,7 +92,7 @@ function init(config) {
             api.default = config.default;
         } else {
             api.default = function() {
-                return when.resolve({
+                return Promise.resolve({
                     "anonymous": true,
                     "permissions":config.default.permissions
                 });
@@ -106,10 +102,17 @@ function init(config) {
         api.default = getDefaultUser;
     }
 }
+function cleanUser(user) {
+    if (user && user.hasOwnProperty('password')) {
+        user = clone(user);
+        delete user.password;
+    }
+    return user;
+}
 
 module.exports = {
     init: init,
-    get: function(username) { return api.get(username) },
+    get: function(username) { return api.get(username).then(cleanUser)},
     authenticate: function() { return api.authenticate.apply(null, arguments) },
     default: function() { return api.default(); }
 };

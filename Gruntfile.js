@@ -52,10 +52,12 @@ module.exports = function(grunt) {
                 timeout: 3000,
                 ignoreLeaks: false,
                 ui: 'bdd',
-                reportFormats: ['lcov'],
+                reportFormats: ['lcov','html'],
                 print: 'both'
             },
-            coverage: { src: ['test/**/*_spec.js'] }
+            all: { src: ['test/**/*_spec.js'] },
+            core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
+            nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
         jshint: {
             options: {
@@ -156,6 +158,10 @@ module.exports = function(grunt) {
                     "editor/js/ui/typeSearch.js",
                     "editor/js/ui/subflow.js",
                     "editor/js/ui/userSettings.js",
+                    "editor/js/ui/projects/projects.js",
+                    "editor/js/ui/projects/projectSettings.js",
+                    "editor/js/ui/projects/projectUserSettings.js",
+                    "editor/js/ui/projects/tab-versionControl.js",
                     "editor/js/ui/touch/radialMenu.js"
                 ],
                 dest: "public/red/red.js"
@@ -472,7 +478,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
-        ['jshint:core','simplemocha:core']);
+        ['build','mocha_istanbul:core']);
 
     grunt.registerTask('test-editor',
         'Runs code style check on editor code',
@@ -484,7 +490,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',
-        ['simplemocha:nodes']);
+        ['build','mocha_istanbul:nodes']);
 
     grunt.registerTask('build',
         'Builds editor content',
@@ -500,5 +506,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('coverage',
         'Run Istanbul code test coverage task',
-        ['build','mocha_istanbul']);
+        ['build','mocha_istanbul:all']);
 };

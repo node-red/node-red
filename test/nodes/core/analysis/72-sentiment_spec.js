@@ -75,6 +75,28 @@ describe('sentiment Node', function() {
         });
     });
 
+    it('should add a positive score for good words - alternative property', function(done) {
+        var flow = [{id:"jn1",type:"sentiment",property:"foo",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(sentimentNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('sentiment');
+                    msg.sentiment.should.have.property('score');
+                    msg.sentiment.score.should.be.a.Number();
+                    msg.sentiment.score.should.be.above(10);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var testString = 'good, great, best, brilliant';
+            jn1.receive({foo:testString});
+        });
+    });
+
     it('should add a negative score for bad words', function(done) {
         var flow = [{id:"jn1",type:"sentiment",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
@@ -90,6 +112,24 @@ describe('sentiment Node', function() {
             });
             var testString = 'bad, horrible, negative, awful';
             jn1.receive({payload:testString});
+        });
+    });
+
+    it('should add a negative score for bad words - alternative property', function(done) {
+        var flow = [{id:"jn1",type:"sentiment",property:"foo",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(sentimentNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                msg.should.have.property('sentiment');
+                msg.sentiment.should.have.property('score');
+                msg.sentiment.score.should.be.a.Number();
+                msg.sentiment.score.should.be.below(-10);
+                done();
+            });
+            var testString = 'bad, horrible, negative, awful';
+            jn1.receive({foo:testString});
         });
     });
 
@@ -109,6 +149,25 @@ describe('sentiment Node', function() {
             var testString = 'sick, wicked';
             var overrides = {'sick': 10, 'wicked': 10 };
             jn1.receive({payload:testString,overrides:overrides});
+        });
+    });
+
+    it('should allow you to override word scoring - alternative property', function(done) {
+        var flow = [{id:"jn1",type:"sentiment",property:"foo",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(sentimentNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                msg.should.have.property('sentiment');
+                msg.sentiment.should.have.property('score');
+                msg.sentiment.score.should.be.a.Number();
+                msg.sentiment.score.should.equal(20);
+                done();
+            });
+            var testString = 'sick, wicked';
+            var overrides = {'sick': 10, 'wicked': 10 };
+            jn1.receive({foo:testString,overrides:overrides});
         });
     });
 

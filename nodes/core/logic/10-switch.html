@@ -40,7 +40,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="switch">
-    <p>Route messages based on their property values.</p>
+    <p>Route messages based on their property values or sequence position.</p>
     <h3>Details</h3>
     <p>When a message arrives, the node will evaluate each of the defined rules
     and forward the message to the corresponding outputs of any matching rules.</p>
@@ -48,115 +48,25 @@
     that matches.</p>
     <p>The rules can be evaluated against an individual message property, a flow or global
     context property or the result of a JSONata expression.</p>
-    <h3>Rules</h3>
-    <p>Routing rules are categorized into three:</p>
-    <dl>
-        <dt>value rules</dt>
-        <dd>
-            <table>
-                <tr>
-                    <th>operator</th>
-                    <th>description</th>
-                </tr>
-                <tr>
-                    <td><b>==</b></td>
-                    <td>property value is equals to specified value</td>
-                </tr>
-                <tr>
-                    <td><b>!=</b></td>
-                    <td>property value is not equals to specified value</td>
-                </tr>
-                <tr>
-                    <td><b>&lt;</b></td>
-                    <td>property value is less than specified value</td>
-                </tr>
-                <tr>
-                    <td><b>&lt;=</b></td>
-                    <td>property value is less than or equals to specified value</td>
-                </tr>
-                <tr>
-                    <td><b>&gt;</b></td>
-                    <td>property value is greater than specified value</td>
-                </tr>
-                <tr>
-                    <td><b>&gt;=</b></td>
-                    <td>property value is greater than or equals to specified value</td>
-                </tr>
-                <tr>
-                    <td><b>is between</b></td>
-                    <td>property value is between specified values</td>
-                </tr>
-                <tr>
-                    <td><b>contains</b></td>
-                    <td>property string value contains specified string value</td>
-                </tr>
-                <tr>
-                    <td><b>matches regex</b></td>
-                    <td>property string value matches specified regex</td>
-                </tr>
-                <tr>
-                    <td><b>is true</b></td>
-                    <td>property value is true</td>
-                </tr>
-                <tr>
-                    <td><b>is false</b></td>
-                    <td>property value is false</td>
-                </tr>
-                <tr>
-                    <td><b>is null</b></td>
-                    <td>property value is null</td>
-                </tr>
-                <tr>
-                    <td><b>is not null</b></td>
-                    <td>property value is not null</td>
-                </tr>
-            </table>
-        </dd>
-        <dt>sequence rules</dt>
-        <dd>
-            <table>
-                <tr>
-                    <th>operator</th>
-                    <th>description</th>
-                </tr>
-                <tr>
-                    <td><b>head</b></td>
-                    <td>message is included in the first specified number of messages in a sequence</td>
-                </tr>
-                <tr>
-                    <td><b>tail</b></td>
-                    <td>message is included in the last specified number of messages in a sequence</td>
-                </tr>
-                <tr>
-                    <td><b>pos. between</b></td>
-                    <td>message is included between specified positions in a sequence</td>
-                </tr>
-            </table>
-        </dd>
-        <dt>other rules</dt>
-        <dd>
-            <table>
-                <tr>
-                    <th>operator</th>
-                    <th>description</th>
-                </tr>
-                <tr>
-                    <td><b>JSONata exp</b></td>
-                    <td>specified JSONata expression evaluate to true. In JSONata expression, $I represents <code>msg.parts.index</code> and $N represents <code>msg.parts.count</code> respectively if exists.</td>
-                </tr>
-                <tr>
-                    <td><b>otherwise</b></td>
-                    <td>no matching rule found</td>
-                </tr>
-            </table>
-        </dd>
-    </dl>
-
-    <h3>Repair Sequence</h3>
-    <p>If <b>repair sequence (reconstruct parts property of outgoing messages)</b> checkbox is selected, <code>msg.parts</code> property are reconstructed for each port to make forks of valid sequences.  Otherwise, <code>msg.parts</code> property of incoming messages are passed through.</p>
-
-    <h3>Note:</h3>
-    <p>This node internally keeps messages for its operation if <b>repair sequence</b> checkbox is ON.  In order to prevent unexpected memory usage, maximum number of messages kept can be specified by <code>switchMaxKeptMsgsCount</code> property in <b>settings.js</b>.</p>
+    <h4>Rules</h4>
+    <p>There are four types of rule:</p>
+    <ol>
+        <li><b>Value</b> rules are evaluated against the configured property</li>
+        <li><b>Sequence</b> rules can be used on message sequences, such as those
+            generated by the Split node</li>
+        <li>A JSONata <b>Expression</b> can be provided that will be evaluated
+            against the whole message and will match if the expression returns
+            a true value.</li>
+        <li>An <b>Otherwise</b> rule can be used to match if none of the preceeding
+            rules have matched.</li>
+    </ol>
+    <h4>Handling message sequences</h4>
+    <p>By default, the node does not modify the <code>msg.parts</code> property of messages
+       that are part of a sequence.</p>
+    <p>The <b>recreate message sequences</b> option can be enabled to generate new message sequences
+       for each rule that matches. In this mode, the node will buffer the entire incoming
+       sequence before sending the new sequences on. The runtime setting `nodeMessageBufferMaxLength`
+       can be used to limit how many messages nodes will buffer.</p>
 </script>
 
 <script type="text/javascript">
@@ -221,7 +131,6 @@
                     }
                 }
                 if ((rule.t === 'btwn') || (rule.t === 'index')) {
-                    console.log(`; ${label}/${JSON.stringify(rule)}`);
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
                 } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);

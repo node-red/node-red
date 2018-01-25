@@ -21,7 +21,7 @@ module.exports = function(RED) {
 
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
-            var name = "batchMaxKeptMsgsCount";
+            var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
                 _max_kept_msgs_count = RED.settings[name];
             }
@@ -47,7 +47,7 @@ module.exports = function(RED) {
             node.send(msg);
         }
     }
-    
+
     function send_interval(node, allow_empty_seq) {
         let msgs = node.pending;
         if (msgs.length > 0) {
@@ -119,7 +119,7 @@ module.exports = function(RED) {
         send_msgs(node, msgs, false);
         node.pending_count -= msgs.length;
     }
-    
+
     function add_to_topic_group(pending, topic, gid, msg) {
         if (!pending.hasOwnProperty(topic)) {
             pending[topic] = { groups: {}, gids: [] };
@@ -171,9 +171,9 @@ module.exports = function(RED) {
         node.pending_count = 0;
         if (mode === "count") {
             var count = Number(n.count || 1);
-            var overwrap = Number(n.overwrap || 0);
-            var is_overwrap = (overwrap > 0);
-            if (count <= overwrap) {
+            var overlap = Number(n.overlap || 0);
+            var is_overlap = (overlap > 0);
+            if (count <= overlap) {
                 node.error(RED._("batch.count.invalid"));
                 return;
             }
@@ -183,9 +183,9 @@ module.exports = function(RED) {
                 queue.push(msg);
                 node.pending_count++;
                 if (queue.length === count) {
-                    send_msgs(node, queue, is_overwrap);
+                    send_msgs(node, queue, is_overlap);
                     node.pending =
-                        (overwrap === 0) ? [] : queue.slice(-overwrap);
+                        (overlap === 0) ? [] : queue.slice(-overlap);
                     node.pending_count = 0;
                 }
                 var max_msgs = max_kept_msgs_count(node);

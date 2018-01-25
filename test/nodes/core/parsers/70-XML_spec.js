@@ -57,6 +57,26 @@ describe('XML node', function() {
         });
     });
 
+    it('should convert a valid xml string to a javascript object - alternative property', function(done) {
+        var flow = [{id:"n1",type:"xml",property:"foo",wires:[["n2"]],func:"return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(xmlNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.foo.should.have.property('employees');
+                msg.foo.employees.should.have.property('firstName');
+                should.equal(msg.foo.employees.firstName[0], 'John');
+                msg.foo.employees.should.have.property('lastName');
+                should.equal(msg.foo.employees.lastName[0], 'Smith');
+                done();
+            });
+            var string = '<employees><firstName>John</firstName><lastName>Smith</lastName></employees>';
+            n1.receive({foo:string,topic: "bar"});
+        });
+    });
+
     it('should convert a valid xml string to a javascript object with options', function(done) {
         var flow = [{id:"n1",type:"xml",wires:[["n2"]],func:"return msg;"},
                     {id:"n2", type:"helper"}];
@@ -94,20 +114,20 @@ describe('XML node', function() {
         });
     });
 
-    it('should convert a javascript object to an xml string with options', function(done) {
-        var flow = [{id:"n1",type:"xml",wires:[["n2"]],func:"return msg;"},
+    it('should convert a javascript object to an xml string with options - alternative property', function(done) {
+        var flow = [{id:"n1",type:"xml",property:"foo",wires:[["n2"]],func:"return msg;"},
                     {id:"n2", type:"helper"}];
         helper.load(xmlNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
-                var index = msg.payload.indexOf('<employees>\n  <firstName>John</firstName>\n  <lastName>Smith</lastName>\n</employees>');
+                var index = msg.foo.indexOf('<employees>\n  <firstName>John</firstName>\n  <lastName>Smith</lastName>\n</employees>');
                 index.should.be.above(-1);
                 done();
             });
             var obj = {"employees":{"firstName":["John"],"lastName":["Smith"] }};
-            n1.receive({payload:obj, topic:"bar", options:{headless:true}});
+            n1.receive({foo:obj, topic:"bar", options:{headless:true}});
         });
     });
 
@@ -133,7 +153,7 @@ describe('XML node', function() {
             },200);
         });
     });
-    
+
     it('should log an error if asked to parse something thats not xml or js', function(done) {
         var flow = [{id:"n1",type:"xml",wires:[["n2"]],func:"return msg;"},
                     {id:"n2", type:"helper"}];

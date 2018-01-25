@@ -501,6 +501,11 @@ textarea.span1,
   padding-top: 5px;
 }
 
+label.disabled {
+    color: #bbb !important;
+    cursor: default;
+}
+
 input[disabled],
 select[disabled],
 textarea[disabled],

@@ -87,17 +87,22 @@ table.node-info tr.blank {
         padding-left: 5px;
     }
 }
-
+.node-info-none {
+    font-style: italic;
+    color: #aaa;
+}
 table.node-info tr:not(.blank) td:first-child{
-    color: #666;
+    color: #444;
     vertical-align: top;
     width: 90px;
     padding: 3px 3px 3px 6px;
+    background:#f9f9f9;
     border-right: 1px solid #ddd;
 }
 table.node-info tr:not(.blank) td:last-child{
     padding: 3px 3px 3px 6px;
     color: #666;
+    overflow-y: hidden;
 }
 div.node-info {
     margin: 5px;

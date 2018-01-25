@@ -272,10 +272,19 @@ RED.nodes = (function() {
                 if (updatedConfigNode) {
                     RED.workspaces.refresh();
                 }
+                try {
+                    if (node._def.oneditdelete) {
+                        node._def.oneditdelete.call(node);
+                    }
+                } catch(err) {
+                    console.log("oneditdelete",node.id,node.type,err.toString());
+                }
                 RED.events.emit('nodes:remove',node);
             }
         }
         if (node && node._def.onremove) {
+            // Deprecated: never documented but used by some early nodes
+            console.log("Deprecated API warning: node type ",node.type," has an onremove function - should be oneditremove - please report");
             node._def.onremove.call(n);
         }
         return {links:removedLinks,nodes:removedNodes};
@@ -714,7 +723,9 @@ RED.nodes = (function() {
         if (!$.isArray(newNodes)) {
             newNodes = [newNodes];
         }
+        var isInitialLoad = false;
         if (!initialLoad) {
+            isInitialLoad = true;
             initialLoad = JSON.parse(JSON.stringify(newNodes));
         }
         var unknownTypes = [];
@@ -735,7 +746,7 @@ RED.nodes = (function() {
             }
 
         }
-        if (unknownTypes.length > 0) {
+        if (!isInitialLoad && unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
             RED.notify("<strong>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</strong>"+typeList,"error",false,10000);
@@ -885,7 +896,7 @@ RED.nodes = (function() {
 
                 }
 
-                if (!existingConfigNode) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode._def.exclusive || existingConfigNode.z !== n.z) {
+                if (!existingConfigNode || existingConfigNode._def.exclusive) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode.z !== n.z) {
                     configNode = {id:n.id, z:n.z, type:n.type, users:[], _config:{}};
                     for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
@@ -1214,12 +1225,13 @@ RED.nodes = (function() {
             RED.workspaces.remove(workspaces[id]);
         });
         defaultWorkspace = null;
-
-        RED.nodes.dirty(true);
+        initialLoad = null;
+        RED.nodes.dirty(false);
         RED.view.redraw(true);
         RED.palette.refresh();
         RED.workspaces.refresh();
         RED.sidebar.config.refresh();
+        RED.sidebar.info.refresh();
 
         // var node_defs = {};
         // var nodes = [];

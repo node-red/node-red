@@ -17,7 +17,7 @@
 var should = require("should");
 var permissions = require("../../../../red/api/auth/permissions");
 
-describe("Auth permissions", function() {
+describe("api/auth/permissions", function() {
     describe("hasPermission", function() {
         it('a user with no permissions',function() {
             permissions.hasPermission([],"*").should.be.false();
