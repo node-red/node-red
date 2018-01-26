@@ -83,8 +83,8 @@ module.exports = function(RED) {
         this.previousValue = null;
         var node = this;
         var valid = true;
-        var needs_count = false;
         var repair = n.repair;
+        var needs_count = repair;
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
             needs_count = needs_count || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
@@ -187,16 +187,18 @@ module.exports = function(RED) {
 
         function send_group(onwards, port_count) {
             var counts = new Array(port_count).fill(0);
-            var ids = new Array(port_count);
-            for(var i = 0; i < onwards.length; i++) {
+            for (var i = 0; i < onwards.length; i++) {
                 var onward = onwards[i];
-                for(var j = 0; j < port_count; j++) {
+                for (var j = 0; j < port_count; j++) {
                     counts[j] += (onward[j] !== null) ? 1 : 0
                 }
-                ids[i] = RED.util.generateId();
             }
-            var indexes = new Array(port_count).fill(0);
+            var ids = new Array(port_count);
+            for (var j = 0; j < port_count; j++) {
+                ids[j] = RED.util.generateId();
+            }
             var ports = new Array(port_count);
+            var indexes = new Array(port_count).fill(0);
             for (var i = 0; i < onwards.length; i++) {
                 var onward = onwards[i];
                 for (var j = 0; j < port_count; j++) {
@@ -250,8 +252,7 @@ module.exports = function(RED) {
             if (msg.hasOwnProperty("parts")) {
                 var parts = msg.parts;
                 return (parts.hasOwnProperty("id") &&
-                        parts.hasOwnProperty("index") &&
-                        parts.hasOwnProperty("count"));
+                        parts.hasOwnProperty("index"));
             }
             return false;
         }
@@ -325,7 +326,7 @@ module.exports = function(RED) {
                     }
                 }
                 node.previousValue = prop;
-                if (repair || !has_parts) {
+                if (!repair || !has_parts) {
                     node.send(onward);
                 }
                 else {
