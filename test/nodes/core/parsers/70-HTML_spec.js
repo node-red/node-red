@@ -66,6 +66,25 @@ describe('html node', function() {
         });
     });
 
+    it('should emit an empty array if no matching elements', function(done) {
+        fs.readFile(file, 'utf8', function(err, data) {
+            var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;"},
+                        {id:"n2", type:"helper"}];
+
+            helper.load(htmlNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload');
+                    msg.payload.should.be.empty;
+                    done();
+                });
+                n1.receive({payload:data,topic:"bar",select:"h4"});
+            });
+        });
+    });
+
     it('should retrieve paragraph contents when specified', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
             var flow = [{id:"n1",type:"html",wires:[["n2"]],ret:"text",tag:"p"},
@@ -141,7 +160,7 @@ describe('html node', function() {
         });
     });
 
-    it('should retrive an attribute from a tag', function(done) {
+    it('should retrieve an attribute from a tag', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
             var flow = [{id:"n1",type:"html",wires:[["n2"]],ret:"attr",tag:"span img"},
                         {id:"n2", type:"helper"}];
