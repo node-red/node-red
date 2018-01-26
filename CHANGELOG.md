@@ -54,6 +54,7 @@ Nodes
  - let default apply if msg.delay not set in override mode. (#1397)
  - let trigger node be reset by boolean message (#1554)
  - Let trigger node support per topic mode (#1398)
+ - let HTML node return empty array for no matching input (#1582)
  - MQTT node - if Server/URL config contains '//' use it as a complete url; enabled ws:// and wss://
  - clone messages before delayed send (#1474)
  - Decrement connected client count rather than show disconnected
