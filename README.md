@@ -56,7 +56,7 @@ Before raising a pull-request, please read our
 
 This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
  By participating, you are expected to uphold this code. Please report unacceptable
- behavior to any of the [project's core team](https://github.com/orgs/node-red/teams/core).
+ behavior to any of the project's core team at team@nodered.org.
 
 ## Authors
 
