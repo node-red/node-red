@@ -86,6 +86,9 @@ RED.notifications = (function() {
         }
         n.style.display = "none";
         if (typeof msg === "string") {
+            if (!/<p>/i.test(msg)) {
+                msg = "<p>"+msg+"</p>";
+            }
             n.innerHTML = msg;
         } else {
             $(n).append(msg);
@@ -153,6 +156,9 @@ RED.notifications = (function() {
             var nn = n;
             return function(msg,options) {
                 if (typeof msg === "string") {
+                    if (!/<p>/i.test(msg)) {
+                        msg = "<p>"+msg+"</p>";
+                    }
                     nn.innerHTML = msg;
                 } else {
                     $(nn).empty().append(msg);
