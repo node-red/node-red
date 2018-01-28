@@ -542,20 +542,63 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("n2");
                 var c = 0;
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload');
-                    msg.payload.should.be.a.String();
-                    msg.payload.should.have.length(19);
-                    if (c === 0) {
-                        msg.payload.should.equal("File message line 1");
-                        c++;
-                    } else {
-                        msg.payload.should.equal("File message line 2");
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
                         msg.should.have.property('parts');
-                        msg.parts.should.have.property('index',1);
-                        msg.parts.should.have.property('count',2);
+                        msg.parts.should.have.property('index',c);
                         msg.parts.should.have.property('type','string');
                         msg.parts.should.have.property('ch','\n');
-                        done();
+                        if (c === 0) {
+                            msg.payload.should.equal("File message line 1");
+                        }
+                        if (c === 1) {
+                            msg.payload.should.equal("File message line 2");
+                        }
+                        if (c === 2) {
+                            msg.payload.should.equal("");
+                            done();
+                        }
+                        c++;
+                    }
+                    catch(e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:""});
+            });
+        });
+
+        it('should read in a file with empty line and output split lines with parts', function(done) {
+            var data = ["-", "", "-", ""];
+            var line = data.join("\n");
+            fs.writeFileSync(fileToTest, line);
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"lines", wires:[["n2"]]},
+                {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.equal(data[c]);
+                        msg.should.have.property('parts');
+                        var parts = msg.parts;
+                        parts.should.have.property('index',c);
+                        parts.should.have.property('type','string');
+                        parts.should.have.property('ch','\n');
+                        c++;
+                        if (c === data.length) {
+                            parts.should.have.property('count', data.length);
+                            done();
+                        }
+                        else {
+                            parts.should.not.have.property('count');
+                        }
+                    }
+                    catch(e) {
+                        done(e);
                     }
                 });
                 n1.receive({payload:""});
