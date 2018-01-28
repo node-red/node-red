@@ -328,6 +328,32 @@ describe('html node', function() {
             });
         });
 
+        it('should not reuse message', function(done) {
+            fs.readFile(file, 'utf8', function(err, data) {
+                var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ul",ret:"text",as:"multi"},
+                            {id:"n2", type:"helper"}];
+
+                helper.load(htmlNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    var prev_msg = undefined;
+                    n2.on("input", function(msg) {
+                        cnt++;
+                        if (prev_msg == undefined) {
+                            prev_msg = msg;
+                        }
+                        else {
+                            msg.should.not.equal(prev_msg);
+                        }
+                        if (cnt == 2) {
+                            done();
+                        }
+                    });
+                    n1.receive({payload:data,topic: "bar"});
+                });
+            });
+        });
+
     });
 
 });

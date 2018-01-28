@@ -45,15 +45,16 @@ module.exports = function(RED) {
                             //if (node.ret === "val")  { pay2 = $(this).val(); }
                             /* istanbul ignore else */
                             if (pay2) {
-                                msg.payload = pay2;
-                                msg.parts = {
+                                var new_msg = RED.util.cloneMessage(msg);
+                                new_msg.payload = pay2;
+                                new_msg.parts = {
                                     id: msg._msgid,
                                     index: index,
                                     count: count,
                                     type: "string",
                                     ch: ""
                                 };
-                                node.send(msg);
+                                node.send(new_msg);
                             }
                         }
                         if (node.as === "single") {
