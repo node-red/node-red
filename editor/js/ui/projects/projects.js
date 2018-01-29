@@ -1015,13 +1015,7 @@ RED.projects = (function() {
                                         };
                                         var encryptionState = $("input[name=projects-encryption-type]:checked").val();
                                         if (encryptionState === 'enabled') {
-                                            var encryptionKeyType = $("input[name=projects-encryption-key]:checked").val();
-                                            if (encryptionKeyType === 'custom') {
-                                                projectData.credentialSecret = emptyProjectCredentialInput.val();
-                                            } else {
-                                                // If 'use default', leave projectData.credentialSecret blank - as that will trigger
-                                                // it to use the default (TODO: if its set...)
-                                            }
+                                            projectData.credentialSecret = emptyProjectCredentialInput.val();
                                         } else {
                                             // Disabled encryption by explicitly setting credSec to false
                                             projectData.credentialSecret = false;
