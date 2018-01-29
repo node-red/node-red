@@ -24,7 +24,7 @@ function getListenPath() {
     var fn = 'node-red-git-askpass-'+seed+'-sock';
     var listenPath;
     if (process.platform === 'win32') {
-        listenPath = '\\\\.\\pipe\\'+getListenPath;
+        listenPath = '\\\\.\\pipe\\'+fn;
     } else {
         listenPath = path.join(process.env['XDG_RUNTIME_DIR'] || os.tmpdir(), fn);
     }
