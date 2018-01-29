@@ -58,7 +58,7 @@ describe("localfilesystem/projects/git/authWriter", function() {
             child_process.exec('"'+process.execPath+'" "'+authWriter+'" "'+listenPath+'" TEST_PHRASE_FOO',{cwd:__dirname}, (error,stdout,stderr) => {
                 server.close();
                 try {
-                    error.should.equal(0);
+                    should.not.exist(error);
                     receivedData.should.eql("TEST_PHRASE_FOO\n");
                     done();
                 } catch(err) {
