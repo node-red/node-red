@@ -40,7 +40,7 @@ module.exports = {
         redNodes.addFlow(flow).then(function(id) {
             log.audit({event: "flow.add",id:id},req);
             res.json({id:id});
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             log.audit({event: "flow.add",error:err.code||"unexpected_error",message:err.toString()},req);
             res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
         })
@@ -53,7 +53,7 @@ module.exports = {
             redNodes.updateFlow(id,flow).then(function() {
                 log.audit({event: "flow.update",id:id},req);
                 res.json({id:id});
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             })

@@ -301,7 +301,7 @@ function loadNodeSet(node) {
                     node.enabled = true;
                     node.loaded = true;
                     return node;
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     node.err = err;
                     return node;
                 });

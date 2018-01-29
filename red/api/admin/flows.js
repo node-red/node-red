@@ -54,7 +54,7 @@ module.exports = {
                 } else {
                     res.json({rev:flowId});
                 }
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 log.warn(log._("api.flows.error-reload",{message:err.message}));
                 log.warn(err.stack);
                 res.status(500).json({error:"unexpected_error", message:err.message});
@@ -77,7 +77,7 @@ module.exports = {
                 } else if (version === "v2") {
                     res.json({rev:flowId});
                 }
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 log.warn(log._("api.flows.error-save",{message:err.message}));
                 log.warn(err.stack);
                 res.status(500).json({error:"unexpected_error", message:err.message});

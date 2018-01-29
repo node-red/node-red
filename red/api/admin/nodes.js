@@ -81,7 +81,7 @@ module.exports = {
                 log.audit({event: "nodes.install",module:node.module,version:node.version},req);
                 res.json(info);
             }
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             if (err.code === 404) {
                 log.audit({event: "nodes.install",module:node.module,version:node.version,error:"not_found"},req);
                 res.status(404).end();
@@ -117,7 +117,7 @@ module.exports = {
                 events.emit("runtime-event",{id:"node/removed",retain:false,payload:list});
                 log.audit({event: "nodes.remove",module:mod},req);
                 res.status(204).end();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 log.audit({event: "nodes.remove",module:mod,error:err.code||"unexpected_error",message:err.toString()},req);
                 res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
             });

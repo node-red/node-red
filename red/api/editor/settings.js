@@ -90,7 +90,7 @@ module.exports = {
         settings.setUserSettings(username, currentSettings).then(function() {
             log.audit({event: "settings.update",username:username},req);
             res.status(204).end();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
             res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
         });
