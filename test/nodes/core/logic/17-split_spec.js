@@ -874,6 +874,45 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should redece messages with array result', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$append($A,[payload])",
+                     reduceInit:"[]",
+                     reduceInitType:"json",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    var payload = msg.payload;
+                    payload.length.should.equal(2);
+                    if (count == 0) {
+                        payload[0].should.equal(1);
+                        payload[1].should.equal(2);
+                    }
+                    else if (count == 1){
+                        payload[0].should.equal(3);
+                        payload[1].should.equal(4);
+                        done();
+                    }
+                    count++;
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:1, parts:{index:0, count:2, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:2, id:222}});
+            n1.receive({payload:3, parts:{index:2, count:2, id:333}});
+            n1.receive({payload:4, parts:{index:3, count:2, id:333}});
+        });
+    });
+
     it('should handle too many pending messages for reduce mode', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
