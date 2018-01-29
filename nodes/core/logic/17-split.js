@@ -71,7 +71,8 @@ module.exports = function(RED) {
             if (msg.hasOwnProperty("payload")) {
                 if (msg.hasOwnProperty("parts")) { msg.parts = { parts:msg.parts }; } // push existing parts to a stack
                 else { msg.parts = {}; }
-                msg.parts.id = msg._msgid;  // use the existing _msgid by default.
+                msg.parts.id = RED.util.generateId();  // generate a random id
+                delete msg._msgid;
                 if (typeof msg.payload === "string") { // Split String into array
                     msg.payload = (node.remainder || "") + msg.payload;
                     msg.parts.type = "string";
@@ -628,7 +629,7 @@ module.exports = function(RED) {
                 group.msg = msg;
                 var tcnt = group.targetCount;
                 if (msg.hasOwnProperty("parts")) { tcnt = group.targetCount || msg.parts.count; }
-               if ((tcnt > 0 && group.currentCount >= tcnt) || msg.hasOwnProperty('complete')) {
+                if ((tcnt > 0 && group.currentCount >= tcnt) || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
             } catch(err) {

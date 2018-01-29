@@ -70,6 +70,9 @@ function start() {
             wsServer.on('connection',function(ws) {
                 log.audit({event: "comms.open"});
                 var pendingAuth = (settings.adminAuth != null);
+                ws._nr_stack = [];
+                ws._nr_ok2tx = true;
+
                 if (!pendingAuth) {
                     activeConnections.push(ws);
                 } else {
@@ -190,23 +193,22 @@ function publish(topic,data,retain) {
     }
 }
 
-var stack = [];
-var ok2tx = true;
 function publishTo(ws,topic,data) {
-    if (topic && data) { stack.push({topic:topic,data:data}); }
-
-    if (ok2tx && (stack.length > 0)) {
-        ok2tx = false;
+    if (topic && data) {
+        ws._nr_stack.push({topic:topic,data:data});
+    }
+    if (ws._nr_ok2tx && (ws._nr_stack.length > 0)) {
+        ws._nr_ok2tx = false;
         try {
-            ws.send(JSON.stringify(stack));
+            ws.send(JSON.stringify(ws._nr_stack));
         } catch(err) {
             removeActiveConnection(ws);
             removePendingConnection(ws);
             log.warn(log._("comms.error-send",{message:err.toString()}));
         }
-        stack = [];
-        var txtout = setTimeout(function() {
-            ok2tx = true;
+        ws._nr_stack = [];
+        setTimeout(function() {
+            ws._nr_ok2tx = true;
             publishTo(ws);
         }, 50);  // TODO: OK so a 50mS update rate should prob not be hard-coded
     }
