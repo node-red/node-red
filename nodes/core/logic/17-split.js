@@ -273,7 +273,7 @@ module.exports = function(RED) {
         var is_right = node.reduce_right;
         var flag = is_right ? -1 : 1;
         var msgs = group.msgs;
-        var accum = node.reduce_init;
+        var accum = eval_exp(node, node.exp_init, node.exp_init_type);
         var reduce_exp = node.reduce_exp;
         var reduce_fixup = node.reduce_fixup;
         var count = group.count;
@@ -389,13 +389,12 @@ module.exports = function(RED) {
 
         this.reduce = (this.mode === "reduce");
         if (this.reduce) {
-            var exp_init = n.reduceInit;
-            var exp_init_type = n.reduceInitType;
+            this.exp_init = n.reduceInit;
+            this.exp_init_type = n.reduceInitType;
             var exp_reduce = n.reduceExp;
             var exp_fixup = exp_or_undefined(n.reduceFixup);
             this.reduce_right = n.reduceRight;
             try {
-                this.reduce_init = eval_exp(this, exp_init, exp_init_type);
                 this.reduce_exp = RED.util.prepareJSONataExpression(exp_reduce, this);
                 this.reduce_fixup = (exp_fixup !== undefined) ? RED.util.prepareJSONataExpression(exp_fixup, this) : undefined;
             } catch(e) {
