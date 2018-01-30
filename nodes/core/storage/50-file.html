@@ -100,6 +100,7 @@
     <p>On Windows, path separators may need to be escaped, for example: <code>\\Users\\myUser</code>.</p>
     <p>Optionally, a text file can be split into lines, outputting one message per line, or a binary file
     file into smaller buffer chunks, the chunk size is operating system dependant, but typically 64k (linux/mac) or 41k (Windows).</p>
+    <p>If split the outgoing messages will also have a <code>parts</code> property set.</p>
     <h4>Legacy error handling</h4>
     <p>Before Node-RED 0.17, if this node hit an error whilst reading the file, it would
     send a message with no <code>msg.payload</code> and <code>msg.error</code> set to the
