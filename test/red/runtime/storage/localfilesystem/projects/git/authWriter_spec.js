@@ -29,7 +29,7 @@ function getListenPath() {
     var fn = 'node-red-git-askpass-'+seed+'-sock';
     var listenPath;
     if (process.platform === 'win32') {
-        listenPath = '\\\\.\\pipe\\'+getListenPath;
+        listenPath = '\\\\.\\pipe\\'+fn;
     } else {
         listenPath = path.join(process.env['XDG_RUNTIME_DIR'] || os.tmpdir(), fn);
     }
@@ -55,9 +55,10 @@ describe("localfilesystem/projects/git/authWriter", function() {
         var listenPath = getListenPath();
 
         server.listen(listenPath, function(ready) {
-            child_process.exec(process.execPath+' "'+authWriter+'" "'+listenPath+'" TEST_PHRASE_FOO',{cwd:__dirname}, (error,stdout,stderr) => {
+            child_process.exec('"'+process.execPath+'" "'+authWriter+'" "'+listenPath+'" TEST_PHRASE_FOO',{cwd:__dirname}, (error,stdout,stderr) => {
                 server.close();
                 try {
+                    should.not.exist(error);
                     receivedData.should.eql("TEST_PHRASE_FOO\n");
                     done();
                 } catch(err) {

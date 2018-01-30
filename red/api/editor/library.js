@@ -95,7 +95,7 @@ module.exports = {
     },
     get: function(req,res) {
         if (req.params[0].indexOf("_examples_/") === 0) {
-            var m = /^_examples_\/([^\/]+)\/(.*)$/.exec(req.params[0]);
+            var m = /^_examples_\/(@.*?\/[^\/]+|[^\/]+)\/(.*)$/.exec(req.params[0]);
             if (m) {
                 var module = m[1];
                 var path = m[2];
