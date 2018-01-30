@@ -15,6 +15,9 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
+var fs = require("fs");
+var fspath = require('path');
 var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -27,7 +30,7 @@ var auth = require("../../../../red/api/auth");
 
 describe("api/editor/library", function() {
 
-    function initLibrary(_flows,_libraryEntries,_examples) {
+    function initLibrary(_flows,_libraryEntries,_examples,_exampleFlowPathFunction) {
         var flows = _flows;
         var libraryEntries = _libraryEntries;
         library.init(app,{
@@ -88,7 +91,8 @@ describe("api/editor/library", function() {
             nodes: {
                 getNodeExampleFlows: function() {
                     return _examples;
-                }
+                },
+                getNodeExampleFlowPath: _exampleFlowPathFunction
             }
         });
     }
@@ -100,6 +104,13 @@ describe("api/editor/library", function() {
             app.get("/library/flows",library.getAll);
             app.post(new RegExp("/library/flows\/(.*)"),library.post);
             app.get(new RegExp("/library/flows\/(.*)"),library.get);
+            app.response.sendFile = function (path) {
+                app.response.json.call(this, {sendFile: path});
+            };
+            sinon.stub(fs,"statSync",function() { return true; });
+        });
+        after(function() {
+            fs.statSync.restore();
         });
         it('returns empty result', function(done) {
             initLibrary({},{flows:{}});
@@ -197,6 +208,42 @@ describe("api/editor/library", function() {
                     res.body.should.have.property('d');
                     res.body.d.should.have.property('_examples_');
                     should.deepEqual(res.body.d._examples_,examples);
+                    done();
+                });
+        });
+
+        it('can retrieve an example flow', function(done) {
+            var examples = {"d":{"node-module":{"f":["example-one"]}}};
+            initLibrary({},{},examples,function(module,path) {
+                return module + ':' + path
+            });
+            request(app)
+                .get('/library/flows/_examples_/node-module/example-one')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.have.property('sendFile',
+                        'node-module:example-one');
+                    done();
+                });
+        });
+
+        it('can retrieve an example flow in an org scoped package', function(done) {
+            var examples = {"d":{"@org_scope/node_package":{"f":["example-one"]}}};
+            initLibrary({},{},examples,function(module,path) {
+                return module + ':' + path
+            });
+            request(app)
+                .get('/library/flows/_examples_/@org_scope/node_package/example-one')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.have.property('sendFile',
+                        '@org_scope/node_package:example-one');
                     done();
                 });
         });
