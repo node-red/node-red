@@ -66,6 +66,24 @@ describe('html node', function() {
         });
     });
 
+    it('should retrieve header contents if asked to by msg.select - alternative property', function(done) {
+        fs.readFile(file, 'utf8', function(err, data) {
+            var flow = [{id:"n1",type:"html",property:"foo",wires:[["n2"]],func:"return msg;"},
+                        {id:"n2", type:"helper"}];
+
+            helper.load(htmlNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    should.equal(msg.foo, 'This is a test page for node 70-HTML');
+                    done();
+                });
+                n1.receive({foo:data,topic:"bar",select:"h1"});
+            });
+        });
+    });
+
     it('should emit an empty array if no matching elements', function(done) {
         fs.readFile(file, 'utf8', function(err, data) {
             var flow = [{id:"n1",type:"html",wires:[["n2"]],func:"return msg;"},
@@ -249,7 +267,7 @@ describe('html node', function() {
             msg.parts.should.have.property('ch', '');
         }
 
-        it('should retrieve list contents as html as default with output as multiple msgs ', function(done) {
+        it('should retrieve list contents as html as default with output as multiple msgs', function(done) {
             fs.readFile(file, 'utf8', function(err, data) {
                 var flow = [{id:"n1",type:"html",wires:[["n2"]],tag:"ul",as:"multi"},
                             {id:"n2", type:"helper"}];
@@ -274,6 +292,36 @@ describe('html node', function() {
                         }
                     });
                     n1.receive({payload:data,topic: "bar"});
+                });
+            });
+        });
+
+
+        it('should retrieve list contents as html as default with output as multiple msgs - alternative property', function(done) {
+            fs.readFile(file, 'utf8', function(err, data) {
+                var flow = [{id:"n1",type:"html",property:"foo",wires:[["n2"]],tag:"ul",as:"multi"},
+                            {id:"n2", type:"helper"}];
+
+                helper.load(htmlNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    n2.on("input", function(msg) {
+                        cnt++;
+                        msg.should.have.property('topic', 'bar');
+                        check_parts(msg, cnt -1, 2);
+                        if (cnt !== 1 && cnt !== 2) {
+                            return false;
+                        }
+                        if (cnt === 1) {
+                            msg.foo.indexOf("<li>Apple</li>").should.be.above(-1);
+                            msg.foo.indexOf("<li>Pear</li>").should.be.above(-1);
+                        } else if (cnt === 2) {
+                            msg.foo.indexOf("<li>Potato</li>").should.be.above(-1);
+                            msg.foo.indexOf("<li>Parsnip</li>").should.be.above(-1);
+                            done();
+                        }
+                    });
+                    n1.receive({foo:data, topic:"bar"});
                 });
             });
         });

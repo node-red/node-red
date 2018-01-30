@@ -1,6 +1,10 @@
 
 <script type="text/x-red" data-template-name="html">
     <div class="form-row">
+        <label for="node-input-property"><i class="fa fa-ellipsis-h"></i> <span data-i18n="node-red:common.label.property"></span></label>
+        <input type="text" id="node-input-property" style="width:70%;"/>
+    </div>
+    <div class="form-row">
         <label for="node-input-tag"><i class="fa fa-filter"></i> <span data-i18n="html.label.select"></span></label>
         <input type="text" id="node-input-tag" placeholder="h1">
     </div>
@@ -40,7 +44,7 @@
     <dl class="message-properties">
         <dt>payload <span class="property-type">array | string</span></dt>
         <dd>the result can be either a single message with a payload containing an array of the matched elements, or multiple
-           messages that each contain a matched element.</dd>
+           messages that each contain a matched element. If multiple messages are sent they will also have <code>parts</code> set.</dd>
     </dl>
     <h3>Details</h3>
     <p>This node supports a combination of CSS and jQuery selectors. See the
