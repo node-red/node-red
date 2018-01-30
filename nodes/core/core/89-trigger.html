@@ -70,7 +70,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="trigger">
-    <p>Sends a message if nothing is received within a set time interval or until reset.</p>
+    <p>When triggered, can send a message, and then optionally a second message, unless extended or reset.</p>
 
     <h3>Inputs</h3>
     <dl class="message-properties">
@@ -95,6 +95,8 @@
     progress will be cleared and no message triggered.</p>
     <p>The node can be configured to resend a message at a regular interval until it
     is reset by a received message.</p>
+    <p>Optionally, the node can be configured to treat messages with <code>msg.topic</code> as if they
+    are separate streams.</p>
 </script>
 
 <script type="text/javascript">
