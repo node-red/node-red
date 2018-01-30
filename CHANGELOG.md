@@ -5,7 +5,7 @@ Runtime
  - Beta: Projects - must be enabled in settings file
  - Allow port zero for Express (#1363)
  - Better error reporting when module provides duplicate type
- - Update jsonata to 1.4.1
+ - Update jsonata to 1.5.0
  - add express-session memorystore without leaks (#1435)
  - Allow adminAuth.user to be a Function Fixes #1461
  - Ensure RED.server is set even if admin api disabled
