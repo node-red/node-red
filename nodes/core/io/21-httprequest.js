@@ -135,7 +135,7 @@ module.exports = function(RED) {
             }
             var payload = null;
 
-            if (method !== 'GET' && typeof msg.payload !== "undefined") {
+            if (method !== 'GET' && method !== 'HEAD' && typeof msg.payload !== "undefined") {
                 if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
                     payload = msg.payload;
                 } else if (typeof msg.payload == "number") {
