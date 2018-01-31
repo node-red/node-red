@@ -781,9 +781,14 @@ function createDefaultProject(user, project) {
                     files.push(baseCredentialFileName);
                     flowFilePath = fspath.join(projectPath,baseFlowFileName);
                     credsFilePath = fspath.join(projectPath,baseCredentialFileName);
-                    log.trace("Migrating "+project.files.oldFlow+" to "+flowFilePath);
+                    if (fs.existsSync(project.files.oldFlow)) {
+                        log.trace("Migrating "+project.files.oldFlow+" to "+flowFilePath);
+                        promises.push(fs.copy(project.files.oldFlow,flowFilePath));
+                    } else {
+                        log.trace(project.files.oldFlow+" does not exist - creating blank file");
+                        promises.push(util.writeFile(flowFilePath,"[]"));
+                    }
                     log.trace("Migrating "+project.files.oldCredentials+" to "+credsFilePath);
-                    promises.push(fs.copy(project.files.oldFlow,flowFilePath));
                     runtime.nodes.setCredentialSecret(project.credentialSecret);
                     promises.push(runtime.nodes.exportCredentials().then(function(creds) {
                         var credentialData;
