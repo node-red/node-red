@@ -650,10 +650,10 @@ RED.sidebar.versionControl = (function() {
                             // done(error,null);
                         },
                         200: function(data) {
-                            RED.projects.refresh(function() {
-                                closeBranchBox(function() {
-                                    spinner.remove();
-                                });
+                            // Changing branch will trigger a runtime event
+                            // that leads to a project refresh.
+                            closeBranchBox(function() {
+                                spinner.remove();
                             });
                         },
                         400: {
@@ -672,7 +672,9 @@ RED.sidebar.versionControl = (function() {
                         },
                     }
                 },body).always(function(){
-                    RED.deploy.setDeployInflight(false);
+                    setTimeout(function() {
+                        RED.deploy.setDeployInflight(false);
+                    },500);
                 });
             }
         });
