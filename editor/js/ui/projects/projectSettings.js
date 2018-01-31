@@ -1193,6 +1193,7 @@ RED.projects.settings = (function() {
                 editRepoButton.attr('disabled',true);
                 addRemoteDialog.slideDown(200, function() {
                     addRemoteDialog[0].scrollIntoView();
+                    validateForm();
                 });
             });
 
@@ -1287,7 +1288,7 @@ RED.projects.settings = (function() {
 
         var validateForm = function() {
             var validName = /^[a-zA-Z0-9\-_]+$/.test(remoteNameInput.val());
-            var validRepo = /^(?:git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+\.git(?:\/?|\#[\d\w\.\-_]+?)$/.test(remoteURLInput.val());
+            var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\.git)?(?:\/?|\#[\d\w\.\-_]+?)$/.test(remoteURLInput.val());
             saveButton.attr('disabled',(!validName || !validRepo))
             remoteNameInput.toggleClass('input-error',remoteNameInputChanged&&!validName);
             if (popover) {

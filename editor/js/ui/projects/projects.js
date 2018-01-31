@@ -681,7 +681,7 @@ RED.projects = (function() {
                             } else if (projectType === 'clone') {
                                 var repo = projectRepoInput.val();
 
-                                var validRepo = /^(?:git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+\.git(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
+                                var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
                                 if (!validRepo) {
                                     if (projectRepoChanged) {
                                         projectRepoInput.addClass("input-error");
@@ -700,7 +700,7 @@ RED.projects = (function() {
                                     $(".projects-dialog-screen-create-row-creds").show();
                                     $(".projects-dialog-screen-create-row-sshkey").hide();
                                 } else {
-                                    $(".projects-dialog-screen-create-row-creds").show();
+                                    $(".projects-dialog-screen-create-row-creds").hide();
                                     $(".projects-dialog-screen-create-row-sshkey").hide();
                                 }
 
@@ -888,13 +888,13 @@ RED.projects = (function() {
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
                         $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
                         projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
-                        $('<label class="projects-edit-form-sublabel"><small>https:// or ssh://</small></label>').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
 
                         var projectRepoChanged = false;
                         projectRepoInput.on("change keyup paste",function() {
                             projectRepoChanged = true;
                             var repo = $(this).val();
-                            var m = /\/([^/]+)\.git/.exec(repo);
+                            var m = /\/([^/]+?)(?:\.git)?$/.exec(repo);
                             if (m) {
                                 var projectName = projectNameInput.val();
                                 if (projectName === "" || projectName === autoInsertedName) {
