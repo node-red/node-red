@@ -1254,14 +1254,16 @@ RED.projects.settings = (function() {
                                                         row.fadeOut(200,function() {
                                                             remotesList.editableList('removeItem',entry);
                                                             setTimeout(spinner.remove, 100);
-                                                            activeProject.git.remotes = {};
-                                                            data.remotes.forEach(function(remote) {
-                                                                var name = remote.name;
-                                                                delete remote.name;
-                                                                activeProject.git.remotes[name] = remote;
-                                                            });
                                                             if (data.remotes.length === 0) {
+                                                                delete activeProject.git.remotes;
                                                                 remotesList.editableList('addItem',emptyItem);
+                                                            } else {
+                                                                activeProject.git.remotes = {};
+                                                                data.remotes.forEach(function(remote) {
+                                                                    var name = remote.name;
+                                                                    delete remote.name;
+                                                                    activeProject.git.remotes[name] = remote;
+                                                                });
                                                             }
                                                         });
                                                     },

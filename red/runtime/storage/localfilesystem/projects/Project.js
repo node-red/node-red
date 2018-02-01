@@ -179,15 +179,19 @@ Project.prototype.loadRemotes = function() {
         project.branches = {};
         return project.status();
     }).then(function() {
-        var allRemotes = Object.keys(project.remotes);
-        var match = "";
-        if (project.branches.remote) {
-            allRemotes.forEach(function(remote) {
-                if (project.branches.remote.indexOf(remote) === 0 && match.length < remote.length) {
-                    match = remote;
-                }
-            });
-            project.currentRemote = project.parseRemoteBranch(project.branches.remote).remote;
+        if (project.remotes) {
+            var allRemotes = Object.keys(project.remotes);
+            var match = "";
+            if (project.branches.remote) {
+                allRemotes.forEach(function(remote) {
+                    if (project.branches.remote.indexOf(remote) === 0 && match.length < remote.length) {
+                        match = remote;
+                    }
+                });
+                project.currentRemote = project.parseRemoteBranch(project.branches.remote).remote;
+            }
+        } else {
+            delete project.currentRemote;
         }
     });
 }
