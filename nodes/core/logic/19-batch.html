@@ -14,8 +14,6 @@
   limitations under the License.
 -->
 
-<!DOCTYPE html>
-
 <script type="text/x-red" data-template-name="batch">
     <div class="form-row">
         <label for="node-input-mode"><span data-i18n="batch.mode.label"></span></label>
@@ -83,10 +81,10 @@
             arrive within the interval, the node can optionally send on an empty message.</dd>
 
         <dt>Concatenate Sequences</dt>
-        <dd>creates a message sequence by concatenating incoming sequences. Each sequence
-            must have a <code>msg.topic</code> property to identify it. The node is
-            configured with a list of <code>topic</code> values to identify the order
-            sequences are concatenated.
+        <dd>creates a message sequence by concatenating incoming sequences. Each message
+            must have a <code>msg.topic</code> property and a <code>msg.parts</code> property
+            identifying its sequence. The node is configured with a list of <code>topic</code>
+            values to identify the order sequences are concatenated.
             </dd>
         </dd>
     </dl>
