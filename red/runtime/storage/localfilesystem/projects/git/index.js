@@ -63,6 +63,10 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_delete_branch_unmerged";
                 } else if (/remote .* already exists/.test(stderr)) {
                     err.code = "git_remote_already_exists";
+                } else if (/does not appear to be a git repository/.test(stderr)) {
+                    err.code = "git_not_a_repository";
+                } else if (/Repository not found/i.test(stderr)) {
+                    err.code = "git_repository_not_found";
                 }
                 return reject(err);
             }

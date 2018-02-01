@@ -889,12 +889,18 @@ RED.projects = (function() {
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
                         $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
                         projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
-                        $('<label class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
+                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
 
                         var projectRepoChanged = false;
+                        var lastProjectRepo = "";
                         projectRepoInput.on("change keyup paste",function() {
                             projectRepoChanged = true;
                             var repo = $(this).val();
+                            if (lastProjectRepo !== repo) {
+                                $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                            }
+                            lastProjectRepo = repo;
+
                             var m = /\/([^/]+?)(?:\.git)?$/.exec(repo);
                             if (m) {
                                 var projectName = projectNameInput.val();
@@ -1069,6 +1075,14 @@ RED.projects = (function() {
                                         })
                                     }
 
+                                    $(".projects-dialog-screen-create-row-auth-error").hide();
+
+                                    projectRepoUserInput.removeClass("input-error");
+                                    projectRepoPasswordInput.removeClass("input-error");
+                                    projectRepoSSHKeySelect.removeClass("input-error");
+                                    projectRepoPassphrase.removeClass("input-error");
+
+
                                     RED.deploy.setDeployInflight(true);
                                     RED.projects.settings.switchProject(projectData.name);
 
@@ -1089,6 +1103,15 @@ RED.projects = (function() {
                                                 },
                                                 'git_connection_failed': function(error) {
                                                     projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Connection failed");
+                                                },
+                                                'git_not_a_repository': function(error) {
+                                                    projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Not a git repository");
+                                                },
+                                                'git_repository_not_found': function(error) {
+                                                    projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Repository not found");
                                                 },
                                                 'git_auth_failed': function(error) {
                                                     $(".projects-dialog-screen-create-row-auth-error").show();
