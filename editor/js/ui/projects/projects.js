@@ -141,10 +141,10 @@ RED.projects = (function() {
             'project-details': (function() {
                 var projectNameInput;
                 var projectSummaryInput;
+                var projectNameValid;
                 return {
                     content: function(options) {
                         var projectList = null;
-                        var projectNameValid;
 
                         var pendingFormValidation = false;
                         $.getJSON("projects", function(data) {
@@ -193,7 +193,7 @@ RED.projects = (function() {
                                 }
                                 projectNameLastChecked = projectName;
                             }
-                            valid = projectNameValid;
+                            valid = !projectName?false:projectNameValid;
                             $("#projects-dialog-create-name").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
                         }
 
@@ -206,7 +206,6 @@ RED.projects = (function() {
 
                         var projectNameInputChanged = false;
                         var projectNameLastChecked = "";
-                        var projectNameValid;
                         var checkProjectName;
                         var autoInsertedName = "";
 
