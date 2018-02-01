@@ -238,7 +238,7 @@ RED.projects = (function() {
 
                         setTimeout(function() {
                             projectNameInput.focus();
-                            validateForm();
+                            projectNameInput.change();
                         },50);
                         return container;
                     },
