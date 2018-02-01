@@ -29,11 +29,12 @@
         "label": {
             "view": {
                 "view": "显示",
+                "grid": "网格",
                 "showGrid": "显示网格",
                 "snapGrid": "对齐网格",
                 "gridSize": "网格尺寸",
                 "textDir": "文本方向",
-                "defaultDir": "默认",
+                "defaultDir": "默认方向",
                 "ltr": "从左到右",
                 "rtl": "从右到左",
                 "auto": "上下文"
@@ -41,12 +42,15 @@
             "sidebar": {
                 "show": "显示侧边栏"
             },
-            "userSettings": "设定",
+            "settings": "设置",
+            "userSettings": "用户设置",
+            "nodes": "节点",
             "displayStatus": "显示节点状态",
-            "displayConfig": "配置节点设定",
+            "displayConfig": "修改节点配置",
             "import": "导入",
             "export": "导出",
-            "search": "查询",
+            "search": "查找流程",
+            "searchInput": "查找流程",
             "clipboard": "剪贴板",
             "library": "库",
             "examples": "例子",
@@ -60,15 +64,23 @@
             "keyboardShortcuts": "键盘快捷方式",
             "login": "登陆",
             "logout": "退出",
-            "editPalette": "编辑调面板",
+            "editPalette":"节点管理",
+            "other": "其他",
             "showTips": "显示小提示"
         }
     },
     "user": {
         "loggedInAs": "作为__name__登陆",
+        "username": "账号",
+        "password": "密码",
         "login": "登陆",
         "loginFailed": "登陆失败",
-        "notAuthorized": "未授权"
+        "notAuthorized": "未授权",
+        "errors": {
+            "settings": "设置信息需要登陆后才能访问",
+            "deploy": "改动需要登陆后才能部署",
+            "notAuthorized": "此操作需要登陆后才能执行"
+        }
     },
     "notification": {
         "warning": "<strong>警告</strong>: __message__",
@@ -192,10 +204,10 @@
         "configDelete": "删除",
         "nodesUse": "__count__个节点使用此配置",
         "nodesUse_plural": "__count__个节点使用此配置",
-        "addNewConfig": "添加新的__type__配置节点",
+        "addNewConfig": "添加新的__type__配置",
         "editNode": "编辑__type__节点",
-        "editConfig": "编辑__type__配置节点",
-        "addNewType": "添加新节点__type__...",
+        "editConfig": "编辑__type__配置",
+        "addNewType": "添加新的__type__节点",
         "nodeProperties": "节点属性",
         "portLabels": "端口标签",
         "labelInputs": "输入",
@@ -347,18 +359,31 @@
     "sidebar": {
         "info": {
             "name": "节点信息",
+            "tabName": "名称",
             "label": "信息",
             "node": "节点",
             "type": "类型",
             "id": "ID",
+            "status": "状态",
+            "enabled": "启用",
+            "disabled": "禁用",
             "subflow": "子流程",
             "instances": "实例",
             "properties": "属性",
             "info": "信息",
             "blank": "空白",
             "null": "空",
+            "showMore": "展开",
+            "showLess": "收起",
+            "flow": "流程",
+            "selection":"选择",
+            "nodes":"__count__ 个节点",
+            "flowDesc": "流程描述",
+            "subflowDesc": "子流程描述",
+            "nodeHelp": "节点帮助",
+            "none":"无",
             "arrayItems": "__count__个项目",
-            "showTips": "您可以从设置面板打开提示"
+            "showTips": "您可以从设置面板启用提示信息"
         },
         "config": {
             "name": "配置节点",
@@ -369,11 +394,20 @@
             "flows": "流程",
             "filterUnused": "未使用",
             "filterAll": "所有",
-            "filtered": "__count__个隐藏"
+            "filtered": "__count__ 个隐藏"
         },
         "palette": {
-            "name": "面板管理",
-            "label": "面板"
+            "name": "节点管理",
+            "label": "节点"
+        },
+        "project": {
+            "label": "项目",
+            "name": "项目",
+            "description": "描述",
+            "dependencies": "依赖",
+            "settings": "设置",
+            "editDescription": "编辑项目描述",
+            "editDependencies": "编辑项目依赖"
         }
     },
     "typedInput": {
@@ -383,6 +417,7 @@
             "re": "正则表达式",
             "bool": "布尔",
             "json": "JSON",
+            "bin": "二进制流",
             "date": "时间戳"
         }
     },
