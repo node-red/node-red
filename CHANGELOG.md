@@ -19,7 +19,7 @@ Node Fixes
  - Add HEAD to list of methods with no body in http req node #1598
  - Do not include payload in GET requests Fixes #1598
  - Update sort/batch docs Fixes #1601
-
+ - Don't assume node has defaults when exporting icon property
 
 
 #### 0.18: Milestone Release

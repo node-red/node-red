@@ -501,7 +501,7 @@ RED.nodes = (function() {
             if (n.outputs > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
                 node.outputLabels = n.outputLabels.slice();
             }
-            if (!n._def.defaults.hasOwnProperty("icon") && n.icon) {
+            if ((!n._def.defaults || !n._def.defaults.hasOwnProperty("icon")) && n.icon) {
                 var defIcon = RED.utils.getDefaultNodeIcon(n._def, n);
                 if (n.icon !== defIcon.module+"/"+defIcon.file) {
                     node.icon = n.icon;
