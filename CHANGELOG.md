@@ -1,3 +1,21 @@
+#### 0.18.1: Maintenance Release
+
+Projects
+
+ - Handle more repo clone error cases
+ - Relax validation of git urls
+ - Revalidate project name on return to project-details view
+ - Avoid unnecessary project refresh on branch-switch Fixes #1597
+ - Add support for file:// git urls
+ - Handle project first-run without existing flow file
+
+Node Fixes
+
+ - Trigger node migration - ensure bytopic not blank
+ - Add HEAD to list of methods with no body in http req node #1598
+ - Do not include payload in GET requests Fixes #1598
+
+
 #### 0.18: Milestone Release
 
 Runtime
