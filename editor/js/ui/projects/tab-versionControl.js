@@ -894,6 +894,9 @@ RED.sidebar.versionControl = (function() {
                             'unexpected_error': function(error) {
                                 console.log(error);
                                 // done(error,null);
+                            },
+                            'git_pull_unrelated_history': function(error) {
+                                RED.notify("Unable to pull remote changes; refusing to merge unrelated histories.","error");
                             }
                         },
                     }
