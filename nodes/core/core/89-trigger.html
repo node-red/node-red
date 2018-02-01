@@ -177,6 +177,10 @@
                 ]
             });
 
+            if (this.bytopic === undefined) {
+                $("#node-input-bytopic").val("all");
+            }
+
             if (this.duration == "0") {
                 $("#node-then-type").val("block");
             }
