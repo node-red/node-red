@@ -681,7 +681,8 @@ RED.projects = (function() {
                             } else if (projectType === 'clone') {
                                 var repo = projectRepoInput.val();
 
-                                var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
+                                // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
+                                var validRepo = !/\s/.test(repo);
                                 if (!validRepo) {
                                     if (projectRepoChanged) {
                                         projectRepoInput.addClass("input-error");
@@ -690,7 +691,7 @@ RED.projects = (function() {
                                 } else {
                                     projectRepoInput.removeClass("input-error");
                                 }
-                                if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repo)) {
+                                if (/^(?:ssh|[\S]+?@[\S]+?):(?:\/\/)?/.test(repo)) {
                                     $(".projects-dialog-screen-create-row-creds").hide();
                                     $(".projects-dialog-screen-create-row-sshkey").show();
                                     // if ( !getSelectedSSHKey(projectRepoSSHKeySelect) ) {
