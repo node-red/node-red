@@ -8,12 +8,18 @@ Projects
  - Avoid unnecessary project refresh on branch-switch Fixes #1597
  - Add support for file:// git urls
  - Handle project first-run without existing flow file
+ - Handle delete of last remote in project settings
+ - Add git_pull_unrelated_history handling
+ - Fix pull/push when no tracked branch
+ - Remember to disable projects in editor when git not found
 
 Node Fixes
 
  - Trigger node migration - ensure bytopic not blank
  - Add HEAD to list of methods with no body in http req node #1598
  - Do not include payload in GET requests Fixes #1598
+ - Update sort/batch docs Fixes #1601
+
 
 
 #### 0.18: Milestone Release
