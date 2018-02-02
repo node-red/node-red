@@ -38,8 +38,8 @@
             "repeat": "重复"
         },
         "timestamp": "时间戳",
-        "none": "空白",
-        "interval": "间隔",
+        "none": "无",
+        "interval": "周期性执行",
         "interval-time": "指定时间段周期性执行",
         "time": "指定时间",
         "seconds": "秒",
@@ -70,10 +70,10 @@
         }
     },
     "catch": {
-        "catch": "检测异常",
-        "catchNodes": "检测到 (__number__)",
+        "catch": "监测所有节点",
+        "catchNodes": "监测__number__个节点",
         "label": {
-            "source": "检测错误来自",
+            "source": "监测范围",
             "node": "节点",
             "type": "类型",
             "selectAll": "全选",
@@ -82,14 +82,14 @@
         },
         "scope": {
             "all": "所有节点",
-            "selected": "已选节点"
+            "selected": "指定节点"
         }
     },
     "status": {
-        "status": "状态 (所有)",
-        "statusNodes": "状态显示(__number__)",
+        "status": "报告所有节点状态",
+        "statusNodes": "报告__number__个节点状态",
         "label": {
-            "source": "状态报告来自",
+            "source": "报告状态范围",
             "node": "节点",
             "type": "类型",
             "selectAll": "全选",
@@ -98,7 +98,7 @@
         },
         "scope": {
             "all": "所有节点",
-            "selected": "已选节点"
+            "selected": "指定节点"
         }
     },
     "debug": {
@@ -178,8 +178,8 @@
             "extraparams": "额外的输入参数"
         },
         "opt": {
-            "exec": "当命令任务完成时 - exec模式",
-            "spawn": "当命令任务进行时 - spawn模式"
+            "exec": "当命令完成时 - exec模式",
+            "spawn": "当命令进行时 - spawn模式"
         },
         "oldrc": "使用旧式输出 (兼容模式)"
     },
@@ -216,10 +216,10 @@
         "delayfixed": "固定延迟时间",
         "delayvarmsg": "允许msg.delay复写延迟时长",
         "randomdelay": "随机延迟",
-        "limitrate": "信息速度限制",
+        "limitrate": "限制信息速率",
         "limitall": "所有信息",
         "limittopic": "每一个msg.topic",
-        "fairqueue": "轮流发每一个topic",
+        "fairqueue": "依次发送每一个topic",
         "timedqueue": "发所有topic",
         "milisecs": "毫秒",
         "secs": "秒",
@@ -428,7 +428,7 @@
             "output": "输出",
             "port": "端口",
             "host": "主机地址",
-            "payload": "有效载荷",
+            "payload": "的有效载荷",
             "delimited": "分隔符号",
             "close-connection": "是否在成功发送每条信息后断开连接?",
             "decode-base64": "用 Base64 解码信息?",
