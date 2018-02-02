@@ -120,10 +120,7 @@ module.exports = function(RED) {
                                 if (node.op2type === "flow" || node.op2type === "global") {
                                     node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
                                 }
-                                if (node.topics.hasOwnProperty(topic)) {
-                                    msg2.payload = node.topics[topic].m2;
-                                }
-                                else { node.error("No topic:"+topic,msg); }  // temporary fix to try to get more data.
+                                msg2.payload = node.topics[topic].m2;
                             }
                             delete node.topics[topic];
                             node.status({});
