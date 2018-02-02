@@ -438,8 +438,9 @@ module.exports = {
                 res.json(data);
             })
             .catch(function(err) {
+                console.log(err);
                 if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
+                    res.status(400).json({error:err.code, message: err.message, remote: err.remote});
                 } else {
                     res.status(400).json({error:"unexpected_error", message:err.toString()});
                 }

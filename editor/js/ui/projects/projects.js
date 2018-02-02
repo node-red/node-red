@@ -691,15 +691,15 @@ RED.projects = (function() {
                                 } else {
                                     projectRepoInput.removeClass("input-error");
                                 }
-                                if (/^(?:ssh|[\S]+?@[\S]+?):(?:\/\/)?/.test(repo)) {
+                                if (/^https?:\/\//.test(repo)) {
+                                    $(".projects-dialog-screen-create-row-creds").show();
+                                    $(".projects-dialog-screen-create-row-sshkey").hide();
+                                } else if (/^(?:ssh|[\S]+?@[\S]+?):(?:\/\/)?/.test(repo)) {
                                     $(".projects-dialog-screen-create-row-creds").hide();
                                     $(".projects-dialog-screen-create-row-sshkey").show();
                                     // if ( !getSelectedSSHKey(projectRepoSSHKeySelect) ) {
                                     //     valid = false;
                                     // }
-                                } else if (/^https?:\/\//.test(repo)) {
-                                    $(".projects-dialog-screen-create-row-creds").show();
-                                    $(".projects-dialog-screen-create-row-sshkey").hide();
                                 } else {
                                     $(".projects-dialog-screen-create-row-creds").hide();
                                     $(".projects-dialog-screen-create-row-sshkey").hide();
@@ -1509,7 +1509,7 @@ RED.projects = (function() {
                     resultCallbackArgs = {error:responses.statusText};
                     return;
                 } else if (options.handleAuthFail !== false && xhr.responseJSON.error === 'git_auth_failed') {
-                    var url = activeProject.git.remotes[options.remote||'origin'].fetch;
+                    var url = activeProject.git.remotes[xhr.responseJSON.remote||options.remote||'origin'].fetch;
 
                     var message = $('<div>'+
                         '<div class="form-row">Authentication required for repository:</div>'+
@@ -1517,7 +1517,10 @@ RED.projects = (function() {
                         '</div>');
 
                     var isSSH = false;
-                    if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(url)) {
+                    if (/^https?:\/\//) {
+                        $('<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
+                        '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
+                    } else if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(url)) {
                         isSSH = true;
                         var row = $('<div class="form-row"></div>').appendTo(message);
                         $('<label for="projects-user-auth-key">SSH Key</label>').appendTo(row);
@@ -1535,9 +1538,6 @@ RED.projects = (function() {
                         row = $('<div class="form-row"></div>').appendTo(message);
                         $('<label for="projects-user-auth-passphrase">Passphrase</label>').appendTo(row);
                         $('<input id="projects-user-auth-passphrase" type="password"></input>').appendTo(row);
-                    } else {
-                        $('<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
-                          '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
                     }
 
                     var notification = RED.notify(message,{
@@ -1575,7 +1575,7 @@ RED.projects = (function() {
 
                                     }
                                     sendRequest({
-                                        url: "projects/"+activeProject.name+"/remotes/"+(options.remote||'origin'),
+                                        url: "projects/"+activeProject.name+"/remotes/"+(xhr.responseJSON.remote||options.remote||'origin'),
                                         type: "PUT",
                                         responses: {
                                             0: function(error) {
