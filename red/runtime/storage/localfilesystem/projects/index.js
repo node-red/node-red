@@ -46,7 +46,6 @@ function init(_settings, _runtime) {
 
     try {
         if (settings.editorTheme.projects.enabled === true) {
-            projectLogMessages.push(log._("storage.localfilesystem.projects.disabled"))
             projectsEnabled = true;
         } else if (settings.editorTheme.projects.enabled === false) {
             projectLogMessages.push(log._("storage.localfilesystem.projects.disabled"))
@@ -92,8 +91,12 @@ function init(_settings, _runtime) {
     if (projectsEnabled) {
         return sshTools.init(settings,runtime).then(function() {
             gitTools.init(_settings, _runtime).then(function(gitConfig) {
-                if (!gitConfig) {
-                    projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
+                if (!gitConfig || /^1\./.test(gitConfig.version)) {
+                    if (!gitConfig) {
+                        projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
+                    } else {
+                        projectLogMessages.push(log._("storage.localfilesystem.projects.git-version-old",{version:gitConfig.version}))
+                    }
                     projectsEnabled = false;
                     try {
                         // As projects have to be turned on, we know this property

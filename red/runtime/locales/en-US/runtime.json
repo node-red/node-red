@@ -148,7 +148,7 @@
                 "disabled": "Projects disabled : editorTheme.projects.enabled=false",
                 "disabledNoFlag": "Projects disabled : set editorTheme.projects.enabled=true to enable",
                 "git-not-found": "Projects disabled : git command not found",
-                "git-version-old": "Projects disabled : git __version__ too old"
+                "git-version-old": "Projects disabled : git __version__ not supported. Requires 2.x"
             }
         }
     }

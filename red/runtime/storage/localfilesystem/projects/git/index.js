@@ -393,9 +393,10 @@ module.exports = {
                         email: globalUserEmail
                     }
                 }
+                log.trace("git init: "+JSON.stringify(result));
                 resolve(result);
             }).catch(function(err) {
-                console.log(err);
+                log.trace("git init: git not found");
                 resolve(null);
             });
         });
