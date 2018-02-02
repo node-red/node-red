@@ -239,7 +239,7 @@
         "managePalette": "管理面板"
     },
     "library": {
-        "openLibrary": "“打开库...",
+        "openLibrary": "打开库...",
         "saveToLibrary": "保存到库...",
         "typeLibrary": "__type__类型库",
         "unnamedType": "无名__type__",
