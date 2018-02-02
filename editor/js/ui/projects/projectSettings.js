@@ -1193,12 +1193,19 @@ RED.projects.settings = (function() {
                 editRepoButton.attr('disabled',true);
                 addRemoteDialog.slideDown(200, function() {
                     addRemoteDialog[0].scrollIntoView();
+                    if (isEmpty) {
+                        remoteNameInput.val('origin');
+                        remoteURLInput.focus();
+                    } else {
+                        remoteNameInput.focus();
+                    }
                     validateForm();
                 });
             });
 
 
         var emptyItem = { empty: true };
+        var isEmpty = true;
         var row = $('<div class="user-settings-row"></div>').appendTo(repoContainer);
         var addRemoteDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
         row = $('<div class="user-settings-row projects-dialog-list"></div>').appendTo(repoContainer);
@@ -1256,6 +1263,7 @@ RED.projects.settings = (function() {
                                                             setTimeout(spinner.remove, 100);
                                                             if (data.remotes.length === 0) {
                                                                 delete activeProject.git.remotes;
+                                                                isEmpty = true;
                                                                 remotesList.editableList('addItem',emptyItem);
                                                             } else {
                                                                 activeProject.git.remotes = {};
@@ -1290,16 +1298,26 @@ RED.projects.settings = (function() {
 
         var validateForm = function() {
             var validName = /^[a-zA-Z0-9\-_]+$/.test(remoteNameInput.val());
+            var repo = remoteURLInput.val();
             // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\.git)?(?:\/?|\#[\d\w\.\-_]+?)$/.test(remoteURLInput.val());
-            var validRepo = !/\s/.test(remoteURLInput.val());
+            var validRepo = repo.length > 0 && !/\s/.test(repo);
+            if (/^https?:\/\/[^/]+@/i.test(repo)) {
+                remoteURLLabel.text("Do not include the username/password in the url");
+                validRepo = false;
+            } else {
+                remoteURLLabel.text("https://, ssh:// or file://");
+            }
             saveButton.attr('disabled',(!validName || !validRepo))
             remoteNameInput.toggleClass('input-error',remoteNameInputChanged&&!validName);
+            remoteURLInput.toggleClass('input-error',remoteURLInputChanged&&!validRepo);
             if (popover) {
                 popover.close();
                 popover = null;
             }
         };
         var popover;
+        var remoteNameInputChanged = false;
+        var remoteURLInputChanged = false;
 
         $('<div class="projects-dialog-list-dialog-header">').text('Add remote').appendTo(addRemoteDialog);
 
@@ -1309,11 +1327,14 @@ RED.projects.settings = (function() {
             remoteNameInputChanged = true;
             validateForm();
         });
-        var remoteNameInputChanged = false;
         $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
         $('<label for=""></label>').text('URL').appendTo(row);
-        var remoteURLInput = $('<input type="text">').appendTo(row).on("change keyup paste",validateForm);
+        var remoteURLInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
+            remoteURLInputChanged = true;
+            validateForm()
+        });
+        var remoteURLLabel = $('<label class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row).find("small");
 
         var hideEditForm = function() {
             editRepoButton.attr('disabled',false);
@@ -1389,6 +1410,7 @@ RED.projects.settings = (function() {
                     }
                 },payload);
             });
+
         var updateForm = function() {
             remotesList.editableList('empty');
             var count = 0;
@@ -1400,7 +1422,8 @@ RED.projects.settings = (function() {
                     }
                 }
             }
-            if (count === 0) {
+            isEmpty = (count === 0);
+            if (isEmpty) {
                 remotesList.editableList('addItem',emptyItem);
             }
         }

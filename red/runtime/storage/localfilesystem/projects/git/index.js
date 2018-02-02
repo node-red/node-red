@@ -69,6 +69,8 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_not_a_repository";
                 } else if (/Repository not found/i.test(stderr)) {
                     err.code = "git_repository_not_found";
+                } else if (/repository '.*' does not exist/i.test(stderr)) {
+                    err.code = "git_repository_not_found";
                 } else if (/refusing to merge unrelated histories/.test(stderr)) {
                     err.code = "git_pull_unrelated_history"
                 }

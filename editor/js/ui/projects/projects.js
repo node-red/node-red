@@ -682,7 +682,11 @@ RED.projects = (function() {
                                 var repo = projectRepoInput.val();
 
                                 // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
-                                var validRepo = !/\s/.test(repo);
+                                var validRepo = repo.length > 0 && !/\s/.test(repo);
+                                if (/^https?:\/\/[^/]+@/i.test(repo)) {
+                                    $("#projects-dialog-screen-create-project-repo-label small").text("Do not include the username/password in the url");
+                                    validRepo = false;
+                                }
                                 if (!validRepo) {
                                     if (projectRepoChanged) {
                                         projectRepoInput.addClass("input-error");
@@ -1738,6 +1742,15 @@ RED.projects = (function() {
                             },Math.max(300-(Date.now() - start),0));
                         },
                         400: {
+                            'git_connection_failed': function(error) {
+                                RED.notify(error.message,'error');
+                            },
+                            'git_not_a_repository': function(error) {
+                                RED.notify(error.message,'error');
+                            },
+                            'git_repository_not_found': function(error) {
+                                RED.notify(error.message,'error');
+                            },
                             'unexpected_error': function(error) {
                                 console.log(error);
                             }

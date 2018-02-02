@@ -749,7 +749,13 @@ RED.sidebar.versionControl = (function() {
                         },
                         400: {
                             'git_connection_failed': function(error) {
-                                RED.notify(error.message);
+                                RED.notify(error.message,'error');
+                            },
+                            'git_not_a_repository': function(error) {
+                                RED.notify(error.message,'error');
+                            },
+                            'git_repository_not_found': function(error) {
+                                RED.notify(error.message,'error');
                             },
                             'unexpected_error': function(error) {
                                 console.log(error);

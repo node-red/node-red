@@ -501,6 +501,10 @@ module.exports = {
         // Add a remote
         app.post("/:id/remotes", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
+            if (/^https?:\/\/[^/]+@/i.test(req.body.url)) {
+                res.status(400).json({error:"unexpected_error", message:"Git http url must not include username/password"});
+                return;
+            }
             runtime.storage.projects.addRemote(req.user, projectName, req.body).then(function() {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/remotes");
             }).catch(function(err) {
