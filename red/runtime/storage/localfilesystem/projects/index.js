@@ -95,6 +95,14 @@ function init(_settings, _runtime) {
                 if (!gitConfig) {
                     projectLogMessages.push(log._("storage.localfilesystem.projects.git-not-found"))
                     projectsEnabled = false;
+                    try {
+                        // As projects have to be turned on, we know this property
+                        // must exist at this point, so turn it off.
+                        // TODO: when on-by-default, this will need to do more
+                        // work to disable.
+                        settings.editorTheme.projects.enabled = false;
+                    } catch(err) {
+                    }
                 } else {
                     globalGitUser = gitConfig.user;
                     Projects.init(settings,runtime);
