@@ -37,17 +37,19 @@ function runGitCommand(args,cwd,env) {
         child.stdout.on('data', function(data) {
             stdout += data;
         });
-
         child.stderr.on('data', function(data) {
             stderr += data;
         });
-
+        child.on('error', function(err) {
+            stderr = err.toString();
+        })
         child.on('close', function(code) {
             if (code !== 0) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
                 err.stderr = stderr;
-                if (/fatal: could not read Username/.test(stderr)) {
+                if (/fatal: could not read/.test(stderr)) {
+                    // Username/Password
                     err.code = "git_auth_failed";
                 } else if(/HTTP Basic: Access denied/.test(stderr)) {
                     err.code = "git_auth_failed";
