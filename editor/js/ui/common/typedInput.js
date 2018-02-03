@@ -116,7 +116,9 @@
             this.options.types = this.options.types||Object.keys(allOptions);
 
             this.selectTrigger = $('<button tabindex="0"></button>').prependTo(this.uiSelect);
-            $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
+            if (this.options.types.length > 1) {
+                $('<i class="fa fa-sort-desc"></i>').appendTo(this.selectTrigger);
+            }
             this.selectLabel = $('<span></span>').appendTo(this.selectTrigger);
 
             this.types(this.options.types);
