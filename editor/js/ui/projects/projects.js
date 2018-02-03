@@ -1521,7 +1521,7 @@ RED.projects = (function() {
                         '</div>');
 
                     var isSSH = false;
-                    if (/^https?:\/\//) {
+                    if (/^https?:\/\//.test(url)) {
                         $('<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
                         '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
                     } else if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(url)) {
