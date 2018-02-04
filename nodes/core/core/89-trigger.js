@@ -100,8 +100,6 @@ module.exports = function(RED) {
                         msg.payload = RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg);
                     }
 
-                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
-
                     if (node.duration === 0) { node.topics[topic].tout = 0; }
                     else if (node.loop === true) {
                         /* istanbul ignore else  */
@@ -130,6 +128,7 @@ module.exports = function(RED) {
                         }
                     }
                     node.status({fill:"blue",shape:"dot",text:" "});
+                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     /* istanbul ignore else  */
