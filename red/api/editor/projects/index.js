@@ -248,8 +248,11 @@ module.exports = {
                 res.redirect(303,req.baseUrl+"/"+projectName+"/status");
             })
             .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+                if (err.code) {
+                    res.status(400).json({error:err.code, message: err.message});
+                } else {
+                    res.status(400).json({error:"unexpected_error", message:err.toString()});
+                }
             })
         });
 

@@ -912,40 +912,17 @@ function createProject(user, metadata) {
                         );
                         auth = authCache.get(project,originRemote.url,username);
                     }
-                    return gitTools.clone(originRemote,auth,projectPath).then(function(result) {
-                        // Check this is a valid project
-                        // If it is empty
-                        //  - if 'populate' flag is set, call populateProject
-                        //  - otherwise reject with suitable error to allow UI to confirm population
-                        // If it is missing package.json/flow.json/flow_cred.json
-                        //  - reject as invalid project
-
-                        // checkProjectFiles(project).then(function(results) {
-                        //     console.log("checkProjectFiles");
-                        //     console.log(results);
-                        // });
-                        // return gitTools.getFiles(projectPath).then(function() {
-                        //     // It wasn't an empty repository.
-                        //     // TODO: check for required files -  checkProjectFiles
-                        //
-                        // }).catch(function(err) {
-                        //     if (/ambiguous argument/.test(err.message)) {
-                        //         // Empty repository
-                        //         err.code = "project_empty";
-                        //         err.message = "Project is empty";
-                        //     }
-                        //     throw err;
-                        // });
-                        resolve(getProject(project));
-                    }).catch(function(error) {
-                        fs.remove(projectPath,function() {
-                            reject(error);
-                        });
-                    })
+                    return gitTools.clone(originRemote,auth,projectPath);
                 } else {
-                    createDefaultProject(user, metadata).then(function() { resolve(getProject(project))}).catch(reject);
+                    return createDefaultProject(user, metadata);
                 }
-            }).catch(reject);
+            }).then(function() {
+                resolve(getProject(project))
+            }).catch(function(err) {
+                fs.remove(projectPath,function() {
+                    reject(err);
+                });
+            });
         })
     })
 }

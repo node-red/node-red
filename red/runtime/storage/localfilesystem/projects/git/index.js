@@ -73,6 +73,10 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_repository_not_found";
                 } else if (/refusing to merge unrelated histories/.test(stderr)) {
                     err.code = "git_pull_unrelated_history"
+                } else if (/Please tell me who you are/.test(stderr)) {
+                    err.code = "git_missing_user";
+                } else if (/name consists only of disallowed characters/.test(stderr)) {
+                    err.code = "git_missing_user";
                 }
                 return reject(err);
             }

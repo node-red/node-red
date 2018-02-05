@@ -143,7 +143,8 @@ RED.projects.settings = (function() {
                             RED.sidebar.versionControl.refresh(true);
                         },
                         400: {
-                            'unexpected_error': function(error) {
+                            '*': function(error) {
+                                utils.reportUnexpectedError(error);
                                 done(error,null);
                             }
                         },
@@ -208,7 +209,8 @@ RED.projects.settings = (function() {
                             done(null,data);
                         },
                         400: {
-                            'unexpected_error': function(error) {
+                            '*': function(error) {
+                                utils.reportUnexpectedError(error);
                                 done(error,null);
                             }
                         },
@@ -962,7 +964,7 @@ RED.projects.settings = (function() {
                 var done = function(err) {
                     spinner.remove();
                     if (err) {
-                        console.log(err);
+                        utils.reportUnexpectedError(err);
                         return;
                     }
                     flowFileLabelText.text(flowFileInput.val());
@@ -1005,10 +1007,6 @@ RED.projects.settings = (function() {
                             'credentials_load_failed': function(error) {
                                 done(error);
                             },
-                            'unexpected_error': function(error) {
-                                console.log(error);
-                                done(error);
-                            },
                             'missing_current_credential_key':  function(error) {
                                 credentialSecretExistingInput.addClass("input-error");
                                 popover = RED.popover.create({
@@ -1018,6 +1016,9 @@ RED.projects.settings = (function() {
                                     content: "Incorrect key",
                                     autoClose: 3000
                                 }).open();
+                                done(error);
+                            },
+                            '*': function(error) {
                                 done(error);
                             }
                         },
@@ -1142,8 +1143,8 @@ RED.projects.settings = (function() {
                                                                 ]
                                                             });
                                                         },
-                                                        'unexpected_error': function(error) {
-                                                            console.log(error);
+                                                        '*': function(error) {
+                                                            utils.reportUnexpectedError(error);
                                                             spinner.remove();
                                                         }
                                                     },
@@ -1277,8 +1278,8 @@ RED.projects.settings = (function() {
                                                         });
                                                     },
                                                     400: {
-                                                        'unexpected_error': function(error) {
-                                                            console.log(error);
+                                                        '*': function(error) {
+                                                            utils.reportUnexpectedError(error);
                                                             spinner.remove();
                                                         }
                                                     },
@@ -1404,8 +1405,8 @@ RED.projects.settings = (function() {
                                 remoteNameInput.addClass('input-error');
                                 done(error);
                             },
-                            'unexpected_error': function(error) {
-                                console.log(error);
+                            '*': function(error) {
+                                utils.reportUnexpectedError(error);
                                 done(error);
                             }
                         },

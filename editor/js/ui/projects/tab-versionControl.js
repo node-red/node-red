@@ -487,8 +487,8 @@ RED.sidebar.versionControl = (function() {
                             refresh(true);
                         },
                         400: {
-                            'unexpected_error': function(error) {
-                                console.log(error);
+                            '*': function(error) {
+                                utils.reportUnexpectedError(error);
                             }
                         },
                     }

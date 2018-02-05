@@ -19,7 +19,45 @@ RED.projects = (function() {
     var dialogBody;
 
     var activeProject;
-
+    function reportUnexpectedError(error) {
+        var notification;
+        if (error.error === 'git_missing_user') {
+            notification = RED.notify("<p>You Git client is not configured with a username/email.</p>",{
+                fixed: true,
+                type:'error',
+                buttons: [
+                    {
+                        text: "Cancel",
+                        click: function() {
+                            notification.close();
+                        }
+                    },
+                    {
+                        text: "Configure Git client",
+                        click: function() {
+                            RED.userSettings.show('gitconfig');
+                            notification.close();
+                        }
+                    }
+                ]
+            })
+        } else {
+            console.log(error);
+            notification = RED.notify("<p>An unexpected error occurred:</p><p>"+error.message+"</p><small>code: "+error.error+"</small>",{
+                fixed: true,
+                modal: true,
+                type: 'error',
+                buttons: [
+                    {
+                        text: "Close",
+                        click: function() {
+                            notification.close();
+                        }
+                    }
+                ]
+            })
+        }
+    }
     var screens = {};
     function initScreens() {
         var migrateProjectHeader = $('<div class="projects-dialog-screen-start-hero"></div>');
@@ -565,8 +603,9 @@ RED.projects = (function() {
                                                     // getRepoAuthDetails(req);
                                                     console.log("git auth error",error);
                                                 },
-                                                'unexpected_error': function(error) {
-                                                    console.log("unexpected_error",error)
+                                                '*': function(error) {
+                                                    reportUnexpectedError(error);
+                                                    $( dialog ).dialog( "close" );
                                                 }
                                             }
                                         }
@@ -1753,7 +1792,7 @@ RED.projects = (function() {
                                 RED.notify(error.message,'error');
                             },
                             'unexpected_error': function(error) {
-                                console.log(error);
+                                reportUnexpectedError(error);
                             }
                         }
                     }
@@ -1800,7 +1839,8 @@ RED.projects = (function() {
         var projectsAPI = {
             sendRequest:sendRequest,
             createBranchList:createBranchList,
-            addSpinnerOverlay:addSpinnerOverlay
+            addSpinnerOverlay:addSpinnerOverlay,
+            reportUnexpectedError:reportUnexpectedError
         };
         RED.projects.settings.init(projectsAPI);
         RED.projects.userSettings.init(projectsAPI);
