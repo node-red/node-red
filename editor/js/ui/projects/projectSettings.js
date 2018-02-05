@@ -1273,6 +1273,7 @@ RED.projects.settings = (function() {
                                                                     activeProject.git.remotes[name] = remote;
                                                                 });
                                                             }
+                                                            RED.sidebar.versionControl.refresh();
                                                         });
                                                     },
                                                     400: {
@@ -1388,6 +1389,7 @@ RED.projects.settings = (function() {
                                 activeProject.git.remotes[name] = remote;
                             });
                             updateForm();
+                            RED.sidebar.versionControl.refresh();
                             done();
                         },
                         400: {
