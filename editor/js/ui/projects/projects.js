@@ -546,6 +546,7 @@ RED.projects = (function() {
                                                 } else {
                                                     show('create-success');
                                                     RED.menu.setDisabled('menu-item-projects-open',false);
+                                                    RED.menu.setDisabled('menu-item-projects-settings',false);
                                                 }
                                             },
                                             400: {
@@ -1795,7 +1796,7 @@ RED.projects = (function() {
 
         RED.actions.add("core:new-project",RED.projects.newProject);
         RED.actions.add("core:open-project",RED.projects.selectProject);
-
+        RED.actions.add("core:show-project-settings",RED.projects.settings.show);
         var projectsAPI = {
             sendRequest:sendRequest,
             createBranchList:createBranchList,

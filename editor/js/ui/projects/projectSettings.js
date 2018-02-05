@@ -49,7 +49,7 @@ RED.projects.settings = (function() {
         var tabContainer;
 
         var trayOptions = {
-            title: "Project Information",// RED._("menu.label.userSettings"),, // TODO: nls
+            title: "Project Settings",// RED._("menu.label.userSettings"),, // TODO: nls
             buttons: [
                 {
                     id: "node-dialog-ok",
