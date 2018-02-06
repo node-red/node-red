@@ -65,6 +65,8 @@ module.exports = function(RED) {
                                  "log:__node__.log,"+
                                  "error:__node__.error,"+
                                  "warn:__node__.warn,"+
+                                 "debug:__node__.debug,"+
+                                 "trace:__node__.trace,"+
                                  "on:__node__.on,"+
                                  "status:__node__.status,"+
                                  "send:function(msgs){ __node__.send(__msgid__,msgs);}"+
@@ -90,6 +92,12 @@ module.exports = function(RED) {
                 },
                 warn: function() {
                     node.warn.apply(node, arguments);
+                },
+                debug: function() {
+                    node.debug.apply(node, arguments);
+                },
+                trace: function() {
+                    node.trace.apply(node, arguments);
                 },
                 send: function(id, msgs) {
                     sendResults(node, id, msgs);

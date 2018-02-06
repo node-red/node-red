@@ -527,6 +527,50 @@ describe('function node', function() {
                 }
             });
         });
+        it('should log a Debug Message', function (done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.debug('test');"}];
+            helper.load(functionNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                n1.receive({payload: "foo", topic: "bar"});
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().DEBUG);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', 'test');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+        it('should log a Trace Message', function (done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.trace('test');"}];
+            helper.load(functionNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                n1.receive({payload: "foo", topic: "bar"});
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().TRACE);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', 'test');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
         it('should log a Warning Message', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.warn('test');"}];
             helper.load(functionNode, flow, function () {
