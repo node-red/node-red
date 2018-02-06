@@ -152,9 +152,9 @@ module.exports = function(RED) {
                             msg.rc = msg3.payload;
                             if (msg2) { msg2.rc = msg3.payload; }
                         }
+                        node.send([msg,msg2,msg3]);
                         if (child.tout) { clearTimeout(child.tout); }
                         delete node.activeProcesses[child.pid];
-                        node.send([msg,msg2,msg3]);
                     });
                     node.status({fill:"blue",shape:"dot",text:"pid:"+child.pid});
                     child.on('error',function() {});
