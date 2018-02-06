@@ -41,31 +41,41 @@ RED.search = (function() {
             properties = properties.concat(Object.keys(n._def.defaults));
         }
         for (var i=0;i<properties.length;i++) {
-            if (n.hasOwnProperty(properties[i])) {
-                var v = n[properties[i]];
-                if (typeof v === 'string' || typeof v === 'number') {
-                    v = (""+v).toLowerCase();
-                    index[v] = index[v] || {};
-                    index[v][n.id] = {node:n,label:l};
+            if (n.hasOwnProperty(properties[i]) && n[properties[i]]) {
+                var prop = n[properties[i]];
+                if (typeof prop === 'string' || typeof prop === 'number') {
+                  setValueInIndex(n, prop);
                 }
-                else if(typeof v === 'object' && Array.isArray(v)) {
-                    v.forEach(function (rule) {
-                    if(typeof rule === 'object') {
-                       var props = Object.keys(rule);
-                       props.forEach(function(prop){
-                            var value = rule[prop];
-                            value = (""+value).toLowerCase();
-                            index[value] = index[value] || {};
-                            index[value][n.id] = {node:n,label:l};
-                        });
-                    }
-                });
-            }
+                else if(typeof prop === 'object' && Array.isArray(prop)) {
+                    prop.forEach(function (p) {
+                        if (typeof p === 'object'){
+                            indexObjectProps(n, p)
+                        } else {
+                            setValueInIndex(n, p)
+                        }
+                    });
+                }
+                else {
+                  indexObjectProps(n, prop);
+                }
             }
         }
-
-
     }
+    function indexObjectProps(node, property) {
+        keys.forEach(function (key) {
+            if (typeof property[key] === 'object') {
+                return indexObjectProps(node, property)
+            }
+            setValueInIndex(node, property[key])
+        })
+    }
+    function setValueInIndex(node, property) {
+        var label= RED.utils.getNodeLabel(node);
+        property = ("" + property).toLowerCase();
+        index[property] = index[property] || {};
+        index[property][node.id] = {node: node, label: label};
+    }
+
     function indexWorkspace() {
         index = {};
         RED.nodes.eachWorkspace(indexNode);
