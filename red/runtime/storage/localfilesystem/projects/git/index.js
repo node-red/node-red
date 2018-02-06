@@ -288,7 +288,8 @@ function parseLog(log) {
         }
         var m = /^(.*): (.*)$/.exec(l);
         if (m) {
-            if (m[1] === 'refs' && m[2]) {
+            // git 2.1.4 (Debian Stable) doesn't support %D for refs - so filter out
+            if (m[1] === 'refs' && m[2] && m[2] !== '%D') {
                 currentCommit[m[1]] = m[2].split(",").map(function(v) { return v.trim() });
             } else {
                 if (m[1] === 'parents') {
