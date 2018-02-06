@@ -1,3 +1,33 @@
+#### 0.18.2: Maintenance Release
+
+Projects
+
+ - Filter out %D from git log command for older git versions
+ - Ensure projects are created as logged in user
+ - Better error handling/reporting in project creation
+ - Add Project Settings menu option
+ - Refresh vc sidebar on remote add/remove
+ - Fix auth prompt for ssh repos
+ - Prevent http git urls from including username/pword
+ - Fix fetch auth handling on non-default remote
+ - Avoid exception if git not installed
+ - Check version of git client on startup
+ - Fix pull/push when no tracked branch
+ - Add git_pull_unrelated_history handling
+ - Handle delete of last remote in project settings
+
+Node Fixes
+
+ - Fix and Add some Chinese translations
+ - Update sort/batch docs
+ - Don't assume node has defaults when exporting icon property
+ - Ensure send is last thing trigger does
+ - Ensure trigger doesn't set two simultaneous timeouts
+ - Add missing property select var to HTML node
+ - Add a default keepalive to tcp client mode
+ - Move node.send in exec and httprequest nodes
+
+
 #### 0.18.1: Maintenance Release
 
 Projects
