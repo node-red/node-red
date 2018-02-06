@@ -341,7 +341,7 @@ function createProject(user, metadata) {
         metadata.files.oldCredentials = credentialsFile;
         metadata.files.credentialSecret = currentEncryptionKey;
     }
-    return Projects.create(null,metadata).then(function(p) {
+    return Projects.create(user, metadata).then(function(p) {
         return setActiveProject(user, p.name);
     }).then(function() {
         return getProject(user, metadata.name);
