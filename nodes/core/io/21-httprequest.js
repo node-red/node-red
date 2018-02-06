@@ -263,9 +263,8 @@ module.exports = function(RED) {
                                 catch(e) { node.warn(RED._("httpin.errors.json-error")); }
                             }
                         }
-
-                        node.send(msg);
                         node.status({});
+                        node.send(msg);
                     }
                 });
             });
@@ -280,8 +279,8 @@ module.exports = function(RED) {
                 node.error(err,msg);
                 msg.payload = err.toString() + " : " + url;
                 msg.statusCode = err.code;
-                node.send(msg);
                 node.status({fill:"red",shape:"ring",text:err.code});
+                node.send(msg);
             });
             if (payload) {
                 req.write(payload);
