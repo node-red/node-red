@@ -333,7 +333,9 @@ RED.tabs = (function() {
             previousTab: activatePreviousTab,
             resize: updateTabWidths,
             count: function() {
-                return ul.find("li.red-ui-tab").size();
+                var numOfTabs = ul.find("li.red-ui-tab").size();
+                var numOfSubflow = ul.find('img[src="red/images/subflow_tab.png"]').size();
+                return numOfTabs - numOfSubflow;
             },
             contains: function(id) {
                 return ul.find("a[href='#"+id+"']").length > 0;
