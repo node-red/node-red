@@ -55,6 +55,9 @@ function runGitCommand(args,cwd,env) {
                     err.code = "git_auth_failed";
                 } else if(/Permission denied \(publickey\)/.test(stderr)) {
                     err.code = "git_auth_failed";
+                } else if(/Host key verification failed/.test(stderr)) {
+                    // TODO: handle host key verification errors separately
+                    err.code = "git_auth_failed";
                 } else if(/Connection refused/.test(stderr)) {
                     err.code = "git_connection_failed";
                 } else if (/commit your changes or stash/.test(stderr)) {
