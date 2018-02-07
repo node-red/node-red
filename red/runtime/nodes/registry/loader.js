@@ -255,6 +255,12 @@ function loadNodeConfig(fileInfo) {
                         break;
                     }
                 }
+                if (node.module === 'node-red') {
+                    // do not look up locales directory for core nodes
+                    node.namespace = node.module;
+                    resolve(node);
+                    return;
+                }
                 fs.stat(path.join(path.dirname(file),"locales"),function(err,stat) {
                     if (!err) {
                         node.namespace = node.id;
