@@ -105,6 +105,10 @@ function runGitCommandWithSSHCommand(args,cwd,auth) {
         commandEnv.NODE_RED_GIT_NODE_PATH = process.execPath;
         commandEnv.NODE_RED_GIT_SOCK_PATH = rs.path;
         commandEnv.NODE_RED_GIT_ASKPASS_PATH = path.join(__dirname,"authWriter.js");
+        // For git < 2.3.0
+        commandEnv.GIT_SSH = path.join(__dirname,"node-red-ssh.sh");
+        commandEnv.NODE_RED_KEY_FILE=auth.key_path;
+        // GIT_SSH_COMMAND - added in git 2.3.0
         commandEnv.GIT_SSH_COMMAND = "ssh -i " + auth.key_path + " -F /dev/null";
         // console.log('commandEnv:', commandEnv);
         return runGitCommand(args,cwd,commandEnv).finally(function() {

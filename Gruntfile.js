@@ -392,9 +392,9 @@ module.exports = function(grunt) {
                 mode: '755'
             },
             release: {
-                // Target-specific file/dir lists and/or options go here.
                 src: [
-                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/nodes/core/hardware/nrgpio*')
+                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/nodes/core/hardware/nrgpio*'),
+                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/red/runtime/storage/localfilesystem/projects/git/node-red-*sh')
                 ]
             }
         },
