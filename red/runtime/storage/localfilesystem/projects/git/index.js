@@ -48,37 +48,37 @@ function runGitCommand(args,cwd,env) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
                 err.stderr = stderr;
-                if (/fatal: could not read/.test(stderr)) {
+                if (/fatal: could not read/i.test(stderr)) {
                     // Username/Password
                     err.code = "git_auth_failed";
-                } else if(/HTTP Basic: Access denied/.test(stderr)) {
+                } else if(/HTTP Basic: Access denied/i.test(stderr)) {
                     err.code = "git_auth_failed";
-                } else if(/Permission denied \(publickey\)/.test(stderr)) {
+                } else if(/Permission denied \(publickey\)/i.test(stderr)) {
                     err.code = "git_auth_failed";
-                } else if(/Host key verification failed/.test(stderr)) {
+                } else if(/Host key verification failed/i.test(stderr)) {
                     // TODO: handle host key verification errors separately
                     err.code = "git_auth_failed";
-                } else if(/Connection refused/.test(stderr)) {
+                } else if(/Connection refused/i.test(stderr)) {
                     err.code = "git_connection_failed";
-                } else if (/commit your changes or stash/.test(stderr)) {
+                } else if (/commit your changes or stash/i.test(stderr)) {
                     err.code = "git_local_overwrite";
                 } else if (/CONFLICT/.test(err.stdout)) {
                     err.code = "git_pull_merge_conflict";
-                } else if (/not fully merged/.test(stderr)) {
+                } else if (/not fully merged/i.test(stderr)) {
                     err.code = "git_delete_branch_unmerged";
-                } else if (/remote .* already exists/.test(stderr)) {
+                } else if (/remote .* already exists/i.test(stderr)) {
                     err.code = "git_remote_already_exists";
-                } else if (/does not appear to be a git repository/.test(stderr)) {
+                } else if (/does not appear to be a git repository/i.test(stderr)) {
                     err.code = "git_not_a_repository";
                 } else if (/Repository not found/i.test(stderr)) {
                     err.code = "git_repository_not_found";
                 } else if (/repository '.*' does not exist/i.test(stderr)) {
                     err.code = "git_repository_not_found";
-                } else if (/refusing to merge unrelated histories/.test(stderr)) {
+                } else if (/refusing to merge unrelated histories/i.test(stderr)) {
                     err.code = "git_pull_unrelated_history"
-                } else if (/Please tell me who you are/.test(stderr)) {
+                } else if (/Please tell me who you are/i.test(stderr)) {
                     err.code = "git_missing_user";
-                } else if (/name consists only of disallowed characters/.test(stderr)) {
+                } else if (/name consists only of disallowed characters/i.test(stderr)) {
                     err.code = "git_missing_user";
                 }
                 return reject(err);
@@ -172,7 +172,7 @@ function getStatus(localRepo) {
     return runGitCommand(['rev-list', 'HEAD', '--count'],localRepo).then(function(count) {
         result.commits.total = parseInt(count);
     }).catch(function(err) {
-        if (/ambiguous argument/.test(err.message)) {
+        if (/ambiguous argument/i.test(err.message)) {
             result.commits.total = 0;
         } else {
             throw err;
@@ -450,7 +450,7 @@ module.exports = {
                 var e = new Error("NLS: pull failed - merge conflict");
                 e.code = "git_pull_merge_conflict";
                 throw e;
-            } else if (/Please commit your changes or stash/.test(err.message)) {
+            } else if (/Please commit your changes or stash/i.test(err.message)) {
                 var e = new Error("NLS: Pull failed - local changes would be overwritten");
                 e.code = "git_pull_overwrite";
                 throw e;
@@ -613,7 +613,7 @@ module.exports = {
     getRemotes: getRemotes,
     getRemoteBranch: function(cwd) {
         return runGitCommand(['rev-parse','--abbrev-ref','--symbolic-full-name','@{u}'],cwd).catch(function(err) {
-            if (/no upstream configured for branch/.test(err.message)) {
+            if (/no upstream configured for branch/i.test(err.message)) {
                 return null;
             }
             throw err;
