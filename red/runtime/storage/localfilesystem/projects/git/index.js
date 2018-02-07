@@ -204,7 +204,7 @@ function getStatus(localRepo) {
             return runGitCommand(["status","--porcelain","-b"],localRepo).then(function(output) {
                 var lines = output.split("\n");
                 var unknownDirs = [];
-                var branchLineRE = /^## (?:No commits yet on )?(.+?)(?:$|\.\.\.(.+?)(?:$| \[(?:(?:ahead (\d+)(?:,\s*)?)?(?:behind (\d+))?|(gone))\]))/;
+                var branchLineRE = /^## (?:(?:No commits yet on )|(?:Initial commit on))?(.+?)(?:$|\.\.\.(.+?)(?:$| \[(?:(?:ahead (\d+)(?:,\s*)?)?(?:behind (\d+))?|(gone))\]))/;
                 lines.forEach(function(line) {
                     if (line==="") {
                         return;
