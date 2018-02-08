@@ -521,7 +521,7 @@ RED.sidebar.versionControl = (function() {
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
-                refresh(true);
+                refresh(true,true);
             })
 
         var localBranchToolbar = $('<div class="sidebar-version-control-change-header" style="text-align: right;"></div>').appendTo(localHistory.content);
@@ -909,6 +909,7 @@ RED.sidebar.versionControl = (function() {
                         },
                         'git_pull_merge_conflict': function(err) {
                             refresh(true);
+                            closeRemoteBox();
                         },
                         'git_connection_failed': function(err) {
                             RED.notify("Could not connect to remote repository: "+err.toString(),"warning")
@@ -1226,7 +1227,7 @@ RED.sidebar.versionControl = (function() {
         }
     }
 
-    function refresh(full) {
+    function refresh(full, includeRemote) {
         if (refreshInProgress) {
             return;
         }
@@ -1246,7 +1247,11 @@ RED.sidebar.versionControl = (function() {
 
         var activeProject = RED.projects.getActiveProject();
         if (activeProject) {
-            $.getJSON("projects/"+activeProject.name+"/status",function(result) {
+            var url = "projects/"+activeProject.name+"/status";
+            if (includeRemote) {
+                url += "?remote=true"
+            }
+            $.getJSON(url,function(result) {
                 refreshFiles(result);
 
                 $('#sidebar-version-control-local-branch').text(result.branches.local);

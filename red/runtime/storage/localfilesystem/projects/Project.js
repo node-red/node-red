@@ -410,11 +410,11 @@ Project.prototype.revertFile = function (filePath) {
 
 
 
-Project.prototype.status = function(user) {
+Project.prototype.status = function(user, includeRemote) {
     var self = this;
 
     var fetchPromise;
-    if (this.remotes) {
+    if (this.remotes && includeRemote) {
         fetchPromise = gitTools.getRemoteBranch(self.path).then(function(remoteBranch) {
             if (remoteBranch) {
                 var allRemotes = Object.keys(self.remotes);

@@ -247,9 +247,9 @@ function pull(user, project,remoteBranchName,setRemote,allowUnrelatedHistories) 
         return reloadActiveProject("pull");
     });
 }
-function getStatus(user, project) {
+function getStatus(user, project, includeRemote) {
     checkActiveProject(project);
-    return activeProject.status(user);
+    return activeProject.status(user, includeRemote);
 }
 function resolveMerge(user, project,file,resolution) {
     checkActiveProject(project);

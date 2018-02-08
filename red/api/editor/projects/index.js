@@ -149,7 +149,9 @@ module.exports = {
 
         // Get project status - files, commit counts, branch info
         app.get("/:id/status", needsPermission("projects.read"), function(req,res) {
-            runtime.storage.projects.getStatus(req.user, req.params.id).then(function(data) {
+            var includeRemote = req.query.remote;
+
+            runtime.storage.projects.getStatus(req.user, req.params.id, includeRemote).then(function(data) {
                 if (data) {
                     res.json(data);
                 } else {
