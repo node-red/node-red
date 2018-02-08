@@ -381,7 +381,7 @@ Project.prototype.getFileDiff = function(file,type) {
 }
 Project.prototype.getCommits = function(options) {
     return gitTools.getCommits(this.path,options).catch(function(err) {
-        if (/ambiguous argument/.test(err.message) || /does not have any commits yet/.test(err.message)) {
+        if (/bad default revision/i.test(err.message) || /ambiguous argument/i.test(err.message) || /does not have any commits yet/i.test(err.message)) {
             return {
                 count:0,
                 commits:[],
@@ -733,6 +733,7 @@ Project.prototype.toJSON = function () {
 
 
 function getCredentialsFilename(filename) {
+    filename = filename || "undefined";
     // TODO: DRY - ./index.js
     var ffDir = fspath.dirname(filename);
     var ffExt = fspath.extname(filename);
@@ -741,6 +742,7 @@ function getCredentialsFilename(filename) {
 }
 function getBackupFilename(filename) {
     // TODO: DRY - ./index.js
+    filename = filename || "undefined";
     var ffName = fspath.basename(filename);
     var ffDir = fspath.dirname(filename);
     return fspath.join(ffDir,"."+ffName+".backup");
