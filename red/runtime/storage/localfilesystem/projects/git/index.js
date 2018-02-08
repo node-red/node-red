@@ -428,7 +428,7 @@ module.exports = {
         var args = ["branch","--set-upstream-to",remoteBranch];
         return runGitCommand(args,cwd);
     },
-    pull: function(cwd,remote,branch,auth,gitUser) {
+    pull: function(cwd,remote,branch,allowUnrelatedHistories,auth,gitUser) {
         var args = ["pull"];
         if (remote && branch) {
             args.push(remote);
@@ -440,8 +440,9 @@ module.exports = {
             args.unshift('user.email="'+gitUser['email']+'"');
             args.unshift('-c');
         }
-        //TODO: only do this if asked for
-        args.push("--allow-unrelated-histories");
+        if (allowUnrelatedHistories) {
+            args.push("--allow-unrelated-histories");
+        }
         var promise;
         if (auth) {
             if ( auth.key_path ) {

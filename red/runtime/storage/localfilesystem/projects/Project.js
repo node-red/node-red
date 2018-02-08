@@ -512,7 +512,7 @@ Project.prototype.push = function (user,remoteBranchName,setRemote) {
     return gitTools.push(this.path, remote.remote || this.currentRemote,remote.branch, setRemote, authCache.get(this.name,this.remotes[remote.remote || this.currentRemote].fetch,username));
 };
 
-Project.prototype.pull = function (user,remoteBranchName,setRemote) {
+Project.prototype.pull = function (user,remoteBranchName,setRemote,allowUnrelatedHistories) {
     var username;
     if (!user) {
         username = "_";
@@ -523,11 +523,11 @@ Project.prototype.pull = function (user,remoteBranchName,setRemote) {
     if (setRemote) {
         return gitTools.setUpstream(this.path, remoteBranchName).then(function() {
             self.currentRemote = self.parseRemoteBranch(remoteBranchName).remote;
-            return gitTools.pull(self.path, null, null, authCache.get(self.name,self.remotes[self.currentRemote].fetch,username),getGitUser(user));
+            return gitTools.pull(self.path, null, null, allowUnrelatedHistories, authCache.get(self.name,self.remotes[self.currentRemote].fetch,username),getGitUser(user));
         })
     } else {
         var remote = this.parseRemoteBranch(remoteBranchName);
-        return gitTools.pull(this.path, remote.remote, remote.branch, authCache.get(this.name,this.remotes[remote.remote||self.currentRemote].fetch,username),getGitUser(user));
+        return gitTools.pull(this.path, remote.remote, remote.branch, allowUnrelatedHistories, authCache.get(this.name,this.remotes[remote.remote||self.currentRemote].fetch,username),getGitUser(user));
     }
 };
 

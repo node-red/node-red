@@ -241,9 +241,9 @@ function push(user, project,remoteBranchName,setRemote) {
     checkActiveProject(project);
     return activeProject.push(user,remoteBranchName,setRemote);
 }
-function pull(user, project,remoteBranchName,setRemote) {
+function pull(user, project,remoteBranchName,setRemote,allowUnrelatedHistories) {
     checkActiveProject(project);
-    return activeProject.pull(user,remoteBranchName,setRemote).then(function() {
+    return activeProject.pull(user,remoteBranchName,setRemote,allowUnrelatedHistories).then(function() {
         return reloadActiveProject("pull");
     });
 }

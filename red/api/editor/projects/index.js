@@ -353,8 +353,9 @@ module.exports = {
         app.post("/:id/pull/?*", needsPermission("projects.write"), function(req,res) {
             var projectName = req.params.id;
             var remoteBranchName = req.params[0];
-            var setRemote = req.query.u;
-            runtime.storage.projects.pull(req.user, projectName,remoteBranchName,setRemote).then(function(data) {
+            var setUpstream = req.query.setUpstream;
+            var allowUnrelatedHistories = req.query.allowUnrelatedHistories;
+            runtime.storage.projects.pull(req.user, projectName,remoteBranchName,setUpstream,allowUnrelatedHistories).then(function(data) {
                 res.status(204).end();
             })
             .catch(function(err) {

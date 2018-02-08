@@ -870,54 +870,86 @@ RED.sidebar.versionControl = (function() {
                 });
             });
 
+        var pullRemote = function(options) {
+            options = options || {};
+            var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
+            var activeProject = RED.projects.getActiveProject();
+            var url = "projects/"+activeProject.name+"/pull";
+            if (activeProject.git.branches.remoteAlt) {
+                url+="/"+activeProject.git.branches.remoteAlt;
+            }
+            if (options.setUpstream || options.allowUnrelatedHistories) {
+                url+="?";
+            }
+            if (options.setUpstream) {
+                url += "setUpstream=true"
+                if (options.allowUnrelatedHistories) {
+                    url += "&";
+                }
+            }
+            if (options.allowUnrelatedHistories) {
+                url += "allowUnrelatedHistories=true"
+            }
+            utils.sendRequest({
+                url: url,
+                type: "POST",
+                responses: {
+                    0: function(error) {
+                        console.log(error);
+                        // done(error,null);
+                    },
+                    200: function(data) {
+                        refresh(true);
+                        closeRemoteBox();
+                    },
+                    400: {
+                        'git_local_overwrite': function(err) {
+                            RED.notify("<p>Unable to pull remote changes; your unstaged local changes would be overwritten.</p><p>Commit your changes and try again.</p>"+
+                                '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+'Show unstaged changes'+'</a></p>',"error",false,10000000);
+                        },
+                        'git_pull_merge_conflict': function(err) {
+                            refresh(true);
+                        },
+                        'git_connection_failed': function(err) {
+                            RED.notify("Could not connect to remote repository: "+err.toString(),"warning")
+                        },
+                        'git_pull_unrelated_history': function(error) {
+                            var notification = RED.notify("<p>The remote has an unrelated history of commits.</p><p>Are you sure you want to pull the changes into your local repository?</p>",{
+                                type: 'error',
+                                modal: true,
+                                fixed: true,
+                                buttons: [
+                                    {
+                                        text: RED._("common.label.cancel"),
+                                        click: function() {
+                                            notification.close();
+                                        }
+                                    },{
+                                        text: 'Pull changes',
+                                        click: function() {
+                                            notification.close();
+                                            options.allowUnrelatedHistories = true;
+                                            pullRemote(options)
+                                        }
+                                    }
+                                ]
+                            });
+                        },
+                        '*': function(error) {
+                            utils.reportUnexpectedError(error);
+                        }
+                    },
+                }
+            },{}).always(function() {
+                spinner.remove();
+            });
+        }
         $('<button id="sidebar-version-control-repo-pull" class="sidebar-version-control-repo-sub-action editor-button"><i class="fa fa-long-arrow-down"></i> <span>pull</span></button>')
             .appendTo(row)
             .click(function(e) {
                 e.preventDefault();
-                var spinner = utils.addSpinnerOverlay(remoteBox).addClass("projects-dialog-spinner-contain");
-                var activeProject = RED.projects.getActiveProject();
-                var url = "projects/"+activeProject.name+"/pull";
-                if (activeProject.git.branches.remoteAlt) {
-                    url+="/"+activeProject.git.branches.remoteAlt;
-                }
-                if ($("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked')) {
-                    url+="?u=true"
-                }
-
-                utils.sendRequest({
-                    url: url,
-                    type: "POST",
-                    responses: {
-                        0: function(error) {
-                            console.log(error);
-                            // done(error,null);
-                        },
-                        200: function(data) {
-                            refresh(true);
-                            closeRemoteBox();
-                        },
-                        400: {
-                            'git_local_overwrite': function(err) {
-                                RED.notify("Unable to pull remote changes; your unstaged local changes would be overwritten. Commit your changes and try again."+
-                                    '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+'Show unstaged changes'+'</a></p>',"error",false,10000000);
-                            },
-                            'git_pull_merge_conflict': function(err) {
-                                refresh(true);
-                            },
-                            'git_connection_failed': function(err) {
-                                RED.notify("Could not connect to remote repository: "+err.toString(),"warning")
-                            },
-                            'unexpected_error': function(error) {
-                                console.log(error);
-                                // done(error,null);
-                            },
-                            'git_pull_unrelated_history': function(error) {
-                                RED.notify("Unable to pull remote changes; refusing to merge unrelated histories.","error");
-                            }
-                        },
-                    }
-                },{}).always(function() {
-                    spinner.remove();
+                pullRemote({
+                    setUpstream: $("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked')
                 });
             });
 
