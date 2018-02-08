@@ -523,11 +523,11 @@ Project.prototype.pull = function (user,remoteBranchName,setRemote) {
     if (setRemote) {
         return gitTools.setUpstream(this.path, remoteBranchName).then(function() {
             self.currentRemote = self.parseRemoteBranch(remoteBranchName).remote;
-            return gitTools.pull(self.path, null, null, authCache.get(self.name,self.remotes[self.currentRemote].fetch,username));
+            return gitTools.pull(self.path, null, null, authCache.get(self.name,self.remotes[self.currentRemote].fetch,username),getGitUser(user));
         })
     } else {
         var remote = this.parseRemoteBranch(remoteBranchName);
-        return gitTools.pull(this.path, remote.remote, remote.branch, authCache.get(this.name,this.remotes[remote.remote||self.currentRemote].fetch,username));
+        return gitTools.pull(this.path, remote.remote, remote.branch, authCache.get(this.name,this.remotes[remote.remote||self.currentRemote].fetch,username),getGitUser(user));
     }
 };
 

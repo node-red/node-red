@@ -428,12 +428,20 @@ module.exports = {
         var args = ["branch","--set-upstream-to",remoteBranch];
         return runGitCommand(args,cwd);
     },
-    pull: function(cwd,remote,branch,auth) {
+    pull: function(cwd,remote,branch,auth,gitUser) {
         var args = ["pull"];
         if (remote && branch) {
             args.push(remote);
             args.push(branch);
         }
+        if (gitUser && gitUser['name'] && gitUser['email']) {
+            args.unshift('user.name="'+gitUser['name']+'"');
+            args.unshift('-c');
+            args.unshift('user.email="'+gitUser['email']+'"');
+            args.unshift('-c');
+        }
+        //TODO: only do this if asked for
+        args.push("--allow-unrelated-histories");
         var promise;
         if (auth) {
             if ( auth.key_path ) {
@@ -556,7 +564,7 @@ module.exports = {
         return runGitCommand(args,cwd,env);
     },
     getFileDiff(cwd,file,type) {
-        var args = ["diff"];
+        var args = ["diff","-w"];
         if (type === "tree") {
             // nothing else to do
         } else if (type === "index") {

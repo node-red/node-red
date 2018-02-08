@@ -1768,7 +1768,7 @@ RED.diff = (function() {
                         // }
 
                         var actualLineNumber = hunk.diffStart + lineNumber;
-                        var isMergeHeader = isConflict && /^..(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
+                        var isMergeHeader = isConflict && /^\+\+(<<<<<<<|=======$|>>>>>>>)/.test(lineText);
                         var diffRow = $('<tr>').appendTo(codeBody);
                         var localLineNo = $('<td class="lineno">').appendTo(diffRow);
                         var remoteLineNo;
@@ -1827,7 +1827,7 @@ RED.diff = (function() {
                             $('<span>').text(lineText.substring(prefixEnd)).appendTo(line);
                         } else {
                             diffRow.addClass("mergeHeader");
-                            var isSeparator = /^..(=======$)/.test(lineText);
+                            var isSeparator = /^\+\+=======$/.test(lineText);
                             if (!isSeparator) {
                                 var isOurs = /^..<<<<<<</.test(lineText);
                                 if (isOurs) {
@@ -2047,7 +2047,7 @@ RED.diff = (function() {
         } else {
             lines = diff.split("\n");
         }
-        var diffHeader = /^diff --git a\/(.*) b\/(.*)$/;
+        var diffHeader = /^diff (?:(?:--git a\/(.*) b\/(.*))|(?:--cc (.*)))$/;
         var fileHeader = /^\+\+\+ b\/(.*)\t?/;
         var binaryFile = /^Binary files /;
         var hunkHeader = /^@@ -((\d+)(,(\d+))?) \+((\d+)(,(\d+))?) @@ ?(.*)$/;
@@ -2066,7 +2066,7 @@ RED.diff = (function() {
                 }
                 currentHunk = null;
                 currentFile = {
-                    file: diffLine[1],
+                    file: diffLine[1]||diffLine[3],
                     hunks: []
                 }
             } else if (binaryFile.test(line)) {

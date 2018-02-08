@@ -51,10 +51,6 @@ RED.sidebar.versionControl = (function() {
                     // done(error,null);
                 },
                 200: function(data) {
-                    if (mergeConflictNotification) {
-                        mergeConflictNotification.close();
-                        mergeConflictNotification = null;
-                    }
                     var title;
                     if (state === 'unstaged') {
                         title = 'Unstaged changes : '+entry.file
@@ -102,9 +98,7 @@ RED.sidebar.versionControl = (function() {
                             },{resolutions:resolution.resolutions[entry.file]});
                         }
                     }
-                    options.oncancel = showMergeConflictNotification;
                     RED.diff.showUnifiedDiff(options);
-                    // console.log(data.diff);
                 },
                 400: {
                     'unexpected_error': function(error) {
@@ -377,6 +371,16 @@ RED.sidebar.versionControl = (function() {
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
                 createChangeEntry(row,entry,entry.treeStatus,'unmerged');
+                if (entry === emptyMergedItem) {
+                    var toolbar = $('<div style="text-align: center"></div>').appendTo(row);
+                    $('<button class="editor-button editor-button-small">commit</button>')
+                        .appendTo(toolbar)
+                        .click(function(evt) {
+                            evt.preventDefault();
+                            evt.stopPropagation();
+                            showCommitBox();
+                        });
+                }
             },
             sort: function(A,B) {
                 if (A.treeStatus === '?' && B.treeStatus !== '?') {
@@ -395,28 +399,32 @@ RED.sidebar.versionControl = (function() {
         header = $('<div class="sidebar-version-control-change-header">Changes to commit</div>').appendTo(stagedContent);
 
         bg = $('<div style="float: right"></div>').appendTo(header);
+        var showCommitBox = function() {
+            commitMessage.val("");
+            submitCommitButton.attr("disabled",true);
+            unstagedContent.css("height","30px");
+            if (unmergedContent.is(":visible")) {
+                unmergedContent.css("height","30px");
+                stagedContent.css("height","calc(100% - 60px - 175px)");
+            } else {
+                stagedContent.css("height","calc(100% - 30px - 175px)");
+            }
+            commitBox.show();
+            setTimeout(function() {
+                commitBox.css("height","175px");
+            },10);
+            stageAllButton.attr("disabled",true);
+            unstageAllButton.attr("disabled",true);
+            commitButton.attr("disabled",true);
+            abortMergeButton.attr("disabled",true);
+            commitMessage.focus();
+        }
         commitButton = $('<button class="editor-button editor-button-small" style="margin-right: 5px;">commit</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
-                commitMessage.val("");
-                submitCommitButton.attr("disabled",true);
-                unstagedContent.css("height","30px");
-                if (unmergedContent.is(":visible")) {
-                    unmergedContent.css("height","30px");
-                    stagedContent.css("height","calc(100% - 60px - 175px)");
-                } else {
-                    stagedContent.css("height","calc(100% - 30px - 175px)");
-                }
-                commitBox.show();
-                setTimeout(function() {
-                    commitBox.css("height","175px");
-                },10);
-                stageAllButton.attr("disabled",true);
-                unstageAllButton.attr("disabled",true);
-                commitButton.attr("disabled",true);
-                commitMessage.focus();
+                showCommitBox();
             });
         unstageAllButton = $('<button class="editor-button editor-button-small"><i class="fa fa-minus"></i> all</button>')
             .appendTo(bg)
@@ -467,6 +475,8 @@ RED.sidebar.versionControl = (function() {
                 stageAllButton.attr("disabled",false);
                 unstageAllButton.attr("disabled",false);
                 commitButton.attr("disabled",false);
+                abortMergeButton.attr("disabled",false);
+
             })
         var submitCommitButton = $('<button class="editor-button">Commit</button>')
             .appendTo(commitToolbar)
@@ -1045,16 +1055,6 @@ RED.sidebar.versionControl = (function() {
     //     }
     // }
 
-    function showMergeConflictNotification() {
-        if (isMerging) {
-            mergeConflictNotification = RED.notify("NLS: Automatic merging of remote changes failed. Fix the unmerged conflicts then commit the results."+
-                '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+'Show merge conflicts'+'</a></p>',"error",true);
-        }
-    }
-
-
-
-
     function refreshFiles(result) {
         var files = result.files;
         if (bulkChangeSpinner) {
@@ -1064,7 +1064,22 @@ RED.sidebar.versionControl = (function() {
         isMerging = !!result.merging;
         if (isMerging) {
             if (!mergeConflictNotification) {
-                showMergeConflictNotification();
+                var text = "<p>Automatic merging of changes failed.</p><p>Fix the unmerged conflicts then commit the results.</p>";
+                var options = {
+                    type: 'error',
+                    fixed: true,
+                    id: 'merge-conflict',
+                    buttons: [
+                        {
+                            text: "Show merge conflicts",
+                            click: function() {
+                                mergeConflictNotification.hideNotification();
+                                RED.sidebar.versionControl.showLocalChanges();
+                            }
+                        }
+                    ]
+                }
+                mergeConflictNotification = RED.notify(text,options);
             }
             sidebarContent.addClass("sidebar-version-control-merging");
             unmergedContent.show();
