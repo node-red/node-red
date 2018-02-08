@@ -1,3 +1,4 @@
+<!--
 ## Before you hit that Submit button....
 
 This issue tracker is for problems with the Node-RED runtime, the editor or the core nodes.
@@ -14,6 +15,7 @@ That way the whole Node-RED user community can help, rather than rely on the cor
 ## So you have a real issue to raise...
 
 To help us understand the issue, please fill-in as much of the following information as you can:
+-->
 
 ### What are the steps to reproduce?
 
