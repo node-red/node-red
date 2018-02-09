@@ -116,6 +116,18 @@ RED.sidebar.versionControl = (function() {
         if (entry.label) {
             row.addClass('node-info-none');
             container.text(entry.label);
+            if (entry.button) {
+                container.css({
+                    display: "inline-block",
+                    maxWidth: "300px",
+                    textAlign: "left"
+                })
+                var toolbar = $('<div style="float: right; margin: 5px; height: 50px;"></div>').appendTo(container);
+
+                $('<button class="editor-button editor-button-small"></button>').text(entry.button.label)
+                    .appendTo(toolbar)
+                    .click(entry.button.click);
+            }
             return;
         }
 
@@ -370,17 +382,17 @@ RED.sidebar.versionControl = (function() {
             addButton: false,
             scrollOnAdd: false,
             addItem: function(row,index,entry) {
-                createChangeEntry(row,entry,entry.treeStatus,'unmerged');
                 if (entry === emptyMergedItem) {
-                    var toolbar = $('<div style="text-align: center"></div>').appendTo(row);
-                    $('<button class="editor-button editor-button-small">commit</button>')
-                        .appendTo(toolbar)
-                        .click(function(evt) {
+                    entry.button = {
+                        label: 'commit',
+                        click: function(evt) {
                             evt.preventDefault();
                             evt.stopPropagation();
                             showCommitBox();
-                        });
+                        }
+                    }
                 }
+                createChangeEntry(row,entry,entry.treeStatus,'unmerged');
             },
             sort: function(A,B) {
                 if (A.treeStatus === '?' && B.treeStatus !== '?') {
@@ -453,7 +465,7 @@ RED.sidebar.versionControl = (function() {
 
         commitBox = $('<div class="sidebar-version-control-slide-box sidebar-version-control-slide-box-bottom"></div>').hide().appendTo(localChanges.content);
 
-        var commitMessage = $('<textarea>')
+        var commitMessage = $('<textarea placeholder="Enter your commit message"></textarea>')
             .appendTo(commitBox)
             .on("change keyup paste",function() {
                 submitCommitButton.attr('disabled',$(this).val().trim()==="");
