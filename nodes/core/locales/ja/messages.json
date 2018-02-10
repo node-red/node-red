@@ -234,7 +234,7 @@
         "and": "回／",
         "rate": "流量",
         "msgper": "メッセージ／",
-        "dropmsg": "仲介メッセージを削除",
+        "dropmsg": "中間メッセージを削除",
         "label": {
             "delay": "delay",
             "variable": "variable",
