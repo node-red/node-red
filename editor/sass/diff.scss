@@ -16,17 +16,16 @@
 
 
 .node-dialog-view-diff-panel {
+    padding: 5px;
+    padding-top: 30px;
+    position: relative;
+
     .red-ui-editableList-container {
         border-radius:1px;
         padding:0;
         background: #f9f9f9;
     }
     .node-dialog-view-diff-diff {
-        position: absolute;
-        top:30px;
-        bottom:10px;
-        left:10px;
-        right:10px;
         li {
             background: #f9f9f9;
             padding: 0px;
@@ -38,21 +37,20 @@
         padding: 5px;
         // padding-bottom: 5px;
     }
-    &.node-dialog-view-diff-panel-merge {
-        .node-dialog-view-diff-diff {
-            top: 80px
-        }
-        .node-dialog-view-diff-headers {
-            top: 55px;
-        }
-
-    }
+}
+.node-diff-container {
+    position: absolute;
+    top: 40px;
+    right:0;
+    bottom: 0;
+    left: 0;
+    overflow-y: scroll;
 }
 
 .node-dialog-view-diff-headers {
     position: absolute;
-    left:237px;
-    right:18px;
+    left:232px;
+    right:12px;
     top: 5px;
     height: 25px;
     div {
@@ -76,11 +74,6 @@
 }
 
 .node-diff-toolbar {
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height: 43px;
     box-sizing: border-box;
     color: #666;
     text-align: right;
@@ -555,129 +548,129 @@ ul.node-dialog-configm-deploy-list {
 .node-text-diff {
     height: 100%;
     overflow-y:auto;
-    table {
+
+    table.node-text-diff-content {
         margin: 10px;
         border: 1px solid $secondary-border-color;
         border-radius: 3px;
         table-layout: fixed;
         width: calc(100% - 20px);
-    }
-    td {
-        vertical-align: top;
-        word-wrap: break-word;
-    }
-    td.lineno {
-        font-family: monospace;
-        text-align: right;
-        color: #aaa;
-        background: #f6f6f6;
-        padding: 1px 5px;
-    }
-    td.lineno:nth-child(3) {
-        border-left: 1px solid $secondary-border-color;
-    }
-    td.linetext {
-        font-family: monospace;
-        white-space: pre-wrap;
-        padding: 1px 5px;
-        span.prefix {
-            width: 30px;
-            display: inline-block;
-            text-align: center;
-            color: #999;
+        td {
+            vertical-align: top;
+            word-wrap: break-word;
         }
-    }
-    td.blank {
-        background: #f6f6f6;
-    }
-    td.added {
-        background: #eefaee;
-    }
-    td.removed {
-        background: #fadddd;
-    }
-    tr.mergeHeader td {
-        color: #800080;
-        background: #e5f9ff;
-        height: 26px;
-        vertical-align: middle;
-    }
-    tr.mergeHeader-separator td {
-        color: #800080;
-        background: darken(#e5f9ff, 10%);
-        height: 0px;
-    }
-    tr.mergeHeader-ours td {
-        border-top: 2px solid darken(#e5f9ff, 10%);
-    }
-    tr.mergeHeader-theirs td {
-        border-bottom: 2px solid darken(#e5f9ff, 10%);
-    }
-    td.unchanged {
-        color: #999;
-    }
-    tr.unchanged {
-        background: #fefefe;
-    }
-    tr.start-block {
-        border-top: 1px solid #f0f0f0;
-    }
-    tr.end-block {
-        border-bottom: 1px solid #f0f0f0;
-    }
-    tr.node-text-diff-file-header td {
-        .filename {
+        td.lineno {
             font-family: monospace;
+            text-align: right;
+            color: #aaa;
+            background: #f6f6f6;
+            padding: 1px 5px;
         }
-        background: #f3f3f3;
-        padding: 5px 10px 5px 0;
-        color: #333;
-        cursor: pointer;
-        i.node-diff-chevron {
-            width: 30px;
+        td.lineno:nth-child(3) {
+            border-left: 1px solid $secondary-border-color;
         }
-    }
-    tr.node-text-diff-file-header.collapsed {
-        td i.node-diff-chevron {
-            transform: rotate(-90deg);
+        td.linetext {
+            font-family: monospace;
+            white-space: pre-wrap;
+            padding: 1px 5px;
+            span.prefix {
+                width: 30px;
+                display: inline-block;
+                text-align: center;
+                color: #999;
+            }
         }
-    }
-    tr.node-text-diff-commit-header td {
-        background: #f3f3f3;
-        padding: 5px 10px;
-        color: #333;
-        h3 {
-            font-size: 1.4em;
-            margin: 0;
+        td.blank {
+            background: #f6f6f6;
         }
-        .commit-summary {
-            border-top: 1px solid $secondary-border-color;
-            padding-top: 5px;
+        td.added {
+            background: #eefaee;
+        }
+        td.removed {
+            background: #fadddd;
+        }
+        tr.mergeHeader td {
+            color: #800080;
+            background: #e5f9ff;
+            height: 26px;
+            vertical-align: middle;
+        }
+        tr.mergeHeader-separator td {
+            color: #800080;
+            background: darken(#e5f9ff, 10%);
+            height: 0px;
+        }
+        tr.mergeHeader-ours td {
+            border-top: 2px solid darken(#e5f9ff, 10%);
+        }
+        tr.mergeHeader-theirs td {
+            border-bottom: 2px solid darken(#e5f9ff, 10%);
+        }
+        td.unchanged {
             color: #999;
         }
-        .commit-body {
-            margin-bottom:15px;
-            white-space: pre;
-            line-height: 1.2em;
+        tr.unchanged {
+            background: #fefefe;
+        }
+        tr.start-block {
+            border-top: 1px solid #f0f0f0;
+        }
+        tr.end-block {
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr.node-text-diff-file-header td {
+            .filename {
+                font-family: monospace;
+            }
+            background: #f3f3f3;
+            padding: 5px 10px 5px 0;
+            color: #333;
+            cursor: pointer;
+            i.node-diff-chevron {
+                width: 30px;
+            }
+        }
+        tr.node-text-diff-file-header.collapsed {
+            td i.node-diff-chevron {
+                transform: rotate(-90deg);
+            }
+        }
+        tr.node-text-diff-commit-header td {
+            background: #f3f3f3;
+            padding: 5px 10px;
+            color: #333;
+            h3 {
+                font-size: 1.4em;
+                margin: 0;
+            }
+            .commit-summary {
+                border-top: 1px solid $secondary-border-color;
+                padding-top: 5px;
+                color: #999;
+            }
+            .commit-body {
+                margin-bottom:15px;
+                white-space: pre;
+                line-height: 1.2em;
+            }
+        }
+
+        tr.node-text-diff-header > td:not(.flow-diff) {
+            font-family: monospace;
+            padding: 5px 10px;
+            text-align: left;
+            color: #666;
+            background: #ffd;
+            height: 30px;
+            vertical-align: middle;
+            border-top: 1px solid #f0f0f0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        tr.node-text-diff-expand td {
+            cursor: pointer;
+            &:hover {
+                background: #ffc;
+            }
         }
     }
-
-    tr.node-text-diff-header td {
-        font-family: monospace;
-        padding: 5px 10px;
-        text-align: left;
-        color: #666;
-        background: #ffd;
-        height: 30px;
-        vertical-align: middle;
-        border-top: 1px solid #f0f0f0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    tr.node-text-diff-expand td {
-        cursor: pointer;
-        &:hover {
-            background: #ffc;
-        }
-    }
-
 }

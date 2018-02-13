@@ -131,11 +131,12 @@
                         var project = RED.projects.getActiveProject();
                         var message = {
                             "change-branch":"Change to local branch '"+project.git.branches.local+"'",
-                            "abort-merge":"Git merge aborted",
+                            "merge-abort":"Git merge aborted",
                             "loaded":"Project '"+msg.project+"' loaded",
                             "updated":"Project '"+msg.project+"' updated",
                             "pull":"Project '"+msg.project+"' reloaded",
-                            "revert": "Project '"+msg.project+"' reloaded"
+                            "revert": "Project '"+msg.project+"' reloaded",
+                            "merge-complete":"Git merge completed"
                         }[msg.action];
                         RED.notify("<p>"+message+"</p>");
                         RED.sidebar.info.refresh()
@@ -215,6 +216,20 @@
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.createDefaultFileSet();
+                                    }
+                                }
+                            ]
+                        }
+                    } else if (msg.error === "git_merge_conflict") {
+                        RED.nodes.clear();
+                        RED.sidebar.versionControl.refresh(true);
+                        if (RED.user.hasPermission("projects.write")) {
+                            options.buttons = [
+                                {
+                                    text: "Show merge conflicts",
+                                    click: function() {
+                                        persistentNotifications[notificationId].hideNotification();
+                                        RED.sidebar.versionControl.showLocalChanges();
                                     }
                                 }
                             ]

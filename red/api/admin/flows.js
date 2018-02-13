@@ -80,7 +80,7 @@ module.exports = {
             }).catch(function(err) {
                 log.warn(log._("api.flows.error-save",{message:err.message}));
                 log.warn(err.stack);
-                res.status(500).json({error:"unexpected_error", message:err.message});
+                res.status(500).json({error:err.code || "unexpected_error", message:err.message});
             });
         }
     }

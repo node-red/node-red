@@ -454,18 +454,19 @@ module.exports = {
         } else {
             promise = runGitCommand(args,cwd)
         }
-        return promise.catch(function(err) {
-            if (/CONFLICT/.test(err.stdout)) {
-                var e = new Error("NLS: pull failed - merge conflict");
-                e.code = "git_pull_merge_conflict";
-                throw e;
-            } else if (/Please commit your changes or stash/i.test(err.message)) {
-                var e = new Error("NLS: Pull failed - local changes would be overwritten");
-                e.code = "git_pull_overwrite";
-                throw e;
-            }
-            throw err;
-        });
+        return promise;
+        // .catch(function(err) {
+        //     if (/CONFLICT/.test(err.stdout)) {
+        //         var e = new Error("pull failed - merge conflict");
+        //         e.code = "git_pull_merge_conflict";
+        //         throw e;
+        //     } else if (/Please commit your changes or stash/i.test(err.message)) {
+        //         var e = new Error("Pull failed - local changes would be overwritten");
+        //         e.code = "git_pull_overwrite";
+        //         throw e;
+        //     }
+        //     throw err;
+        // });
     },
     push: function(cwd,remote,branch,setUpstream, auth) {
         var args = ["push"];

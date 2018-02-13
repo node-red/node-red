@@ -21,17 +21,18 @@ RED.diff = (function() {
         RED.keyboard.add("*","ctrl-shift-f 3","core:show-test-flow-diff-3");
 
     }
-    function createDiffTable(container) {
+    function createDiffTable(container,CurrentDiff) {
         var diffList = $('<ol class="node-dialog-view-diff-diff"></ol>').appendTo(container);
         diffList.editableList({
             addButton: false,
+            height: "auto",
             scrollOnAdd: false,
             addItem: function(container,i,object) {
                 var localDiff = object.diff;
                 var remoteDiff = object.remoteDiff;
                 var tab = object.tab.n;
                 var def = object.def;
-                var conflicts = currentDiff.conflicts;
+                var conflicts = CurrentDiff.conflicts;
 
                 var tabDiv = $('<div>',{class:"node-diff-tab"}).appendTo(container);
                 tabDiv.addClass('collapsed');
@@ -150,10 +151,10 @@ RED.diff = (function() {
                             }
                             div.addClass("node-diff-node-entry-conflict");
                         } else {
-                            selectState = currentDiff.resolutions[tab.id];
+                            selectState = CurrentDiff.resolutions[tab.id];
                         }
                         // Tab properties row
-                        createNodeConflictRadioBoxes(tab,div,localNodeDiv,remoteNodeDiv,true,!conflicts[tab.id],selectState);
+                        createNodeConflictRadioBoxes(tab,div,localNodeDiv,remoteNodeDiv,true,!conflicts[tab.id],selectState,CurrentDiff);
                     }
                 }
                 // var stats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(titleRow);
@@ -162,14 +163,14 @@ RED.diff = (function() {
                 var seen = {};
                 object.tab.nodes.forEach(function(node) {
                     seen[node.id] = true;
-                    createNodeDiffRow(node,flowStats).appendTo(nodesDiv)
+                    createNodeDiffRow(node,flowStats,CurrentDiff).appendTo(nodesDiv)
                 });
                 if (object.newTab) {
                     localNodeCount = object.newTab.nodes.length;
                     object.newTab.nodes.forEach(function(node) {
                         if (!seen[node.id]) {
                             seen[node.id] = true;
-                            createNodeDiffRow(node,flowStats).appendTo(nodesDiv)
+                            createNodeDiffRow(node,flowStats,CurrentDiff).appendTo(nodesDiv)
                         }
                     });
                 }
@@ -177,7 +178,7 @@ RED.diff = (function() {
                     remoteNodeCount = object.remoteTab.nodes.length;
                     object.remoteTab.nodes.forEach(function(node) {
                         if (!seen[node.id]) {
-                            createNodeDiffRow(node,flowStats).appendTo(nodesDiv)
+                            createNodeDiffRow(node,flowStats,CurrentDiff).appendTo(nodesDiv)
                         }
                     });
                 }
@@ -269,12 +270,12 @@ RED.diff = (function() {
                     if (flowStats.conflicts > 0) {
                         titleRow.addClass("node-diff-node-entry-conflict");
                     } else {
-                        selectState = currentDiff.resolutions[tab.id];
+                        selectState = CurrentDiff.resolutions[tab.id];
                     }
                     if (tab.id) {
                         var hide = !(flowStats.conflicts > 0 &&(localDiff.deleted[tab.id] || remoteDiff.deleted[tab.id]));
                         // Tab parent row
-                        createNodeConflictRadioBoxes(tab,titleRow,localCell,remoteCell, false, hide, selectState);
+                        createNodeConflictRadioBoxes(tab,titleRow,localCell,remoteCell, false, hide, selectState, CurrentDiff);
                     }
                 }
 
@@ -291,11 +292,8 @@ RED.diff = (function() {
         var diffHeaders = $('<div class="node-dialog-view-diff-headers"></div>').appendTo(diffPanel);
         if (options.mode === "merge") {
             diffPanel.addClass("node-dialog-view-diff-panel-merge");
-            var toolbar = $('<div class="node-diff-toolbar">'+
-                '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
-                '</div>').prependTo(diffPanel);
         }
-        var diffList = createDiffTable(diffPanel);
+        var diffList = createDiffTable(diffPanel, diff);
 
         var localDiff = diff.localDiff;
         var remoteDiff = diff.remoteDiff;
@@ -512,10 +510,10 @@ RED.diff = (function() {
         $('<span>',{class:"node-diff-node-label"}).html(nodeLabel).appendTo(contentDiv);
         return nodeTitleDiv;
     }
-    function createNodeDiffRow(node,stats) {
-        var localDiff = currentDiff.localDiff;
-        var remoteDiff = currentDiff.remoteDiff;
-        var conflicted = currentDiff.conflicts[node.id];
+    function createNodeDiffRow(node,stats,CurrentDiff) {
+        var localDiff = CurrentDiff.localDiff;
+        var remoteDiff = CurrentDiff.remoteDiff;
+        var conflicted = CurrentDiff.conflicts[node.id];
 
         var hasChanges = false; // exists in original and local/remote but with changes
         var unChanged = true; // existing in original,local,remote unchanged
@@ -703,10 +701,10 @@ RED.diff = (function() {
             }
             div.addClass("node-diff-node-entry-conflict");
         } else {
-            selectState = currentDiff.resolutions[node.id];
+            selectState = CurrentDiff.resolutions[node.id];
         }
         // Node row
-        createNodeConflictRadioBoxes(node,div,localNodeDiv,remoteNodeDiv,false,!conflicted,selectState);
+        createNodeConflictRadioBoxes(node,div,localNodeDiv,remoteNodeDiv,false,!conflicted,selectState,CurrentDiff);
         row.click(function(evt) {
             $(this).parent().toggleClass('collapsed');
         });
@@ -982,7 +980,7 @@ RED.diff = (function() {
         });
         return nodePropertiesDiv;
     }
-    function createNodeConflictRadioBoxes(node,row,localDiv,remoteDiv,propertiesTable,hide,state) {
+    function createNodeConflictRadioBoxes(node,row,localDiv,remoteDiv,propertiesTable,hide,state,diff) {
         var safeNodeId = "node-diff-selectbox-"+node.id.replace(/\./g,'-')+(propertiesTable?"-props":"");
         var className = "";
         if (node.z||propertiesTable) {
@@ -1019,7 +1017,7 @@ RED.diff = (function() {
                 row.addClass("node-diff-select-remote");
                 row.removeClass("node-diff-select-local");
             }
-            refreshConflictHeader();
+            refreshConflictHeader(diff);
         }
 
         var localSelectDiv = $('<label>',{class:"node-diff-selectbox",for:safeNodeId+"-local"}).click(function(e) { e.stopPropagation();}).appendTo(localDiv);
@@ -1037,7 +1035,7 @@ RED.diff = (function() {
         }
 
     }
-    function refreshConflictHeader() {
+    function refreshConflictHeader(currentDiff) {
         var resolutionCount = 0;
         $(".node-diff-selectbox>input:checked").each(function() {
             if (currentDiff.conflicts[$(this).data('node-id')]) {
@@ -1053,6 +1051,7 @@ RED.diff = (function() {
         }
         if (conflictCount === resolutionCount) {
             $("#node-diff-view-diff-merge").removeClass('disabled');
+            $("#node-diff-view-resolve-diff").removeClass('disabled');
         }
     }
     function getRemoteDiff(callback) {
@@ -1231,7 +1230,7 @@ RED.diff = (function() {
         var localDiff = diff.localDiff;
         var remoteDiff = diff.remoteDiff;
         var conflicts = diff.conflicts;
-        currentDiff = diff;
+        // currentDiff = diff;
 
         var trayOptions = {
             title: options.title||"Review Changes", //TODO: nls
@@ -1250,7 +1249,11 @@ RED.diff = (function() {
             },
             open: function(tray) {
                 var trayBody = tray.find('.editor-tray-body');
-                var diffTable = buildDiffPanel(trayBody,diff,options);
+                var toolbar = $('<div class="node-diff-toolbar">'+
+                    '<span><span id="node-diff-toolbar-resolved-conflicts"></span></span> '+
+                    '</div>').prependTo(trayBody);
+                var diffContainer = $('<div class="node-diff-container"></div>').appendTo(trayBody);
+                var diffTable = buildDiffPanel(diffContainer,diff,options);
                 diffTable.list.hide();
                 if (remoteDiff) {
                     $("#node-diff-view-diff-merge").show();
@@ -1262,7 +1265,7 @@ RED.diff = (function() {
                 } else {
                     $("#node-diff-view-diff-merge").hide();
                 }
-                refreshConflictHeader();
+                refreshConflictHeader(diff);
                 // console.log("--------------");
                 // console.log(localDiff);
                 // console.log(remoteDiff);
@@ -1290,8 +1293,8 @@ RED.diff = (function() {
                     class: "primary disabled",
                     click: function() {
                         if (!$("#node-diff-view-diff-merge").hasClass('disabled')) {
-                            refreshConflictHeader();
-                            mergeDiff(currentDiff);
+                            refreshConflictHeader(diff);
+                            mergeDiff(diff);
                             RED.tray.close();
                         }
                     }
@@ -1302,7 +1305,7 @@ RED.diff = (function() {
         RED.tray.show(trayOptions);
     }
 
-    function mergeDiff(diff) {
+    function applyDiff(diff) {
         var currentConfig = diff.localDiff.currentConfig;
         var localDiff = diff.localDiff;
         var remoteDiff = diff.remoteDiff;
@@ -1356,6 +1359,20 @@ RED.diff = (function() {
                 }
             }
         }
+        return {
+            config: newConfig,
+            nodeChangedStates: nodeChangedStates,
+            localChangedStates: localChangedStates
+        }
+    }
+
+    function mergeDiff(diff) {
+        var appliedDiff = applyDiff(diff);
+
+        var newConfig = appliedDiff.config;
+        var nodeChangedStates = appliedDiff.nodeChangedStates;
+        var localChangedStates = appliedDiff.localChangedStates;
+
         var historyEvent = {
             t:"replace",
             config: RED.nodes.createCompleteNodeSet(),
@@ -1417,7 +1434,7 @@ RED.diff = (function() {
                 var trayBody = tray.find('.editor-tray-body');
                 var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
 
-                var codeTable = $("<table>").appendTo(diffPanel);
+                var codeTable = $("<table>",{class:"node-text-diff-content"}).appendTo(diffPanel);
                 $('<colgroup><col width="50"><col width="50%"><col width="50"><col width="50%"></colgroup>').appendTo(codeTable);
                 var codeBody = $('<tbody>').appendTo(codeTable);
                 var diffSummary = diffText(textA||"",textB||"");
@@ -1681,7 +1698,7 @@ RED.diff = (function() {
         files.forEach(function(file) {
             var hunks = file.hunks;
             var isBinary = file.binary;
-            var codeTable = $("<table>").appendTo(diffPanel);
+            var codeTable = $("<table>",{class:"node-text-diff-content"}).appendTo(diffPanel);
             $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
             var codeBody = $('<tbody>').appendTo(codeTable);
 
@@ -1700,49 +1717,145 @@ RED.diff = (function() {
             var unresolvedConflicts = 0;
             var resolvedConflicts = 0;
             var conflictResolutions = {};
+            if (commitOptions.project.files && commitOptions.project.files.flow === file.file) {
+                if (commitOptions.unmerged) {
+                    $('<span style="float: right;"><span id="node-diff-toolbar-resolved-conflicts"></span></span>').appendTo(content);
+                }
+                // var tools = $('<span style="float: right;" class="button-group"></span>').appendTo(content);
+                // $('<button class="editor-button editor-button-small">show flow diff</button>').appendTo(tools).click(function(e) {
+                //     e.preventDefault();
+                //     e.stopPropagation();
+                //     var projectName = commitOptions.project.name;
+                //     var filename = commitOptions.project.files.flow;
+                //     var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                //     var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
+                //     var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
+                //     var promises = [];
+                //     if (commitOptions.commonRev) {
+                //         var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                //         promises.push($.getJSON(commonVersionUrl));
+                //     } else {
+                //         promises.push($.when(null));
+                //     }
+                //     promises.push($.getJSON(oldVersionUrl));
+                //     promises.push($.getJSON(newVersionUrl));
+                //     $.when.apply($,promises).done(function(commonVersion, oldVersion,newVersion) {
+                //         var commonFlow;
+                //         var oldFlow;
+                //         var newFlow;
+                //         if (commonVersion) {
+                //             try {
+                //                 commonFlow = JSON.parse(commonVersion[0].content||"[]");
+                //             } catch(err) {
+                //                 console.log("Common Version doesn't contain valid JSON:",commonVersionUrl);
+                //                 console.log(err);
+                //                 return;
+                //             }
+                //         }
+                //         try {
+                //             oldFlow = JSON.parse(oldVersion[0].content||"[]");
+                //         } catch(err) {
+                //             console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                //             console.log(err);
+                //             return;
+                //         }
+                //         if (!commonFlow) {
+                //             commonFlow = oldFlow;
+                //         }
+                //         try {
+                //             newFlow = JSON.parse(newVersion[0].content||"[]");
+                //         } catch(err) {
+                //             console.log("New Version doesn't contain valid JSON:",newFlow);
+                //             console.log(err);
+                //             return;
+                //         }
+                //         var localDiff = generateDiff(commonFlow,oldFlow);
+                //         var remoteDiff = generateDiff(commonFlow,newFlow);
+                //         var diff = resolveDiffs(localDiff,remoteDiff);
+                //         showDiff(diff,{
+                //             title: filename,
+                //             mode: commitOptions.commonRev?'merge':'view',
+                //             oldRevTitle: commitOptions.oldRevTitle,
+                //             newRevTitle: commitOptions.newRevTitle
+                //         });
+                //         // var flowDiffRow = $("<tr>").insertAfter(diffRow);
+                //         // var content = $('<td colspan="3"></td>').appendTo(flowDiffRow);
+                //         // currentDiff = diff;
+                //         // var diffTable = buildDiffPanel(content,diff,{mode:"view"}).finish();
+                //     });
+                // })
+                var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
+                var flowDiffContent = $('<td class="flow-diff" colspan="3"></td>').appendTo(diffRow);
 
-            if (!commitOptions.unmerged && commitOptions.project.files && commitOptions.project.files.flow === file.file) {
-                var tools = $('<span style="float: right;" class="button-group"></span>').appendTo(content);
-                $('<button class="editor-button editor-button-small">show flow diff</button>').appendTo(tools).click(function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var projectName = commitOptions.project.name;
-                    var filename = commitOptions.project.files.flow;
-                    var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
-                    var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
-                    $.when($.getJSON(oldVersionUrl),$.getJSON(newVersionUrl)).done(function(oldVersion,newVersion) {
-                        var oldFlow;
-                        var newFlow;
+                var projectName = commitOptions.project.name;
+                var filename = commitOptions.project.files.flow;
+                var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
+                var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
+                var promises = [$.Deferred(),$.Deferred(),$.Deferred()];
+                if (commitOptions.commonRev) {
+                    var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                    $.ajax({dataType: "json",url: commonVersionUrl}).then(function(data) { promises[0].resolve(data); }).fail(function() { promises[0].resolve(null);})
+                } else {
+                    promises[0].resolve(null);
+                }
+
+                $.ajax({dataType: "json",url: oldVersionUrl}).then(function(data) { promises[1].resolve(data); }).fail(function() { promises[1].resolve({content:"[]"});})
+                $.ajax({dataType: "json",url: newVersionUrl}).then(function(data) { promises[2].resolve(data); }).fail(function() { promises[2].resolve({content:"[]"});})
+                $.when.apply($,promises).always(function(commonVersion, oldVersion,newVersion) {
+                    var commonFlow;
+                    var oldFlow;
+                    var newFlow;
+                    if (commonVersion) {
                         try {
-                            oldFlow = JSON.parse(oldVersion[0].content||"[]");
+                            commonFlow = JSON.parse(commonVersion.content||"[]");
                         } catch(err) {
-                            console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                            console.log("Common Version doesn't contain valid JSON:",commonVersionUrl);
                             console.log(err);
                             return;
                         }
-                        try {
-                            newFlow = JSON.parse(newVersion[0].content||"[]");
-                        } catch(err) {
-                            console.log("New Version doesn't contain valid JSON:",newFlow);
-                            console.log(err);
-                            return;
-                        }
-                        var localDiff = generateDiff(oldFlow,oldFlow);
-                        var remoteDiff = generateDiff(oldFlow,newFlow);
-                        var diff = resolveDiffs(localDiff,remoteDiff);
-                        showDiff(diff,{
-                            title: filename,
-                            mode: 'view',
-                            oldRevTitle: commitOptions.oldRevTitle,
-                            newRevTitle: commitOptions.newRevTitle
-                        });
-                        // var flowDiffRow = $("<tr>").insertAfter(diffRow);
-                        // var content = $('<td colspan="3"></td>').appendTo(flowDiffRow);
-                        // currentDiff = diff;
-                        // var diffTable = buildDiffPanel(content,diff,{mode:"view"}).finish();
+                    }
+                    try {
+                        oldFlow = JSON.parse(oldVersion.content||"[]");
+                    } catch(err) {
+                        console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                        console.log(err);
+                        return;
+                    }
+                    if (!commonFlow) {
+                        commonFlow = oldFlow;
+                    }
+                    try {
+                        newFlow = JSON.parse(newVersion.content||"[]");
+                    } catch(err) {
+                        console.log("New Version doesn't contain valid JSON:",newFlow);
+                        console.log(err);
+                        return;
+                    }
+                    var localDiff = generateDiff(commonFlow,oldFlow);
+                    var remoteDiff = generateDiff(commonFlow,newFlow);
+                    commitOptions.currentDiff = resolveDiffs(localDiff,remoteDiff);
+                    var diffTable = buildDiffPanel(flowDiffContent,commitOptions.currentDiff,{
+                        title: filename,
+                        mode: commitOptions.commonRev?'merge':'view',
+                        oldRevTitle: commitOptions.oldRevTitle,
+                        newRevTitle: commitOptions.newRevTitle
                     });
-                })
-            }
+                    diffTable.list.hide();
+                    refreshConflictHeader(commitOptions.currentDiff);
+                    setTimeout(function() {
+                        diffTable.finish();
+                        diffTable.list.show();
+                    },300);
+                    // var flowDiffRow = $("<tr>").insertAfter(diffRow);
+                    // var content = $('<td colspan="3"></td>').appendTo(flowDiffRow);
+                    // currentDiff = diff;
+                    // var diffTable = buildDiffPanel(content,diff,{mode:"view"}).finish();
+                });
+
+
+
+            } else
 
             if (isBinary) {
                 var diffBinaryRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
@@ -1750,6 +1863,9 @@ RED.diff = (function() {
                 $('<span></span>').text("Cannot show binary file contents").appendTo(binaryContent);
 
             } else {
+                if (commitOptions.unmerged) {
+                    conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
+                }
                 hunks.forEach(function(hunk) {
                     var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
                     var content = $('<td colspan="3"></td>').appendTo(diffRow);
@@ -1886,9 +2002,6 @@ RED.diff = (function() {
                     });
                 });
             }
-            if (commitOptions.unmerged) {
-                conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
-            }
         });
         return diffPanel;
     }
@@ -1914,7 +2027,7 @@ RED.diff = (function() {
                 var trayBody = tray.find('.editor-tray-body');
                 var diffPanel = $('<div class="node-text-diff"></div>').appendTo(trayBody);
 
-                var codeTable = $("<table>").appendTo(diffPanel);
+                var codeTable = $("<table>",{class:"node-text-diff-content"}).appendTo(diffPanel);
                 $('<colgroup><col width="50"><col width="50"><col width="100%"></colgroup>').appendTo(codeTable);
                 var codeBody = $('<tbody>').appendTo(codeTable);
 
@@ -1957,7 +2070,6 @@ RED.diff = (function() {
             }
         }
 
-
         var trayOptions = {
             title: title||"Compare Changes", //TODO: nls
             width: Infinity,
@@ -1996,6 +2108,15 @@ RED.diff = (function() {
                     class: "primary disabled",
                     click: function() {
                         if (!$("#node-diff-view-resolve-diff").hasClass('disabled')) {
+                            if (options.currentDiff) {
+                                // This is a flow file. Need to apply the diff
+                                // and generate the new flow.
+                                var result = applyDiff(options.currentDiff);
+                                currentResolution = {
+                                    resolutions:{}
+                                };
+                                currentResolution.resolutions[options.project.files.flow] = JSON.stringify(result.config,"",4);
+                            }
                             if (options.onresolve) {
                                 options.onresolve(currentResolution);
                             }

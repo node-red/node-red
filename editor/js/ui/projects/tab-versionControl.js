@@ -30,7 +30,6 @@ RED.sidebar.versionControl = (function() {
     var unmergedContent;
     var unmergedChangesList;
     var commitButton;
-    var mergeConflictNotification;
     var localChanges;
 
     var localCommitList;
@@ -76,6 +75,11 @@ RED.sidebar.versionControl = (function() {
                         options.oldRev = "@";
                         options.newRev = ":0";
                     } else {
+                        options.oldRevTitle = "Local";
+                        options.newRevTitle = "Remote";
+                        options.commonRev = ":1";
+                        options.oldRev = ":2";
+                        options.newRev = ":3";
                         options.onresolve = function(resolution) {
                             utils.sendRequest({
                                 url: "projects/"+activeProject.name+"/resolve/"+encodeURIComponent(entry.file),
@@ -358,6 +362,7 @@ RED.sidebar.versionControl = (function() {
                 evt.stopPropagation();
                 var spinner = utils.addSpinnerOverlay(unmergedContent);
                 var activeProject = RED.projects.getActiveProject();
+                RED.deploy.setDeployInflight(true);
                 utils.sendRequest({
                     url: "projects/"+activeProject.name+"/merge",
                     type: "DELETE",
@@ -375,6 +380,10 @@ RED.sidebar.versionControl = (function() {
                             }
                         },
                     }
+                }).always(function() {
+                    setTimeout(function() {
+                        RED.deploy.setDeployInflight(false);
+                    },500);
                 });
             });
         unmergedChangesList = $("<ol>",{style:"position: absolute; top: 30px; bottom: 0; right:0; left:0;"}).appendTo(unmergedContent);
@@ -496,6 +505,7 @@ RED.sidebar.versionControl = (function() {
                 evt.preventDefault();
                 var spinner = utils.addSpinnerOverlay(submitCommitButton).addClass('projects-dialog-spinner-sidebar');
                 var activeProject = RED.projects.getActiveProject();
+                RED.deploy.setDeployInflight(true);
                 utils.sendRequest({
                     url: "projects/"+activeProject.name+"/commit",
                     type: "POST",
@@ -516,10 +526,11 @@ RED.sidebar.versionControl = (function() {
                     }
                 },{
                     message:commitMessage.val()
-                });
-
-
-
+                }).always(function() {
+                    setTimeout(function() {
+                        RED.deploy.setDeployInflight(false);
+                    },500);
+                })
             })
 
 
@@ -1108,31 +1119,9 @@ RED.sidebar.versionControl = (function() {
         }
         isMerging = !!result.merging;
         if (isMerging) {
-            if (!mergeConflictNotification) {
-                var text = "<p>Automatic merging of changes failed.</p><p>Fix the unmerged conflicts then commit the results.</p>";
-                var options = {
-                    type: 'error',
-                    fixed: true,
-                    id: 'merge-conflict',
-                    buttons: [
-                        {
-                            text: "Show merge conflicts",
-                            click: function() {
-                                mergeConflictNotification.hideNotification();
-                                RED.sidebar.versionControl.showLocalChanges();
-                            }
-                        }
-                    ]
-                }
-                mergeConflictNotification = RED.notify(text,options);
-            }
             sidebarContent.addClass("sidebar-version-control-merging");
             unmergedContent.show();
         } else {
-            if (mergeConflictNotification) {
-                mergeConflictNotification.close();
-                mergeConflictNotification = null;
-            }
             sidebarContent.removeClass("sidebar-version-control-merging");
             unmergedContent.hide();
         }
@@ -1307,6 +1296,8 @@ RED.sidebar.versionControl = (function() {
                 }
                 refreshInProgress = false;
                 $('.sidebar-version-control-shade').hide();
+            }).fail(function() {
+                refreshInProgress = false;
             });
         } else {
             $('.sidebar-version-control-shade').show();

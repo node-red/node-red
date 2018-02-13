@@ -212,7 +212,13 @@ function unstageFile(user, project,file) {
 }
 function commit(user, project,options) {
     checkActiveProject(project);
-    return activeProject.commit(user, options);
+    var isMerging = activeProject.isMerging();
+    return activeProject.commit(user, options).then(function() {
+        // The project was merging, now it isn't. Lets reload.
+        if (isMerging && !activeProject.isMerging()) {
+            return reloadActiveProject("merge-complete");
+        }
+    })
 }
 function getFileDiff(user, project,file,type) {
     checkActiveProject(project);
@@ -258,7 +264,7 @@ function resolveMerge(user, project,file,resolution) {
 function abortMerge(user, project) {
     checkActiveProject(project);
     return activeProject.abortMerge().then(function() {
-        return reloadActiveProject("abort-merge")
+        return reloadActiveProject("merge-abort")
     });
 }
 function getBranches(user, project,isRemote) {
@@ -478,6 +484,13 @@ function getFlows() {
             error.code = "missing_flow_file";
             return when.reject(error);
         }
+        if (activeProject.isMerging()) {
+            log.warn("Project has unmerged changes");
+            error = new Error("Project has unmerged changes. Cannot load flows");
+            error.code = "git_merge_conflict";
+            return when.reject(error);
+        }
+
     }
     return util.readFile(flowsFullPath,flowsFileBackup,[],'flow');
 }
@@ -485,6 +498,11 @@ function getFlows() {
 function saveFlows(flows) {
     if (settings.readOnly) {
         return when.resolve();
+    }
+    if (activeProject && activeProject.isMerging()) {
+        var error = new Error("Project has unmerged changes. Cannot deploy new flows");
+        error.code = "git_merge_conflict";
+        return when.reject(error);
     }
 
     try {

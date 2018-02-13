@@ -127,7 +127,7 @@ Project.prototype.load = function () {
 
         promises.push(project.loadRemotes());
 
-        return when.settle(promises).then(function() {
+        return when.settle(promises).then(function(results) {
             return project;
         })
     });
@@ -218,6 +218,9 @@ Project.prototype.parseRemoteBranch = function (remoteBranch) {
 Project.prototype.isEmpty = function () {
     return this.empty;
 };
+Project.prototype.isMerging = function() {
+    return this.merging;
+}
 
 Project.prototype.update = function (user, data) {
     var username;
@@ -374,7 +377,13 @@ Project.prototype.unstageFile = function(file) {
     return gitTools.unstageFile(this.path,file);
 }
 Project.prototype.commit = function(user, options) {
-    return gitTools.commit(this.path,options.message,getGitUser(user));
+    var self = this;
+    return gitTools.commit(this.path,options.message,getGitUser(user)).then(function() {
+        if (self.merging) {
+            self.merging = false;
+            return
+        }
+    });
 }
 Project.prototype.getFileDiff = function(file,type) {
     return gitTools.getFileDiff(this.path,file,type);
@@ -440,6 +449,21 @@ Project.prototype.status = function(user, includeRemote) {
             var result = results[0];
             if (results[1]) {
                 result.merging = true;
+                if (!self.merging) {
+                    self.merging = true;
+                    runtime.events.emit("runtime-event",{
+                        id:"runtime-state",
+                        payload:{
+                            type:"warning",
+                            error:"git_merge_conflict",
+                            project:self.name,
+                            text:"notification.warnings.git_merge_conflict"
+                        },
+                        retain:true}
+                    );
+                }
+            } else {
+                self.merging = false;
             }
             self.branches.local = result.branches.local;
             self.branches.remote = result.branches.remote;
@@ -534,6 +558,11 @@ Project.prototype.pull = function (user,remoteBranchName,setRemote,allowUnrelate
 Project.prototype.resolveMerge = function (file,resolutions) {
     var filePath = fspath.join(this.path,file);
     var self = this;
+    if (typeof resolutions === 'string') {
+        return util.writeFile(filePath, resolutions).then(function() {
+            return self.stageFile(file);
+        })
+    }
     return fs.readFile(filePath,"utf8").then(function(content) {
         var lines = content.split("\n");
         var result = [];
@@ -573,7 +602,10 @@ Project.prototype.resolveMerge = function (file,resolutions) {
     });
 };
 Project.prototype.abortMerge = function () {
-    return gitTools.abortMerge(this.path);
+    var self = this;
+    return gitTools.abortMerge(this.path).then(function() {
+        self.merging = false;
+    })
 };
 
 Project.prototype.getBranches = function (user, isRemote) {

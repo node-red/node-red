@@ -93,7 +93,8 @@
             "credentials_load_failed": "<p>Flows stopped as the credentials could not be decrypted.</p><p>The flow credential file is encrypted, but the project's encryption key is missing or invalid.</p>",
             "missing_flow_file": "<p>Project flow file not found.</p><p>The project is not configured with a flow file.</p>",
             "project_empty": "<p>The project is empty.</p><p>Do you want to create a default set of project files?<br/>Otherwise, you will have to manually add files to the project outside of the editor.</p>",
-            "project_not_found": "<p>Project '__project__' not found.</p>"
+            "project_not_found": "<p>Project '__project__' not found.</p>",
+            "git_merge_conflict": "<p>Automatic merging of changes failed.</p><p>Fix the unmerged conflicts then commit the results.</p>"
         },
 
         "error": "<strong>Error</strong>: __message__",
