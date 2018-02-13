@@ -1,3 +1,20 @@
+#### 0.18.3: Maintenance Release
+
+Projects
+
+ - Fix permissions on git/ssh scripts
+ - Add support for GIT_SSH on older levels of git
+ - Handle host key verification as auth error
+ - Ensure commit list has a refs object even if empty
+ - Make git error detection case-insensitive
+ - Fix up merge conflict handling
+ - Use flow-diff when looking at flow file changes
+
+Node Fixes
+
+ - Ensure debug tools show for 'complete msg object'
+ - Fix msg.parts handling in concat mode of Batch node
+
 #### 0.18.2: Maintenance Release
 
 Projects
