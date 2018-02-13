@@ -116,7 +116,7 @@ module.exports = function(RED) {
         for (var topic of topics) {
             remove_topic(pending, topic);
         }
-        send_msgs(node, msgs, false);
+        send_msgs(node, msgs, true);
         node.pending_count -= msgs.length;
     }
 

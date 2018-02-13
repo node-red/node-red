@@ -54,8 +54,13 @@ describe('BATCH node', function() {
         var ix0 = 0; // seq no
         var ix1 = 0; // loc. in seq
         var seq = undefined;
+        var msgs = [];
         n2.on("input", function(msg) {
             try {
+                for (var i = 0; i < msgs.length; i++) {
+                    msg.should.not.equal(msgs[i]);
+                }
+                msgs.push(msg);
                 if (seq === undefined) {
                     seq = results[ix0];
                 }
@@ -302,6 +307,19 @@ describe('BATCH node', function() {
                 ["TB", 1, 1, 2],
                 ["TA", 2, 0, 2],
                 ["TA", 3, 1, 2]
+            ];
+            check_concat(flow, results, inputs, done);
+        });
+
+        it('should concat same seq.', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "concat", count: 0, overlap: 0, interval: 1, allowEmptySequence: false, topics: [{topic: "TA"}, {topic: "TA"}], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            var results = [
+                [9, 8, 9, 8]
+            ];
+            var inputs = [
+                ["TA", 9, 0, 2],
+                ["TA", 8, 1, 2]
             ];
             check_concat(flow, results, inputs, done);
         });
