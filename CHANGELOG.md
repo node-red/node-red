@@ -15,6 +15,12 @@ Node Fixes
  - Ensure debug tools show for 'complete msg object'
  - Fix msg.parts handling in concat mode of Batch node
 
+Editor Fixes
+
+ - Fix offset calculation when dragging node from palette
+ - Allow a library entry to use non-default node-input- prefixes
+ - Change remote-diff shortcut and add it to keymap Fixes #1628
+
 #### 0.18.2: Maintenance Release
 
 Projects
