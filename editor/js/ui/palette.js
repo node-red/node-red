@@ -219,13 +219,19 @@ RED.palette = (function() {
             var mouseX;
             var mouseY;
             var spliceTimer;
+            var paletteWidth;
+            var paletteTop;
             $(d).draggable({
                 helper: 'clone',
                 appendTo: 'body',
                 revert: true,
                 revertDuration: 50,
                 containment:'#main-container',
-                start: function() {RED.view.focus();},
+                start: function() {
+                    paletteWidth = $("#palette").width();
+                    paletteTop = $("#palette").parent().position().top + $("#palette-container").position().top;
+                    RED.view.focus();
+                },
                 stop: function() { d3.select('.link_splice').classed('link_splice',false); if (spliceTimer) { clearTimeout(spliceTimer); spliceTimer = null;}},
                 drag: function(e,ui) {
 
@@ -235,9 +241,8 @@ RED.palette = (function() {
                     ui.position.left += 17.5;
 
                     if (def.inputs > 0 && def.outputs > 0) {
-                        mouseX = ui.position.left+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
-                        mouseY = ui.position.top+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();
-
+                        mouseX = ui.position.left-paletteWidth+(ui.helper.width()/2) - chartOffset.left + chart.scrollLeft();
+                        mouseY = ui.position.top-paletteTop+(ui.helper.height()/2) - chartOffset.top + chart.scrollTop();
                         if (!spliceTimer) {
                             spliceTimer = setTimeout(function() {
                                 var nodes = [];
@@ -259,6 +264,7 @@ RED.palette = (function() {
                                     mouseY /= RED.view.scale();
                                     nodes = RED.view.getLinksAtPoint(mouseX,mouseY);
                                 }
+
                                 for (var i=0;i<nodes.length;i++) {
                                     if (d3.select(nodes[i]).classed('link_background')) {
                                         var length = nodes[i].getTotalLength();
