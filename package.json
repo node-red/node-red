@@ -12,7 +12,8 @@
     "scripts": {
         "start": "node red.js",
         "test": "grunt",
-        "build": "grunt build"
+        "build": "grunt build",
+        "install-the-extra-modules": "npm install chromedriver@\">=2.33.2 <3.0.0\""
     },
     "bin": {
         "node-red": "./red.js",
@@ -80,7 +81,6 @@
         "bcrypt": "~1.0.3"
     },
     "devDependencies": {
-        "chromedriver": "^2.33.2",
         "grunt": "~1.0.1",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.2.0",
