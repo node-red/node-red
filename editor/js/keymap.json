@@ -14,7 +14,7 @@
         "ctrl-i": "core:show-import-dialog",
         "ctrl-space": "core:toggle-sidebar",
         "ctrl-,": "core:show-user-settings",
-
+        "ctrl-alt-r": "core:show-remote-diff",
         "ctrl-alt-n": "core:new-project",
         "ctrl-alt-o": "core:open-project",
         "ctrl-g v": "core:show-version-control-tab"

@@ -9,16 +9,16 @@ RED.diff = (function() {
         // RED.actions.add("core:show-current-diff",showLocalDiff);
         RED.actions.add("core:show-remote-diff",showRemoteDiff);
         // RED.keyboard.add("*","ctrl-shift-l","core:show-current-diff");
-        RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
+        // RED.keyboard.add("*","ctrl-shift-r","core:show-remote-diff");
 
 
-        RED.actions.add("core:show-test-flow-diff-1",function(){showTestFlowDiff(1)});
-        RED.keyboard.add("*","ctrl-shift-f 1","core:show-test-flow-diff-1");
-
-        RED.actions.add("core:show-test-flow-diff-2",function(){showTestFlowDiff(2)});
-        RED.keyboard.add("*","ctrl-shift-f 2","core:show-test-flow-diff-2");
-        RED.actions.add("core:show-test-flow-diff-3",function(){showTestFlowDiff(3)});
-        RED.keyboard.add("*","ctrl-shift-f 3","core:show-test-flow-diff-3");
+        // RED.actions.add("core:show-test-flow-diff-1",function(){showTestFlowDiff(1)});
+        // RED.keyboard.add("*","ctrl-shift-f 1","core:show-test-flow-diff-1");
+        //
+        // RED.actions.add("core:show-test-flow-diff-2",function(){showTestFlowDiff(2)});
+        // RED.keyboard.add("*","ctrl-shift-f 2","core:show-test-flow-diff-2");
+        // RED.actions.add("core:show-test-flow-diff-3",function(){showTestFlowDiff(3)});
+        // RED.keyboard.add("*","ctrl-shift-f 3","core:show-test-flow-diff-3");
 
     }
     function createDiffTable(container,CurrentDiff) {
