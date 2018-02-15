@@ -1170,6 +1170,10 @@ RED.projects = (function() {
                                                     projectRepoSSHKeySelect.addClass("input-error");
                                                     projectRepoPassphrase.addClass("input-error");
                                                 },
+                                                'missing_flow_file': function(error) {
+                                                    // This is handled via a runtime notification.
+                                                    dialog.dialog("close");
+                                                },
                                                 'project_empty': function(error) {
                                                     // This is handled via a runtime notification.
                                                     dialog.dialog("close");
@@ -1178,8 +1182,9 @@ RED.projects = (function() {
                                                     // This is handled via a runtime notification.
                                                     dialog.dialog("close");
                                                 },
-                                                'unexpected_error': function(error) {
-                                                    console.log("unexpected_error",error)
+                                                '*': function(error) {
+                                                    reportUnexpectedError(error);
+                                                    $( dialog ).dialog( "close" );
                                                 }
                                             }
                                         }
