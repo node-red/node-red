@@ -721,7 +721,12 @@ RED.utils = (function() {
 
         var iconPath = separateIconPath(icon_url);
         if (!iconPath.module) {
-            iconPath.module = def.set.module;
+            if (def.set) {
+                iconPath.module = def.set.module;
+            } else {
+                // Handle subflow instance nodes that don't have def.set
+                iconPath.module = "node-red";
+            }
         }
         return iconPath;
     }
