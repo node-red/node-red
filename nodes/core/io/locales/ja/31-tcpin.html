@@ -1,0 +1,37 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="tcp in">
+    <p>TCPからの入力を行います。リモートTCPポートに接続するか、外部らからのコネクションを受け付けます。</p>
+    <p><b>注: </b>1024番より小さな番号のポートをアクセスするにはroodもしくはadministrator権限が必要なシステムもあります。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp out">
+    <p>TCPへの出力を行います。リモートTCPポートへ接続、外部からのコネクションの受け付け、もしくは、TCP Inノードで受け付けたメッセージへのリプライを行います。</p>
+    <p><code>msg.payload</code>のみが送信対象となります。</p>
+    <p><code>msg.payload</code>がバイナリデータをBase64エンコーディングの文字列に変換したものの場合、Base64デコードオプションを指定するとデータをバイナリに変化んして送信します。</p>
+    <p><code>msg._session</code>が存在しない場合、接続している<b>全ての</b>クライアントに送信します。</p>
+    <p><b>注: </b>1024番より小さな番号のポートをアクセスするにはroodもしくはadministrator権限が必要なシステムもあります。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>シンプルなTCPリクエストノード。<code>msg.payload</code>をサーバのTCPポートに送信し、レスポンスを待ちます。</p>
+    <p>
+サーバに接続、"リクエスト"送信、"レスポンス"受信を行います。固定長の文字数、指定文字へのマッチ、最初のリプライの到着から指定した時間待つ、データの到着待ち、データ送信を行いリプライを待たず接続を即時解除、などから動作を選択できます。</p>
+    <p>
+レスポンスはバッファ形式で<code>msg.payload</code>に出力されます。文字列として扱いには、toString()を使用してください。</p>
+    <p>TCPホストのポート番号設定を空にした場合、<code>msg.host</code>および<code>msg.port</code>プロパティを設定しなくてはなりません。</p>
+</script>
