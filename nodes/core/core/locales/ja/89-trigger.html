@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="trigger">
+    <p>メッセージの受信すると、別のメッセージの送信を行います。延長もしくは初期化が指定されていない場合には、2つ目のメッセージを送信することもできます。</p>
+
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt class="optional">reset</dt>
+        <dd>このプロパティを持つメッセージを受け取ると、仕掛かり中の待機や繰り返しをクリアしメッセージの送信は行いません。</dd>
+    </dl>
+
+    <h3>詳細</h3>
+    <p>フロー内でタイムアウトを作成するのに利用します。メッセージを受け取ると、
+デフォルトでは<code>payload</code>に<code>1</code>を設定して送信します。送信後250ms待機し、<code>payload</code>を<code>0</code>に設定した2つ目のメッセージを送信します。この機能は、例えばRaspberry PIのGPIOピンに接続したLEDを点滅させるために活用できます。</p>
+    <p>各送信メッセージのペイロードはさまざまな種類の値に設定できます。再送信デ
+ータなしとすることも可能です。例えば、再送信データを「<i>なし</i>」とし、
+メッセージを受け取った時に遅延を延長することを選択した場合、triggerノードは監視タイマとして動作します。すなわち、指定間隔内にメッセージを受信しない場合にメッセージを送信します。</p>
+    <p>ペイロードに<i>文字列</i>を指定する場合、mustache形式のテンプレートが利用できます。</p>
+    <p><code>reset</code>プロパティを持つメッセージを受信した場合、もしくは、<code>payload</code>が設定した値にマッチする場合、仕掛かり中の待機や繰り返しをクリアしメッセージの送信は行いません。</p>
+    <p>受信メッセージでリセットするまで一定間隔でメッセージを再送するように指定することもできます。</p>
+    <p><code>msg.topic</code>毎に別のストリームとして扱うように設定することも可能です。</p>
+</script>

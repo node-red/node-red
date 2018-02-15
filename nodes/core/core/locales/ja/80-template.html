@@ -1,0 +1,47 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="template">
+    <p>テンプレートに基づいてプロパティを設定します。</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">オブジェクト</span></dt>
+        <dd>テンプレートを生成するための情報を含むメッセージオブジェクト</dd>
+        <dt class="optional">template <span class="property-type">文字列</span></dt>
+        <dd><code>msg.payload</code>を生成するためのテンプレート。編集パネルでテンプレートを設定しない場合に、出力メッセージとして利用します</dd>
+    </dl>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">オブジェクト</span></dt>
+        <dd>指定したテンプレートと入力メッセージのプロパティから生成した値を設定したメッセージ</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>このノードは<i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>形式をデフォルトで利用しますが、使用しないようにすることもできます。</p>
+    <p>例えば、
+    <pre>こんにちは{{payload.name}}さん。今日は{{date}}です。</pre>
+    <p>というテンプレートに対して、
+    <pre>{
+  date: "月曜日"
+  payload: {
+    name: "山田",
+  }
+}</pre>
+    <p>というメッセージを受信した場合、</p>
+    <pre>こんにちは山田さん。今日は月曜日です。</pre>
+    <p>というプロパティが生成されます。</p>
+    <p>フローコンテキストもしくはグローバルコンテキストのプロパティ値を使うこともできます。それぞれ、<code>{{flow.名前}}</code>もしくは<code>{{global.名前}}</code>を用います。</p>
+    <p><b>注: </b>デフォルトでは、<i>mustache</i>形式は置換対象のHTML要素をエスケープします。これを抑止するには<code>{{{三重}}}</code>括弧形式を使います。</p>
+</script>

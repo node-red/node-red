@@ -1,0 +1,75 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="exec">
+    <p>システムのコマンドを実行し出力を返します。</p>
+    <p>コマンドの完了まで待つか、コマンドが出力を行う毎にメッセージを出力するかを指定できます。</p>
+    <p>実行対象のコマンドは、ノードの設定もしくは受信メッセージで指定します。</p>
+
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">文字列</span></dt>
+        <dd>実行コマンドの最後に追加するよう設定できます</dd>
+        <dt class="optional">kill <span class="property-type">文字列</span></dt>
+        <dd>execノードのプロセスに対して送るシグナルの種別を指定します</dd>
+        <dt class="optional">pid <span class="property-type">数値|文字列</span></dt>
+        <dd>シグナル送信対象のexecノードのプロセスID</dd>
+    </dl>
+
+    <h3>出力</h3>
+    <ol class="node-ports">
+        <li>標準出力(stdout)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">文字列</span></dt>
+                <dd>コマンドの標準出力</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">オブジェクト</span></dt>
+                <dd>返却コードオブジェクト(3番ポートでも受取り可能)のコピー(execモードのみ)</dd>
+            </dl>
+        </li>
+        <li>標準エラー出力(stderr)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">文字列</span></dt>
+                <dd>コマンドの標準エラー出力</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">オブジェクト</span></dt>
+                <dd>返却コードオブジェクト(3番ポートでも受取り可能)のコピー(execモードのみ)</dd>
+            </dl>
+        </li>
+        <li>返却コード(return code)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">オブジェクト</span></dt>
+                <dd>リターンコード、<code>message</code>、<code>signal</code>プロパティを含むオブジェクト(<code>message</code>、<code>signal</code>は利用可能な場合)</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>詳細</h3>
+    <p>デフォルトでは、<code>exec</code>システムコールを用いてコマンドを呼び出してその完了を待ち、出力を返します。例えば、コマンドの実行が成功した場合には、<code>{ code: 0 }</code>と言う返却値を返します。</p>
+    <p><code>spawn</code>を使ってコマンドを実行し、
+標準出力および標準エラー出力へ出力を返すようにすることもできます。この場合、通常1行毎に値を返します。コマンドの実行が完了すると、3番目のポートにオブジェクトを出力します。例えば、コマンドの実行が成功した場合には、<code>{ code: 0 }</code>と言う返却値を返します。</p>
+    <p>エラー発生時には、3番目のポートの<code>msg.payload</code>に<code>message</code>、<code>signal</code>など付加情報を返します。</p>
+    <p>実行対象のコマンドはノード設定で定義します。<code>msg.payload</code>や追加引数をコマンドに追加することもできます。</p>
+    <p>コマンドもしくはパラメータが空白を含む場合には、引用符で囲みます。- <code>"This is a single parameter"</code></p>
+    <p>返却する<code>payload</code>は通常<i>文字列</i>ですが、UTF8文字以外が存在すると<i>バッファ</i>となります。</p>
+    <p>ノードが実行中の場合、ステータスアイコンとPIDを表示します。この状態変化は<code>status</code>ノードで検知できます。</p>
+    <h4>プロセスの停止</h4>
+    <p><code>msg.kill</code>を受信すると、実行中のプロセスを停止することができます。<code>msg.kill</code>には送出するシグナルの種別を指定します。例えば、<code>SIGINT</code>、<code>SIGQUIT</code>、<code>SIGHUP</code>などです。空の文字列を指定した場合には、<code>SIGTERM</code>を指定したものとみなします。</p>
+    <p>ノードが1つ以上のプロセスを実行している場合、<code>msg.pid</code>に停止対象のPIDを指定しなければなりません。</p>
+    <p><code>タイムアウト</code>フィールドに値を指定すると、指定した秒数以内にコマンドが完了しない場合、プロセスを自動的に停止します。</p>
+    <p>ヒント: Pythonアプリケーションを実行する場合、<code>-u</code>を指定すると出力がバッファされるのを抑止できます。</p>
+</script>

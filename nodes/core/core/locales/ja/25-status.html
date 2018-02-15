@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="status">
+    <p>同じタブ内のノードのステータスメッセージを取得します。</p>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>status.text <span class="property-type">文字列</span></dt>
+        <dd>ステータス文字列</dd>
+        <dt>status.source.type <span class="property-type">文字列</span></dt>
+        <dd>ステータスを表示したノードの種別</dd>
+        <dt>status.source.id <span class="property-type">文字列</span></dt>
+        <dd>ステータスを表示したノードのID</dd>
+        <dt>status.source.name <span class="property-type">文字列</span></dt>
+        <dd>ステータスを表示したノードの名称(設定されている場合)</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>このノードは<code>payload</code>を設定しません。</p>
+    <p>デフォルトでは、同じワークスペースタブ内の全てのノードのステータスを取得します。特定のノードのステータスを取得対象とすることも可能です。</p>
+</script>
