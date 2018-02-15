@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="switch">
+    <p>プロパティの値によってメッセージの振り分けを行います。</p>
+    <h3>詳細</h3>
+    <p>受信したメッセージに対し、指定されたルールを順に評価し、マッチしたルールに対応する出力ポートにメッセージを送出します。</p>
+    <p>最初にルールがマッチしたところで評価を止めることも可能です。</p>
+    <p>評価ルールには、メッセージプロパティ、フローコンテキスト/グローバルコンテキストのプロパティ、JSONata式の評価結果が利用できます。</p>
+    <h3>ルール</h3>
+    <p>振り分けルールは以下の4つに分類されます。</p>
+    <ol>
+        <li><b>値(value)</b>ルール - 指定したプロパティに対して評価</li>
+        <li><b>列(sequence)</b>ルール - メッセージ列に対して適用(メッセージ列はsplitノードなどで生成)</li>
+        <li><b>JSONata式</b> - メッセージ全体に対して評価を行い、結果が真の場合にマッチ</li>
+        <li><b>その他</b> - これより前のルールにマッチするものがなかった場合に適用</li>
+    </ol>
+
+    <h3>メッセージ列の扱い</h3>
+    <p>switchノードは入力メッセージの列に関する情報を保持する<code>msg.parts</code>をデフォルトでは変更しません。</p>
+    <p>「<b>メッセージ列の補正</b>」オプションを指定すると、マッチした各ルールに対して新しいメッセージ列を生成します。このモードでは、switchノードは新たなメッセージ列を送信する前に、入力メッセージ列全体を内部に蓄積します。<code>nodeMessageBufferMaxLength</code>を設定すると、蓄積するメッセージ数を制限できます。</p>
+
+</script>
