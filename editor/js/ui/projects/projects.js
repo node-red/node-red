@@ -813,7 +813,11 @@ RED.projects = (function() {
                                 validateForm();
                             },
                             delete: function(project) {
+                                if (projectList) {
+                                    delete projectList[project.name];
+                                }
                                 selectedProject = null;
+
                                 validateForm();
                             }
                         }).appendTo(row);
