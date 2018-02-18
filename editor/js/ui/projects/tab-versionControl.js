@@ -154,6 +154,7 @@ RED.sidebar.versionControl = (function() {
                 .appendTo(bg)
                 .click(function(evt) {
                     evt.preventDefault();
+
                     var spinner = utils.addSpinnerOverlay(container).addClass('projects-dialog-spinner-contain');
                     var notification = RED.notify("Are you sure you want to revert the changes to '"+entry.file+"'? This cannot be undone.", {
                         type: "warning",
@@ -188,7 +189,12 @@ RED.sidebar.versionControl = (function() {
                                             }
                                         }
                                     }
-                                    utils.sendRequest(options);
+                                    RED.deploy.setDeployInflight(true);
+                                    utils.sendRequest(options).always(function() {
+                                        setTimeout(function() {
+                                            RED.deploy.setDeployInflight(false);
+                                        },500);
+                                    });
                                 }
                             }
 
