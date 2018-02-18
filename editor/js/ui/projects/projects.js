@@ -654,6 +654,7 @@ RED.projects = (function() {
                 var projectSecretSelect;
                 var copyProject;
                 var projectRepoInput;
+                var projectCloneSecret;
                 var emptyProjectCredentialInput;
                 var projectRepoUserInput;
                 var projectRepoPasswordInput;
@@ -1019,10 +1020,12 @@ RED.projects = (function() {
                         // -----------------------------------------------------
 
 
-                        // // Secret - clone
-                        // row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        // $('<label>Credentials encryption key</label>').appendTo(row);
-                        // projectSecretInput = $('<input type="text"></input>').appendTo(row);
+                        // Secret - clone
+                        row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
+                        $('<label>Credentials encryption key</label>').appendTo(row);
+                        projectSecretInput = $('<input type="password"></input>').appendTo(row);
+
+
                         switch(options.screen||"empty") {
                             case "empty": createAsEmpty.click(); break;
                             case "open":  openProject.click(); break;
@@ -1080,7 +1083,7 @@ RED.projects = (function() {
                                     } else if (projectType === 'copy') {
                                         projectData.copy = copyProject.name;
                                     } else if (projectType === 'clone') {
-                                        // projectData.credentialSecret = projectSecretInput.val();
+                                        projectData.credentialSecret = projectSecretInput.val();
                                         var repoUrl = projectRepoInput.val();
                                         var metaData = {};
                                         if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repoUrl)) {
@@ -1129,7 +1132,6 @@ RED.projects = (function() {
                                     projectRepoPasswordInput.removeClass("input-error");
                                     projectRepoSSHKeySelect.removeClass("input-error");
                                     projectRepoPassphrase.removeClass("input-error");
-
 
                                     RED.deploy.setDeployInflight(true);
                                     RED.projects.settings.switchProject(projectData.name);
