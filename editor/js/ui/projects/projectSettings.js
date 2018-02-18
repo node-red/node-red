@@ -1024,7 +1024,9 @@ RED.projects.settings = (function() {
                         },
                     }
                 },payload).always(function() {
-                    RED.deploy.setDeployInflight(false);
+                    setTimeout(function() {
+                        RED.deploy.setDeployInflight(false);
+                    },500);
                 });
             });
         var updateForm = function() {
