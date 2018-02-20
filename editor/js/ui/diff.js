@@ -1721,80 +1721,17 @@ RED.diff = (function() {
                 if (commitOptions.unmerged) {
                     $('<span style="float: right;"><span id="node-diff-toolbar-resolved-conflicts"></span></span>').appendTo(content);
                 }
-                // var tools = $('<span style="float: right;" class="button-group"></span>').appendTo(content);
-                // $('<button class="editor-button editor-button-small">show flow diff</button>').appendTo(tools).click(function(e) {
-                //     e.preventDefault();
-                //     e.stopPropagation();
-                //     var projectName = commitOptions.project.name;
-                //     var filename = commitOptions.project.files.flow;
-                //     var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
-                //     var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
-                //     var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
-                //     var promises = [];
-                //     if (commitOptions.commonRev) {
-                //         var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
-                //         promises.push($.getJSON(commonVersionUrl));
-                //     } else {
-                //         promises.push($.when(null));
-                //     }
-                //     promises.push($.getJSON(oldVersionUrl));
-                //     promises.push($.getJSON(newVersionUrl));
-                //     $.when.apply($,promises).done(function(commonVersion, oldVersion,newVersion) {
-                //         var commonFlow;
-                //         var oldFlow;
-                //         var newFlow;
-                //         if (commonVersion) {
-                //             try {
-                //                 commonFlow = JSON.parse(commonVersion[0].content||"[]");
-                //             } catch(err) {
-                //                 console.log("Common Version doesn't contain valid JSON:",commonVersionUrl);
-                //                 console.log(err);
-                //                 return;
-                //             }
-                //         }
-                //         try {
-                //             oldFlow = JSON.parse(oldVersion[0].content||"[]");
-                //         } catch(err) {
-                //             console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
-                //             console.log(err);
-                //             return;
-                //         }
-                //         if (!commonFlow) {
-                //             commonFlow = oldFlow;
-                //         }
-                //         try {
-                //             newFlow = JSON.parse(newVersion[0].content||"[]");
-                //         } catch(err) {
-                //             console.log("New Version doesn't contain valid JSON:",newFlow);
-                //             console.log(err);
-                //             return;
-                //         }
-                //         var localDiff = generateDiff(commonFlow,oldFlow);
-                //         var remoteDiff = generateDiff(commonFlow,newFlow);
-                //         var diff = resolveDiffs(localDiff,remoteDiff);
-                //         showDiff(diff,{
-                //             title: filename,
-                //             mode: commitOptions.commonRev?'merge':'view',
-                //             oldRevTitle: commitOptions.oldRevTitle,
-                //             newRevTitle: commitOptions.newRevTitle
-                //         });
-                //         // var flowDiffRow = $("<tr>").insertAfter(diffRow);
-                //         // var content = $('<td colspan="3"></td>').appendTo(flowDiffRow);
-                //         // currentDiff = diff;
-                //         // var diffTable = buildDiffPanel(content,diff,{mode:"view"}).finish();
-                //     });
-                // })
                 var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
                 var flowDiffContent = $('<td class="flow-diff" colspan="3"></td>').appendTo(diffRow);
 
                 var projectName = commitOptions.project.name;
                 var filename = commitOptions.project.files.flow;
-                var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
-                var oldVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
-                var newVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
+                var commonVersionUrl = "projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                var oldVersionUrl = "projects/"+projectName+"/files/"+commitOptions.oldRev+"/"+filename;
+                var newVersionUrl = "projects/"+projectName+"/files/"+commitOptions.newRev+"/"+filename;
                 var promises = [$.Deferred(),$.Deferred(),$.Deferred()];
                 if (commitOptions.commonRev) {
-                    var commonVersionUrl = "/projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
+                    var commonVersionUrl = "projects/"+projectName+"/files/"+commitOptions.commonRev+"/"+filename;
                     $.ajax({dataType: "json",url: commonVersionUrl}).then(function(data) { promises[0].resolve(data); }).fail(function() { promises[0].resolve(null);})
                 } else {
                     promises[0].resolve(null);
