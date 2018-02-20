@@ -1391,7 +1391,7 @@ RED.diff = (function() {
             }
         })
 
-        RED.nodes.version(remoteDiff.rev);
+        RED.nodes.version(diff.remoteDiff.rev);
 
         RED.view.redraw(true);
         RED.palette.refresh();
