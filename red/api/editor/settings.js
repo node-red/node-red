@@ -54,10 +54,11 @@ module.exports = {
             var activeProject = runtime.storage.projects.getActiveProject();
             if (activeProject) {
                 safeSettings.project = activeProject;
-            }
-            safeSettings.files = {
-                flow: runtime.storage.projects.getFlowFilename(),
-                credentials: runtime.storage.projects.getCredentialsFilename()
+            } else if (runtime.storage.projects.flowFileExists()) {
+                safeSettings.files = {
+                    flow: runtime.storage.projects.getFlowFilename(),
+                    credentials: runtime.storage.projects.getCredentialsFilename()
+                }
             }
             safeSettings.git = {
                 globalUser: runtime.storage.projects.getGlobalGitUser()

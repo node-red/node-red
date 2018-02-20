@@ -445,6 +445,7 @@ var initialFlowLoadComplete = false;
 
 var flowsFile;
 var flowsFullPath;
+var flowsFileExists = false;
 var flowsFileBackup;
 var credentialsFile;
 var credentialsFileBackup;
@@ -492,7 +493,14 @@ function getFlows() {
         }
 
     }
-    return util.readFile(flowsFullPath,flowsFileBackup,[],'flow');
+    return util.readFile(flowsFullPath,flowsFileBackup,null,'flow').then(function(result) {
+        if (result === null) {
+            flowsFileExists = false;
+            return [];
+        }
+        flowsFileExists = true;
+        return result;
+    });
 }
 
 function saveFlows(flows) {
@@ -505,6 +513,8 @@ function saveFlows(flows) {
         return when.reject(error);
     }
 
+    flowsFileExists = true;
+    
     try {
         fs.renameSync(flowsFullPath,flowsFileBackup);
     } catch(err) {
@@ -586,6 +596,7 @@ module.exports = {
     removeRemote: removeRemote,
     updateRemote: updateRemote,
     getFlowFilename: getFlowFilename,
+    flowFileExists: function() { return flowsFileExists },
     getCredentialsFilename: getCredentialsFilename,
     getGlobalGitUser: function() { return globalGitUser },
     getFlows: getFlows,

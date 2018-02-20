@@ -77,8 +77,8 @@ RED.projects = (function() {
                     var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
                     $('<p>').text("Hello! We have introduced 'projects' to Node-RED.").appendTo(body);
                     $('<p>').text("This is a new way for you to manage your flow files and includes version control of your flows.").appendTo(body);
-                    $('<p>').text("To get started you can create your first project using your current flow files in a few easy steps.").appendTo(body);
-                    $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu option at any time.").appendTo(body);
+                    $('<p>').text("To get started you can create your first project or clone an existing project from a git repository.").appendTo(body);
+                    $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu at any time.").appendTo(body);
 
                     return container;
                 },
@@ -313,9 +313,9 @@ RED.projects = (function() {
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
                         $('<p>').text("Create your project files").appendTo(body);
-                        $('<p>').text("A project contains your flow files, a README file, a package.json file and a settings file.").appendTo(body);
+                        $('<p>').text("A project contains your flow files, a README file and a package.json file.").appendTo(body);
                         $('<p>').text("It can contain any other files you want to maintain in the Git repository.").appendTo(body);
-                        if (!options.existingProject) {
+                        if (!options.existingProject && RED.settings.files) {
                             $('<p>').text("Your existing flow and credential files will be copied into the project.").appendTo(body);
                         }
 
@@ -349,14 +349,14 @@ RED.projects = (function() {
                         var row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="projects-dialog-screen-create-project-file">Flow file</label>').appendTo(row);
                         var subrow = $('<div style="position:relative;"></div>').appendTo(row);
-                        var defaultFlowFile = (createProjectOptions.files &&createProjectOptions.files.flow) || RED.settings.files.flow||"flow.json";
+                        var defaultFlowFile = (createProjectOptions.files &&createProjectOptions.files.flow) || (RED.settings.files && RED.settings.files.flow)||"flow.json";
                         projectFlowFileInput = $('<input id="projects-dialog-screen-create-project-file" type="text">').val(defaultFlowFile)
                             .on("change keyup paste",validateForm)
                             .appendTo(subrow);
                         $('<div class="projects-dialog-screen-input-status"></div>').appendTo(subrow);
                         $('<label class="projects-edit-form-sublabel"><small>*.json</small></label>').appendTo(row);
 
-                        var defaultCredentialsFile = (createProjectOptions.files &&createProjectOptions.files.credentials) || RED.settings.files.credentials||"flow_cred.json";
+                        var defaultCredentialsFile = (createProjectOptions.files &&createProjectOptions.files.credentials) || (RED.settings.files && RED.settings.files.credentials)||"flow_cred.json";
                         row = $('<div class="form-row"></div>').appendTo(body);
                         $('<label for="projects-dialog-screen-create-project-credfile">Credentials file</label>').appendTo(row);
                         subrow = $('<div style="position:relative;"></div>').appendTo(row);
