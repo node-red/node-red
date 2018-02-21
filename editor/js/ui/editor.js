@@ -742,7 +742,7 @@ RED.editor = (function() {
             buildLabelRow().appendTo(outputsDiv);
         }
 
-        if (!node._def.defaults.hasOwnProperty("icon")) {
+        if (!node._def.defaults.hasOwnProperty("icon") && node.type !== "subflow") {
             $('<div class="form-row"><div id="node-settings-icon"></div></div>').appendTo(dialogForm);
             var iconDiv = $("#node-settings-icon");
             $('<label data-i18n="editor.settingIcon">').appendTo(iconDiv);
