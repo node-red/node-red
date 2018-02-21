@@ -104,9 +104,89 @@ describe("api/editor/settings", function() {
                         return done(err);
                     }
                     res.body.should.have.property("project","test-active-project");
+                    res.body.should.not.have.property("files");
+                    res.body.should.have.property("git");
+                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
+                    done();
+                });
+        });
+        it('includes existing files details if projects enabled but no active project and files exist', function(done) {
+            info.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: function(obj) {
+                        obj.testNodeSetting = "helloWorld";
+                    }
+                },
+                nodes: {
+                    paletteEditorEnabled: function() { return true; },
+                    getCredentialKeyType: function() { return "test-key-type"}
+                },
+                log: { error: console.error },
+                storage: {
+                    projects: {
+                        flowFileExists: () => true,
+                        getActiveProject: () => false,
+                        getFlowFilename:  () => 'test-flow-file',
+                        getCredentialsFilename:  () => 'test-creds-file',
+                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
+                    }
+                }
+            });
+            request(app)
+                .get("/settings")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.not.have.property("project");
                     res.body.should.have.property("files");
                     res.body.files.should.have.property("flow",'test-flow-file');
                     res.body.files.should.have.property("credentials",'test-creds-file');
+                    res.body.should.have.property("git");
+                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
+                    done();
+                });
+        });
+        it('does not include file details if projects enabled but no active project and files do not exist', function(done) {
+            info.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: function(obj) {
+                        obj.testNodeSetting = "helloWorld";
+                    }
+                },
+                nodes: {
+                    paletteEditorEnabled: function() { return true; },
+                    getCredentialKeyType: function() { return "test-key-type"}
+                },
+                log: { error: console.error },
+                storage: {
+                    projects: {
+                        flowFileExists: () => false,
+                        getActiveProject: () => false,
+                        getFlowFilename:  () => 'test-flow-file',
+                        getCredentialsFilename:  () => 'test-creds-file',
+                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
+                    }
+                }
+            });
+            request(app)
+                .get("/settings")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.not.have.property("project");
+                    res.body.should.not.have.property("files");
                     res.body.should.have.property("git");
                     res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
                     done();
