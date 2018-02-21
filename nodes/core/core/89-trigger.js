@@ -123,6 +123,7 @@ module.exports = function(RED) {
                                     delete node.topics[topic];
                                     node.send(msg2);
                                 }
+                                else { delete node.topics[topic]; }
                                 node.status({});
                             }, node.duration);
                         }
