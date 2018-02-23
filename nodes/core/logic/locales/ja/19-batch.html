@@ -1,0 +1,34 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="batch">
+    <p>指定したルールによりメッセージ列を生成します。</p>
+    <h3>詳細</h3>
+    <p>メッセージ列の生成には以下の3つのモードが利用できます。</p>
+    <dl>
+        <dt>入力メッセージ数でグループ化</dt>
+        <dd>入力メッセージを指定した長さのメッセージ列にグループ化します。メッセージ列の最後の部分を次のメッセージ列の先頭で繰り返すメッセージ数を「<b>オーバラップ</b>」で指定できます。</dd>
+
+        <dt>入力間隔(秒)でグループ化</dt>
+        <dd>指定時間間隔内に受信した入力メッセージをメッセージ列にグループ化します。指定した時間内にメッセージを受信しない場合に空のメッセージを送信するように設定することもできます。</dd>
+
+        <dt>メッセージグループの結合</dt>
+        <dd>入力メッセージ列を結合し、1つのメッセージ列にします。メッセージ列の識別のため、各メッセージは<code>msg.topic</code>プロパティと<code>msg.parts</code>プロパティを持っていなければなりません。メッセージ列の結合順は、<code>topic</code>値のリストとしてbatchノードに指定します。
+        </dd>
+    </dl>
+    <h4>メッセージの蓄積</h4>
+    <p>このノードの処理ではメッセージ列の処理のためメッセージを内部に蓄積します。<code>nodeMessageBufferMaxLength</code>を指定することで蓄積するメッセージの最大値を制限することができます。</p>
+</script>

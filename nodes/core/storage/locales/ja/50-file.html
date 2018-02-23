@@ -1,0 +1,57 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="file">
+    <p><code>msg.payload</code>をファイルに書き出します。書き出しは、ファイルの
+最後に追記もしくは既存の内容の置き換えを選択できます。
+       この他、ファイルの削除を行うことも可能です。</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">文字列</span></dt>
+        <dd>対象ファイル名をノードに設定していない場合、このプロパティでファイルを指定できます</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>入力メッセージのペイロードをファイルの最後に追記します。改行(\n)を各データの最後に追加することもできます。</p>
+    <p><code>msg.filename</code>を使う場合、書き込みを行う毎にファイルをクローズします。より良い性能を得るためにはファイル名をノードに設定してください。</p>
+    <p>追記を行う代わりに、ファイル全体を上書きするように設定することもできます。例えば、画像のようなバイナリデータをファイルに書き出す場合は、このオプションを指定し、改行を追記するオプションを指定しないようにします。</p>
+    <p>この他、ファイルの削除を行うことも可能です。</p>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>ファイルの内容を文字列もしくはバイナリバッファとして読み出します。</p>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">文字列</span></dt>
+        <dd>読み出し対象のファイル名をノードに設定していない場合、このプロパティでファイルを指定できます</dd>
+    </dl>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">文字列 | バッファ</span></dt>
+        <dd>ファイルの内容を文字列もしくはバッファで表現します</dd>
+        <dt class="optional">filename <span class="property-type">文字列</span></dt>
+        <dd>読み出し対象のファイル名をノードに設定していない場合、このプロパティでファイルを指定します</dd>
+        <dt class="optional">error <span class="property-type">オブジェクト</span></dt>
+        <dd><i>非推奨</i>: 設定で有効にした場合、ファイルの読み込み時にエラーが発生すると<code>payload</code>を持たず<code>error</code>プロパティにエラーの詳細情報を設定したメッセージを送信します。この動作モードは非推奨であり、新しいノード実装ではデフォルトでは無効としています。詳細については、以下を参照してください。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>ファイルネームは絶対パスでの指定を推奨します。絶対パスを指定しない場合は、Node-REDプロセスのワーキングディレクトリからの相対パスとして扱います。</p>
+    <p>Windowsではパスの区切り文字を(例えば、<code>\\ユーザー\\名前</code>のように)エスケープする必要があります。</p>
+    <p>テキストファイルの場合、行毎に分割して各々メッセージを送信することができます。また、バイナリファイルの場合、小さな塊のバッファに分割して送信できます。バッファの分割単位はオペレーティングシステム依存ですが、一般に64k(Linux/Mac)もしくは41k(Windows)です。</p>
+    <p>複数のメッセージに分割する場合、各メッセージには<code>parts</code>プロパティが設定され、メッセージ列を構成します。</p>
+    <h4>旧式のエラー処理</h4>
+    <p>Node-RED 0.17より前の版では、ファイルの読み込み時にエラーが発生すると<code>payload</code>を持たず<code>error</code>プロパティにエラーの詳細情報を設定したメッセージを送信します。この動作モードは非推奨であり、新しいノード実装ではデフォルトでは無効としています。ノードの設定により、必要に応じてこのモードを有効にできます。</p>
+    <p>エラーはcatchノードで補足して処理することを推奨します。</p>
+</script>
