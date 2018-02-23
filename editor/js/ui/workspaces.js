@@ -241,7 +241,9 @@ RED.workspaces = (function() {
                 }
             },
             onadd: function(tab) {
-                workspaceTabCount = tab.type === "tab"?workspaceTabCount+1:workspaceTabCount;
+                if (tab.type === "tab") {
+                    workspaceTabCount++;
+                }
                 $('<span class="workspace-disabled-icon"><i class="fa fa-ban"></i> </span>').prependTo("#red-ui-tab-"+(tab.id.replace(".","-"))+" .red-ui-tab-label");
                 if (tab.disabled) {
                     $("#red-ui-tab-"+(tab.id.replace(".","-"))).addClass('workspace-disabled');
@@ -252,7 +254,9 @@ RED.workspaces = (function() {
                 }
             },
             onremove: function(tab) {
-                workspaceTabCount = tab.type === "tab"?workspaceTabCount-1:workspaceTabCount;
+                if (tab.type === "tab") {
+                    workspaceTabCount--;
+                }
                 RED.menu.setDisabled("menu-item-workspace-delete",workspaceTabCount <= 1);
                 if (workspaceTabCount === 0) {
                     hideWorkspace();
