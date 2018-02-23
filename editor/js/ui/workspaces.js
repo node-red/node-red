@@ -43,7 +43,7 @@ RED.workspaces = (function() {
         return ws;
     }
     function deleteWorkspace(ws) {
-        if (workspace_tabs.count() == 1) {
+        if (workspaceTabCount === 1) {
             return;
         }
         removeWorkspace(ws);
@@ -65,7 +65,7 @@ RED.workspaces = (function() {
             buttons: [
                 {
                     id: "node-dialog-delete",
-                    class: 'leftButton'+((workspace_tabs.count() == 1)?" disabled":""),
+                    class: 'leftButton'+((workspaceTabCount === 1)?" disabled":""),
                     text: RED._("common.label.delete"), //'<i class="fa fa-trash"></i>',
                     click: function() {
                         deleteWorkspace(workspace);
@@ -214,6 +214,7 @@ RED.workspaces = (function() {
 
 
     var workspace_tabs;
+    var workspaceTabCount = 0;
     function createWorkspaceTabs() {
         workspace_tabs = RED.tabs.create({
             id: "workspace-tabs",
@@ -240,18 +241,24 @@ RED.workspaces = (function() {
                 }
             },
             onadd: function(tab) {
+                if (tab.type === "tab") {
+                    workspaceTabCount++;
+                }
                 $('<span class="workspace-disabled-icon"><i class="fa fa-ban"></i> </span>').prependTo("#red-ui-tab-"+(tab.id.replace(".","-"))+" .red-ui-tab-label");
                 if (tab.disabled) {
                     $("#red-ui-tab-"+(tab.id.replace(".","-"))).addClass('workspace-disabled');
                 }
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() <= 1);
-                if (workspace_tabs.count() === 1) {
+                RED.menu.setDisabled("menu-item-workspace-delete",workspaceTabCount <= 1);
+                if (workspaceTabCount === 1) {
                     showWorkspace();
                 }
             },
             onremove: function(tab) {
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() <= 1);
-                if (workspace_tabs.count() === 0) {
+                if (tab.type === "tab") {
+                    workspaceTabCount--;
+                }
+                RED.menu.setDisabled("menu-item-workspace-delete",workspaceTabCount <= 1);
+                if (workspaceTabCount === 0) {
                     hideWorkspace();
                 }
             },
@@ -266,6 +273,7 @@ RED.workspaces = (function() {
                 addWorkspace();
             }
         });
+        workspaceTabCount = 0;
     }
     function showWorkspace() {
         $("#workspace .red-ui-tabs").show()
@@ -334,7 +342,7 @@ RED.workspaces = (function() {
             return workspace_tabs.contains(id);
         },
         count: function() {
-            return workspace_tabs.count();
+            return workspaceTabCount;
         },
         active: function() {
             return activeWorkspace
