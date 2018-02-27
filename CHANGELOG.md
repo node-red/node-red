@@ -1,3 +1,34 @@
+#### 0.18.4: Maintenance Release
+
+Projects
+
+ - Ensure sshkey file path is properly escaped on Windows
+ - Normalize ssh key paths for Windows file names
+ - Ensure userDir is an absolute path when used with sshkeygen
+ - Detect if there are no existing flows to migrate into a project
+ - Use relative urls when retriving flow history
+ - Add credentialSecret to clone pane
+ - Delay clearing inflight when changing credentials key
+ - Mark deploy inflight when reverting a file change
+ - Handle missing_flow_file error on clone properly
+ - Remote project from cached list on delete so it can be reused
+ - Fix tests for existing file flag in settings
+
+Editor Fixes
+
+ - Fix merging a remote diff
+ - Fixed the problems when using a node without defaults
+ - Disable user defined icon for subflow
+ - getDefaultNodeIcon should handle subflow instance nodes Fixes #1635
+ - Add Japanese info text for core nodes
+ - Fix message lookup for core nodes in case of i18 locales directory exists
+ - Prevent the last tab from being deleted
+
+Node Fixes
+
+ - Ensure trigger gets reset when 2nd output is null
+
+
 #### 0.18.3: Maintenance Release
 
 Projects
