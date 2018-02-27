@@ -118,7 +118,7 @@ function generateSSHKey(username, options) {
                 var password = options.password || "";
                 var size = options.size || 2048;
                 var sshKeyFileBasename = username + '_' + name;
-                var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
+                var privateKeyFilePath = fs.normalize(fspath.join(sshkeyDir, sshKeyFileBasename));
                 return generateSSHKeyPair(name, privateKeyFilePath, comment, password, size)
             }
         })
@@ -184,7 +184,7 @@ function generateSSHKeyPair(name, privateKeyPath, comment, password, size) {
 
 function getPrivateKeyPath(username, name) {
     var sshKeyFileBasename = username + '_' + name;
-    var privateKeyFilePath = fspath.join(sshkeyDir, sshKeyFileBasename);
+    var privateKeyFilePath = fspath.normalize(fspath.join(sshkeyDir, sshKeyFileBasename));
     try {
         fs.accessSync(privateKeyFilePath, (fs.constants || fs).R_OK);
         return privateKeyFilePath;
