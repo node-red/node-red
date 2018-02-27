@@ -187,16 +187,18 @@ function getPrivateKeyPath(username, name) {
     var privateKeyFilePath = fspath.normalize(fspath.join(sshkeyDir, sshKeyFileBasename));
     try {
         fs.accessSync(privateKeyFilePath, (fs.constants || fs).R_OK);
-        return privateKeyFilePath;
     } catch(err) {
         privateKeyFilePath = fspath.join(userSSHKeyDir,name);
         try {
             fs.accessSync(privateKeyFilePath, (fs.constants || fs).R_OK);
-            return privateKeyFilePath;
         } catch(err2) {
             return null;
         }
     }
+    if (fspath.sep === '\\') {
+        privateKeyFilePath = privateKeyFilePath.replace(/\\/g,'\\\\');
+    }
+    return privateKeyFilePath;
 }
 
 module.exports = {
