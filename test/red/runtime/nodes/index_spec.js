@@ -240,7 +240,7 @@ describe("red/nodes/index", function() {
                 }
             });
             sinon.stub(registry,"disableNode",function(id) {
-                return randomNodeInfo;
+                return when.resolve(randomNodeInfo);
             });
         });
         afterEach(function() {
@@ -252,11 +252,12 @@ describe("red/nodes/index", function() {
             index.init(runtime);
             index.registerType('test-node-set','test', TestNode);
             index.loadFlows().then(function() {
-                var info = index.disableNode("5678");
-                registry.disableNode.calledOnce.should.be.true();
-                registry.disableNode.calledWith("5678").should.be.true();
-                info.should.eql(randomNodeInfo);
-                done();
+                return index.disableNode("5678").then(function(info) {
+                    registry.disableNode.calledOnce.should.be.true();
+                    registry.disableNode.calledWith("5678").should.be.true();
+                    info.should.eql(randomNodeInfo);
+                    done();
+                });
             }).otherwise(function(err) {
                 done(err);
             });

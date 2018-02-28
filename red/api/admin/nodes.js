@@ -18,17 +18,13 @@ var when = require("when");
 var apiUtils = require("../util");
 var redNodes;
 var log;
-var i18n;
 var settings;
-var events;
 
 module.exports = {
     init: function(runtime) {
         redNodes = runtime.nodes;
         log = runtime.log;
-        i18n = runtime.i18n;
         settings = runtime.settings;
-        events = runtime.events;
     },
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
@@ -72,11 +68,6 @@ module.exports = {
             return;
         }
         promise.then(function(info) {
-            if (isUpgrade) {
-                events.emit("runtime-event",{id:"node/upgraded",retain:false,payload:{module:node.module,version:node.version}});
-            } else {
-                events.emit("runtime-event",{id:"node/added",retain:false,payload:info.nodes});
-            }
             if (node.module) {
                 log.audit({event: "nodes.install",module:node.module,version:node.version},req);
                 res.json(info);
@@ -114,7 +105,6 @@ module.exports = {
             }
 
             promise.then(function(list) {
-                events.emit("runtime-event",{id:"node/removed",retain:false,payload:list});
                 log.audit({event: "nodes.remove",module:mod},req);
                 res.status(204).end();
             }).catch(function(err) {
@@ -248,21 +238,6 @@ function putNode(node, enabled) {
         } else {
             promise = redNodes.disableNode(node.id);
         }
-
-        return promise.then(function(info) {
-            if (info.enabled === enabled && !info.err) {
-                events.emit("runtime-event",{id:"node/"+(enabled?"enabled":"disabled"),retain:false,payload:info});
-                log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
-                for (var i=0;i<info.types.length;i++) {
-                    log.info(" - "+info.types[i]);
-                }
-            } else if (enabled && info.err) {
-            log.warn(log._("api.nodes.error-enable"));
-                log.warn(" - "+info.name+" : "+info.err);
-            }
-            return info;
-        });
     }
-
     return promise;
 }

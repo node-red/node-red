@@ -24,8 +24,6 @@ var cors = require('cors');
 var auth = require("./auth");
 var apiUtil = require("./util");
 
-var i18n;
-var log;
 var adminApp;
 var server;
 var runtime;
@@ -35,8 +33,6 @@ function init(_server,_runtime) {
     server = _server;
     runtime = _runtime;
     var settings = runtime.settings;
-    i18n = runtime.i18n;
-    log = runtime.log;
     if (settings.httpAdminRoot !== false) {
         apiUtil.init(runtime);
         adminApp = express();

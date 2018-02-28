@@ -104,7 +104,43 @@ function init(runtime) {
 
 function disableNode(id) {
     flows.checkTypeInUse(id);
-    return registry.disableNode(id);
+    return registry.disableNode(id).then(function(info) {
+        reportNodeStateChange(info,false);
+        return info;
+    });
+}
+
+function enableNode(id) {
+    return registry.enableNode(id).then(function(info) {
+        reportNodeStateChange(info,true);
+        return info;
+    });
+}
+
+function reportNodeStateChange(info,enabled) {
+    if (info.enabled === enabled && !info.err) {
+        events.emit("runtime-event",{id:"node/"+(enabled?"enabled":"disabled"),retain:false,payload:info});
+        log.info(" "+log._("api.nodes."+(enabled?"enabled":"disabled")));
+        for (var i=0;i<info.types.length;i++) {
+            log.info(" - "+info.types[i]);
+        }
+    } else if (enabled && info.err) {
+    log.warn(log._("api.nodes.error-enable"));
+        log.warn(" - "+info.name+" : "+info.err);
+    }
+}
+
+function installModule(module,version) {
+    var module = registry.getModuleInfo(module);
+    var isUpgrade = !!module;
+    return registry.installModule(module,version).then(function(info) {
+        if (isUpgrade) {
+            events.emit("runtime-event",{id:"node/upgraded",retain:false,payload:{module:module,version:version}});
+        } else {
+            events.emit("runtime-event",{id:"node/added",retain:false,payload:info.nodes});
+        }
+        return info;
+    });
 }
 
 function uninstallModule(module) {
@@ -115,7 +151,10 @@ function uninstallModule(module) {
         for (var i=0;i<info.nodes.length;i++) {
             flows.checkTypeInUse(module+"/"+info.nodes[i].name);
         }
-        return registry.uninstallModule(module);
+        return registry.uninstallModule(module).then(function(list) {
+            events.emit("runtime-event",{id:"node/removed",retain:false,payload:list});
+            return list;
+        });
     }
 }
 
@@ -130,10 +169,10 @@ module.exports = {
     eachNode: flows.eachNode,
 
     paletteEditorEnabled: registry.paletteEditorEnabled,
-    installModule: registry.installModule,
+    installModule: installModule,
     uninstallModule: uninstallModule,
 
-    enableNode: registry.enableNode,
+    enableNode: enableNode,
     disableNode: disableNode,
 
     // Node type registry
