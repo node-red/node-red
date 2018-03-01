@@ -355,6 +355,34 @@ describe('trigger node', function() {
         });
     });
 
+    it('should be able to reset correctly having not output anything on second edge', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"nul", op1:"true",op1type:"val", op2:"false", duration:"35", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.a.property("payload", true);
+                    c += 1;
+                }
+                catch(err) { done(err); }
+            });
+            setTimeout( function() {
+                c.should.equal(3); // should only have had one output.
+                done();
+            },300);
+            n1.emit("input", {payload:1});
+            setTimeout( function() {
+                n1.emit("input", {payload:2});
+            },100);
+            setTimeout( function() {
+                n1.emit("input", {payload:3});
+            },200);
+        });
+    });
+
     it('should be able to extend the delay', function(done) {
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
             function(arg1, arg2, arg3, arg4) { return arg1; }
