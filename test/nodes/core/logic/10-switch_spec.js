@@ -17,7 +17,7 @@
 var should = require("should");
 
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
 
 describe('switch Node', function() {

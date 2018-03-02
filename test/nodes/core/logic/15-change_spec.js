@@ -17,7 +17,7 @@
 var should = require("should");
 
 var changeNode = require("../../../../nodes/core/logic/15-change.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 
 describe('change Node', function() {
 

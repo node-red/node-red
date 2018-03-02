@@ -16,7 +16,7 @@
 
 var net = require("net");
 var should = require("should");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var tcpinNode = require("../../../../nodes/core/io/31-tcpin.js");
 
 

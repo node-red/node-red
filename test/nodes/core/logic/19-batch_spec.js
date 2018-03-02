@@ -16,7 +16,7 @@
 
 var should = require("should");
 var batchNode = require("../../../../nodes/core/logic/19-batch.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
 
 describe('BATCH node', function() {

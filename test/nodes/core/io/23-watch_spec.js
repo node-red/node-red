@@ -17,7 +17,7 @@
 var fs = require("fs-extra");
 var path = require("path");
 var should = require("should");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var watchNode = require("../../../../nodes/core/io/23-watch.js");
 
 

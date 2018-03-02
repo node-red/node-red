@@ -16,7 +16,7 @@
 
 var should = require("should");
 var sortNode = require("../../../../nodes/core/logic/18-sort.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
 
 describe('SORT node', function() {

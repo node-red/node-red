@@ -19,7 +19,7 @@ var http = require("http");
 var should = require("should");
 var express = require("express");
 var bodyParser = require('body-parser');
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var httpRequestNode = require("../../../../nodes/core/io/21-httprequest.js");
 var hashSum = require("hash-sum");
 
