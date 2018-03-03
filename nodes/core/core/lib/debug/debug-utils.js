@@ -222,7 +222,6 @@ RED.debug = (function() {
             clearMessageList(false);
         });
 
-
         return {
             content: content,
             footer: footerToolbar
@@ -238,6 +237,9 @@ RED.debug = (function() {
         workspaceOrder.forEach(function(ws,i) {
             workspaceOrderMap[ws] = i;
         });
+        candidateNodes = candidateNodes.filter(function(node) {
+            return workspaceOrderMap.hasOwnProperty(node.z);
+        })
         candidateNodes.sort(function(A,B) {
             var wsA = workspaceOrderMap[A.z];
             var wsB = workspaceOrderMap[B.z];
@@ -339,7 +341,7 @@ RED.debug = (function() {
                         activeMenuMessage.clearPinned();
                     }},
                     null,
-                    {id:"debug-message-menu-item-filter",label:RED._("node-red:debug.messageMenu.filterNode"),onselect:function(){
+                    {id:"debug-message-menu-item-filter", label:RED._("node-red:debug.messageMenu.filterNode"),onselect:function(){
                         var candidateNodes = RED.nodes.filterNodes({type:'debug'});
                         candidateNodes.forEach(function(n) {
                             filteredNodes[n.id] = true;
@@ -361,6 +363,15 @@ RED.debug = (function() {
             menuOptionMenu.on('mouseup', function() { $(this).hide() });
             menuOptionMenu.appendTo("body");
         }
+
+        var filterOptionDisabled = false;
+        var sourceNode = RED.nodes.node(sourceId);
+        if (sourceNode && sourceNode.type !== 'debug') {
+            filterOptionDisabled = true;
+        }
+        RED.menu.setDisabled('debug-message-menu-item-filter',filterOptionDisabled);
+        RED.menu.setDisabled('debug-message-menu-item-clear-filter',filterOptionDisabled);
+
         var elementPos = button.offset();
         menuOptionMenu.css({
             top: elementPos.top+"px",
