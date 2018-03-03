@@ -131,8 +131,8 @@ function reportNodeStateChange(info,enabled) {
 }
 
 function installModule(module,version) {
-    var module = registry.getModuleInfo(module);
-    var isUpgrade = !!module;
+    var ex_module = registry.getModuleInfo(module);
+    var isUpgrade = !!ex_module;
     return registry.installModule(module,version).then(function(info) {
         if (isUpgrade) {
             events.emit("runtime-event",{id:"node/upgraded",retain:false,payload:{module:module,version:version}});
