@@ -819,6 +819,47 @@ RED.editor = (function() {
         selectIconModule.removeClass("input-error");
     }
 
+    function updateLabels(editing_node, changes, outputMap) {
+        var inputLabels = $("#node-label-form-inputs").children().find("input");
+        var outputLabels = $("#node-label-form-outputs").children().find("input");
+
+        var hasNonBlankLabel = false;
+        var changed = false;
+        var newValue = inputLabels.map(function() {
+            var v = $(this).val();
+            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+            return v;
+        }).toArray().slice(0,editing_node.inputs);
+        if ((editing_node.inputLabels === undefined && hasNonBlankLabel) ||
+            (editing_node.inputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels))) {
+            changes.inputLabels = editing_node.inputLabels;
+            editing_node.inputLabels = newValue;
+            changed = true;
+        }
+        hasNonBlankLabel = false;
+        newValue = new Array(editing_node.outputs);
+        outputLabels.each(function() {
+            var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
+            if (outputMap && outputMap.hasOwnProperty(index)) {
+                index = parseInt(outputMap[index]);
+                if (index === -1) {
+                    return;
+                }
+            }
+            var v = $(this).val();
+            hasNonBlankLabel = hasNonBlankLabel || v!== "";
+            newValue[index] = v;
+        });
+
+        if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
+            (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
+            changes.outputLabels = editing_node.outputLabels;
+            editing_node.outputLabels = newValue;
+            changed = true;
+        }
+        return changed;
+    }
+
     function showEditDialog(node) {
         var editing_node = node;
         var isDefaultIcon;
@@ -1034,40 +1075,7 @@ RED.editor = (function() {
                         // }
                         var removedLinks = updateNodeProperties(editing_node,outputMap);
 
-                        var inputLabels = $("#node-label-form-inputs").children().find("input");
-                        var outputLabels = $("#node-label-form-outputs").children().find("input");
-
-                        var hasNonBlankLabel = false;
-                        newValue = inputLabels.map(function() {
-                            var v = $(this).val();
-                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
-                            return v;
-                        }).toArray().slice(0,editing_node.inputs);
-                        if ((editing_node.inputLabels === undefined && hasNonBlankLabel) ||
-                            (editing_node.inputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels))) {
-                            changes.inputLabels = editing_node.inputLabels;
-                            editing_node.inputLabels = newValue;
-                            changed = true;
-                        }
-                        hasNonBlankLabel = false;
-                        newValue = new Array(editing_node.outputs);
-                        outputLabels.each(function() {
-                            var index = $(this).attr('id').substring(23); // node-label-form-output-<index>
-                            if (outputMap && outputMap.hasOwnProperty(index)) {
-                                index = parseInt(outputMap[index]);
-                                if (index === -1) {
-                                    return;
-                                }
-                            }
-                            var v = $(this).val();
-                            hasNonBlankLabel = hasNonBlankLabel || v!== "";
-                            newValue[index] = v;
-                        })
-
-                        if ((editing_node.outputLabels === undefined && hasNonBlankLabel) ||
-                            (editing_node.outputLabels !== undefined && JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels))) {
-                            changes.outputLabels = editing_node.outputLabels;
-                            editing_node.outputLabels = newValue;
+                        if (updateLabels(editing_node, changes, outputMap)) {
                             changed = true;
                         }
 
@@ -1675,19 +1683,7 @@ RED.editor = (function() {
                             editing_node.info = newDescription;
                             changed = true;
                         }
-                        var inputLabels = $("#node-label-form-inputs").children().find("input");
-                        var outputLabels = $("#node-label-form-outputs").children().find("input");
-
-                        var newValue = inputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.inputs);
-                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.inputLabels)) {
-                            changes.inputLabels = editing_node.inputLabels;
-                            editing_node.inputLabels = newValue;
-                            changed = true;
-                        }
-                        newValue = outputLabels.map(function() { return $(this).val();}).toArray().slice(0,editing_node.outputs);
-                        if (JSON.stringify(newValue) !== JSON.stringify(editing_node.outputLabels)) {
-                            changes.outputLabels = editing_node.outputLabels;
-                            editing_node.outputLabels = newValue;
+                        if (updateLabels(editing_node, changes, null)) {
                             changed = true;
                         }
 

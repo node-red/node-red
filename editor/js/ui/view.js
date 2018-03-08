@@ -490,6 +490,7 @@ RED.view = (function() {
             }
         } else {
             var subflow = RED.nodes.subflow(m[1]);
+            nn.name = "";
             nn.inputs = subflow.in.length;
             nn.outputs = subflow.out.length;
         }
