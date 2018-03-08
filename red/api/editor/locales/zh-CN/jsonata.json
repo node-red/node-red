@@ -205,11 +205,11 @@
     },
     "$formatNumber": {
         "args": "number, picture [, options]",
-        "desc": "将`number`转换成具有`picture`所指定的数值格式的字符串。\n\n此函数的功能与XPath F&O 3.1规格中定义的XPath/XQuery函数的fn:format-number功能相一致。参数`picture`用于指定数值的转换格式，其语法与fn:format-number中的定义一致。\n\n可选的第三参数`options`用来覆盖默认的局部环境格式，如小数点分隔符。如果指定该参数，那么该参数必须是包含name/value对的对象，并且该name/value对必须符合XPath F&O 3.1规格中记述的数值格式。"
+        "desc": "将`number`转换成具有`picture`所指定的数值格式的字符串。\n\n此函数的功能与XPath F&O 3.1规格中定义的XPath/XQuery函数的fn:format-number功能相一致。参数`picture`用于指定数值的转换格式，其语法与fn:format-number中的定义一致。\n\n可选的第三参数`options`用来覆盖默认的局部环境格式，如小数点分隔符。如果指定该参数，那么该参数必须是包含name/value对的对象，并且name/value对必须符合XPath F&O 3.1规格中记述的数值格式。"
     },
     "$formatBase": {
         "args": "number [, radix]",
-        "desc": "将`number`变换为以参数`radix`的值为基数形式的字符串。如果不指定`radix`，则将基数10指定为默认值。指定的`radix`必须在2～36之间，否则抛出错误。"
+        "desc": "将`number`变换为以参数`radix`的值为基数形式的字符串。如果不指定`radix`的值，则默认基数为10。指定的`radix`值必须在2～36之间，否则抛出错误。"
     },
     "$toMillis": {
         "args": "timestamp",
