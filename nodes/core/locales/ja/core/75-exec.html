@@ -38,7 +38,7 @@
             </dl>
             <dl class="message-properties">
                 <dt>rc <span class="property-type">オブジェクト</span></dt>
-                <dd>返却コードオブジェクト(3番ポートでも受取り可能)のコピー(execモードのみ)</dd>
+                <dd>返却コードオブジェクト(3番目の端子でも受取り可能)のコピー(execモードのみ)</dd>
             </dl>
         </li>
         <li>標準エラー出力(stderr)
@@ -48,7 +48,7 @@
             </dl>
             <dl class="message-properties">
                 <dt>rc <span class="property-type">オブジェクト</span></dt>
-                <dd>返却コードオブジェクト(3番ポートでも受取り可能)のコピー(execモードのみ)</dd>
+                <dd>返却コードオブジェクト(3番目の端子でも受取り可能)のコピー(execモードのみ)</dd>
             </dl>
         </li>
         <li>返却コード(return code)
@@ -61,8 +61,8 @@
     <h3>詳細</h3>
     <p>デフォルトでは、<code>exec</code>システムコールを用いてコマンドを呼び出してその完了を待ち、出力を返します。例えば、コマンドの実行が成功した場合には、<code>{ code: 0 }</code>と言う返却値を返します。</p>
     <p><code>spawn</code>を使ってコマンドを実行し、
-標準出力および標準エラー出力へ出力を返すようにすることもできます。この場合、通常1行毎に値を返します。コマンドの実行が完了すると、3番目のポートにオブジェクトを出力します。例えば、コマンドの実行が成功した場合には、<code>{ code: 0 }</code>と言う返却値を返します。</p>
-    <p>エラー発生時には、3番目のポートの<code>msg.payload</code>に<code>message</code>、<code>signal</code>など付加情報を返します。</p>
+標準出力および標準エラー出力へ出力を返すようにすることもできます。この場合、通常1行毎に値を返します。コマンドの実行が完了すると、3番目の端子にオブジェクトを出力します。例えば、コマンドの実行が成功した場合には、<code>{ code: 0 }</code>と言う返却値を返します。</p>
+    <p>エラー発生時には、3番目の端子の<code>msg.payload</code>に<code>message</code>、<code>signal</code>など付加情報を返します。</p>
     <p>実行対象のコマンドはノード設定で定義します。<code>msg.payload</code>や追加引数をコマンドに追加することもできます。</p>
     <p>コマンドもしくはパラメータが空白を含む場合には、引用符で囲みます。- <code>"This is a single parameter"</code></p>
     <p>返却する<code>payload</code>は通常<i>文字列</i>ですが、UTF8文字以外が存在すると<i>バッファ</i>となります。</p>
