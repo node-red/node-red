@@ -48,7 +48,7 @@ RED.editor = (function() {
                 isValid = validateNode(subflow);
                 hasChanged = subflow.changed;
             }
-            node.valid = isValid;
+            node.valid = isValid && validateNodeProperties(node, node._def.defaults, node);
             node.changed = node.changed || hasChanged;
         } else if (node._def) {
             node.valid = validateNodeProperties(node, node._def.defaults, node);
@@ -170,6 +170,10 @@ RED.editor = (function() {
                 }
             }
         }
+        validateIcon(node);
+    }
+
+    function validateIcon(node) {
         if (node._def.hasOwnProperty("defaults") && !node._def.defaults.hasOwnProperty("icon") && node.icon) {
             var iconPath = RED.utils.separateIconPath(node.icon);
             var iconSets = RED.nodes.getIconSets();
@@ -188,6 +192,7 @@ RED.editor = (function() {
             }
         }
     }
+
     function validateNodeEditorProperty(node,defaults,property,prefix) {
         var input = $("#"+prefix+"-"+property);
         if (input.length > 0) {
@@ -742,7 +747,7 @@ RED.editor = (function() {
             buildLabelRow().appendTo(outputsDiv);
         }
 
-        if ((!node._def.defaults || !node._def.defaults.hasOwnProperty("icon")) && node.type !== "subflow") {
+        if ((!node._def.defaults || !node._def.defaults.hasOwnProperty("icon"))) {
             $('<div class="form-row"><div id="node-settings-icon"></div></div>').appendTo(dialogForm);
             var iconDiv = $("#node-settings-icon");
             $('<label data-i18n="editor.settingIcon">').appendTo(iconDiv);
@@ -782,7 +787,12 @@ RED.editor = (function() {
             var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(iconForm);
             clear.click(function(evt) {
                 evt.preventDefault();
-                var iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
+                var iconPath;
+                if (node.type === "subflow") {
+                    iconPath = { module:"node-red", file:"subflow.png" };
+                } else {
+                    iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
+                }
                 selectIconModule.val(iconPath.module);
                 moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
                 selectIconFile.removeClass("input-error");
@@ -816,6 +826,7 @@ RED.editor = (function() {
             });
         }
         selectIconFile.prop("disabled", !iconFileList);
+        selectIconFile.removeClass("input-error");
         selectIconModule.removeClass("input-error");
     }
 
@@ -1690,10 +1701,22 @@ RED.editor = (function() {
                             editing_node.outputLabels = newValue;
                             changed = true;
                         }
+                        var iconModule = $("#node-settings-icon-module-hidden").val();
+                        var iconFile = $("#node-settings-icon-file-hidden").val();
+                        var icon = (iconModule && iconFile) ? iconModule+"/"+iconFile : "";
+                        if ((editing_node.icon === undefined && icon !== "node-red/subflow.png") ||
+                            (editing_node.icon !== undefined && editing_node.icon !== icon)) {
+                            changes.icon = editing_node.icon;
+                            editing_node.icon = icon;
+                            changed = true;
+                        }
 
                         RED.palette.refresh();
 
                         if (changed) {
+                            var wasChanged = editing_node.changed;
+                            editing_node.changed = true;
+                            validateNode(editing_node);
                             var subflowInstances = [];
                             RED.nodes.eachNode(function(n) {
                                 if (n.type == "subflow:"+editing_node.id) {
@@ -1704,10 +1727,9 @@ RED.editor = (function() {
                                     n.changed = true;
                                     n.dirty = true;
                                     updateNodeProperties(n);
+                                    validateNode(n);
                                 }
                             });
-                            var wasChanged = editing_node.changed;
-                            editing_node.changed = true;
                             RED.nodes.dirty(true);
                             var historyEvent = {
                                 t:'edit',
@@ -1786,6 +1808,7 @@ RED.editor = (function() {
                 $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
 
                 buildLabelForm(portLabels.content,subflow);
+                validateIcon(subflow);
                 trayBody.i18n();
             },
             close: function() {

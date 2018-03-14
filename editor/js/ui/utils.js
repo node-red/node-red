@@ -731,6 +731,16 @@ RED.utils = (function() {
         return iconPath;
     }
 
+    function isIconExists(iconPath) {
+        var iconSets = RED.nodes.getIconSets();
+        var iconFileList = iconSets[iconPath.module];
+        if (iconFileList && iconFileList.indexOf(iconPath.file) !== -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     function getNodeIcon(def,node) {
         if (def.category === 'config') {
             return "icons/node-red/cog.png"
@@ -738,18 +748,21 @@ RED.utils = (function() {
             return "icons/node-red/subflow.png"
         } else if (node && node.type === 'unknown') {
             return "icons/node-red/alert.png"
-        } else if (node && node.type === 'subflow') {
-            return "icons/node-red/subflow.png"
         } else if (node && node.icon) {
             var iconPath = separateIconPath(node.icon);
-            var iconSets = RED.nodes.getIconSets();
-            var iconFileList = iconSets[iconPath.module];
-            if (iconFileList && iconFileList.indexOf(iconPath.file) !== -1) {
+            if (isIconExists(iconPath)) {
                 return "icons/" + node.icon;
             }
+        } else if (node && node.type === 'subflow') {
+            return "icons/node-red/subflow.png"
         }
 
         var iconPath = getDefaultNodeIcon(def, node);
+        if (def.category === 'subflows') {
+            if (!isIconExists(iconPath)) {
+                return "icons/node-red/subflow.png";
+            }
+        }
         return "icons/"+iconPath.module+"/"+iconPath.file;
     }
 
