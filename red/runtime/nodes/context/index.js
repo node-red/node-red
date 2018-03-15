@@ -14,20 +14,27 @@
  * limitations under the License.
  **/
 
-var clone = require("clone");
-var when = require("when");
-var util = require("../util");
+var util = require("../../util");
+var log = require("../../log");
+var externalContext = require("./external");
+
+var contexts = {};
+var globalContext = null;
+
+var re = /^(\$.*?)\.(.+)|^(\$.*)/;
 
 function createContext(id,seed) {
+    var flowId = id;
     var data = seed || {};
     var obj = seed || {};
-    obj.get = function get(key) {
+
+    function get(key) {
         return util.getMessageProperty(data,key);
     };
-    obj.set = function set(key, value) {
+    function set(key, value) {
         util.setMessageProperty(data,key,value);
-    }
-    obj.keys = function() {
+    };
+    function keys() {
         var keysData = Object.keys(data);
         if (seed == null) {
             return keysData;
@@ -36,12 +43,31 @@ function createContext(id,seed) {
                 return key !== "set" && key !== "get" && key !== "keys";
             });
         }
+    };
+
+    obj.get = function(key) {
+        if(externalContext.canUse(key)) {
+            return externalContext.get(key, flowId);
+        }else{
+            return get(key);
+        }
+    };
+    obj.set = function(key, value) {
+        if(externalContext.canUse(key)) {
+            externalContext.set(key, value, flowId);
+        }else{
+            set(key, value);
+        }
+    }
+    obj.keys = function(key) {
+        if(externalContext.canUse(key)) {
+            return externalContext.keys(key, flowId);
+        }else{
+            return keys();
+        }
     }
     return obj;
 }
-
-var contexts = {};
-var globalContext = null;
 
 function getContext(localId,flowId) {
     var contextId = localId;
@@ -61,6 +87,7 @@ function getContext(localId,flowId) {
     contexts[contextId] = newContext;
     return newContext;
 }
+
 function deleteContext(id,flowId) {
     var contextId = id;
     if (flowId) {
@@ -68,6 +95,7 @@ function deleteContext(id,flowId) {
     }
     delete contexts[contextId];
 }
+
 function clean(flowConfig) {
     var activeIds = {};
     var contextId;
@@ -81,9 +109,11 @@ function clean(flowConfig) {
         }
     }
 }
+
 module.exports = {
     init: function(settings) {
         globalContext = createContext("global",settings.functionGlobalContext || {});
+        externalContext.init(settings);
     },
     get: getContext,
     delete: deleteContext,
