@@ -72,7 +72,7 @@ function createContext(id,seed) {
 function getContext(localId,flowId) {
     var contextId = localId;
     if (flowId) {
-        contextId = localId+":"+flowId;
+        contextId = localId+"_"+flowId;
     }
     if (contexts.hasOwnProperty(contextId)) {
         return contexts[contextId];
@@ -91,7 +91,7 @@ function getContext(localId,flowId) {
 function deleteContext(id,flowId) {
     var contextId = id;
     if (flowId) {
-        contextId = id+":"+flowId;
+        contextId = id+"_"+flowId;
     }
     delete contexts[contextId];
 }
@@ -102,7 +102,7 @@ function clean(flowConfig) {
     var node;
     for (var id in contexts) {
         if (contexts.hasOwnProperty(id)) {
-            var idParts = id.split(":");
+            var idParts = id.split("_");
             if (!flowConfig.allNodes.hasOwnProperty(idParts[0])) {
                 delete contexts[id];
             }
