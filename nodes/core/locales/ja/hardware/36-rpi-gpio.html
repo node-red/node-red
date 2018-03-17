@@ -1,0 +1,71 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="rpi-gpio in">
+    <p>Raspberry Piの入力ノード。入力ピンの状態に応じて、0 または 1 の値を持つ<code>msg.payload</code>を生成します。</p>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">数値</span></dt>
+        <dd>ペイロードには、0 または 1 が設定されます。</dd>
+        <dt>topic <span class="property-type">文字列</span></dt>
+        <dd>トピックには、<code>pi/{ピン番号}</code>が設定されます。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>入力のプルアップ抵抗またはプルダウン抵抗を有効にすることもできます。</p>
+    <p>動作にはRPi.GPIO pythonライブラリのバージョン 0.5.10 (またはそれ以上)が必要です。</p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-gpio out">
+    <p>Raspberry Piの出力ノード。デジタルモードまたはPWMモードで利用できます。
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">数値 | 文字列 | 真偽値</span></dt>
+    </dl>
+    <h3>詳細</h3>
+    <p>デジタルモード - <code>msg.payload</code>に 0 または 1 (あるいは true または false ) を指定すると、入力値に応じて選択された物理ピンにハイまたはローを設定します。</p>
+    <p>デプロイ時にピンの初期値として 0 または 1 を設定することもできます。</p>
+    <p>PWMモード - 入力値に 0 から 100 の数値を指定でき。小数値の指定も可能です。</p>
+    <p>サーボの制御にPWMモードが利用でき、入力に小数値も含む 10 から 20 の値が指定可能です。
+    PWMを行うハードウェアを利用していることから、PWMモードの指定にはGPIO2ピンが最も適しています。
+    より良くサーボの制御を行いたい場合は、node-red-node-pi-gpiod ノードの利用も検討してください。</p>
+    <p>動作にはRPi.GPIO pythonライブラリのバージョン 0.5.10 (またはそれ以上)が必要です。</p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-mouse">
+    <p>Raspberry Pi のマウスボタンノード。USBマウスが必要です。</p>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">数値</span></dt>
+        <dd>選択されたマウスのボタンが押された、または離された場合に 1 または 0 が設定されます。</dd>
+        <dt>button <span class="property-type">数値</span></dt>
+        <dd>左、右、真ん中のボタンに応じて 1, 2, 4 が設定され、ボタンあるいはボタンの組み合わせに応じた処理ができます。</dd>
+        <dt>topic <span class="property-type">文字列</span></dt>
+        <dd><code>pi/mouse</code>が設定されます。</dd>
+    </dl>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-keyboard">
+    <p>Raspberry Pi のキーボードを制御するノード。USBキーボードが必要です。</p>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">数値</span></dt>
+        <dd>キーコードを含みます。</dd>
+        <dt>action <span class="property-type">文字列</span></dt>
+        <dd>"up", "down", または "repeat" が設定されます。</dd>
+        <dt>topic <span class="property-type">文字列</span></dt>
+        <dd><code>pi/key</code>が設定されます。</dd>
+    </dl>
+</script>
