@@ -194,5 +194,25 @@
     "$globalContext": {
         "args": "string",
         "desc": "获取全局上下文的属性。"
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "根据需要，向字符串`string`的副本中填充文字使该字符串的字数达到`width`的绝对值并返回填充文字后的字符串。\n\n如果`width`的值为正，则向字符串`string`的右侧填充文字，如果`width`为负，则向字符串`string`的左侧填充文字。\n\n可选参数`char`用来指定填充的文字。如果未指定该参数，则填充空白文字。"
+    },
+    "$fromMillis": {
+        "args": "number",
+        "desc": "将表示从UNIX时间 (1970年1月1日 UTC/GMT的午夜）开始到现在的毫秒数的数值转换成ISO 8601形式时间戳的字符串。"
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "将`number`转换成具有`picture`所指定的数值格式的字符串。\n\n此函数的功能与XPath F&O 3.1规格中定义的XPath/XQuery函数的fn:format-number功能相一致。参数`picture`用于指定数值的转换格式，其语法与fn:format-number中的定义一致。\n\n可选的第三参数`options`用来覆盖默认的局部环境格式，如小数点分隔符。如果指定该参数，那么该参数必须是包含name/value对的对象，并且name/value对必须符合XPath F&O 3.1规格中记述的数值格式。"
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "将`number`变换为以参数`radix`的值为基数形式的字符串。如果不指定`radix`的值，则默认基数为10。指定的`radix`值必须在2～36之间，否则抛出错误。"
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "将ISO 8601格式的字符串`timestamp`转换为从UNIX时间 (1970年1月1日 UTC/GMT的午夜）开始到现在的毫秒数。如果该字符串的格式不正确，则抛出错误。"
     }
 }
