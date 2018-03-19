@@ -17,7 +17,6 @@
 var express = require("express");
 var os = require("os");
 var runtime;
-var settings;
 var needsPermission = require("../auth").needsPermission;
 
 function getUsername(userObj) {
@@ -31,7 +30,6 @@ function getUsername(userObj) {
 module.exports = {
     init: function(_runtime) {
         runtime = _runtime;
-        settings = runtime.settings;
     },
     app: function() {
         var app = express();

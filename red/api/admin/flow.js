@@ -16,11 +16,9 @@
 
 var log;
 var redNodes;
-var settings;
 
 module.exports = {
     init: function(runtime) {
-        settings = runtime.settings;
         redNodes = runtime.nodes;
         log = runtime.log;
     },

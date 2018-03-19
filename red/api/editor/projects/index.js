@@ -16,13 +16,11 @@
 
 var express = require("express");
 var runtime;
-var settings;
 var needsPermission = require("../../auth").needsPermission;
 
 module.exports = {
     init: function(_runtime) {
         runtime = _runtime;
-        settings = runtime.settings;
     },
     app: function() {
         var app = express();
