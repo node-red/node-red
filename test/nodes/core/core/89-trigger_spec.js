@@ -450,8 +450,8 @@ describe('trigger node', function() {
         });
     });
 
-    it('should be able to extend the delay and output the 2nd payload', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:"50", wires:[["n2"]] },
+    it('should be able to extend the delay and output the most recent payload', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:"60", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -459,15 +459,9 @@ describe('trigger node', function() {
             var c = 0;
             n2.on("input", function(msg) {
                 try {
-                    if (c === 0) {
-                        msg.should.have.a.property("payload", "Goodbye");
-                        c += 1;
-                    }
-                    else {
-                        msg.should.have.a.property("payload", "World");
-                        (Date.now() - ss).should.be.greaterThan(70);
-                        done();
-                    }
+                    msg.should.have.a.property("payload", "World");
+                    (Date.now() - ss).should.be.greaterThan(120);
+                    done();
                 }
                 catch(err) { done(err); }
             });
@@ -475,7 +469,7 @@ describe('trigger node', function() {
             n1.emit("input", {payload:"Hello"});
             setTimeout( function() {
                 n1.emit("input", {payload:"Goodbye"});
-            },20);
+            },40);
             setTimeout( function() {
                 n1.emit("input", {payload:"World"});
             },80);
