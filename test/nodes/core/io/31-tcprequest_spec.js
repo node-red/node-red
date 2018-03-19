@@ -27,12 +27,12 @@ describe('TCP Request Node', function() {
     function startServer(done) {
         port += 1;
         server = net.createServer(function(c) {
-	    c.on('data', function(data) {
-		var rdata = "ACK:"+data.toString();
-		c.write(rdata);
-	    });
+            c.on('data', function(data) {
+                var rdata = "ACK:"+data.toString();
+                c.write(rdata);
+            });
             c.on('error', function(err) {
-		startServer(done);
+                startServer(done);
             });
         }).listen(port, "127.0.0.1", function(err) {
             done();
@@ -63,48 +63,47 @@ describe('TCP Request Node', function() {
                     done(err);
                 }
             });
-	    if((typeof val0) === 'object') {
-		n1.receive(val0);
-	    } else {
-		n1.receive({payload:val0});
-	    }
+            if((typeof val0) === 'object') {
+                n1.receive(val0);
+            } else {
+                n1.receive({payload:val0});
+            }
         });
     }
     
     it('should send & recv data', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, "foo", "ACK:foo", done)
+        testTCP(flow, "foo", "ACK:foo", done)
     });
 
     it('should send & recv data when specified character received', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"char", splitc: "0", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, "foo0bar0", "ACK:foo0", done);
+        testTCP(flow, "foo0bar0", "ACK:foo0", done);
     });
 
     it('should send & recv data after fixed number of chars received', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"count", splitc: "7", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, "foo bar", "ACK:foo", done);
+        testTCP(flow, "foo bar", "ACK:foo", done);
     });
 
     it('should send & receive, then keep connection', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", splitc: "5", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, "foo", "ACK:foo", done);
+        testTCP(flow, "foo", "ACK:foo", done);
     });
 
     it('should send & close', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", splitc: "5", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, "foo", "ACK:foo", done);
+        testTCP(flow, "foo", "ACK:foo", done);
     });
 
     it('should send & recv data to/from server:port from msg', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"", port:"", out:"time", splitc: "0", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
-	testTCP(flow, {payload:"foo", host:"localhost", port:port}, "ACK:foo", done)
+        testTCP(flow, {payload:"foo", host:"localhost", port:port}, "ACK:foo", done)
     });
-
 });
