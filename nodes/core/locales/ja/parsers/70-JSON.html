@@ -15,7 +15,7 @@
 -->
 
 <script type="text/x-red" data-help-name="json">
-    <p>Converts between a JSON string and its JavaScript object representation, in either direction.</p>
+    <p>JSON文字列とJavaScriptオブジェクトとの間で相互変換を行います。</p>
     <h3>入力</h3>
     <dl class="message-properties">
         <dt>payload<span class="property-type">オブジェクト | 文字列</span></dt>
@@ -33,6 +33,6 @@
     </dl>
     <h3>詳細</h3>
     <p>デフォルトの変換対象は<code>msg.payload</code>ですが、他のメッセージプロパティを変換対象とすることも可能です。</p>
-    <p>双方向の変換を自動選択するのではなく、特定の変換のみ行うように設定できます。この機能は、例えば、<code>HTTP In</code>ノードに対するリクエストがcontent-typeを正しく設定していないであっても、JSONノードによる変換結果がJavaScriptオブジェクトであることを保証するために利用します。</p>
+    <p>双方向の変換を自動選択するのではなく、特定の変換のみ行うように設定できます。この機能は、例えば、<code>HTTP In</code>ノードに対するリクエストがcontent-typeを正しく設定していない場合であっても、JSONノードによる変換結果がJavaScriptオブジェクトであることを保証するために利用します。</p>
     <p>JSON文字列への変換が指定されている場合、受信した文字列に対してさらなるチェックは行いません。すなわち、文字列がJSONとして正しいかどうかの検査や、整形オプションを指定していたとしても整形処理を実施しません。</p>
 </script>

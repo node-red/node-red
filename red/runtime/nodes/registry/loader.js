@@ -376,9 +376,18 @@ function addModule(module) {
 }
 
 function loadNodeHelp(node,lang) {
-    var dir = path.dirname(node.template);
     var base = path.basename(node.template);
-    var localePath = path.join(dir,"locales",lang,base);
+    var localePath = undefined;
+    if (node.module === 'node-red') {
+        var cat_dir = path.dirname(node.template);
+        var cat = path.basename(cat_dir);
+        var dir = path.dirname(cat_dir);
+        localePath = path.join(dir, "locales", lang, cat, base)
+    }
+    else {
+        var dir = path.dirname(node.template);
+        localePath = path.join(dir,"locales",lang,base);
+    }
     try {
         // TODO: make this async
         var content = fs.readFileSync(localePath, "utf8")
