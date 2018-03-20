@@ -514,11 +514,6 @@ function saveFlows(flows) {
     }
 
     flowsFileExists = true;
-    
-    try {
-        fs.renameSync(flowsFullPath,flowsFileBackup);
-    } catch(err) {
-    }
 
     var flowData;
 
@@ -527,7 +522,7 @@ function saveFlows(flows) {
     } else {
         flowData = JSON.stringify(flows);
     }
-    return util.writeFile(flowsFullPath, flowData);
+    return util.writeFile(flowsFullPath, flowData, flowsFileBackup);
 }
 
 function getCredentials() {
@@ -539,17 +534,13 @@ function saveCredentials(credentials) {
         return when.resolve();
     }
 
-    try {
-        fs.renameSync(credentialsFile,credentialsFileBackup);
-    } catch(err) {
-    }
     var credentialData;
     if (settings.flowFilePretty) {
         credentialData = JSON.stringify(credentials,null,4);
     } else {
         credentialData = JSON.stringify(credentials);
     }
-    return util.writeFile(credentialsFile, credentialData);
+    return util.writeFile(credentialsFile, credentialData, credentialsFileBackup);
 }
 
 function getFlowFilename() {

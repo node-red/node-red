@@ -78,7 +78,16 @@ module.exports = {
      * This forces a fsync before completing to ensure
      * the write hits disk.
      */
-     writeFile: function(path,content) {
+     writeFile: function(path,content,backupPath) {
+         if (backupPath) {
+             try {
+                 console.log(path);
+                 console.log(backupPath);
+                 fs.renameSync(path,backupPath);
+             } catch(err) {
+                 console.log(err);
+             }
+         }
          return when.promise(function(resolve,reject) {
              var stream = fs.createWriteStream(path);
              stream.on('open',function(fd) {

@@ -22,12 +22,14 @@ var log = require("../../log");
 var util = require("./util");
 
 var globalSettingsFile;
+var globalSettingsBackup;
 var settings;
 
 module.exports = {
     init: function(_settings) {
         settings = _settings;
         globalSettingsFile = fspath.join(settings.userDir,".config.json");
+        globalSettingsBackup = fspath.join(settings.userDir,".config.json.backup");
     },
     getSettings: function() {
         return when.promise(function(resolve,reject) {
@@ -47,6 +49,6 @@ module.exports = {
         if (settings.readOnly) {
             return when.resolve();
         }
-        return util.writeFile(globalSettingsFile,JSON.stringify(newSettings,null,1));
+        return util.writeFile(globalSettingsFile,JSON.stringify(newSettings,null,1),globalSettingsBackup);
     }
 }
