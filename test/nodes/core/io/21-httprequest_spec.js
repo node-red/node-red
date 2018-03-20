@@ -19,6 +19,7 @@ var http = require("http");
 var should = require("should");
 var express = require("express");
 var bodyParser = require('body-parser');
+var stoppable = require('stoppable');
 var helper = require("../../helper.js");
 var httpRequestNode = require("../../../../nodes/core/io/21-httprequest.js");
 var hashSum = require("hash-sum");
@@ -30,13 +31,10 @@ describe('HTTP Request Node', function() {
 
     function startServer(done) {
         testPort += 1;
-        testServer = http.createServer(testApp);
-        testServer.on('error', function(err) {
-            startServer(done);
-        });
+        testServer = stoppable(http.createServer(testApp));
         testServer.listen(testPort,function(err) {
-            done();
-        })
+            done(err);
+        });
     }
 
     function getTestURL(url) {
@@ -57,13 +55,18 @@ describe('HTTP Request Node', function() {
             }
             res.json(result);
         });
-        startServer(function() {
+        startServer(function(err) {
+            if (err) {
+                done(err);
+            }
             helper.startServer(done);
         });
     });
 
-    after(function() {
-        testServer.close();
+    after(function(done) {
+        testServer.stop(() => {
+            helper.stopServer(done);
+        });
     });
     afterEach(function() {
         helper.unload();

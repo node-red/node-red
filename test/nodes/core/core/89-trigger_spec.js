@@ -304,11 +304,11 @@ describe('trigger node', function() {
                     }
                     else {
                         msg.should.have.a.property("payload", "bar");
-                        spy.restore();
+                        RED.util.evaluateNodeProperty.restore();
                         done();
                     }
                 }
-                catch(err) { spy.restore(); done(err); }
+                catch(err) { RED.util.evaluateNodeProperty.restore(); done(err); }
             });
             n1.emit("input", {payload:null});
         });

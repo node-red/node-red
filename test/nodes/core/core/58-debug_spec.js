@@ -25,6 +25,10 @@ describe('debug node', function() {
         helper.startServer(done);
     });
 
+    after(function(done) {
+        helper.stopServer(done);
+    });
+
     beforeEach(function (done) {
         setTimeout(function() {
             done();

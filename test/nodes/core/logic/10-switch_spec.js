@@ -28,8 +28,8 @@ describe('switch Node', function() {
 
     afterEach(function(done) {
         helper.unload();
-        helper.stopServer(done);
         RED.settings.nodeMessageBufferMaxLength = 0;
+        helper.stopServer(done);
     });
 
     it('should be loaded with some defaults', function(done) {

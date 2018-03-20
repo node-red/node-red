@@ -27,7 +27,8 @@ describe('UDP in Node', function() {
         helper.startServer(done);
     });
 
-    after(function() {
+    after(function(done) {
+        helper.stopServer(done);
     });
 
     afterEach(function() {
