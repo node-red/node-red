@@ -408,9 +408,12 @@ RED.deploy = (function() {
                         delete confNode.credentials;
                     }
                 });
+                RED.nodes.eachSubflow(function(subflow) {
+                    subflow.changed = false;
+                });
                 RED.nodes.eachWorkspace(function(ws) {
                     ws.changed = false;
-                })
+                });
                 // Once deployed, cannot undo back to a clean state
                 RED.history.markAllDirty();
                 RED.view.redraw();
