@@ -201,6 +201,9 @@ var api = module.exports = {
             encryptedCredentials = credentials;
         }
         log.debug("red/runtime/nodes/credentials.load : keyType="+encryptionKeyType);
+        if (encryptionKeyType === 'system') {
+            log.warn(log._("nodes.credentials.system-key-warning"));
+        }
         return setupEncryptionPromise.then(function() {
             var clearInvalidFlag = false;
             if (credentials.hasOwnProperty("$")) {
