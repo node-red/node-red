@@ -22,7 +22,8 @@ module.exports = {
     // the tcp port that the Node-RED web server is listening on
     uiPort: process.env.PORT || 1880,
 
-    // By default, the Node-RED UI accepts connections on all IPv4 interfaces.
+    // By default, the Node-RED UI accepts connections on all IPv4 and IPv6 interfaces.
+    // If for some reason IPv6 is not available, set uiHost to "0.0.0.0",
     // The following property can be used to listen on a specific interface. For
     // example, the following would only allow connections from the local machine.
     //uiHost: "127.0.0.1",
