@@ -26,6 +26,8 @@ module.exports = {
     // The following property can be used to listen on a specific interface. For
     // example, the following would only allow connections from the local machine.
     //uiHost: "127.0.0.1",
+    // or for the ipv6 equivalent
+    //uiHost: "::1",
 
     // Retry time in milliseconds for MQTT connections
     mqttReconnectTime: 15000,
