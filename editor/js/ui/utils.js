@@ -708,7 +708,9 @@ RED.utils = (function() {
 
     function getDefaultNodeIcon(def,node) {
         var icon_url;
-        if (typeof def.icon === "function") {
+        if (node && node.type === "subflow") {
+            icon_url = "node-red/subflow.png";
+        } else if (typeof def.icon === "function") {
             try {
                 icon_url = def.icon.call(node);
             } catch(err) {
@@ -753,8 +755,6 @@ RED.utils = (function() {
             if (isIconExists(iconPath)) {
                 return "icons/" + node.icon;
             }
-        } else if (node && node.type === 'subflow') {
-            return "icons/node-red/subflow.png"
         }
 
         var iconPath = getDefaultNodeIcon(def, node);
