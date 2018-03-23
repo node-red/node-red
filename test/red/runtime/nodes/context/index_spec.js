@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require('sinon');
 var path = require('path');
 var fs = require('fs-extra');
+var rewire = require("rewire");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
 describe('context', function() {
@@ -147,6 +148,7 @@ describe('context', function() {
         var stubGet = sinon.stub();
         var stubSet = sinon.stub();
         var stubKeys = sinon.stub();
+        var stubDelete = sinon.stub();
         var contextStorage={
                 test:{
                     module: {
@@ -156,6 +158,7 @@ describe('context', function() {
                         get: stubGet,
                         set: stubSet,
                         keys: stubKeys,
+                        delete: stubDelete
                     },
                     config:{}
                 }
@@ -235,4 +238,52 @@ describe('context', function() {
             });
         });
     });
+
+    describe('#parseKey()', function() {
+        var parseKey = rewire("../../../../../red/runtime/nodes/context/index").__get__("parseKey");
+
+        function returnModuleAndKey(input, expectedModule, expectedKey) {
+            var result = parseKey(input);
+            result[0].should.eql(expectedModule);
+            result[1].should.eql(expectedKey);
+        };
+
+        function returnModule(input, expectedModule) {
+            var result = parseKey(input);
+            result[0].should.eql(expectedModule);
+            should(result[1]).be.null();
+        };
+
+        it('should retrun module and key', function() {
+            returnModuleAndKey("$test.aaa","test","aaa");
+            returnModuleAndKey("$test.aaa.bbb","test","aaa.bbb");
+            returnModuleAndKey("$1.234","1","234");
+            returnModuleAndKey("$$test.foo","$test","foo");
+            returnModuleAndKey("$test.$foo","test","$foo"); 
+            returnModuleAndKey("$test.$foo.$bar","test","$foo.$bar"); 
+            returnModuleAndKey("$test..foo","test",".foo");
+            returnModuleAndKey("$test..","test",".");
+        });
+
+        // it('should retrun only module', function() {
+        //     returnModule("$test","test",null);
+        //     returnModule("$1","1",null);
+        //     returnModule("$$test","$test",null);
+        //     returnModule("$test.","test.",null);
+        // });
+
+        it('should retrun module as default', function() {
+            returnModuleAndKey("$default.foo","default","foo");
+            returnModuleAndKey("$.foo","default","foo");
+            // returnModule("$default","default");
+            // returnModule("$","default");
+        });
+
+        it('should retrun null', function() {
+            should(parseKey("test.aaa")).be.null();
+            should(parseKey("test")).be.null();
+            should(parseKey(null)).be.null();
+        });
+    });
+
 });

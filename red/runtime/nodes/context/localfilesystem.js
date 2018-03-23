@@ -14,67 +14,105 @@
  * limitations under the License.
  **/
 
-var storage = require('node-persist');
+var JsonDB = require('node-json-db');
 var fs = require('fs-extra');
-var fspath = require("path");
+var path = require("path");
 
 var configs;
-var storagePath;
-var fileStorages;
+var storageBaseDir;
+var storages;
 
-function createStorage(path) {
-    var fileStorage = storage.create({dir: fspath.join(storagePath,path)});
-    fileStorage.initSync();
-    fileStorages[path] = fileStorage;
+function createStorage(scope) {
+    var i = scope.indexOf(":")
+    
+    if(i === -1){
+        if(scope === "global"){
+            storages[scope] = new JsonDB(path.join(storageBaseDir,"global",scope), true, true); 
+        }else{ // scope:flow
+            storages[scope] = new JsonDB(path.join(storageBaseDir,scope,"flow"), true, true);
+        }
+    }else{ // scope:local
+        var ids = scope.split(":")
+        storages[scope] = new JsonDB(path.join(storageBaseDir,ids[1],ids[0]), true, true);
+    }
 }
 
 var localfilesystem = {
     init: function(_configs) {
         configs = _configs;
-        fileStorages = {};
+        storages = {};
         if (!configs.dir) {
-            try {
-                fs.statSync(fspath.join(process.env.NODE_RED_HOME,".config.json"));
-                storagePath = fspath.join(process.env.NODE_RED_HOME,"contexts");
-            } catch(err) {
+            if(configs.settings && configs.settings.userDir){
+                storageBaseDir = path.join(configs.settings.userDir,"contexts");
+            }else{
                 try {
-                    // Consider compatibility for older versions
-                    if (process.env.HOMEPATH) {
-                        fs.statSync(fspath.join(process.env.HOMEPATH,".node-red",".config.json"));
-                        storagePath = fspath.join(process.env.HOMEPATH,".node-red","contexts");
-                    }
+                    fs.statSync(path.join(process.env.NODE_RED_HOME,".config.json"));
+                    storageBaseDir = path.join(process.env.NODE_RED_HOME,"contexts");
                 } catch(err) {
-                }
-                if (!configs.dir) {
-                    storagePath = fspath.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red","contexts");
+                    try {
+                        // Consider compatibility for older versions
+                        if (process.env.HOMEPATH) {
+                            fs.statSync(path.join(process.env.HOMEPATH,".node-red",".config.json"));
+                            storageBaseDir = path.join(process.env.HOMEPATH,".node-red","contexts");
+                        }
+                    } catch(err) {
+                    }
+                    if (!storageBaseDir) {
+                        storageBaseDir = path.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red","contexts");
+                    }
                 }
             }
         }else{
-            storagePath = configs.dir;
+            storageBaseDir = configs.dir;
         }
-        
     },
-    stop: function() {
-        return when.resolve();
-    },
-    get: function (key, flowId) {
-        if(!fileStorages[flowId]){
-            createStorage(flowId);
+    get: function (key, scope) {
+        if(!storages[scope]){
+            createStorage(scope);
         }
-        return fileStorages[flowId].getItemSync(key);
+        try{
+            storages[scope].reload();
+            return storages[scope].getData("/" + key.replace(/\./g,"/"));
+        }catch(err){
+            if(err.name === "DataError"){
+                return undefined;
+            }else{
+                throw err;
+            }
+        }
     },
 
-    set: function (key, value, flowId) {
-        if(!fileStorages[flowId]){
-            createStorage(flowId);
+    set: function (key, value, scope) {
+        if(!storages[scope]){
+            createStorage(scope);
         }
-        fileStorages[flowId].setItemSync(key, value);
+        if(value){
+            storages[scope].push("/" + key.replace(/\./g,"/"), value);
+        }else{
+            storages[scope].delete("/" + key.replace(/\./g,"/"));
+        }
     },
-    keys: function (flowId) {
-        if(!fileStorages[flowId]){
-            createStorage(flowId);
+    keys: function (scope) {
+        if(!storages[scope]){
+            return [];
         }
-        return fileStorages[flowId].keys();
+        return Object.keys(storages[scope].getData("/"));
+    },
+    delete: function(scope){
+        if(storages[scope]){
+            storages[scope].delete("/");
+            if(scope.indexOf(":") === -1){
+                fs.removeSync(path.dirname(storages[scope].filename));
+            }else{
+                try{
+                    fs.statSync(storages[scope].filename);
+                    fs.unlinkSync(storages[scope].filename);
+                }catch(err){
+                    console.log("deleted");
+                }
+            }
+            delete storages[scope];
+        }
     }
 };
 

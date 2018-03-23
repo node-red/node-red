@@ -15,25 +15,12 @@
  **/
 
 var should = require('should');
-var fs = require('fs-extra');
-var path = require("path");
-var context = require('../../../../../red/runtime/nodes/context/localfilesystem');
+var context = require('../../../../../red/runtime/nodes/context/memory');
 
-var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
-
-describe('localfilesystem',function() {
+describe('memory',function() {
 
     beforeEach(function() {
-        context.init({dir: resourcesDir});
-    });
-
-    afterEach(function() {
-        context.delete("nodeX");
-        context.delete("nodeY");
-    });
-
-    after(function() {
-        fs.removeSync(resourcesDir);
+        context.init({});
     });
 
     describe('#get/set',function() {
@@ -107,6 +94,20 @@ describe('localfilesystem',function() {
             keysY.should.have.length(1);
             keysY[0].should.eql("hoge");
         });
+
+        it('should enumerate only context keys when GlobalContext was given', function() {
+            var keys = context.keys("global");
+            keys.should.be.an.Array();
+            keys.should.be.empty();
+
+            var data = {
+                foo: "bar"
+            }
+            context.setGlobalContext(data);
+            keys = context.keys("global");
+            keys.should.have.length(1);
+            keys[0].should.eql("foo");
+        });
     });
 
     describe('#delete',function() {
@@ -121,6 +122,20 @@ describe('localfilesystem',function() {
             context.delete("nodeX");
             should.not.exist(context.get("foo","nodeX"));
             should.exist(context.get("foo","nodeY"));
+        });
+    });
+
+    describe('#setGlobalContext',function() {
+        it('should initialize global context with argument', function() {
+            var keys = context.keys("global");
+            keys.should.be.an.Array();
+            keys.should.be.empty();
+
+            var data = {
+                foo: "bar"
+            }
+            context.setGlobalContext(data);
+            context.get("foo","global").should.eql("bar");
         });
     });
 });
