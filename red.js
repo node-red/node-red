@@ -177,7 +177,7 @@ if (parsedArgs.port !== undefined){
     }
 }
 
-settings.uiHost = settings.uiHost||"::";
+settings.uiHost = settings.uiHost||"0.0.0.0";
 
 if (flowFile) {
     settings.flowFile = flowFile;
@@ -276,7 +276,7 @@ function getListenPath() {
     }
 
     var listenPath = 'http'+(settings.https?'s':'')+'://'+
-                    (settings.uiHost == '::'?'localhost':settings.uiHost)+
+                    (settings.uiHost == '::'?'localhost':(settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost))+
                     ':'+port;
     if (settings.httpAdminRoot !== false) {
         listenPath += settings.httpAdminRoot;
