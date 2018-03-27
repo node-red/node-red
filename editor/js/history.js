@@ -229,10 +229,12 @@ RED.history = (function() {
                             }
                         });
                     }
+                    RED.editor.validateNode(ev.node);
                     RED.nodes.filterNodes({type:"subflow:"+ev.node.id}).forEach(function(n) {
                         n.inputs = ev.node.in.length;
                         n.outputs = ev.node.out.length;
                         RED.editor.updateNodeProperties(n);
+                        RED.editor.validateNode(n);
                     });
                 } else {
                     var outputMap;

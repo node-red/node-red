@@ -116,6 +116,12 @@ RED.palette = (function() {
         el.data('popover').setContent(popOverContent);
     }
 
+    function setIcon(element,sf) {
+        var iconElement = element.find(".palette_icon");
+        var icon_url = RED.utils.getNodeIcon(sf._def,sf);
+        iconElement.attr("style", "background-image: url("+icon_url+")");
+    }
+
     function escapeNodeType(nt) {
         return nt.replace(" ","_").replace(".","_").replace(":","_");
     }
@@ -375,6 +381,7 @@ RED.palette = (function() {
                 portOutput.remove();
             }
             setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info||""));
+            setIcon(paletteNode,sf);
         });
     }
 

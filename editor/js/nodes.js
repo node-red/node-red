@@ -355,7 +355,7 @@ RED.nodes = (function() {
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
             info: sf.info,
-            icon:"subflow.png",
+            icon: function() { return sf.icon||"subflow.png" },
             category: "subflows",
             inputs: sf.in.length,
             outputs: sf.out.length,
@@ -550,7 +550,11 @@ RED.nodes = (function() {
         if (node.out.length > 0 && n.outputLabels && !/^\s*$/.test(n.outputLabels.join(""))) {
             node.outputLabels = n.outputLabels.slice();
         }
-
+        if (n.icon) {
+            if (n.icon !== "node-red/subflow.png") {
+                node.icon = n.icon;
+            }
+        }
 
         return node;
     }
