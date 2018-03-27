@@ -80,6 +80,7 @@
         "bcrypt": "~1.0.3"
     },
     "devDependencies": {
+        "basic-auth": "^2.0.0",
         "chromedriver": "^2.33.2",
         "grunt": "~1.0.1",
         "grunt-chmod": "~1.1.1",
@@ -98,6 +99,8 @@
         "grunt-sass": "~2.0.0",
         "grunt-simple-mocha": "~0.4.1",
         "grunt-webdriver": "^2.0.3",
+        "hoek": "^4.2.1",
+        "http-proxy": "^1.16.2",
         "istanbul": "0.4.5",
         "mocha": "~3.4.2",
         "should": "^8.4.0",
