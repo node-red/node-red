@@ -87,20 +87,21 @@ module.exports = function(RED) {
                 * Allow template contents to be defined externally
                 * through inbound msg.template IFF node.template empty
                 */
+                var template = node.template;
                 if (msg.hasOwnProperty("template")) {
-                    if (node.template == "" || node.template === null) {
-                        node.template = msg.template;
+                    if (template == "" || template === null) {
+                        template = msg.template;
                     }
                 }
 
                 if (node.syntax === "mustache") {
                     if (node.outputFormat === "json") {
-                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, true));
+                        value = mustache.render(template,new NodeContext(msg, node.context(), null, true));
                     } else {
-                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, false));
+                        value = mustache.render(template,new NodeContext(msg, node.context(), null, false));
                     }
                 } else {
-                    value = node.template;
+                    value = template;
                 }
                 if (node.outputFormat === "json") {
                     value = JSON.parse(value);

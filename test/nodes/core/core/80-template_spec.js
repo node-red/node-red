@@ -29,37 +29,42 @@ describe('template node', function() {
     });
 
 
-    it('should modify payload', function(done) {
+    it('should modify payload using node-configured template', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
-                msg.should.have.property('topic', 'bar');
-                msg.should.have.property('payload', 'payload=foo');
-                msg.should.have.property('template', '{{payload}}');
-                done();
+                try {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo');
+                    msg.should.have.property('template', 'this should be ignored as the node has its own template {{payload}}');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
-            n1.receive({payload:"foo",topic: "bar", template: "{{payload}}"});
+            n1.receive({payload:"foo",topic: "bar", template: "this should be ignored as the node has its own template {{payload}}"});
         });
     });
 
-    it('should modify template from msg.template', function(done) {
-        var flow = [{id:"n1", type:"template", field:"template", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
+    it('should modify the configured property using msg.template', function(done) {
+        var flow = [{id:"n1", type:"template", field:"randomProperty", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'foo');
-                msg.should.have.property('template', 'payload=foo');
+                msg.should.have.property('template', 'payload={{payload}}');
+                msg.should.have.property('randomProperty', 'payload=foo');
                 done();
             });
             n1.receive({payload:"foo", topic: "bar", template: "payload={{payload}}"});
         });
     });
 
-    it('should modify payload from msg.template', function(done) {
+    it('should be able to overwrite msg.template using the template from msg.template', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -73,6 +78,40 @@ describe('template node', function() {
             n1.receive({payload:"foo", topic: "bar", template: "topic={{topic}}"});
         });
     });
+
+    it('should modify payload from msg.template', function(done) {
+        var flow = [{id:"n1", type:"template", field:"payload", template:"",wires:[["n2"]]},{id:"n2",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var received = [];
+            n2.on("input", function(msg) {
+                try {
+                    received.push(msg);
+                    if (received.length === 3) {
+                        received[0].should.have.property('topic', 'bar');
+                        received[0].should.have.property('payload', 'topic=bar');
+                        received[0].should.have.property('template', 'topic={{topic}}');
+
+                        received[1].should.have.property('topic', 'another bar');
+                        received[1].should.have.property('payload', 'topic=another bar');
+                        received[1].should.have.property('template', 'topic={{topic}}');
+
+                        received[2].should.have.property('topic', 'bar');
+                        received[2].should.have.property('payload', 'payload=foo');
+                        received[2].should.have.property('template', 'payload={{payload}}');
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.receive({payload:"foo", topic: "bar", template: "topic={{topic}}"});
+            n1.receive({payload:"foo", topic: "another bar", template: "topic={{topic}}"});
+            n1.receive({payload:"foo", topic: "bar", template: "payload={{payload}}"});
+        });
+    });
+
 
     it('should modify payload from flow context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
