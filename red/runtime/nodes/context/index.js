@@ -21,12 +21,13 @@ var settings;
 var contexts = {};
 var globalContext = null;
 var externalContexts = {};
+var noContextStorage = false;
 
 function init(_settings) {
     settings = _settings;
     externalContexts = {};
 
-    // init meomory plugin
+    // init memory plugin
     externalContexts["_"] = require("./memory");
     externalContexts["_"].init();
     globalContext = createContext("global",settings.functionGlobalContext || {});
@@ -37,6 +38,7 @@ function load() {
     var plugins = settings.contextStorage;
     var alias = null;
     if (plugins) {
+        noContextStorage = false;
         for(var pluginName in plugins){
             if(pluginName === "_"){
                 continue;
@@ -49,24 +51,30 @@ function load() {
             if(plugins[pluginName].hasOwnProperty("module")){
                 var config = plugins[pluginName].config || {};
                 copySettings(config, settings);
-                try{
-                    plugin = require("./"+plugins[pluginName].module);
-                }catch(err){
-                    throw new Error(plugins[pluginName].module + " could not be loaded");
+                if(typeof plugins[pluginName].module === "string") {
+                    try{
+                        plugin = require("./"+plugins[pluginName].module);
+                    }catch(err){
+                        throw new Error(plugins[pluginName].module + " could not be loaded");
+                    }
+                } else {
+                    plugin = plugins[pluginName].module;
                 }
                 plugin.init(config);
                 externalContexts[pluginName] = plugin;
             }else{
-                throw new Error("module is is not defined in settings.contextStorage." + plugins[pluginName] );
+                throw new Error("module is not defined in settings.contextStorage." + pluginName );
             }
         }
         if(alias){
             if(externalContexts.hasOwnProperty(alias)){
                 externalContexts["default"] = externalContexts[alias];
             }else{
-                throw new Error("default is invalid" + plugins["default"])
+                throw new Error("default is invalid. module name=" + plugins["default"])
             }
         }
+    } else {
+        noContextStorage = true;
     }
 }
 
@@ -78,35 +86,49 @@ function copySettings(config, settings){
     });
 }
 
+function parseKey(key){
+    if(!key){
+        return null;
+    }
+    var keyPath = {storage: "", key: ""};
+    var index_$ = key.indexOf("$");
+    var index_dot = key.indexOf(".", 1);
+    if(index_$===0&&index_dot) {
+        keyPath.storage = key.substring(1,index_dot)||"default";
+        keyPath.key = key.substring(index_dot+1);
+    } else {
+        keyPath.key = key;
+    }
+    return keyPath;
+}
+
+function getContextStorage(keyPath) {
+    if (noContextStorage || !keyPath.storage) {
+        return externalContexts["_"];
+    } else if (externalContexts.hasOwnProperty(keyPath.storage)) {
+        return externalContexts[keyPath.storage];
+    } else if (externalContexts.hasOwnProperty("default")) {
+        return externalContexts["default"];
+    } else {
+        var contextError = new Error(keyPath.storage + " is not defined in contextStorage on settings.js");
+        contextError.name = "ContextError";
+        throw contextError;
+    }
+}
+
 function createContext(id,seed) {
     var scope = id;
     var obj = seed || {};
 
     obj.get = function(key) {
-        var result = parseKey(key);
-        if(!result){
-            return externalContexts["_"].get(key, scope);
-        }
-        if(externalContexts.hasOwnProperty(result[0])){
-            return externalContexts[result[0]].get(result[1], scope);
-        }else if(externalContexts.hasOwnProperty("defalut")){
-            return externalContexts["defalut"].get(result[1], scope);
-        }else{
-            throw new Error(result[0] + " is not defined in setting.js");
-        }  
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath);
+        return context.get(keyPath.key, scope);
     };
     obj.set = function(key, value) {
-        var result = parseKey(key);
-        if(!result){
-            return externalContexts["_"].set(key, value, scope);
-        }
-        if(externalContexts.hasOwnProperty(result[0])){
-            externalContexts[result[0]].set(result[1], value, scope);
-        }else if(externalContexts.hasOwnProperty("defalut")){
-            externalContexts["defalut"].set(result[1], value, scope);
-        }else{
-            throw new Error(result[0] + " is not defined in setting.js");
-        }
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath);
+        return context.set(keyPath.key, value, scope);
     };
     obj.keys = function() {
         //TODO: discuss about keys() behavior
@@ -167,22 +189,6 @@ function clean(flowConfig) {
             }
         }
     }
-}
-
-function parseKey(key){
-    var keys = null;
-    if(!key){
-        return null;
-    }
-    var index_$ = key.indexOf("$");
-    var index_dot = key.indexOf(".", 1);
-    if(index_$ === 0 && index_dot){
-        keys = [];
-        keys[0] = key.substring(1,index_dot);
-        keys[1] = key.substring(index_dot + 1);
-        keys[0] = keys[0] || "default";
-    }
-    return keys;
 }
 
 module.exports = {
