@@ -525,7 +525,8 @@
             "mc-ready": "udp 组播已准备好: __outport__ -> __host__:__port__",
             "bc-ready": "udp 广播已准备好: __outport__ -> __host__:__port__",
             "ready": "udp 已准备好: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udp 已准备好: __host__:__port__"
+            "ready-nolocal": "udp 已准备好: __host__:__port__",
+            "re-use": "udp 重用套接字: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP 访问错误, 你可能需要root权限才能接入1024以下的端口",

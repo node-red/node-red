@@ -526,7 +526,8 @@
             "mc-ready": "udpノードはマルチキャストの準備ができています: __outport__ -> __host__:__port__",
             "bc-ready": "udpノードはブロードキャストの準備ができています: __outport__ -> __host__:__port__",
             "ready": "udpノードは準備ができています: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udpノードは準備ができています: __host__:__port__"
+            "ready-nolocal": "udpノードは準備ができています: __host__:__port__",
+            "re-use": "udp再利用ソケット: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP接続エラー 管理者権限で1024未満のポート番号にアクセスできる必要があります",

@@ -125,8 +125,11 @@ module.exports = function(RED) {
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
 
         var sock;
-        if (udpInputPortsInUse[this.outport || this.port]) {
-            sock = udpInputPortsInUse[this.outport || this.port];
+        var p = this.port;
+        if (node.multicast != "false") { p = this.outport||"0"; }
+        if (udpInputPortsInUse[p]) {
+            sock = udpInputPortsInUse[p];
+            node.log(RED._("udp.status.re-use",{outport:node.outport,host:node.addr,port:node.port}));
         }
         else {
             sock = dgram.createSocket(opts);  // default to udp4
@@ -136,36 +139,35 @@ module.exports = function(RED) {
                 // prevent it going to the global error handler and shutting node-red
                 // down.
             });
-            udpInputPortsInUse[this.outport || this.port] = sock;
-        }
+            udpInputPortsInUse[p] = sock;
 
-        if (node.multicast != "false") {
-            if (node.outport === "") { node.outport = node.port; }
-            sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
-                sock.setBroadcast(true);            // turn on broadcast
-                if (node.multicast == "multi") {
-                    try {
-                        sock.setMulticastTTL(128);
-                        sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-                        node.log(RED._("udp.status.mc-ready",{outport:node.outport,host:node.addr,port:node.port}));
-                    } catch (e) {
-                        if (e.errno == "EINVAL") {
-                            node.error(RED._("udp.errors.bad-mcaddress"));
-                        } else if (e.errno == "ENODEV") {
-                            node.error(RED._("udp.errors.interface"));
-                        } else {
-                            node.error(RED._("udp.errors.error",{error:e.errno}));
+            if (node.multicast != "false") {
+                sock.bind(node.outport, function() {    // have to bind before you can enable broadcast...
+                    sock.setBroadcast(true);            // turn on broadcast
+                    if (node.multicast == "multi") {
+                        try {
+                            sock.setMulticastTTL(128);
+                            sock.addMembership(node.addr,node.iface);   // Add to the multicast group
+                            node.log(RED._("udp.status.mc-ready",{outport:node.outport,host:node.addr,port:node.port}));
+                        } catch (e) {
+                            if (e.errno == "EINVAL") {
+                                node.error(RED._("udp.errors.bad-mcaddress"));
+                            } else if (e.errno == "ENODEV") {
+                                node.error(RED._("udp.errors.interface"));
+                            } else {
+                                node.error(RED._("udp.errors.error",{error:e.errno}));
+                            }
                         }
+                    } else {
+                        node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
                     }
-                } else {
-                    node.log(RED._("udp.status.bc-ready",{outport:node.outport,host:node.addr,port:node.port}));
-                }
-            });
-        } else if ((node.outport !== "") && (!udpInputPortsInUse[node.outport])) {
-            sock.bind(node.outport);
-            node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
-        } else {
-            node.log(RED._("udp.status.ready-nolocal",{host:node.addr,port:node.port}));
+                });
+            } else if ((node.outport !== "") && (!udpInputPortsInUse[node.outport])) {
+                sock.bind(node.outport);
+                node.log(RED._("udp.status.ready",{outport:node.outport,host:node.addr,port:node.port}));
+            } else {
+                node.log(RED._("udp.status.ready-nolocal",{host:node.addr,port:node.port}));
+            }
         }
 
         node.on("input", function(msg) {
@@ -198,8 +200,8 @@ module.exports = function(RED) {
         });
 
         node.on("close", function() {
-            if (udpInputPortsInUse.hasOwnProperty(node.outport || node.port)) {
-                delete udpInputPortsInUse[node.outport || node.port];
+            if (udpInputPortsInUse.hasOwnProperty(p)) {
+                delete udpInputPortsInUse[p];
             }
             try {
                 sock.close();

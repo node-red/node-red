@@ -528,7 +528,8 @@
             "mc-ready": "udp multicast ready: __outport__ -> __host__:__port__",
             "bc-ready": "udp broadcast ready: __outport__ -> __host__:__port__",
             "ready": "udp ready: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udp ready: __host__:__port__"
+            "ready-nolocal": "udp ready: __host__:__port__",
+            "re-use": "udp re-use socket: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP access error, you may need root access for ports below 1024",
