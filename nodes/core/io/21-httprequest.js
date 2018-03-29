@@ -108,6 +108,9 @@ module.exports = function(RED) {
                     }
                 }
             }
+            if (msg.hasOwnProperty('followRedirects')) {
+                opts.followRedirects = msg.followRedirects;
+                }
             if (msg.cookies) {
                 var cookies = [];
                 if (opts.headers.hasOwnProperty('cookie')) {
