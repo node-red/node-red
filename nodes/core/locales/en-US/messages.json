@@ -763,7 +763,9 @@
         "status": {
             "stopped": "stopped",
             "closed": "closed",
-            "not-running": "not running"
+            "not-running": "not running",
+            "not-available": "not available",
+            "na": "N/A : __value__"
         },
         "errors": {
             "ignorenode": "Ignoring Raspberry Pi specific node",
