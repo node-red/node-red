@@ -138,7 +138,7 @@
         icon: "arrow-in.png",
         align: "right",
         label: function() {
-            return this.name||this.command;
+            return this.name||this.command||(this.useSpawn=="true"?this._("exec.spawn"):this._("exec.exec"));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";

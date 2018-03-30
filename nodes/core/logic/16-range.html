@@ -76,7 +76,8 @@
         outputs: 1,
         icon: "range.png",
         label: function() {
-            return this.name || "range";
+            if (this.minout !== "" && this.maxout !== "") { return this.name||this.minout + " - " + this.maxout; }
+            else { return this.name||this._("range.range"); }
         },
         labelStyle: function() {
             return this.name ? "node_label_italic" : "";

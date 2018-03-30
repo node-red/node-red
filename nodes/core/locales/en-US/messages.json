@@ -70,8 +70,8 @@
         }
     },
     "catch": {
-        "catch": "catch all",
-        "catchNodes": "catch (__number__)",
+        "catch": "catch: all",
+        "catchNodes": "catch: __number__",
         "label": {
             "source": "Catch errors from",
             "node": "node",
@@ -86,8 +86,8 @@
         }
     },
     "status": {
-        "status": "status (all)",
-        "statusNodes": "status (__number__)",
+        "status": "status: all",
+        "statusNodes": "status: __number__",
         "label": {
             "source": "Report status from",
             "node": "node",
@@ -166,6 +166,8 @@
         }
     },
     "exec": {
+        "exec": "exec",
+        "spawn": "spawn",
         "label": {
             "command": "Command",
             "append": "Append",
@@ -195,6 +197,7 @@
         "tip": "See the Info tab for help writing functions."
     },
     "template": {
+        "template": "template",
         "label": {
             "template": "Template",
             "property": "Set property",
@@ -301,6 +304,7 @@
         }
     },
     "comment": {
+        "comment": "comment",
         "label": {
             "title": "Title",
             "body": "Body"
@@ -416,6 +420,7 @@
         }
     },
     "watch": {
+        "watch": "watch",
         "label": {
             "files": "File(s)",
             "recursive": "Watch sub-directories recursively"
@@ -542,6 +547,7 @@
         }
     },
     "switch": {
+        "switch": "switch",
         "label": {
             "property": "Property",
             "rule": "rule",
@@ -597,6 +603,7 @@
         }
     },
     "range": {
+        "range": "range",
         "label": {
             "action": "Action",
             "inputrange": "Map the input range",
@@ -784,6 +791,7 @@
         }
     },
     "tail": {
+        "tail": "tail",
         "label": {
             "filename": "Filename",
             "type": "File type",
@@ -837,6 +845,7 @@
         "tip": "Tip: The filename should be an absolute path, otherwise it will be relative to the working directory of the Node-RED process."
     },
     "split": {
+        "split": "split",
         "intro":"Split <code>msg.payload</code> based on type:",
         "object":"<b>Object</b>",
         "objectSend":"Send a message for each key/value pair",
@@ -848,6 +857,7 @@
         "addname":" Copy key to "
     },
     "join":{
+        "join": "join",
         "mode":{
             "mode":"Mode",
             "auto":"automatic",
@@ -894,6 +904,7 @@
         }
     },
     "sort" : {
+        "sort": "sort",
         "target" : "Sort",
         "seq" : "message sequence",
         "key" : "Key",
@@ -907,6 +918,7 @@
         "clear" : "clear pending message in sort node"
     },
     "batch" : {
+        "batch": "batch",
         "mode": {
             "label" : "Mode",
             "num-msgs" : "Group by number of messages",
