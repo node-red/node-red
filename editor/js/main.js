@@ -179,17 +179,29 @@
                             ]
                         }
                     } else if (msg.error === "credentials_load_failed") {
-                        if (RED.user.hasPermission("projects.write")) {
+                        if (RED.settings.theme("projects.enabled",false)) {
+                            // projects enabled
+                            if (RED.user.hasPermission("projects.write")) {
+                                options.buttons = [
+                                    {
+                                        text: "Setup credentials",
+                                        click: function() {
+                                            persistentNotifications[notificationId].hideNotification();
+                                            RED.projects.showCredentialsPrompt();
+                                        }
+                                    }
+                                ]
+                            }
+                        } else {
                             options.buttons = [
                                 {
-                                    text: "Setup credentials",
+                                    text: "Close",
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
-                                        RED.projects.showCredentialsPrompt();
                                     }
                                 }
                             ]
-                        }
+                        }   
                     } else if (msg.error === "missing_flow_file") {
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
