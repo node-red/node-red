@@ -201,7 +201,7 @@
                                     }
                                 }
                             ]
-                        }   
+                        }
                     } else if (msg.error === "missing_flow_file") {
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
