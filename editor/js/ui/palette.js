@@ -15,22 +15,35 @@
  **/
 
 RED.palette = (function() {
-
     var exclusion = ['config','unknown','deprecated'];
     var coreCategories = ['subflows', 'input', 'output', 'function', 'social', 'mobile', 'storage', 'analysis', 'advanced'];
 
     var categoryContainers = {};
 
-    function createCategoryContainer(category, label) {
+    function createCategoryContainer(category, label, parent) {
         label = (label || category).replace(/_/g, " ");
-        var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
+        var catDiv;
+        var DivSelector = '<div id="palette-container-'+category+'" class="palette-category HIDESETTINGS " STYLESETTINGS >'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
             '<div id="palette-'+category+'-output"></div>'+
             '<div id="palette-'+category+'-function"></div>'+
             '</div>'+
-            '</div>').appendTo("#palette-container");
+            '</div>';
+        if(parent === ""){
+            DivSelector=DivSelector.replace(/HIDESETTINGS/,"palette-open");
+            DivSelector=DivSelector.replace(/STYLESETTINGS/,' style="display:block" ');
+            catDiv = $(DivSelector).appendTo("#palette-container");
+        }else if(parent && typeof parent != "undefined" && parent != ""){
+            DivSelector=DivSelector.replace(/HIDESETTINGS/, "palette-close hide");
+            DivSelector=DivSelector.replace(/STYLESETTINGS/, ' style="margin-left:10%; display:block" ');
+            catDiv = $(DivSelector).appendTo("#palette-container-"+parent);
+        }else{
+            DivSelector=DivSelector.replace(/HIDESETTINGS/, "palette-close hide");
+            DivSelector=DivSelector.replace(/STYLESETTINGS/, '');
+            catDiv = $(DivSelector).appendTo("#palette-container");
+        }
 
         categoryContainers[category] = {
             container: catDiv,
@@ -39,12 +52,24 @@ RED.palette = (function() {
                 catDiv.addClass("palette-closed");
                 $("#palette-base-category-"+category).slideUp();
                 $("#palette-header-"+category+" i").removeClass("expanded");
+
+                catDiv.find("div[id*='palette-container-']").removeClass("palette-open");
+                catDiv.find("div[id*='palette-container-']").addClass("palette-closed");
+                catDiv.find("div[id*='palette-base-category-']").slideUp();
+                catDiv.find("div[id*='palette-header-']").removeClass("expanded");
+                catDiv.find("div[id*='palette-container-']").css("display","none"); 
             },
             open: function() {
                 catDiv.addClass("palette-open");
                 catDiv.removeClass("palette-closed");
                 $("#palette-base-category-"+category).slideDown();
                 $("#palette-header-"+category+" i").addClass("expanded");
+
+                catDiv.find("div[id*='palette-container-']").addClass("palette-open");
+                catDiv.find("div[id*='palette-container-']").removeClass("palette-closed");
+                catDiv.find("div[id*='palette-base-category-']").slideDown();
+                catDiv.find("div[id*='palette-header-']").addClass("expanded");
+                catDiv.find("div[id*='palette-container-']").css("display","block");
             },
             toggle: function() {
                 if (catDiv.hasClass("palette-open")) {
@@ -174,7 +199,28 @@ RED.palette = (function() {
                 d.appendChild(portIn);
             }
 
-            if ($("#palette-base-category-"+rootCategory).length === 0) {
+            if(rootCategory.indexOf("_") !== -1){
+                var CategoryPath = rootCategory.split("_");
+                var lastCategory = "";
+                CategoryPath.forEach(function(current){
+                    if($("#palette-base-category-"+current).length === 0){
+                        var ns = def.set.id;
+                        createCategoryContainer(current, RED._(ns+":palette.label."+current, {defaultValue:current}), lastCategory);
+                        if(lastCategory !== ""){
+                            categoryContainers[lastCategory].open();
+                        }
+                    }
+
+                    lastCategory = current.substring(0);
+
+                });
+
+                if ($("#palette-"+lastCategory).length === 0) {
+                    $("#palette-base-category-"+lastCategory).append('<div id="palette-'+lastCategory+'"></div>');
+                }
+
+                $("#palette-"+lastCategory).append(d);
+            }else if ($("#palette-base-category-"+rootCategory).length === 0) {
                 if(coreCategories.indexOf(rootCategory) !== -1){
                     createCategoryContainer(rootCategory, RED._("node-red:palette.label."+rootCategory, {defaultValue:rootCategory}));
                 } else {
@@ -381,6 +427,7 @@ RED.palette = (function() {
                 portOutput.remove();
             }
             setLabel(sf.type+":"+sf.id,paletteNode,sf.name,marked(sf.info||""));
+
             setIcon(paletteNode,sf);
         });
     }
