@@ -403,7 +403,7 @@ function stop(type,diff,muteLog) {
             // id to the list of subflow instance nodes is something only Flow
             // can do... so cheat by wiping the map knowing it'll be rebuilt
             // in start()
-            subflowInstancgeNodeMap = {};
+            subflowInstanceNodeMap = {};
             if (!muteLog) {
                 if (type !== "full") {
                     log.info(log._("nodes.flows.stopped-modified-"+type));
