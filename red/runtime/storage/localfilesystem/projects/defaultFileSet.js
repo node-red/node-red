@@ -44,5 +44,5 @@ module.exports = {
 
         return content;
     },
-    ".gitignore": function() { return "*.backup\n" ;}
+    ".gitignore": function() { return "*.backup\n.config.json\n" ;}
 }
