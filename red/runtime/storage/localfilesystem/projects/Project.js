@@ -280,7 +280,7 @@ Project.prototype.update = function (user, data) {
         savePackage = true;
         this.package.dependencies = data.dependencies;
         if (this.package.dependencies.hasOwnProperty("node-red")) {
-            this.package.scripts = {"start":"node node_modules/node-red/red.js -u . " + this.package['node-red'].settings.flowFile};
+            this.package.scripts = {"start":"node-red -u . " + this.package['node-red'].settings.flowFile};
         } else {
             delete(this.package.scripts.start);
         }
@@ -338,7 +338,7 @@ Project.prototype.update = function (user, data) {
             this.paths.flowFile = data.files.flow;
             this.package['node-red'].settings.flowFile = data.files.flow;
             if (this.package.dependencies.hasOwnProperty("node-red")) {
-                this.package.scripts = {"start":"node node_modules/node-red/red.js -u . " + data.files.flow};
+                this.package.scripts = {"start":"node-red -u . " + data.files.flow};
             } else {
                 delete(this.package.scripts.start);
             }
