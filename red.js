@@ -33,6 +33,7 @@ var settingsFile;
 var flowFile;
 
 var knownOpts = {
+    "credentialSecret": String,
     "help": Boolean,
     "port": Number,
     "settings": [path],
@@ -41,6 +42,7 @@ var knownOpts = {
     "verbose": Boolean
 };
 var shortHands = {
+    "k":["--credentialSecret"],
     "?":["--help"],
     "p":["--port"],
     "s":["--settings"],
@@ -59,9 +61,11 @@ var parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 if (parsedArgs.help) {
     console.log("Node-RED v"+RED.version());
     console.log("Usage: node-red [-v] [-?] [--settings settings.js] [--userDir DIR]");
-    console.log("                [--port PORT] [--title TITLE] [flows.json]");
+    console.log("                [--port PORT] [--credentialSecret SECRET_KEY]");
+    console.log("                [--title TITLE] [flows.json]");
     console.log("");
     console.log("Options:");
+    console.log("  -k, --credentialSecret SECRET_KEY  key to unlock credentials file");
     console.log("  -p, --port     PORT  port to listen on");
     console.log("  -s, --settings FILE  use specified settings file");
     console.log("      --title    TITLE process window title");
@@ -124,6 +128,10 @@ try {
         console.log(err);
     }
     process.exit();
+}
+
+if (parsedArgs.credentialSecret) {
+    settings.credentialSecret = parsedArgs.credentialSecret;
 }
 
 if (parsedArgs.verbose) {
