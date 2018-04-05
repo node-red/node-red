@@ -24,7 +24,8 @@ module.exports = {
             "node-red": {
                 "settings": {
                 }
-            }
+            },
+            "scripts": {}
         };
         if (project.files) {
             if (project.files.flow) {
@@ -43,5 +44,5 @@ module.exports = {
 
         return content;
     },
-    ".gitignore": function() { return "*.backup" ;}
+    ".gitignore": function() { return "*.backup\n" ;}
 }

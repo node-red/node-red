@@ -279,6 +279,11 @@ Project.prototype.update = function (user, data) {
     if (data.hasOwnProperty('dependencies')) {
         savePackage = true;
         this.package.dependencies = data.dependencies;
+        if (this.package.dependencies.hasOwnProperty("node-red")) {
+            this.package.scripts = {"start":"node node_modules/node-red/red.js -u . " + this.package['node-red'].settings.flowFile};
+        } else {
+            delete(this.package.scripts.start);
+        }
     }
     if (data.hasOwnProperty('summary')) {
         savePackage = true;
@@ -332,6 +337,11 @@ Project.prototype.update = function (user, data) {
         if (data.files.hasOwnProperty('flow') && this.package['node-red'].settings.flowFile !== data.files.flow) {
             this.paths.flowFile = data.files.flow;
             this.package['node-red'].settings.flowFile = data.files.flow;
+            if (this.package.dependencies.hasOwnProperty("node-red")) {
+                this.package.scripts = {"start":"node node_modules/node-red/red.js -u . " + data.files.flow};
+            } else {
+                delete(this.package.scripts.start);
+            }
             savePackage = true;
             flowFilesChanged = true;
         }
