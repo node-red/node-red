@@ -352,6 +352,7 @@ RED.projects.settings = (function() {
             }
         },{dependencies:dependencies});
     }
+
     function editDependencies(activeProject,depsJSON,container,depsList) {
         var json = depsJSON||JSON.stringify(activeProject.dependencies||{},"",4);
         if (json === "{}") {
@@ -380,6 +381,7 @@ RED.projects.settings = (function() {
 
     function createDependenciesPane(activeProject) {
         var pane = $('<div id="project-settings-tab-deps" class="project-settings-tab-pane node-help"></div>');
+        var nrDepButton;
         if (RED.user.hasPermission("projects.write")) {
             $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">edit</button>')
                 .appendTo(pane)
@@ -387,6 +389,16 @@ RED.projects.settings = (function() {
                     evt.preventDefault();
                     editDependencies(activeProject,null,pane,depsList)
                 });
+
+            nrDepButton = $('<button class="editor-button editor-button-small" style="margin-top:10px;">add Node-RED core</button>')
+                .appendTo(pane)
+                .click(function(evt) {
+                    evt.preventDefault();
+                    activeProject.dependencies["node-red"] = RED.settings.version;
+                    updateProjectDependencies(activeProject,depsList);
+                    $(this).hide();
+                });
+            if (activeProject.dependencies.hasOwnProperty("node-red")) { nrDepButton.hide(); }
         }
         var depsList = $("<ol>",{style:"position: absolute;top: 60px;bottom: 20px;left: 20px;right: 20px;"}).appendTo(pane);
         depsList.editableList({
@@ -473,6 +485,7 @@ RED.projects.settings = (function() {
                                     evt.preventDefault();
                                     var deps = $.extend(true, {}, activeProject.dependencies);
                                     delete deps[entry.id];
+                                    if (entry.id === "node-red") { nrDepButton.show(); }
                                     saveDependencies(depsList,row,deps,function(err) {
                                         if (!err) {
                                             row.fadeOut(200,function() {
@@ -519,7 +532,6 @@ RED.projects.settings = (function() {
 
         updateProjectDependencies(activeProject,depsList);
         return pane;
-
     }
 
     function showProjectFileListing(row,activeProject,current,filter,done) {
