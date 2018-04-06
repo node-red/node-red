@@ -31,6 +31,7 @@ var app = express();
 
 var settingsFile;
 var flowFile;
+var readonly;
 
 var knownOpts = {
     "credentialSecret": String,
@@ -105,8 +106,15 @@ if (parsedArgs.settings) {
             var settingsStat = fs.statSync(defaultSettings);
             if (settingsStat.mtime.getTime() <= settingsStat.ctime.getTime()) {
                 // Default settings file has not been modified - safe to copy
-                fs.copySync(defaultSettings,userSettingsFile);
-                settingsFile = userSettingsFile;
+                try {
+                    fs.copySync(defaultSettings,userSettingsFile);
+                    settingsFile = userSettingsFile;
+                }
+                catch (err) {
+                    console.log("Can't copy settings file.");
+                    settingsFile = defaultSettings;
+                    readonly = true;
+                }
             } else {
                 // Use default settings.js as it has been modified
                 settingsFile = defaultSettings;
@@ -118,6 +126,10 @@ if (parsedArgs.settings) {
 try {
     var settings = require(settingsFile);
     settings.settingsFile = settingsFile;
+    if (readonly === true) {
+        console.log("Setting to read Only mode.");
+        settings.readOnly = true;
+    }
 } catch(err) {
     console.log("Error loading settings file: "+settingsFile)
     if (err.code == 'MODULE_NOT_FOUND') {
