@@ -394,7 +394,7 @@ RED.projects.settings = (function() {
                 .appendTo(pane)
                 .click(function(evt) {
                     evt.preventDefault();
-                    activeProject.dependencies["node-red"] = RED.settings.version;
+                    activeProject.dependencies["node-red"] = "~"+RED.settings.version;
                     updateProjectDependencies(activeProject,depsList);
                     $(this).hide();
                 });
