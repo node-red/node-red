@@ -37,6 +37,7 @@ var activeFlowConfig = null;
 
 var activeFlows = {};
 var started = false;
+var credentialsPendingReset = false;
 
 var activeNodesToFlow = {};
 var subflowInstanceNodeMap = {};
@@ -70,21 +71,31 @@ function init(runtime) {
 }
 
 function loadFlows() {
-    return storage.getFlows().then(function(config) {
+    var config;
+    return storage.getFlows().then(function(_config) {
+        config = _config;
         log.debug("loaded flow revision: "+config.rev);
         return credentials.load(config.credentials).then(function() {
             events.emit("runtime-event",{id:"runtime-state",retain:true});
             return config;
         });
     }).catch(function(err) {
-        activeConfig = null;
-        events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,project:err.project,text:"notification.warnings."+err.code},retain:true});
-        if (err.code === "project_not_found") {
-            log.warn(log._("storage.localfilesystem.projects.project-not-found",{project:err.project}));
-        } else {
+        if (err.code === "credentials_load_failed" && !storage.projects) {
+            // project disabled, credential load failed
+            credentialsPendingReset = true;
             log.warn(log._("nodes.flows.error",{message:err.toString()}));
+            events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,text:"notification.warnings.credentials_load_failed_reset"},retain:true});
+            return config;
+        } else {
+            activeConfig = null;
+            events.emit("runtime-event",{id:"runtime-state",payload:{type:"warning",error:err.code,project:err.project,text:"notification.warnings."+err.code},retain:true});
+            if (err.code === "project_not_found") {
+                log.warn(log._("storage.localfilesystem.projects.project-not-found",{project:err.project}));
+            } else {
+                log.warn(log._("nodes.flows.error",{message:err.toString()}));
+            }
+            throw err;
         }
-        throw err;
     });
 }
 function load(forceStart) {
@@ -317,7 +328,12 @@ function start(type,diff,muteLog) {
         }
     }
     events.emit("nodes-started");
-    events.emit("runtime-event",{id:"runtime-state",retain:true});
+
+    if (credentialsPendingReset === true) {
+        credentialsPendingReset = false;
+    } else {
+        events.emit("runtime-event",{id:"runtime-state",retain:true});
+    }
 
     if (!muteLog) {
         if (type !== "full") {
