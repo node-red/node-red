@@ -13,117 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var theme = require("../editor/theme");
-var util = require('util');
-var runtime;
-var settings;
-var log;
+var apiUtils = require("../util");
+var runtimeAPI;
+var sshkeys = require("./sshkeys");
+var theme = require("./theme");
 
 module.exports = {
-    init: function(_runtime) {
-        runtime = _runtime;
-        settings = runtime.settings;
-        log = runtime.log;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
+        sshkeys.init(runtimeAPI);
     },
     runtimeSettings: function(req,res) {
-        var safeSettings = {
-            httpNodeRoot: settings.httpNodeRoot||"/",
-            version: settings.version,
+        var opts = {
             user: req.user
         }
-
-        var themeSettings = theme.settings();
-        if (themeSettings) {
-            safeSettings.editorTheme = themeSettings;
-        }
-
-        if (util.isArray(settings.paletteCategories)) {
-            safeSettings.paletteCategories = settings.paletteCategories;
-        }
-
-        if (settings.flowFilePretty) {
-            safeSettings.flowFilePretty = settings.flowFilePretty;
-        }
-
-        if (!runtime.nodes.paletteEditorEnabled()) {
-            safeSettings.editorTheme = safeSettings.editorTheme || {};
-            safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
-            safeSettings.editorTheme.palette.editable = false;
-        }
-        if (runtime.storage.projects) {
-            var activeProject = runtime.storage.projects.getActiveProject();
-            if (activeProject) {
-                safeSettings.project = activeProject;
-            } else if (runtime.storage.projects.flowFileExists()) {
-                safeSettings.files = {
-                    flow: runtime.storage.projects.getFlowFilename(),
-                    credentials: runtime.storage.projects.getCredentialsFilename()
-                }
+        runtimeAPI.settings.getRuntimeSettings(opts).then(function(result) {
+            var themeSettings = theme.settings();
+            if (themeSettings) {
+                result.editorTheme = themeSettings;
             }
-            safeSettings.git = {
-                globalUser: runtime.storage.projects.getGlobalGitUser()
-            }
-        }
-
-        safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();
-
-        settings.exportNodeSettings(safeSettings);
-        res.json(safeSettings);
+            res.json(result);
+        });
     },
     userSettings: function(req, res) {
-        var username;
-        if (!req.user || req.user.anonymous) {
-            username = '_';
-        } else {
-            username = req.user.username;
+        var opts = {
+            user: req.user
         }
-        res.json(settings.getUserSettings(username)||{});
+        runtimeAPI.settings.getUserSettings(opts).then(function(result) {
+            res.json(result);
+        });
     },
     updateUserSettings: function(req,res) {
-        var username;
-        if (!req.user || req.user.anonymous) {
-            username = '_';
-        } else {
-            username = req.user.username;
+        var opts = {
+            user: req.user,
+            settings: req.body
         }
-        var currentSettings = settings.getUserSettings(username)||{};
-        currentSettings = extend(currentSettings, req.body);
-        try {
-            settings.setUserSettings(username, currentSettings).then(function() {
-                log.audit({event: "settings.update",username:username},req);
-                res.status(204).end();
-            }).catch(function(err) {
-                log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
-                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-            });
-        } catch(err) {
-            log.warn(log._("settings.user-not-available",{message:log._("settings.not-available")}));
-            log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
-            res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-        }
+        runtimeAPI.settings.updateUserSettings(opts).then(function(result) {
+            res.status(204).end();
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        });
+    },
+    sshkeys: function() {
+        return sshkeys.app()
     }
-}
-
-function extend(target, source) {
-    var keys = Object.keys(source);
-    var i = keys.length;
-    while(i--) {
-        var value = source[keys[i]]
-        var type = typeof value;
-        if (type === 'string' || type === 'number' || type === 'boolean' || Array.isArray(value)) {
-            target[keys[i]] = value;
-        } else if (value === null) {
-            if (target.hasOwnProperty(keys[i])) {
-                delete target[keys[i]];
-            }
-        } else {
-            // Object
-            if (target.hasOwnProperty(keys[i])) {
-                target[keys[i]] = extend(target[keys[i]],value);
-            } else {
-                target[keys[i]] = value;
-            }
-        }
-    }
-    return target;
 }

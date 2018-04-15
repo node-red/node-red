@@ -1,0 +1,17 @@
+{
+    "tags": {
+        "allowUnknownTags": false,
+        "dictionaries": ["jsdoc"]
+    },
+    "source": {
+        "include": [
+            "./red/runtime-api"
+        ]
+    },
+    "templates": {
+        "systemName": "Node-RED Runtime API",
+        "theme":"yeti",
+        "footer": "",
+        "copyright": "Released under the Apache License v2.0"
+    }
+}

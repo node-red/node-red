@@ -40,7 +40,6 @@ var defaultContext = {
 var theme = null;
 var themeContext = clone(defaultContext);
 var themeSettings = null;
-var runtime = null;
 
 var themeApp;
 
@@ -78,11 +77,10 @@ function serveFilesFromTheme(themeValue, themeApp, directory) {
 }
 
 module.exports = {
-    init: function(runtime) {
-        var settings = runtime.settings;
+    init: function(settings,version) {
         themeContext = clone(defaultContext);
-        if (runtime.version) {
-            themeContext.version = runtime.version();
+        if (version) {
+            themeContext.version = version;
         }
         themeSettings = null;
         theme = settings.editorTheme || {};

@@ -15,8 +15,7 @@
  **/
 
 var express = require("express");
-var os = require("os");
-var runtime;
+var runtimeAPI;
 var needsPermission = require("../auth").needsPermission;
 
 function getUsername(userObj) {
@@ -28,94 +27,66 @@ function getUsername(userObj) {
 }
 
 module.exports = {
-    init: function(_runtime) {
-        runtime = _runtime;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
     },
     app: function() {
         var app = express();
 
-        // SSH keys
-
         // List all SSH keys
         app.get("/", needsPermission("settings.read"), function(req,res) {
-            var username = getUsername(req.user);
-            runtime.storage.projects.ssh.listSSHKeys(username)
-            .then(function(list) {
+            var opts = {
+                user: req.user
+            }
+            runtimeAPI.settings.getUserKeys(opts).then(function(list) {
                 res.json({
                     keys: list
                 });
-            })
-            .catch(function(err) {
-                // console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             });
         });
 
         // Get SSH key detail
         app.get("/:id", needsPermission("settings.read"), function(req,res) {
-            var username = getUsername(req.user);
-            // console.log('username:', username);
-            runtime.storage.projects.ssh.getSSHKey(username, req.params.id)
-            .then(function(data) {
-                if (data) {
-                    res.json({
-                        publickey: data
-                    });
-                } else {
-                    res.status(404).end();
-                }
-            })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.settings.getUserKey(opts).then(function(data) {
+                res.json({
+                    publickey: data
+                });
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             });
         });
 
         // Generate a SSH key
         app.post("/", needsPermission("settings.write"), function(req,res) {
-            var username = getUsername(req.user);
-            // console.log('req.body:', req.body);
-            if ( req.body && req.body.name && /^[a-zA-Z0-9\-_]+$/.test(req.body.name)) {
-                runtime.storage.projects.ssh.generateSSHKey(username, req.body)
-                .then(function(name) {
-                    // console.log('generate key --- success  name:', name);
-                    res.json({
-                        name: name
-                    });
-                })
-                .catch(function(err) {
-                    if (err.code) {
-                        res.status(400).json({error:err.code, message: err.message});
-                    } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
-                    }
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.settings.generateUserKey(opts).then(function(name) {
+                res.json({
+                    name: name
                 });
-            }
-            else {
-                res.status(400).json({error:"unexpected_error", message:"You need to have body or body.name"});
-            }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
+            });
         });
 
         // Delete a SSH key
         app.delete("/:id", needsPermission("settings.write"), function(req,res) {
-            var username = getUsername(req.user);
-            runtime.storage.projects.ssh.deleteSSHKey(username, req.params.id)
-            .then(function() {
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.settings.generateUserKey(opts).then(function(name) {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             });
         });
 

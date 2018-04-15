@@ -107,6 +107,11 @@ function getSSHKey(username, name) {
 function generateSSHKey(username, options) {
     options = options || {};
     var name = options.name || "";
+    if (!/^[a-zA-Z0-9\-_]+$/.test(options.name)) {
+        var err = new Error("Invalid SSH Key name");
+        e.code = "invalid_key_name";
+        return Promise.reject(err);
+    }
     return checkExistSSHKeyFiles(username, name)
         .then(function(result) {
             if ( result ) {

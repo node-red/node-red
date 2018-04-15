@@ -14,72 +14,56 @@
  * limitations under the License.
  **/
 
-var log;
-var redNodes;
+var runtimeAPI;
+var apiUtils = require("../util");
 
 module.exports = {
-    init: function(runtime) {
-        redNodes = runtime.nodes;
-        log = runtime.log;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
     },
     get: function(req,res) {
-        var id = req.params.id;
-        var flow = redNodes.getFlow(id);
-        if (flow) {
-            log.audit({event: "flow.get",id:id},req);
-            res.json(flow);
-        } else {
-            log.audit({event: "flow.get",id:id,error:"not_found"},req);
-            res.status(404).end();
+        var opts = {
+            user: req.user,
+            id: req.params.id
         }
+        runtimeAPI.flows.getFlow(opts).then(function(result) {
+            return res.json(result);
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
     },
     post: function(req,res) {
-        var flow = req.body;
-        redNodes.addFlow(flow).then(function(id) {
-            log.audit({event: "flow.add",id:id},req);
-            res.json({id:id});
+        var opts = {
+            user: req.user,
+            flow: req.body
+        }
+        runtimeAPI.flows.addFlow(opts).then(function(id) {
+            return res.json({id:id});
         }).catch(function(err) {
-            log.audit({event: "flow.add",error:err.code||"unexpected_error",message:err.toString()},req);
-            res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            apiUtils.rejectHandler(req,res,err);
         })
-
     },
     put: function(req,res) {
-        var id = req.params.id;
-        var flow = req.body;
-        try {
-            redNodes.updateFlow(id,flow).then(function() {
-                log.audit({event: "flow.update",id:id},req);
-                res.json({id:id});
-            }).catch(function(err) {
-                log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
-                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-            })
-        } catch(err) {
-            if (err.code === 404) {
-                log.audit({event: "flow.update",id:id,error:"not_found"},req);
-                res.status(404).end();
-            } else {
-                log.audit({event: "flow.update",error:err.code||"unexpected_error",message:err.toString()},req);
-                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-            }
+        var opts = {
+            user: req.user,
+            id: req.params.id,
+            flow: req.body
         }
+        runtimeAPI.flows.updateFlow(opts).then(function(id) {
+            return res.json({id:id});
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
     },
     delete: function(req,res) {
-        var id = req.params.id;
-        try {
-            redNodes.removeFlow(id).then(function() {
-                log.audit({event: "flow.remove",id:id},req);
-                res.status(204).end();
-            })
-        } catch(err) {
-            if (err.code === 404) {
-                log.audit({event: "flow.remove",id:id,error:"not_found"},req);
-                res.status(404).end();
-            } else {
-                log.audit({event: "flow.remove",id:id,error:err.code||"unexpected_error",message:err.toString()},req);
-                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-            }
+        var opts = {
+            user: req.user,
+            id: req.params.id
         }
+        runtimeAPI.flows.deleteFlow(opts).then(function() {
+            res.status(204).end();
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
     }
 }

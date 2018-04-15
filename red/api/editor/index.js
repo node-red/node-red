@@ -25,6 +25,7 @@ var auth = require("../auth");
 var nodes = require("../admin/nodes"); // TODO: move /icons into here
 var needsPermission;
 var runtime;
+var runtimeAPI;
 var log;
 var apiUtil = require("../util");
 
@@ -38,16 +39,17 @@ var ensureRuntimeStarted = function(req,res,next) {
 }
 
 module.exports = {
-    init: function(server, _runtime) {
+    init: function(server, settings, _runtime, _runtimeAPI) {
         runtime = _runtime;
+        runtimeAPI = _runtimeAPI;
         log = runtime.log;
         needsPermission = auth.needsPermission;
-        var settings = runtime.settings;
         if (!settings.disableEditor) {
-            info.init(runtime);
+            info.init(runtimeAPI);
             comms.init(server,runtime);
 
             var ui = require("./ui");
+            // ui is passed runtime so it get access runtime.nodes.getNodeIconPath
             ui.init(runtime);
             var editorApp = express();
             if (settings.requireHttps === true) {
@@ -67,7 +69,7 @@ module.exports = {
             editorApp.get("/icons/:scope/:module/:icon",ui.icon);
 
             var theme = require("./theme");
-            theme.init(runtime);
+            theme.init(settings, runtime.version());
             editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
 
@@ -91,7 +93,7 @@ module.exports = {
 
             // Credentials
             var credentials = require("./credentials");
-            credentials.init(runtime);
+            credentials.init(runtimeAPI);
             editorApp.get('/credentials/:type/:id', needsPermission("credentials.read"),credentials.get,apiUtil.errorHandler);
 
             // Settings
@@ -100,11 +102,8 @@ module.exports = {
             editorApp.get("/settings/user",needsPermission("settings.read"),info.userSettings,apiUtil.errorHandler);
             // User Settings
             editorApp.post("/settings/user",needsPermission("settings.write"),info.updateUserSettings,apiUtil.errorHandler);
-
             // SSH keys
-            var sshkeys = require("./sshkeys");
-            sshkeys.init(runtime);
-            editorApp.use("/settings/user/keys",sshkeys.app());
+            editorApp.use("/settings/user/keys",info.sshkeys());
 
             return editorApp;
         }

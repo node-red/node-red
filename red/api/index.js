@@ -26,13 +26,10 @@ var apiUtil = require("./util");
 
 var adminApp;
 var server;
-var runtime;
 var editor;
 
-function init(_server,_runtime) {
+function init(_server,settings,runtime,runtimeAPI) {
     server = _server;
-    runtime = _runtime;
-    var settings = runtime.settings;
     if (settings.httpAdminRoot !== false) {
         apiUtil.init(runtime);
         adminApp = express();
@@ -61,7 +58,7 @@ function init(_server,_runtime) {
         // Editor
         if (!settings.disableEditor) {
             editor = require("./editor");
-            var editorApp = editor.init(server, runtime);
+            var editorApp = editor.init(server, settings, runtime, runtimeAPI);
             adminApp.use(editorApp);
         }
 
@@ -70,7 +67,7 @@ function init(_server,_runtime) {
             adminApp.use(corsHandler);
         }
 
-        var adminApiApp = require("./admin").init(runtime);
+        var adminApiApp = require("./admin").init(runtimeAPI);
         adminApp.use(adminApiApp);
     } else {
         adminApp = null;

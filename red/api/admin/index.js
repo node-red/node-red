@@ -24,10 +24,10 @@ var auth = require("../auth");
 var apiUtil = require("../util");
 
 module.exports = {
-    init: function(runtime) {
-        flows.init(runtime);
-        flow.init(runtime);
-        nodes.init(runtime);
+    init: function(runtimeAPI) {
+        flows.init(runtimeAPI);
+        flow.init(runtimeAPI);
+        nodes.init(runtimeAPI);
 
         var needsPermission = auth.needsPermission;
 

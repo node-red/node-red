@@ -41,5 +41,15 @@ module.exports = {
             lang = acceptedLanguages[0];
         }
         return lang;
+    },
+    rejectHandler: function(req,res,err) {
+        res.status(err.status||500);
+        if (err.code || err.message) {
+            res.json({
+                code: err.code||"unexpected_error",
+                message: err.message
+            })
+        }
+        res.end();
     }
 }

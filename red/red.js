@@ -18,6 +18,8 @@ var fs = require("fs");
 var path = require('path');
 
 var runtime = require("./runtime");
+var runtimeAPI = require("./runtime-api");
+
 var api = require("./api");
 
 process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || path.resolve(__dirname+"/..");
@@ -67,7 +69,10 @@ module.exports = {
 
         if (userSettings.httpAdminRoot !== false) {
             runtime.init(userSettings,api);
-            api.init(httpServer,runtime);
+
+            runtimeAPI.init(runtime);
+            api.init(httpServer,userSettings,runtime,runtimeAPI);
+
             apiEnabled = true;
             server = runtime.adminApi.server;
             runtime.server = runtime.adminApi.server;
