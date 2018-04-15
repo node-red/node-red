@@ -389,6 +389,7 @@ RED.keyboard = (function() {
                 var currentEditorSettings = RED.settings.get('editor') || {};
                 var userKeymap = currentEditorSettings.keymap || {};
                 userKeymap[object.id] = null;
+                currentEditorSettings.keymap = userKeymap;
                 RED.settings.set('editor',currentEditorSettings);
 
                 var obj = {
@@ -442,6 +443,7 @@ RED.keyboard = (function() {
                         var currentEditorSettings = RED.settings.get('editor') || {};
                         var userKeymap = currentEditorSettings.keymap || {};
                         userKeymap[object.id] = RED.keyboard.getShortcut(object.id);
+                        currentEditorSettings.keymap = userKeymap;
                         RED.settings.set('editor',currentEditorSettings);
                     }
                 }

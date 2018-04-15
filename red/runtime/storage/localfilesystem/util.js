@@ -81,8 +81,6 @@ module.exports = {
      writeFile: function(path,content,backupPath) {
          if (backupPath) {
              try {
-                 console.log(path);
-                 console.log(backupPath);
                  fs.renameSync(path,backupPath);
              } catch(err) {
                  console.log(err);
