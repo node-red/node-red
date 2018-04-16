@@ -186,6 +186,7 @@
         "oldrc": "Use old style output (compatibility mode)"
     },
     "function": {
+        "function": "",
         "label": {
             "function": "Function",
             "outputs": "Outputs"
