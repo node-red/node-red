@@ -75,6 +75,7 @@
     },
 
     "settings": {
+        "user-not-available": "Cannot save user settings: __message__",
         "not-available": "Settings not available",
         "property-read-only": "Property '__prop__' is read-only"
     },

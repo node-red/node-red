@@ -173,6 +173,9 @@ var persistentSettings = {
         return clone(userSettings[username]);
     },
     setUserSettings: function(username,settings) {
+        if (globalSettings === null) {
+            throw new Error(log._("settings.not-available"));
+        }
         var current = userSettings[username];
         userSettings[username] = settings;
         try {

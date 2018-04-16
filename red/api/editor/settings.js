@@ -88,13 +88,19 @@ module.exports = {
         }
         var currentSettings = settings.getUserSettings(username)||{};
         currentSettings = extend(currentSettings, req.body);
-        settings.setUserSettings(username, currentSettings).then(function() {
-            log.audit({event: "settings.update",username:username},req);
-            res.status(204).end();
-        }).catch(function(err) {
+        try {
+            settings.setUserSettings(username, currentSettings).then(function() {
+                log.audit({event: "settings.update",username:username},req);
+                res.status(204).end();
+            }).catch(function(err) {
+                log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
+                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            });
+        } catch(err) {
+            log.warn(log._("settings.user-not-available",{message:log._("settings.not-available")}));
             log.audit({event: "settings.update",username:username,error:err.code||"unexpected_error",message:err.toString()},req);
             res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
-        });
+        }
     }
 }
 
