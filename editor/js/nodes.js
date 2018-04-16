@@ -753,7 +753,7 @@ RED.nodes = (function() {
         if (!isInitialLoad && unknownTypes.length > 0) {
             var typeList = "<ul><li>"+unknownTypes.join("</li><li>")+"</li></ul>";
             var type = "type"+(unknownTypes.length > 1?"s":"");
-            RED.notify("<strong>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</strong>"+typeList,"error",false,10000);
+            RED.notify("<p>"+RED._("clipboard.importUnrecognised",{count:unknownTypes.length})+"</p>"+typeList,"error",false,10000);
         }
 
         var activeWorkspace = RED.workspaces.active();
@@ -1033,6 +1033,11 @@ RED.nodes = (function() {
                         if (node._def.category != "config") {
                             node.inputs = n.inputs||node._def.inputs;
                             node.outputs = n.outputs||node._def.outputs;
+                            // If 'wires' is longer than outputs, clip wires
+                            if (node.hasOwnProperty('wires') && node.wires.length > node.outputs) {
+                                node.wires = node.wires.slice(0,node.outputs);
+                                wireClippedNodes.push(node);
+                            }
                             for (d in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d)) {
                                     node[d] = n[d];
