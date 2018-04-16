@@ -127,6 +127,15 @@ function setFlows(_config,type,muteLog,forceStart) {
         config = clone(_config);
         newFlowConfig = flowUtil.parseConfig(clone(config));
         diff = flowUtil.diffConfigs(activeFlowConfig,newFlowConfig);
+
+        // Now the flows have been compared, remove any credentials from newFlowConfig
+        // so they don't cause false-positive diffs the next time a flow is deployed
+        for (var id in newFlowConfig.allNodes) {
+            if (newFlowConfig.allNodes.hasOwnProperty(id)) {
+                delete newFlowConfig.allNodes[id].credentials;
+            }
+        }
+
         credentials.clean(config);
         var credsDirty = credentials.dirty();
         configSavePromise = credentials.export().then(function(creds) {
