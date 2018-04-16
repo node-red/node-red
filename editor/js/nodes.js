@@ -1012,6 +1012,13 @@ RED.nodes = (function() {
                                     set: registry.getNodeSet("node-red/unknown")
                                 };
                                 node.users = [];
+                                // This is a config node, so delete the default
+                                // non-config node properties
+                                delete node.x;
+                                delete node.y;
+                                delete node.wires;
+                                delete node.inputLabels;
+                                delete node.outputLabels;
                             }
                             var orig = {};
                             for (var p in n) {
@@ -1047,7 +1054,9 @@ RED.nodes = (function() {
                     addNode(node);
                     RED.editor.validateNode(node);
                     node_map[n.id] = node;
-                    if (node._def.category != "config") {
+                    // If an 'unknown' config node, it will not have been caught by the
+                    // proper config node handling, so needs adding to new_nodes here
+                    if (node.type === "unknown" || node._def.category !== "config") {
                         new_nodes.push(node);
                     }
                 }
