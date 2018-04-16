@@ -88,7 +88,7 @@
         category: 'function',
         defaults: {
             name: {value:""},
-            field: {value:"payload", validate: RED.validators.typedInput("fieldType")},
+            field: {value:"payload", validate:RED.validators.typedInput("fieldType")},
             fieldType: {value:"msg"},
             format: {value:"handlebars"},
             syntax: {value:"mustache"},
@@ -106,6 +106,10 @@
         },
         oneditprepare: function() {
             var that = this;
+            if (!this.field) {
+                this.field = 'payload';
+                $("#node-input-field").val("payload");
+            }
             if (!this.fieldType) {
                 this.fieldType = 'msg';
             }
