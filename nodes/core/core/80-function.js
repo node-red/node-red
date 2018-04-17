@@ -204,7 +204,12 @@ module.exports = function(RED) {
         }
         var context = vm.createContext(sandbox);
         try {
-            this.script = vm.createScript(functionText);
+            this.script = vm.createScript(functionText, {
+                filename: this.name + '_' + this.id, // filename for stack traces
+                lineOffset: -11, // line number offset to be used for stack traces
+                columnOffset: 0, // column number offset to be used for stack traces
+                displayErrors: true
+            });
             this.on("input", function(msg) {
                 try {
                     var start = process.hrtime();
@@ -219,7 +224,7 @@ module.exports = function(RED) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
-
+                    msg.error = err;
                     var line = 0;
                     var errorMessage;
                     var stack = err.stack.split(/\r?\n/);
