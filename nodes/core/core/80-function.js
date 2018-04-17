@@ -224,7 +224,15 @@ module.exports = function(RED) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
+                    //remove unwanted part 
+                    const index = err.stack.search(/\n\s*at ContextifyScript.Script.runInContext/);
+                    err.stack = err.stack.slice(0, index).split('\n').slice(0,-1).join('\n');
+                    console.log(index, err.stack);
+                    const stack = err.stack.split(/\r?\n/);
+
+                    //store the error in msg to be used in flows
                     msg.error = err;
+                    
                     var line = 0;
                     var errorMessage;
                     var stack = err.stack.split(/\r?\n/);
