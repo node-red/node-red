@@ -403,12 +403,19 @@ RED.debug = (function() {
             $(msg).addClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseEnter(o._source.id);
+                if (o._source._alias) {
+                    config.messageMouseEnter(o._source._alias);
+                }
             }
+
         };
         msg.onmouseleave = function() {
             $(msg).removeClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseLeave(o._source.id);
+                if (o._source._alias) {
+                    config.messageMouseLeave(o._source._alias);
+                }
             }
         };
         var name = sanitize(((o.name?o.name:o.id)||"").toString());
