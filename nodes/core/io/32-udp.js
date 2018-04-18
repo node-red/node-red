@@ -16,6 +16,7 @@
 
 module.exports = function(RED) {
     "use strict";
+    var os = require('os');
     var dgram = require('dgram');
     var udpInputPortsInUse = {};
 
@@ -30,6 +31,21 @@ module.exports = function(RED) {
         this.ipv = n.ipv || "udp4";
         var node = this;
 
+        if (node.iface && node.iface.indexOf(".") === -1) {
+            try { // using ip4 in preference if specifying interface only.
+                if ((os.networkInterfaces())[node.iface][0].hasOwnProperty("scopeid")) {
+                    node.iface = (os.networkInterfaces())[node.iface][1].address;
+                }
+                else {
+                    node.iface = (os.networkInterfaces())[node.iface][0].address;
+                }
+            }
+            catch(e) {
+                node.warn(RED._("udp.errors.ifnotfound",{iface:node.iface}));
+                node.iface = null;
+            }
+        }
+
         var opts = {type:node.ipv, reuseAddr:true};
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
         var server;
@@ -39,7 +55,7 @@ module.exports = function(RED) {
             udpInputPortsInUse[this.port] = server;
         }
         else {
-            node.warn(RED._("udp.errors.alreadyused",node.port));
+            node.warn(RED._("udp.errors.alreadyused",{port:node.port}));
             server = udpInputPortsInUse[this.port];  // re-use existing
         }
 
@@ -120,6 +136,21 @@ module.exports = function(RED) {
         this.multicast = n.multicast;
         this.ipv = n.ipv || "udp4";
         var node = this;
+
+        if (node.iface && node.iface.indexOf(".") === -1) {
+            try { // using ip4 in preference if specifying interface only.
+                if ((os.networkInterfaces())[node.iface][0].hasOwnProperty("scopeid")) {
+                    node.iface = (os.networkInterfaces())[node.iface][1].address;
+                }
+                else {
+                    node.iface = (os.networkInterfaces())[node.iface][0].address;
+                }
+            }
+            catch(e) {
+                node.warn(RED._("udp.errors.ifnotfound",{iface:node.iface}));
+                node.iface = null;
+            }
+        }
 
         var opts = {type:node.ipv, reuseAddr:true};
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
