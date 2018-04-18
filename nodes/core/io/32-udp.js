@@ -195,7 +195,7 @@ module.exports = function(RED) {
                         try {
                             sock.setMulticastTTL(128);
                             sock.addMembership(node.addr,node.iface);   // Add to the multicast group
-                            node.log(RED._("udp.status.mc-ready",{outport:node.outport,host:node.addr,port:node.port}));
+                            node.log(RED._("udp.status.mc-ready",{iface:node.iface,outport:node.outport,host:node.addr,port:node.port}));
                         } catch (e) {
                             if (e.errno == "EINVAL") {
                                 node.error(RED._("udp.errors.bad-mcaddress"));
