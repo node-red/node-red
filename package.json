@@ -110,5 +110,18 @@
     },
     "engines": {
         "node": ">=4"
-    }
+    },
+    "files": [
+        "red.js",
+        "settings.js",
+        "red/",
+        "nodes/",
+        "lib/",
+        "editor/",
+        "bin/",
+        "public/",
+        "CHANGELOG.md",
+        "CODE_OF_CONDUCT.md",
+        "CONTRIBUTING.md"
+    ]
 }
