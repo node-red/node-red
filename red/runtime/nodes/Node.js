@@ -222,11 +222,15 @@ function log_helper(self, level, msg) {
     var o = {
         level: level,
         id: self.id,
-        z: self.z,
         type: self.type,
-        _alias: self._alias,
         msg: msg
     };
+    if (self._alias) {
+        o._alias = self._alias;
+    }
+    if (self.z) {
+        o.z = self.z;
+    }
     if (self.name) {
         o.name = self.name;
     }

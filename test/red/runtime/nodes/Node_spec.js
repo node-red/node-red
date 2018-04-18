@@ -398,7 +398,7 @@ describe('Node', function() {
             });
             n.log("a log message");
             should.deepEqual({level:Log.INFO, id:n.id,
-                               type:n.type, msg:"a log message",_alias:undefined, z:'789'}, loginfo);
+                               type:n.type, msg:"a log message",z:'789'}, loginfo);
             Log.log.restore();
             done();
         });
@@ -410,7 +410,7 @@ describe('Node', function() {
             });
             n.log("a log message");
             should.deepEqual({level:Log.INFO, id:n.id, name: "barney",
-                              type:n.type, msg:"a log message",_alias:undefined, z:'789'}, loginfo);
+                              type:n.type, msg:"a log message",z:'789'}, loginfo);
             Log.log.restore();
             done();
         });
@@ -425,7 +425,7 @@ describe('Node', function() {
             });
             n.warn("a warning");
             should.deepEqual({level:Log.WARN, id:n.id,
-                              type:n.type, msg:"a warning",_alias:undefined, z:'789'}, loginfo);
+                              type:n.type, msg:"a warning",z:'789'}, loginfo);
             Log.log.restore();
             done();
         });
@@ -444,7 +444,7 @@ describe('Node', function() {
             var message = {a:1};
 
             n.error(null,message);
-            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:"",_alias:undefined, z:'789'}, loginfo);
+            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:"",z:'789'}, loginfo);
 
             flows.handleError.called.should.be.true();
             flows.handleError.args[0][0].should.eql(n);
@@ -468,7 +468,7 @@ describe('Node', function() {
             var message = {a:2};
 
             n.error("This is an error",message);
-            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:"This is an error",_alias:undefined, z:'789'}, loginfo);
+            should.deepEqual({level:Log.ERROR, id:n.id, type:n.type, msg:"This is an error",z:'789'}, loginfo);
 
             flows.handleError.called.should.be.true();
             flows.handleError.args[0][0].should.eql(n);
