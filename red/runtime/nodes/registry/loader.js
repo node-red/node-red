@@ -80,7 +80,11 @@ function createNodeApi(node) {
     copyObjectProperties(runtime.settings,red.settings,null,["init","load","reset"]);
     if (runtime.adminApi) {
         red.comms = runtime.adminApi.comms;
-        red.library = runtime.adminApi.library;
+        red.library = {
+            register: function(type) {
+                return runtime.library.registerType(node.id,type);
+            }
+        };
         red.auth = runtime.adminApi.auth;
         red.httpAdmin = runtime.adminApi.adminApp;
         red.httpNode = runtime.nodeApp;
@@ -377,7 +381,7 @@ function addModule(module) {
 
 function loadNodeHelp(node,lang) {
     var base = path.basename(node.template);
-    var localePath = undefined;
+    var localePath;
     if (node.module === 'node-red') {
         var cat_dir = path.dirname(node.template);
         var cat = path.basename(cat_dir);

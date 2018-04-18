@@ -86,10 +86,12 @@ module.exports = {
 
             // Library
             var library = require("./library");
-            library.init(editorApp,runtime);
-            editorApp.post(new RegExp("/library/flows\/(.*)"),needsPermission("library.write"),library.post,apiUtil.errorHandler);
+            library.init(editorApp,runtimeAPI);
+
             editorApp.get("/library/flows",needsPermission("library.read"),library.getAll,apiUtil.errorHandler);
-            editorApp.get(new RegExp("/library/flows\/(.*)"),needsPermission("library.read"),library.get,apiUtil.errorHandler);
+            editorApp.get(/library\/([^\/]+)(?:$|\/(.*))/,needsPermission("library.read"),library.getEntry);
+            editorApp.post(/library\/([^\/]+)\/(.*)/,needsPermission("library.write"),library.saveEntry);
+
 
             // Credentials
             var credentials = require("./credentials");

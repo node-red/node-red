@@ -30,6 +30,7 @@ var api = module.exports = {
         api.flows.init(runtime);
         api.nodes.init(runtime);
         api.settings.init(runtime);
+        api.library.init(runtime);
     },
 
     /**

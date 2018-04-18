@@ -13,149 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+
+var apiUtils = require("../util");
 var fs = require('fs');
 var fspath = require('path');
 var when = require('when');
 
-var redApp = null;
-var storage;
-var log;
-var redNodes;
-var needsPermission = require("../auth").needsPermission;
-
-function createLibrary(type) {
-    if (redApp) {
-        redApp.get(new RegExp("/library/"+type+"($|\/(.*))"),needsPermission("library.read"),function(req,res) {
-            var path = req.params[1]||"";
-            storage.getLibraryEntry(type,path).then(function(result) {
-                log.audit({event: "library.get",type:type},req);
-                if (typeof result === "string") {
-                    res.writeHead(200, {'Content-Type': 'text/plain'});
-                    res.write(result);
-                    res.end();
-                } else {
-                    res.json(result);
-                }
-            }).catch(function(err) {
-                if (err) {
-                    log.warn(log._("api.library.error-load-entry",{path:path,message:err.toString()}));
-                    if (err.code === 'forbidden') {
-                        log.audit({event: "library.get",type:type,error:"forbidden"},req);
-                        res.status(403).end();
-                        return;
-                    }
-                }
-                log.audit({event: "library.get",type:type,error:"not_found"},req);
-                res.status(404).end();
-            });
-        });
-
-        redApp.post(new RegExp("/library/"+type+"\/(.*)"),needsPermission("library.write"),function(req,res) {
-            var path = req.params[0];
-            var meta = req.body;
-            var text = meta.text;
-            delete meta.text;
-
-            storage.saveLibraryEntry(type,path,meta,text).then(function() {
-                log.audit({event: "library.set",type:type},req);
-                res.status(204).end();
-            }).catch(function(err) {
-                log.warn(log._("api.library.error-save-entry",{path:path,message:err.toString()}));
-                    if (err.code === 'forbidden') {
-                    log.audit({event: "library.set",type:type,error:"forbidden"},req);
-                    res.status(403).end();
-                    return;
-                }
-                log.audit({event: "library.set",type:type,error:"unexpected_error",message:err.toString()},req);
-                res.status(500).json({error:"unexpected_error", message:err.toString()});
-            });
-        });
-    }
-}
+var runtimeAPI;
 
 module.exports = {
-    init: function(app,runtime) {
-        redApp = app;
-        log = runtime.log;
-        storage = runtime.storage;
-        redNodes = runtime.nodes;
+    init: function(app,_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
     },
-    register: createLibrary,
 
     getAll: function(req,res) {
-        storage.getAllFlows().then(function(flows) {
-            log.audit({event: "library.get.all",type:"flow"},req);
-            var examples = redNodes.getNodeExampleFlows();
-            if (examples) {
-                flows.d = flows.d||{};
-                flows.d._examples_ = redNodes.getNodeExampleFlows();
-            }
-            res.json(flows);
+        var opts = {
+            user: req.user,
+            type: 'flows'
+        }
+        runtimeAPI.library.getEntries(opts).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
         });
     },
-    get: function(req,res) {
-        if (req.params[0].indexOf("_examples_/") === 0) {
-            var m = /^_examples_\/(@.*?\/[^\/]+|[^\/]+)\/(.*)$/.exec(req.params[0]);
-            if (m) {
-                var module = m[1];
-                var path = m[2];
-                var fullPath = redNodes.getNodeExampleFlowPath(module,path);
-                if (fullPath) {
-                    try {
-                        fs.statSync(fullPath);
-                        log.audit({event: "library.get",type:"flow",path:req.params[0]},req);
-                        return res.sendFile(fullPath,{
-                            headers:{
-                                'Content-Type': 'application/json'
-                            }
-                        })
-                    } catch(err) {
-                        console.log(err);
-                    }
-                }
-            }
-            // IF we get here, we didn't find the file
-            log.audit({event: "library.get",type:"flow",path:req.params[0],error:"not_found"},req);
-            return res.status(404).end();
-        } else {
-            storage.getFlow(req.params[0]).then(function(data) {
-                // data is already a JSON string
-                log.audit({event: "library.get",type:"flow",path:req.params[0]},req);
-                res.set('Content-Type', 'application/json');
-                res.send(data);
-            }).catch(function(err) {
-                if (err) {
-                    log.warn(log._("api.library.error-load-flow",{path:req.params[0],message:err.toString()}));
-                    if (err.code === 'forbidden') {
-                        log.audit({event: "library.get",type:"flow",path:req.params[0],error:"forbidden"},req);
-                        res.status(403).end();
-                        return;
-                    }
-                }
-                log.audit({event: "library.get",type:"flow",path:req.params[0],error:"not_found"},req);
-                res.status(404).end();
-            });
+    getEntry: function(req,res) {
+        var opts = {
+            user: req.user,
+            type: req.params[0],
+            path: req.params[1]||""
         }
+        runtimeAPI.library.getEntry(opts).then(function(result) {
+            if (typeof result === "string") {
+                if (opts.type === 'flows') {
+                    res.writeHead(200, {'Content-Type': 'application/json'});
+                } else {
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                }
+                res.write(result);
+                res.end();
+            } else {
+                res.json(result);
+            }
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        });
     },
-    post: function(req,res) {
-        // if (req.params[0].indexOf("_examples_/") === 0) {
-        //     log.warn(log._("api.library.error-save-flow",{path:req.params[0],message:"forbidden"}));
-        //     log.audit({event: "library.set",type:"flow",path:req.params[0],error:"forbidden"},req);
-        //     return res.status(403).send({error:"unexpected_error", message:"forbidden"});
-        // }
-        var flow = JSON.stringify(req.body);
-        storage.saveFlow(req.params[0],flow).then(function() {
-            log.audit({event: "library.set",type:"flow",path:req.params[0]},req);
+    saveEntry: function(req,res) {
+        var opts = {
+            user: req.user,
+            type: req.params[0],
+            path: req.params[1]||""
+        }
+        // TODO: horrible inconsistencies between flows and all other types
+        if (opts.type === "flows") {
+            opts.meta = {};
+            opts.body = JSON.stringify(req.body);
+        } else {
+            opts.meta = req.body;
+            opts.body = opts.meta.text;
+            delete opts.meta.text;
+        }
+        runtimeAPI.library.saveEntry(opts).then(function(result) {
             res.status(204).end();
         }).catch(function(err) {
-            log.warn(log._("api.library.error-save-flow",{path:req.params[0],message:err.toString()}));
-            if (err.code === 'forbidden') {
-                log.audit({event: "library.set",type:"flow",path:req.params[0],error:"forbidden"},req);
-                res.status(403).end();
-                return;
-            }
-            log.audit({event: "library.set",type:"flow",path:req.params[0],error:"unexpected_error",message:err.toString()},req);
-            res.status(500).send({error:"unexpected_error", message:err.toString()});
+            apiUtils.rejectHandler(req,res,err);
         });
     }
 }

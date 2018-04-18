@@ -18,6 +18,7 @@ var when = require('when');
 
 var redNodes = require("./nodes");
 var storage = require("./storage");
+var library = require("./library");
 var log = require("./log");
 var i18n = require("./i18n");
 var events = require("./events");
@@ -65,6 +66,7 @@ function init(userSettings,_adminApi) {
         adminApi = _adminApi;
     }
     redNodes.init(runtime);
+    library.init(runtime);
 }
 
 var version;
@@ -245,6 +247,7 @@ var runtime = module.exports = {
     storage: storage,
     events: events,
     nodes: redNodes,
+    library: library,
     util: require("./util"),
     get adminApi() { return adminApi },
     get nodeApp() { return nodeApp },

@@ -14,26 +14,11 @@
  * limitations under the License.
  **/
 "use strict"
- /**
-  * @namespace RED.nodes
-  */
+/**
+ * @namespace RED.nodes
+ */
 
 var runtime;
-
-function putNode(node, enabled) {
-    var promise;
-    if (!node.err && node.enabled === enabled) {
-        promise = Promise.resolve(node);
-    } else {
-        if (enabled) {
-            promise = runtime.nodes.enableNode(node.id);
-        } else {
-            promise = runtime.nodes.disableNode(node.id);
-        }
-    }
-    return promise;
-}
-
 
 var api = module.exports = {
     init: function(_runtime) {

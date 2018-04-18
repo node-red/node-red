@@ -223,7 +223,7 @@ var api = module.exports = {
     */
     getNodeCredentials: function(opts) {
         return new Promise(function(resolve,reject) {
-            log.audit({event: "credentials.get",type:opts.type,id:opts.id});
+            runtime.log.audit({event: "credentials.get",type:opts.type,id:opts.id});
             var credentials = runtime.nodes.getCredentials(opts.id);
             if (!credentials) {
                 return resolve({});
