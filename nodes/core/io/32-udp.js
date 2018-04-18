@@ -32,12 +32,20 @@ module.exports = function(RED) {
         var node = this;
 
         if (node.iface && node.iface.indexOf(".") === -1) {
-            try { // using ip4 in preference if specifying interface only.
+            try {
                 if ((os.networkInterfaces())[node.iface][0].hasOwnProperty("scopeid")) {
-                    node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    if (node.ipv === "udp4") {
+                        node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    } else {
+                        node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    }
                 }
                 else {
-                    node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    if (node.ipv === "udp4") {
+                        node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    } else {
+                        node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    }
                 }
             }
             catch(e) {
@@ -138,12 +146,20 @@ module.exports = function(RED) {
         var node = this;
 
         if (node.iface && node.iface.indexOf(".") === -1) {
-            try { // using ip4 in preference if specifying interface only.
+            try {
                 if ((os.networkInterfaces())[node.iface][0].hasOwnProperty("scopeid")) {
-                    node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    if (node.ipv === "udp4") {
+                        node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    } else {
+                        node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    }
                 }
                 else {
-                    node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    if (node.ipv === "udp4") {
+                        node.iface = (os.networkInterfaces())[node.iface][0].address;
+                    } else {
+                        node.iface = (os.networkInterfaces())[node.iface][1].address;
+                    }
                 }
             }
             catch(e) {

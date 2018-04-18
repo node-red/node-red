@@ -489,15 +489,15 @@
             "using": "using",
             "output": "Output",
             "group": "Group",
-            "interface": "Local IP",
-            "interfaceprompt": "(optional) local ip address to bind to",
+            "interface": "Local IF",
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
             "decode-base64": "Decode Base64 encoded payload?"
         },
         "placeholder": {
-            "interface": "(optional) ip address of eth0",
+            "interface": "(optional) local interface or address to bind to",
+            "interfaceprompt": "(optional) local interface or address to bind to",
             "address": "destination ip"
         },
         "udpmsgs": "udp messages",
