@@ -13,12 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-"use strict"
+
 /**
  * @namespace RED.nodes
  */
 
 var runtime;
+
+function putNode(node, enabled) {
+    var info;
+    var promise;
+    if (!node.err && node.enabled === enabled) {
+        promise = Promise.resolve(node);
+    } else {
+        if (enabled) {
+            promise = runtime.nodes.enableNode(node.id);
+        } else {
+            promise = runtime.nodes.disableNode(node.id);
+        }
+    }
+    return promise;
+}
 
 var api = module.exports = {
     init: function(_runtime) {
@@ -37,7 +52,7 @@ var api = module.exports = {
     getNodeInfo: function(opts) {
         return new Promise(function(resolve,reject) {
             var id = opts.id;
-            var result = redNodes.getNodeInfo(id);
+            var result = runtime.nodes.getNodeInfo(id);
             if (result) {
                 runtime.log.audit({event: "nodes.info.get",id:id});
                 delete result.loaded;
@@ -117,13 +132,12 @@ var api = module.exports = {
     */
     getModuleInfo: function(opts) {
         return new Promise(function(resolve,reject) {
-            var module = opts.module;
-            var result = redNodes.getModuleInfo(module);
+            var result = runtime.nodes.getModuleInfo(opts.module);
             if (result) {
-                runtime.log.audit({event: "nodes.module.get",id:id});
+                runtime.log.audit({event: "nodes.module.get",id:opts.module});
                 return resolve(result);
             } else {
-                runtime.log.audit({event: "nodes.module.get",id:id,error:"not_found"});
+                runtime.log.audit({event: "nodes.module.get",id:opts.module,error:"not_found"});
                 var err = new Error();
                 err.code = "not_found";
                 err.status = 404;
@@ -145,7 +159,7 @@ var api = module.exports = {
         return new Promise(function(resolve,reject) {
             if (!runtime.settings.available()) {
                 runtime.log.audit({event: "nodes.install",error:"settings_unavailable"});
-                let err = new Error("Settings unavailable");
+                var err = new Error("Settings unavailable");
                 err.code = "settings_unavailable";
                 err.status = 400;
                 return reject(err);
@@ -155,14 +169,14 @@ var api = module.exports = {
                 if (existingModule) {
                     if (!opts.version || existingModule.version === opts.version) {
                         runtime.log.audit({event: "nodes.install",module:opts.module, version:opts.version, error:"module_already_loaded"});
-                        let err = new Error("Module already loaded");
+                        var err = new Error("Module already loaded");
                         err.code = "module_already_loaded";
                         err.status = 400;
                         return reject(err);
                     }
-                    if (!module.local) {
+                    if (!existingModule.local) {
                         runtime.log.audit({event: "nodes.install",module:opts.module, version:opts.version, error:"module_not_local"});
-                        let err = new Error("Module not locally installed");
+                        var err = new Error("Module not locally installed");
                         err.code = "module_not_local";
                         err.status = 400;
                         return reject(err);
@@ -187,7 +201,7 @@ var api = module.exports = {
                 })
             } else {
                 runtime.log.audit({event: "nodes.install",module:opts.module,error:"invalid_request"});
-                let err = new Error("Invalid request");
+                var err = new Error("Invalid request");
                 err.code = "invalid_request";
                 err.status = 400;
                 return reject(err);
@@ -207,7 +221,7 @@ var api = module.exports = {
         return new Promise(function(resolve,reject) {
             if (!runtime.settings.available()) {
                 runtime.log.audit({event: "nodes.install",error:"settings_unavailable"});
-                let err = new Error("Settings unavailable");
+                var err = new Error("Settings unavailable");
                 err.code = "settings_unavailable";
                 err.status = 400;
                 return reject(err);
@@ -229,10 +243,10 @@ var api = module.exports = {
                     runtime.log.audit({event: "nodes.remove",module:opts.module,error:err.code||"unexpected_error",message:err.toString()});
                     return reject(err);
                 })
-            } catch(err) {
-                runtime.log.audit({event: "nodes.remove",module:opts.module,error:err.code||"unexpected_error",message:err.toString()});
-                err.status = 400;
-                return reject(err);
+            } catch(error) {
+                runtime.log.audit({event: "nodes.remove",module:opts.module,error:error.code||"unexpected_error",message:error.toString()});
+                error.status = 400;
+                return reject(error);
             }
         });
     },
@@ -247,16 +261,16 @@ var api = module.exports = {
     * @memberof RED.nodes
     */
     setModuleState: function(opts) {
+        var mod = opts.module;
         return new Promise(function(resolve,reject) {
             if (!runtime.settings.available()) {
                 runtime.log.audit({event: "nodes.module.set",error:"settings_unavailable"});
-                let err = new Error("Settings unavailable");
+                var err = new Error("Settings unavailable");
                 err.code = "settings_unavailable";
                 err.status = 400;
                 return reject(err);
             }
             try {
-                var mod = opts.module;
                 var module = runtime.nodes.getModuleInfo(mod);
                 if (!module) {
                     runtime.log.audit({event: "nodes.module.set",module:mod,error:"not_found"});
@@ -277,10 +291,10 @@ var api = module.exports = {
                     err.status = 400;
                     return reject(err);
                 });
-            } catch(err) {
-                runtime.log.audit({event: "nodes.module.set",module:mod,enabled:opts.enabled,error:err.code||"unexpected_error",message:err.toString()});
-                err.status = 400;
-                return reject(err);
+            } catch(error) {
+                runtime.log.audit({event: "nodes.module.set",module:mod,enabled:opts.enabled,error:error.code||"unexpected_error",message:error.toString()});
+                error.status = 400;
+                return reject(error);
             }
         });
     },
@@ -298,7 +312,7 @@ var api = module.exports = {
         return new Promise(function(resolve,reject) {
             if (!runtime.settings.available()) {
                 runtime.log.audit({event: "nodes.info.set",error:"settings_unavailable"});
-                let err = new Error("Settings unavailable");
+                var err = new Error("Settings unavailable");
                 err.code = "settings_unavailable";
                 err.status = 400;
                 return reject(err);
@@ -325,9 +339,10 @@ var api = module.exports = {
                         return reject(err);
                     });
                 }
-            } catch(err) {
-                runtime.log.audit({event: "nodes.info.set",id:id,enabled:enabled,error:err.code||"unexpected_error",message:err.toString()});
-                res.status(400).json({error:err.code||"unexpected_error", message:err.toString()});
+            } catch(error) {
+                runtime.log.audit({event: "nodes.info.set",id:id,enabled:enabled,error:error.code||"unexpected_error",message:error.toString()});
+                error.status = 400;
+                return reject(error);
             }
         });
     },

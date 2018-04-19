@@ -431,7 +431,6 @@ RED.palette = (function() {
             }
         });
         RED.events.on('registry:node-set-disabled', function(nodeSet) {
-            console.log(nodeSet);
             for (var j=0;j<nodeSet.types.length;j++) {
                 hideNodeType(nodeSet.types[j]);
                 var def = RED.nodes.getType(nodeSet.types[j]);

@@ -88,8 +88,8 @@ var api = module.exports = {
             apiPromise.then(function(flowId) {
                 return resolve({rev:flowId});
             }).catch(function(err) {
-                log.warn(log._("api.flows.error-"+(deploymentType === 'reload'?'reload':'save'),{message:err.message}));
-                log.warn(err.stack);
+                runtime.log.warn(runtime.log._("api.flows.error-"+(deploymentType === 'reload'?'reload':'save'),{message:err.message}));
+                runtime.log.warn(err.stack);
                 return reject(err);
             });
         });
