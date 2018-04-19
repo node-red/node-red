@@ -80,6 +80,11 @@
     <p>It is possible to use a property from the flow context or global context. Just use <code>{{flow.name}}</code> or <code>{{global.name}}</code>.
     <p><b>Note: </b>By default, <i>mustache</i> will escape any HTML entities in the values it substitutes.
        To prevent this, use <code>{{{triple}}}</code> braces.
+    <h4>Migrating Template Libraries</h4>
+    <p>Before Node-RED 0.18.4, library template files were saved in the <i>functions</i> library located in the
+    Node-RED user directory (typically <code>.node-red</code> in the user's home directory).  To access these saved templates, 
+    after upgrading, make a copy of the template files and directories in <code>.node-red/functions</code> to
+    <code>.node-red/templates</code>.</p>
 </script>
 
 <script type="text/javascript">
@@ -128,12 +133,14 @@
                 mode: 'ace/mode/html',
                 value: $("#node-input-template").val()
             });
+
             RED.library.create({
-                url:"functions", // where to get the data from
-                type:"function", // the type of object the library is for
+                url:"templates", // where to get the data from
+                type:"template", // the type of object the library is for
                 editor:that.editor, // the field name the main text body goes to
-                fields:['name','outputs']
+                fields:['name']   // fields to save in the library entry
             });
+
             this.editor.focus();
 
             $("#node-input-format").change(function() {
