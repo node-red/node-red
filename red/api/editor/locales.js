@@ -16,13 +16,14 @@
 var fs = require('fs');
 var path = require('path');
 //var apiUtil = require('../util');
-var i18n;
-var redNodes;
+
+var i18n = require("../../util").i18n; // TODO: separate module
+
+var runtimeAPI;
 
 module.exports = {
-    init: function(runtime) {
-        i18n = runtime.i18n;
-        redNodes = runtime.nodes;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
     },
     get: function(req,res) {
         var namespace = req.params[0];
@@ -40,13 +41,17 @@ module.exports = {
     },
     getAllNodes: function(req,res) {
         var lngs = req.query.lng;
-        var nodeList = redNodes.getNodeList();
-        var result = {};
-        nodeList.forEach(function(n) {
-            if (n.module !== "node-red") {
-                result[n.id] = i18n.catalog(n.id,lngs)||{};
-            }
-        });
-        res.json(result);
+        var opts = {
+            user: req.user
+        }
+        runtimeAPI.nodes.getNodeList(opts).then(function(nodeList) {
+            var result = {};
+            nodeList.forEach(function(n) {
+                if (n.module !== "node-red") {
+                    result[n.id] = i18n.catalog(n.id,lngs)||{};
+                }
+            });
+            res.json(result);
+        })
     }
 }
