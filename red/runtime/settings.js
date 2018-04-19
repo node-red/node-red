@@ -17,7 +17,7 @@
 var when = require("when");
 var clone = require("clone");
 var assert = require("assert");
-var log = require("./log");
+var log = require("../util").log; // TODO: separate module
 var util = require("./util");
 
 // localSettings are those provided in the runtime settings.js file

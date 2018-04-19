@@ -25,7 +25,7 @@ var permissions = require("./permissions");
 var theme = require("../editor/theme");
 
 var settings = null;
-var log = null
+var log = require("../../util").log; // TODO: separate module
 
 
 passport.use(strategies.bearerStrategy.BearerStrategy);
@@ -36,13 +36,11 @@ var server = oauth2orize.createServer();
 
 server.exchange(oauth2orize.exchange.password(strategies.passwordTokenExchange));
 
-function init(runtime) {
-    settings = runtime.settings;
-    log = runtime.log;
+function init(_settings,storage) {
+    settings = _settings;
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
-        Tokens.init(settings.adminAuth,runtime.storage);
-        strategies.init(runtime);
+        Tokens.init(settings.adminAuth,storage);
     }
 }
 

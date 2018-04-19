@@ -31,9 +31,8 @@ var editor;
 function init(_server,settings,runtime,runtimeAPI) {
     server = _server;
     if (settings.httpAdminRoot !== false) {
-        apiUtil.init(runtime);
         adminApp = express();
-        auth.init(runtime);
+        auth.init(settings,runtime.storage);
 
         var maxApiRequestSize = settings.apiMaxLength || '5mb';
         adminApp.use(bodyParser.json({limit:maxApiRequestSize}));

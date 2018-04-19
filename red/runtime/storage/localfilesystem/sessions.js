@@ -18,7 +18,8 @@ var when = require('when');
 var fs = require('fs-extra');
 var fspath = require("path");
 
-var log = require("../../log");
+var log = require("../../../util").log; // TODO: separate module
+
 var util = require("./util");
 
 var sessionsFile;

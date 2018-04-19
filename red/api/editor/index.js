@@ -26,7 +26,9 @@ var nodes = require("../admin/nodes"); // TODO: move /icons into here
 var needsPermission;
 var runtime;
 var runtimeAPI;
-var log;
+var log = require("../../util").log; // TODO: separate module
+var i18n = require("../../util").i18n; // TODO: separate module
+
 var apiUtil = require("../util");
 
 var ensureRuntimeStarted = function(req,res,next) {
@@ -42,15 +44,16 @@ module.exports = {
     init: function(server, settings, _runtime, _runtimeAPI) {
         runtime = _runtime;
         runtimeAPI = _runtimeAPI;
-        log = runtime.log;
         needsPermission = auth.needsPermission;
         if (!settings.disableEditor) {
             info.init(runtimeAPI);
             comms.init(server,runtime);
 
             var ui = require("./ui");
-            // ui is passed runtime so it get access runtime.nodes.getNodeIconPath
+
+            // TODO: ui is passed runtime so it get access runtime.nodes.getNodeIconPath
             ui.init(runtime);
+
             var editorApp = express();
             if (settings.requireHttps === true) {
                 editorApp.enable('trust proxy');
@@ -112,7 +115,7 @@ module.exports = {
     },
     start: function() {
         var catalogPath = path.resolve(path.join(__dirname,"locales"));
-        return runtime.i18n.registerMessageCatalogs([
+        return i18n.registerMessageCatalogs([
             {namespace: "editor",   dir: catalogPath, file:"editor.json"},
             {namespace: "jsonata",  dir: catalogPath, file:"jsonata.json"},
             {namespace: "infotips", dir: catalogPath, file:"infotips.json"}

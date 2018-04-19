@@ -19,6 +19,7 @@ var path = require('path');
 
 var runtime = require("./runtime");
 var runtimeAPI = require("./runtime-api");
+var redUtil = require("./util");
 
 var api = require("./api");
 
@@ -66,18 +67,18 @@ module.exports = {
         if (!userSettings.coreNodesDir) {
             userSettings.coreNodesDir = path.resolve(path.join(__dirname,"..","nodes"));
         }
-
+        redUtil.init(userSettings);
         if (userSettings.httpAdminRoot !== false) {
-            runtime.init(userSettings,api);
+            runtime.init(userSettings,redUtil,api);
 
-            runtimeAPI.init(runtime);
-            api.init(httpServer,userSettings,runtime,runtimeAPI);
+            runtimeAPI.init(runtime,redUtil);
+            api.init(httpServer,userSettings,runtime,runtimeAPI,redUtil);
 
             apiEnabled = true;
             server = runtime.adminApi.server;
             runtime.server = runtime.adminApi.server;
         } else {
-            runtime.init(userSettings);
+            runtime.init(userSettings,redUtil);
             apiEnabled = false;
             if (httpServer){
                 server = httpServer;
@@ -106,7 +107,7 @@ module.exports = {
         })
     },
     nodes: runtime.nodes,
-    log: runtime.log,
+    get log() { return redUtil.log },
     settings:runtime.settings,
     util: runtime.util,
     version: runtime.version,

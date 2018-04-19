@@ -23,6 +23,7 @@ var defaultLang = "en-US";
 
 var resourceMap = {};
 var resourceCache = {};
+var initPromise;
 
 function registerMessageCatalogs(catalogs) {
     var promises = catalogs.map(function(catalog) {
@@ -32,10 +33,12 @@ function registerMessageCatalogs(catalogs) {
 }
 
 function registerMessageCatalog(namespace,dir,file) {
-    return when.promise(function(resolve,reject) {
-        resourceMap[namespace] = { basedir:dir, file:file};
-        i18n.loadNamespace(namespace,function() {
-            resolve();
+    return initPromise.then(function() {
+            when.promise(function(resolve,reject) {
+            resourceMap[namespace] = { basedir:dir, file:file};
+            i18n.loadNamespace(namespace,function() {
+                resolve();
+            });
         });
     });
 }
@@ -82,18 +85,20 @@ var MessageFileLoader = {
 }
 
 function init() {
-    return when.promise(function(resolve,reject) {
-        i18n.backend(MessageFileLoader);
-        i18n.init({
-            ns: {
-                namespaces: [],
-                defaultNs: "runtime"
-            },
-            fallbackLng: [defaultLang]
-        },function() {
-            resolve();
+    if (!initPromise) {
+        initPromise = when.promise(function(resolve,reject) {
+            i18n.backend(MessageFileLoader);
+            i18n.init({
+                ns: {
+                    namespaces: [],
+                    defaultNs: "runtime"
+                },
+                fallbackLng: [defaultLang]
+            },function() {
+                resolve();
+            });
         });
-    });
+    }
 }
 
 function getCatalog(namespace,lang) {

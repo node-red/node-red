@@ -19,8 +19,6 @@ var when = require('when');
 var redNodes = require("./nodes");
 var storage = require("./storage");
 var library = require("./library");
-var log = require("./log");
-var i18n = require("./i18n");
 var events = require("./events");
 var settings = require("./settings");
 
@@ -28,6 +26,10 @@ var express = require("express");
 var path = require('path');
 var fs = require("fs");
 var os = require("os");
+
+var redUtil;
+var log;
+var i18n;
 
 var runtimeMetricInterval = null;
 
@@ -55,9 +57,12 @@ var adminApi = {
 
 var nodeApp;
 
-function init(userSettings,_adminApi) {
+function init(userSettings,_redUtil,_adminApi) {
+    redUtil = _redUtil;
+    log = redUtil.log;
+    i18n = redUtil.i18n;
+
     userSettings.version = getVersion();
-    log.init(userSettings);
     settings.init(userSettings);
 
     nodeApp = express();
@@ -86,10 +91,7 @@ function getVersion() {
 }
 
 function start() {
-    return i18n.init()
-        .then(function() {
-            return i18n.registerMessageCatalog("runtime",path.resolve(path.join(__dirname,"locales")),"runtime.json")
-        })
+    return i18n.registerMessageCatalog("runtime",path.resolve(path.join(__dirname,"locales")),"runtime.json")
         .then(function() { return storage.init(runtime)})
         .then(function() { return settings.load(storage)})
         .then(function() {
@@ -241,8 +243,8 @@ var runtime = module.exports = {
 
     version: getVersion,
 
-    log: log,
-    i18n: i18n,
+    get log() { return log },
+    get i18n() { return i18n },
     settings: settings,
     storage: storage,
     events: events,

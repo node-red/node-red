@@ -18,7 +18,7 @@ var fs = require('fs-extra');
 var when = require('when');
 var nodeFn = require('when/node/function');
 
-var log = require("../../log");
+var log = require("../../../util").log; // TODO: separate module
 
 function parseJSON(data) {
     if (data.charCodeAt(0) === 0xFEFF) {

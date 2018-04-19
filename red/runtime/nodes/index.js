@@ -25,7 +25,7 @@ var flows = require("./flows");
 var flowUtil = require("./flows/util")
 var context = require("./context");
 var Node = require("./Node");
-var log = null;
+var log = require("../../util").log; // TODO: separate module
 var library = require("./library");
 
 var events = require("../events");
@@ -94,7 +94,6 @@ function createNode(node,def) {
 
 function init(runtime) {
     settings = runtime.settings;
-    log = runtime.log;
     credentials.init(runtime);
     flows.init(runtime);
     registry.init(runtime);

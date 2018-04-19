@@ -15,14 +15,11 @@
  **/
 
 
-var i18n;
-var log;
+var log = require("../util").log; // TODO: separate module
+var i18n = require("../util").i18n; // TODO: separate module
+
 
 module.exports = {
-    init: function(_runtime) {
-        log = _runtime.log;
-        i18n = _runtime.i18n;
-    },
     errorHandler: function(err,req,res,next) {
         console.error(err.stack);
         if (err.message === "request entity too large") {

@@ -21,12 +21,11 @@
   * @type {object}
   */
 
-
 /**
  * @namespace RED
  */
 var api = module.exports = {
-    init: function(runtime) {
+    init: function(runtime, redUtil) {
         api.flows.init(runtime);
         api.nodes.init(runtime);
         api.settings.init(runtime);

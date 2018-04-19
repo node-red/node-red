@@ -17,7 +17,7 @@
 var when = require("when");
 var clone = require("clone");
 var typeRegistry = require("../registry");
-var Log = require("../../log");
+var Log = require("../../../util").log; // TODO: separate module
 var redUtil = require("../../util");
 var flowUtil = require("./util");
 

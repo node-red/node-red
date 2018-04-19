@@ -19,8 +19,8 @@ var fs = require("fs");
 var path = require("path");
 
 var events;
-var log;
-var i18n;
+var log = require("../../../util").log; // TODO: separate module
+var i18n = require("../../../util").i18n; // TODO: separate module
 
 var settings;
 var disableNodePathScan = false;
@@ -29,8 +29,6 @@ var iconFileExtensions = [".png", ".gif"];
 function init(runtime) {
     settings = runtime.settings;
     events = runtime.events;
-    log = runtime.log;
-    i18n = runtime.i18n;
 }
 
 function isIncluded(name) {

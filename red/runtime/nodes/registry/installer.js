@@ -20,7 +20,7 @@ var path = require("path");
 var fs = require("fs");
 
 var registry = require("./registry");
-var log = require("../../log");
+var log = require("../../../util").log; // TODO: separate module
 
 var events = require("../../events");
 
