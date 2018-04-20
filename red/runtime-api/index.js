@@ -21,44 +21,30 @@
   * @type {object}
   */
 
+var runtime;
 /**
  * @namespace RED
  */
 var api = module.exports = {
-    init: function(runtime, redUtil) {
+    init: function(_runtime, redUtil) {
+        runtime = _runtime;
         api.flows.init(runtime);
         api.nodes.init(runtime);
         api.settings.init(runtime);
         api.library.init(runtime);
+        api.projects.init(runtime);
     },
 
-    /**
-    * Auth module
-    */
     auth: require("./auth"),
-
-    /**
-    * Comms module
-    */
     comms: require("./comms"),
-
-    /**
-    * Flows module
-    */
     flows: require("./flows"),
-
-    /**
-    * Library module
-    */
     library: require("./library"),
-
-    /**
-    * Nodes module
-    */
     nodes: require("./nodes"),
+    settings: require("./settings"),
+    projects: require("./projects"),
 
-    /**
-    * Settings module
-    */
-    settings: require("./settings")
+
+    version: function(opts) {
+        return Promise.resolve(runtime.version());
+    }
 }

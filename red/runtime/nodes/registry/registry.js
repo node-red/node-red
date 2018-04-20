@@ -615,6 +615,9 @@ function nodeIconDir(dir) {
 }
 
 function getNodeIconPath(module,icon) {
+    if (/\.\./.test(icon)) {
+        throw new Error();
+    }
     var iconName = module+"/"+icon;
     if (iconCache[iconName]) {
         return iconCache[iconName];

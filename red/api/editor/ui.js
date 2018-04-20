@@ -17,17 +17,20 @@ var express = require('express');
 var fs = require("fs");
 var path = require("path");
 var Mustache = require("mustache");
+var mime = require("mime");
+
+var apiUtils = require("../util");
 
 var theme = require("./theme");
 
-var redNodes;
+var runtimeAPI;
 
 var templateDir = path.resolve(__dirname+"/../../../editor/templates");
 var editorTemplate;
 
 module.exports = {
-    init: function(runtime) {
-        redNodes = runtime.nodes;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
         editorTemplate = fs.readFileSync(path.join(templateDir,"index.mst"),"utf8");
         Mustache.parse(editorTemplate);
     },
@@ -46,8 +49,18 @@ module.exports = {
         var icon = req.params.icon;
         var scope = req.params.scope;
         var module = scope ? scope + '/' +  req.params.module : req.params.module;
-        var iconPath = redNodes.getNodeIconPath(module,icon);
-        res.sendFile(iconPath);
+        var opts = {
+            user: req.user,
+            module: module,
+            icon: icon
+        }
+        runtimeAPI.nodes.getIcon(opts).then(function(data) {
+            var contentType = mime.lookup(icon);
+            res.set("Content-Type", contentType);
+            res.send(data);
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
     },
     editor: function(req,res) {
         res.send(Mustache.render(editorTemplate,theme.context()));

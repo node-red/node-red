@@ -77,11 +77,8 @@ function serveFilesFromTheme(themeValue, themeApp, directory) {
 }
 
 module.exports = {
-    init: function(settings,version) {
+    init: function(settings) {
         themeContext = clone(defaultContext);
-        if (version) {
-            themeContext.version = version;
-        }
         themeSettings = null;
         theme = settings.editorTheme || {};
     },

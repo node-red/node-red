@@ -22,7 +22,7 @@ var when = require('when');
 var runtimeAPI;
 
 module.exports = {
-    init: function(app,_runtimeAPI) {
+    init: function(_runtimeAPI) {
         runtimeAPI = _runtimeAPI;
     },
 

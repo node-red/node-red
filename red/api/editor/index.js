@@ -51,8 +51,7 @@ module.exports = {
 
             var ui = require("./ui");
 
-            // TODO: ui is passed runtime so it get access runtime.nodes.getNodeIconPath
-            ui.init(runtime);
+            ui.init(runtimeAPI);
 
             var editorApp = express();
             if (settings.requireHttps === true) {
@@ -72,13 +71,13 @@ module.exports = {
             editorApp.get("/icons/:scope/:module/:icon",ui.icon);
 
             var theme = require("./theme");
-            theme.init(settings, runtime.version());
+            theme.init(settings);
             editorApp.use("/theme",theme.app());
             editorApp.use("/",ui.editorResources);
 
             //Projects
             var projects = require("./projects");
-            projects.init(runtime);
+            projects.init(runtimeAPI);
             editorApp.use("/projects",projects.app());
 
             // Locales
@@ -89,7 +88,7 @@ module.exports = {
 
             // Library
             var library = require("./library");
-            library.init(editorApp,runtimeAPI);
+            library.init(runtimeAPI);
 
             editorApp.get("/library/flows",needsPermission("library.read"),library.getAll,apiUtil.errorHandler);
             editorApp.get(/library\/([^\/]+)(?:$|\/(.*))/,needsPermission("library.read"),library.getEntry);

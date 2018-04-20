@@ -45,7 +45,7 @@ function extend(target, source) {
     return target;
 }
 
-function getUsername(userObj) {
+function getSSHKeyUsername(userObj) {
     var username = '__default';
     if ( userObj && userObj.name ) {
         username = userObj.name;
@@ -66,48 +66,48 @@ var api = module.exports = {
     getRuntimeSettings: function(opts) {
         return new Promise(function(resolve,reject) {
             try {
-            var safeSettings = {
-                httpNodeRoot: runtime.settings.httpNodeRoot||"/",
-                version: runtime.settings.version,
-                user: opts.user
-            }
+                var safeSettings = {
+                    httpNodeRoot: runtime.settings.httpNodeRoot||"/",
+                    version: runtime.settings.version,
+                    user: opts.user
+                }
 
-            if (util.isArray(runtime.settings.paletteCategories)) {
-                safeSettings.paletteCategories = runtime.settings.paletteCategories;
-            }
+                if (util.isArray(runtime.settings.paletteCategories)) {
+                    safeSettings.paletteCategories = runtime.settings.paletteCategories;
+                }
 
-            if (runtime.settings.flowFilePretty) {
-                safeSettings.flowFilePretty = runtime.settings.flowFilePretty;
-            }
+                if (runtime.settings.flowFilePretty) {
+                    safeSettings.flowFilePretty = runtime.settings.flowFilePretty;
+                }
 
-            if (!runtime.nodes.paletteEditorEnabled()) {
-                safeSettings.editorTheme = safeSettings.editorTheme || {};
-                safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
-                safeSettings.editorTheme.palette.editable = false;
-            }
-            if (runtime.storage.projects) {
-                var activeProject = runtime.storage.projects.getActiveProject();
-                if (activeProject) {
-                    safeSettings.project = activeProject;
-                } else if (runtime.storage.projects.flowFileExists()) {
-                    safeSettings.files = {
-                        flow: runtime.storage.projects.getFlowFilename(),
-                        credentials: runtime.storage.projects.getCredentialsFilename()
+                if (!runtime.nodes.paletteEditorEnabled()) {
+                    safeSettings.editorTheme = safeSettings.editorTheme || {};
+                    safeSettings.editorTheme.palette = safeSettings.editorTheme.palette || {};
+                    safeSettings.editorTheme.palette.editable = false;
+                }
+                if (runtime.storage.projects) {
+                    var activeProject = runtime.storage.projects.getActiveProject();
+                    if (activeProject) {
+                        safeSettings.project = activeProject;
+                    } else if (runtime.storage.projects.flowFileExists()) {
+                        safeSettings.files = {
+                            flow: runtime.storage.projects.getFlowFilename(),
+                            credentials: runtime.storage.projects.getCredentialsFilename()
+                        }
+                    }
+                    safeSettings.git = {
+                        globalUser: runtime.storage.projects.getGlobalGitUser()
                     }
                 }
-                safeSettings.git = {
-                    globalUser: runtime.storage.projects.getGlobalGitUser()
-                }
+
+                safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();
+
+                runtime.settings.exportNodeSettings(safeSettings);
+
+                resolve(safeSettings);
+            }catch(err) {
+                console.log(err);
             }
-
-            safeSettings.flowEncryptionType = runtime.nodes.getCredentialKeyType();
-
-            runtime.settings.exportNodeSettings(safeSettings);
-
-            resolve(safeSettings);
-        }catch(err) {
-            console.log(err);
-        }
         });
     },
 
@@ -173,7 +173,7 @@ var api = module.exports = {
     */
     getUserKeys: function(opts) {
         return new Promise(function(resolve,reject) {
-            var username = getUsername(opts.user);
+            var username = getSSHKeyUsername(opts.user);
             runtime.storage.projects.ssh.listSSHKeys(username).then(function(list) {
                 return resolve(list);
             }).catch(function(err) {
@@ -193,7 +193,7 @@ var api = module.exports = {
     */
     getUserKey: function(opts) {
         return new Promise(function(resolve,reject) {
-            var username = getUsername(opts.user);
+            var username = getSSHKeyUsername(opts.user);
             // console.log('username:', username);
             runtime.storage.projects.ssh.getSSHKey(username, opts.id).then(function(data) {
                 if (data) {
@@ -224,7 +224,7 @@ var api = module.exports = {
     */
     generateUserKey: function(opts) {
         return new Promise(function(resolve,reject) {
-            var username = getUsername(opts.user);
+            var username = getSSHKeyUsername(opts.user);
             runtime.storage.projects.ssh.generateSSHKey(username, opts).then(function(name) {
                 return resolve(name);
             }).catch(function(err) {
@@ -244,7 +244,7 @@ var api = module.exports = {
     */
     removeUserKey: function(opts) {
         return new Promise(function(resolve,reject) {
-            var username = getUsername(req.user);
+            var username = getSSHKeyUsername(req.user);
             runtime.storage.projects.ssh.deleteSSHKey(username, opts.id).then(function() {
                 return resolve();
             }).catch(function(err) {

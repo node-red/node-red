@@ -18,6 +18,8 @@
  * @namespace RED.nodes
  */
 
+var fs = require("fs");
+
 var runtime;
 
 function putNode(node, enabled) {
@@ -371,7 +373,24 @@ var api = module.exports = {
 
     },
     /**
-    * TODO: getIcon
+    * Gets a node icon
+    * @param {Object} opts
+    * @param {User} opts.user - the user calling the api
+    * @param {String} opts.module - the id of the module requesting the icon
+    * @param {String} opts.icon - the name of the icon
+    * @return {Promise<Buffer>} - the icon file as a Buffer
+    * @memberof RED.nodes
     */
-    getIcon: function() {}
+    getIcon: function(opts) {
+        return new Promise(function(resolve,reject) {
+            var iconPath = runtime.nodes.getNodeIconPath(opts.module,opts.icon);
+            fs.readFile(iconPath,function(err,data) {
+                if (err) {
+                    err.status = 400;
+                    return reject(err);
+                }
+                return resolve(data)
+            });
+        });
+    }
 }

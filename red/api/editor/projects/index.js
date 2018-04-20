@@ -15,89 +15,74 @@
  **/
 
 var express = require("express");
-var runtime;
+var apiUtils = require("../../util");
+
+var runtimeAPI;
 var needsPermission = require("../../auth").needsPermission;
 
 module.exports = {
-    init: function(_runtime) {
-        runtime = _runtime;
+    init: function(_runtimeAPI) {
+        runtimeAPI = _runtimeAPI;
     },
     app: function() {
         var app = express();
 
         app.use(function(req,res,next) {
-            if (!runtime.storage.projects) {
-                res.status(404).end();
-            } else {
-                next();
-            }
+            runtimeAPI.projects.available().then(function(available) {
+                if (!available) {
+                    res.status(404).end();
+                } else {
+                    next();
+                }
+            })
         });
 
         // Projects
 
         // List all projects
         app.get("/", needsPermission("projects.read"), function(req,res) {
-            runtime.storage.projects.listProjects(req.user, req.user).then(function(list) {
-                var active = runtime.storage.projects.getActiveProject(req.user);
-                var response = {
-                    projects: list
-                };
-                if (active) {
-                    response.active = active.name;
-                }
-                res.json(response);
+            var opts = {
+                user: req.user
+            }
+            runtimeAPI.projects.listProjects(opts).then(function(result) {
+                res.json(result);
             }).catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            })
+                apiUtils.rejectHandler(req,res,err);
+            });
         });
 
         // Create project
         app.post("/", needsPermission("projects.write"), function(req,res) {
-            runtime.storage.projects.createProject(req.user, req.body).then(function(data) {
-                res.json(data);
+            var opts = {
+                user: req.user,
+                project: req.body
+            }
+            runtimeAPI.projects.createProject(opts).then(function(result) {
+                res.json(result);
             }).catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            })
+                apiUtils.rejectHandler(req,res,err);
+            });
         });
 
         // Update a project
         app.put("/:id", needsPermission("projects.write"), function(req,res) {
-            //TODO: validate the payload properly
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                project: req.body
+            }
+
             if (req.body.active) {
-                var currentProject = runtime.storage.projects.getActiveProject(req.user);
-                if (!currentProject || req.params.id !== currentProject.name) {
-                    runtime.storage.projects.setActiveProject(req.user, req.params.id).then(function() {
-                        res.redirect(303,req.baseUrl + '/');
-                    }).catch(function(err) {
-                        if (err.code) {
-                            res.status(400).json({error:err.code, message: err.message});
-                        } else {
-                            res.status(400).json({error:"unexpected_error", message:err.toString()});
-                        }
-                    })
-                } else {
-                    res.redirect(303,req.baseUrl + '/'+ req.params.id);
-                }
+                runtimeAPI.projects.setActiveProject(opts).then(function() {
+                    res.redirect(303,req.baseUrl + '/');
+                }).catch(function(err) {
+                    apiUtils.rejectHandler(req,res,err);
+                })
             } else if (req.body.initialise) {
-                // Initialised set when creating default files for an empty repo
-                runtime.storage.projects.initialiseProject(req.user, req.params.id, req.body).then(function() {
+                runtimeAPI.projects.initialiseProject(opts).then(function() {
                     res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }).catch(function(err) {
-                    if (err.code) {
-                        res.status(400).json({error:err.code, message: err.message});
-                    } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
-                    }
+                    apiUtils.rejectHandler(req,res,err);
                 })
             } else if (req.body.hasOwnProperty('credentialSecret') ||
                        req.body.hasOwnProperty('description') ||
@@ -105,14 +90,10 @@ module.exports = {
                        req.body.hasOwnProperty('summary') ||
                        req.body.hasOwnProperty('files') ||
                         req.body.hasOwnProperty('git')) {
-                runtime.storage.projects.updateProject(req.user, req.params.id, req.body).then(function() {
+                runtimeAPI.projects.updateProject(opts).then(function() {
                     res.redirect(303,req.baseUrl + '/'+ req.params.id);
                 }).catch(function(err) {
-                    if (err.code) {
-                        res.status(400).json({error:err.code, message: err.message});
-                    } else {
-                        res.status(400).json({error:"unexpected_error", message:err.toString()});
-                    }
+                    apiUtils.rejectHandler(req,res,err);
                 })
             } else {
                 res.status(400).json({error:"unexpected_error", message:"invalid_request"});
@@ -121,437 +102,404 @@ module.exports = {
 
         // Get project metadata
         app.get("/:id", needsPermission("projects.read"), function(req,res) {
-            runtime.storage.projects.getProject(req.user, req.params.id).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.getProject(opts).then(function(data) {
                 if (data) {
                     res.json(data);
                 } else {
                     res.status(404).end();
                 }
             }).catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Delete project
         app.delete("/:id", needsPermission("projects.write"), function(req,res) {
-            runtime.storage.projects.deleteProject(req.user, req.params.id).then(function() {
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.deleteProject(opts).then(function() {
                 res.status(204).end();
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()})
-            });
         });
 
 
         // Get project status - files, commit counts, branch info
         app.get("/:id/status", needsPermission("projects.read"), function(req,res) {
-            var includeRemote = req.query.remote;
-
-            runtime.storage.projects.getStatus(req.user, req.params.id, includeRemote).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: req.query.remote
+            }
+            runtimeAPI.projects.getStatus(opts).then(function(data){
                 if (data) {
                     res.json(data);
                 } else {
                     res.status(404).end();
                 }
             }).catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
 
         // Project file listing
         app.get("/:id/files", needsPermission("projects.read"), function(req,res) {
-            runtime.storage.projects.getFiles(req.user, req.params.id).then(function(data) {
-                // console.log("TODO: REMOVE /:id/files as /:id/status is better!")
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.getFiles(opts).then(function(data) {
                 res.json(data);
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            })
+
         });
 
 
         // Get file content in a given tree (index/stage)
         app.get("/:id/files/:treeish/*", needsPermission("projects.read"), function(req,res) {
-            var projectId = req.params.id;
-            var treeish = req.params.treeish;
-            var filePath = req.params[0];
-
-            runtime.storage.projects.getFile(req.user, projectId,filePath,treeish).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0],
+                tree: req.params.treeish
+            }
+            runtimeAPI.projects.getFile(opts).then(function(data) {
                 res.json({content:data});
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Revert a file
         app.delete("/:id/files/_/*", needsPermission("projects.write"), function(req,res) {
-            var projectId = req.params.id;
-            var filePath = req.params[0];
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0]
+            }
 
-            runtime.storage.projects.revertFile(req.user, projectId,filePath).then(function() {
+            runtimeAPI.projects.revertFile(opts).then(function() {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
-
-
         // Stage a file
         app.post("/:id/stage/*", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var file = req.params[0];
-
-            runtime.storage.projects.stageFile(req.user, projectName,file).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/status");
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0]
+            }
+            runtimeAPI.projects.stageFile(opts).then(function() {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/status");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Stage multiple files
         app.post("/:id/stage", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var files = req.body.files;
-
-            runtime.storage.projects.stageFile(req.user, projectName,files).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/status");
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.body.files
+            }
+            runtimeAPI.projects.stageFile(opts).then(function() {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/status");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Commit changes
         app.post("/:id/commit", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-
-            runtime.storage.projects.commit(req.user, projectName,req.body).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/status");
-            })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                message: req.body.message
+            }
+            runtimeAPI.projects.commit(opts).then(function() {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/status");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Unstage a file
         app.delete("/:id/stage/*", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var file = req.params[0];
-
-            runtime.storage.projects.unstageFile(req.user, projectName,file).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/status");
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0]
+            }
+            runtimeAPI.projects.unstageFile(opts).then(function() {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/status");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Unstage multiple files
         app.delete("/:id/stage", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            runtime.storage.projects.unstageFile(req.user, projectName).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/status");
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.unstageFile(opts).then(function() {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/status");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get a file diff
         app.get("/:id/diff/:type/*", needsPermission("projects.read"), function(req,res) {
-            var projectName = req.params.id;
-            var type = req.params.type;
-            var file = req.params[0];
-            runtime.storage.projects.getFileDiff(req.user, projectName,file,type).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0],
+                type: req.params.type
+            }
+            runtimeAPI.projects.getFileDiff(opts).then(function(data) {
                 res.json({
                     diff: data
                 })
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get a list of commits
         app.get("/:id/commits", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            var options = {
-                limit: req.query.limit||20,
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                limit: req.query.limit || 20,
                 before: req.query.before
-            };
-            runtime.storage.projects.getCommits(req.user, projectName,options).then(function(data) {
+            }
+            runtimeAPI.projects.getCommits(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get an individual commit details
         app.get("/:id/commits/:sha", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            var sha = req.params.sha;
-
-            runtime.storage.projects.getCommit(req.user, projectName,sha).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                sha: req.params.sha
+            }
+            runtimeAPI.projects.getCommit(opts).then(function(data) {
                 res.json({commit:data});
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                res.status(400).json({error:"unexpected_error", message:err.toString()});
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Push local commits to remote
         app.post("/:id/push/?*", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var remoteBranchName = req.params[0]
-            var setRemote = req.query.u;
-            runtime.storage.projects.push(req.user, projectName,remoteBranchName,setRemote).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: req.params[0],
+                track: req.query.u
+            }
+            runtimeAPI.projects.push(opts).then(function(data) {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Pull remote commits
         app.post("/:id/pull/?*", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var remoteBranchName = req.params[0];
-            var setUpstream = req.query.setUpstream;
-            var allowUnrelatedHistories = req.query.allowUnrelatedHistories;
-            runtime.storage.projects.pull(req.user, projectName,remoteBranchName,setUpstream,allowUnrelatedHistories).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: req.params[0],
+                track: req.query.setUpstream,
+                allowUnrelatedHistories: req.query.allowUnrelatedHistories
+            }
+            runtimeAPI.projects.pull(opts).then(function(data) {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Abort an ongoing merge
         app.delete("/:id/merge", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            runtime.storage.projects.abortMerge(req.user, projectName).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.abortMerge(opts).then(function() {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Resolve a merge
         app.post("/:id/resolve/*", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            var file = req.params[0];
-            var resolution = req.body.resolutions;
-            runtime.storage.projects.resolveMerge(req.user, projectName,file,resolution).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                path: req.params[0],
+                resolution: req.body.resolutions
+            }
+            runtimeAPI.projects.resolveMerge(opts).then(function() {
                 res.status(204).end();
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get a list of local branches
         app.get("/:id/branches", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            runtime.storage.projects.getBranches(req.user, projectName,false).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: false
+            }
+            runtimeAPI.projects.getBranches(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Delete a local branch - ?force=true
         app.delete("/:id/branches/:branchName", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            var branchName = req.params.branchName;
-            var force = !!req.query.force;
-            runtime.storage.projects.deleteBranch(req.user, projectName, branchName, false, force).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                branch: req.params.branchName,
+                force: !!req.query.force
+            }
+            runtimeAPI.projects.deleteBranch(opts).then(function(data) {
                 res.status(204).end();
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            });
         });
 
         // Get a list of remote branches
         app.get("/:id/branches/remote", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            runtime.storage.projects.getBranches(req.user, projectName,true).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: true
+            }
+            runtimeAPI.projects.getBranches(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message, remote: err.remote});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get branch status - commit counts/ahead/behind
         app.get("/:id/branches/remote/*/status", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            var branch = req.params[0];
-            runtime.storage.projects.getBranchStatus(req.user, projectName,branch).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                branch: req.params[0]
+            }
+            runtimeAPI.projects.getBranchStatus(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Set the active local branch
         app.post("/:id/branches", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            var branchName = req.body.name;
-            var isCreate = req.body.create;
-            runtime.storage.projects.setBranch(req.user, projectName,branchName,isCreate).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                branch: req.body.name,
+                create: req.body.create
+            }
+            runtimeAPI.projects.setBranch(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Get a list of remotes
         app.get("/:id/remotes", needsPermission("projects.read"), function(req, res) {
-            var projectName = req.params.id;
-            runtime.storage.projects.getRemotes(req.user, projectName).then(function(data) {
+            var opts = {
+                user: req.user,
+                id: req.params.id
+            }
+            runtimeAPI.projects.getRemotes(opts).then(function(data) {
                 res.json(data);
-            })
-            .catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Add a remote
         app.post("/:id/remotes", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: req.body
+            }
             if (/^https?:\/\/[^/]+@/i.test(req.body.url)) {
                 res.status(400).json({error:"unexpected_error", message:"Git http url must not include username/password"});
                 return;
             }
-            runtime.storage.projects.addRemote(req.user, projectName, req.body).then(function() {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/remotes");
+            runtimeAPI.projects.addRemote(opts).then(function(data) {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/remotes");
             }).catch(function(err) {
-                console.log(err.stack);
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
+                apiUtils.rejectHandler(req,res,err);
             })
         });
 
         // Delete a remote
         app.delete("/:id/remotes/:remoteName", needsPermission("projects.write"), function(req, res) {
-            var projectName = req.params.id;
-            var remoteName = req.params.remoteName;
-            runtime.storage.projects.removeRemote(req.user, projectName, remoteName).then(function(data) {
-                res.redirect(303,req.baseUrl+"/"+projectName+"/remotes");
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: req.params.remoteName
+            }
+            runtimeAPI.projects.removeRemote(opts).then(function(data) {
+                res.redirect(303,req.baseUrl+"/"+opts.id+"/remotes");
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            });
         });
 
         // Update a remote
         app.put("/:id/remotes/:remoteName", needsPermission("projects.write"), function(req,res) {
-            var projectName = req.params.id;
-            var remoteName = req.params.remoteName;
-            runtime.storage.projects.updateRemote(req.user, projectName, remoteName, req.body).then(function(data) {
+            var remote = req.body || {};
+            remote.name = req.params.remoteName;
+            var opts = {
+                user: req.user,
+                id: req.params.id,
+                remote: remote
+            }
+            runtimeAPI.projects.updateRemote(opts).then(function() {
                 res.status(204).end();
+            }).catch(function(err) {
+                apiUtils.rejectHandler(req,res,err);
             })
-            .catch(function(err) {
-                if (err.code) {
-                    res.status(400).json({error:err.code, message: err.message});
-                } else {
-                    res.status(400).json({error:"unexpected_error", message:err.toString()});
-                }
-            });
-
         });
 
         return app;
