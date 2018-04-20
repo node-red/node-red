@@ -16,6 +16,7 @@
 
 var clone = require("clone");
 var util = require("../../util");
+var log = require("../../log");
 
 var settings;
 var contexts = {};
@@ -55,7 +56,7 @@ function load() {
                     try{
                         plugin = require("./"+plugins[pluginName].module);
                     }catch(err){
-                        throw new Error(plugins[pluginName].module + " could not be loaded");
+                        throw new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module}));
                     }
                 } else {
                     plugin = plugins[pluginName].module;
@@ -63,14 +64,14 @@ function load() {
                 plugin.init(config);
                 externalContexts[pluginName] = plugin;
             }else{
-                throw new Error("module is not defined in settings.contextStorage." + pluginName );
+                throw new Error(log._("context.error-module-not-defined", {storage:pluginName}));
             }
         }
         if(alias){
             if(externalContexts.hasOwnProperty(alias)){
                 externalContexts["default"] = externalContexts[alias];
             }else{
-                throw new Error("default is invalid. module name=" + plugins["default"])
+                throw new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]}));
             }
         }
     } else {
@@ -86,31 +87,52 @@ function copySettings(config, settings){
     });
 }
 
-function parseKey(key){
-    if(!key){
-        return null;
+function parseStorage(key) {
+    if (!key || key.charAt(0) !== '$') {
+        return "";
+    } else {
+        var endOfStorageName = key.indexOf(".");
+        if (endOfStorageName == -1) {
+            endOfStorageName = key.length;
+        }
+        return key.substring(1,endOfStorageName)||"default";
     }
-    var keyPath = {storage: "", key: ""};
-    var index_$ = key.indexOf("$");
-    var index_dot = key.indexOf(".", 1);
-    if(index_$===0&&index_dot) {
-        keyPath.storage = key.substring(1,index_dot)||"default";
-        keyPath.key = key.substring(index_dot+1);
+}
+
+function parseKey(key) {
+    if (!key) {
+        throw new Error(log._("context.error-key-zero-length"));
+    }
+    var indexSpace = key.indexOf(" ");
+    if (indexSpace != -1) {
+        throw new Error(log._("context.error-unexpected-space-character", {index:indexSpace}));
+    }
+    var keyPath = { storage: "", key: "" };
+    var indexDot = key.indexOf(".");
+    // The key of "$file" should be treated as a key without persistable context.
+    if (indexDot != -1) {
+        keyPath.storage = parseStorage(key);
+    }
+    if (keyPath.storage) {
+        keyPath.key = key.substring(indexDot + 1);
     } else {
         keyPath.key = key;
+    }
+    if(!keyPath.key) {
+        throw new Error(log._("context.error-empty-key"));
     }
     return keyPath;
 }
 
-function getContextStorage(keyPath) {
-    if (noContextStorage || !keyPath.storage) {
+function getContextStorage(storage) {
+    if (noContextStorage || !storage) {
         return externalContexts["_"];
-    } else if (externalContexts.hasOwnProperty(keyPath.storage)) {
-        return externalContexts[keyPath.storage];
+    } else if (externalContexts.hasOwnProperty(storage)) {
+        return externalContexts[storage];
     } else if (externalContexts.hasOwnProperty("default")) {
         return externalContexts["default"];
     } else {
-        var contextError = new Error(keyPath.storage + " is not defined in contextStorage on settings.js");
+        var contextError = new Error(log._("context.error-use-undefined-storage", {storage:storage}));
         contextError.name = "ContextError";
         throw contextError;
     }
@@ -122,21 +144,19 @@ function createContext(id,seed) {
 
     obj.get = function(key) {
         var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath);
+        var context = getContextStorage(keyPath.storage);
         return context.get(keyPath.key, scope);
     };
     obj.set = function(key, value) {
         var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath);
+        var context = getContextStorage(keyPath.storage);
         return context.set(keyPath.key, value, scope);
     };
-    obj.keys = function() {
+    obj.keys = function(storage) {
         //TODO: discuss about keys() behavior
-        var keys = [];
-        for(var plugin in externalContexts){
-            keys.concat(externalContexts[plugin].keys(scope));
-        }
-        return keys;
+        var storageName = parseStorage(storage);
+        var context = getContextStorage(storageName);
+        return context.keys(scope);
     };
     if(id === "global"){
         externalContexts["_"].setGlobalContext(seed);
