@@ -15,10 +15,10 @@
  **/
 
 var express = require("express");
-var apiUtils = require("../../util");
+var apiUtils = require("../util");
 
 var runtimeAPI;
-var needsPermission = require("../../auth").needsPermission;
+var needsPermission = require("../auth").needsPermission;
 
 module.exports = {
     init: function(_runtimeAPI) {

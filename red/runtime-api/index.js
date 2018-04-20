@@ -35,7 +35,6 @@ var api = module.exports = {
         api.projects.init(runtime);
     },
 
-    auth: require("./auth"),
     comms: require("./comms"),
     flows: require("./flows"),
     library: require("./library"),
