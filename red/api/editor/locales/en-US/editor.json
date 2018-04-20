@@ -53,6 +53,7 @@
             "searchInput": "search your flows",
             "clipboard": "Clipboard",
             "library": "Library",
+            "creatingNodes": "Creating nodes",
             "examples": "Examples",
             "subflows": "Subflows",
             "createSubflow": "Create Subflow",
@@ -277,6 +278,21 @@
         "folderPlaceholder": "a/b",
 
         "breadcrumb": "Library"
+    },
+    "creatingNodes": {
+        "label": {
+            "build": "Build",
+            "type": "Type",
+            "target": "Target",
+            "name": "Node name",
+            "nameExample": "e.g. lower-case",
+            "source": "Source",
+            "version": "Version",
+            "versionExample": "0.0.1",
+            "success": "Node was created successfully",
+            "error": "Process failed",
+            "download": "Download"
+        }
     },
     "palette": {
         "noInfo": "no information available",

@@ -232,5 +232,10 @@ module.exports = {
             // Whether or not to include audit events in the log output
             audit: false
         }
+    },
+    editorTheme: {
+        menu: {
+            "menu-item-creating-nodes": false
+        }
     }
 }
