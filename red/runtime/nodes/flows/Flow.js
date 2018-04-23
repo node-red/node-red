@@ -17,7 +17,7 @@
 var when = require("when");
 var clone = require("clone");
 var typeRegistry = require("../registry");
-var Log = require("../../../util").log; // TODO: separate module
+var Log;
 var redUtil = require("../../util");
 var flowUtil = require("./util");
 
@@ -495,8 +495,9 @@ function createSubflow(sf,sfn,subflows,globalSubflows,activeNodes) {
 
 
 module.exports = {
-    init: function(settings) {
-        nodeCloseTimeout = settings.nodeCloseTimeout || 15000;
+    init: function(runtime) {
+        nodeCloseTimeout = runtime.settings.nodeCloseTimeout || 15000;
+        Log = runtime.log;
     },
     create: function(global,conf) {
         return new Flow(global,conf);

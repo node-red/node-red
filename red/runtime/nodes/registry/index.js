@@ -27,7 +27,7 @@ var settings;
 
 function init(runtime) {
     settings = runtime.settings;
-    installer.init(runtime.settings);
+    installer.init(runtime);
     loader.init(runtime);
     registry.init(settings,loader);
 }

@@ -19,7 +19,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var when = require("when");
 var sinon = require('sinon');
-
+console.log(__dirname);
 var index = require("../../../../red/runtime/nodes/index");
 var flows = require("../../../../red/runtime/nodes/flows");
 var registry = require("../../../../red/runtime/nodes/registry");
@@ -131,7 +131,7 @@ describe("red/nodes/index", function() {
             var runtime = require("../../../../red/runtime");
             var credentials = require("../../../../red/runtime/nodes/credentials");
             var localfilesystem = require("../../../../red/runtime/storage/localfilesystem");
-            var log = require("../../../../red/runtime/log");
+            var log = require("../../../../red/util/log");
             var RED = require("../../../../red/red.js");
 
             var userDir = path.join(__dirname,".testUserHome");

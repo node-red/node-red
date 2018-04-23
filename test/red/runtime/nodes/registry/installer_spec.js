@@ -28,8 +28,18 @@ var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry")
 
 describe('nodes/registry/installer', function() {
 
+    var mockLog = {
+        log: sinon.stub(),
+        debug: sinon.stub(),
+        trace: sinon.stub(),
+        warn: sinon.stub(),
+        info: sinon.stub(),
+        metric: sinon.stub(),
+        _: function() { return "abc"}
+    }
+
     before(function() {
-        installer.init({});
+        installer.init({log:mockLog, settings:{}});
     });
     afterEach(function() {
         if (child_process.spawn.restore) {
@@ -74,7 +84,7 @@ describe('nodes/registry/installer', function() {
             });
 
             installer.installModule("this_wont_exist").otherwise(function(err) {
-                err.code.should.be.eql(404);
+                err.should.have.property("code",404);
                 done();
             });
         });

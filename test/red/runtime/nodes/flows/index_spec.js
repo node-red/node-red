@@ -36,6 +36,17 @@ describe('flows/index', function() {
     var flowCreate;
     var getType;
 
+    var mockLog = {
+        log: sinon.stub(),
+        debug: sinon.stub(),
+        trace: sinon.stub(),
+        warn: sinon.stub(),
+        info: sinon.stub(),
+        metric: sinon.stub(),
+        _: function() { return "abc"}
+    }
+
+
     before(function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
             return type.indexOf('missing') === -1;
@@ -112,7 +123,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 credentialsClean.called.should.be.true();
                 storage.hasOwnProperty('conf').should.be.true();
@@ -135,7 +146,7 @@ describe('flows/index', function() {
                     return when.resolve({flows:originalConfig,rev:123})
                 }
             }
-            flows.init({settings:{},storage:loadStorage});
+            flows.init({log:mockLog, settings:{},storage:loadStorage});
             flows.setFlows(originalConfig,"load").then(function() {
                 credentialsClean.called.should.be.false();
                 // 'load' type does not trigger a save
@@ -151,7 +162,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[],credentials:{"a":1}},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 credentialsClean.called.should.be.true();
                 storage.hasOwnProperty('conf').should.be.true();
@@ -187,7 +198,7 @@ describe('flows/index', function() {
                 })
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -216,7 +227,7 @@ describe('flows/index', function() {
                 })
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -233,7 +244,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve({flows:originalConfig});
             }
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 credentialsLoad.called.should.be.true();
                 // 'load' type does not trigger a save
@@ -259,7 +270,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -274,7 +285,7 @@ describe('flows/index', function() {
                 return when.resolve({flows:originalConfig});
             }
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
                 flowCreate.called.should.be.false();
@@ -292,7 +303,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve({flows:originalConfig});
             }
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
                 flowCreate.called.should.be.false();
@@ -326,7 +337,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve({flows:originalConfig});
             }
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 var c = 0;
                 flows.eachNode(function(node) {
@@ -357,7 +368,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -388,7 +399,7 @@ describe('flows/index', function() {
                 }
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -410,7 +421,7 @@ describe('flows/index', function() {
                 done();
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -442,7 +453,7 @@ describe('flows/index', function() {
                 }
             });
 
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.startFlows();
             });
@@ -470,7 +481,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 flows.checkTypeInUse("unused-module");
                 done();
@@ -481,7 +492,7 @@ describe('flows/index', function() {
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
                 {id:"t1",type:"tab"}
             ];
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
                 /*jshint immed: false */
                 try {
@@ -504,7 +515,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve({flows:originalConfig});
             }
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 flows.addFlow({
                     label:'new flow',
@@ -531,7 +542,7 @@ describe('flows/index', function() {
             storage.setFlows = function() {
                 return when.resolve();
             }
-            flows.init({settings:{},storage:storage});
+            flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
                 return flows.startFlows();
             }).then(function() {
@@ -539,8 +550,7 @@ describe('flows/index', function() {
                     label:'new flow',
                     nodes:[
                         {id:"t2-1",x:10,y:10,z:"t1",type:"test",wires:[]},
-                        {id:"t2-2",x:10,y:10,z:"t1",type:"test",wires:[]}
-                        ,
+                        {id:"t2-2",x:10,y:10,z:"t1",type:"test",wires:[]},
                         {id:"t2-3",z:"t1",type:"test"}
                     ]
                 }).then(function(id) {

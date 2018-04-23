@@ -24,7 +24,7 @@ var context = require("../context")
 var credentials = require("../credentials");
 
 var flowUtil = require("./util");
-var log = require("../../../util").log; // TODO: separate module
+var log;
 var events = require("../../events");
 var redUtil = require("../../util");
 var deprecated = require("../registry/deprecated");
@@ -50,6 +50,7 @@ function init(runtime) {
     }
     settings = runtime.settings;
     storage = runtime.storage;
+    log = runtime.log;
     started = false;
     if (!typeEventRegistered) {
         events.on('type-registered',function(type) {
@@ -67,7 +68,7 @@ function init(runtime) {
         });
         typeEventRegistered = true;
     }
-    Flow.init(settings);
+    Flow.init(runtime);
 }
 
 function loadFlows() {

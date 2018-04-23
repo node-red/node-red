@@ -20,7 +20,7 @@ var path = require('path');
 var sinon = require('sinon');
 
 var localfilesystem = require("../../../../../red/runtime/storage/localfilesystem");
-var log = require("../../../../../red/runtime/log");
+var log = require("../../../../../red/util/log");
 
 describe('storage/localfilesystem', function() {
     var mockRuntime = {

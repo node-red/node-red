@@ -17,7 +17,7 @@
 var should = require("should");
 var sinon = require('sinon');
 var RedNode = require("../../../../red/runtime/nodes/Node");
-var Log = require("../../../../red/runtime/log");
+var Log = require("../../../../red/util/log");
 var flows = require("../../../../red/runtime/nodes/flows");
 
 describe('Node', function() {

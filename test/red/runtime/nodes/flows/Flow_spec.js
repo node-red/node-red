@@ -41,7 +41,15 @@ describe('Flow', function() {
         stoppedNodes = {};
         rewiredNodes = {};
         createCount = 0;
-        Flow.init({});
+        Flow.init({settings:{},log:{
+            log: sinon.stub(),
+            debug: sinon.stub(),
+            trace: sinon.stub(),
+            warn: sinon.stub(),
+            info: sinon.stub(),
+            metric: sinon.stub(),
+            _: function() { return "abc"}
+        }});
     });
 
     var TestNode = function(n) {
@@ -162,15 +170,19 @@ describe('Flow', function() {
             currentNodes["3"].should.have.a.property("handled",1);
 
             flow.stop().then(function() {
-                currentNodes.should.not.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.not.have.a.property("3");
-                currentNodes.should.not.have.a.property("4");
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-                stoppedNodes.should.have.a.property("4");
-                done();
+                try {
+                    currentNodes.should.not.have.a.property("1");
+                    currentNodes.should.not.have.a.property("2");
+                    currentNodes.should.not.have.a.property("3");
+                    currentNodes.should.not.have.a.property("4");
+                    stoppedNodes.should.have.a.property("1");
+                    stoppedNodes.should.have.a.property("2");
+                    stoppedNodes.should.have.a.property("3");
+                    stoppedNodes.should.have.a.property("4");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
 
@@ -552,10 +564,15 @@ describe('Flow', function() {
         });
 
         it("Times out a node that fails to close", function(done) {
-
-            Flow.init({nodeCloseTimeout:50});
-
-
+            Flow.init({settings:{nodeCloseTimeout:50},log:{
+                log: sinon.stub(),
+                debug: sinon.stub(),
+                trace: sinon.stub(),
+                warn: sinon.stub(),
+                info: sinon.stub(),
+                metric: sinon.stub(),
+                _: function() { return "abc"}
+            }});
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"testAsync",closeDelay: 80, foo:"a",wires:["2"]},
@@ -1084,6 +1101,6 @@ describe('Flow', function() {
                 done();
             });
         });
-        it.skip("prevents an error looping more than 10 times",function(){});
+        it("prevents an error looping more than 10 times",function(){});
     });
 });

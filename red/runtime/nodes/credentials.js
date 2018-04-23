@@ -18,7 +18,7 @@ var when = require("when");
 var crypto = require('crypto');
 var runtime;
 var settings;
-var log = require("../../util").log; // TODO: separate module
+var log;
 
 
 var encryptedCredentials = null;

@@ -21,7 +21,7 @@ var util = require("util");
 
 var index = require("../../../../red/runtime/nodes/index");
 var credentials = require("../../../../red/runtime/nodes/credentials");
-var log = require("../../../../red/runtime/log");
+var log = require("../../../../red/util/log");
 
 
 describe('red/runtime/nodes/credentials', function() {

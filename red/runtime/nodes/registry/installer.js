@@ -20,7 +20,7 @@ var path = require("path");
 var fs = require("fs");
 
 var registry = require("./registry");
-var log = require("../../../util").log; // TODO: separate module
+var log;
 
 var events = require("../../events");
 
@@ -32,8 +32,9 @@ var settings;
 var moduleRe = /^(@[^/]+?[/])?[^/]+?$/;
 var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
 
-function init(_settings) {
-    settings = _settings;
+function init(runtime) {
+    settings = runtime.settings;
+    log = runtime.log;
 }
 
 function checkModulePath(folder) {
