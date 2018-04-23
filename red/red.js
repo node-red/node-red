@@ -70,9 +70,8 @@ module.exports = {
         redUtil.init(userSettings);
         if (userSettings.httpAdminRoot !== false) {
             runtime.init(userSettings,redUtil,api);
-
             runtimeAPI.init(runtime,redUtil);
-            api.init(httpServer,userSettings,runtime,runtimeAPI,redUtil);
+            api.init(httpServer,userSettings,runtime.storage,runtimeAPI,redUtil);
 
             apiEnabled = true;
             server = runtime.adminApi.server;

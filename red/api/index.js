@@ -28,11 +28,11 @@ var adminApp;
 var server;
 var editor;
 
-function init(_server,settings,runtime,runtimeAPI) {
+function init(_server,settings,storage,runtimeAPI) {
     server = _server;
     if (settings.httpAdminRoot !== false) {
         adminApp = express();
-        auth.init(settings,runtime.storage);
+        auth.init(settings,storage);
 
         var maxApiRequestSize = settings.apiMaxLength || '5mb';
         adminApp.use(bodyParser.json({limit:maxApiRequestSize}));
@@ -57,7 +57,7 @@ function init(_server,settings,runtime,runtimeAPI) {
         // Editor
         if (!settings.disableEditor) {
             editor = require("./editor");
-            var editorApp = editor.init(server, settings, runtime, runtimeAPI);
+            var editorApp = editor.init(server, settings, runtimeAPI);
             adminApp.use(editorApp);
         }
 

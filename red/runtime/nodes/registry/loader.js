@@ -71,6 +71,15 @@ function createNodeApi(node) {
         events: runtime.events,
         util: runtime.util,
         version: runtime.version,
+        comms: {
+            publish: function(topic,data,retain) {
+                runtime.events.emit("comms",{
+                    topic: topic,
+                    data: data,
+                    retain: retain
+                })
+            }
+        }
     }
     copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","addCredentials","getCredentials","deleteCredentials" ]);
     red.nodes.registerType = function(type,constructor,opts) {
@@ -79,7 +88,6 @@ function createNodeApi(node) {
     copyObjectProperties(runtime.log,red.log,null,["init"]);
     copyObjectProperties(runtime.settings,red.settings,null,["init","load","reset"]);
     if (runtime.adminApi) {
-        red.comms = runtime.adminApi.comms;
         red.library = {
             register: function(type) {
                 return runtime.library.registerType(node.id,type);

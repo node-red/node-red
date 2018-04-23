@@ -14,12 +14,11 @@
  * limitations under the License.
  **/
 
-
- /**
-  * A user accessing the API
-  * @typedef User
-  * @type {object}
-  */
+/**
+ * A user accessing the API
+ * @typedef User
+ * @type {object}
+ */
 
 var runtime;
 /**
@@ -28,6 +27,7 @@ var runtime;
 var api = module.exports = {
     init: function(_runtime, redUtil) {
         runtime = _runtime;
+        api.comms.init(runtime);
         api.flows.init(runtime);
         api.nodes.init(runtime);
         api.settings.init(runtime);
@@ -42,7 +42,24 @@ var api = module.exports = {
     settings: require("./settings"),
     projects: require("./projects"),
 
+    /**
+    * Returns whether the runtime is started
+    * @param {Object} opts
+    * @param {User} opts.user - the user calling the api
+    * @return {Promise<Boolean>} - whether the runtime is started
+    * @memberof RED
+    */
+    isStarted: function(opts) {
+        return Promise.resolve(runtime.isStarted());
+    },
 
+    /**
+    * Returns version number of the runtime
+    * @param {Object} opts
+    * @param {User} opts.user - the user calling the api
+    * @return {Promise<String>} - the runtime version number
+    * @memberof RED
+    */
     version: function(opts) {
         return Promise.resolve(runtime.version());
     }

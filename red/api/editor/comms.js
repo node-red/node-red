@@ -15,13 +15,17 @@
  **/
 
 var ws = require("ws");
-var log;
+
+var log = require("../../util").log; // TODO: separate module
+var Tokens;
+var Users;
+var Permissions;
 
 var server;
 var settings;
+var runtimeAPI;
 
 var wsServer;
-var pendingConnections = [];
 var activeConnections = [];
 
 var retained = {};
@@ -29,29 +33,145 @@ var retained = {};
 var heartbeatTimer;
 var lastSentTime;
 
-function handleStatus(event) {
-    publish("status/"+event.id,event.status,true);
-}
-function handleRuntimeEvent(event) {
-    log.trace("runtime event: "+JSON.stringify(event));
-    publish("notification/"+event.id,event.payload||{},event.retain);
-}
-function init(_server,runtime) {
+function init(_server,_settings,_runtimeAPI) {
     server = _server;
-    settings = runtime.settings;
-    log = runtime.log;
+    settings = _settings;
+    runtimeAPI = _runtimeAPI;
+    Tokens = require("../auth/tokens");
+    Users = require("../auth/users");
+    Permissions = require("../auth/permissions");
 
-    runtime.events.removeListener("node-status",handleStatus);
-    runtime.events.on("node-status",handleStatus);
+}
 
-    runtime.events.removeListener("runtime-event",handleRuntimeEvent);
-    runtime.events.on("runtime-event",handleRuntimeEvent);
+function generateSession(length) {
+    var c = "ABCDEFGHIJKLMNOPQRSTUZWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+    var token = [];
+    for (var i=0;i<length;i++) {
+        token.push(c[Math.floor(Math.random()*c.length)]);
+    }
+    return token.join("");
+}
+
+function CommsConnection(ws) {
+    this.session = generateSession(32);
+    this.ws = ws;
+    this.stack = [];
+    this.user = null;
+    this.lastSentTime = 0;
+    var self = this;
+
+    log.audit({event: "comms.open"});
+    log.trace("comms.open "+self.session);
+    var pendingAuth = (settings.adminAuth != null);
+
+    if (!pendingAuth) {
+        addActiveConnection(self);
+    }
+    ws.on('close',function() {
+        log.audit({event: "comms.close",user:self.user, session: self.session});
+        log.trace("comms.close "+self.session);
+        removeActiveConnection(self);
+    });
+    ws.on('message', function(data,flags) {
+        var msg = null;
+        try {
+            msg = JSON.parse(data);
+        } catch(err) {
+            log.trace("comms received malformed message : "+err.toString());
+            return;
+        }
+        if (!pendingAuth) {
+            if (msg.subscribe) {
+                self.subscribe(msg.subscribe);
+                // handleRemoteSubscription(ws,msg.subscribe);
+            }
+        } else {
+            var completeConnection = function(userScope,sendAck) {
+                try {
+                    if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
+                        ws.send(JSON.stringify({auth:"fail"}));
+                        ws.close();
+                    } else {
+                        pendingAuth = false;
+                        addActiveConnection(self);
+                        if (sendAck) {
+                            ws.send(JSON.stringify({auth:"ok"}));
+                        }
+                    }
+                } catch(err) {
+                    console.log(err.stack);
+                    // Just in case the socket closes before we attempt
+                    // to send anything.
+                }
+            }
+            if (msg.auth) {
+                Tokens.get(msg.auth).then(function(client) {
+                    if (client) {
+                        Users.get(client.user).then(function(user) {
+                            if (user) {
+                                self.user = user;
+                                log.audit({event: "comms.auth",user:self.user});
+                                completeConnection(client.scope,true);
+                            } else {
+                                log.audit({event: "comms.auth.fail"});
+                                completeConnection(null,false);
+                            }
+                        });
+                    } else {
+                        log.audit({event: "comms.auth.fail"});
+                        completeConnection(null,false);
+                    }
+                });
+            } else {
+                if (anonymousUser) {
+                    log.audit({event: "comms.auth",user:anonymousUser});
+                    self.user = anonymousUser;
+                    completeConnection(anonymousUser.permissions,false);
+                    //TODO: duplicated code - pull non-auth message handling out
+                    if (msg.subscribe) {
+                        self.subscribe(msg.subscribe);
+                    }
+                } else {
+                    log.audit({event: "comms.auth.fail"});
+                    completeConnection(null,false);
+                }
+            }
+        }
+    });
+    ws.on('error', function(err) {
+        log.warn(log._("comms.error",{message:err.toString()}));
+    });
+}
+
+CommsConnection.prototype.send = function(topic,data) {
+    var self = this;
+    if (topic && data) {
+        this.stack.push({topic:topic,data:data});
+    }
+    if (!this._xmitTimer) {
+        this._xmitTimer = setTimeout(function() {
+            try {
+                self.ws.send(JSON.stringify(self.stack));
+                self.lastSentTime = Date.now();
+            } catch(err) {
+                removeActiveConnection(self);
+                log.warn(log._("comms.error-send",{message:err.toString()}));
+            }
+            delete self._xmitTimer;
+            self.stack = [];
+        },50);
+    }
+}
+
+CommsConnection.prototype.subscribe = function(topic) {
+    runtimeAPI.comms.subscribe({
+        user: this.user,
+        client: this,
+        topic: topic
+    })
 }
 
 function start() {
-    var Tokens = require("../auth/tokens");
-    var Users = require("../auth/users");
-    var Permissions = require("../auth/permissions");
     if (!settings.disableEditor) {
         Users.default().then(function(anonymousUser) {
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
@@ -68,89 +188,9 @@ function start() {
             });
 
             wsServer.on('connection',function(ws) {
-                log.audit({event: "comms.open"});
-                var pendingAuth = (settings.adminAuth != null);
-                ws._nr_stack = [];
-                ws._nr_ok2tx = true;
-
-                if (!pendingAuth) {
-                    activeConnections.push(ws);
-                } else {
-                    pendingConnections.push(ws);
-                }
-                ws.on('close',function() {
-                    log.audit({event: "comms.close",user:ws.user});
-                    removeActiveConnection(ws);
-                    removePendingConnection(ws);
-                });
-                ws.on('message', function(data,flags) {
-                    var msg = null;
-                    try {
-                        msg = JSON.parse(data);
-                    } catch(err) {
-                        log.trace("comms received malformed message : "+err.toString());
-                        return;
-                    }
-                    if (!pendingAuth) {
-                        if (msg.subscribe) {
-                            handleRemoteSubscription(ws,msg.subscribe);
-                        }
-                    } else {
-                        var completeConnection = function(userScope,sendAck) {
-                            try {
-                                if (!userScope || !Permissions.hasPermission(userScope,"status.read")) {
-                                    ws.send(JSON.stringify({auth:"fail"}));
-                                    ws.close();
-                                } else {
-                                    pendingAuth = false;
-                                    removePendingConnection(ws);
-                                    activeConnections.push(ws);
-                                    if (sendAck) {
-                                        ws.send(JSON.stringify({auth:"ok"}));
-                                    }
-                                }
-                            } catch(err) {
-                                // Just in case the socket closes before we attempt
-                                // to send anything.
-                            }
-                        }
-                        if (msg.auth) {
-                            Tokens.get(msg.auth).then(function(client) {
-                                if (client) {
-                                    Users.get(client.user).then(function(user) {
-                                        if (user) {
-                                            ws.user = user;
-                                            log.audit({event: "comms.auth",user:ws.user});
-                                            completeConnection(client.scope,true);
-                                        } else {
-                                            log.audit({event: "comms.auth.fail"});
-                                            completeConnection(null,false);
-                                        }
-                                    });
-                                } else {
-                                    log.audit({event: "comms.auth.fail"});
-                                    completeConnection(null,false);
-                                }
-                            });
-                        } else {
-                            if (anonymousUser) {
-                                log.audit({event: "comms.auth",user:anonymousUser});
-                                completeConnection(anonymousUser.permissions,false);
-                                //TODO: duplicated code - pull non-auth message handling out
-                                if (msg.subscribe) {
-                                    handleRemoteSubscription(ws,msg.subscribe);
-                                }
-                            } else {
-                                log.audit({event: "comms.auth.fail"});
-                                completeConnection(null,false);
-                            }
-                        }
-                    }
-                });
-                ws.on('error', function(err) {
-                    log.warn(log._("comms.error",{message:err.toString()}));
-                });
+                var commsConnection = new CommsConnection(ws);
             });
+
 
             wsServer.on('error', function(err) {
                 log.warn(log._("comms.error-server",{message:err.toString()}));
@@ -161,7 +201,7 @@ function start() {
             heartbeatTimer = setInterval(function() {
                 var now = Date.now();
                 if (now-lastSentTime > webSocketKeepAliveTime) {
-                    publish("hb",lastSentTime);
+                    activeConnections.forEach(connection => connection.send("hb",lastSentTime));
                 }
             }, webSocketKeepAliveTime);
         });
@@ -179,63 +219,15 @@ function stop() {
     }
 }
 
-function publish(topic,data,retain) {
-    if (server) {
-        if (retain) {
-            retained[topic] = data;
-        } else {
-            delete retained[topic];
-        }
-        lastSentTime = Date.now();
-        activeConnections.forEach(function(conn) {
-            publishTo(conn,topic,data);
-        });
-    }
+function addActiveConnection(connection) {
+    activeConnections.push(connection);
+    runtimeAPI.comms.addConnection({client: connection});
 }
-
-function publishTo(ws,topic,data) {
-    if (topic && data) {
-        ws._nr_stack.push({topic:topic,data:data});
-    }
-    if (ws._nr_ok2tx && (ws._nr_stack.length > 0)) {
-        ws._nr_ok2tx = false;
-        try {
-            ws.send(JSON.stringify(ws._nr_stack));
-        } catch(err) {
-            removeActiveConnection(ws);
-            removePendingConnection(ws);
-            log.warn(log._("comms.error-send",{message:err.toString()}));
-        }
-        ws._nr_stack = [];
-        setTimeout(function() {
-            ws._nr_ok2tx = true;
-            publishTo(ws);
-        }, 50);  // TODO: OK so a 50mS update rate should prob not be hard-coded
-    }
-
-}
-
-function handleRemoteSubscription(ws,topic) {
-    var re = new RegExp("^"+topic.replace(/([\[\]\?\(\)\\\\$\^\*\.|])/g,"\\$1").replace(/\+/g,"[^/]+").replace(/\/#$/,"(\/.*)?")+"$");
-    for (var t in retained) {
-        if (re.test(t)) {
-            publishTo(ws,t,retained[t]);
-        }
-    }
-}
-
-function removeActiveConnection(ws) {
+function removeActiveConnection(connection) {
     for (var i=0;i<activeConnections.length;i++) {
-        if (activeConnections[i] === ws) {
+        if (activeConnections[i] === connection) {
             activeConnections.splice(i,1);
-            break;
-        }
-    }
-}
-function removePendingConnection(ws) {
-    for (var i=0;i<pendingConnections.length;i++) {
-        if (pendingConnections[i] === ws) {
-            pendingConnections.splice(i,1);
+            runtimeAPI.comms.removeConnection({client:connection})
             break;
         }
     }
@@ -244,6 +236,5 @@ function removePendingConnection(ws) {
 module.exports = {
     init:init,
     start:start,
-    stop:stop,
-    publish:publish
+    stop:stop
 }

@@ -24,7 +24,6 @@ var info = require("./settings");
 var auth = require("../auth");
 var nodes = require("../admin/nodes"); // TODO: move /icons into here
 var needsPermission;
-var runtime;
 var runtimeAPI;
 var log = require("../../util").log; // TODO: separate module
 var i18n = require("../../util").i18n; // TODO: separate module
@@ -32,22 +31,23 @@ var i18n = require("../../util").i18n; // TODO: separate module
 var apiUtil = require("../util");
 
 var ensureRuntimeStarted = function(req,res,next) {
-    if (!runtime.isStarted()) {
-        log.error("Node-RED runtime not started");
-        res.status(503).send("Not started");
-    } else {
-        next();
-    }
+    runtimeAPI.isStarted().then( started => {
+        if (!started) {
+            log.error("Node-RED runtime not started");
+            res.status(503).send("Not started");
+        } else {
+            next()
+        }
+    })
 }
 
 module.exports = {
-    init: function(server, settings, _runtime, _runtimeAPI) {
-        runtime = _runtime;
+    init: function(server, settings, _runtimeAPI) {
         runtimeAPI = _runtimeAPI;
         needsPermission = auth.needsPermission;
         if (!settings.disableEditor) {
             info.init(runtimeAPI);
-            comms.init(server,runtime);
+            comms.init(server,settings,runtimeAPI);
 
             var ui = require("./ui");
 
@@ -122,6 +122,5 @@ module.exports = {
             comms.start();
         });
     },
-    stop: comms.stop,
-    publish: comms.publish
+    stop: comms.stop
 }

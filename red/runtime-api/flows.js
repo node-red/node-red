@@ -20,7 +20,6 @@
 
 /**
  * @typedef Flows
- * @alias Dave
  * @type {object}
  * @property {string} rev - the flow revision identifier
  * @property {Array}  flows - the flow configuration, an array of node configuration objects
