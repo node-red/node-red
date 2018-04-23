@@ -304,11 +304,11 @@ describe('trigger node', function() {
                     }
                     else {
                         msg.should.have.a.property("payload", "bar");
-                        spy.restore();
+                        RED.util.evaluateNodeProperty.restore();
                         done();
                     }
                 }
-                catch(err) { spy.restore(); done(err); }
+                catch(err) { RED.util.evaluateNodeProperty.restore(); done(err); }
             });
             n1.emit("input", {payload:null});
         });
@@ -384,6 +384,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to extend the delay', function(done) {
+        this.timeout(5000); // add extra time for flake
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
             function(arg1, arg2, arg3, arg4) { return arg1; }
         );

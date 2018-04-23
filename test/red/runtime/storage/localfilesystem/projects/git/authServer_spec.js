@@ -49,7 +49,11 @@ describe("localfilesystem/projects/git/authServer", function() {
                 return sendPrompt(rs.path,"Password");
             }).then(function(response) {
                 response.should.eql("TEST_PASS");
-            }).then(done).catch(function(err) {
+            }).then(() => {
+                rs.close();
+                done();
+            }).catch(function(err) {
+                rs.close();
                 done(err);
             })
 
@@ -64,7 +68,11 @@ describe("localfilesystem/projects/git/authServer", function() {
                 return sendPrompt(rs.path,"Enter");
             }).then(function(response) {
                 response.should.eql("TEST_PASSPHRASE");
-            }).then(done).catch(function(err) {
+            }).then(() => {
+                rs.close();
+                done();
+            }).catch(function(err) {
+                rs.close();
                 done(err);
             })
 

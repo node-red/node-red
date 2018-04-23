@@ -27,7 +27,8 @@ describe('UDP out Node', function() {
         helper.startServer(done);
     });
 
-    after(function() {
+    after(function(done) {
+        helper.stopServer(done);
     });
 
     afterEach(function() {
@@ -38,7 +39,7 @@ describe('UDP out Node', function() {
         var sock = dgram.createSocket('udp4');
         sock.on('message', function(msg, rinfo) {
             msg.should.deepEqual(data);
-            done();
+            sock.close(done);
         });
         sock.bind(port, '127.0.0.1');
         port++;

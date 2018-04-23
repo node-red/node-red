@@ -130,15 +130,20 @@ describe('tail Node', function() {
         });
     }
 
-    it('should throw an error if run on Windows', function(done) {
+    it('should throw an error if run on Windows', function() {
         // Stub os platform so we can make it look like windows
         var os = require('os');
         var spy = sinon.stub(os, 'platform', function(arg) { return("windows"); });
 
         /*jshint immed: false */
-        (function() { tailNode("1234"); }).should.throw();
-        os.platform.restore();
-        done();
+        try {
+            (function() { tailNode("1234"); }).should.throw();
+        } catch (err) {
+            throw err;
+        }
+        finally {
+            os.platform.restore();
+        }
     });
 
     /*

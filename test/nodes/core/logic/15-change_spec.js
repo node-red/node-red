@@ -578,7 +578,6 @@ describe('change Node', function() {
         });
 
         it('reports invalid regex', function(done) {
-            var sinon = require('sinon');
             var flow = [{"id":"changeNode1","type":"change","action":"change","property":"payload","from":"\\+**+","to":"NUMBER","reg":true,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {

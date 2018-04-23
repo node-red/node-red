@@ -16,6 +16,7 @@
 
 var net = require("net");
 var should = require("should");
+var stoppable = require('stoppable');
 var helper = require("../../helper.js");
 var tcpinNode = require("../../../../nodes/core/io/31-tcpin.js");
 
@@ -26,7 +27,7 @@ describe('TCP Request Node', function() {
 
     function startServer(done) {
         port += 1;
-        server = net.createServer(function(c) {
+        server = stoppable(net.createServer(function(c) {
 	    c.on('data', function(data) {
 		var rdata = "ACK:"+data.toString();
 		c.write(rdata);
@@ -34,7 +35,7 @@ describe('TCP Request Node', function() {
             c.on('error', function(err) {
 		startServer(done);
             });
-        }).listen(port, "127.0.0.1", function(err) {
+        })).listen(port, "127.0.0.1", function(err) {
             done();
         });
     }
@@ -43,8 +44,8 @@ describe('TCP Request Node', function() {
         startServer(done);
     });
 
-    after(function() {
-        server.close();
+    after(function(done) {
+        server.stop(done);
     });
 
     afterEach(function() {

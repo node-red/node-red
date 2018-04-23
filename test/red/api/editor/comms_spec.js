@@ -16,6 +16,7 @@
 
 var should = require("should");
 var sinon = require("sinon");
+const stoppable = require('stoppable');
 
 var when = require("when");
 var http = require('http');
@@ -30,13 +31,8 @@ var Tokens = require("../../../../red/api/auth/tokens");
 var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port
 
-describe("api/editor/comms", function() {
 
-    beforeEach(function (done) {
-        setTimeout(function() {
-            done();
-        }, 55);
-    });
+describe("api/editor/comms", function() {
 
     describe("with default keepalive", function() {
         var server;
@@ -44,7 +40,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -59,9 +55,10 @@ describe("api/editor/comms", function() {
             });
         });
 
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('accepts connection', function(done) {
@@ -150,7 +147,7 @@ describe("api/editor/comms", function() {
             });
         });
 
-        it.skip('listens for node/status events');
+        it('listens for node/status events');
     });
     describe("disabled editor", function() {
         var server;
@@ -158,7 +155,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{disableEditor:true},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -173,9 +170,10 @@ describe("api/editor/comms", function() {
             });
         });
 
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('rejects websocket connections',function(done) {
@@ -197,7 +195,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{httpAdminRoot:"/adminPath"},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -212,9 +210,10 @@ describe("api/editor/comms", function() {
             });
         });
 
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('accepts connections',function(done) {
@@ -236,7 +235,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server,{
                 settings:{httpAdminRoot:"/adminPath"},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -251,9 +250,10 @@ describe("api/editor/comms", function() {
             });
         });
 
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('accepts connections',function(done) {
@@ -275,7 +275,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{httpAdminRoot:"adminPath"},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -290,9 +290,10 @@ describe("api/editor/comms", function() {
             });
         });
 
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('accepts connections',function(done) {
@@ -314,7 +315,7 @@ describe("api/editor/comms", function() {
         var port;
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{webSocketKeepAliveTime: 100},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -328,9 +329,10 @@ describe("api/editor/comms", function() {
                 done();
             });
         });
-        after(function() {
+        after(function(done) {
             Users.default.restore();
             comms.stop();
+            server.stop(done);
         });
         it('are sent', function(done) {
             var ws = new WebSocket(url);
@@ -400,7 +402,7 @@ describe("api/editor/comms", function() {
             });
 
 
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server,{
                 settings:{adminAuth:{}},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -414,11 +416,12 @@ describe("api/editor/comms", function() {
                 done();
             });
         });
-        after(function() {
+        after(function(done) {
             getDefaultUser.restore();
             getUser.restore();
             getToken.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('prevents connections that do not authenticate',function(done) {
@@ -490,7 +493,7 @@ describe("api/editor/comms", function() {
         var getDefaultUser;
         before(function(done) {
             getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve({permissions:"read"});});
-            server = http.createServer(function(req,res){app(req,res)});
+            server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {
                 settings:{adminAuth:{}},
                 log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
@@ -504,9 +507,10 @@ describe("api/editor/comms", function() {
                 done();
             });
         });
-        after(function() {
+        after(function(done) {
             getDefaultUser.restore();
             comms.stop();
+            server.stop(done);
         });
 
         it('allows anonymous connections that do not authenticate',function(done) {

@@ -813,7 +813,6 @@ describe("api/admin/nodes", function() {
 
     describe('get icons', function() {
         it('returns icon list', function(done) {
-            debugger;
             initNodes({
                 nodes:{
                     getNodeIcons: function() {
