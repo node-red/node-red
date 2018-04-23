@@ -28,7 +28,6 @@ var httpProxy = require('http-proxy');
 var cookieParser = require('cookie-parser');
 var RED = require("../../../../red/red.js");
 var fs = require('fs-extra');
-var hoek = require('hoek');
 var auth = require('basic-auth');
 
 describe('HTTP Request Node', function() {
@@ -41,7 +40,10 @@ describe('HTTP Request Node', function() {
     var testProxyPort = 9200;
 
     //save environment variables
-    var preEnv;
+    var preEnvHttpProxyLowerCase;
+    var preEnvHttpProxyUpperCase;
+    var preEnvNoProxyLowerCase;
+    var preEnvNoProxyUpperCase;
 
     function startServer(done) {
         testPort += 1;
@@ -102,14 +104,43 @@ describe('HTTP Request Node', function() {
         return "localhost:"+testSslPort+url;
     }
 
-    before(function(done) {
-        //save environment variables
-        preEnv = hoek.clone(process.env);
+    function saveProxySetting() {
+        preEnvHttpProxyLowerCase = process.env.http_proxy;
+        preEnvHttpProxyUpperCase = process.env.HTTP_PROXY;
+        preEnvNoProxyLowerCase = process.env.no_proxy;
+        preEnvNoProxyUpperCase = process.env.NO_PROXY;
+        delete process.env.http_proxy;
+        delete process.env.HTTP_PROXY;
+        delete process.env.no_proxy;
+        delete process.env.NO_PROXY;
+    }
 
+    function restoreProxySetting() {
+        process.env.http_proxy = preEnvHttpProxyLowerCase;
+        process.env.HTTP_PROXY = preEnvHttpProxyUpperCase;
+        // On Windows, if environment variable of NO_PROXY that includes lower cases
+        // such as No_Proxy is replaced with NO_PROXY.
+        process.env.no_proxy = preEnvNoProxyLowerCase;
+        process.env.NO_PROXY = preEnvNoProxyUpperCase;
+        if (preEnvHttpProxyLowerCase == undefined){
+            delete process.env.http_proxy;
+        }
+        if (preEnvHttpProxyUpperCase == undefined){
+            delete process.env.HTTP_PROXY;
+        }
+        if (preEnvNoProxyLowerCase == undefined){
+            delete process.env.no_proxy;
+        }
+        if (preEnvNoProxyUpperCase == undefined){
+            delete process.env.NO_PROXY;
+        }
+    }
+
+    before(function(done) {
         testApp = express();
         testApp.use(bodyParser.raw({type:"*/*"}));
         testApp.use(cookieParser());
-        testApp.get('/statusCode204', function(req,res) { res.status(204).end();})
+        testApp.get('/statusCode204', function(req,res) { res.status(204).end();});
         testApp.get('/text', function(req, res){ res.send('hello'); });
         testApp.get('/redirectToText', function(req, res){ res.status(302).set('Location', getTestURL('/text')).end(); });
         testApp.get('/json-valid', function(req, res){ res.json({a:1}); });
@@ -133,7 +164,7 @@ describe('HTTP Request Node', function() {
             var result = {
                 user: user.name,
                 pass: user.pass,
-            }
+            };
             res.json(result);
         });
         testApp.get('/proxyAuthenticate', function(req, res){
@@ -142,21 +173,21 @@ describe('HTTP Request Node', function() {
                 user: user.name,
                 pass: user.pass,
                 headers: req.headers
-            }
+            };
             res.json(result);
         });
         testApp.post('/postInspect', function(req,res) {
             var result = {
                 body: req.body.toString(),
                 headers: req.headers
-            }
+            };
             res.json(result);
         });
         testApp.put('/putInspect', function(req,res) {
             var result = {
                 body: req.body.toString(),
                 headers: req.headers
-            }
+            };
             res.json(result);
         });
         testApp.delete('/deleteInspect', function(req,res) { res.status(204).end();});
@@ -165,14 +196,14 @@ describe('HTTP Request Node', function() {
             var result = {
                 body: req.body.toString(),
                 headers: req.headers
-            }
+            };
             res.json(result);
         });
         testApp.trace('/traceInspect', function(req,res) {
             var result = {
                 body: req.body.toString(),
                 headers: req.headers
-            }
+            };
             res.json(result);
         });
         testApp.options('/*', function(req,res) {
@@ -184,22 +215,6 @@ describe('HTTP Request Node', function() {
     });
 
     after(function() {
-        //delete environment variables that were not set
-        if (!preEnv.http_proxy){
-            delete process.env.http_proxy;
-        }
-        if (!preEnv.HTTP_PROXY){
-            delete process.env.HTTP_PROXY;
-        }
-        if (!preEnv.no_proxy){
-            delete process.env.no_proxy;
-        }
-        if (!preEnv.NO_PROXY){
-            delete process.env.NO_PROXY;
-        }
-        //compare with saved environment variables
-        process.env.should.be.deepEqual(preEnv);
-
         testServer.close();
         testProxyServer.close();
     });
@@ -579,11 +594,11 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
                 setTimeout(function() {
                     if (inError) {
-                        done(new Error("no url allowed though"))
+                        done(new Error("no url allowed though"));
                     } else {
                         done();
                     }
-                },20)
+                },20);
             });
         });
 
@@ -666,11 +681,11 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
                 setTimeout(function() {
                     if (inError) {
-                        done(new Error("non http(s):// scheme allowed through"))
+                        done(new Error("non http(s):// scheme allowed through"));
                     } else {
                         done();
                     }
-                },20)
+                },20);
             });
         });
 
@@ -687,11 +702,11 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo",url:"ftp://foo"});
                 setTimeout(function() {
                     if (inError) {
-                        done(new Error("non http(s):// scheme allowed through"))
+                        done(new Error("non http(s):// scheme allowed through"));
                     } else {
                         done();
                     }
-                },20)
+                },20);
             });
         });
 
@@ -840,7 +855,7 @@ describe('HTTP Request Node', function() {
 
         it('should send cookie with obejct data', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
-            {id:"n2", type:"helper"}];
+                {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -988,7 +1003,7 @@ describe('HTTP Request Node', function() {
             var flow = [
                 {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURLWithoutProtocol('/text'),tls:"n3"},
                 {id:"n2", type:"helper"},
-                {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:""}];
+                {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"", verifyservercert:false}];
             var testNodes = [httpRequestNode, tlsNode];
             helper.load(testNodes, flow, function() {
                 var n3 = helper.getNode("n3");
@@ -1014,13 +1029,13 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.http_proxy;
+            saveProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.http_proxy = preHttpProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1037,13 +1052,13 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy when environment variable is invalid', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.http_proxy;
+            saveProxySetting();
             process.env.http_proxy = "invalidvalue";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.http_proxy = preHttpProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1060,13 +1075,13 @@ describe('HTTP Request Node', function() {
         it('should use HTTP_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.HTTP_PROXY;
+            saveProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.HTTP_PROXY = preHttpProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1083,16 +1098,14 @@ describe('HTTP Request Node', function() {
         it('should use no_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.http_proxy;
-            var preNoProxy = process.env.no_proxy;
+            saveProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             process.env.no_proxy = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.http_proxy = preHttpProxy;
-                    process.env.no_proxy = preNoProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1108,16 +1121,14 @@ describe('HTTP Request Node', function() {
         it('should use NO_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.HTTP_PROXY;
-            var preNoProxy = process.env.NO_PROXY;
+            saveProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             process.env.NO_PROXY = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.HTTP_PROXY = preHttpProxy;
-                    process.env.NO_PROXY = preNoProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1138,7 +1149,7 @@ describe('HTTP Request Node', function() {
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                n1.credentials = {user:'userfoo', password:'passwordfoo'}
+                n1.credentials = {user:'userfoo', password:'passwordfoo'};
                 n2.on("input", function(msg) {
                     try {
                         msg.should.have.property('statusCode',200);
@@ -1151,18 +1162,18 @@ describe('HTTP Request Node', function() {
                 });
                 n1.receive({payload:"foo"});
             });
-        })
+        });
 
         it('should authenticate on proxy server', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.http_proxy;
+            saveProxySetting();
             process.env.http_proxy = "http://foouser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.http_proxy = preHttpProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('user', 'foouser');
@@ -1181,13 +1192,13 @@ describe('HTTP Request Node', function() {
         it('should output an error when proxy authentication was failed', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            var preHttpProxy = process.env.http_proxy;
+            saveProxySetting();
             process.env.http_proxy = "http://xxxuser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    process.env.http_proxy = preHttpProxy;
+                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',407);
                         msg.headers.should.have.property('proxy-authenticate', 'BASIC realm="test"');

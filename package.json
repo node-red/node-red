@@ -99,7 +99,6 @@
         "grunt-sass": "~2.0.0",
         "grunt-simple-mocha": "~0.4.1",
         "grunt-webdriver": "^2.0.3",
-        "hoek": "^4.2.1",
         "http-proxy": "^1.16.2",
         "istanbul": "0.4.5",
         "mocha": "~3.4.2",
