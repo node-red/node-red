@@ -161,10 +161,15 @@ function start() {
                 }
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
-                }
-                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
-                started = true;
-            }).catch(function(err) {
+                }                                
+            }).then(function() {
+                return redNodes.loadFlows()
+                    .then(redNodes.startFlows)
+                    .then(function() {
+                        started = true;
+                    });
+            })
+            .catch(function(err) {
                 console.log(err);
             });
         });
