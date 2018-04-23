@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-describe("runtime/i18n", function() {
+describe("util/i18n", function() {
     it('can be required without errors', function() {
-        require("../../../red/runtime/i18n");
+        require("../../../red/util/i18n");
     });
     it.skip('more tests needed', function(){})
 });
