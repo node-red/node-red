@@ -123,7 +123,7 @@ describe('context', function() {
             should.not.exist(context.get("foo"));
         });
 
-        it.skip('enumerates context keys', function() {
+        it('enumerates context keys', function() {
             var context = Context.get("1","flowA");
 
             var keys = context.keys();
@@ -168,6 +168,7 @@ describe('context', function() {
             stubGet.reset();
             stubSet.reset();
             stubKeys.reset();
+            stubDelete.reset();
             Context.clean({allNodes:{}});
             fs.remove(testDir,done);
         });
@@ -418,7 +419,7 @@ describe('context', function() {
             var result = parseKey(input);
             result.storage.should.eql(expectedModule);
             result.key.should.eql(expectedKey);
-        };
+        }
 
         it('should return module and key', function() {
             returnModuleAndKey("$test.aaa","test","aaa");

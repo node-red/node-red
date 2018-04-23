@@ -37,7 +37,7 @@ function init(_settings) {
 function load() {
     // load & init plugins in settings.contextStorage
     var plugins = settings.contextStorage;
-    var alias = null;
+    var isAlias = false;
     if (plugins) {
         noContextStorage = false;
         for(var pluginName in plugins){
@@ -45,7 +45,7 @@ function load() {
                 continue;
             }
             if(pluginName === "default" && typeof plugins[pluginName] === "string"){
-                alias = plugins[pluginName];
+                isAlias = true;
                 continue;
             }
             var plugin;
@@ -67,9 +67,9 @@ function load() {
                 throw new Error(log._("context.error-module-not-defined", {storage:pluginName}));
             }
         }
-        if(alias){
-            if(externalContexts.hasOwnProperty(alias)){
-                externalContexts["default"] = externalContexts[alias];
+        if(isAlias){
+            if(externalContexts.hasOwnProperty(plugins["default"])){
+                externalContexts["default"] =  externalContexts[plugins["default"]];
             }else{
                 throw new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]}));
             }

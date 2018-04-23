@@ -79,6 +79,7 @@ describe("runtime", function() {
         var redNodesGetNodeList;
         var redNodesLoadFlows;
         var redNodesStartFlows;
+        var redNodesLoadContextsPlugin;
 
         beforeEach(function() {
             storageInit = sinon.stub(storage,"init",function(settings) {return when.resolve();});
@@ -91,6 +92,7 @@ describe("runtime", function() {
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
             redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return when.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
+            redNodesLoadContextsPlugin = sinon.stub(redNodes,"loadContextsPlugin",function() {});
         });
         afterEach(function() {
             storageInit.restore();
@@ -104,6 +106,7 @@ describe("runtime", function() {
             redNodesCleanModuleList.restore();
             redNodesLoadFlows.restore();
             redNodesStartFlows.restore();
+            redNodesLoadContextsPlugin.restore();
         });
         it("reports errored/missing modules",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
