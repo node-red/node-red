@@ -407,6 +407,24 @@ module.exports = function(grunt) {
                 cwd: '<%= paths.dist %>/',
                 src: ['node-red-<%= pkg.version %>/**']
             }
+        },
+        jsdoc : {
+            runtimeAPI: {
+                src: 'red/runtime-api/*.js',
+                options: {
+                    destination: 'docs',
+                    configure: './jsdoc.json'
+                }
+            }
+        },
+        jsdoc2md: {
+            runtimeAPI: {
+                options: {
+                    separators: true
+                },
+                src: 'red/runtime-api/*.js',
+                dest: 'docs/runtime-api.md'
+            }
         }
     });
 
@@ -425,6 +443,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-jsonlint');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
     grunt.loadNpmTasks('grunt-webdriver');
+    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-jsdoc-to-markdown');
 
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
@@ -507,4 +527,8 @@ module.exports = function(grunt) {
     grunt.registerTask('coverage',
         'Run Istanbul code test coverage task',
         ['build','mocha_istanbul:all']);
+
+    grunt.registerTask('docs',
+        'Generates API documentation',
+        ['jsdoc','jsdoc2md']);
 };
