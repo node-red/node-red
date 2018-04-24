@@ -28,7 +28,7 @@ describe('file Nodes', function() {
 
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
         var fileToTest = path.join(resourcesDir,"50-file-test-file.txt");
-        var wait = 150;
+        var wait = 250;
 
         beforeEach(function(done) {
             //fs.writeFileSync(fileToTest, "File message line 1\File message line 2\n");

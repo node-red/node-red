@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var sinon = require("sinon");
 var path = require("path");
 var fs = require('fs-extra');
 
@@ -29,6 +28,10 @@ describe('html node', function() {
 
     before(function(done) {
         helper.startServer(done);
+    });
+
+    after(function(done) {
+        helper.stopServer(done);
     });
 
     beforeEach(function() {

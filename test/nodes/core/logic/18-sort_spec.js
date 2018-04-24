@@ -25,6 +25,10 @@ describe('SORT node', function() {
         helper.startServer(done);
     });
 
+    after(function(done) {
+        helper.stopServer(done);
+    });
+
     afterEach(function() {
         helper.unload();
         RED.settings.nodeMessageBufferMaxLength = 0;

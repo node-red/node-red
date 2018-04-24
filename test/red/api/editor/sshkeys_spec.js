@@ -52,9 +52,9 @@ describe("api/editor/sshkeys", function() {
                     session_data = _session;
                     return when.resolve();
                 }
-            },
-            log:{audit:function(){},error:function(msg){errors.push(msg)}}
+            }
         },
+        log:{audit:function(){},error:function(msg){errors.push(msg)},trace:function(){}},
         storage: {
             projects: {
                 ssh: {

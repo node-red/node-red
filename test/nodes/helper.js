@@ -19,6 +19,7 @@ var sinon = require("sinon");
 var when = require("when");
 var request = require('supertest');
 var express = require("express");
+var stoppable = require('stoppable');
 var nock;
 if (!process.version.match(/^v0\.[0-9]\./)) {
     // only set nock for node >= 0.10
@@ -132,7 +133,7 @@ module.exports = {
     },
 
     startServer: function(done) {
-        server = http.createServer(function(req,res) { app(req,res); });
+        server = stoppable(http.createServer(function(req,res) { app(req,res); }), 0);
         RED.init(server, {
             SKIP_BUILD_CHECK: true,
             logging:{console:{level:'off'}}
@@ -150,13 +151,13 @@ module.exports = {
     stopServer: function(done) {
         if (server) {
             try {
-                server.on('close', function() {
-                    comms.stop();
-                });
-                server.close(done);
+                comms.stop();
+                server.stop(done);
             } catch(e) {
                 done();
             }
+        } else {
+            done();
         }
     },
 

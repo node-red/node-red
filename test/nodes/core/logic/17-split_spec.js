@@ -26,6 +26,10 @@ describe('SPLIT node', function() {
         helper.startServer(done);
     });
 
+    after(function(done) {
+        helper.stopServer(done);
+    });
+
     afterEach(function() {
         helper.unload();
     });
@@ -266,6 +270,10 @@ describe('JOIN node', function() {
 
     before(function(done) {
         helper.startServer(done);
+    });
+
+    after(function(done) {
+        helper.stopServer(done);
     });
 
     afterEach(function() {
