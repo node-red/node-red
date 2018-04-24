@@ -1,10 +1,12 @@
 sudo: false
 language: node_js
-node_js:
-  - "8"
-  - "6"
-  - "4"
-script:
-  - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
-before_script:
-  - npm install -g istanbul coveralls
+matrix:
+  include:
+    - node_js: "10"
+      script:
+        - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
+      before_script:
+        - npm install -g istanbul coveralls
+    - node_js: "8"
+    - node_js: "6"
+    - node_js: "4"
