@@ -33,6 +33,24 @@ var listenPort = 0; // use ephemeral port
 
 
 describe("api/editor/comms", function() {
+    var connections = [];
+    var mockComms = {
+        addConnection: function(opts) {
+            connections.push(opts.client);
+            return Promise.resolve()
+        },
+        removeConnection: function(opts) {
+            for (var i=0;i<connections.length;i++) {
+                if (connections[i] === opts.client) {
+                    connections.splice(i,1);
+                    break;
+                }
+            }
+            return Promise.resolve()
+        },
+        subscribe: function() { return Promise.resolve()},
+        unsubscribe: function() { return Promise.resolve(); }
+    }
 
     describe("with default keepalive", function() {
         var server;
@@ -41,11 +59,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -63,9 +77,15 @@ describe("api/editor/comms", function() {
 
         it('accepts connection', function(done) {
             var ws = new WebSocket(url);
+            connections.length.should.eql(0);
             ws.on('open', function() {
-                ws.close();
-                done();
+                try {
+                    connections.length.should.eql(1);
+                    ws.close();
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
 
@@ -73,40 +93,11 @@ describe("api/editor/comms", function() {
             var ws = new WebSocket(url);
             ws.on('open', function() {
                 ws.send('{"subscribe":"topic1"}');
-                comms.publish('topic1', 'foo');
+                connections.length.should.eql(1);
+                connections[0].send('topic1', 'foo');
             });
             ws.on('message', function(msg) {
                 msg.should.equal('[{"topic":"topic1","data":"foo"}]');
-                ws.close();
-                done();
-            });
-        });
-
-        it('publishes retained message for subscription', function(done) {
-            comms.publish('topic2', 'bar', true);
-            var ws = new WebSocket(url);
-            ws.on('open', function() {
-                ws.send('{"subscribe":"topic2"}');
-            });
-            ws.on('message', function(msg) {
-                console.log(msg);
-                msg.should.equal('[{"topic":"topic2","data":"bar"}]');
-                ws.close();
-                done();
-            });
-        });
-
-        it('retained message is deleted by non-retained message', function(done) {
-            comms.publish('topic3', 'retained', true);
-            comms.publish('topic3', 'non-retained');
-            var ws = new WebSocket(url);
-            ws.on('open', function() {
-                ws.send('{"subscribe":"topic3"}');
-                comms.publish('topic3', 'new');
-            });
-            ws.on('message', function(msg) {
-                console.log(msg);
-                msg.should.equal('[{"topic":"topic3","data":"new"}]');
                 ws.close();
                 done();
             });
@@ -118,7 +109,7 @@ describe("api/editor/comms", function() {
                 ws.send('not json');
                 ws.send('[]');
                 ws.send('{"subscribe":"topic3"}');
-                comms.publish('topic3', 'correct');
+                connections[0].send('topic3', 'correct');
             });
             ws.on('message', function(msg) {
                 console.log(msg);
@@ -127,40 +118,16 @@ describe("api/editor/comms", function() {
                 done();
             });
         });
-
-        // The following test currently fails due to minimum viable
-        // implementation. More test should be written to test topic
-        // matching once this one is passing
-
-        it.skip('receives message on correct topic', function(done) {
-            var ws = new WebSocket(url);
-            ws.on('open', function() {
-                ws.send('{"subscribe":"topic4"}');
-                comms.publish('topic5', 'foo');
-                comms.publish('topic4', 'bar');
-            });
-            ws.on('message', function(msg) {
-                console.log(msg);
-                msg.should.equal('[{"topic":"topic4","data":"bar"}]');
-                ws.close();
-                done();
-            });
-        });
-
-        it('listens for node/status events');
     });
+
     describe("disabled editor", function() {
         var server;
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{disableEditor:true},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {disableEditor:true}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -177,12 +144,14 @@ describe("api/editor/comms", function() {
         });
 
         it('rejects websocket connections',function(done) {
+            connections.length.should.eql(0);
             var ws = new WebSocket(url);
             ws.on('open', function() {
                  done(new Error("Socket connection unexpectedly accepted"));
                  ws.close();
             });
             ws.on('error', function() {
+                connections.length.should.eql(0);
                 done();
             });
 
@@ -196,11 +165,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{httpAdminRoot:"/adminPath"},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {httpAdminRoot:"/adminPath"}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -217,8 +182,10 @@ describe("api/editor/comms", function() {
         });
 
         it('accepts connections',function(done) {
+            connections.length.should.eql(0);
             var ws = new WebSocket(url);
             ws.on('open', function() {
+                connections.length.should.eql(1);
                  ws.close();
                  done();
             });
@@ -236,11 +203,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server,{
-                settings:{httpAdminRoot:"/adminPath"},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {httpAdminRoot:"/adminPath/"}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -257,8 +220,10 @@ describe("api/editor/comms", function() {
         });
 
         it('accepts connections',function(done) {
+            connections.length.should.eql(0);
             var ws = new WebSocket(url);
             ws.on('open', function() {
+                connections.length.should.eql(1);
                  ws.close();
                  done();
             });
@@ -276,11 +241,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{httpAdminRoot:"adminPath"},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {httpAdminRoot:"adminPath"}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -297,8 +258,10 @@ describe("api/editor/comms", function() {
         });
 
         it('accepts connections',function(done) {
+            connections.length.should.eql(0);
             var ws = new WebSocket(url);
             ws.on('open', function() {
+                connections.length.should.eql(1);
                  ws.close();
                  done();
             });
@@ -316,11 +279,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             sinon.stub(Users,"default",function() { return when.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{webSocketKeepAliveTime: 100},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {webSocketKeepAliveTime: 100}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -355,7 +314,7 @@ describe("api/editor/comms", function() {
             ws.on('open', function() {
                 ws.send('{"subscribe":"foo"}');
                 interval = setInterval(function() {
-                    comms.publish('foo', 'bar');
+                    connections[0].send('foo', 'bar');
                 }, 50);
             });
             ws.on('message', function(data) {
@@ -403,11 +362,7 @@ describe("api/editor/comms", function() {
 
 
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server,{
-                settings:{adminAuth:{}},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {adminAuth:{}}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -447,7 +402,7 @@ describe("api/editor/comms", function() {
                 if (received == 1) {
                     msg.should.equal('{"auth":"ok"}');
                     ws.send('{"subscribe":"foo"}');
-                    comms.publish('foo', 'correct');
+                    connections[0].send('foo', 'correct');
                 } else {
                     msg.should.equal('[{"topic":"foo","data":"correct"}]');
                     ws.close();
@@ -494,11 +449,7 @@ describe("api/editor/comms", function() {
         before(function(done) {
             getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve({permissions:"read"});});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
-            comms.init(server, {
-                settings:{adminAuth:{}},
-                log:{warn:function(){},_:function(){},trace:function(){},audit:function(){}},
-                events:{on:function(){},removeListener:function(){}}
-            });
+            comms.init(server, {adminAuth:{}}, {comms: mockComms});
             server.listen(listenPort, address);
             server.on('listening', function() {
                 port = server.address().port;
@@ -520,7 +471,7 @@ describe("api/editor/comms", function() {
             ws.on('open', function() {
                 ws.send('{"subscribe":"foo"}');
                 setTimeout(function() {
-                    comms.publish('foo', 'correct');
+                    connections[0].send('foo', 'correct');
                 },200);
             });
             ws.on('message', function(msg) {

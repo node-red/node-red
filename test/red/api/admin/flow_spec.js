@@ -38,18 +38,23 @@ describe("api/admin/flow", function() {
 
     describe("get", function() {
         before(function() {
+            var opts;
             flow.init({
-                settings:{},
-                nodes: {
-                    getFlow: function(id) {
-                        if (id === '123') {
-                            return {id:'123'}
+                flows: {
+                    getFlow: function(_opts) {
+                        opts = _opts;
+                        if (opts.id === '123') {
+                            return Promise.resolve({id:'123'});
                         } else {
-                            return null;
+                            var err = new Error("message");
+                            err.code = "not_found";
+                            err.status = 404;
+                            var p = Promise.reject(err);
+                            p.catch(()=>{});
+                            return p;
                         }
                     }
-                },
-                log:{ audit: sinon.stub() }
+                }
             });
         })
         it('gets a known flow', function(done) {
@@ -75,19 +80,24 @@ describe("api/admin/flow", function() {
     });
 
     describe("add", function() {
+        var opts;
         before(function() {
             flow.init({
-                settings:{},
-                nodes: {
-                    addFlow: function(f) {
-                        if (f.id === "123") {
-                            return when.resolve('123')
+                flows: {
+                    addFlow: function(_opts) {
+                        opts = _opts;
+                        if (opts.flow.id === "123") {
+                            return Promise.resolve('123')
                         } else {
-                            return when.reject(new Error("test error"));
+                            var err = new Error("random error");
+                            err.code = "random_error";
+                            err.status = 400;
+                            var p = Promise.reject(err);
+                            p.catch(()=>{});
+                            return p;
                         }
                     }
-                },
-                log:{ audit: sinon.stub() }
+                }
             });
         })
         it('adds a new flow', function(done) {
@@ -114,8 +124,8 @@ describe("api/admin/flow", function() {
                     if (err) {
                         return done(err);
                     }
-                    res.body.should.has.a.property('error','unexpected_error');
-                    res.body.should.has.a.property('message','Error: test error');
+                    res.body.should.has.a.property('code','random_error');
+                    res.body.should.has.a.property('message','random error');
 
                     done();
                 });
@@ -123,35 +133,29 @@ describe("api/admin/flow", function() {
     })
 
     describe("update", function() {
-        var nodes;
+
+        var opts;
         before(function() {
-            nodes = {
-                updateFlow: function(id,f) {
-                    var err;
-                    if (id === "123") {
-                        return when.resolve()
-                    } else if (id === "unknown") {
-                        err = new Error();
-                        err.code = 404;
-                        throw err;
-                    } else if (id === "unexpected") {
-                        err = new Error();
-                        err.code = 500;
-                        throw err;
-                    } else {
-                        return when.reject(new Error("test error"));
+            flow.init({
+                flows: {
+                    updateFlow: function(_opts) {
+                        opts = _opts;
+                        if (opts.id === "123") {
+                            return Promise.resolve('123')
+                        } else {
+                            var err = new Error("random error");
+                            err.code = "random_error";
+                            err.status = 400;
+                            var p = Promise.reject(err);
+                            p.catch(()=>{});
+                            return p;
+                        }
                     }
                 }
-            };
-            flow.init({
-                settings:{},
-                nodes: nodes,
-                log:{ audit: sinon.stub() }
             });
         })
 
         it('updates an existing flow', function(done) {
-            sinon.spy(nodes,"updateFlow");
             request(app)
                 .put('/flow/123')
                 .set('Accept', 'application/json')
@@ -162,115 +166,79 @@ describe("api/admin/flow", function() {
                         return done(err);
                     }
                     res.body.should.has.a.property('id','123');
-                    nodes.updateFlow.calledOnce.should.be.true();
-                    nodes.updateFlow.lastCall.args[0].should.eql('123');
-                    nodes.updateFlow.lastCall.args[1].should.eql({id:'123'});
-                    nodes.updateFlow.restore();
+                    opts.should.have.property('id','123');
+                    opts.should.have.property('flow',{id:'123'})
                     done();
                 });
         })
 
-        it('404s on an unknown flow', function(done) {
+        it('400 an invalid flow', function(done) {
             request(app)
-                .put('/flow/unknown')
+                .put('/flow/456')
                 .set('Accept', 'application/json')
-                .send({id:'123'})
-                .expect(404)
-                .end(done);
-        })
-
-        it('400 on async update error', function(done) {
-            request(app)
-                .put('/flow/async_error')
-                .set('Accept', 'application/json')
-                .send({id:'123'})
+                .send({id:'456'})
                 .expect(400)
                 .end(function(err,res) {
                     if (err) {
                         return done(err);
                     }
-                    res.body.should.has.a.property('error','unexpected_error');
-                    res.body.should.has.a.property('message','Error: test error');
-                    done();
-                });
-        })
+                    res.body.should.has.a.property('code','random_error');
+                    res.body.should.has.a.property('message','random error');
 
-        it('400 on sync update error', function(done) {
-            request(app)
-                .put('/flow/unexpected')
-                .set('Accept', 'application/json')
-                .send({id:'123'})
-                .expect(400)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.has.a.property('error',500);
-                    res.body.should.has.a.property('message','Error');
                     done();
                 });
         })
     })
 
     describe("delete", function() {
-        var nodes;
+
+        var opts;
         before(function() {
-            nodes = {
-                removeFlow: function(id) {
-                    var err;
-                    if (id === "123") {
-                        return when.resolve()
-                    } else if (id === "unknown") {
-                        err = new Error();
-                        err.code = 404;
-                        throw err;
-                    } else if (id === "unexpected") {
-                        err = new Error();
-                        err.code = 500;
-                        throw err;
+            flow.init({
+                flows: {
+                    deleteFlow: function(_opts) {
+                        opts = _opts;
+                        if (opts.id === "123") {
+                            return Promise.resolve()
+                        } else {
+                            var err = new Error("random error");
+                            err.code = "random_error";
+                            err.status = 400;
+                            var p = Promise.reject(err);
+                            p.catch(()=>{});
+                            return p;
+                        }
                     }
                 }
-            };
-            flow.init({
-                settings:{},
-                nodes: nodes,
-                log:{ audit: sinon.stub() }
             });
         })
 
-        it('updates an existing flow', function(done) {
-            sinon.spy(nodes,"removeFlow");
+        it('deletes an existing flow', function(done) {
             request(app)
-                .delete('/flow/123')
+                .del('/flow/123')
+                .set('Accept', 'application/json')
                 .expect(204)
                 .end(function(err,res) {
                     if (err) {
                         return done(err);
                     }
-                    nodes.removeFlow.calledOnce.should.be.true();
-                    nodes.removeFlow.lastCall.args[0].should.eql('123');
-                    nodes.removeFlow.restore();
+                    opts.should.have.property('id','123');
                     done();
                 });
         })
 
-        it('404s on an unknown flow', function(done) {
+        it('400 an invalid flow', function(done) {
             request(app)
-                .delete('/flow/unknown')
-                .expect(404)
-                .end(done);
-        })
-
-        it('400 on remove error', function(done) {
-            request(app)
-                .delete('/flow/unexpected')
+                .del('/flow/456')
+                .set('Accept', 'application/json')
                 .expect(400)
                 .end(function(err,res) {
                     if (err) {
                         return done(err);
                     }
-                    res.body.should.has.a.property('error',500);
-                    res.body.should.has.a.property('message','Error');
+                    res.body.should.has.a.property('code','random_error');
+                    res.body.should.has.a.property('message','random error');
+
                     done();
                 });
         })

@@ -39,7 +39,7 @@ describe('storage/localfilesystem/settings', function() {
         localfilesystemSettings.getSettings().then(function(settings) {
             settings.should.eql({});
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -52,7 +52,7 @@ describe('storage/localfilesystem/settings', function() {
         localfilesystemSettings.getSettings().then(function(settings) {
             settings.should.eql({});
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -70,10 +70,10 @@ describe('storage/localfilesystem/settings', function() {
             localfilesystemSettings.getSettings().then(function(_settings) {
                 _settings.should.eql(settings);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });

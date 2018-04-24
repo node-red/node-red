@@ -19,7 +19,6 @@ var fs = require('fs-extra');
 var path = require('path');
 var when = require("when");
 var sinon = require('sinon');
-console.log(__dirname);
 var index = require("../../../../red/runtime/nodes/index");
 var flows = require("../../../../red/runtime/nodes/flows");
 var registry = require("../../../../red/runtime/nodes/registry");
@@ -81,7 +80,7 @@ describe("red/nodes/index", function() {
             testnode.credentials.should.have.property('c',"2");
             testnode.credentials.should.have.property('d',"bar");
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -93,7 +92,7 @@ describe("red/nodes/index", function() {
             // console.log(index.getFlows());
             should.deepEqual(testFlows, index.getFlows().flows);
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
 
@@ -258,7 +257,7 @@ describe("red/nodes/index", function() {
                     info.should.eql(randomNodeInfo);
                     done();
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -273,7 +272,7 @@ describe("red/nodes/index", function() {
                 }).should.throw();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -288,7 +287,7 @@ describe("red/nodes/index", function() {
                 }).should.throw();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -341,7 +340,7 @@ describe("red/nodes/index", function() {
                 }).should.throw();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -356,7 +355,7 @@ describe("red/nodes/index", function() {
                 }).should.throw();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });

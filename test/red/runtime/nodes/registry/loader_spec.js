@@ -69,7 +69,7 @@ describe("red/nodes/registry/loader",function() {
             loader.load("foo",true).then(function() {
                 registry.saveNodeList.called.should.be.true();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             })
         });
@@ -118,7 +118,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.lastCall.args[1].should.eql('test-node-1');
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -169,7 +169,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.secondCall.args[1].should.eql('test-node-multiple-1b');
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -219,7 +219,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.lastCall.args[1].should.eql('test-node-2');
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -267,7 +267,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.calledOnce.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -313,7 +313,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.calledOnce.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -360,7 +360,7 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.calledOnce.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -379,7 +379,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getModuleInfo",function(){return{}}));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
 
-            loader.addModule("test-module").otherwise(function(err) {
+            loader.addModule("test-module").catch(function(err) {
                 err.code.should.eql("module_already_loaded");
                 done();
             });
@@ -390,7 +390,7 @@ describe("red/nodes/registry/loader",function() {
                 throw new Error("failure");
             }));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
-            loader.addModule("test-module").otherwise(function(err) {
+            loader.addModule("test-module").catch(function(err) {
                 err.message.should.eql("failure");
                 done();
             });
@@ -441,7 +441,7 @@ describe("red/nodes/registry/loader",function() {
 
                 nodes.registerType.calledOnce.should.be.true();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -477,7 +477,7 @@ describe("red/nodes/registry/loader",function() {
                 registry.addNodeSet.called.should.be.false();
                 nodes.registerType.called.should.be.false();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -498,7 +498,7 @@ describe("red/nodes/registry/loader",function() {
                 node.enabled.should.be.false();
                 nodes.registerType.called.should.be.false();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -517,7 +517,7 @@ describe("red/nodes/registry/loader",function() {
                 node.err.toString().should.eql("Error: fail to require (line:1)");
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });

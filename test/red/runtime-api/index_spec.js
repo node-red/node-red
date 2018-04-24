@@ -14,6 +14,41 @@
  * limitations under the License.
  **/
 
+var should = require("should");
+var sinon = require("sinon");
+
+var index = require("../../../red/runtime-api/index");
+
+
 describe("runtime-api/index", function() {
-    it.skip('more tests needed', function(){})
+    before(function() {
+        ["comms","flows","nodes","settings","library","projects"].forEach(n => {
+            sinon.stub(require(`../../../red/runtime-api/${n}`),"init",()=>{});
+        })
+    });
+    after(function() {
+        ["comms","flows","nodes","settings","library","projects"].forEach(n => {
+            require(`../../../red/runtime-api/${n}`).init.restore()
+        })
+    })
+    it('isStarted', function(done) {
+        index.init({
+            isStarted: ()=>true
+        });
+        index.isStarted({}).then(function(started) {
+            started.should.be.true();
+            done();
+        }).catch(done);
+    })
+
+    it('isStarted', function(done) {
+        index.init({
+            version: ()=>"1.2.3.4"
+        });
+        index.version({}).then(function(version) {
+            version.should.eql("1.2.3.4");
+            done();
+        }).catch(done);
+    })
+
 });

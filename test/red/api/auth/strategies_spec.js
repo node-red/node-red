@@ -24,9 +24,6 @@ var Tokens = require("../../../../red/api/auth/tokens");
 var Clients = require("../../../../red/api/auth/clients");
 
 describe("api/auth/strategies", function() {
-    before(function() {
-        strategies.init({log:{audit:function(){}}})
-    });
     describe("Password Token Exchange", function() {
         var userAuthentication;
         afterEach(function() {

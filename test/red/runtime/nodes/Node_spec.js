@@ -110,7 +110,7 @@ describe('Node', function() {
             p.then(function() {
                 callbacksClosed.should.eql(3);
                 testdone();
-            }).otherwise(function(e) {
+            }).catch(function(e) {
                 testdone(e);
             });
         });

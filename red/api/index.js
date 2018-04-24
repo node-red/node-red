@@ -89,22 +89,8 @@ module.exports = {
     init: init,
     start: start,
     stop: stop,
-    library: {
-        register: function(type) {
-            if (editor) {
-                editor.registerLibrary(type);
-            }
-        }
-    },
     auth: {
         needsPermission: auth.needsPermission
-    },
-    comms: {
-        publish: function(topic,data,retain) {
-            if (editor) {
-                editor.publish(topic,data,retain);
-            }
-        }
     },
     get adminApp() { return adminApp; },
     get server() { return server; }

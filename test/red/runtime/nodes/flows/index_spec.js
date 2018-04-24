@@ -524,7 +524,7 @@ describe('flows/index', function() {
                     ]
                 }).then(function() {
                     done(new Error('failed to reject duplicate node id'));
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done();
                 })
             });
@@ -559,7 +559,7 @@ describe('flows/index', function() {
                     createdFlows.should.have.lengthOf(3);
                     createdFlows[2].should.eql(id);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 })
             });

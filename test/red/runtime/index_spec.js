@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
@@ -45,6 +44,7 @@ describe("runtime", function() {
                 log: sinon.stub(),
                 warn: sinon.stub(),
                 info: sinon.stub(),
+                trace: sinon.stub(),
                 metric: sinon.stub().returns(!!metrics),
                 _: function() { return "abc"}
             },
@@ -90,11 +90,11 @@ describe("runtime", function() {
         var redNodesLoadFlows;
         var redNodesStartFlows;
         beforeEach(function() {
-            storageInit = sinon.stub(storage,"init",function(settings) {return when.resolve();});
+            storageInit = sinon.stub(storage,"init",function(settings) {return Promise.resolve();});
             redNodesInit = sinon.stub(redNodes,"init", function() {});
-            redNodesLoad = sinon.stub(redNodes,"load", function() {return when.resolve()});
+            redNodesLoad = sinon.stub(redNodes,"load", function() {return Promise.resolve()});
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
-            redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return when.resolve()});
+            redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return Promise.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
         });
         afterEach(function() {
@@ -114,7 +114,7 @@ describe("runtime", function() {
                 ].filter(cb);
             });
             var util = mockUtil();
-            runtime.init({testSettings: true, httpAdminRoot:"/", load:function() { return when.resolve();}},util);
+            runtime.init({testSettings: true, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
             // sinon.stub(console,"log");
             runtime.start().then(function() {
                 // console.log.restore();
@@ -143,9 +143,9 @@ describe("runtime", function() {
                     {  module:"node-red",enabled:true,loaded:false,types:["typeC","typeD"]} // missing
                 ].filter(cb);
             });
-            var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return when.resolve({nodes:[]});});
+            var serverInstallModule = sinon.stub(redNodes,"installModule",function(name) { return Promise.resolve({nodes:[]});});
             var util = mockUtil();
-            runtime.init({testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return when.resolve();}},util);
+            runtime.init({testSettings: true, autoInstallModules:true, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -172,7 +172,7 @@ describe("runtime", function() {
                 ].filter(cb);
             });
             var util = mockUtil();
-            runtime.init({testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return when.resolve();}},util);
+            runtime.init({testSettings: true, verbose:true, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();
@@ -190,7 +190,7 @@ describe("runtime", function() {
             var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             var util = mockUtil(true);
-            runtime.init({testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return when.resolve();}},util);
+            runtime.init({testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
             sinon.stub(console,"log");
             runtime.start().then(function() {
                 console.log.restore();

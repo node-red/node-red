@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 var should = require("should");
-var when = require("when");
 
 var settings = require("../../../red/runtime/settings");
 
@@ -86,12 +85,12 @@ describe("red/settings", function() {
         var saveCount = 0;
         var storage = {
             getSettings: function() {
-                return when.resolve({globalA:789});
+                return Promise.resolve({globalA:789});
             },
             saveSettings: function(settings) {
                 saveCount++;
                 savedSettings = settings;
-                return when.resolve();
+                return Promise.resolve();
             }
         }
         settings.init(userSettings);
@@ -115,7 +114,7 @@ describe("red/settings", function() {
                     done();
                 });
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });

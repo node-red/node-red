@@ -29,17 +29,20 @@ function init(_runtime) {
 }
 
 function registerType(id,type) {
-    if (knownTypes.hasOwnProperty(type)) {
-        throw new Error(`Library type '${type}' already registerd by ${id}'`)
-    }
+    // TODO: would like to enforce this, but currently the tests register the same type multiple
+    //       times and have no way to remove themselves.
+    // if (knownTypes.hasOwnProperty(type)) {
+    //     throw new Error(`Library type '${type}' already registered by ${id}'`)
+    // }
     knownTypes[type] = id;
 }
 
-function getAllEntries(type) {
-    if (!knownTypes.hasOwnProperty(type)) {
-        throw new Error(`Unknown library type '${type}'`);
-    }
-}
+// function getAllEntries(type) {
+//     if (!knownTypes.hasOwnProperty(type)) {
+//         throw new Error(`Unknown library type '${type}'`);
+//     }
+// }
+
 function getEntry(type,path) {
     if (type !== 'flows') {
         if (!knownTypes.hasOwnProperty(type)) {
@@ -67,12 +70,11 @@ function getEntry(type,path) {
                             return reject(err);
                         }
                     }
-                } else {
-                    // IF we get here, we didn't find the file
-                    var error = new Error("not_found");
-                    error.code = "not_found";
-                    return reject(error);
                 }
+                // IF we get here, we didn't find the file
+                var error = new Error("not_found");
+                error.code = "not_found";
+                return reject(error);
             } else {
                 resolve(storage.getFlow(path));
             }
@@ -92,8 +94,8 @@ function saveEntry(type,path,meta,body) {
 
 module.exports = {
     init: init,
-    registerType: registerType,
-    getAllEntries: getAllEntries,
+    register: registerType,
+    // getAllEntries: getAllEntries,
     getEntry: getEntry,
     saveEntry: saveEntry
 

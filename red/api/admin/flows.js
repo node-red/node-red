@@ -15,6 +15,7 @@
  **/
 
 var runtimeAPI;
+var apiUtils = require("../util");
 
 module.exports = {
     init: function(_runtimeAPI) {
@@ -23,7 +24,7 @@ module.exports = {
     get: function(req,res) {
         var version = req.get("Node-RED-API-Version")||"v1";
         if (!/^v[12]$/.test(version)) {
-            return res.status(500).json({code:"invalid_api_version", message:"Invalid API Version requested"});
+            return res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
         }
         var opts = {
             user: req.user
@@ -41,7 +42,7 @@ module.exports = {
     post: function(req,res) {
         var version = req.get("Node-RED-API-Version")||"v1";
         if (!/^v[12]$/.test(version)) {
-            return res.status(500).json({code:"invalid_api_version", message:"Invalid API Version requested"});
+            return res.status(400).json({code:"invalid_api_version", message:"Invalid API Version requested"});
         }
         var opts = {
             user: req.user,

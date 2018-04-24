@@ -23,6 +23,7 @@ var passport = require("passport");
 var auth = require("../../../../red/api/auth");
 var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
+var Permissions = require("../../../../red/api/auth/permissions");
 
 describe("api/auth/index",function() {
 
@@ -30,7 +31,7 @@ describe("api/auth/index",function() {
 
     describe("ensureClientSecret", function() {
         before(function() {
-            auth.init({settings:{},log:{audit:function(){}}})
+            auth.init({},{})
         });
         it("leaves client_secret alone if not present",function(done) {
             var req = {
@@ -85,7 +86,7 @@ describe("api/auth/index",function() {
             Users.init.restore();
         });
         it("returns login details - credentials", function(done) {
-            auth.init({settings:{adminAuth:{type:"credentials"}},log:{audit:function(){}}})
+            auth.init({adminAuth:{type:"credentials"}},{})
             auth.login(null,{json: function(resp) {
                 resp.should.have.a.property("type","credentials");
                 resp.should.have.a.property("prompts");
@@ -94,14 +95,14 @@ describe("api/auth/index",function() {
             }});
         });
         it("returns login details - none", function(done) {
-            auth.init({settings:{},log:{audit:function(){}}})
+            auth.init({},{})
             auth.login(null,{json: function(resp) {
                 resp.should.eql({});
                 done();
             }});
         });
         it("returns login details - strategy", function(done) {
-            auth.init({settings:{adminAuth:{type:"strategy",strategy:{label:"test-strategy",icon:"test-icon"}}},log:{audit:function(){}}})
+            auth.init({adminAuth:{type:"strategy",strategy:{label:"test-strategy",icon:"test-icon"}}},{})
             auth.login(null,{json: function(resp) {
                 resp.should.have.a.property("type","strategy");
                 resp.should.have.a.property("prompts");
@@ -115,5 +116,100 @@ describe("api/auth/index",function() {
         });
 
     });
+    describe("needsPermission", function() {
+        beforeEach(function() {
+            sinon.stub(Tokens,"init",function(){});
+            sinon.stub(Users,"init",function(){});
+        });
+        afterEach(function() {
+            Tokens.init.restore();
+            Users.init.restore();
+            if (passport.authenticate.restore) {
+                passport.authenticate.restore();
+            }
+            if (Permissions.hasPermission.restore) {
+                Permissions.hasPermission.restore();
+            }
+        });
 
+
+        it('no-ops if adminAuth not set', function(done) {
+            sinon.stub(passport,"authenticate",function(scopes,opts) {
+                return function(req,res,next) {
+                }
+            });
+            auth.init({});
+            var func = auth.needsPermission("foo");
+            func({},{},function() {
+                passport.authenticate.called.should.be.false();
+                done();
+            })
+        });
+        it('skips auth if req.user undefined', function(done) {
+            sinon.stub(passport,"authenticate",function(scopes,opts) {
+                return function(req,res,next) {
+                    next();
+                }
+            });
+            sinon.stub(Permissions,"hasPermission",function(perm) { return true });
+            auth.init({adminAuth:{}});
+            var func = auth.needsPermission("foo");
+            func({user:null},{},function() {
+                try {
+                    passport.authenticate.called.should.be.true();
+                    Permissions.hasPermission.called.should.be.false();
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            })
+        });
+
+        it('passes for valid user permission', function(done) {
+            sinon.stub(passport,"authenticate",function(scopes,opts) {
+                return function(req,res,next) {
+                    next();
+                }
+            });
+            sinon.stub(Permissions,"hasPermission",function(perm) { return true });
+            auth.init({adminAuth:{}});
+            var func = auth.needsPermission("foo");
+            func({user:true,authInfo: { scope: "read"}},{},function() {
+                try {
+                    passport.authenticate.called.should.be.true();
+                    Permissions.hasPermission.called.should.be.true();
+                    Permissions.hasPermission.lastCall.args[0].should.eql("read");
+                    Permissions.hasPermission.lastCall.args[1].should.eql("foo");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            })
+        });
+
+        it('rejects for invalid user permission', function(done) {
+            sinon.stub(passport,"authenticate",function(scopes,opts) {
+                return function(req,res,next) {
+                    next();
+                }
+            });
+            sinon.stub(Permissions,"hasPermission",function(perm) { return false });
+            auth.init({adminAuth:{}});
+            var func = auth.needsPermission("foo");
+            func({user:true,authInfo: { scope: "read"}},{
+                status: function(status) {
+                    return { end: function() {
+                        try {
+                            status.should.eql(401);
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    }}
+                }
+            },function() {
+                done(new Error("hasPermission unexpected passed"))
+            });
+        });
+    });
 });

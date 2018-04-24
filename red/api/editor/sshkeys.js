@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
+var apiUtils = require("../util");
 var express = require("express");
 var runtimeAPI;
-var needsPermission = require("../auth").needsPermission;
 
 function getUsername(userObj) {
     var username = '__default';
@@ -34,7 +34,7 @@ module.exports = {
         var app = express();
 
         // List all SSH keys
-        app.get("/", needsPermission("settings.read"), function(req,res) {
+        app.get("/", function(req,res) {
             var opts = {
                 user: req.user
             }
@@ -48,7 +48,7 @@ module.exports = {
         });
 
         // Get SSH key detail
-        app.get("/:id", needsPermission("settings.read"), function(req,res) {
+        app.get("/:id", function(req,res) {
             var opts = {
                 user: req.user,
                 id: req.params.id
@@ -63,11 +63,17 @@ module.exports = {
         });
 
         // Generate a SSH key
-        app.post("/", needsPermission("settings.write"), function(req,res) {
+        app.post("/", function(req,res) {
             var opts = {
                 user: req.user,
                 id: req.params.id
             }
+            // TODO: validate params
+            opts.name = req.body.name;
+            opts.password = req.body.password;
+            opts.comment = req.body.comment;
+            opts.size = req.body.size;
+
             runtimeAPI.settings.generateUserKey(opts).then(function(name) {
                 res.json({
                     name: name
@@ -78,12 +84,12 @@ module.exports = {
         });
 
         // Delete a SSH key
-        app.delete("/:id", needsPermission("settings.write"), function(req,res) {
+        app.delete("/:id", function(req,res) {
             var opts = {
                 user: req.user,
                 id: req.params.id
             }
-            runtimeAPI.settings.generateUserKey(opts).then(function(name) {
+            runtimeAPI.settings.removeUserKey(opts).then(function(name) {
                 res.status(204).end();
             }).catch(function(err) {
                 apiUtils.rejectHandler(req,res,err);

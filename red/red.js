@@ -111,9 +111,20 @@ module.exports = {
     util: runtime.util,
     version: runtime.version,
     events: runtime.events,
-
-    comms: api.comms,
-    library: api.library,
+    comms: {
+        publish: function(topic,data,retain) {
+            runtime.events.emit("comms",{
+                topic: topic,
+                data: data,
+                retain: retain
+            })
+        }
+    },
+    library: {
+        register: function(type) {
+            return runtime.library.register(null,type);
+        }
+    },
     auth: api.auth,
 
     get app() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return runtime.app },

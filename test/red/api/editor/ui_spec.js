@@ -20,8 +20,6 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 
-var EventEmitter = require('events').EventEmitter;
-var events = new EventEmitter();
 var ui = require("../../../../red/api/editor/ui");
 
 
@@ -30,10 +28,13 @@ describe("api/editor/ui", function() {
 
     before(function() {
         ui.init({
-            events:events,
             nodes: {
-                getNodeIconPath: function(module,icon) {
-                    return path.resolve(__dirname+'/../../../../public/icons/arrow-in.png');
+                getIcon: function(opts) {
+                    return new Promise(function(resolve,reject) {
+                        fs.readFile(path.resolve(__dirname+'/../../../../public/icons/arrow-in.png'), function(err,data) {
+                            resolve(data);
+                        })
+                    });
                 }
             }
         });

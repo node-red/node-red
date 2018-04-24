@@ -21,7 +21,6 @@ var i18n = require("../util").i18n; // TODO: separate module
 
 module.exports = {
     errorHandler: function(err,req,res,next) {
-        console.error(err.stack);
         if (err.message === "request entity too large") {
             log.error(err);
         } else {
@@ -40,13 +39,9 @@ module.exports = {
         return lang;
     },
     rejectHandler: function(req,res,err) {
-        res.status(err.status||500);
-        if (err.code || err.message) {
-            res.json({
-                code: err.code||"unexpected_error",
-                message: err.message
-            })
-        }
-        res.end();
+        res.status(err.status||500).json({
+            code: err.code||"unexpected_error",
+            message: err.message||err.toString()
+        });
     }
 }

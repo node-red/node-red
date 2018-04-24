@@ -15,10 +15,16 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
 var request = require('supertest');
 var express = require('express');
 
 var apiUtil = require("../../../red/api/util");
+
+var log = require("../../../red/util").log; // TODO: separate module
+var i18n = require("../../../red/util").i18n; // TODO: separate module
+
+
 
 describe("api/util", function() {
     describe("errorHandler", function() {
@@ -27,17 +33,8 @@ describe("api/util", function() {
         var app;
         before(function() {
             app = express();
-            apiUtil.init({
-                log:{
-                    error: function(msg) {
-                        loggedError = msg;
-                    },
-                    audit: function(event) {
-                        loggedEvent = event;
-                    }
-                },
-                i18n:{}
-            })
+            sinon.stub(log,'error',function(msg) {loggedError = msg;});
+            sinon.stub(log,'audit',function(event) {loggedEvent = event;});
             app.get("/tooLarge", function(req,res) {
                 var err = new Error();
                 err.message = "request entity too large";
@@ -49,6 +46,10 @@ describe("api/util", function() {
                 throw err;
             },apiUtil.errorHandler)
         });
+        after(function() {
+            log.error.restore();
+            log.audit.restore();
+        })
         beforeEach(function() {
             loggedError = null;
             loggedEvent = null;
@@ -91,11 +92,13 @@ describe("api/util", function() {
     })
 
     describe('determineLangFromHeaders', function() {
+        var oldDefaultLang;
         before(function() {
-            apiUtil.init({
-                log:{},
-                i18n:{defaultLang:"en-US"}
-            });
+            oldDefaultLang = i18n.defaultLang;
+            i18n.defaultLang = "en-US";
+        })
+        after(function() {
+            i18n.defaultLang = oldDefaultLang;
         })
         it('returns the default lang if non provided', function() {
             apiUtil.determineLangFromHeaders(null).should.eql("en-US");

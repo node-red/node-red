@@ -49,13 +49,15 @@ function publish(topic,data,retain) {
     } else {
         delete retained[topic];
     }
-    connections.forEach(connection => connection.send(topic,data,retain))
+    connections.forEach(connection => connection.send(topic,data))
 }
 
 
 var api = module.exports = {
     init: function(_runtime) {
         runtime = _runtime;
+        connections = [];
+        retained = {};
         runtime.events.removeListener("node-status",handleStatusEvent);
         runtime.events.on("node-status",handleStatusEvent);
         runtime.events.removeListener("runtime-event",handleRuntimeEvent);

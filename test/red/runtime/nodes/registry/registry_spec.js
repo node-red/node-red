@@ -292,7 +292,7 @@ describe("red/nodes/registry/registry",function() {
         it('rejects when settings unavailable',function(done) {
             typeRegistry.init(stubSettings({},false,{}));
             typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
-            typeRegistry.saveNodeList().otherwise(function(err) {
+            typeRegistry.saveNodeList().catch(function(err) {
                 done();
             });
         });
@@ -312,7 +312,7 @@ describe("red/nodes/registry/registry",function() {
                     nn.should.not.have.property('id');
                 }
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });

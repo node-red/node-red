@@ -16,334 +16,287 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var fs = require("fs");
-var fspath = require('path');
 var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var when = require('when');
-
 var app;
+
 var library = require("../../../../red/api/editor/library");
-var auth = require("../../../../red/api/auth");
 
 describe("api/editor/library", function() {
 
-    function initLibrary(_flows,_libraryEntries,_examples,_exampleFlowPathFunction) {
-        var flows = _flows;
-        var libraryEntries = _libraryEntries;
-        library.init(app,{
-            log:{audit:function(){},_:function(){},warn:function(){}},
-            storage: {
-                init: function() {
-                    return when.resolve();
-                },
-                getAllFlows: function() {
-                    return when.resolve(flows);
-                },
-                getFlow: function(fn) {
-                    if (flows[fn]) {
-                        return when.resolve(flows[fn]);
-                    } else if (fn.indexOf("..")!==-1) {
-                        var err = new Error();
-                        err.code = 'forbidden';
-                        return when.reject(err);
-                    } else {
-                        return when.reject();
-                    }
-                },
-                saveFlow: function(fn,data) {
-                    if (fn.indexOf("..")!==-1) {
-                        var err = new Error();
-                        err.code = 'forbidden';
-                        return when.reject(err);
-                    }
-                    flows[fn] = data;
-                    return when.resolve();
-                },
-                getLibraryEntry: function(type,path) {
-                    if (path.indexOf("..")!==-1) {
-                        var err = new Error();
-                        err.code = 'forbidden';
-                        return when.reject(err);
-                    }
-                    if (libraryEntries[type] && libraryEntries[type][path]) {
-                        return when.resolve(libraryEntries[type][path]);
-                    } else {
-                        return when.reject();
-                    }
-                },
-                saveLibraryEntry: function(type,path,meta,body) {
-                    if (path.indexOf("..")!==-1) {
-                        var err = new Error();
-                        err.code = 'forbidden';
-                        return when.reject(err);
-                    }
-                    libraryEntries[type][path] = body;
-                    return when.resolve();
+    before(function() {
+        app = express();
+        app.use(bodyParser.json());
+
+        app.get("/library/flows",library.getAll);
+        app.post(/library\/([^\/]+)\/(.*)/,library.saveEntry);
+        app.get(/library\/([^\/]+)(?:$|\/(.*))/,library.getEntry);
+    });
+    after(function() {
+    });
+    it('returns all flows', function(done) {
+        library.init({
+            library: {
+                getEntries: function(opts) {
+                    return Promise.resolve({a:1,b:2});
                 }
-            },
-            events: {
-                on: function(){},
-                removeListener: function(){}
-            },
-            nodes: {
-                getNodeExampleFlows: function() {
-                    return _examples;
-                },
-                getNodeExampleFlowPath: _exampleFlowPathFunction
             }
         });
-    }
-
-    describe("flows", function() {
-        before(function() {
-            app = express();
-            app.use(bodyParser.json());
-            app.get("/library/flows",library.getAll);
-            app.post(new RegExp("/library/flows\/(.*)"),library.post);
-            app.get(new RegExp("/library/flows\/(.*)"),library.get);
-            app.response.sendFile = function (path) {
-                app.response.json.call(this, {sendFile: path});
-            };
-            sinon.stub(fs,"statSync",function() { return true; });
-        });
-        after(function() {
-            fs.statSync.restore();
-        });
-        it('returns empty result', function(done) {
-            initLibrary({},{flows:{}});
-            request(app)
-                .get('/library/flows')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.not.have.property('f');
-                    res.body.should.not.have.property('d');
-                    done();
-                });
-        });
-
-        it('returns 404 for non-existent entry', function(done) {
-            initLibrary({},{flows:{}});
-            request(app)
-                .get('/library/flows/foo')
-                .expect(404)
-                .end(done);
-        });
-
-
-        it('can store and retrieve item', function(done) {
-            initLibrary({},{flows:{}});
-            var flow = '[]';
-            request(app)
-                .post('/library/flows/foo')
-                .set('Content-Type', 'application/json')
-                .send(flow)
-                .expect(204).end(function (err, res) {
-                    if (err) {
-                        throw err;
-                    }
-                    request(app)
-                        .get('/library/flows/foo')
-                        .expect(200)
-                        .end(function(err,res) {
-                            if (err) {
-                                throw err;
-                            }
-                            res.text.should.equal(flow);
-                            done();
-                        });
-                });
-        });
-
-        it('lists a stored item', function(done) {
-            initLibrary({f:["bar"]});
-            request(app)
-                .get('/library/flows')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property('f');
-                    should.deepEqual(res.body.f,['bar']);
-                    done();
-                });
-        });
-
-        it('returns 403 for malicious get attempt', function(done) {
-            initLibrary({});
-            // without the userDir override the malicious url would be
-            // http://127.0.0.1:1880/library/flows/../../package to
-            // obtain package.json from the node-red root.
-            request(app)
-                .get('/library/flows/../../../../../package')
-                .expect(403)
-                .end(done);
-        });
-        it('returns 403 for malicious post attempt', function(done) {
-            initLibrary({});
-            // without the userDir override the malicious url would be
-            // http://127.0.0.1:1880/library/flows/../../package to
-            // obtain package.json from the node-red root.
-            request(app)
-                .post('/library/flows/../../../../../package')
-                .expect(403)
-                .end(done);
-        });
-        it('includes examples flows if set', function(done) {
-            var examples = {"d":{"node-module":{"f":["example-one"]}}};
-            initLibrary({},{},examples);
-            request(app)
-                .get('/library/flows')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property('d');
-                    res.body.d.should.have.property('_examples_');
-                    should.deepEqual(res.body.d._examples_,examples);
-                    done();
-                });
-        });
-
-        it('can retrieve an example flow', function(done) {
-            var examples = {"d":{"node-module":{"f":["example-one"]}}};
-            initLibrary({},{},examples,function(module,path) {
-                return module + ':' + path
+        request(app)
+            .get('/library/flows')
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property('a',1);
+                res.body.should.have.property('b',2);
+                done();
             });
-            request(app)
-                .get('/library/flows/_examples_/node-module/example-one')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property('sendFile',
-                        'node-module:example-one');
-                    done();
-                });
+    })
+    it('returns an error on all flows', function(done) {
+        library.init({
+            library: {
+                getEntries: function(opts) {
+                    var err = new Error("message");
+                    err.code = "random_error";
+                    err.status = 400;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+            }
         });
-
-        it('can retrieve an example flow in an org scoped package', function(done) {
-            var examples = {"d":{"@org_scope/node_package":{"f":["example-one"]}}};
-            initLibrary({},{},examples,function(module,path) {
-                return module + ':' + path
+        request(app)
+            .get('/library/flows')
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property('code');
+                res.body.code.should.be.equal("random_error");
+                res.body.should.have.property('message');
+                res.body.message.should.be.equal("message");
+                done();
             });
-            request(app)
-                .get('/library/flows/_examples_/@org_scope/node_package/example-one')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property('sendFile',
-                        '@org_scope/node_package:example-one');
-                    done();
-                });
-        });
     });
 
-    describe("type", function() {
-        before(function() {
-
-            app = express();
-            app.use(bodyParser.json());
-            initLibrary({},{});
-            auth.init({settings:{}});
-            library.register("test");
+    it('returns an individual entry - flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                getEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve('{"a":1,"b":2}');
+                }
+            }
         });
-
-        it('returns empty result', function(done) {
-            initLibrary({},{'test':{"":[]}});
-            request(app)
-                .get('/library/test')
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.not.have.property('f');
-                    done();
-                });
+        request(app)
+            .get('/library/flows/abc')
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property('a',1);
+                res.body.should.have.property('b',2);
+                opts.should.have.property('type','flows');
+                opts.should.have.property('path','abc');
+                done();
+            });
+    })
+    it('returns a directory listing - flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                getEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve({"a":1,"b":2});
+                }
+            }
         });
-
-        it('returns 404 for non-existent entry', function(done) {
-            initLibrary({},{});
-            request(app)
-                .get('/library/test/foo')
-                .expect(404)
-                .end(done);
+        request(app)
+            .get('/library/flows/abc/def')
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property('a',1);
+                res.body.should.have.property('b',2);
+                opts.should.have.property('type','flows');
+                opts.should.have.property('path','abc/def');
+                done();
+            });
+    })
+    it('returns an individual entry - non-flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                getEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve('{"a":1,"b":2}');
+                }
+            }
         });
-
-        it('can store and retrieve item', function(done) {
-            initLibrary({},{'test':{}});
-            var flow = {text:"test content"};
-            request(app)
-                .post('/library/test/foo')
-                .set('Content-Type', 'application/json')
-                .send(flow)
-                .expect(204).end(function (err, res) {
-                    if (err) {
-                        throw err;
-                    }
-                    request(app)
-                        .get('/library/test/foo')
-                        .expect(200)
-                        .end(function(err,res) {
-                            if (err) {
-                                throw err;
-                            }
-                            res.text.should.equal(flow.text);
-                            done();
-                        });
-                });
+        request(app)
+            .get('/library/non-flow/abc')
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                opts.should.have.property('type','non-flow');
+                opts.should.have.property('path','abc');
+                res.text.should.eql('{"a":1,"b":2}');
+                done();
+            });
+    })
+    it('returns a directory listing - non-flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                getEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve({"a":1,"b":2});
+                }
+            }
         });
+        request(app)
+            .get('/library/non-flow/abc/def')
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property('a',1);
+                res.body.should.have.property('b',2);
+                opts.should.have.property('type','non-flow');
+                opts.should.have.property('path','abc/def');
+                done();
+            });
+    })
 
-        it('lists a stored item', function(done) {
-            initLibrary({},{'test':{'a':['abc','def']}});
-                request(app)
-                    .get('/library/test/a')
-                    .expect(200)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        // This response isn't strictly accurate - but it
-                        // verifies the api returns what storage gave it
-                        should.deepEqual(res.body,['abc','def']);
-                        done();
-                    });
+    it('returns an error on individual get', function(done) {
+        var opts;
+        library.init({
+            library: {
+                getEntry: function(_opts) {
+                    opts = _opts;
+                    var err = new Error("message");
+                    err.code = "random_error";
+                    err.status = 400;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+            }
         });
+        request(app)
+            .get('/library/flows/123')
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                opts.should.have.property('type','flows');
+                opts.should.have.property('path','123');
+
+                res.body.should.have.property('code');
+                res.body.code.should.be.equal("random_error");
+                res.body.should.have.property('message');
+                res.body.message.should.be.equal("message");
+                done();
+            });
+    });
 
 
-        it('returns 403 for malicious access attempt', function(done) {
-            request(app)
-                .get('/library/test/../../../../../../../../../../etc/passwd')
-                .expect(403)
-                .end(done);
+    it('saves an individual entry - flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                saveEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve();
+                }
+            }
         });
+        request(app)
+            .post('/library/flows/abc/def')
+            .expect(204)
+            .send({a:1,b:2,c:3})
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                opts.should.have.property('type','flows');
+                opts.should.have.property('path','abc/def');
+                opts.should.have.property('meta',{});
+                opts.should.have.property('body',JSON.stringify({a:1,b:2,c:3}));
+                done();
+            });
+    })
 
-        it('returns 403 for malicious access attempt', function(done) {
-            request(app)
-                .get('/library/test/..\\..\\..\\..\\..\\..\\..\\..\\..\\..\\etc\\passwd')
-                .expect(403)
-                .end(done);
+    it('saves an individual entry - non-flow type', function(done) {
+        var opts;
+        library.init({
+            library: {
+                saveEntry: function(_opts) {
+                    opts = _opts;
+                    return Promise.resolve();
+                }
+            }
         });
+        request(app)
+            .post('/library/non-flow/abc/def')
+            .expect(204)
+            .send({a:1,b:2,text:"123"})
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                opts.should.have.property('type','non-flow');
+                opts.should.have.property('path','abc/def');
+                opts.should.have.property('meta',{a:1,b:2});
+                opts.should.have.property('body',"123");
+                done();
+            });
+    })
 
-        it('returns 403 for malicious access attempt', function(done) {
-            request(app)
-                .post('/library/test/../../../../../../../../../../etc/passwd')
-                .set('Content-Type', 'text/plain')
-                .send('root:x:0:0:root:/root:/usr/bin/tclsh')
-                .expect(403)
-                .end(done);
+    it('returns an error on individual save', function(done) {
+        var opts;
+        library.init({
+            library: {
+                saveEntry: function(_opts) {
+                    opts = _opts;
+                    var err = new Error("message");
+                    err.code = "random_error";
+                    err.status = 400;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+            }
         });
+        request(app)
+            .post('/library/non-flow/abc/def')
+            .send({a:1,b:2,text:"123"})
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                opts.should.have.property('type','non-flow');
+                opts.should.have.property('path','abc/def');
 
+                res.body.should.have.property('code');
+                res.body.code.should.be.equal("random_error");
+                res.body.should.have.property('message');
+                res.body.message.should.be.equal("message");
+                done();
+            });
     });
 });

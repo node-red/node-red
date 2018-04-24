@@ -60,7 +60,7 @@ describe('red/nodes/registry/index', function() {
             registry.addModule("foo").then(function(info) {
                 info.should.eql("info");
                 done();
-            }).otherwise(function(err) { done(err); });
+            }).catch(function(err) { done(err); });
         });
         it('rejects if loader rejects', function(done) {
             stubs.push(sinon.stub(loader,"addModule",function(module) {
@@ -71,7 +71,7 @@ describe('red/nodes/registry/index', function() {
             }));
             registry.addModule("foo").then(function(info) {
                 done(new Error("unexpected resolve"));
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 err.should.eql("error");
                 done();
             })
@@ -90,7 +90,7 @@ describe('red/nodes/registry/index', function() {
                 typeRegistry.enableNodeSet.called.should.be.true();
                 ns.should.have.a.property('id','node-set');
                 done();
-            }).otherwise(function(err) { done(err); });
+            }).catch(function(err) { done(err); });
         });
 
         it('rejects if node unknown',function() {
@@ -121,7 +121,7 @@ describe('red/nodes/registry/index', function() {
                 ns.should.have.a.property('id','node-set');
                 ns.should.have.a.property('loaded',true);
                 done();
-            }).otherwise(function(err) { done(err); });
+            }).catch(function(err) { done(err); });
         });
 
     });

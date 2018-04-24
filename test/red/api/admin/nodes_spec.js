@@ -27,31 +27,17 @@ var apiUtil = require("../../../../red/api/util");
 describe("api/admin/nodes", function() {
 
     var app;
-    function initNodes(runtime) {
-        runtime.log = {
-            audit:function(e){},//console.log(e)},
-            _:function(){},
-            info: function(){},
-            warn: function(){}
-        }
-        runtime.events = {
-            emit: function(){}
-        }
-        nodes.init(runtime);
-
-    }
-
     before(function() {
         app = express();
         app.use(bodyParser.json());
         app.get("/nodes",nodes.getAll);
         app.post("/nodes",nodes.post);
         app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.getModule);
-        app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.getSet);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.putModule);
+        app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.getSet);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.putSet);
         app.get("/getIcons",nodes.getIcons);
-        app.delete("/nodes/:id",nodes.delete);
+        app.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.delete);
         sinon.stub(apiUtil,"determineLangFromHeaders", function() {
             return "en-US";
         });
@@ -62,10 +48,10 @@ describe("api/admin/nodes", function() {
 
     describe('get nodes', function() {
         it('returns node list', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
                     getNodeList: function() {
-                        return [1,2,3];
+                        return Promise.resolve([1,2,3]);
                     }
                 }
             });
@@ -84,10 +70,10 @@ describe("api/admin/nodes", function() {
         });
 
         it('returns node configs', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
                     getNodeConfigs: function() {
-                        return "<script></script>";
+                        return Promise.resolve("<script></script>");
                     }
                 },
                 i18n: {
@@ -108,10 +94,10 @@ describe("api/admin/nodes", function() {
         });
 
         it('returns node module info', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getModuleInfo: function(id) {
-                        return {"node-red":{name:"node-red"}}[id];
+                    getModuleInfo: function(opts) {
+                        return Promise.resolve({"node-red":{name:"node-red"}}[opts.module]);
                     }
                 }
             });
@@ -128,10 +114,15 @@ describe("api/admin/nodes", function() {
         });
 
         it('returns 404 for unknown module', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getModuleInfo: function(id) {
-                        return {"node-red":{name:"node-red"}}[id];
+                    getModuleInfo: function(opts) {
+                        var errInstance = new Error("Not Found");
+                        errInstance.code = "not_found";
+                        errInstance.status = 404;
+                        var p = Promise.reject(errInstance);
+                        p.catch(()=>{});
+                        return p;
                     }
                 }
             });
@@ -147,10 +138,10 @@ describe("api/admin/nodes", function() {
         });
 
         it('returns individual node info', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getNodeInfo: function(id) {
-                        return {"node-red/123":{id:"node-red/123"}}[id];
+                    getNodeInfo: function(opts) {
+                        return Promise.resolve({"node-red/123":{id:"node-red/123"}}[opts.id]);
                     }
                 }
             });
@@ -168,10 +159,10 @@ describe("api/admin/nodes", function() {
         });
 
         it('returns individual node configs', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getNodeConfig: function(id) {
-                        return {"node-red/123":"<script></script>"}[id];
+                    getNodeConfig: function(opts) {
+                        return Promise.resolve({"node-red/123":"<script></script>"}[opts.id]);
                     }
                 },
                 i18n: {
@@ -190,12 +181,16 @@ describe("api/admin/nodes", function() {
                     done();
                 });
         });
-
         it('returns 404 for unknown node', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getNodeInfo: function(id) {
-                        return {"node-red/123":{id:"node-red/123"}}[id];
+                    getNodeInfo: function(opts) {
+                        var errInstance = new Error("Not Found");
+                        errInstance.code = "not_found";
+                        errInstance.status = 404;
+                        var p = Promise.reject(errInstance);
+                        p.catch(()=>{});
+                        return p;
                     }
                 }
             });
@@ -213,142 +208,96 @@ describe("api/admin/nodes", function() {
     });
 
     describe('install', function() {
-
-        it('returns 400 if settings are unavailable', function(done) {
-            initNodes({
-                settings:{available:function(){return false}}
+        it('installs the module and returns module info', function(done) {
+            var opts;
+            nodes.init({
+                nodes:{
+                    addModule: function(_opts) {
+                        opts = _opts;
+                        return Promise.resolve({
+                            name:"foo",
+                            nodes:[{id:"123"}]
+                        });
+                    }
+                }
+            });
+            request(app)
+            .post('/nodes')
+            .send({module: 'foo',version:"1.2.3"})
+            .expect(200)
+            .end(function(err,res) {
+                if (err) {
+                    throw err;
+                }
+                res.body.should.have.property("name","foo");
+                res.body.should.have.property("nodes");
+                res.body.nodes[0].should.have.property("id","123");
+                opts.should.have.property("module","foo");
+                opts.should.have.property("version","1.2.3");
+                done();
+            });
+        });
+        it('returns error', function(done) {
+            nodes.init({
+                nodes:{
+                    addModule: function(opts) {
+                        var errInstance = new Error("Message");
+                        errInstance.code = "random_error";
+                        errInstance.status = 400;
+                        var p = Promise.reject(errInstance);
+                        p.catch(()=>{});
+                        return p;
+                    }
+                }
             });
             request(app)
                 .post('/nodes')
+                .send({module: 'foo',version:"1.2.3"})
                 .expect(400)
                 .end(function(err,res) {
                     if (err) {
                         throw err;
                     }
+                    res.body.should.have.a.property('code','random_error');
                     done();
                 });
-        });
-
-        it('returns 400 if request is invalid', function(done) {
-            initNodes({
-                settings:{available:function(){return true}}
-            });
-            request(app)
-                .post('/nodes')
-                .send({})
-                .expect(400)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    done();
-                });
-        });
-
-        describe('by module', function() {
-            it('installs the module and returns module info', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return null; },
-                        installModule: function() {
-                            return when.resolve({
-                                name:"foo",
-                                nodes:[{id:"123"}]
-                            });
-                        }
-                    }
-                });
-                request(app)
-                    .post('/nodes')
-                    .send({module: 'foo'})
-                    .expect(200)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        res.body.should.have.property("name","foo");
-                        res.body.should.have.property("nodes");
-                        res.body.nodes[0].should.have.property("id","123");
-                        done();
-                    });
-            });
-
-            it('fails the install if already installed', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return {nodes:{id:"123"}}; },
-                        installModule: function() {
-                            return when.resolve({id:"123"});
-                        }
-                    }
-                });
-                request(app)
-                    .post('/nodes')
-                    .send({module: 'foo'})
-                    .expect(400)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        done();
-                    });
-            });
-
-            it('fails the install if module error', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return null },
-                        installModule: function() {
-                            return when.reject(new Error("test error"));
-                        }
-                    }
-                });
-                request(app)
-                    .post('/nodes')
-                    .send({module: 'foo'})
-                    .expect(400)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        res.body.should.have.property("message","Error: test error");
-                        done();
-                    });
-            });
-            it('fails the install if module not found', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return null },
-                        installModule: function() {
-                            var err = new Error("test error");
-                            err.code = 404;
-                            return when.reject(err);
-                        }
-                    }
-                });
-                request(app)
-                    .post('/nodes')
-                    .send({module: 'foo'})
-                    .expect(404)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        done();
-                    });
-            });
         });
     });
     describe('delete', function() {
-         it('returns 400 if settings are unavailable', function(done) {
-            initNodes({
-                settings:{available:function(){return false}}
+        it('uninstalls the module', function(done) {
+            var opts;
+            nodes.init({
+                nodes:{
+                    removeModule: function(_opts) {
+                        opts = _opts;
+                        return Promise.resolve();
+                    }
+                }
             });
-
+            request(app)
+            .del('/nodes/123')
+            .expect(204)
+            .end(function(err,res) {
+                if (err) {
+                    throw err;
+                }
+                opts.should.have.property("module","123");
+                done();
+            });
+        });
+        it('returns error', function(done) {
+            nodes.init({
+                nodes:{
+                    removeModule: function(opts) {
+                        var errInstance = new Error("Message");
+                        errInstance.code = "random_error";
+                        errInstance.status = 400;
+                        var p = Promise.reject(errInstance);
+                        p.catch(()=>{});
+                        return p;
+                    }
+                }
+            });
             request(app)
                 .del('/nodes/123')
                 .expect(400)
@@ -356,93 +305,18 @@ describe("api/admin/nodes", function() {
                     if (err) {
                         throw err;
                     }
+                    res.body.should.have.a.property('code','random_error');
                     done();
                 });
         });
-
-        describe('by module', function() {
-            it('uninstalls the module', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
-                        getNodeInfo: function() { return null },
-                        uninstallModule: function() { return when.resolve({id:"123"});}
-                    }
-                });
-                request(app)
-                    .del('/nodes/foo')
-                    .expect(204)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        done();
-                    });
-            });
-
-            it('fails the uninstall if the module is not installed', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return null },
-                        getNodeInfo: function() { return null }
-                    }
-                });
-                request(app)
-                    .del('/nodes/foo')
-                    .expect(404)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        done();
-                    });
-            });
-
-            it('fails the uninstall if the module is not installed', function(done) {
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
-                        getNodeInfo: function() { return null },
-                        uninstallModule: function() { return when.reject(new Error("test error"));}
-                    }
-                });
-                request(app)
-                    .del('/nodes/foo')
-                    .expect(400)
-                    .end(function(err,res) {
-                        if (err) {
-                            throw err;
-                        }
-                        res.body.should.have.property("message","Error: test error");
-                        done();
-                    });
-            });
-        });
-
     });
 
-    describe('enable/disable', function() {
-        it('returns 400 if settings are unavailable', function(done) {
-            initNodes({
-                settings:{available:function(){return false}}
-            });
-            request(app)
-                .put('/nodes/123')
-                .expect(400)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    done();
-                });
-        });
-
-        it('returns 400 for invalid node payload', function(done) {
-            initNodes({
-                settings:{available:function(){return true}}
+    describe('enable/disable node set', function() {
+        it('returns 400 for invalid request payload', function(done) {
+            nodes.init({
+                nodes:{
+                    setNodeSetState: function(opts) {return Promise.resolve()}
+                }
             });
             request(app)
                 .put('/nodes/node-red/foo')
@@ -452,77 +326,23 @@ describe("api/admin/nodes", function() {
                     if (err) {
                         throw err;
                     }
+                    res.body.should.have.property("code","invalid_request");
                     res.body.should.have.property("message","Invalid request");
                     done();
                 });
         });
 
-        it('returns 400 for invalid module payload', function(done) {
-            initNodes({
-                settings:{available:function(){return true}}
-            });
-            request(app)
-                .put('/nodes/foo')
-                .send({})
-                .expect(400)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property("message","Invalid request");
-
-                    done();
-                });
-        });
-
-        it('returns 404 for unknown node', function(done) {
-            initNodes({
-                settings:{available:function(){return true}},
+        it('sets node state and returns node info', function(done) {
+            var opts;
+            nodes.init({
                 nodes:{
-                    getNodeInfo: function() { return null }
+                    setNodeSetState: function(_opts) {
+                        opts = _opts;
+                        return Promise.resolve({id:"123",enabled: true });
+                    }
                 }
             });
 
-            request(app)
-                .put('/nodes/node-red/foo')
-                .send({enabled:false})
-                .expect(404)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    done();
-                });
-        });
-
-        it('returns 404 for unknown module', function(done) {
-            initNodes({
-                settings:{available:function(){return true}},
-                nodes:{
-                    getModuleInfo: function(id) { return null }
-                }
-            });
-
-            request(app)
-                .put('/nodes/node-blue')
-                .send({enabled:false})
-                .expect(404)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    done();
-                });
-        });
-
-        it('enables disabled node', function(done) {
-            initNodes({
-                settings:{available:function(){return true}},
-                nodes:{
-                    getNodeInfo: function() { return {id:"123",enabled: false} },
-                    enableNode: function() { return when.resolve({id:"123",enabled: true,types:['a']}); }
-                }
-            });
             request(app)
                 .put('/nodes/node-red/foo')
                 .send({enabled:true})
@@ -533,130 +353,41 @@ describe("api/admin/nodes", function() {
                     }
                     res.body.should.have.property("id","123");
                     res.body.should.have.property("enabled",true);
+                    opts.should.have.property("enabled",true);
+                    opts.should.have.property("id","node-red/foo");
 
                     done();
                 });
         });
-
-        it('disables enabled node', function(done) {
-            initNodes({
-                settings:{available:function(){return true}},
+    });
+    describe('enable/disable module' ,function() {
+        it('returns 400 for invalid request payload', function(done) {
+            nodes.init({
                 nodes:{
-                    getNodeInfo: function() { return {id:"123",enabled: true} },
-                    disableNode: function() { return when.resolve({id:"123",enabled: false,types:['a']}); }
+                    setModuleState: function(opts) {return Promise.resolve()}
                 }
             });
             request(app)
-                .put('/nodes/node-red/foo')
-                .send({enabled:false})
-                .expect(200)
+                .put('/nodes/node-red')
+                .send({})
+                .expect(400)
                 .end(function(err,res) {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.have.property("id","123");
-                    res.body.should.have.property("enabled",false);
-
+                    res.body.should.have.property("code","invalid_request");
+                    res.body.should.have.property("message","Invalid request");
                     done();
                 });
         });
-
-        describe('no-ops if already in the right state', function() {
-            function run(state,done) {
-                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
-                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
-
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getNodeInfo: function() { return {id:"123",enabled: state} },
-                        enableNode: enableNode,
-                        disableNode: disableNode
-                    }
-                });
-                request(app)
-                    .put('/nodes/node-red/foo')
-                    .send({enabled:state})
-                    .expect(200)
-                    .end(function(err,res) {
-                        var enableNodeCalled = enableNode.called;
-                        var disableNodeCalled = disableNode.called;
-                        if (err) {
-                            throw err;
-                        }
-                        enableNodeCalled.should.be.false();
-                        disableNodeCalled.should.be.false();
-                        res.body.should.have.property("id","123");
-                        res.body.should.have.property("enabled",state);
-
-                        done();
-                    });
-            }
-            it('already enabled', function(done) {
-                run(true,done);
-            });
-            it('already disabled', function(done) {
-                run(false,done);
-            });
-        });
-
-        describe('does not no-op if err on node', function() {
-            function run(state,done) {
-                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
-                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
-
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getNodeInfo: function() { return {id:"123",enabled: state, err:"foo"} },
-                        enableNode: enableNode,
-                        disableNode: disableNode
-                    }
-                });
-                request(app)
-                    .put('/nodes/node-red/foo')
-                    .send({enabled:state})
-                    .expect(200)
-                    .end(function(err,res) {
-                        var enableNodeCalled = enableNode.called;
-                        var disableNodeCalled = disableNode.called;
-                        if (err) {
-                            throw err;
-                        }
-                        enableNodeCalled.should.be.equal(state);
-                        disableNodeCalled.should.be.equal(!state);
-                        res.body.should.have.property("id","123");
-                        res.body.should.have.property("enabled",state);
-
-                        done();
-                    });
-            }
-            it('already enabled', function(done) {
-                run(true,done);
-            });
-            it('already disabled', function(done) {
-                run(false,done);
-            });
-        });
-
-        it('enables disabled module', function(done) {
-            var n1 = {id:"123",enabled:false,types:['a']};
-            var n2 = {id:"456",enabled:false,types:['b']};
-            var enableNode = sinon.stub();
-            enableNode.onFirstCall().returns((function() {
-                n1.enabled = true;
-                return when.resolve(n1);
-            })());
-            enableNode.onSecondCall().returns((function() {
-                n2.enabled = true;
-                return when.resolve(n2);
-            })());
-            enableNode.returns(null);
-            initNodes({
-                settings:{available:function(){return true}},
+        it('sets module state and returns module info', function(done) {
+            var opts;
+            nodes.init({
                 nodes:{
-                    getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
-                    enableNode: enableNode
+                    setModuleState: function(_opts) {
+                        opts = _opts;
+                        return Promise.resolve({name:"node-red"});
+                    }
                 }
             });
 
@@ -669,154 +400,20 @@ describe("api/admin/nodes", function() {
                         throw err;
                     }
                     res.body.should.have.property("name","node-red");
-                    res.body.should.have.property("nodes");
-                    res.body.nodes[0].should.have.property("enabled",true);
-                    res.body.nodes[1].should.have.property("enabled",true);
+                    opts.should.have.property("enabled",true);
+                    opts.should.have.property("module","node-red");
 
                     done();
                 });
-        });
-
-        it('disables enabled module', function(done) {
-            var n1 = {id:"123",enabled:true,types:['a']};
-            var n2 = {id:"456",enabled:true,types:['b']};
-            var disableNode = sinon.stub();
-            disableNode.onFirstCall().returns((function() {
-                n1.enabled = false;
-                return when.resolve(n1);
-            })());
-            disableNode.onSecondCall().returns((function() {
-                n2.enabled = false;
-                return when.resolve(n2);
-            })());
-            disableNode.returns(null);
-            initNodes({
-                settings:{available:function(){return true}},
-                nodes:{
-                    getModuleInfo: function() { return {name:"node-red", nodes:[n1, n2]} },
-                    disableNode: disableNode
-                }
-            });
-
-            request(app)
-                .put('/nodes/node-red')
-                .send({enabled:false})
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        throw err;
-                    }
-                    res.body.should.have.property("name","node-red");
-                    res.body.should.have.property("nodes");
-                    res.body.nodes[0].should.have.property("enabled",false);
-                    res.body.nodes[1].should.have.property("enabled",false);
-
-                    done();
-                });
-        });
-
-        describe('no-ops if a node in module already in the right state', function() {
-            function run(state,done) {
-                var node = {id:"123",enabled:state,types:['a']};
-                var enableNode = sinon.spy(function(id) {
-                    node.enabled = true;
-                    return when.resolve(node);
-                });
-                var disableNode = sinon.spy(function(id) {
-                    node.enabled = false;
-                    return when.resolve(node);
-                });
-
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
-                        enableNode: enableNode,
-                        disableNode: disableNode
-                    }
-                });
-                request(app)
-                    .put('/nodes/node-red')
-                    .send({enabled:state})
-                    .expect(200)
-                    .end(function(err,res) {
-                        var enableNodeCalled = enableNode.called;
-                        var disableNodeCalled = disableNode.called;
-                        if (err) {
-                            throw err;
-                        }
-                        enableNodeCalled.should.be.false();
-                        disableNodeCalled.should.be.false();
-                        res.body.should.have.property("name","node-red");
-                        res.body.should.have.property("nodes");
-                        res.body.nodes[0].should.have.property("enabled",state);
-
-                        done();
-                    });
-            }
-            it('already enabled', function(done) {
-                run(true,done);
-            });
-            it('already disabled', function(done) {
-                run(false,done);
-            });
-        });
-
-        describe('does not no-op if err on a node in module', function() {
-            function run(state,done) {
-                var node = {id:"123",enabled:state,types:['a'],err:"foo"};
-                var enableNode = sinon.spy(function(id) {
-                    node.enabled = true;
-                    return when.resolve(node);
-                });
-                var disableNode = sinon.spy(function(id) {
-                    node.enabled = false;
-                    return when.resolve(node);
-                });
-
-                initNodes({
-                    settings:{available:function(){return true}},
-                    nodes:{
-                        getModuleInfo: function() { return {name:"node-red", nodes:[node]}; },
-                        enableNode: enableNode,
-                        disableNode: disableNode
-                    }
-                });
-
-                request(app)
-                    .put('/nodes/node-red')
-                    .send({enabled:state})
-                    .expect(200)
-                    .end(function(err,res) {
-                        var enableNodeCalled = enableNode.called;
-                        var disableNodeCalled = disableNode.called;
-                        if (err) {
-                            throw err;
-                        }
-                        enableNodeCalled.should.be.equal(state);
-                        disableNodeCalled.should.be.equal(!state);
-                        res.body.should.have.property("name","node-red");
-                        res.body.should.have.property("nodes");
-                        res.body.nodes[0].should.have.property("enabled",state);
-
-                        done();
-                    });
-            }
-            it('already enabled', function(done) {
-                run(true,done);
-            });
-            it('already disabled', function(done) {
-                run(false,done);
-            });
         });
     });
 
     describe('get icons', function() {
         it('returns icon list', function(done) {
-            initNodes({
+            nodes.init({
                 nodes:{
-                    getNodeIcons: function() {
-                        return {"module":["1.png","2.png","3.png"]};
+                    getIconList: function() {
+                        return Promise.resolve({module:[1,2,3]});
                     }
                 }
             });
@@ -827,7 +424,6 @@ describe("api/admin/nodes", function() {
                     if (err) {
                         throw err;
                     }
-                    console.log(res.body);
                     res.body.should.have.property("module");
                     res.body.module.should.be.an.Array();
                     res.body.module.should.have.lengthOf(3);

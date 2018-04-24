@@ -33,7 +33,7 @@ describe("api/editor/theme", function() {
         fs.statSync.restore();
     });
     it("applies the default theme", function() {
-        var result = theme.init({settings:{},version:function() { return '123.456'}});
+        var result = theme.init({});
         should.not.exist(result);
 
         var context = theme.context();
@@ -43,13 +43,12 @@ describe("api/editor/theme", function() {
         context.should.have.a.property("header");
         context.header.should.have.a.property("title","Node-RED");
         context.header.should.have.a.property("image","red/images/node-red.png");
-        context.should.have.a.property("version","123.456");
 
         should.not.exist(theme.settings());
     });
 
     it("picks up custom theme", function() {
-        theme.init({settings:{
+        theme.init({
             editorTheme: {
                 page: {
                     title: "Test Page Title",
@@ -84,7 +83,7 @@ describe("api/editor/theme", function() {
                     image: "/absolute/path/to/login/page/big/image" // a 256x256 image
                 }
             }
-        }});
+        });
 
         theme.app();
 

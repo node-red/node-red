@@ -47,7 +47,7 @@ describe('storage/localfilesystem', function() {
             fs.existsSync(path.join(userDir,"lib")).should.be.true();
             fs.existsSync(path.join(userDir,"lib",'flows')).should.be.true();
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -70,7 +70,7 @@ describe('storage/localfilesystem', function() {
             } finally {
                 process.env.NODE_RED_HOME = oldNRH;
             }
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -96,7 +96,7 @@ describe('storage/localfilesystem', function() {
                 process.env.NODE_RED_HOME = oldNRH;
                 process.env.NODE_HOMEPATH = oldHOMEPATH;
             }
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -124,7 +124,7 @@ describe('storage/localfilesystem', function() {
                 process.env.HOME = oldHOME;
                 process.env.HOMEPATH = oldHOMEPATH;
             }
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -155,7 +155,7 @@ describe('storage/localfilesystem', function() {
                 process.env.HOMEPATH = oldHOMEPATH;
                 process.env.USERPROFILE = oldUSERPROFILE;
             }
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -168,10 +168,10 @@ describe('storage/localfilesystem', function() {
             localfilesystem.getFlows().then(function(flows) {
                 flows.should.eql([]);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -186,10 +186,10 @@ describe('storage/localfilesystem', function() {
             localfilesystem.getFlows().then(function(flows) {
                 flows.should.eql([]);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -208,11 +208,11 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getFlows().then(function(flows) {
                     flows.should.eql(testFlow);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
             },50);
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -230,13 +230,13 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getFlows().then(function(flows) {
                     flows.should.eql(testFlow);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -257,13 +257,13 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getFlows().then(function(flows) {
                     flows.should.eql(testFlow);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -278,13 +278,13 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getFlows().then(function(flows) {
                     flows.should.eql(testFlow);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -298,11 +298,11 @@ describe('storage/localfilesystem', function() {
                 fs.fsync.callCount.should.be.greaterThan(0);
                 fs.fsync.restore();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 fs.fsync.restore();
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -321,10 +321,10 @@ describe('storage/localfilesystem', function() {
                 fs.fsync.callCount.should.be.greaterThan(0);
                 fs.fsync.restore();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -358,14 +358,14 @@ describe('storage/localfilesystem', function() {
                     content2.should.not.equal(backupContent);
                     done();
 
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
 
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
 
@@ -382,10 +382,10 @@ describe('storage/localfilesystem', function() {
             localfilesystem.getCredentials().then(function(creds) {
                 creds.should.eql({});
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -406,13 +406,13 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getCredentials().then(function(creds) {
                     creds.should.eql(credentials);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -437,10 +437,10 @@ describe('storage/localfilesystem', function() {
                 fs.existsSync(credFile).should.be.true();
                 fs.existsSync(credFileBackup).should.be.true();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -463,13 +463,13 @@ describe('storage/localfilesystem', function() {
                 localfilesystem.getCredentials().then(function(creds) {
                     creds.should.eql(credentials);
                     done();
-                }).otherwise(function(err) {
+                }).catch(function(err) {
                     done(err);
                 });
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });

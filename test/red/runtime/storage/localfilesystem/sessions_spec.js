@@ -38,7 +38,7 @@ describe('storage/localfilesystem/sessions', function() {
         localfilesystemSessions.getSessions().then(function(sessions) {
             sessions.should.eql({});
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -51,7 +51,7 @@ describe('storage/localfilesystem/sessions', function() {
         localfilesystemSessions.getSessions().then(function(sessions) {
             sessions.should.eql({});
             done();
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });
@@ -69,10 +69,10 @@ describe('storage/localfilesystem/sessions', function() {
             localfilesystemSessions.getSessions().then(function(_sessions) {
                 _sessions.should.eql(sessions);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
-        }).otherwise(function(err) {
+        }).catch(function(err) {
             done(err);
         });
     });

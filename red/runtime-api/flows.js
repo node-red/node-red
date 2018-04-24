@@ -135,6 +135,7 @@ var api = module.exports = {
             } else {
                 runtime.log.audit({event: "flow.get",id:opts.id,error:"not_found"});
                 var err = new Error();
+                err.code = "not_found";
                 err.status = 404;
                 return reject(err);
             }

@@ -23,7 +23,6 @@ var fs = require("fs");
 var path = require("path");
 var api = require("../../../red/api");
 
-var apiUtil = require("../../../red/api/util");
 var apiAuth = require("../../../red/api/auth");
 var apiEditor = require("../../../red/api/editor");
 var apiAdmin = require("../../../red/api/admin");
@@ -31,7 +30,6 @@ var apiAdmin = require("../../../red/api/admin");
 
 describe("api/index", function() {
     var beforeEach = function() {
-        sinon.stub(apiUtil,"init",function(){});
         sinon.stub(apiAuth,"init",function(){});
         sinon.stub(apiEditor,"init",function(){
             var app = express();
@@ -48,7 +46,6 @@ describe("api/index", function() {
         });
     };
     var afterEach = function() {
-        apiUtil.init.restore();
         apiAuth.init.restore();
         apiAuth.login.restore();
         apiEditor.init.restore();
@@ -59,18 +56,14 @@ describe("api/index", function() {
     afterEach(afterEach);
 
     it("does not setup admin api if httpAdminRoot is false", function(done) {
-        api.init({},{
-            settings: { httpAdminRoot: false }
-        });
+        api.init({},{ httpAdminRoot: false },{},{});
         should.not.exist(api.adminApp);
         done();
     });
     describe('initalises admin api without adminAuth', function(done) {
         before(function() {
             beforeEach();
-            api.init({},{
-                settings: { }
-            });
+            api.init({},{},{},{});
         });
         after(afterEach);
         it('exposes the editor',function(done) {
@@ -87,9 +80,7 @@ describe("api/index", function() {
     describe('initalises admin api without editor', function(done) {
         before(function() {
             beforeEach();
-            api.init({},{
-                settings: { disableEditor: true }
-            });
+            api.init({},{ disableEditor: true },{},{});
         });
         after(afterEach);
         it('does not expose the editor',function(done) {

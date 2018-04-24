@@ -79,6 +79,11 @@ function createNodeApi(node) {
                     retain: retain
                 })
             }
+        },
+        library: {
+            register: function(type) {
+                return runtime.library.register(node.id,type);
+            }
         }
     }
     copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","addCredentials","getCredentials","deleteCredentials" ]);
@@ -88,11 +93,6 @@ function createNodeApi(node) {
     copyObjectProperties(runtime.log,red.log,null,["init"]);
     copyObjectProperties(runtime.settings,red.settings,null,["init","load","reset"]);
     if (runtime.adminApi) {
-        red.library = {
-            register: function(type) {
-                return runtime.library.registerType(node.id,type);
-            }
-        };
         red.auth = runtime.adminApi.auth;
         red.httpAdmin = runtime.adminApi.adminApp;
         red.httpNode = runtime.nodeApp;
@@ -100,12 +100,6 @@ function createNodeApi(node) {
     } else {
         //TODO: runtime.adminApi is always stubbed if not enabled, so this block
         // is unused - but may be needed for the unit tests
-        red.comms = {
-            publish: function() {}
-        };
-        red.library = {
-            register: function() {}
-        };
         red.auth = {
             needsPermission: function() {}
         };

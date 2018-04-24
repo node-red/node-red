@@ -22,6 +22,10 @@ var editorApi = require("../../../../red/api/editor");
 var comms = require("../../../../red/api/editor/comms");
 var info = require("../../../../red/api/editor/settings");
 var auth = require("../../../../red/api/auth");
+
+var log = require("../../../../red/util/log");
+
+
 var when = require("when");
 
 
@@ -37,9 +41,7 @@ describe("api/editor/index", function() {
             info.init.restore();
         });
         it("disables the editor", function() {
-            var editorApp = editorApi.init({},{
-                settings:{disableEditor:true}
-            });
+            var editorApp = editorApi.init({},{disableEditor:true},{});
             should.not.exist(editorApp);
             comms.init.called.should.be.false();
             info.init.called.should.be.false();
@@ -67,15 +69,13 @@ describe("api/editor/index", function() {
             })
             require("../../../../red/api/editor/theme").app.restore();
             auth.needsPermission.restore();
+            log.error.restore();
         });
 
         before(function() {
-            app = editorApi.init({},{
-                log:{audit:function(){},error:function(msg){errors.push(msg)}},
-                settings:{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},
-                events:{on:function(){},removeListener:function(){}},
-                isStarted: function() { return isStarted; },
-                nodes: {paletteEditorEnabled: function() { return false }}
+            sinon.stub(log,"error",function(err) { errors.push(err)})
+            app = editorApi.init({},{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},{
+                isStarted: () => Promise.resolve(isStarted)
             });
         });
         it('serves the editor', function(done) {
@@ -117,7 +117,7 @@ describe("api/editor/index", function() {
                 done();
             });
         });
-        // it('GET /settings', function(done) {
+        // it.skip('GET /settings', function(done) {
         //     request(app).get("/settings").expect(200).end(function(err,res) {
         //         if (err) {
         //             return done(err);

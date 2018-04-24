@@ -427,7 +427,7 @@ describe('red/runtime/nodes/credentials', function() {
                 // credentials.dirty().should.be.true();
                 // should.not.exist(credentials.get("node"));
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 err.should.have.property('code','credentials_load_failed');
                 done();
             });
@@ -443,7 +443,7 @@ describe('red/runtime/nodes/credentials', function() {
                 // credentials.dirty().should.be.true();
                 // should.not.exist(credentials.get("node"));
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 err.should.have.property('code','credentials_load_failed');
                 done();
             });

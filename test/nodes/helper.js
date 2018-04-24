@@ -35,7 +35,7 @@ var redNodes = require("../../red/runtime/nodes");
 var flows = require("../../red/runtime/nodes/flows");
 var credentials = require("../../red/runtime/nodes/credentials");
 var comms = require("../../red/api/editor/comms.js");
-var log = require("../../red/runtime/log.js");
+var log = require("../../red/util/log.js");
 var context = require("../../red/runtime/nodes/context.js");
 var events = require("../../red/runtime/events.js");
 

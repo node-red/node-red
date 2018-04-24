@@ -42,9 +42,6 @@ var stubbedExpressApp = {
     delete: function() {}
 }
 var adminApi = {
-    library: {
-        register: function() {}
-    },
     auth: {
         needsPermission: function() {}
     },

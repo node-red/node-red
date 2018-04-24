@@ -28,6 +28,8 @@ var runtimeAPI;
 var wsServer;
 var activeConnections = [];
 
+var anonymousUser;
+
 var retained = {};
 
 var heartbeatTimer;
@@ -173,7 +175,8 @@ CommsConnection.prototype.subscribe = function(topic) {
 
 function start() {
     if (!settings.disableEditor) {
-        Users.default().then(function(anonymousUser) {
+        Users.default().then(function(_anonymousUser) {
+            anonymousUser = _anonymousUser;
             var webSocketKeepAliveTime = settings.webSocketKeepAliveTime || 15000;
             var path = settings.httpAdminRoot || "/";
             path = (path.slice(0,1) != "/" ? "/":"") + path + (path.slice(-1) == "/" ? "":"/") + "comms";

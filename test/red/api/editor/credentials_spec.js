@@ -29,64 +29,30 @@ describe('api/editor/credentials', function() {
         app = express();
         app.get('/credentials/:type/:id',credentials.get);
         credentials.init({
-            log:{audit:function(){}},
-            nodes:{
-                getCredentials: function(id) {
-                    if (id === "n1") {
-                        return {user1:"abc",password1:"123"};
+            flows: {
+                getNodeCredentials: function(opts) {
+                    if (opts.type === "known-type" && opts.id === "n1") {
+                        return Promise.resolve({
+                            user1:"abc",
+                            has_password1: true
+                        });
                     } else {
-                        return null;
-                    }
-                },
-                getCredentialDefinition:function(type) {
-                    if (type === "known-type") {
-                        return {user1:{type:"text"},password1:{type:"password"}};
-                    } else {
-                        return null;
+                        var err = new Error("message");
+                        err.code = "test_code";
+                        var p = Promise.reject(err);
+                        p.catch(()=>{});
+                        return p;
                     }
                 }
             }
         });
     });
-    it('returns empty credentials if unknown type',function(done) {
-        request(app)
-            .get("/credentials/unknown-type/n1")
-            .expect(200)
-            .expect("Content-Type",/json/)
-            .end(function(err,res) {
-                if (err) {
-                    done(err);
-                } else {
-                    try {
-                        res.body.should.eql({});
-                        done();
-                    } catch(e) {
-                        done(e);
-                    }
-                }
-            })
-    });
-    it('returns empty credentials if none are stored',function(done) {
-        request(app)
-            .get("/credentials/known-type/n2")
-            .expect("Content-Type",/json/)
-            .end(function(err,res) {
-                if (err) {
-                    done(err);
-                } else {
-                    try {
-                        res.body.should.eql({});
-                        done();
-                    } catch(e) {
-                        done(e);
-                    }
-                }
-            })
-    });
+
     it('returns stored credentials',function(done) {
         request(app)
             .get("/credentials/known-type/n1")
             .expect("Content-Type",/json/)
+            .expect(200)
             .end(function(err,res) {
                 if (err) {
                     done(err);
@@ -95,6 +61,27 @@ describe('api/editor/credentials', function() {
                         res.body.should.have.a.property("user1","abc");
                         res.body.should.not.have.a.property("password1");
                         res.body.should.have.a.property("has_password1",true);
+                        done();
+                    } catch(e) {
+                        done(e);
+                    }
+                }
+            })
+    });
+    it('returns any error',function(done) {
+        request(app)
+            .get("/credentials/unknown-type/n2")
+            .expect("Content-Type",/json/)
+            .expect(500)
+            .end(function(err,res) {
+                if (err) {
+                    done(err);
+                } else {
+                    try {
+                        res.body.should.have.property('code');
+                        res.body.code.should.be.equal("test_code");
+                        res.body.should.have.property('message');
+                        res.body.message.should.be.equal('message');
                         done();
                     } catch(e) {
                         done(e);

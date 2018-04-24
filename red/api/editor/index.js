@@ -89,7 +89,6 @@ module.exports = {
             // Library
             var library = require("./library");
             library.init(runtimeAPI);
-
             editorApp.get("/library/flows",needsPermission("library.read"),library.getAll,apiUtil.errorHandler);
             editorApp.get(/library\/([^\/]+)(?:$|\/(.*))/,needsPermission("library.read"),library.getEntry);
             editorApp.post(/library\/([^\/]+)\/(.*)/,needsPermission("library.write"),library.saveEntry);
@@ -107,7 +106,7 @@ module.exports = {
             // User Settings
             editorApp.post("/settings/user",needsPermission("settings.write"),info.updateUserSettings,apiUtil.errorHandler);
             // SSH keys
-            editorApp.use("/settings/user/keys",info.sshkeys());
+            editorApp.use("/settings/user/keys",needsPermission("settings.write"),info.sshkeys());
 
             return editorApp;
         }

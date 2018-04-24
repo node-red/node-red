@@ -17,215 +17,103 @@
 var should = require("should");
 var request = require('supertest');
 var express = require('express');
+var bodyParser = require("body-parser");
 var sinon = require('sinon');
-var when = require('when');
 
-var app = express();
+var app;
 var info = require("../../../../red/api/editor/settings");
 var theme = require("../../../../red/api/editor/theme");
 
 describe("api/editor/settings", function() {
-    describe("settings handler", function() {
-        before(function() {
-            sinon.stub(theme,"settings",function() { return { test: 456 };});
-            app = express();
-            app.get("/settings",info.runtimeSettings);
-        });
+    before(function() {
+        sinon.stub(theme,"settings",function() { return { test: 456 };});
+        app = express();
+        app.use(bodyParser.json());
+        app.get("/settings",info.runtimeSettings);
+        app.get("/settings/user",function(req,res,next) {req.user = "fred"; next()}, info.userSettings);
+        app.post("/settings/user",function(req,res,next) {req.user = "fred"; next()},info.updateUserSettings);
+    });
 
-        after(function() {
-            theme.settings.restore();
-        });
+    after(function() {
+        theme.settings.restore();
+    });
 
-        it('returns the filtered settings', function(done) {
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
-                        obj.testNodeSetting = "helloWorld";
-                    }
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-                },
-                log: { error: console.error },
-                storage: {}
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
-                    res.body.should.have.property("version","testVersion");
-                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
-                    res.body.should.have.property("editorTheme",{test:456});
-                    res.body.should.have.property("testNodeSetting","helloWorld");
-                    res.body.should.not.have.property("foo",123);
-                    res.body.should.have.property("flowEncryptionType","test-key-type");
-                    done();
-                });
-        });
-        it('includes project settings if projects available', function(done) {
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
-                        obj.testNodeSetting = "helloWorld";
-                    }
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-                },
-                log: { error: console.error },
-                storage: {
-                    projects: {
-                        getActiveProject: () => 'test-active-project',
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+    it('returns the runtime settings', function(done) {
+        info.init({
+            settings: {
+                getRuntimeSettings: function(opts) {
+                    return Promise.resolve({
+                        a:1,
+                        b:2
+                    })
                 }
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("project","test-active-project");
-                    res.body.should.not.have.property("files");
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
+            }
         });
-        it('includes existing files details if projects enabled but no active project and files exist', function(done) {
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
-                        obj.testNodeSetting = "helloWorld";
+        request(app)
+        .get("/settings")
+        .expect(200)
+        .end(function(err,res) {
+            if (err) {
+                return done(err);
+            }
+            res.body.should.have.property("a",1);
+            res.body.should.have.property("b",2);
+            res.body.should.have.property("editorTheme",{test:456});
+            done();
+        });
+    });
+    it('returns the user settings', function(done) {
+        info.init({
+            settings: {
+                getUserSettings: function(opts) {
+                    if (opts.user !== "fred") {
+                        return Promise.reject(new Error("Unknown user"));
                     }
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-                },
-                log: { error: console.error },
-                storage: {
-                    projects: {
-                        flowFileExists: () => true,
-                        getActiveProject: () => false,
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                    return Promise.resolve({
+                        c:3,
+                        d:4
+                    })
                 }
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.not.have.property("project");
-                    res.body.should.have.property("files");
-                    res.body.files.should.have.property("flow",'test-flow-file');
-                    res.body.files.should.have.property("credentials",'test-creds-file');
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
+            }
         });
-        it('does not include file details if projects enabled but no active project and files do not exist', function(done) {
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
-                        obj.testNodeSetting = "helloWorld";
+        request(app)
+        .get("/settings/user")
+        .expect(200)
+        .end(function(err,res) {
+            if (err) {
+                return done(err);
+            }
+            res.body.should.eql({c:3,d:4});
+            done();
+        });
+    });
+    it('updates the user settings', function(done) {
+        var update;
+        info.init({
+            settings: {
+                updateUserSettings: function(opts) {
+                    if (opts.user !== "fred") {
+                        return Promise.reject(new Error("Unknown user"));
                     }
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-                },
-                log: { error: console.error },
-                storage: {
-                    projects: {
-                        flowFileExists: () => false,
-                        getActiveProject: () => false,
-                        getFlowFilename:  () => 'test-flow-file',
-                        getCredentialsFilename:  () => 'test-creds-file',
-                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
-                    }
+                    update = opts.settings;
+                    return Promise.resolve()
                 }
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.not.have.property("project");
-                    res.body.should.not.have.property("files");
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
+            }
         });
-        it('overrides palette editable if runtime says it is disabled', function(done) {
-            info.init({
-                settings: {
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function() {}
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return false; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-
-                },
-                log: { error: console.error },
-                storage: {}
-
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
-                    res.body.should.have.property("version","testVersion");
-                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
-                    res.body.should.have.property("editorTheme");
-                    res.body.editorTheme.should.have.property("test",456);
-
-                    res.body.editorTheme.should.have.property("palette",{editable:false});
-                    done();
-                });
+        request(app)
+        .post("/settings/user")
+        .send({
+            e:4,
+            f:5
         })
+        .expect(204)
+        .end(function(err,res) {
+            if (err) {
+                return done(err);
+            }
+            update.should.eql({e:4,f:5});
+            done();
+        });
     });
 
 });

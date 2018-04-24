@@ -56,7 +56,7 @@ module.exports = {
             user: req.user,
             module: req.params[0]
         }
-        runtimeAPI.nodes.removeModule(opts).then(function(info) {
+        runtimeAPI.nodes.removeModule(opts).then(function() {
             res.status(204).end();
         }).catch(function(err) {
             apiUtils.rejectHandler(req,res,err);
@@ -77,7 +77,7 @@ module.exports = {
         } else {
             opts.lang = apiUtils.determineLangFromHeaders(req.acceptsLanguages());
             runtimeAPI.nodes.getNodeConfig(opts).then(function(result) {
-                return res.json(result);
+                return res.send(result);
             }).catch(function(err) {
                 apiUtils.rejectHandler(req,res,err);
             })
@@ -100,7 +100,7 @@ module.exports = {
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
             // log.audit({event: "nodes.module.set",error:"invalid_request"},req);
-            res.status(400).json({error:"invalid_request", message:"Invalid request"});
+            res.status(400).json({code:"invalid_request", message:"Invalid request"});
             return;
         }
         var opts = {
@@ -119,7 +119,7 @@ module.exports = {
         var body = req.body;
         if (!body.hasOwnProperty("enabled")) {
             // log.audit({event: "nodes.module.set",error:"invalid_request"},req);
-            res.status(400).json({error:"invalid_request", message:"Invalid request"});
+            res.status(400).json({code:"invalid_request", message:"Invalid request"});
             return;
         }
         var opts = {
