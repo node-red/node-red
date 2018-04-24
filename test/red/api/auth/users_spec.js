@@ -21,6 +21,9 @@ var sinon = require('sinon');
 var Users = require("../../../../red/api/auth/users");
 
 describe("api/auth/users", function() {
+    after(function() {
+        Users.init({});
+    })
     describe('Initalised with a credentials object, no anon',function() {
         before(function() {
             Users.init({
@@ -214,7 +217,7 @@ describe("api/auth/users", function() {
         });
         describe('#default',function() {
             it('handles api.default being a function',function(done) {
-                Users.should.have.property('default').which.is.a.Function;
+                Users.should.have.property('default').which.is.a.Function();
                 (Users.default()).should.equal("Done");
                 done();
             });

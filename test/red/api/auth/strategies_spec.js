@@ -105,7 +105,6 @@ describe("api/auth/strategies", function() {
                 user.should.equal("anon");
                 strategies.anonymousStrategy.success = strategies.anonymousStrategy._success;
                 delete strategies.anonymousStrategy._success;
-                userDefault.restore();
                 done();
             };
             strategies.anonymousStrategy.authenticate({});
@@ -119,11 +118,13 @@ describe("api/auth/strategies", function() {
                 err.should.equal(401);
                 strategies.anonymousStrategy.fail = strategies.anonymousStrategy._fail;
                 delete strategies.anonymousStrategy._fail;
-                userDefault.restore();
                 done();
             };
             strategies.anonymousStrategy.authenticate({});
         });
+        afterEach(function() {
+            Users.default.restore();
+        })
     });
 
     describe("Bearer Strategy", function() {

@@ -53,7 +53,7 @@ var api = module.exports = {
                     runtime.log.audit({event: "library.get",type:opts.type,path:opts.path,error:err.code});
                     return reject(err);
                 }
-                runtime.log.audit({event: "library.get",type:type,error:"not_found"});
+                runtime.log.audit({event: "library.get",type:opts.type,error:"not_found"});
                 var error = new Error();
                 error.code = "not_found";
                 error.status = 404;
@@ -80,14 +80,13 @@ var api = module.exports = {
                 return resolve();
             }).catch(function(err) {
                 runtime.log.warn(runtime.log._("api.library.error-save-entry",{path:opts.path,message:err.toString()}));
-                    if (err.code === 'forbidden') {
+                if (err.code === 'forbidden') {
                     runtime.log.audit({event: "library.set",type:opts.type,path:opts.path,error:"forbidden"});
                     err.status = 403;
                     return reject(err);
                 }
                 runtime.log.audit({event: "library.set",type:opts.type,path:opts.path,error:"unexpected_error",message:err.toString()});
                 var error = new Error();
-                error.code = "not_found";
                 error.status = 400;
                 return reject(error);
             });
