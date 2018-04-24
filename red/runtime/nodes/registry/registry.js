@@ -16,7 +16,6 @@
 
  //var UglifyJS = require("uglify-js");
 var util = require("util");
-var when = require("when");
 var path = require("path");
 var fs = require("fs");
 
@@ -133,7 +132,7 @@ function saveNodeList() {
     if (settings.available()) {
         return settings.set("nodes",moduleList);
     } else {
-        return when.reject("Settings unavailable");
+        return Promise.reject("Settings unavailable");
     }
 }
 

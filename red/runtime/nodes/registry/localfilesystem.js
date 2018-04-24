@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var when = require("when");
 var fs = require("fs");
 var path = require("path");
 

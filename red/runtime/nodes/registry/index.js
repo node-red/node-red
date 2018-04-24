@@ -14,11 +14,6 @@
  * limitations under the License.
  **/
 
-var when = require("when");
-var fs = require("fs");
-var path = require("path");
-
-var events = require("../../events");
 var registry = require("./registry");
 var loader = require("./loader");
 var installer = require("./installer");
@@ -51,7 +46,7 @@ function enableNodeSet(typeOrId) {
                 return registry.getNodeInfo(typeOrId);
             });
         }
-        return when.resolve(nodeSet);
+        return Promise.resolve(nodeSet);
     });
 }
 

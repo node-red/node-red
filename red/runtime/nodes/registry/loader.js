@@ -173,7 +173,7 @@ function loadNodeFiles(nodeFiles) {
 }
 
 function loadNodeConfig(fileInfo) {
-    return when.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var file = fileInfo.file;
         var module = fileInfo.module;
         var name = fileInfo.name;
@@ -298,7 +298,7 @@ function loadNodeSet(node) {
     var nodeDir = path.dirname(node.file);
     var nodeFn = path.basename(node.file);
     if (!node.enabled) {
-        return when.resolve(node);
+        return Promise.resolve(node);
     } else {
     }
     try {
@@ -322,7 +322,7 @@ function loadNodeSet(node) {
         if (loadPromise == null) {
             node.enabled = true;
             node.loaded = true;
-            loadPromise = when.resolve(node);
+            loadPromise = Promise.resolve(node);
         }
         return loadPromise;
     } catch(err) {
@@ -339,7 +339,7 @@ function loadNodeSet(node) {
                 }
             }
         }
-        return when.resolve(node);
+        return Promise.resolve(node);
     }
 }
 
@@ -371,13 +371,13 @@ function addModule(module) {
         // TODO: nls
         var e = new Error("module_already_loaded");
         e.code = "module_already_loaded";
-        return when.reject(e);
+        return Promise.reject(e);
     }
     try {
         var moduleFiles = localfilesystem.getModuleFiles(module);
         return loadNodeFiles(moduleFiles);
     } catch(err) {
-        return when.reject(err);
+        return Promise.reject(err);
     }
 }
 

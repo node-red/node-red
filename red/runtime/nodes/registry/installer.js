@@ -15,7 +15,6 @@
  **/
 
 
-var when = require("when");
 var path = require("path");
 var fs = require("fs");
 
@@ -73,7 +72,7 @@ function checkExistingModule(module,version) {
 }
 function installModule(module,version) {
     //TODO: ensure module is 'safe'
-    return when.promise(function(resolve,reject) {
+    return new Promise(function(resolve,reject) {
         var installName = module;
         var isUpgrade = false;
         try {
@@ -177,7 +176,7 @@ function reportRemovedModules(removedNodes) {
 }
 
 function uninstallModule(module) {
-    return when.promise(function(resolve,reject) {
+    return new Promise(function(resolve,reject) {
         if (/[\s;]/.test(module)) {
             reject(new Error(log._("server.install.invalid")));
             return;
@@ -228,9 +227,9 @@ function checkPrereq() {
     ) {
         log.info(log._("server.palette-editor.disabled"));
         paletteEditorEnabled = false;
-        return when.resolve();
+        return Promise.resolve();
     } else {
-        return when.promise(function(resolve) {
+        return new Promise(function(resolve) {
             child_process.execFile(npmCommand,['-v'],function(err) {
                 if (err) {
                     log.info(log._("server.palette-editor.npm-not-found"));
