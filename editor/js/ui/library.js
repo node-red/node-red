@@ -18,6 +18,12 @@ RED.library = (function() {
     var exportToLibraryDialog;
     var elementPrefix = "node-input-";
 
+
+    var _librarySaveConfirm = '<div id="node-dialog-library-save-confirm" class="hide"><form class="form-horizontal"><div style="text-align: center; padding-top: 30px;" id="node-dialog-library-save-content"></div></form></div>';
+    var _librarySave = '<div id="node-dialog-library-save" class="hide"><form class="form-horizontal"><div class="form-row"><label for="node-dialog-library-save-folder" data-i18n="[append]library.folder"><i class="fa fa-folder-open"></i> </label><input type="text" id="node-dialog-library-save-folder" data-i18n="[placeholder]library.folderPlaceholder"></div><div class="form-row"><label for="node-dialog-library-save-filename" data-i18n="[append]library.filename"><i class="fa fa-file"></i> </label><input type="text" id="node-dialog-library-save-filename" data-i18n="[placeholder]library.filenamePlaceholder"></div></form></div>';
+    var _libraryLookup = '<div id="node-dialog-library-lookup" class="hide"><form class="form-horizontal"><div class="form-row"><ul id="node-dialog-library-breadcrumbs" class="breadcrumb"><li class="active"><a href="#" data-i18n="[append]library.breadcrumb"></a></li></ul></div><div class="form-row"><div style="vertical-align: top; display: inline-block; height: 100%; width: 30%; padding-right: 20px;"><div id="node-select-library" style="border: 1px solid #999; width: 100%; height: 100%; overflow:scroll;"><ul></ul></div></div><div style="vertical-align: top; display: inline-block;width: 65%; height: 100%;"><div style="height: 100%; width: 95%;" class="node-text-editor" id="node-select-library-text" ></div></div></div></form></div>';
+
+
     function loadFlowLibrary() {
         $.getJSON("library/flows",function(data) {
             //console.log(data);
@@ -409,6 +415,11 @@ RED.library = (function() {
 
     return {
         init: function() {
+
+
+            $(_librarySave).appendTo(document.body);
+            $(_librarySaveConfirm).appendTo(document.body);
+            $(_libraryLookup).appendTo(document.body);
 
             RED.actions.add("core:library-export",exportFlow);
 
