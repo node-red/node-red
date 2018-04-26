@@ -24,7 +24,7 @@ var flowUtils = require("../../../../../red/runtime/nodes/flows/util");
 var Flow = require("../../../../../red/runtime/nodes/flows/Flow");
 var flows = require("../../../../../red/runtime/nodes/flows");
 var Node = require("../../../../../red/runtime/nodes/Node");
-var typeRegistry = require("../../../../../red/runtime/nodes/registry");
+var typeRegistry = require("../../../../../red/runtime-registry");
 
 
 describe('Flow', function() {

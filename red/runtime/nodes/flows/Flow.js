@@ -16,10 +16,11 @@
 
 var when = require("when");
 var clone = require("clone");
-var typeRegistry = require("../registry");
+var typeRegistry = require("../../../runtime-registry");
 var Log;
 var redUtil = require("../../util");
 var flowUtil = require("./util");
+var Node;
 
 var nodeCloseTimeout = 15000;
 
@@ -292,6 +293,7 @@ function Flow(global,flow) {
 
 function createNode(type,config) {
     var nn = null;
+    try {
     var nt = typeRegistry.get(type);
     if (nt) {
         var conf = clone(config);
@@ -315,6 +317,9 @@ function createNode(type,config) {
     } else {
         Log.error(Log._("nodes.flow.unknown-type", {type:type}));
     }
+} catch(err) {
+    Log.error(err);
+}
     return nn;
 }
 
@@ -498,6 +503,7 @@ module.exports = {
     init: function(runtime) {
         nodeCloseTimeout = runtime.settings.nodeCloseTimeout || 15000;
         Log = runtime.log;
+        Node = require("../Node");
     },
     create: function(global,conf) {
         return new Flow(global,conf);

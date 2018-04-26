@@ -19,9 +19,10 @@ var path = require("path");
 var fs = require("fs");
 
 var registry = require("./registry");
+var library = require("./library");
 var log;
 
-var events = require("../../events");
+var events;
 
 var child_process = require('child_process');
 var npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -32,6 +33,7 @@ var moduleRe = /^(@[^/]+?[/])?[^/]+?$/;
 var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
 
 function init(runtime) {
+    events = runtime.events;
     settings = runtime.settings;
     log = runtime.log;
 }
@@ -210,8 +212,7 @@ function uninstallModule(module) {
                 } else {
                     log.info(log._("server.install.uninstalled",{name:module}));
                     reportRemovedModules(list);
-                    // TODO: tidy up internal event names
-                    events.emit("node-module-uninstalled",module)
+                    library.removeExamplesDir(module);
                     resolve(list);
                 }
             }

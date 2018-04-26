@@ -23,7 +23,7 @@ var RedNode = require("../../../../../red/runtime/nodes/Node");
 var RED = require("../../../../../red/runtime/nodes");
 var events = require("../../../../../red/runtime/events");
 var credentials = require("../../../../../red/runtime/nodes/credentials");
-var typeRegistry = require("../../../../../red/runtime/nodes/registry");
+var typeRegistry = require("../../../../../red/runtime-registry");
 var Flow = require("../../../../../red/runtime/nodes/flows/Flow");
 
 describe('flows/index', function() {

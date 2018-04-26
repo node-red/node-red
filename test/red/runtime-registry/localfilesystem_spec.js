@@ -19,13 +19,19 @@ var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
-var localfilesystem = require("../../../../../red/runtime/nodes/registry/localfilesystem");
+var localfilesystem = require("../../../red/runtime-registry/localfilesystem");
 
-var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local"));
-var userDir = path.resolve(path.join(__dirname,"..","resources","userDir"));
-var moduleDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule"));
+var resourcesDir = path.resolve(path.join(__dirname,"resources","local"));
+var userDir = path.resolve(path.join(__dirname,"resources","userDir"));
+var moduleDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule"));
+
+var i18n = require("../../../red/util").i18n; // TODO: separate module
 
 describe("red/nodes/registry/localfilesystem",function() {
+    beforeEach(function() {
+        stubs.push(sinon.stub(i18n,"registerMessageCatalog", function() { return Promise.resolve(); }));
+    })
+
     var stubs = [];
     afterEach(function() {
         while(stubs.length) {
@@ -46,7 +52,7 @@ describe("red/nodes/registry/localfilesystem",function() {
     }
     describe("#getNodeFiles",function() {
         it("Finds all the node files in the resources tree",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:resourcesDir}});
+            localfilesystem.init({settings:{coreNodesDir:resourcesDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -54,10 +60,14 @@ describe("red/nodes/registry/localfilesystem",function() {
             nm.should.have.a.property("nodes");
             var nodes = nm.nodes;
             checkNodes(nm.nodes,['TestNode1','MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4'],['TestNodeModule']);
+            i18n.registerMessageCatalog.called.should.be.true();
+            i18n.registerMessageCatalog.lastCall.args[0].should.eql('node-red');
+            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(resourcesDir,"core","locales")));
+            i18n.registerMessageCatalog.lastCall.args[2].should.eql('messages.json');
             done();
         });
         it("Includes node files from settings",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesIncludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
+            localfilesystem.init({settings:{nodesIncludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -67,7 +77,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Excludes node files from settings",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesExcludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
+            localfilesystem.init({settings:{nodesExcludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -77,7 +87,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in userDir/nodes",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{userDir:userDir,coreNodesDir:__dirname}});
+            localfilesystem.init({settings:{userDir:userDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -88,7 +98,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
 
         it("Finds nodes in settings.nodesDir (string)",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesDir:userDir,coreNodesDir:__dirname}});
+            localfilesystem.init({settings:{nodesDir:userDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -97,19 +107,19 @@ describe("red/nodes/registry/localfilesystem",function() {
             checkNodes(nm.nodes,['TestNode5'],['TestNode1']);
             done();
         });
-	    it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
-		    var relativeUserDir = path.join("test","red","runtime","nodes","resources","userDir");
-		    localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesDir:relativeUserDir,coreNodesDir:__dirname}});
-		    var nodeList = localfilesystem.getNodeFiles(true);
-		    nodeList.should.have.a.property("node-red");
-		    var nm = nodeList['node-red'];
-		    nm.should.have.a.property('name','node-red');
-		    nm.should.have.a.property("nodes");
-		    checkNodes(nm.nodes,['TestNode5'],['TestNode1']);
-		    done();
-	    });
-	    it("Finds nodes in settings.nodesDir (array)",function(done) {
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{nodesDir:[userDir],coreNodesDir:__dirname}});
+        it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
+            var relativeUserDir = path.join("test","red","runtime-registry","resources","userDir");
+            localfilesystem.init({settings:{nodesDir:relativeUserDir}});
+            var nodeList = localfilesystem.getNodeFiles(true);
+            nodeList.should.have.a.property("node-red");
+            var nm = nodeList['node-red'];
+            nm.should.have.a.property('name','node-red');
+            nm.should.have.a.property("nodes");
+            checkNodes(nm.nodes,['TestNode5'],['TestNode1']);
+            done();
+        });
+        it("Finds nodes in settings.nodesDir (array)",function(done) {
+            localfilesystem.init({settings:{nodesDir:[userDir]}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -128,7 +138,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
             var nodeList = localfilesystem.getNodeFiles();
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -146,6 +156,13 @@ describe("red/nodes/registry/localfilesystem",function() {
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,['VersionMismatchMod1','VersionMismatchMod2'],[],'VersionMismatchModule');
 
+            i18n.registerMessageCatalog.called.should.be.true();
+            i18n.registerMessageCatalog.lastCall.args[0].should.eql('node-red');
+            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(moduleDir,"core","locales")));
+            i18n.registerMessageCatalog.lastCall.args[2].should.eql('messages.json');
+
+
+
             done();
         });
         it.skip("finds locales directory");
@@ -153,42 +170,58 @@ describe("red/nodes/registry/localfilesystem",function() {
         it("scans icon files in the resources tree",function(done) {
             var count = 0;
             localfilesystem.init({
-                i18n:{registerMessageCatalog:function(){}},
-                events:{emit:function(eventName,dir){
-                    if (count === 0) {
-                        eventName.should.equal("node-icon-dir");
-                        dir.name.should.equal("node-red");
-                        dir.icons.should.be.an.Array();
-                        count = 1;
-                    } else if (count === 1) {
-                        done();
-                    }
-                }},
+
+                // events:{emit:function(eventName,dir){
+                //     if (count === 0) {
+                //         eventName.should.equal("node-icon-dir");
+                //         dir.name.should.equal("node-red");
+                //         dir.icons.should.be.an.Array();
+                //         count = 1;
+                //     } else if (count === 1) {
+                //         done();
+                //     }
+                // }},
                 settings:{coreNodesDir:resourcesDir}
             });
-            localfilesystem.getNodeFiles(true);
+            var list = localfilesystem.getNodeFiles(true);
+            list.should.have.property("node-red");
+            list["node-red"].should.have.property("icons");
+            list["node-red"].icons.should.have.length(2);
+            list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/local/NestedDirectoryNode/NestedNode/icons"))
+            list["node-red"].icons[1].should.have.property("icons");
+            list["node-red"].icons[1].icons.should.have.length(1);
+            list["node-red"].icons[1].icons[0].should.eql("arrow-in.png");
+            done();
         });
         it("scans icons dir in library",function(done) {
             var count = 0;
             localfilesystem.init({
-                i18n:{registerMessageCatalog:function(){}},
-                events:{emit:function(eventName,dir){
-                    eventName.should.equal("node-icon-dir");
-                    if (count === 0) {
-                        dir.name.should.equal("node-red");
-                        dir.icons.should.be.an.Array();
-                        count = 1;
-                    } else if (count === 1) {
-                        dir.name.should.equal("Library");
-                        dir.icons.should.be.an.Array();
-                        dir.icons.length.should.equal(1);
-                        dir.icons[0].should.be.equal("test_icon.png");
-                        done();
-                    }
-                }},
+                //
+                // events:{emit:function(eventName,dir){
+                //     eventName.should.equal("node-icon-dir");
+                //     if (count === 0) {
+                //         dir.name.should.equal("node-red");
+                //         dir.icons.should.be.an.Array();
+                //         count = 1;
+                //     } else if (count === 1) {
+                //         dir.name.should.equal("Library");
+                //         dir.icons.should.be.an.Array();
+                //         dir.icons.length.should.equal(1);
+                //         dir.icons[0].should.be.equal("test_icon.png");
+                //         done();
+                //     }
+                // }},
                 settings:{userDir:userDir}
             });
-            localfilesystem.getNodeFiles(true);
+            var list = localfilesystem.getNodeFiles(true);
+            list.should.have.property("node-red");
+            list["node-red"].should.have.property("icons");
+            list["node-red"].icons.should.have.length(2);
+            list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/userDir/lib/icons"))
+            list["node-red"].icons[1].should.have.property("icons");
+            list["node-red"].icons[1].icons.should.have.length(1);
+            list["node-red"].icons[1].icons[0].should.eql("test_icon.png");
+            done();
         });
     });
     describe("#getModuleFiles",function() {
@@ -202,7 +235,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
             nodeModule.should.have.a.property('TestNodeModule');
             nodeModule['TestNodeModule'].should.have.a.property('name','TestNodeModule');
@@ -226,7 +259,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
             /*jshint immed: false */
             (function(){
                 localfilesystem.getModuleFiles('WontExistModule');
@@ -246,16 +279,24 @@ describe("red/nodes/registry/localfilesystem",function() {
                 return _join.apply(null,arguments);
             }));
             localfilesystem.init({
-                i18n:{registerMessageCatalog:function(){}},
-                events:{emit:function(eventName,dir){
-                    eventName.should.equal("node-icon-dir");
-                    dir.name.should.equal("TestNodeModule");
-                    dir.icons.should.be.an.Array();
-                    done();
-                }},
+
+                // events:{emit:function(eventName,dir){
+                //     eventName.should.equal("node-icon-dir");
+                //     dir.name.should.equal("TestNodeModule");
+                //     dir.icons.should.be.an.Array();
+                //     done();
+                // }},
                 settings:{coreNodesDir:moduleDir}
             });
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
+            nodeModule.should.have.property("TestNodeModule");
+            nodeModule.TestNodeModule.should.have.property('icons');
+
+            nodeModule.TestNodeModule.icons.should.have.length(1);
+            nodeModule.TestNodeModule.icons[0].should.have.property("path");
+            nodeModule.TestNodeModule.icons[0].should.have.property("icons");
+            nodeModule.TestNodeModule.icons[0].icons[0].should.eql("arrow-in.png");
+            done();
         });
     });
 });

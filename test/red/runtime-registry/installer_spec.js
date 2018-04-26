@@ -22,9 +22,9 @@ var fs = require('fs');
 var EventEmitter = require('events');
 
 var child_process = require('child_process');
-var installer = require("../../../../../red/runtime/nodes/registry/installer");
-var registry = require("../../../../../red/runtime/nodes/registry/index");
-var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
+var installer = require("../../../red/runtime-registry/installer");
+var registry = require("../../../red/runtime-registry/index");
+var typeRegistry = require("../../../red/runtime-registry/registry");
 
 describe('nodes/registry/installer', function() {
 
@@ -39,7 +39,7 @@ describe('nodes/registry/installer', function() {
     }
 
     before(function() {
-        installer.init({log:mockLog, settings:{}});
+        installer.init({log:mockLog, settings:{}, events: new EventEmitter()});
     });
     afterEach(function() {
         if (child_process.spawn.restore) {
@@ -166,7 +166,7 @@ describe('nodes/registry/installer', function() {
         });
         it("rejects when non-existant path is provided", function(done) {
             this.timeout(10000);
-            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","NonExistant"));
+            var resourcesDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule","node_modules","NonExistant"));
             installer.installModule(resourcesDir).then(function() {
                 done(new Error("Unexpected success"));
             }).catch(function(err) {
@@ -186,7 +186,7 @@ describe('nodes/registry/installer', function() {
             var addModule = sinon.stub(registry,"addModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","TestNodeModule"));
+            var resourcesDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule","node_modules","TestNodeModule"));
             sinon.stub(child_process,"spawn",function(cmd,args,opt) {
                 var ee = new EventEmitter();
                 ee.stdout = new EventEmitter();

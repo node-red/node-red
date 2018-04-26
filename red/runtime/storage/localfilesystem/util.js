@@ -83,7 +83,6 @@ module.exports = {
              try {
                  fs.renameSync(path,backupPath);
              } catch(err) {
-                 console.log(err);
              }
          }
          return when.promise(function(resolve,reject) {

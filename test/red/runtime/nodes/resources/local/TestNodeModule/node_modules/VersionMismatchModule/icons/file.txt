@@ -1,3 +1,0 @@
-This file exists just to ensure the 'icons' directory is in the repository.
-TODO: a future test needs to ensure the right icon files are loaded - this
-      directory can be used for that

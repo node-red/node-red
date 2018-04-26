@@ -18,15 +18,16 @@ var when = require("when");
 var path = require("path");
 var fs = require("fs");
 var clone = require("clone");
+var util = require("util");
 
-var registry = require("./registry");
+var registry = require("../../runtime-registry");
+
 var credentials = require("./credentials");
 var flows = require("./flows");
 var flowUtil = require("./flows/util")
 var context = require("./context");
 var Node = require("./Node");
 var log;
-var library = require("./library");
 
 var events = require("../events");
 
@@ -58,6 +59,26 @@ function registerType(nodeSet,type,constructor,opts) {
                 settings.registerNodeSettings(type,opts.settings);
             } catch(err) {
                 log.warn("["+type+"] "+err.message);
+            }
+        }
+    }
+    if(!(constructor.prototype instanceof Node)) {
+        if(Object.getPrototypeOf(constructor.prototype) === Object.prototype) {
+            util.inherits(constructor,Node);
+        } else {
+            var proto = constructor.prototype;
+            while(Object.getPrototypeOf(proto) !== Object.prototype) {
+                proto = Object.getPrototypeOf(proto);
+            }
+            //TODO: This is a partial implementation of util.inherits >= node v5.0.0
+            //      which should be changed when support for node < v5.0.0 is dropped
+            //      see: https://github.com/nodejs/node/pull/3455
+            proto.constructor.super_ = Node;
+            if(Object.setPrototypeOf) {
+                Object.setPrototypeOf(proto, Node.prototype);
+            } else {
+                // hack for node v0.10
+                proto.__proto__ = Node.prototype;
             }
         }
     }
@@ -99,7 +120,6 @@ function init(runtime) {
     flows.init(runtime);
     registry.init(runtime);
     context.init(runtime.settings);
-    library.init(runtime);
 }
 
 function disableNode(id) {
@@ -188,8 +208,8 @@ module.exports = {
     getNodeConfig: registry.getNodeConfig,
     getNodeIconPath: registry.getNodeIconPath,
     getNodeIcons: registry.getNodeIcons,
-    getNodeExampleFlows: library.getExampleFlows,
-    getNodeExampleFlowPath: library.getExampleFlowPath,
+    getNodeExampleFlows: registry.getNodeExampleFlows,
+    getNodeExampleFlowPath: registry.getNodeExampleFlowPath,
 
     clearRegistry: registry.clear,
     cleanModuleList: registry.cleanModuleList,

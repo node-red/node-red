@@ -19,13 +19,10 @@ var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
-var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
+var typeRegistry = require("../../../red/runtime-registry/registry");
+var EventEmitter = require('events');
 
-var Node = require("../../../../../red/runtime/nodes/Node");
-
-var events = require("../../../../../red/runtime/events");
-
-var inherits = require("util").inherits;
+var events = new EventEmitter();
 
 describe("red/nodes/registry/registry",function() {
 
@@ -86,7 +83,7 @@ describe("red/nodes/registry/registry",function() {
 
     describe('#init/load', function() {
         it('loads initial config', function(done) {
-            typeRegistry.init(settingsWithStorageAndInitialConfig);
+            typeRegistry.init(settingsWithStorageAndInitialConfig,null,events);
             typeRegistry.getNodeList().should.have.lengthOf(0);
             typeRegistry.load();
             typeRegistry.getNodeList().should.have.lengthOf(1);
@@ -123,7 +120,7 @@ describe("red/nodes/registry/registry",function() {
                  }}
             };
             var expected = JSON.parse('{"node-red":{"name":"node-red","nodes":{"sentiment":{"name":"sentiment","types":["sentiment"],"enabled":true,"module":"node-red"},"inject":{"name":"inject","types":["inject"],"enabled":true,"module":"node-red"}}},"testModule":{"name":"testModule","nodes":{"a-module.js":{"name":"a-module.js","types":["example"],"enabled":true,"module":"testModule"}}}}');
-            typeRegistry.init(legacySettings);
+            typeRegistry.init(legacySettings,null,events);
             typeRegistry.load();
             legacySettings.set.calledOnce.should.be.true();
             legacySettings.set.args[0][1].should.eql(expected);
@@ -132,10 +129,10 @@ describe("red/nodes/registry/registry",function() {
     });
 
 
-    describe('#addNodeSet', function() {
+    describe.skip('#addNodeSet', function() {
        it('adds a node set for an unknown module', function() {
 
-           typeRegistry.init(settings);
+           typeRegistry.init(settings,null,events);
 
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
@@ -164,7 +161,7 @@ describe("red/nodes/registry/registry",function() {
 
        it('adds a node set to an existing module', function() {
 
-           typeRegistry.init(settings);
+           typeRegistry.init(settings,null,events);
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
 
@@ -193,7 +190,7 @@ describe("red/nodes/registry/registry",function() {
        });
 
        it('doesnt add node set types if node set has an error', function() {
-           typeRegistry.init(settings);
+           typeRegistry.init(settings,null,events);
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
 
@@ -209,7 +206,7 @@ describe("red/nodes/registry/registry",function() {
        });
 
        it('doesnt add node set if type already exists', function() {
-           typeRegistry.init(settings);
+           typeRegistry.init(settings,null,events);
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
 
@@ -243,7 +240,7 @@ describe("red/nodes/registry/registry",function() {
 
     describe("#enableNodeSet", function() {
         it('throws error if settings unavailable', function() {
-            typeRegistry.init(settings);
+            typeRegistry.init(settings,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.enableNodeSet("test-module/test-name");
@@ -251,7 +248,7 @@ describe("red/nodes/registry/registry",function() {
         });
 
         it('throws error if module unknown', function() {
-            typeRegistry.init(settingsWithStorageAndInitialConfig);
+            typeRegistry.init(settingsWithStorageAndInitialConfig,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.enableNodeSet("test-module/unknown");
@@ -262,7 +259,7 @@ describe("red/nodes/registry/registry",function() {
     });
     describe("#disableNodeSet", function() {
         it('throws error if settings unavailable', function() {
-            typeRegistry.init(settings);
+            typeRegistry.init(settings,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.disableNodeSet("test-module/test-name");
@@ -270,7 +267,7 @@ describe("red/nodes/registry/registry",function() {
         });
 
         it('throws error if module unknown', function() {
-            typeRegistry.init(settingsWithStorageAndInitialConfig);
+            typeRegistry.init(settingsWithStorageAndInitialConfig,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.disableNodeSet("test-module/unknown");
@@ -281,7 +278,7 @@ describe("red/nodes/registry/registry",function() {
 
     describe('#getNodeConfig', function() {
         it('returns nothing for an unregistered type config', function(done) {
-            typeRegistry.init(settings);
+            typeRegistry.init(settings,null,events);
             var config = typeRegistry.getNodeConfig("imaginary-shark");
             (config === null).should.be.true();
             done();
@@ -290,26 +287,32 @@ describe("red/nodes/registry/registry",function() {
 
     describe('#saveNodeList',function() {
         it('rejects when settings unavailable',function(done) {
-            typeRegistry.init(stubSettings({},false,{}));
-            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
+            typeRegistry.init(stubSettings({},false,{}),null,events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {"test-name":{module:"test-module",name:"test-name",types:[]}}});
             typeRegistry.saveNodeList().catch(function(err) {
                 done();
             });
         });
         it('saves the list',function(done) {
             var s = stubSettings({},true,{});
-            typeRegistry.init(s);
-            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
-            typeRegistry.addNodeSet("test-module/test-name-2",testNodeSet2WithError, "0.0.1");
+            typeRegistry.init(s,null,events);
+
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":testNodeSet1,
+                "test-name-2":testNodeSet2WithError
+            }});
+
             typeRegistry.saveNodeList().then(function() {
                 s.set.called.should.be.true();
                 s.set.lastCall.args[0].should.eql('nodes');
                 var nodes = s.set.lastCall.args[1];
                 nodes.should.have.property('test-module');
                 for (var n in nodes['test-module'].nodes) {
-                    var nn = nodes['test-module'].nodes[n];
-                    nn.should.not.have.property('err');
-                    nn.should.not.have.property('id');
+                    if (nodes['test-module'].nodes.hasOwnProperty(n)) {
+                        var nn = nodes['test-module'].nodes[n];
+                        nn.should.not.have.property('err');
+                        nn.should.not.have.property('id');
+                    }
                 }
                 done();
             }).catch(function(err) {
@@ -321,7 +324,7 @@ describe("red/nodes/registry/registry",function() {
     describe('#removeModule',function() {
         it('throws error for unknown module', function() {
             var s = stubSettings({},true,{});
-            typeRegistry.init(s);
+            typeRegistry.init(s,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.removeModule("test-module/unknown");
@@ -329,7 +332,7 @@ describe("red/nodes/registry/registry",function() {
         });
         it('throws error for unavaiable settings', function() {
             var s = stubSettings({},false,{});
-            typeRegistry.init(s);
+            typeRegistry.init(s,null,events);
             /*jshint immed: false */
             (function(){
                 typeRegistry.removeModule("test-module/unknown");
@@ -337,8 +340,10 @@ describe("red/nodes/registry/registry",function() {
         });
         it('removes a known module', function() {
             var s = stubSettings({},true,{});
-            typeRegistry.init(s);
-            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1, "0.0.1");
+            typeRegistry.init(s,null,events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":testNodeSet1
+            }});
             var moduleList = typeRegistry.getModuleList();
             moduleList.should.have.a.property("test-module");
             typeRegistry.getNodeList().should.have.lengthOf(1);
@@ -354,45 +359,48 @@ describe("red/nodes/registry/registry",function() {
         it('returns node config', function() {
             typeRegistry.init(settings,{
                 getNodeHelp: function(config) { return "HE"+config.name+"LP" }
-            });
-            typeRegistry.addNodeSet("test-module/test-name",{
-                id: "test-module/test-name",
-                module: "test-module",
-                name: "test-name",
-                enabled: true,
-                loaded: false,
-                config: "configA",
-                types: [ "test-a","test-b"]
-            }, "0.0.1");
-            typeRegistry.getNodeConfig("test-module/test-name").should.eql('configAHEtest-nameLP');
-            typeRegistry.getAllNodeConfigs().should.eql('configAHEtest-nameLP');
+            },events);
 
-            typeRegistry.addNodeSet("test-module/test-name-2",{
-                id: "test-module/test-name-2",
-                module: "test-module",
-                name: "test-name-2",
-                enabled: true,
-                loaded: false,
-                config: "configB",
-                types: [ "test-c","test-d"]
-            }, "0.0.1");
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"]
+                },
+                "test-name-2":{
+                    id: "test-module/test-name-2",
+                    module: "test-module",
+                    name: "test-name-2",
+                    enabled: true,
+                    loaded: false,
+                    config: "configB",
+                    types: [ "test-c","test-d"]
+                }
+            }});
+            typeRegistry.getNodeConfig("test-module/test-name").should.eql('configAHEtest-nameLP');
             typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('configBHEtest-name-2LP');
             typeRegistry.getAllNodeConfigs().should.eql('configAHEtest-nameLPconfigBHEtest-name-2LP');
         });
     });
     describe('#getModuleInfo', function() {
         it('returns module info', function() {
-            typeRegistry.init(settings,{});
-            typeRegistry.addNodeSet("test-module/test-name",{
-                id: "test-module/test-name",
-                module: "test-module",
-                name: "test-name",
-                enabled: true,
-                loaded: false,
-                config: "configA",
-                types: [ "test-a","test-b"],
-                file: "abc"
-            }, "0.0.1");
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
+                }
+            }});
             var moduleInfo = typeRegistry.getModuleInfo("test-module");
             moduleInfo.should.have.a.property('name','test-module');
             moduleInfo.should.have.a.property('version','0.0.1');
@@ -404,17 +412,19 @@ describe("red/nodes/registry/registry",function() {
     });
     describe('#getNodeInfo', function() {
         it('returns node info', function() {
-            typeRegistry.init(settings,{});
-            typeRegistry.addNodeSet("test-module/test-name",{
-                id: "test-module/test-name",
-                module: "test-module",
-                name: "test-name",
-                enabled: true,
-                loaded: false,
-                config: "configA",
-                types: [ "test-a","test-b"],
-                file: "abc"
-            }, "0.0.1");
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
+                }
+            }});
             var nodeSetInfo = typeRegistry.getNodeInfo("test-module/test-name");
             nodeSetInfo.should.have.a.property('id',"test-module/test-name");
             nodeSetInfo.should.not.have.a.property('config');
@@ -423,18 +433,20 @@ describe("red/nodes/registry/registry",function() {
     });
     describe('#getFullNodeInfo', function() {
         it('returns node info', function() {
-            typeRegistry.init(settings,{});
-            typeRegistry.addNodeSet("test-module/test-name",{
-                id: "test-module/test-name",
-                module: "test-module",
-                name: "test-name",
-                enabled: true,
-                loaded: false,
-                config: "configA",
-                types: [ "test-a","test-b"],
-                file: "abc"
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
 
-            }, "0.0.1");
+                }
+            }});
             var nodeSetInfo = typeRegistry.getFullNodeInfo("test-module/test-name");
             nodeSetInfo.should.have.a.property('id',"test-module/test-name");
             nodeSetInfo.should.have.a.property('config');
@@ -446,27 +458,29 @@ describe("red/nodes/registry/registry",function() {
     });
     describe('#getNodeList', function() {
         it("returns a filtered list", function() {
-            typeRegistry.init(settings,{});
-            typeRegistry.addNodeSet("test-module/test-name",{
-                id: "test-module/test-name",
-                module: "test-module",
-                name: "test-name",
-                enabled: true,
-                loaded: false,
-                config: "configA",
-                types: [ "test-a","test-b"],
-                file: "abc"
-            }, "0.0.1");
-            typeRegistry.addNodeSet("test-module/test-name-2",{
-                id: "test-module/test-name-2",
-                module: "test-module",
-                name: "test-name-2",
-                enabled: true,
-                loaded: false,
-                config: "configB",
-                types: [ "test-c","test-d"],
-                file: "def"
-            }, "0.0.1");
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
+                },
+                "test-name-2":{
+                    id: "test-module/test-name-2",
+                    module: "test-module",
+                    name: "test-name-2",
+                    enabled: true,
+                    loaded: false,
+                    config: "configB",
+                    types: [ "test-c","test-d"],
+                    file: "def"
+                }
+            }});
             var filterCallCount = 0;
             var filteredList = typeRegistry.getNodeList(function(n) { filterCallCount++; return n.name === 'test-name-2';});
             filterCallCount.should.eql(2);
@@ -478,8 +492,7 @@ describe("red/nodes/registry/registry",function() {
     describe('#registerNodeConstructor', function() {
         var TestNodeConstructor;
         beforeEach(function() {
-            TestNodeConstructor = function TestNodeConstructor() {
-            };
+            TestNodeConstructor = function TestNodeConstructor() {};
             sinon.stub(events,'emit');
         });
         afterEach(function() {
@@ -502,44 +515,36 @@ describe("red/nodes/registry/registry",function() {
             }).should.throw("node-type already registered");
             events.emit.calledOnce.should.be.true();
         });
-        it('extends a constructor with the Node constructor', function() {
-            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
-            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
-        });
-        it('does not override a constructor\'s prototype', function() {
-            function Foo(){};
-            inherits(TestNodeConstructor,Foo);
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
-            TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
-
-            typeRegistry.registerNodeConstructor('node-set','node-type',TestNodeConstructor);
-
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
-
-            typeRegistry.registerNodeConstructor('node-set','node-type2',TestNodeConstructor);
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
-            TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
-        });
     });
 
     describe('#getNodeIconPath', function() {
         it('returns the default icon when getting an unknown icon', function() {
-            var defaultIcon = path.resolve(__dirname+'/../../../../../public/icons/arrow-in.png');
+            var defaultIcon = path.resolve(__dirname+'/../../../public/icons/arrow-in.png');
             var iconPath = typeRegistry.getNodeIconPath('random-module','youwonthaveme.png');
             iconPath.should.eql(defaultIcon);
         });
 
         it('returns a registered icon' , function() {
-            var testIcon = path.resolve(__dirname+'/../../../../resources/icons/test_icon.png');
-            events.emit("node-icon-dir",{name:"test-module", path: path.resolve(__dirname+'/../../../../resources/icons'), icons:[]});
+            var testIcon = path.resolve(__dirname+'/resources/userDir/lib/icons/');
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
+                }
+            },icons: [{path:testIcon,icons:['test_icon.png']}]});
             var iconPath = typeRegistry.getNodeIconPath('test-module','test_icon.png');
-            iconPath.should.eql(testIcon);
+            iconPath.should.eql(testIcon+"/test_icon.png");
         });
 
         it('returns the debug icon when getting an unknown module', function() {
-            var debugIcon = path.resolve(__dirname+'/../../../../../public/icons/debug.png');
+            var debugIcon = path.resolve(__dirname+'/../../../public/icons/debug.png');
             var iconPath = typeRegistry.getNodeIconPath('unknown-module', 'debug.png');
             iconPath.should.eql(debugIcon);
         });
@@ -552,16 +557,22 @@ describe("red/nodes/registry/registry",function() {
         });
 
         it('returns an icon list of registered node module', function() {
-            typeRegistry.addNodeSet("test-module/test-name",testNodeSet1,"0.0.1");
-            events.emit("node-icon-dir",{name:"test-module", path:"",icons:["test_icon1.png"]});
+            var testIcon = path.resolve(__dirname+'/resources/userDir/lib/icons/');
+            typeRegistry.init(settings,{},events);
+            typeRegistry.addModule({name: "test-module",version:"0.0.1",nodes: {
+                "test-name":{
+                    id: "test-module/test-name",
+                    module: "test-module",
+                    name: "test-name",
+                    enabled: true,
+                    loaded: false,
+                    config: "configA",
+                    types: [ "test-a","test-b"],
+                    file: "abc"
+                }
+            },icons: [{path:testIcon,icons:['test_icon.png']}]});
             var iconList = typeRegistry.getNodeIcons();
-            iconList.should.eql({"test-module":["test_icon1.png"]});
-        });
-
-        it('returns an icon list of unregistered node module', function() {
-            events.emit("node-icon-dir",{name:"test-module", path:"", icons:["test_icon1.png", "test_icon2.png"]});
-            var iconList = typeRegistry.getNodeIcons();
-            iconList.should.eql({"test-module":["test_icon1.png","test_icon2.png"]});
+            iconList.should.eql({"test-module":["test_icon.png"]});
         });
     });
 

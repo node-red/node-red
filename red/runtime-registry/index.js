@@ -17,6 +17,7 @@
 var registry = require("./registry");
 var loader = require("./loader");
 var installer = require("./installer");
+var library = require("./library");
 
 var settings;
 
@@ -24,7 +25,8 @@ function init(runtime) {
     settings = runtime.settings;
     installer.init(runtime);
     loader.init(runtime);
-    registry.init(settings,loader);
+    registry.init(settings,loader,runtime.events);
+    library.init();
 }
 
 function load() {
@@ -79,5 +81,11 @@ module.exports = {
 
     cleanModuleList: registry.cleanModuleList,
 
-    paletteEditorEnabled: installer.paletteEditorEnabled
+    paletteEditorEnabled: installer.paletteEditorEnabled,
+
+    getNodeExampleFlows: library.getExampleFlows,
+    getNodeExampleFlowPath: library.getExampleFlowPath,
+
+    deprecated: require("./deprecated")
+
 };

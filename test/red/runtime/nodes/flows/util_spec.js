@@ -19,7 +19,7 @@ var sinon = require("sinon");
 var when = require("when");
 var clone = require("clone");
 var flowUtil = require("../../../../../red/runtime/nodes/flows/util");
-var typeRegistry = require("../../../../../red/runtime/nodes/registry");
+var typeRegistry = require("../../../../../red/runtime-registry");
 var redUtil = require("../../../../../red/runtime/util");
 
 describe('flows/util', function() {

@@ -20,16 +20,13 @@ var path = require("path");
 var when = require("when");
 var fs = require("fs");
 
-var registry = require("../../../../../red/runtime/nodes/registry");
+var registry = require("../../../red/runtime-registry");
 
-var installer = require("../../../../../red/runtime/nodes/registry/installer");
-var loader = require("../../../../../red/runtime/nodes/registry/loader");
-var typeRegistry = require("../../../../../red/runtime/nodes/registry/registry");
+var installer = require("../../../red/runtime-registry/installer");
+var loader = require("../../../red/runtime-registry/loader");
+var typeRegistry = require("../../../red/runtime-registry/registry");
 
-
-
-
-describe('red/nodes/registry/index', function() {
+describe('red/registry/index', function() {
     var stubs = [];
     afterEach(function() {
         while(stubs.length) {

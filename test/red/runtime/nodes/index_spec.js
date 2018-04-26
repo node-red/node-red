@@ -19,9 +19,12 @@ var fs = require('fs-extra');
 var path = require('path');
 var when = require("when");
 var sinon = require('sinon');
+var inherits = require("util").inherits;
+
 var index = require("../../../../red/runtime/nodes/index");
 var flows = require("../../../../red/runtime/nodes/flows");
-var registry = require("../../../../red/runtime/nodes/registry");
+var registry = require("../../../../red/runtime-registry");
+var Node = require("../../../../red/runtime/nodes/Node");
 
 describe("red/nodes/index", function() {
     before(function() {
@@ -122,7 +125,45 @@ describe("red/nodes/index", function() {
                 registry.registerType.firstCall.args[2].should.eql(TestNode);
             });
         });
+        describe("extends constructor with Node constructor", function() {
+            var TestNodeConstructor;
+            before(function() {
+                sinon.stub(registry,"registerType");
+            });
+            after(function() {
+                registry.registerType.restore();
+            });
+            beforeEach(function() {
+                TestNodeConstructor = function TestNodeConstructor() {};
+                var runtime = {
+                    settings: settings,
+                    storage: storage,
+                    log: {debug:function() {}, warn:sinon.spy()},
+                    events: new EventEmitter()
+                }
+                index.init(runtime);
+            })
+            it('extends a constructor with the Node constructor', function() {
+                TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
+                index.registerType('node-set','node-type',TestNodeConstructor);
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+            });
+            it('does not override a constructor prototype', function() {
+                function Foo(){};
+                inherits(TestNodeConstructor,Foo);
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+                TestNodeConstructor.prototype.should.not.be.an.instanceOf(Node);
 
+                index.registerType('node-set','node-type',TestNodeConstructor);
+
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+
+                index.registerType('node-set','node-type2',TestNodeConstructor);
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Node);
+                TestNodeConstructor.prototype.should.be.an.instanceOf(Foo);
+            });
+        });
         describe("register credentials definition", function() {
             var http = require('http');
             var express = require('express');
@@ -294,7 +335,6 @@ describe("red/nodes/index", function() {
     });
 
     describe('allows modules to be removed from the registry', function() {
-        var registry = require("../../../../red/runtime/nodes/registry");
         var randomNodeInfo = {id:"5678",types:["random"]};
         var randomModuleInfo = {
             name:"random",

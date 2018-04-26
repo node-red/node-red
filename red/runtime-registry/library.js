@@ -59,11 +59,11 @@ function getFlowsFromPath(path) {
     })
 }
 
-function addNodeExamplesDir(module) {
-    exampleRoots[module.name] = module.path;
-    getFlowsFromPath(module.path).then(function(result) {
+function addNodeExamplesDir(module,path) {
+    exampleRoots[module] = path;
+    return getFlowsFromPath(path).then(function(result) {
         exampleFlows = exampleFlows||{d:{}};
-        exampleFlows.d[module.name] = result;
+        exampleFlows.d[module] = result;
     });
 }
 function removeNodeExamplesDir(module) {
@@ -77,17 +77,9 @@ function removeNodeExamplesDir(module) {
 }
 
 
-function init(_runtime) {
-
-    runtime = _runtime;
-
+function init() {
     exampleRoots = {};
     exampleFlows = null;
-
-    runtime.events.removeListener("node-examples-dir",addNodeExamplesDir);
-    runtime.events.on("node-examples-dir",addNodeExamplesDir);
-    runtime.events.removeListener("node-module-uninstalled",removeNodeExamplesDir);
-    runtime.events.on("node-module-uninstalled",removeNodeExamplesDir);
 }
 
 function getExampleFlows() {
@@ -103,6 +95,8 @@ function getExampleFlowPath(module,path) {
 
 module.exports = {
     init: init,
+    addExamplesDir: addNodeExamplesDir,
+    removeExamplesDir: removeNodeExamplesDir,
     getExampleFlows: getExampleFlows,
     getExampleFlowPath: getExampleFlowPath
 }

@@ -19,7 +19,10 @@ var when = require("when");
 
 var Flow = require('./Flow');
 
-var typeRegistry = require("../registry");
+var typeRegistry = require("../../../runtime-registry");
+var deprecated = typeRegistry.deprecated;
+
+
 var context = require("../context")
 var credentials = require("../credentials");
 
@@ -27,7 +30,6 @@ var flowUtil = require("./util");
 var log;
 var events = require("../../events");
 var redUtil = require("../../util");
-var deprecated = require("../registry/deprecated");
 
 var storage = null;
 var settings = null;

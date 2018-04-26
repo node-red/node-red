@@ -15,16 +15,13 @@
  **/
 
  //var UglifyJS = require("uglify-js");
-var util = require("util");
 var path = require("path");
 var fs = require("fs");
 
-var events = require("../../events");
+var library = require("./library");
 
+var events;
 var settings;
-
-var Node;
-
 var loader;
 
 var nodeConfigCache = null;
@@ -34,18 +31,15 @@ var nodeConstructors = {};
 var nodeTypeToId = {};
 var moduleNodes = {};
 
-function init(_settings,_loader) {
+function init(_settings,_loader, _events) {
     settings = _settings;
     loader = _loader;
+    events = _events;
     moduleNodes = {};
     nodeTypeToId = {};
     nodeConstructors = {};
     nodeList = [];
     nodeConfigCache = null;
-    Node = require("../Node");
-    events.removeListener("node-icon-dir",nodeIconDir);
-    events.on("node-icon-dir",nodeIconDir);
-
 }
 
 function load() {
@@ -180,45 +174,45 @@ function loadNodeConfigs() {
     }
 }
 
-function addNodeSet(id,set,version) {
-    if (!set.err) {
-        set.types.forEach(function(t) {
-            if (nodeTypeToId.hasOwnProperty(t)) {
-                set.err = new Error("Type already registered");
-                set.err.code = "type_already_registered";
-                set.err.details = {
-                    type: t,
-                    moduleA: getNodeInfo(t).module,
-                    moduleB: set.module
-                }
+function addModule(module) {
+    moduleNodes[module.name] = [];
+    moduleConfigs[module.name] = module;
+    for (var setName in module.nodes) {
+        if (module.nodes.hasOwnProperty(setName)) {
+            var set = module.nodes[setName];
+            moduleNodes[module.name].push(set.name);
+            nodeList.push(set.id);
+            if (!set.err) {
+                set.types.forEach(function(t) {
+                    if (nodeTypeToId.hasOwnProperty(t)) {
+                        set.err = new Error("Type already registered");
+                        set.err.code = "type_already_registered";
+                        set.err.details = {
+                            type: t,
+                            moduleA: getNodeInfo(t).module,
+                            moduleB: set.module
+                        }
 
+                    }
+                });
+                if (!set.err) {
+                    set.types.forEach(function(t) {
+                        nodeTypeToId[t] = set.id;
+                    });
+                }
             }
-        });
-        if (!set.err) {
-            set.types.forEach(function(t) {
-                nodeTypeToId[t] = id;
-            });
         }
     }
-    moduleNodes[set.module] = moduleNodes[set.module]||[];
-    moduleNodes[set.module].push(set.name);
-
-    if (!moduleConfigs[set.module]) {
-        moduleConfigs[set.module] = {
-            name: set.module,
-            nodes: {}
-        };
+    if (module.icons) {
+        icon_paths[module.name] = [];
+        module.icons.forEach(icon=>icon_paths[module.name].push(path.resolve(icon.path)) )
     }
-
-    if (version) {
-        moduleConfigs[set.module].version = version;
+    if (module.examples) {
+        library.addExamplesDir(module.name,module.examples.path);
     }
-    moduleConfigs[set.module].local = set.local;
-
-    moduleConfigs[set.module].nodes[set.name] = set;
-    nodeList.push(id);
     nodeConfigCache = null;
 }
+
 
 function removeNode(id) {
     var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
@@ -370,27 +364,6 @@ function getCaller(){
     return stack[0].getFileName();
 }
 
-function inheritNode(constructor) {
-    if(Object.getPrototypeOf(constructor.prototype) === Object.prototype) {
-        util.inherits(constructor,Node);
-    } else {
-        var proto = constructor.prototype;
-        while(Object.getPrototypeOf(proto) !== Object.prototype) {
-            proto = Object.getPrototypeOf(proto);
-        }
-        //TODO: This is a partial implementation of util.inherits >= node v5.0.0
-        //      which should be changed when support for node < v5.0.0 is dropped
-        //      see: https://github.com/nodejs/node/pull/3455
-        proto.constructor.super_ = Node;
-        if(Object.setPrototypeOf) {
-            Object.setPrototypeOf(proto, Node.prototype);
-        } else {
-            // hack for node v0.10
-            proto.__proto__ = Node.prototype;
-        }
-    }
-}
-
 function registerNodeConstructor(nodeSet,type,constructor) {
     if (nodeConstructors.hasOwnProperty(type)) {
         throw new Error(type+" already registered");
@@ -398,9 +371,6 @@ function registerNodeConstructor(nodeSet,type,constructor) {
     //TODO: Ensure type is known - but doing so will break some tests
     //      that don't have a way to register a node template ahead
     //      of registering the constructor
-    if(!(constructor.prototype instanceof Node)) {
-        inheritNode(constructor);
-    }
 
     var nodeSetInfo = getFullNodeInfo(nodeSet);
     if (nodeSetInfo) {
@@ -584,10 +554,10 @@ function setModulePendingUpdated(module,version) {
 }
 
 var icon_paths = {
-    "node-red":[path.resolve(__dirname + '/../../../../public/icons')]
+    "node-red":[path.resolve(__dirname + '/../../public/icons')]
 };
 var iconCache = {};
-var defaultIcon = path.resolve(__dirname + '/../../../../public/icons/arrow-in.png');
+var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
 
 function nodeIconDir(dir) {
     icon_paths[dir.name] = icon_paths[dir.name] || [];
@@ -648,7 +618,8 @@ function getNodeIcons() {
     for (var module in moduleConfigs) {
         if (moduleConfigs.hasOwnProperty(module)) {
             if (moduleConfigs[module].icons) {
-                iconList[module] = moduleConfigs[module].icons;
+                iconList[module] = [];
+                moduleConfigs[module].icons.forEach(icon=>{ iconList[module] = iconList[module].concat(icon.icons)})
             }
         }
     }
@@ -664,7 +635,9 @@ var registry = module.exports = {
     registerNodeConstructor: registerNodeConstructor,
     getNodeConstructor: getNodeConstructor,
 
-    addNodeSet: addNodeSet,
+
+    addModule: addModule,
+
     enableNodeSet: enableNodeSet,
     disableNodeSet: disableNodeSet,
 

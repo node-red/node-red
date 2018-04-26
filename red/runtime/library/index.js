@@ -69,6 +69,7 @@ function getEntry(type,path) {
                         } catch(err) {
                             return reject(err);
                         }
+                        return;
                     }
                 }
                 // IF we get here, we didn't find the file

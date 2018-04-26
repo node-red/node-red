@@ -16,7 +16,7 @@
 
 var should = require("should");
 
-var deprecated = require("../../../../../red/runtime/nodes/registry/deprecated.js");
+var deprecated = require("../../../red/runtime-registry/deprecated.js");
 
 describe('deprecated', function() {
     it('should return info on a node',function() {

@@ -22,6 +22,8 @@ var semver = require("semver");
 var localfilesystem = require("./localfilesystem");
 var registry = require("./registry");
 
+var i18n = require("../util").i18n; // TODO: separate module
+
 var settings;
 var runtime;
 
@@ -110,7 +112,7 @@ function createNodeApi(node) {
         if (args[0].indexOf(":") === -1) {
             args[0] = node.namespace+":"+args[0];
         }
-        return runtime.i18n._.apply(null,args);
+        return i18n._.apply(null,args);
     }
     return red;
 }
@@ -118,6 +120,7 @@ function createNodeApi(node) {
 
 function loadNodeFiles(nodeFiles) {
     var promises = [];
+    var nodes = [];
     for (var module in nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
@@ -125,6 +128,7 @@ function loadNodeFiles(nodeFiles) {
                 !semver.satisfies(runtime.version().replace(/(\-[1-9A-Za-z-][0-9A-Za-z-\.]*)?(\+[0-9A-Za-z-\.]+)?$/,""), nodeFiles[module].redVersion)) {
                 //TODO: log it
                 runtime.log.warn("["+module+"] "+runtime.log._("server.node-version-mismatch",{version:nodeFiles[module].redVersion}));
+                nodeFiles[module].err = "version_mismatch";
                 continue;
             }
             if (module == "node-red" || !registry.getModuleInfo(module)) {
@@ -154,7 +158,14 @@ function loadNodeFiles(nodeFiles) {
                         }
 
                         try {
-                            promises.push(loadNodeConfig(nodeFiles[module].nodes[node]))
+                            promises.push(loadNodeConfig(nodeFiles[module].nodes[node]).then((function() {
+                                var m = module;
+                                var n = node;
+                                return function(nodeSet) {
+                                    nodeFiles[m].nodes[n] = nodeSet;
+                                    nodes.push(nodeSet);
+                                }
+                            })()));
                         } catch(err) {
                             //
                         }
@@ -164,10 +175,13 @@ function loadNodeFiles(nodeFiles) {
         }
     }
     return when.settle(promises).then(function(results) {
-        var nodes = results.map(function(r) {
-            registry.addNodeSet(r.value.id,r.value,r.value.version);
-            return r.value;
-        });
+        for (var module in nodeFiles) {
+            if (nodeFiles.hasOwnProperty(module)) {
+                if (!nodeFiles[module].err) {
+                    registry.addModule(nodeFiles[module]);
+                }
+            }
+        }
         return loadNodeSetList(nodes);
     });
 }
@@ -239,7 +253,7 @@ function loadNodeConfig(fileInfo) {
                     index = regExp.lastIndex;
                     var help = content.substring(regExp.lastIndex-match[1].length,regExp.lastIndex);
 
-                    var lang = runtime.i18n.defaultLang;
+                    var lang = i18n.defaultLang;
                     if ((match = langRegExp.exec(help)) !== null) {
                         lang = match[1];
                     }
@@ -270,7 +284,7 @@ function loadNodeConfig(fileInfo) {
                 fs.stat(path.join(path.dirname(file),"locales"),function(err,stat) {
                     if (!err) {
                         node.namespace = node.id;
-                        runtime.i18n.registerMessageCatalog(node.id,
+                        i18n.registerMessageCatalog(node.id,
                                 path.join(path.dirname(file),"locales"),
                                 path.basename(file,".js")+".json")
                             .then(function() {
@@ -414,10 +428,10 @@ function getNodeHelp(node,lang) {
         }
         if (help) {
             node.help[lang] = help;
-        } else if (lang === runtime.i18n.defaultLang) {
+        } else if (lang === i18n.defaultLang) {
             return null;
         } else {
-            node.help[lang] = getNodeHelp(node, runtime.i18n.defaultLang);
+            node.help[lang] = getNodeHelp(node, i18n.defaultLang);
         }
     }
     return node.help[lang];

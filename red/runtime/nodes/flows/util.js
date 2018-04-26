@@ -16,7 +16,7 @@
 var clone = require("clone");
 var redUtil = require("../../util");
 var subflowInstanceRE = /^subflow:(.+)$/;
-var typeRegistry = require("../registry");
+var typeRegistry = require("../../../runtime-registry");
 
 function diffNodes(oldNode,newNode) {
     if (oldNode == null) {
@@ -203,7 +203,7 @@ module.exports = {
         var linkMap = {};
 
         var changedTabs = {};
-        
+
         // Look for tabs that have been removed
         for (id in oldConfig.flows) {
             if (oldConfig.flows.hasOwnProperty(id) && (!newConfig.flows.hasOwnProperty(id))) {

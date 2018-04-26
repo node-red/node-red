@@ -14,56 +14,47 @@
  * limitations under the License.
  **/
 
-var EventEmitter = require('events').EventEmitter;
-var events = new EventEmitter();
-
 var should = require("should");
 
 var fs = require("fs");
 var path = require("path");
 
-var library = require("../../../../red/runtime/nodes/library")
+var library = require("../../../red/runtime-registry/library");
 
 describe("library api", function() {
     it('returns null list when no modules have been registered', function() {
-        library.init({events:events});
+        library.init();
         should.not.exist(library.getExampleFlows());
     });
     it('returns null path when module is not known', function() {
-        library.init({events:events});
+        library.init();
         should.not.exist(library.getExampleFlowPath('foo','bar'));
     });
 
     it('returns a valid example path', function(done) {
-        library.init({events:events});
-        events.emit('node-examples-dir',{
-            name: "test-module",
-            path: path.resolve(__dirname+'/../../../resources/examples')
-        });
-        setTimeout(function() {
+        library.init();
+        library.addExamplesDir("test-module",path.resolve(__dirname+'/resources/examples')).then(function() {
             try {
                 var flows = library.getExampleFlows();
                 flows.should.deepEqual({"d":{"test-module":{"f":["one"]}}});
 
                 var examplePath = library.getExampleFlowPath('test-module','one');
-                examplePath.should.eql(path.resolve(__dirname+'/../../../resources/examples/one.json'))
+                examplePath.should.eql(path.resolve(__dirname+'/resources/examples/one.json'))
 
 
-                events.emit('node-module-uninstalled', 'test-module');
+                library.removeExamplesDir('test-module');
 
-                setTimeout(function() {
-                    try {
-                        should.not.exist(library.getExampleFlows());
-                        should.not.exist(library.getExampleFlowPath('test-module','one'));
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                },20);
+                try {
+                    should.not.exist(library.getExampleFlows());
+                    should.not.exist(library.getExampleFlowPath('test-module','one'));
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             }catch(err) {
                 done(err);
             }
-        },20);
+        });
 
     })
 });
