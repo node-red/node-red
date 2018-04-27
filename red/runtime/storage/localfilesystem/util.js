@@ -79,13 +79,6 @@ module.exports = {
      * the write hits disk.
      */
      writeFile: function(path,content,backupPath) {
-         if (backupPath) {
-             try {
-                 fs.renameSync(path,backupPath);
-             } catch(err) {
-                 console.log(err);
-             }
-         }
          return when.promise(function(resolve,reject) {
              var stream = fs.createWriteStream(path);
              stream.on('open',function(fd) {
@@ -96,6 +89,13 @@ module.exports = {
                          }
                          stream.end(resolve);
                      });
+                     if (backupPath) {
+                         try {
+                             fs.copySync(path,backupPath);
+                         } catch(err) {
+                             console.log(err);
+                         }
+                     }
                  });
              });
              stream.on('error',function(err) {
