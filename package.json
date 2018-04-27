@@ -62,7 +62,7 @@
     "node-red-node-feedparser": "0.1.*",
     "node-red-node-rbe": "0.2.*",
     "node-red-node-twitter": "0.1.*",
-    "node-red-nodegen": "git+https://github.com/node-red/node-red-nodegen.git#ef367def73f2461c09b6003a130e8d7280938179",
+    "node-red-nodegen": "git+https://github.com/node-red/node-red-nodegen.git#5a44627483b89b1f50488461d4779767ea93a177",
     "nopt": "4.0.1",
     "oauth2orize": "1.11.0",
     "on-headers": "1.0.1",
