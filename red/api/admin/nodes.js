@@ -120,18 +120,27 @@ module.exports = {
             src: body.data.src,
             dst: userDir + '/nodegen/' + id
         };
-        var filename;
         if (body.type === 'swagger') {
-            filename = nodegen.swagger2node(data, options);
+            nodegen.swagger2node(data, options).then(function (result) {
+                res.json({
+                    id: id,
+                    module: result.replace(userDir + '/nodegen/' + id + '/', '')
+                });
+            }).catch(function (error) {
+                console.log('Error: ' + error);
+            });
         } else if (body.type === 'function') {
-            filename = nodegen.function2node(data, options);
+            nodegen.function2node(data, options).then(function (result) {
+                res.json({
+                    id: id,
+                    module: result.replace(userDir + '/nodegen/' + id + '/', '')
+                });
+            }).catch(function (error) {
+                console.log('Error: ' + error);
+            });
         } else {
             console.log('Unsupported type: ' + body.type);
         }
-        res.json({
-            id: id,
-            module: filename.replace(userDir + '/nodegen/' + id + '/', '')
-        });
         return;
     },
     download: function(req,res) {
