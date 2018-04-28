@@ -27,6 +27,7 @@ var api = module.exports = {
     available: function(opts) {
         return Promise.resolve(!!runtime.storage.projects);
     },
+
     /**
     * List projects known to the runtime
     * @param {Object} opts
@@ -49,8 +50,6 @@ var api = module.exports = {
             throw err;
         })
     },
-
-
 
     /**
     * Create a new project

@@ -14,278 +14,400 @@
  * limitations under the License.
  **/
 
-describe("runtime-api/flows", function() {
-    it.skip('more tests needed', function(){})
-});
-
-
-/*
 
 var should = require("should");
-var request = require('supertest');
-var express = require('express');
-var bodyParser = require('body-parser');
-var sinon = require('sinon');
-var when = require('when');
+var sinon = require("sinon");
 
-var flows = require("../../../../red/api/admin/flows");
+var flows = require("../../../red/runtime-api/flows")
 
-describe("api/admin/flows", function() {
+var mockLog = () => ({
+    log: sinon.stub(),
+    debug: sinon.stub(),
+    trace: sinon.stub(),
+    warn: sinon.stub(),
+    info: sinon.stub(),
+    metric: sinon.stub(),
+    audit: sinon.stub(),
+    _: function() { return "abc"}
+})
 
-    var app;
-
-    before(function() {
-        app = express();
-        app.use(bodyParser.json());
-        app.get("/flows",flows.get);
-        app.post("/flows",flows.post);
-    });
-
-    it('returns flow - v1', function(done) {
-        flows.init({
-            settings: {},
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                getFlows: function() { return {rev:"123",flows:[1,2,3]}; }
-            }
-        });
-        request(app)
-            .get('/flows')
-            .set('Accept', 'application/json')
-            .expect(200)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                try {
-                    res.body.should.have.lengthOf(3);
-                    done();
-                } catch(e) {
-                    return done(e);
+describe("runtime-api/flows", function() {
+    describe("getFlows", function() {
+        it("returns the current flow configuration", function(done) {
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    getFlows: function() { return [1,2,3] }
                 }
             });
-    });
-    it('returns flow - v2', function(done) {
-        flows.init({
-            settings: {},
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                getFlows: function() { return {rev:"123",flows:[1,2,3]}; }
-            }
-        });
-        request(app)
-            .get('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','v2')
-            .expect(200)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                try {
-                    res.body.should.have.a.property('rev','123');
-                    res.body.should.have.a.property('flows');
-                    res.body.flows.should.have.lengthOf(3);
-                    done();
-                } catch(e) {
-                    return done(e);
-                }
-            });
-    });
-    it('returns flow - bad version', function(done) {
-        request(app)
-            .get('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','xxx')
-            .expect(400)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                try {
-                    res.body.should.have.a.property('code','invalid_api_version');
-                    done();
-                } catch(e) {
-                    return done(e);
-                }
-            });
-    });
-    it('sets flows - default - v1', function(done) {
-        var setFlows = sinon.spy(function() { return when.resolve();});
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: setFlows
-            }
-        });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .expect(204)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                setFlows.calledOnce.should.be.true();
-                setFlows.lastCall.args[1].should.eql('full');
+            flows.getFlows({}).then(function(result) {
+                result.should.eql([1,2,3]);
                 done();
-            });
-    });
-    it('sets flows - non-default - v1', function(done) {
-        var setFlows = sinon.spy(function() { return when.resolve();});
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: setFlows
-            }
+            }).catch(done);
         });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-Deployment-Type','nodes')
-            .expect(204)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                setFlows.calledOnce.should.be.true();
-                setFlows.lastCall.args[1].should.eql('nodes');
-                done();
-            });
     });
 
-    it('set flows - rejects mismatched revision - v2', function(done) {
-        var setFlows = sinon.spy(function() { return when.resolve();});
-        var getFlows = sinon.spy(function() { return {rev:123,flows:[1,2,3]}});
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: setFlows,
-                getFlows: getFlows
-            }
-        });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','v2')
-            .send({rev:456,flows:[4,5,6]})
-            .expect(409)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
+    describe("setFlows", function() {
+        var setFlows;
+        var loadFlows;
+        var reloadError = false;
+        beforeEach(function() {
+            setFlows = sinon.spy(function(flows,type) {
+                if (flows[0] === "error") {
+                    var err = new Error("error");
+                    err.code = "error";
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 }
-                res.body.should.have.property("code","version_mismatch");
+                return Promise.resolve("newRev");
+            });
+            loadFlows = sinon.spy(function() {
+                if (!reloadError) {
+                    return Promise.resolve("newLoadRev");
+                } else {
+                    var err = new Error("error");
+                    err.code = "error";
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+            })
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    getFlows: function() { return {rev:"currentRev",flows:[]} },
+                    setFlows: setFlows,
+                    loadFlows: loadFlows
+                }
+            })
+
+        })
+        it("defaults to full deploy", function(done) {
+            flows.setFlows({
+                flows: {flows:[4,5,6]}
+            }).then(function(result) {
+                result.should.eql({rev:"newRev"});
+                setFlows.called.should.be.true();
+                setFlows.lastCall.args[0].should.eql([4,5,6]);
+                setFlows.lastCall.args[1].should.eql("full");
                 done();
-            });
-    });
-    it('set flows - rev provided - v2', function(done) {
-        var setFlows = sinon.spy(function() { return when.resolve(456);});
-        var getFlows = sinon.spy(function() { return {rev:123,flows:[1,2,3]}});
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: setFlows,
-                getFlows: getFlows
-            }
+            }).catch(done);
         });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','v2')
-            .send({rev:123,flows:[4,5,6]})
-            .expect(200)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                res.body.should.have.property("rev",456);
+        it("passes through other deploy types", function(done) {
+            flows.setFlows({
+                deploymentType: "nodes",
+                flows: {flows:[4,5,6]}
+            }).then(function(result) {
+                result.should.eql({rev:"newRev"});
+                setFlows.called.should.be.true();
+                setFlows.lastCall.args[0].should.eql([4,5,6]);
+                setFlows.lastCall.args[1].should.eql("nodes");
                 done();
-            });
-    });
-    it('set flows - no rev provided - v2', function(done) {
-        var setFlows = sinon.spy(function() { return when.resolve(456);});
-        var getFlows = sinon.spy(function() { return {rev:123,flows:[1,2,3]}});
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: setFlows,
-                getFlows: getFlows
-            }
+            }).catch(done);
         });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','v2')
-            .send({flows:[4,5,6]})
-            .expect(200)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                res.body.should.have.property("rev",456);
-                done();
-            });
-    });
-    it('sets flow - bad version', function(done) {
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-API-Version','xxx')
-            .expect(400)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                try {
-                    res.body.should.have.a.property('code','invalid_api_version');
-                    done();
-                } catch(e) {
-                    return done(e);
-                }
-            });
-    });
-    it('reloads flows', function(done) {
-        var loadFlows = sinon.spy(function() { return when.resolve(); });
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                loadFlows: loadFlows
-            }
-        });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .set('Node-RED-Deployment-Type','reload')
-            .expect(204)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
+        it("triggers a flow reload", function(done) {
+            flows.setFlows({
+                deploymentType: "reload"
+            }).then(function(result) {
+                result.should.eql({rev:"newLoadRev"});
+                setFlows.called.should.be.false();
                 loadFlows.called.should.be.true();
                 done();
-            });
+            }).catch(done);
+        });
+        it("allows update when revision matches", function(done) {
+            flows.setFlows({
+                deploymentType: "nodes",
+                flows: {flows:[4,5,6],rev:"currentRev"}
+            }).then(function(result) {
+                result.should.eql({rev:"newRev"});
+                setFlows.called.should.be.true();
+                setFlows.lastCall.args[0].should.eql([4,5,6]);
+                setFlows.lastCall.args[1].should.eql("nodes");
+                done();
+            }).catch(done);
+        });
+        it("rejects update when revision does not match", function(done) {
+            flows.setFlows({
+                deploymentType: "nodes",
+                flows: {flows:[4,5,6],rev:"notTheCurrentRev"}
+            }).then(function(result) {
+                done(new Error("Did not reject rev mismatch"));
+            }).catch(function(err) {
+                err.should.have.property('code','version_mismatch');
+                err.should.have.property('status',409);
+                done();
+            }).catch(done);
+        });
+        it("rejects when reload fails",function(done) {
+            reloadError = true;
+            flows.setFlows({
+                deploymentType: "reload"
+            }).then(function(result) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','error');
+                done();
+            }).catch(done);
+        });
+        it("rejects when update fails",function(done) {
+            flows.setFlows({
+                deploymentType: "full",
+                flows: {flows:["error",5,6]}
+            }).then(function(result) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','error');
+                done();
+            }).catch(done);
+        });
     });
 
-    it('returns error when set fails', function(done) {
-        flows.init({
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes:{
-                setFlows: function() { return when.reject(new Error("expected error")); }
-            }
-        });
-        request(app)
-            .post('/flows')
-            .set('Accept', 'application/json')
-            .expect(500)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
+    describe("addFlow", function() {
+        var addFlow;
+        beforeEach(function() {
+            addFlow = sinon.spy(function(flow) {
+                if (flow === "error") {
+                    var err = new Error("error");
+                    err.code = "error";
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 }
-                res.body.should.have.property("message","expected error");
-                done();
+                return Promise.resolve("newId");
             });
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    addFlow: addFlow
+                }
+            });
+        })
+        it("adds a flow", function(done) {
+            flows.addFlow({flow:{a:"123"}}).then(function(id) {
+                addFlow.called.should.be.true();
+                addFlow.lastCall.args[0].should.eql({a:"123"});
+                id.should.eql("newId");
+                done()
+            }).catch(done);
+        });
+        it("rejects when add fails", function(done) {
+            flows.addFlow({flow:"error"}).then(function(id) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','error');
+                done();
+            }).catch(done);
+        });
+    });
+    describe("getFlow", function() {
+        var getFlow;
+        beforeEach(function() {
+            getFlow = sinon.spy(function(flow) {
+                if (flow === "unknown") {
+                    return null;
+                }
+                return [1,2,3];
+            });
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    getFlow: getFlow
+                }
+            });
+        })
+        it("gets a flow", function(done) {
+            flows.getFlow({id:"123"}).then(function(flow) {
+                flow.should.eql([1,2,3]);
+                done()
+            }).catch(done);
+        });
+        it("rejects when flow not found", function(done) {
+            flows.getFlow({id:"unknown"}).then(function(flow) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("updateFlow", function() {
+        var updateFlow;
+        beforeEach(function() {
+            updateFlow = sinon.spy(function(id,flow) {
+                if (id === "unknown") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = 404;
+                    throw err;
+                } else if (id === "error") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = "error";
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+                return Promise.resolve();
+            });
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    updateFlow: updateFlow
+                }
+            });
+        })
+        it("updates a flow", function(done) {
+            flows.updateFlow({id:"123",flow:[1,2,3]}).then(function(id) {
+                id.should.eql("123");
+                updateFlow.called.should.be.true();
+                updateFlow.lastCall.args[0].should.eql("123");
+                updateFlow.lastCall.args[1].should.eql([1,2,3]);
+                done()
+            }).catch(done);
+        });
+        it("rejects when flow not found", function(done) {
+            flows.updateFlow({id:"unknown"}).then(function(flow) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+        it("rejects when update fails", function(done) {
+            flows.updateFlow({id:"error"}).then(function(flow) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','error');
+                err.should.have.property('status',400);
+                done();
+            }).catch(done);
+        });
+    });
+
+
+    describe("deleteFlow", function() {
+        var removeFlow;
+        beforeEach(function() {
+            removeFlow = sinon.spy(function(flow) {
+                if (flow === "unknown") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = 404;
+                    throw err;
+                } else if (flow === "error") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = "error";
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+                return Promise.resolve();
+            });
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    removeFlow: removeFlow
+                }
+            });
+        })
+        it("deletes a flow", function(done) {
+            flows.deleteFlow({id:"123"}).then(function() {
+                removeFlow.called.should.be.true();
+                removeFlow.lastCall.args[0].should.eql("123");
+                done()
+            }).catch(done);
+        });
+        it("rejects when flow not found", function(done) {
+            flows.deleteFlow({id:"unknown"}).then(function(flow) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+        it("rejects when delete fails", function(done) {
+            flows.deleteFlow({id:"error"}).then(function(flow) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','error');
+                err.should.have.property('status',400);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("getNodeCredentials", function() {
+        beforeEach(function() {
+            flows.init({
+                log: mockLog(),
+                nodes: {
+                    getCredentials: function(id) {
+                        if (id === "unknown") {
+                            return undefined;
+                        } else if (id === "known") {
+                            return {
+                                username: "abc",
+                                password: "123"
+                            }
+                        } else if (id === "known2") {
+                            return {
+                                username: "abc",
+                                password: ""
+                            }
+                        } else {
+                            return {};
+                        }
+                    },
+                    getCredentialDefinition: function(type) {
+                        if (type === "node") {
+                            return {
+                                username: {type:"text"},
+                                password: {type:"password"}
+                            }
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            });
+        })
+        it("returns an empty object for an unknown node", function(done) {
+            flows.getNodeCredentials({id:"unknown", type:"node"}).then(function(result) {
+                result.should.eql({});
+                done();
+            }).catch(done);
+        });
+        it("gets the filtered credentials for a known node with password", function(done) {
+            flows.getNodeCredentials({id:"known", type:"node"}).then(function(result) {
+                result.should.eql({
+                    username: "abc",
+                    has_password: true
+                });
+                done();
+            }).catch(done);
+        });
+        it("gets the filtered credentials for a known node without password", function(done) {
+            flows.getNodeCredentials({id:"known2", type:"node"}).then(function(result) {
+                result.should.eql({
+                    username: "abc",
+                    has_password: false
+                });
+                done();
+            }).catch(done);
+        });
+        it("gets the empty credentials for a known node without a registered definition", function(done) {
+            flows.getNodeCredentials({id:"known2", type:"unknown-type"}).then(function(result) {
+                result.should.eql({});
+                done();
+            }).catch(done);
+        });
     });
 
 });
-
-*/

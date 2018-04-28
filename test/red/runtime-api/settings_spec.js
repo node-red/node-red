@@ -14,9 +14,36 @@
  * limitations under the License.
  **/
 
+
+var should = require("should");
+var sinon = require("sinon");
+
+var settings = require("../../../red/runtime-api/settings")
+
+var mockLog = () => ({
+    log: sinon.stub(),
+    debug: sinon.stub(),
+    trace: sinon.stub(),
+    warn: sinon.stub(),
+    info: sinon.stub(),
+    metric: sinon.stub(),
+    audit: sinon.stub(),
+    _: function() { return "abc"}
+})
+
 describe("runtime-api/settings", function() {
-    it.skip('more tests needed', function(){})
+    describe.skip("getRuntimeSettings", function() {});
+    describe.skip("getUserSettings", function() {});
+    describe.skip("updateUserSettings", function() {});
+    describe.skip("getUserKeys", function() {});
+    describe.skip("getUserKey", function() {});
+    describe.skip("generateUserKey", function() {});
+    describe.skip("removeUserKey", function() {});
+
 });
+
+
+
 /*
         it('returns the filtered settings', function(done) {
             info.init({

@@ -71,7 +71,7 @@ module.exports = {
         if (userSettings.httpAdminRoot !== false) {
             runtime.init(userSettings,redUtil,api);
             runtimeAPI.init(runtime,redUtil);
-            api.init(httpServer,userSettings,runtime.storage,runtimeAPI,redUtil);
+            api.init(httpServer,userSettings,runtime.storage,runtimeAPI);
 
             apiEnabled = true;
             server = runtime.adminApi.server;
@@ -106,7 +106,7 @@ module.exports = {
         })
     },
     nodes: runtime.nodes,
-    get log() { return redUtil.log },
+    log: redUtil.log,
     settings:runtime.settings,
     util: runtime.util,
     version: runtime.version,

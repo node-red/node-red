@@ -49,7 +49,6 @@ var api = module.exports = {
     getFlows: function(opts) {
         return new Promise(function(resolve,reject) {
             runtime.log.audit({event: "flows.get"}/*,req*/);
-            var version = opts.version||"v1";
             return resolve(runtime.nodes.getFlows());
         });
     },
@@ -61,7 +60,6 @@ var api = module.exports = {
     * @memberof RED.flows
     */
     setFlows: function(opts) {
-        var err;
         return new Promise(function(resolve,reject) {
 
             var flows = opts.flows;
@@ -75,6 +73,7 @@ var api = module.exports = {
                 if (flows.hasOwnProperty('rev')) {
                     var currentVersion = runtime.nodes.getFlows().rev;
                     if (currentVersion !== flows.rev) {
+                        var err;
                         err = new Error();
                         err.code = "version_mismatch";
                         err.status = 409;
@@ -193,18 +192,22 @@ var api = module.exports = {
             var id = opts.id;
             try {
                 runtime.nodes.removeFlow(id).then(function() {
-                    log.audit({event: "flow.remove",id:id});
+                    runtime.log.audit({event: "flow.remove",id:id});
                     return resolve();
-                })
+                }).catch(function(err) {
+                    runtime.log.audit({event: "flow.remove",id:id,error:err.code||"unexpected_error",message:err.toString()});
+                    err.status = 400;
+                    return reject(err);
+                });
             } catch(err) {
                 if (err.code === 404) {
-                    log.audit({event: "flow.remove",id:id,error:"not_found"});
+                    runtime.log.audit({event: "flow.remove",id:id,error:"not_found"});
                     // TODO: this swap around of .code and .status isn't ideal
                     err.status = 404;
                     err.code = "not_found";
                     return reject(err);
                 } else {
-                    log.audit({event: "flow.remove",id:id,error:err.code||"unexpected_error",message:err.toString()});
+                    runtime.log.audit({event: "flow.remove",id:id,error:err.code||"unexpected_error",message:err.toString()});
                     err.status = 400;
                     return reject(err);
                 }
@@ -228,7 +231,7 @@ var api = module.exports = {
             if (!credentials) {
                 return resolve({});
             }
-            var definition = runtime.nodes.getCredentialDefinition(opts.type);
+            var definition = runtime.nodes.getCredentialDefinition(opts.type) || {};
 
             var sendCredentials = {};
             for (var cred in definition) {

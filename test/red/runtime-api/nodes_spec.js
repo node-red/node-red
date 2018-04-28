@@ -14,8 +14,168 @@
  * limitations under the License.
  **/
 
+var should = require("should");
+var sinon = require("sinon");
+
+var nodes = require("../../../red/runtime-api/nodes")
+
+var mockLog = () => ({
+    log: sinon.stub(),
+    debug: sinon.stub(),
+    trace: sinon.stub(),
+    warn: sinon.stub(),
+    info: sinon.stub(),
+    metric: sinon.stub(),
+    audit: sinon.stub(),
+    _: function() { return "abc"}
+})
+
 describe("runtime-api/nodes", function() {
-    it.skip('more tests needed', function(){})
+    describe("getNodeInfo", function() {
+        beforeEach(function() {
+            nodes.init({
+                log: mockLog(),
+                nodes: {
+                    getNodeInfo: function(id) {
+                        if (id === "known") {
+                            return {id:"known"};
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            });
+        })
+        it("returns node info", function(done) {
+            nodes.getNodeInfo({id:"known"}).then(function(result) {
+                result.should.eql({id:"known"});
+                done();
+            }).catch(done);
+        });
+        it("returns 404 if node not known", function(done) {
+            nodes.getNodeInfo({id:"unknown"}).then(function(result) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+    });
+    describe("getNodeList", function() {
+        beforeEach(function() {
+            nodes.init({
+                log: mockLog(),
+                nodes: {
+                    getNodeList: function() {
+                        return [1,2,3];
+                    }
+                }
+            });
+        })
+        it("returns node list", function(done) {
+            nodes.getNodeList({}).then(function(result) {
+                result.should.eql([1,2,3]);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("getNodeConfig", function() {
+        beforeEach(function() {
+            nodes.init({
+                log: mockLog(),
+                nodes: {
+                    getNodeConfig: function(id,lang) {
+                        if (id === "known") {
+                            return id+lang;
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            });
+        })
+        it("returns node config", function(done) {
+            nodes.getNodeConfig({id:"known",lang:'lang'}).then(function(result) {
+                result.should.eql("knownlang");
+                done();
+            }).catch(done);
+        });
+        it("returns 404 if node not known", function(done) {
+            nodes.getNodeConfig({id:"unknown",lang:'lang'}).then(function(result) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("getNodeConfigs", function() {
+        beforeEach(function() {
+            nodes.init({
+                log: mockLog(),
+                nodes: {
+                    getNodeConfigs: function(lang) {
+                        return lang;
+                    }
+                }
+            });
+        })
+        it("returns all node configs", function(done) {
+            nodes.getNodeConfigs({lang:'lang'}).then(function(result) {
+                result.should.eql("lang");
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe("getModuleInfo", function() {
+        beforeEach(function() {
+            nodes.init({
+                log: mockLog(),
+                nodes: {
+                    getModuleInfo: function(id) {
+                        if (id === "known") {
+                            return {module:"known"};
+                        } else {
+                            return null;
+                        }
+                    }
+                }
+            });
+        })
+        it("returns node info", function(done) {
+            nodes.getModuleInfo({module:"known"}).then(function(result) {
+                result.should.eql({module:"known"});
+                done();
+            }).catch(done);
+        });
+        it("returns 404 if node not known", function(done) {
+            nodes.getModuleInfo({module:"unknown"}).then(function(result) {
+                done(new Error("Did not return internal error"));
+            }).catch(function(err) {
+                err.should.have.property('code','not_found');
+                err.should.have.property('status',404);
+                done();
+            }).catch(done);
+        });
+    });
+
+    describe.skip("addModule", function() {});
+    describe.skip("removeModule", function() {});
+    describe.skip("setModuleState", function() {});
+    describe.skip("setNodeSetState", function() {});
+
+    describe.skip("getModuleCatalogs", function() {});
+    describe.skip("getModuleCatalog", function() {});
+
+    describe.skip("getIconList", function() {});
+    describe.skip("getIcon", function() {});
+
+
 });
 
 /*
