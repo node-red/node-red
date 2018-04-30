@@ -71,49 +71,49 @@ describe("api/editor/locales", function() {
         });
     });
 
-    describe('get all node resource catalogs',function() {
-        var app;
-        before(function() {
-            // bit of a mess of internal workings
-            sinon.stub(i18n,'catalog',function(namespace, lang) {
-                        return {
-                            "node-red": "should not return",
-                            "test-module-a-id": "test-module-a-catalog",
-                            "test-module-b-id": "test-module-b-catalog",
-                            "test-module-c-id": "test-module-c-catalog"
-                        }[namespace]
-                    });
-            locales.init({
-                nodes: {
-                    getNodeList: function(opts) {
-                        return Promise.resolve([
-                            {module:"node-red",id:"node-red-id"},
-                            {module:"test-module-a",id:"test-module-a-id"},
-                            {module:"test-module-b",id:"test-module-b-id"}
-                        ]);
-                    }
-                }
-            });
-            app = express();
-            app.get("/locales/nodes",locales.getAllNodes);
-        });
-        after(function() {
-            i18n.catalog.restore();
-        })
-        it('returns with the node catalogs', function(done) {
-            request(app)
-                .get("/locales/nodes")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.eql({
-                        'test-module-a-id': 'test-module-a-catalog',
-                        'test-module-b-id': 'test-module-b-catalog'
-                    });
-                    done();
-                });
-        });
-    });
+    // describe('get all node resource catalogs',function() {
+    //     var app;
+    //     before(function() {
+    //         // bit of a mess of internal workings
+    //         sinon.stub(i18n,'catalog',function(namespace, lang) {
+    //                     return {
+    //                         "node-red": "should not return",
+    //                         "test-module-a-id": "test-module-a-catalog",
+    //                         "test-module-b-id": "test-module-b-catalog",
+    //                         "test-module-c-id": "test-module-c-catalog"
+    //                     }[namespace]
+    //                 });
+    //         locales.init({
+    //             nodes: {
+    //                 getNodeList: function(opts) {
+    //                     return Promise.resolve([
+    //                         {module:"node-red",id:"node-red-id"},
+    //                         {module:"test-module-a",id:"test-module-a-id"},
+    //                         {module:"test-module-b",id:"test-module-b-id"}
+    //                     ]);
+    //                 }
+    //             }
+    //         });
+    //         app = express();
+    //         app.get("/locales/nodes",locales.getAllNodes);
+    //     });
+    //     after(function() {
+    //         i18n.catalog.restore();
+    //     })
+    //     it('returns with the node catalogs', function(done) {
+    //         request(app)
+    //             .get("/locales/nodes")
+    //             .expect(200)
+    //             .end(function(err,res) {
+    //                 if (err) {
+    //                     return done(err);
+    //                 }
+    //                 res.body.should.eql({
+    //                     'test-module-a-id': 'test-module-a-catalog',
+    //                     'test-module-b-id': 'test-module-b-catalog'
+    //                 });
+    //                 done();
+    //             });
+    //     });
+    // });
 });
