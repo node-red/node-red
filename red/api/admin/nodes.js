@@ -135,6 +135,31 @@ module.exports = {
 
     },
 
+    getModuleCatalog: function(req,res) {
+        var opts = {
+            user: req.user,
+            module: req.params[0],
+            lang: req.query.lng
+        }
+        runtimeAPI.nodes.getModuleCatalog(opts).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
+    },
+
+    getModuleCatalogs: function(req,res) {
+        var opts = {
+            user: req.user,
+            lang: req.query.lng
+        }
+        runtimeAPI.nodes.getModuleCatalogs(opts).then(function(result) {
+            res.json(result);
+        }).catch(function(err) {
+            apiUtils.rejectHandler(req,res,err);
+        })
+    },
+
     getIcons: function(req,res) {
         var opts = {
             user: req.user

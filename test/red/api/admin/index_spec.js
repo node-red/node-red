@@ -66,7 +66,8 @@ describe("api/admin/index", function() {
             sinon.stub(nodes,"delete",stubApp);
             sinon.stub(nodes,"getSet",stubApp);
             sinon.stub(nodes,"putSet",stubApp);
-
+            sinon.stub(nodes,"getModuleCatalog",stubApp);
+            sinon.stub(nodes,"getModuleCatalogs",stubApp);
         });
         after(function() {
             mockList.forEach(function(m) {
@@ -87,6 +88,8 @@ describe("api/admin/index", function() {
             nodes.delete.restore();
             nodes.getSet.restore();
             nodes.putSet.restore();
+            nodes.getModuleCatalog.restore();
+            nodes.getModuleCatalogs.restore();
 
         });
 
@@ -278,6 +281,37 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('nodes.write',1);
                 lastRequest.params.should.have.property(0,'@scope/module')
                 lastRequest.params.should.have.property(2,'set')
+                done();
+            })
+        });
+
+        it('GET /nodes/messages', function(done) {
+            request(app).get("/nodes/messages").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('nodes.read',1);
+
+                done();
+            })
+        });
+        it('GET /nodes/module/set/messages', function(done) {
+            request(app).get("/nodes/module/set/messages").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('nodes.read',1);
+                lastRequest.params.should.have.property(0,'module/set');
+                done();
+            })
+        });
+        it('GET /nodes/@scope/module/set/messages', function(done) {
+            request(app).get("/nodes/@scope/module/set/messages").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('nodes.read',1);
+                lastRequest.params.should.have.property(0,'@scope/module/set');
                 done();
             })
         });

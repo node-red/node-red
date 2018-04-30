@@ -350,13 +350,55 @@ var api = module.exports = {
     },
 
     /**
-    * TODO: getModuleCatalogs
+    * Gets all registered module message catalogs
+    * @param {Object} opts
+    * @param {User} opts.user - the user calling the api
+    * @param {User} opts.lang - the i18n language to return. If not set, uses runtime default (en-US)
+    * @return {Promise<Object>} - the message catalogs
+    * @memberof RED.nodes
     */
-    getModuleCatalogs: function() {},
+    getModuleCatalogs: function(opts) {
+        return new Promise(function(resolve,reject) {
+            var namespace = opts.module;
+            var lang = opts.lang;
+            var prevLang = runtime.i18n.i.lng();
+            // Trigger a load from disk of the language if it is not the default
+            runtime.i18n.i.setLng(lang, function(){
+                var nodeList = runtime.nodes.getNodeList();
+                var result = {};
+                nodeList.forEach(function(n) {
+                    if (n.module !== "node-red") {
+                        result[n.id] = runtime.i18n.catalog(n.id,lang)||{};
+                    }
+                });
+                resolve(result);
+            });
+            runtime.i18n.i.setLng(prevLang);
+        });
+    },
+
     /**
-    * TODO: getModuleCatalog
+    * Gets a modules message catalog
+    * @param {Object} opts
+    * @param {User} opts.user - the user calling the api
+    * @param {User} opts.module - the module
+    * @param {User} opts.lang - the i18n language to return. If not set, uses runtime default (en-US)
+    * @return {Promise<Object>} - the message catalog
+    * @memberof RED.nodes
     */
-    getModuleCatalog: function() {},
+    getModuleCatalog: function(opts) {
+        return new Promise(function(resolve,reject) {
+            var namespace = opts.module;
+            var lang = opts.lang;
+            var prevLang = runtime.i18n.i.lng();
+            // Trigger a load from disk of the language if it is not the default
+            runtime.i18n.i.setLng(lang, function(){
+                var catalog = runtime.i18n.catalog(namespace,lang);
+                resolve(catalog||{});
+            });
+            runtime.i18n.i.setLng(prevLang);
+        });
+    },
 
     /**
     * Gets the list of all icons available in the modules installed within the runtime

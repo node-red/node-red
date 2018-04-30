@@ -38,20 +38,5 @@ module.exports = {
         });
         i18n.i.setLng(prevLang);
 
-    },
-    getAllNodes: function(req,res) {
-        var lngs = req.query.lng;
-        var opts = {
-            user: req.user
-        }
-        runtimeAPI.nodes.getNodeList(opts).then(function(nodeList) {
-            var result = {};
-            nodeList.forEach(function(n) {
-                if (n.module !== "node-red") {
-                    result[n.id] = i18n.catalog(n.id,lngs)||{};
-                }
-            });
-            res.json(result);
-        })
     }
 }

@@ -83,7 +83,6 @@ module.exports = {
             // Locales
             var locales = require("./locales");
             locales.init(runtimeAPI);
-            editorApp.get('/locales/nodes',locales.getAllNodes,apiUtil.errorHandler);
             editorApp.get(/locales\/(.+)\/?$/,locales.get,apiUtil.errorHandler);
 
             // Library

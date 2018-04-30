@@ -36,7 +36,7 @@ RED.i18n = (function() {
             }
 
         },
-        loadCatalog: function(namespace,done) {
+        loadNodeCatalog: function(namespace,done) {
             var languageList = i18n.functions.toLanguages(i18n.detectLanguage());
             var toLoad = languageList.length;
             languageList.forEach(function(lang) {
@@ -45,7 +45,7 @@ RED.i18n = (function() {
                         "Accept":"application/json"
                     },
                     cache: false,
-                    url: 'locales/'+namespace+'?lng='+lang,
+                    url: 'nodes/'+namespace+'/messages?lng='+lang,
                     success: function(data) {
                         i18n.addResourceBundle(lang,namespace,data);
                         toLoad--;
@@ -68,7 +68,7 @@ RED.i18n = (function() {
                         "Accept":"application/json"
                     },
                     cache: false,
-                    url: 'locales/nodes?lng='+lang,
+                    url: 'nodes/messages?lng='+lang,
                     success: function(data) {
                         var namespaces = Object.keys(data);
                         namespaces.forEach(function(ns) {

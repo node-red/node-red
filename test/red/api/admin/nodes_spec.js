@@ -32,6 +32,8 @@ describe("api/admin/nodes", function() {
         app.use(bodyParser.json());
         app.get("/nodes",nodes.getAll);
         app.post("/nodes",nodes.post);
+        app.get(/\/nodes\/messages/,nodes.getModuleCatalogs);
+        app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+\/[^\/]+)\/messages/,nodes.getModuleCatalog);
         app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.getModule);
         app.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,nodes.putModule);
         app.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,nodes.getSet);
@@ -431,4 +433,45 @@ describe("api/admin/nodes", function() {
                 });
         });
     });
+
+    describe('get module messages', function() {
+        it('returns message catalog', function(done) {
+            nodes.init({
+                nodes:{
+                    getModuleCatalog: function(opts) {
+                        return Promise.resolve(opts);
+                    }
+                }
+            });
+            request(app)
+                .get('/nodes/module/set/messages')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.eql({ module: 'module/set' });
+                    done();
+                });
+        });
+        it('returns all node catalogs', function(done) {
+            nodes.init({
+                nodes:{
+                    getModuleCatalogs: function(opts) {
+                        return Promise.resolve({a:1});
+                    }
+                }
+            });
+            request(app)
+                .get('/nodes/messages')
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        throw err;
+                    }
+                    res.body.should.eql({a:1});
+                    done();
+                });
+        });
+    })
 });

@@ -282,7 +282,7 @@ var RED = (function() {
                     var id = m.id;
                     RED.nodes.addNodeSet(m);
                     addedTypes = addedTypes.concat(m.types);
-                    RED.i18n.loadCatalog(id, function() {
+                    RED.i18n.loadNodeCatalog(id, function() {
                         $.get('nodes/'+id, function(data) {
                             $("body").append(data);
                         });
