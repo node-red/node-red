@@ -192,7 +192,7 @@ try {
     if (err.code == "unsupported_version") {
         console.log("Unsupported version of node.js:",process.version);
         console.log("Node-RED requires node.js v4 or later");
-    } else if  (err.code == "not_built") {
+    } else if (err.code == "not_built") {
         console.log("Node-RED has not been built. See README.md for details");
     } else {
         console.log("Failed to start server:");
@@ -276,7 +276,7 @@ function getListenPath() {
     }
 
     var listenPath = 'http'+(settings.https?'s':'')+'://'+
-                    (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
+                    (settings.uiHost == '::'?'localhost':(settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost))+
                     ':'+port;
     if (settings.httpAdminRoot !== false) {
         listenPath += settings.httpAdminRoot;
