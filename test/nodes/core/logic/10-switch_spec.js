@@ -103,7 +103,7 @@ describe('switch Node', function() {
             helperNode1.on("input", function(msg) {
                 try {
                     if (shouldReceive === true) {
-                        msg.payload.should.equal(sendPayload);
+                        should.equal(msg.payload,sendPayload);
                         done();
                     } else {
                         should.fail(null, null, "We should never get an input!");
@@ -168,8 +168,6 @@ describe('switch Node', function() {
         });
     }
 
-    
-    
     it('should check if payload equals given value', function(done) {
         genericSwitchTest("eq", "Hello", true, true, "Hello", done);
     });
@@ -256,6 +254,43 @@ describe('switch Node', function() {
 
     it('should match regex', function(done) {
         genericSwitchTest("regex", "[abc]+", true, true, "abbabac", done);
+    });
+
+    it('should check if payload if of type string ', function(done) {
+        genericSwitchTest("istype", "string", true, true, "Hello", done);
+    });
+    it('should check if payload if of type number ', function(done) {
+        genericSwitchTest("istype", "number", true, true, 999, done);
+    });
+    it('should check if payload if of type number 0', function(done) {
+        genericSwitchTest("istype", "number", true, true, 0, done);
+    });
+    it('should check if payload if of type boolean true', function(done) {
+        genericSwitchTest("istype", "boolean", true, true, true, done);
+    });
+    it('should check if payload if of type boolean false', function(done) {
+        genericSwitchTest("istype", "boolean", true, true, true, done);
+    });
+    it('should check if payload if of type array ', function(done) {
+        genericSwitchTest("istype", "array", true, true, [1,2,3,"a","b"], done);
+    });
+    it('should check if payload if of type buffer ', function(done) {
+        genericSwitchTest("istype", "buffer", true, true, Buffer.from("Hello"), done);
+    });
+    it('should check if payload if of type object ', function(done) {
+        genericSwitchTest("istype", "object", true, true, {a:1,b:"b",c:true}, done);
+    });
+    it('should check if payload if of type JSON string ', function(done) {
+        genericSwitchTest("istype", "json", true, true, JSON.stringify({a:1,b:"b",c:true}), done);
+    });
+    it('should check if payload if of type JSON string (and fail if not) ', function(done) {
+        genericSwitchTest("istype", "json", true, false, "Hello", done);
+    });
+    it('should check if payload if of type null', function(done) {
+        genericSwitchTest("istype", "null", true, true, null, done);
+    });
+    it('should check if payload if of type undefined', function(done) {
+        genericSwitchTest("istype", "undefined", true, true, undefined, done);
     });
 
     it('should match regex with ignore-case flag set true', function(done) {
@@ -432,7 +467,6 @@ describe('switch Node', function() {
     it('should check if input is indeed not null', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"nnull"}],checkall:false,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-
 
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
@@ -787,5 +821,4 @@ describe('switch Node', function() {
             n1.receive({payload:1, parts:{index:0, count:4, id:222}});
         });
     });
-    
 });
