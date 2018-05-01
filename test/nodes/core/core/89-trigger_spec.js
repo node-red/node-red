@@ -419,7 +419,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to extend the delay (but with no 2nd output)', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op2type:"nul", op1:"false",  op2:"true", duration:"50", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op2type:"nul", op1:"false",  op2:"true", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -434,7 +434,7 @@ describe('trigger node', function() {
                     else {
                         msg.should.have.a.property("payload", "World");
                         //console.log(Date.now() - ss);
-                        (Date.now() - ss).should.be.greaterThan(70);
+                        (Date.now() - ss).should.be.greaterThan(140);
                         done();
                     }
                 }
@@ -447,7 +447,7 @@ describe('trigger node', function() {
             },20);
             setTimeout( function() {
                 n1.emit("input", {payload:"World"});
-            },80);
+            },150);
         });
     });
 
