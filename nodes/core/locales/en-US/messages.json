@@ -671,7 +671,8 @@
     "html": {
         "label": {
             "select": "Selector",
-            "output": "Output"
+            "output": "Output",
+            "in": "in"
         },
         "output": {
             "html": "the html content of the elements",
