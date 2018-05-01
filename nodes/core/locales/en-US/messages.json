@@ -495,15 +495,15 @@
             "using": "using",
             "output": "Output",
             "group": "Group",
-            "interface": "Local IP",
-            "interfaceprompt": "(optional) local ip address to bind to",
+            "interface": "Local IF",
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
             "decode-base64": "Decode Base64 encoded payload?"
         },
         "placeholder": {
-            "interface": "(optional) ip address of eth0",
+            "interface": "(optional) local interface or address to bind to",
+            "interfaceprompt": "(optional) local interface or address to bind to",
             "address": "destination ip"
         },
         "udpmsgs": "udp messages",
@@ -531,10 +531,11 @@
             "mc-group": "udp multicast group __group__",
             "listener-stopped": "udp listener stopped",
             "output-stopped": "udp output stopped",
-            "mc-ready": "udp multicast ready: __outport__ -> __host__:__port__",
+            "mc-ready": "udp multicast ready: __iface__:__outport__ -> __host__:__port__",
             "bc-ready": "udp broadcast ready: __outport__ -> __host__:__port__",
             "ready": "udp ready: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udp ready: __host__:__port__"
+            "ready-nolocal": "udp ready: __host__:__port__",
+            "re-use": "udp re-use socket: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP access error, you may need root access for ports below 1024",
@@ -544,7 +545,8 @@
             "ip-notset": "udp: ip address not set",
             "port-notset": "udp: port not set",
             "port-invalid": "udp: port number not valid",
-            "alreadyused": "udp: port already in use"
+            "alreadyused": "udp: port __port__ already in use",
+            "ifnotfound": "udp: interface __iface__ not found"
         }
     },
     "switch": {
