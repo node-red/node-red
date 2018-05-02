@@ -335,24 +335,24 @@
         "tabs-label": {
             "connection": "Connection",
             "security": "Security",
-            "will": "Will Message",
-            "birth": "Birth Message"
+            "messages": "Messages"
         },
         "placeholder": {
             "clientid": "Leave blank for auto generated",
             "clientid-nonclean":"Must be set for non-clean sessions",
             "will-topic": "Leave blank to disable will message",
-            "birth-topic": "Leave blank to disable birth message"
+            "birth-topic": "Leave blank to disable birth message",
+            "close-topic": "Leave blank to use the will message on close"
         },
         "state": {
             "connected": "Connected to broker: __broker__",
             "disconnected": "Disconnected from broker: __broker__",
             "connect-failed": "Connection failed to broker: __broker__"
         },
-        "retain": "Retain",
+        "": "",
         "true": "true",
         "false": "false",
-        "tip": "Tip: Leave topic, qos or retain blank if you want to set them via msg properties.",
+        "tip": "Tip: Leave topic, qos or  blank if you want to set them via msg properties.",
         "errors": {
             "not-defined": "topic not defined",
             "missing-config": "missing broker configuration",
