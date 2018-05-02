@@ -602,6 +602,7 @@ RED.projects = (function() {
                                     }
 
                                     $(".projects-dialog-screen-create-row-auth-error").hide();
+                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
 
                                     projectRepoUserInput.removeClass("input-error");
                                     projectRepoPasswordInput.removeClass("input-error");
@@ -1503,6 +1504,7 @@ RED.projects = (function() {
                                     }
 
                                     $(".projects-dialog-screen-create-row-auth-error").hide();
+                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
 
                                     projectRepoUserInput.removeClass("input-error");
                                     projectRepoPasswordInput.removeClass("input-error");

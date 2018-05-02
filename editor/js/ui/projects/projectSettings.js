@@ -1255,6 +1255,14 @@ RED.projects.settings = (function() {
                                         text: 'Delete remote',
                                         click: function() {
                                             notification.close();
+
+                                            if (activeProject.git.branches.remote && activeProject.git.branches.remote.indexOf(entry.name+"/") === 0) {
+                                                delete activeProject.git.branches.remote;
+                                            }
+                                            if (activeProject.git.branches.remoteAlt && activeProject.git.branches.remoteAlt.indexOf(entry.name+"/") === 0) {
+                                                delete activeProject.git.branches.remoteAlt;
+                                            }
+
                                             var url = "projects/"+activeProject.name+"/remotes/"+entry.name;
                                             var options = {
                                                 url: url,
@@ -1276,6 +1284,7 @@ RED.projects.settings = (function() {
                                                                     activeProject.git.remotes[name] = remote;
                                                                 });
                                                             }
+                                                            delete activeProject.git.branches.remoteAlt;
                                                             RED.sidebar.versionControl.refresh();
                                                         });
                                                     },
