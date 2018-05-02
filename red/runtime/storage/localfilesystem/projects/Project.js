@@ -81,9 +81,7 @@ Project.prototype.load = function () {
 
     var promises = [];
     return checkProjectFiles(project).then(function(missingFiles) {
-        if (missingFiles.length > 0) {
-            project.missingFiles = missingFiles;
-        }
+        project.missingFiles = missingFiles;
         if (missingFiles.indexOf('package.json') === -1) {
             project.paths['package.json'] = fspath.join(project.path,"package.json");
             promises.push(fs.readFile(project.paths['package.json'],"utf8").then(function(content) {
@@ -135,9 +133,9 @@ Project.prototype.load = function () {
 
 Project.prototype.initialise = function(user,data) {
     var project = this;
-    if (!this.empty) {
-        throw new Error("Cannot initialise non-empty project");
-    }
+    // if (!this.empty) {
+    //     throw new Error("Cannot initialise non-empty project");
+    // }
     var files = Object.keys(defaultFileSet);
     var promises = [];
 
@@ -148,17 +146,25 @@ Project.prototype.initialise = function(user,data) {
         promises.push(settings.set('projects',projects));
     }
 
-    project.files.flow = data.files.flow;
-    project.files.credentials = data.files.credentials;
-    var flowFilePath = fspath.join(project.path,project.files.flow);
-    var credsFilePath = getCredentialsFilename(flowFilePath);
-    promises.push(util.writeFile(flowFilePath,"[]"));
-    promises.push(util.writeFile(credsFilePath,"{}"));
-    files.push(project.files.flow);
-    files.push(project.files.credentials);
+    if (data.hasOwnProperty('files')) {
+        if (data.files.hasOwnProperty('flow') && data.files.hasOwnProperty('credentials')) {
+            project.files.flow = data.files.flow;
+            project.files.credentials = data.files.credentials;
+            var flowFilePath = fspath.join(project.path,project.files.flow);
+            var credsFilePath = getCredentialsFilename(flowFilePath);
+            promises.push(util.writeFile(flowFilePath,"[]"));
+            promises.push(util.writeFile(credsFilePath,"{}"));
+            files.push(project.files.flow);
+            files.push(project.files.credentials);
+        }
+    }
     for (var file in defaultFileSet) {
         if (defaultFileSet.hasOwnProperty(file)) {
-            promises.push(util.writeFile(fspath.join(project.path,file),defaultFileSet[file](project)));
+            var path = fspath.join(project.path,file);
+            if (!fs.existsSync(path)) {
+                promises.push(util.writeFile(path,defaultFileSet[file](project)));
+            }
+
         }
     }
 

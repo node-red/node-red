@@ -214,6 +214,18 @@
                                 }
                             ]
                         }
+                    } else if (msg.error === "missing_package_file") {
+                        if (RED.user.hasPermission("projects.write")) {
+                            options.buttons = [
+                                {
+                                    text: "Create default package file",
+                                    click: function() {
+                                        persistentNotifications[notificationId].hideNotification();
+                                        RED.projects.createDefaultPackageFile();
+                                    }
+                                }
+                            ]
+                        }
                     } else if (msg.error === "project_empty") {
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [

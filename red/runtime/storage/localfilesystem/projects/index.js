@@ -479,6 +479,12 @@ function getFlows() {
             error.code = "project_empty";
             return when.reject(error);
         }
+        if (activeProject.missingFiles && activeProject.missingFiles.indexOf('package.json') !== -1) {
+            log.warn("Project missing package.json");
+            error = new Error("Project missing package.json");
+            error.code = "missing_package_file";
+            return when.reject(error);
+        }
         if (!activeProject.getFlowFile()) {
             log.warn("Project has no flow file");
             error = new Error("Project has no flow file");

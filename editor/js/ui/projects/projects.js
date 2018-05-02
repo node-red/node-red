@@ -2251,6 +2251,43 @@ RED.projects = (function() {
         createProjectOptions = {};
         show('default-files',{existingProject: true});
     }
+    function createDefaultPackageFile() {
+        RED.deploy.setDeployInflight(true);
+        RED.projects.settings.switchProject(activeProject.name);
+
+        var method = "PUT";
+        var url = "projects/"+activeProject.name;
+        var createProjectOptions = {
+            initialise: true
+        };
+        sendRequest({
+            url: url,
+            type: method,
+            requireCleanWorkspace: true,
+            handleAuthFail: false,
+            responses: {
+                200: function(data) { },
+                400: {
+                    'git_error': function(error) {
+                        console.log("git error",error);
+                    },
+                    'missing_flow_file': function(error) {
+                        // This is a natural next error - but let the runtime event
+                        // trigger the dialog rather than double-report it.
+                        $( dialog ).dialog( "close" );
+                    },
+                    '*': function(error) {
+                        reportUnexpectedError(error);
+                        $( dialog ).dialog( "close" );
+                    }
+                }
+            }
+        },createProjectOptions).always(function() {
+            setTimeout(function() {
+                RED.deploy.setDeployInflight(false);
+            },500);
+        })
+    }
 
     function refresh(done) {
         $.getJSON("projects",function(data) {
@@ -2330,6 +2367,7 @@ RED.projects = (function() {
             RED.projects.settings.show('deps');
         },
         createDefaultFileSet: createDefaultFileSet,
+        createDefaultPackageFile: createDefaultPackageFile,
         // showSidebar: showSidebar,
         refresh: refresh,
         editProject: function() {
