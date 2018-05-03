@@ -323,6 +323,7 @@
             "broker": "Server",
             "example": "e.g. localhost",
             "qos": "QoS",
+            "retain": "Retain",
             "clientid": "Client ID",
             "port": "Port",
             "keepalive": "Keep alive time (s)",
@@ -331,6 +332,11 @@
             "tls-config":"TLS Configuration",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"
+        },
+        "sections-label":{
+            "birth-message": "Message sent on connection (birth message)",
+            "will-message":"Message sent on an unexpected disconnection (will message)",
+            "close-message":"Message sent before disconnecting (close message)"
         },
         "tabs-label": {
             "connection": "Connection",
@@ -342,7 +348,7 @@
             "clientid-nonclean":"Must be set for non-clean sessions",
             "will-topic": "Leave blank to disable will message",
             "birth-topic": "Leave blank to disable birth message",
-            "close-topic": "Leave blank to use the will message on close"
+            "close-topic": "Leave blank to disable close message"
         },
         "state": {
             "connected": "Connected to broker: __broker__",

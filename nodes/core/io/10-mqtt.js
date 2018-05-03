@@ -60,6 +60,15 @@ module.exports = function(RED) {
             };
         }
 
+        if (n.closeTopic) {
+            this.closeMessage = {
+                topic: n.closeTopic,
+                payload: n.closePayload || "",
+                qos: Number(n.closeQos||0),
+                retain: n.closeRetain=="true"|| n.closeRetain===true
+            }; 
+        }
+
         if (this.credentials) {
             this.username = this.credentials.user;
             this.password = this.credentials.password;
@@ -314,6 +323,10 @@ module.exports = function(RED) {
         this.on('close', function(done) {
             this.closing = true;
             if (this.connected) {
+                // Send close message
+                if (node.closeMessage) {
+                    node.publish(node.closeMessage);
+                }
                 this.client.once('close', function() {
                     done();
                 });
