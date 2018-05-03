@@ -568,6 +568,7 @@
             "false":"is false",
             "null":"is null",
             "nnull":"is not null",
+            "istype":"is of type",
             "head":"head",
             "tail":"tail",
             "index":"index between",
