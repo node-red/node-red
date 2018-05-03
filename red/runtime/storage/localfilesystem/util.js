@@ -80,28 +80,26 @@ module.exports = {
      */
      writeFile: function(path,content,backupPath) {
          if (backupPath) {
-             try {
-                 fs.renameSync(path,backupPath);
-             } catch(err) {
-                 console.log(err);
-             }
-         }
-         return when.promise(function(resolve,reject) {
-             var stream = fs.createWriteStream(path);
-             stream.on('open',function(fd) {
-                 stream.write(content,'utf8',function() {
-                     fs.fsync(fd,function(err) {
-                         if (err) {
-                             log.warn(log._("storage.localfilesystem.fsync-fail",{path: path, message: err.toString()}));
-                         }
-                         stream.end(resolve);
-                     });
-                 });
-             });
-             stream.on('error',function(err) {
-                 reject(err);
-             });
-         });
+            if (fs.existsSync(path)) {
+                fs.renameSync(path,backupPath);
+            }
+        }
+        return when.promise(function(resolve,reject) {
+            var stream = fs.createWriteStream(path);
+            stream.on('open',function(fd) {
+                stream.write(content,'utf8',function() {
+                    fs.fsync(fd,function(err) {
+                        if (err) {
+                            log.warn(log._("storage.localfilesystem.fsync-fail",{path: path, message: err.toString()}));
+                        }
+                        stream.end(resolve);
+                    });
+                });
+            });
+            stream.on('error',function(err) {
+                reject(err);
+            });
+        });
      },
     readFile: readFile,
 
