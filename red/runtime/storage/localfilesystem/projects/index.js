@@ -127,10 +127,20 @@ function init(_settings, _runtime) {
                                 activeProject = globalSettings.projects.activeProject;
                             }
                             if (settings.flowFile) {
+                                // if flowFile is a known project name - use it
                                 if (globalSettings.projects.projects.hasOwnProperty(settings.flowFile)) {
                                     activeProject = settings.flowFile;
                                     globalSettings.projects.activeProject = settings.flowFile;
                                     saveSettings = true;
+                                } else {
+                                    // if it resolves to a dir - use it... but:
+                                    // - where to get credsecret from?
+                                    // - what if the name clashes with a known project?
+                                    
+                                    // var stat = fs.statSync(settings.flowFile);
+                                    // if (stat && stat.isDirectory()) {
+                                    //     activeProject = settings.flowFile;
+                                    // }
                                 }
                             }
                             if (!activeProject) {
@@ -148,6 +158,24 @@ function init(_settings, _runtime) {
     return Promise.resolve();
 }
 
+function listProjects() {
+    return fs.readdir(projectsDir).then(function(fns) {
+        var dirs = [];
+        fns.sort(function(A,B) {
+            return A.toLowerCase().localeCompare(B.toLowerCase());
+        }).filter(function(fn) {
+            var fullPath = fspath.join(projectsDir,fn);
+            if (fn[0] != ".") {
+                var stats = fs.lstatSync(fullPath);
+                if (stats.isDirectory()) {
+                    dirs.push(fn);
+                }
+            }
+        });
+        return dirs;
+    });
+}
+
 function getUserGitSettings(user) {
     var userSettings = settings.getUserSettings(user)||{};
     return userSettings.git;
@@ -160,7 +188,11 @@ function getBackupFilename(filename) {
 }
 
 function loadProject(name) {
-    return Projects.get(name).then(function(project) {
+    var projectPath = name;
+    if (projectPath.indexOf(fspath.sep) === -1) {
+        projectPath = fspath.join(projectsDir,name);
+    }
+    return Projects.load(projectPath).then(function(project) {
         activeProject = project;
         flowsFullPath = project.getFlowFile();
         flowsFileBackup = project.getFlowFileBackup();
@@ -170,26 +202,20 @@ function loadProject(name) {
     })
 }
 
-function listProjects(user) {
-    return Projects.list();
-}
-
 function getProject(user, name) {
     checkActiveProject(name);
     //return when.resolve(activeProject.info);
-    var username;
-    if (!user) {
-        username = "_";
-    } else {
-        username = user.username;
-    }
-    return Projects.get(name).then(function(project) {
-        return project.toJSON();
-    });
+    return Promise.resolve(activeProject.export());
 }
 
 function deleteProject(user, name) {
-    return Projects.delete(user, name);
+    if (activeProject && activeProject.name === name) {
+        var e = new Error("NLS: Can't delete the active project");
+        e.code = "cannot_delete_active_project";
+        throw e;
+    }
+    var projectPath = fspath.join(projectsDir,name);
+    return Projects.delete(user, projectPath);
 }
 
 function checkActiveProject(project) {
@@ -347,6 +373,7 @@ function createProject(user, metadata) {
         metadata.files.oldCredentials = credentialsFile;
         metadata.files.credentialSecret = currentEncryptionKey;
     }
+    metadata.path = fspath.join(projectsDir,metadata.name);
     return Projects.create(user, metadata).then(function(p) {
         return setActiveProject(user, p.name);
     }).then(function() {
