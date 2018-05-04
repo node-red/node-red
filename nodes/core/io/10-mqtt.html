@@ -273,8 +273,8 @@
                 </div>
                 <div class="section-content" style="display:none; padding: 12px">
                     <div class="form-row">
-                        <label for="node-config-input-willTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
-                        <input type="text" id="node-config-input-willTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.close-topic">
+                        <label for="node-config-input-closeTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+                        <input type="text" id="node-config-input-closeTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.close-topic">
                         &nbsp;&nbsp;
                         <i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span> <select id="node-config-input-closeRetain" style="float:right; width:75px !important">
                             <option value="false" data-i18n="mqtt.false"></option>
@@ -283,7 +283,7 @@
                     </div>
                     <div class="form-row">
                         <label for="node-config-input-closePayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
-                        <input type="text" id="node-config-input-willPayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
+                        <input type="text" id="node-config-input-closePayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
                         &nbsp;&nbsp;
                         <i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
                         <select id="node-config-input-closeQos" style="float:right; width:75px !important">
@@ -392,22 +392,31 @@
                 label: this._("mqtt.tabs-label.messages")
             });
 
-            function setUpSection(sectionId) {
+            function setUpSection(sectionId, isExpanded) {
                 var birthMessageSection = $(sectionId);
                 var paletteHeader = birthMessageSection.find('.palette-header');
+                var twistie = paletteHeader.find('i');
                 var sectionContent = birthMessageSection.find('.section-content');
 
+                function toggleSection(expanded) {
+                    twistie.toggleClass('expanded', expanded);
+                    sectionContent.toggle(expanded);
+                }
                 paletteHeader.click(function(e) {
                     e.preventDefault();
-                    var twistie = $(this).find('i');
                     var isExpanded = twistie.hasClass('expanded');
-                    sectionContent.toggle(!isExpanded);
-                    twistie.toggleClass('expanded',!isExpanded);
+                    toggleSection(!isExpanded);
                 });
+                toggleSection(isExpanded);
             }
-            setUpSection('#mqtt-broker-section-birth');
-            setUpSection('#mqtt-broker-section-will');
-            setUpSection('#mqtt-broker-section-close');
+            // show first section if none are set so the user gets the idea
+            var showBirthSection = this.birthTopic !== ""
+                || this.willTopic === ""
+                && this.birthTopic === ""
+                && this.closeTopic == "";
+            setUpSection('#mqtt-broker-section-birth', showBirthSection);
+            setUpSection('#mqtt-broker-section-will', this.willTopic !== "");
+            setUpSection('#mqtt-broker-section-close', this.closeTopic !== "");
 
             setTimeout(function() { tabs.resize(); },0);
             if (typeof this.cleansession === 'undefined') {
