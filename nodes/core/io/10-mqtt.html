@@ -215,9 +215,9 @@
         <div id="mqtt-broker-tab-messages" style="display:none">
             <div id="mqtt-broker-section-birth">
                 <div class="palette-header">
-                    <i class="fa fa-angle-down expanded"></i><span data-i18n="mqtt.sections-label.birth-message"></span>
+                    <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.birth-message"></span>
                 </div>
-                <div class="section-content" style="padding: 12px">
+                <div class="section-content" style="padding:10px 0 0 10px">
                     <div class="form-row">
                         <label for="node-config-input-birthTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
                         <input type="text" id="node-config-input-birthTopic" data-i18n="[placeholder]mqtt.placeholder.birth-topic" style="width:300px !important">
@@ -240,38 +240,11 @@
                     </div>
                 </div>
             </div>
-            <div id="mqtt-broker-section-will">
-                <div class="palette-header">
-                    <i class="fa fa-angle-down expanded"></i><span data-i18n="mqtt.sections-label.will-message"></span>
-                </div>
-                <div class="section-content" style="padding: 12px">
-                    <div class="form-row">
-                        <label for="node-config-input-willTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
-                        <input type="text" id="node-config-input-willTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.will-topic">
-                        &nbsp;&nbsp;
-                        <i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span> <select id="node-config-input-willRetain" style="float:right; width:75px !important">
-                            <option value="false" data-i18n="mqtt.false"></option>
-                            <option value="true" data-i18n="mqtt.true"></option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <label for="node-config-input-willPayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
-                        <input type="text" id="node-config-input-willPayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
-                        &nbsp;&nbsp;
-                        <i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
-                        <select id="node-config-input-willQos" style="float:right; width:75px !important">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
             <div id="mqtt-broker-section-close">
                 <div class="palette-header">
                     <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.close-message"></span>
                 </div>
-                <div class="section-content" style="display:none; padding: 12px">
+                <div class="section-content" style="padding:10px 0 0 10px">
                     <div class="form-row">
                         <label for="node-config-input-closeTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
                         <input type="text" id="node-config-input-closeTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.close-topic">
@@ -287,6 +260,33 @@
                         &nbsp;&nbsp;
                         <i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
                         <select id="node-config-input-closeQos" style="float:right; width:75px !important">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="mqtt-broker-section-will">
+                <div class="palette-header">
+                    <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.will-message"></span>
+                </div>
+                <div class="section-content" style="padding:10px 0 0 10px">
+                    <div class="form-row">
+                        <label for="node-config-input-willTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+                        <input type="text" id="node-config-input-willTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.will-topic">
+                        &nbsp;&nbsp;
+                        <i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span> <select id="node-config-input-willRetain" style="float:right; width:75px !important">
+                            <option value="false" data-i18n="mqtt.false"></option>
+                            <option value="true" data-i18n="mqtt.true"></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label for="node-config-input-willPayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+                        <input type="text" id="node-config-input-willPayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
+                        &nbsp;&nbsp;
+                        <i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+                        <select id="node-config-input-willQos" style="float:right; width:75px !important">
                             <option value="0">0</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -339,10 +339,6 @@
             compatmode: { value: true},
             keepalive: {value:60,validate:RED.validators.number()},
             cleansession: {value: true},
-            willTopic: {value:""},
-            willQos: {value:"0"},
-            willRetain: {value:false},
-            willPayload: {value:""},
             birthTopic: {value:""},
             birthQos: {value:"0"},
             birthRetain: {value:false},
@@ -350,7 +346,11 @@
             closeTopic: {value:""},
             closeQos: {value:"0"},
             closeRetain: {value:false},
-            closePayload: {value:""}
+            closePayload: {value:""},
+            willTopic: {value:""},
+            willQos: {value:"0"},
+            willRetain: {value:false},
+            willPayload: {value:""}
         },
         credentials: {
             user: {type:"text"},
@@ -409,14 +409,15 @@
                 });
                 toggleSection(isExpanded);
             }
+            
             // show first section if none are set so the user gets the idea
             var showBirthSection = this.birthTopic !== ""
                 || this.willTopic === ""
                 && this.birthTopic === ""
                 && this.closeTopic == "";
             setUpSection('#mqtt-broker-section-birth', showBirthSection);
-            setUpSection('#mqtt-broker-section-will', this.willTopic !== "");
             setUpSection('#mqtt-broker-section-close', this.closeTopic !== "");
+            setUpSection('#mqtt-broker-section-will', this.willTopic !== "");
 
             setTimeout(function() { tabs.resize(); },0);
             if (typeof this.cleansession === 'undefined') {
@@ -435,15 +436,15 @@
                 this.keepalive = 15;
                 $("#node-config-input-keepalive").val(this.keepalive);
             }
-            if (typeof this.willQos === 'undefined') {
-                this.willQos = "0";
-                $("#node-config-input-willQos").val("0");
-            }
             if (typeof this.birthQos === 'undefined') {
                 this.birthQos = "0";
                 $("#node-config-input-birthQos").val("0");
             }
             if (typeof this.closeQos === 'undefined') {
+                this.willQos = "0";
+                $("#node-config-input-willQos").val("0");
+            }
+            if (typeof this.willQos === 'undefined') {
                 this.willQos = "0";
                 $("#node-config-input-willQos").val("0");
             }
