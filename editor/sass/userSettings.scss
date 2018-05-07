@@ -38,16 +38,25 @@
     label {
         display: inline-block;
         min-width: 100px;
+        vertical-align: top;
+        margin-top: 5px;
         input {
             vertical-align: top;
             padding-bottom: 0;
         }
     }
-    input {
-        margin-bottom: 0;
+    input, div.uneditable-input {
+        //margin-bottom: 0;
+    }
+    div.uneditable-input {
+        position: relative;
     }
     input[type='number'] {
         width: 60px;
+    }
+    h4 {
+        margin-top: 20px;
+        margin-bottom: 10px;
     }
 }
 
@@ -56,4 +65,19 @@
 }
 .user-settings-row {
     padding: 5px 10px 2px;
+}
+.user-settings-section {
+    position: relative;
+    &:after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+    .uneditable-input, input, textarea {
+        width: calc(100% - 150px);
+    }
+    textarea {
+        resize: none;
+        height: 10em;
+    }
 }

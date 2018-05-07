@@ -69,7 +69,7 @@ RED.debug = (function() {
         // var filterTypeRow = $('<div class="debug-filter-row"></div>').appendTo(filterDialog);
         // $('<select><option>Show all debug nodes</option><option>Show selected debug nodes</option><option>Show current flow only</option></select>').appendTo(filterTypeRow);
 
-        var debugNodeListRow = $('<div class="debug-filter-row hide"></div>').appendTo(filterDialog);
+        var debugNodeListRow = $('<div class="debug-filter-row hide" id="debug-filter-node-list-row"></div>').appendTo(filterDialog);
         var flowCheckboxes = {};
         var debugNodeListHeader = $('<div><span data-i18n="node-red:debug.sidebar.debugNodes"></span><span></span></div>');
         var headerCheckbox = $('<input type="checkbox">').appendTo(debugNodeListHeader.find("span")[1]).checkboxSet();
@@ -219,11 +219,8 @@ RED.debug = (function() {
 
         toolbar.find("#debug-tab-clear").click(function(e) {
             e.preventDefault();
-            $(".debug-message").remove();
-            messageCount = 0;
-            config.clear();
+            clearMessageList(false);
         });
-
 
         return {
             content: content,
@@ -240,6 +237,9 @@ RED.debug = (function() {
         workspaceOrder.forEach(function(ws,i) {
             workspaceOrderMap[ws] = i;
         });
+        candidateNodes = candidateNodes.filter(function(node) {
+            return workspaceOrderMap.hasOwnProperty(node.z);
+        })
         candidateNodes.sort(function(A,B) {
             var wsA = workspaceOrderMap[A.z];
             var wsB = workspaceOrderMap[B.z];
@@ -341,7 +341,7 @@ RED.debug = (function() {
                         activeMenuMessage.clearPinned();
                     }},
                     null,
-                    {id:"debug-message-menu-item-filter",label:RED._("node-red:debug.messageMenu.filterNode"),onselect:function(){
+                    {id:"debug-message-menu-item-filter", label:RED._("node-red:debug.messageMenu.filterNode"),onselect:function(){
                         var candidateNodes = RED.nodes.filterNodes({type:'debug'});
                         candidateNodes.forEach(function(n) {
                             filteredNodes[n.id] = true;
@@ -363,6 +363,15 @@ RED.debug = (function() {
             menuOptionMenu.on('mouseup', function() { $(this).hide() });
             menuOptionMenu.appendTo("body");
         }
+
+        var filterOptionDisabled = false;
+        var sourceNode = RED.nodes.node(sourceId);
+        if (sourceNode && sourceNode.type !== 'debug') {
+            filterOptionDisabled = true;
+        }
+        RED.menu.setDisabled('debug-message-menu-item-filter',filterOptionDisabled);
+        RED.menu.setDisabled('debug-message-menu-item-clear-filter',filterOptionDisabled);
+
         var elementPos = button.offset();
         menuOptionMenu.css({
             top: elementPos.top+"px",
@@ -394,12 +403,19 @@ RED.debug = (function() {
             $(msg).addClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseEnter(o._source.id);
+                if (o._source._alias) {
+                    config.messageMouseEnter(o._source._alias);
+                }
             }
+
         };
         msg.onmouseleave = function() {
             $(msg).removeClass('debug-message-hover');
             if (o._source) {
                 config.messageMouseLeave(o._source.id);
+                if (o._source._alias) {
+                    config.messageMouseLeave(o._source._alias);
+                }
             }
         };
         var name = sanitize(((o.name?o.name:o.id)||"").toString());
@@ -439,7 +455,9 @@ RED.debug = (function() {
             $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
 
-        if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+        if ((format === 'number') && (payload === "NaN")) {
+            payload = Number.NaN;
+        } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
         } else if (/error/i.test(format)) {
             payload = JSON.parse(payload);
@@ -524,9 +542,28 @@ RED.debug = (function() {
         }
     }
 
+    function clearMessageList(clearFilter) {
+        $(".debug-message").remove();
+        config.clear();
+        if (!!clearFilter) {
+            clearFilterSettings();
+        }
+        refreshDebugNodeList();
+    }
+
+    function clearFilterSettings() {
+        filteredNodes = {};
+        filterType = 'filterAll';
+        $('.debug-tab-filter-option').removeClass('selected');
+        $('#debug-tab-filterAll').addClass('selected');
+        $('#debug-tab-filter span').text(RED._('node-red:debug.sidebar.filterAll'));
+        $('#debug-filter-node-list-row').slideUp();
+    }
+
     return {
         init: init,
         refreshMessageList:refreshMessageList,
-        handleDebugMessage: handleDebugMessage
+        handleDebugMessage: handleDebugMessage,
+        clearMessageList: clearMessageList
     }
 })();

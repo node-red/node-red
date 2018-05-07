@@ -43,7 +43,7 @@ RED.workspaces = (function() {
         return ws;
     }
     function deleteWorkspace(ws) {
-        if (workspace_tabs.count() == 1) {
+        if (workspaceTabCount === 1) {
             return;
         }
         removeWorkspace(ws);
@@ -65,7 +65,7 @@ RED.workspaces = (function() {
             buttons: [
                 {
                     id: "node-dialog-delete",
-                    class: 'leftButton'+((workspace_tabs.count() == 1)?" disabled":""),
+                    class: 'leftButton'+((workspaceTabCount === 1)?" disabled":""),
                     text: RED._("common.label.delete"), //'<i class="fa fa-trash"></i>',
                     click: function() {
                         deleteWorkspace(workspace);
@@ -214,6 +214,7 @@ RED.workspaces = (function() {
 
 
     var workspace_tabs;
+    var workspaceTabCount = 0;
     function createWorkspaceTabs() {
         workspace_tabs = RED.tabs.create({
             id: "workspace-tabs",
@@ -240,14 +241,26 @@ RED.workspaces = (function() {
                 }
             },
             onadd: function(tab) {
+                if (tab.type === "tab") {
+                    workspaceTabCount++;
+                }
                 $('<span class="workspace-disabled-icon"><i class="fa fa-ban"></i> </span>').prependTo("#red-ui-tab-"+(tab.id.replace(".","-"))+" .red-ui-tab-label");
                 if (tab.disabled) {
                     $("#red-ui-tab-"+(tab.id.replace(".","-"))).addClass('workspace-disabled');
                 }
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
+                RED.menu.setDisabled("menu-item-workspace-delete",workspaceTabCount <= 1);
+                if (workspaceTabCount === 1) {
+                    showWorkspace();
+                }
             },
             onremove: function(tab) {
-                RED.menu.setDisabled("menu-item-workspace-delete",workspace_tabs.count() == 1);
+                if (tab.type === "tab") {
+                    workspaceTabCount--;
+                }
+                RED.menu.setDisabled("menu-item-workspace-delete",workspaceTabCount <= 1);
+                if (workspaceTabCount === 0) {
+                    hideWorkspace();
+                }
             },
             onreorder: function(oldOrder, newOrder) {
                 RED.history.push({t:'reorder',order:oldOrder,dirty:RED.nodes.dirty()});
@@ -260,6 +273,17 @@ RED.workspaces = (function() {
                 addWorkspace();
             }
         });
+        workspaceTabCount = 0;
+    }
+    function showWorkspace() {
+        $("#workspace .red-ui-tabs").show()
+        $("#chart").show()
+        $("#workspace-footer").children().show()
+    }
+    function hideWorkspace() {
+        $("#workspace .red-ui-tabs").hide()
+        $("#chart").hide()
+        $("#workspace-footer").children().hide()
     }
 
     function init() {
@@ -280,6 +304,8 @@ RED.workspaces = (function() {
         RED.actions.add("core:add-flow",addWorkspace);
         RED.actions.add("core:edit-flow",editWorkspace);
         RED.actions.add("core:remove-flow",removeWorkspace);
+
+        hideWorkspace();
     }
 
     function editWorkspace(id) {
@@ -293,6 +319,9 @@ RED.workspaces = (function() {
             if (workspace_tabs.contains(ws.id)) {
                 workspace_tabs.removeTab(ws.id);
             }
+        }
+        if (ws.id === activeWorkspace) {
+            activeWorkspace = 0;
         }
     }
 
@@ -313,7 +342,7 @@ RED.workspaces = (function() {
             return workspace_tabs.contains(id);
         },
         count: function() {
-            return workspace_tabs.count();
+            return workspaceTabCount;
         },
         active: function() {
             return activeWorkspace

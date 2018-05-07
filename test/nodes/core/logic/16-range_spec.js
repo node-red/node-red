@@ -135,11 +135,13 @@ describe('range Node', function() {
             var sinon = require('sinon');
             sinon.stub(rangeNode1, 'log', function(log) {
                 if (log.indexOf("notnumber") > -1) {
+                    rangeNode1.log.restore();
                     done();
                 } else {
                     try {
                         should.fail(null, null, "Non-number inputs should be reported!");
                     } catch (err) {
+                        rangeNode1.log.restore();
                         done(err);
                     }
                 }

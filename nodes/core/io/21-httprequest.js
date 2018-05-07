@@ -108,6 +108,9 @@ module.exports = function(RED) {
                     }
                 }
             }
+            if (msg.hasOwnProperty('followRedirects')) {
+                opts.followRedirects = msg.followRedirects;
+                }
             if (msg.cookies) {
                 var cookies = [];
                 if (opts.headers.hasOwnProperty('cookie')) {
@@ -135,7 +138,7 @@ module.exports = function(RED) {
             }
             var payload = null;
 
-            if (typeof msg.payload !== "undefined") {
+            if (method !== 'GET' && method !== 'HEAD' && typeof msg.payload !== "undefined") {
                 if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
                     payload = msg.payload;
                 } else if (typeof msg.payload == "number") {
@@ -263,9 +266,8 @@ module.exports = function(RED) {
                                 catch(e) { node.warn(RED._("httpin.errors.json-error")); }
                             }
                         }
-
-                        node.send(msg);
                         node.status({});
+                        node.send(msg);
                     }
                 });
             });
@@ -280,8 +282,8 @@ module.exports = function(RED) {
                 node.error(err,msg);
                 msg.payload = err.toString() + " : " + url;
                 msg.statusCode = err.code;
-                node.send(msg);
                 node.status({fill:"red",shape:"ring",text:err.code});
+                node.send(msg);
             });
             if (payload) {
                 req.write(payload);

@@ -23,7 +23,7 @@ var Users = require("../../../../red/api/auth/users");
 var Tokens = require("../../../../red/api/auth/tokens");
 var Clients = require("../../../../red/api/auth/clients");
 
-describe("Auth strategies", function() {
+describe("api/auth/strategies", function() {
     before(function() {
         strategies.init({log:{audit:function(){}}})
     });

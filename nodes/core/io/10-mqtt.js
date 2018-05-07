@@ -36,6 +36,7 @@ module.exports = function(RED) {
         this.port = n.port;
         this.clientid = n.clientid;
         this.usetls = n.usetls;
+        this.usews = n.usews;
         this.verifyservercert = n.verifyservercert;
         this.compatmode = n.compatmode;
         this.keepalive = n.keepalive;
@@ -69,6 +70,9 @@ module.exports = function(RED) {
         if (typeof this.usetls === 'undefined') {
             this.usetls = false;
         }
+        if (typeof this.usews === 'undefined') {
+            this.usews = false;
+        }
         if (typeof this.compatmode === 'undefined') {
             this.compatmode = true;
         }
@@ -86,15 +90,27 @@ module.exports = function(RED) {
 
         // Create the URL to pass in to the MQTT.js library
         if (this.brokerurl === "") {
-            if (this.usetls) {
-                this.brokerurl="mqtts://";
+            // if the broker may be ws:// or wss:// or even tcp://
+            if (this.broker.indexOf("://") > -1) {
+                this.brokerurl = this.broker;
             } else {
-                this.brokerurl="mqtt://";
-            }
-            if (this.broker !== "") {
-                this.brokerurl = this.brokerurl+this.broker+":"+this.port;
-            } else {
-                this.brokerurl = this.brokerurl+"localhost:1883";
+                // construct the std mqtt:// url
+                if (this.usetls) {
+                    this.brokerurl="mqtts://";
+                } else {
+                    this.brokerurl="mqtt://";
+                }
+                if (this.broker !== "") {
+                    this.brokerurl = this.brokerurl+this.broker+":";
+                    // port now defaults to 1883 if unset.
+                    if (!this.port){
+                        this.brokerurl = this.brokerurl+"1883";
+                    } else {
+                        this.brokerurl = this.brokerurl+this.port;
+                    }
+                } else {
+                    this.brokerurl = this.brokerurl+"localhost:1883";
+                }
             }
         }
 
@@ -120,6 +136,8 @@ module.exports = function(RED) {
                 tlsNode.addTLSOptions(this.options);
             }
         }
+        // console.log(this.brokerurl,this.options);
+
         // If there's no rejectUnauthorized already, then this could be an
         // old config where this option was provided on the broker node and
         // not the tls node
@@ -166,71 +184,71 @@ module.exports = function(RED) {
         this.connect = function () {
             if (!node.connected && !node.connecting) {
                 node.connecting = true;
-                node.client = mqtt.connect(node.brokerurl ,node.options);
-                node.client.setMaxListeners(0);
-                // Register successful connect or reconnect handler
-                node.client.on('connect', function () {
-                    node.connecting = false;
-                    node.connected = true;
-                    node.log(RED._("mqtt.state.connected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
-                    for (var id in node.users) {
-                        if (node.users.hasOwnProperty(id)) {
-                            node.users[id].status({fill:"green",shape:"dot",text:"node-red:common.status.connected"});
-                        }
-                    }
-                    // Remove any existing listeners before resubscribing to avoid duplicates in the event of a re-connection
-                    node.client.removeAllListeners('message');
-
-                    // Re-subscribe to stored topics
-                    for (var s in node.subscriptions) {
-                        if (node.subscriptions.hasOwnProperty(s)) {
-                            var topic = s;
-                            var qos = 0;
-                            for (var r in node.subscriptions[s]) {
-                                if (node.subscriptions[s].hasOwnProperty(r)) {
-                                    qos = Math.max(qos,node.subscriptions[s][r].qos);
-                                    node.client.on('message',node.subscriptions[s][r].handler);
-                                }
-                            }
-                            var options = {qos: qos};
-                            node.client.subscribe(topic, options);
-                        }
-                    }
-
-                    // Send any birth message
-                    if (node.birthMessage) {
-                        node.publish(node.birthMessage);
-                    }
-                });
-                node.client.on("reconnect", function() {
-                    for (var id in node.users) {
-                        if (node.users.hasOwnProperty(id)) {
-                            node.users[id].status({fill:"yellow",shape:"ring",text:"node-red:common.status.connecting"});
-                        }
-                    }
-                })
-                // Register disconnect handlers
-                node.client.on('close', function () {
-                    if (node.connected) {
-                        node.connected = false;
-                        node.log(RED._("mqtt.state.disconnected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
+                try {
+                    node.client = mqtt.connect(node.brokerurl ,node.options);
+                    node.client.setMaxListeners(0);
+                    // Register successful connect or reconnect handler
+                    node.client.on('connect', function () {
+                        node.connecting = false;
+                        node.connected = true;
+                        node.log(RED._("mqtt.state.connected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
                         for (var id in node.users) {
                             if (node.users.hasOwnProperty(id)) {
-                                node.users[id].status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
+                                node.users[id].status({fill:"green",shape:"dot",text:"node-red:common.status.connected"});
                             }
                         }
-                    } else if (node.connecting) {
-                        node.log(RED._("mqtt.state.connect-failed",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
-                    }
-                });
+                        // Remove any existing listeners before resubscribing to avoid duplicates in the event of a re-connection
+                        node.client.removeAllListeners('message');
 
-                // Register connect error handler
-                node.client.on('error', function (error) {
-                    if (node.connecting) {
-                        node.client.end();
-                        node.connecting = false;
-                    }
-                });
+                        // Re-subscribe to stored topics
+                        for (var s in node.subscriptions) {
+                            if (node.subscriptions.hasOwnProperty(s)) {
+                                var topic = s;
+                                var qos = 0;
+                                for (var r in node.subscriptions[s]) {
+                                    if (node.subscriptions[s].hasOwnProperty(r)) {
+                                        qos = Math.max(qos,node.subscriptions[s][r].qos);
+                                        node.client.on('message',node.subscriptions[s][r].handler);
+                                    }
+                                }
+                                var options = {qos: qos};
+                                node.client.subscribe(topic, options);
+                            }
+                        }
+
+                        // Send any birth message
+                        if (node.birthMessage) {
+                            node.publish(node.birthMessage);
+                        }
+                    });
+                    node.client.on("reconnect", function() {
+                        for (var id in node.users) {
+                            if (node.users.hasOwnProperty(id)) {
+                                node.users[id].status({fill:"yellow",shape:"ring",text:"node-red:common.status.connecting"});
+                            }
+                        }
+                    })
+                    // Register disconnect handlers
+                    node.client.on('close', function () {
+                        if (node.connected) {
+                            node.connected = false;
+                            node.log(RED._("mqtt.state.disconnected",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
+                            for (var id in node.users) {
+                                if (node.users.hasOwnProperty(id)) {
+                                    node.users[id].status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
+                                }
+                            }
+                        } else if (node.connecting) {
+                            node.log(RED._("mqtt.state.connect-failed",{broker:(node.clientid?node.clientid+"@":"")+node.brokerurl}));
+                        }
+                    });
+
+                    // Register connect error handler
+                    // The client's own reconnect logic will take care of errors
+                    node.client.on('error', function (error) {});
+                }catch(err) {
+                    console.log(err);
+                }
             }
         };
 
@@ -275,7 +293,9 @@ module.exports = function(RED) {
 
         this.publish = function (msg) {
             if (node.connected) {
-                if (!Buffer.isBuffer(msg.payload)) {
+                if (msg.payload === null || msg.payload === undefined) {
+                    msg.payload = "";
+                } else if (!Buffer.isBuffer(msg.payload)) {
                     if (typeof msg.payload === "object") {
                         msg.payload = JSON.stringify(msg.payload);
                     } else if (typeof msg.payload !== "string") {

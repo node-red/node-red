@@ -17,6 +17,8 @@
 module.exports = function(RED) {
     "use strict";
     var mustache = require("mustache");
+    var yaml = require("js-yaml");
+
 
     /**
      * Custom Mustache Context capable to resolve message property and node
@@ -48,6 +50,7 @@ module.exports = function(RED) {
 
             // try node context:
             var dot = name.indexOf(".");
+            /* istanbul ignore else  */
             if (dot > 0) {
                 var contextName = name.substr(0, dot);
                 var variableName = name.substr(dot + 1);
@@ -59,7 +62,8 @@ module.exports = function(RED) {
                     return this.nodeContext.global.get(variableName);
                 }
             }
-        }catch(err) {
+        }
+        catch(err) {
             throw err;
         }
     }
@@ -81,17 +85,33 @@ module.exports = function(RED) {
         node.on("input", function(msg) {
             try {
                 var value;
+                /***
+                * Allow template contents to be defined externally
+                * through inbound msg.template IFF node.template empty
+                */
+                var template = node.template;
+                if (msg.hasOwnProperty("template")) {
+                    if (template == "" || template === null) {
+                        template = msg.template;
+                    }
+                }
+
                 if (node.syntax === "mustache") {
                     if (node.outputFormat === "json") {
-                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, true));
+                        value = mustache.render(template,new NodeContext(msg, node.context(), null, true));
                     } else {
-                        value = mustache.render(node.template,new NodeContext(msg, node.context(), null, false));
+                        value = mustache.render(template,new NodeContext(msg, node.context(), null, false));
                     }
                 } else {
-                    value = node.template;
+                    value = template;
                 }
+                /* istanbul ignore else  */
                 if (node.outputFormat === "json") {
                     value = JSON.parse(value);
+                }
+                /* istanbul ignore else  */
+                if (node.outputFormat === "yaml") {
+                    value = yaml.load(value);
                 }
 
                 if (node.fieldType === 'msg') {
@@ -102,7 +122,8 @@ module.exports = function(RED) {
                     node.context().global.set(node.field,value);
                 }
                 node.send(msg);
-            } catch(err) {
+            }
+            catch(err) {
                 node.error(err.message);
             }
         });

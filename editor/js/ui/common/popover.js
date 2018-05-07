@@ -23,7 +23,7 @@ RED.popover = (function() {
         },
         "small": {
             top: 5,
-            leftRight: 8,
+            leftRight: 17,
             leftLeft: 16
         }
     }
@@ -33,6 +33,7 @@ RED.popover = (function() {
         var trigger = options.trigger;
         var content = options.content;
         var delay = options.delay;
+        var autoClose = options.autoClose;
         var width = options.width||"auto";
         var size = options.size||"default";
         if (!deltaSizes[size]) {
@@ -43,7 +44,7 @@ RED.popover = (function() {
         var active;
         var div;
 
-        var openPopup = function() {
+        var openPopup = function(instant) {
             if (active) {
                 div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>').appendTo("body");
                 if (size !== "default") {
@@ -62,7 +63,6 @@ RED.popover = (function() {
                 var targetPos = target.offset();
                 var targetWidth = target.width();
                 var targetHeight = target.height();
-
                 var divHeight = div.height();
                 var divWidth = div.width();
                 if (direction === 'right') {
@@ -70,23 +70,29 @@ RED.popover = (function() {
                 } else if (direction === 'left') {
                     div.css({top: targetPos.top+targetHeight/2-divHeight/2-deltaSizes[size].top,left:targetPos.left-deltaSizes[size].leftLeft-divWidth});
                 }
-
-                div.fadeIn("fast");
+                if (instant) {
+                    div.show();
+                } else {
+                    div.fadeIn("fast");
+                }
             }
         }
-        var closePopup = function() {
+        var closePopup = function(instant) {
             if (!active) {
                 if (div) {
-                    div.fadeOut("fast",function() {
+                    if (instant) {
                         $(this).remove();
-                    });
+                    } else {
+                        div.fadeOut("fast",function() {
+                            $(this).remove();
+                        });
+                    }
                     div = null;
                 }
             }
         }
 
         if (trigger === 'hover') {
-
             target.on('mouseenter',function(e) {
                 clearTimeout(timer);
                 active = true;
@@ -110,18 +116,26 @@ RED.popover = (function() {
                     openPopup();
                 }
             });
+        } else if (autoClose) {
+            setTimeout(function() {
+                active = false;
+                closePopup();
+            },autoClose);
         }
         var res = {
             setContent: function(_content) {
                 content = _content;
+                return res;
             },
-            open: function () {
+            open: function (instant) {
                 active = true;
-                openPopup();
+                openPopup(instant);
+                return res;
             },
-            close: function () {
+            close: function (instant) {
                 active = false;
-                closePopup();
+                closePopup(instant);
+                return res;
             }
         }
         return res;

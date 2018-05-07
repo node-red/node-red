@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="websocket in">
+    <p>WebSocket入力ノード</p>
+    <p>デフォルトでは、WebSocketにより受信したデータは<code>msg.payload</code>に格納します。ソケットはJSON形式の文字列を待ち受けるように設定することができます。JSON形式の文字列を受け付けると、オブジェクトへの変換を行い、メッセージ全体として送信します。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket out">
+    <p>WebSocket出力ノード</p>
+    <p>デフォルトでは、<code>msg.payload</code>をWebSocket経由で送信します。ソケットは<code>msg</code>全体をJSON文字列にエンコードしてWebSocketを介して送信することもできます。</p>
+
+    <p>このノードが受信したメッセージがWebSocket Inノードが生成したものである場合、メッセージはフローを起動したクライアントに送り返されます。それ以外の場合、メッセージは接続している全てのクライアントにブロードキャストされます。</p>
+    <p>WebSocket Inノードが生成したメッセージをブロードキャストしたい場合には、フロー中で<code>msg._session</code>プロパティを削除します。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-listener">
+    <p>この設定ノードはパスを指定してWebSocketサーバのエンドポイントを作成します。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-client">
+    <p>この設定ノードは指定したURLにWebSocketクライアントを接続します。</p>
+</script>

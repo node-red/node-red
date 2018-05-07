@@ -75,7 +75,7 @@
     <p>The node will listen on the configured path for requests of a particular type.
        The path can be fully specified, such as <code>/user</code>, or include
        named parameters that accept any value, such as <code>/user/:name</code>.
-       When named parameters are used, their actual value in a request can be accessed under `msg.req.params`.</p>
+       When named parameters are used, their actual value in a request can be accessed under <code>msg.req.params</code>.</p>
     <p>For requests that include a body, such as a POST or PUT, the contents of
        the request is made available as <code>msg.payload</code>.</p>
     <p>If the content type of the request can be determined, the body will be parsed to
@@ -248,11 +248,14 @@ msg.cookies = {
             function resizeRule(rule) {
                 var newWidth = rule.width();
                 rule.find('.red-ui-typedInput').typedInput("width",(newWidth-15)/2);
-
             }
             var headerList = $("#node-input-headers-container").css('min-height','150px').css('min-width','450px').editableList({
                 addItem: function(container,i,header) {
-                    var row = $('<div/>').appendTo(container);
+                    var row = $('<div/>').css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    }).appendTo(container);
+
                     var propertyName = $('<input/>',{class:"node-input-header-name",type:"text"})
                         .appendTo(row)
                         .typedInput({types:headerTypes});

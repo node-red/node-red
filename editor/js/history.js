@@ -191,7 +191,7 @@ RED.history = (function() {
             } else if (ev.t == "edit") {
                 for (i in ev.changes) {
                     if (ev.changes.hasOwnProperty(i)) {
-                        if (ev.node._def.defaults[i] && ev.node._def.defaults[i].type) {
+                        if (ev.node._def.defaults && ev.node._def.defaults[i] && ev.node._def.defaults[i].type) {
                             // This is a config node property
                             var currentConfigNode = RED.nodes.node(ev.node[i]);
                             if (currentConfigNode) {
@@ -229,10 +229,12 @@ RED.history = (function() {
                             }
                         });
                     }
+                    RED.editor.validateNode(ev.node);
                     RED.nodes.filterNodes({type:"subflow:"+ev.node.id}).forEach(function(n) {
                         n.inputs = ev.node.in.length;
                         n.outputs = ev.node.out.length;
                         RED.editor.updateNodeProperties(n);
+                        RED.editor.validateNode(n);
                     });
                 } else {
                     var outputMap;
@@ -321,6 +323,9 @@ RED.history = (function() {
         },
         peek: function() {
             return undo_history[undo_history.length-1];
+        },
+        clear: function() {
+            undo_history = [];
         }
     }
 

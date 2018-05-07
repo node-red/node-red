@@ -20,29 +20,40 @@ module.exports = function(RED) {
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
         this.indent = n.pretty ? 4 : 0;
+        this.action = n.action||"";
+        this.property = n.property||"payload";
         var node = this;
         this.on("input", function(msg) {
-            if (msg.hasOwnProperty("payload")) {
-                if (typeof msg.payload === "string") {
-                    try {
-                        msg.payload = JSON.parse(msg.payload);
-                        node.send(msg);
-                    }
-                    catch(e) { node.error(e.message,msg); }
-                }
-                else if (typeof msg.payload === "object") {
-                    if (!Buffer.isBuffer(msg.payload)) {
+            var value = RED.util.getMessageProperty(msg,node.property);
+            if (value !== undefined) {
+                if (typeof value === "string") {
+                    if (node.action === "" || node.action === "obj") {
                         try {
-                            msg.payload = JSON.stringify(msg.payload,null,node.indent);
+                            RED.util.setMessageProperty(msg,node.property,JSON.parse(value));
                             node.send(msg);
                         }
-                        catch(e) { node.error(RED._("json.errors.dropped-error")); }
+                        catch(e) { node.error(e.message,msg); }
+                    } else {
+                        node.send(msg);
                     }
-                    else { node.warn(RED._("json.errors.dropped-object")); }
+                }
+                else if (typeof value === "object") {
+                    if (node.action === "" || node.action === "str") {
+                        if (!Buffer.isBuffer(value)) {
+                            try {
+                                RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
+                                node.send(msg);
+                            }
+                            catch(e) { node.error(RED._("json.errors.dropped-error")); }
+                        }
+                        else { node.warn(RED._("json.errors.dropped-object")); }
+                    } else {
+                        node.send(msg);
+                    }
                 }
                 else { node.warn(RED._("json.errors.dropped")); }
             }
-            else { node.send(msg); } // If no payload - just pass it on.
+            else { node.send(msg); } // If no property - just pass it on.
         });
     }
     RED.nodes.registerType("json",JSONNode);

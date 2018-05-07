@@ -142,9 +142,9 @@ module.exports = function(RED) {
             var limit = 1;
             if (node.out === "pwm") { limit = 100; }
             if ((out >= 0) && (out <= limit)) {
-                if (RED.settings.verbose) { node.log("out: "+msg.payload); }
+                if (RED.settings.verbose) { node.log("out: "+out); }
                 if (node.child !== null) {
-                    node.child.stdin.write(msg.payload+"\n");
+                    node.child.stdin.write(out+"\n");
                     node.status({fill:"green",shape:"dot",text:msg.payload.toString()});
                 }
                 else {

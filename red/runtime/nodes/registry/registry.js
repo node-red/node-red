@@ -69,7 +69,7 @@ function filterNodeInfo(n) {
         r.module = n.module;
     }
     if (n.hasOwnProperty("err")) {
-        r.err = n.err.toString();
+        r.err = n.err;
     }
     return r;
 }
@@ -184,8 +184,22 @@ function loadNodeConfigs() {
 function addNodeSet(id,set,version) {
     if (!set.err) {
         set.types.forEach(function(t) {
-            nodeTypeToId[t] = id;
+            if (nodeTypeToId.hasOwnProperty(t)) {
+                set.err = new Error("Type already registered");
+                set.err.code = "type_already_registered";
+                set.err.details = {
+                    type: t,
+                    moduleA: getNodeInfo(t).module,
+                    moduleB: set.module
+                }
+
+            }
         });
+        if (!set.err) {
+            set.types.forEach(function(t) {
+                nodeTypeToId[t] = id;
+            });
+        }
     }
     moduleNodes[set.module] = moduleNodes[set.module]||[];
     moduleNodes[set.module].push(set.name);
@@ -579,6 +593,25 @@ var defaultIcon = path.resolve(__dirname + '/../../../../public/icons/arrow-in.p
 function nodeIconDir(dir) {
     icon_paths[dir.name] = icon_paths[dir.name] || [];
     icon_paths[dir.name].push(path.resolve(dir.path));
+
+    if (dir.icons) {
+        if (!moduleConfigs[dir.name]) {
+            moduleConfigs[dir.name] = {
+                name: dir.name,
+                nodes: {},
+                icons: []
+            };
+        }
+        var module = moduleConfigs[dir.name];
+        if (module.icons === undefined) {
+            module.icons = [];
+        }
+        dir.icons.forEach(function(icon) {
+            if (module.icons.indexOf(icon) === -1) {
+                module.icons.push(icon);
+            }
+        });
+    }
 }
 
 function getNodeIconPath(module,icon) {
@@ -607,6 +640,20 @@ function getNodeIconPath(module,icon) {
     }
 }
 
+function getNodeIcons() {
+    var iconList = {};
+
+    for (var module in moduleConfigs) {
+        if (moduleConfigs.hasOwnProperty(module)) {
+            if (moduleConfigs[module].icons) {
+                iconList[module] = moduleConfigs[module].icons;
+            }
+        }
+    }
+
+    return iconList;
+}
+
 var registry = module.exports = {
     init: init,
     load: load,
@@ -629,6 +676,7 @@ var registry = module.exports = {
     getModuleInfo: getModuleInfo,
 
     getNodeIconPath: getNodeIconPath,
+    getNodeIcons: getNodeIcons,
     /**
      * Gets all of the node template configs
      * @return all of the node templates in a single string

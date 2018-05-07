@@ -1,0 +1,218 @@
+{
+    "$string": {
+        "args": "arg",
+        "desc": "通过以下的类型转换规则将参数*arg*转换成字符串:\n\n - 字符串不转换。\n -函数转换成空的字符串。\n - JSON的值无法用数字表示所以用无限大或者NaN（非数）表示。\n - 用’JSON.stringify’函数将其他值转换成JSON字符串。"
+    },
+    "$length": {
+        "args": "str",
+        "desc": "输出字符串’str’的字数。如果’str’不是字符串，抛出错误。"
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "输出`start`位置后的的首次出现的包括`str`的子字符串。 如果`length`被指定，那么的字符串中将只包括前`length`个文字。如果`start`是负数则输出从`str`末尾开始的`length`个文字"
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "输出’str’中首次出现的’chars’之前的子字符串，如果’str’中不包括’chars’则输出’str’。"
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "输出’str’中首次出现的’chars’之后的子字符串，如果’str’中不包括’chars’则输出’str’。"
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "`将’str’中的所有字母变为大写后输出。"
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "将’str’中的所有字母变为小写后输出。"
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "将以下步骤应用于`str`来去除所有空白文字并实现标准化。\n\n – 将全部tab制表符、回车键、换行字符用空白代替。\n- 将连续的空白文字变成一个空白文字。\n- 消除开头和末尾的空白文字。\n\n如果`str`没有被指定(即在无输入参数的情况下调用本函数)，将上下文的值作为`str`来使用。 如果`str` 不是字符串则抛出错误。"
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "字符串`str` 和 `pattern`匹配的话输出`true`，不匹配的情况下输出 `false`。 不指定`str`的情况下(比如用一个参数调用本函数时)、将上下文的值作为`str`来使用。参数 `pattern`可以为字符串或正则表达。"
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "将参数`str`分解成由子字符串组成的数组。 如果`str`不是字符串抛出错误。可以省略的参数 `separator`中指定字符串`str`的分隔符。分隔符可以是文字或正则表达式。在不指定`separator`的情况下、将分隔符看作空的字符串并把`str`拆分成由单个字母组成的数组。如果`separator`不是字符串则抛出错误。在可省略的参数`limit`中指定分割后的子字符串的最大个数。超出个数的子字符串将被舍弃。如果`limit`没有被指定，`str` 将不考虑子字符串的个数而将字符串完全分隔。如果`limit`是负数则抛出错误。"
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "用可以省略的参数 `separator`来把多个字符串连接。如果`array`不是字符串则抛出错误。 如果没有指定`separator`，则用空字符串来连接字符(即字符串之间没有`separator`)。 如果`separator`不是字符则抛出错误。"
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "对字符串`str`使用正则表达式`pattern`并输出与`str`相匹配的部分信息。"
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "在字符串`str`中搜索`pattern`并用`replacement`来替换。\n\n可选参数`limit`用来指定替换次数的上限。"
+    },
+    "$now": {
+        "args": "",
+        "desc": "生成ISO 8601互換格式的时刻，并作为字符串输出。"
+    },
+    "$base64encode": {
+        "args": "string",
+        "desc": "将ASCII格式的字符串转换为Base 64格式。将字符串中的文字视作二进制形式的数据处理。包含URI编码在内的字符串文字必须在0x00到0xFF的范围内，否则不会被支持。"
+    },
+    "$base64decode": {
+        "args": "string",
+        "desc": "用UTF-8代码页将Base 64形式二进制值转换为字符串。"
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "用下述的规则将参数 `arg`转换为数值。:\n\n – 数值不做转换。\n – 将字符串中合法的JSON数値表示转换成数値。\n – 其他形式的值则抛出错误。"
+    },
+    "$abs": {
+        "args": "number",
+        "desc": "输出参数`number`的绝对值。"
+    },
+    "$floor": {
+        "args": "number",
+        "desc": "输出比`number`的值小的最大整数。"
+    },
+    "$ceil": {
+        "args": "number",
+        "desc": "输出比`number`的值大的最小整数。"
+    },
+    "$round": {
+        "args": "number [, precision]",
+        "desc": "输出四舍五入后的参数`number`。可省略的参数 `precision`指定四舍五入后小数点下的位数。"
+    },
+    "$power": {
+        "args": "base, exponent",
+        "desc": "输出底数`base`的`exponent`次幂。"
+    },
+    "$sqrt": {
+        "args": "number",
+        "desc": "输出参数 `number`的平方根。"
+    },
+    "$random": {
+        "args": "",
+        "desc": "输出比0大，比1小的伪随机数。"
+    },
+    "$millis": {
+        "args": "",
+        "desc": "返回从UNIX时间 (1970年1月1日 UTC/GMT的午夜）开始到现在的毫秒数。在同一个表达式的测试中所有对`$millis()`的调用将会返回相同的值。"
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "输出数组`array`的总和。如果`array`不是数值则抛出错误。"
+    },
+    "$max": {
+        "args": "array",
+        "desc": "输出数组`array`的最大值。如果`array`不是数值则抛出错误。"
+    },
+    "$min": {
+        "args": "array",
+        "desc": "输出数组`array`的最小值。如果`array`不是数值则抛出错误。。"
+    },
+    "$average": {
+        "args": "array",
+        "desc": "输出数组`array`的平均数。如果`array`不是数值则抛出错误。。"
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "用下述规则将数据转换成布尔值。:\n\n - 不转换布尔值`Boolean`。\n – 将空的字符串`string`转换为`false`\n – 将不为空的字符串`string`转换为`true`\n – 将为0的数字`number`转换成`false`\n –将不为0的数字`number`转换成`true`\n –将`null`转换成`false`\n –将空的数组`array`转换成`false`\n –如果数组`array`中含有可以转换成`true`的要素则转换成`true`\n –如果`array`中没有可转换成`true`的要素则转换成`false`\n – 空的对象`object`转换成`false`\n – 非空的对象`object`转换成`true`\n –将函数`function`转换成`false`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "输出做取反运算后的布尔值。首先将`arg`转换为布尔值。"
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "如果算式`arg`的值存在则输出`true`。如果算式的值不存在(比如指向不存在区域的引用)则输出`false`。"
+    },
+    "$count": {
+        "args": "array",
+        "desc": "输出数组中的元素数。"
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "将两个数组连接。"
+    },
+    "$sort": {
+        "args": "array [, function]",
+        "desc": "输出排序后的数组`array`。\n\n如果使用了比较函数`function`，则下述两个参数需要被指定。\n\n`function(left, right)`\n\n该比较函数是为了比较left和right两个值而被排序算法调用的。如果用户希望left的值被置于right的值之后，那么该函数必须输出布尔值`true`来表示位置交换。而在不需要位置交换时函数必须输出`false`。"
+    },
+    "$reverse": {
+        "args": "array",
+        "desc": "输出倒序后的数组`array`。"
+    },
+    "$shuffle": {
+        "args": "array",
+        "desc": "输出随机排序后的数组 `array`。"
+    },
+    "$zip": {
+        "args": "array, ...",
+        "desc": "将数组中的值按索引顺序打包后输出。"
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "输出由对象内的键组成的数组。如果参数是对象的数组则输出由所有对象中的键去重后组成的队列。"
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "输出对象中与参数`key`对应的值。如果第一个参数`object`是数组，那么数组中所有的对象都将被搜索并输出这些对象中与参数`key`对应的值。"
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "将对象中的键值对分隔成每个要素中只含有一个键值对的数组。如果参数`object`是数组，那么返回值的数组中包含所有对象中的键值对。"
+    },
+    "$merge": {
+        "args": "array&lt;object&gt;",
+        "desc": "将输入数组`objects`中所有的键值对合并到一个`object`中并返回。如果输入数组的要素中含有重复的键，则返回的`object`中将只包含数组中最后出现要素的值。如果输入数组中包括对象以外的元素，则抛出错误。"
+    },
+    "$sift": {
+        "args": "object, function",
+        "desc": "输出参数`object`中符合`function`的键值对。\n\n`function`必须含有下述参数。\n\n`function(value [, key [, object]])`"
+    },
+    "$each": {
+        "args": "object, function",
+        "desc": "将函数`function`应用于`object`中的所有键值对并输出由所有返回值组成的数组。"
+    },
+    "$map": {
+        "args": "array, function",
+        "desc": "将函数`function`应用于数组`array`中所有的值并输出由返回值组成的数组。\n\n`function`中必须含有下述参数。\n\n`function(value [, index [, array]])`"
+    },
+    "$filter": {
+        "args": "array, function",
+        "desc": "输出数组`array`中符合函数`function`条件的值组成的数组。\n\n`function`必须包括下述参数。\n\n`function(value [, index [, array]])`"
+    },
+    "$reduce": {
+        "args": "array, function [, init]",
+        "desc": "将`function`依次应用于数组中的各要素值。 其中，前一个要素值的计算结果将参与到下一次的函数运算中。。\n\n函数`function`接受两个参数并作为中缀表示法中的操作符。\n\n可省略的参数`init`将作为运算的初始值。"
+    },
+    "$flowContext": {
+        "args": "string",
+        "desc": "获取流上下文(流等级的上下文，可以让所有节点共享)的属性。"
+    },
+    "$globalContext": {
+        "args": "string",
+        "desc": "获取全局上下文的属性。"
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "根据需要，向字符串`string`的副本中填充文字使该字符串的字数达到`width`的绝对值并返回填充文字后的字符串。\n\n如果`width`的值为正，则向字符串`string`的右侧填充文字，如果`width`为负，则向字符串`string`的左侧填充文字。\n\n可选参数`char`用来指定填充的文字。如果未指定该参数，则填充空白文字。"
+    },
+    "$fromMillis": {
+        "args": "number",
+        "desc": "将表示从UNIX时间 (1970年1月1日 UTC/GMT的午夜）开始到现在的毫秒数的数值转换成ISO 8601形式时间戳的字符串。"
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "将`number`转换成具有`picture`所指定的数值格式的字符串。\n\n此函数的功能与XPath F&O 3.1规格中定义的XPath/XQuery函数的fn:format-number功能相一致。参数`picture`用于指定数值的转换格式，其语法与fn:format-number中的定义一致。\n\n可选的第三参数`options`用来覆盖默认的局部环境格式，如小数点分隔符。如果指定该参数，那么该参数必须是包含name/value对的对象，并且name/value对必须符合XPath F&O 3.1规格中记述的数值格式。"
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "将`number`变换为以参数`radix`的值为基数形式的字符串。如果不指定`radix`的值，则默认基数为10。指定的`radix`值必须在2～36之间，否则抛出错误。"
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "将ISO 8601格式的字符串`timestamp`转换为从UNIX时间 (1970年1月1日 UTC/GMT的午夜）开始到现在的毫秒数。如果该字符串的格式不正确，则抛出错误。"
+    }
+}

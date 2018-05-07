@@ -17,11 +17,31 @@
 RED.stack = (function() {
     function createStack(options) {
         var container = options.container;
-
+        container.addClass("red-ui-stack");
+        var contentHeight = 0;
         var entries = [];
 
         var visible = true;
+        // TODO: make this a singleton function - and watch out for stacks no longer
+        //       in the DOM
+        var resizeStack = function() {
+            if (entries.length > 0) {
+                var headerHeight = 0;
+                entries.forEach(function(entry) {
+                    headerHeight += entry.header.outerHeight();
+                });
 
+                var height = container.innerHeight();
+                contentHeight = height - headerHeight - (entries.length-1);
+                entries.forEach(function(e) {
+                    e.contentWrap.height(contentHeight);
+                });
+            }
+        }
+        if (options.fill && options.singleExpanded) {
+            $(window).resize(resizeStack);
+            $(window).focus(resizeStack);
+        }
         return {
             add: function(entry) {
                 entries.push(entry);
@@ -30,7 +50,12 @@ RED.stack = (function() {
                     entry.container.hide();
                 }
                 var header = $('<div class="palette-header"></div>').appendTo(entry.container);
-                entry.content = $('<div></div>').appendTo(entry.container);
+                entry.header = header;
+                entry.contentWrap = $('<div></div>',{style:"position:relative"}).appendTo(entry.container);
+                if (options.fill) {
+                    entry.contentWrap.css("height",contentHeight);
+                }
+                entry.content = $('<div></div>').appendTo(entry.contentWrap);
                 if (entry.collapsible !== false) {
                     header.click(function() {
                         if (options.singleExpanded) {
@@ -49,11 +74,13 @@ RED.stack = (function() {
                     var icon = $('<i class="fa fa-angle-down"></i>').appendTo(header);
 
                     if (entry.expanded) {
+                        entry.container.addClass("palette-category-expanded");
                         icon.addClass("expanded");
                     } else {
-                        entry.content.hide();
+                        entry.contentWrap.hide();
                     }
                 } else {
+                    $('<i style="opacity: 0.5;" class="fa fa-angle-down expanded"></i>').appendTo(header);
                     header.css("cursor","default");
                 }
                 entry.title = $('<span></span>').html(entry.title).appendTo(header);
@@ -74,24 +101,35 @@ RED.stack = (function() {
                         if (entry.onexpand) {
                             entry.onexpand.call(entry);
                         }
+                        if (options.singleExpanded) {
+                            entries.forEach(function(e) {
+                                if (e !== entry) {
+                                    e.collapse();
+                                }
+                            })
+                        }
+
                         icon.addClass("expanded");
-                        entry.content.slideDown(200);
+                        entry.container.addClass("palette-category-expanded");
+                        entry.contentWrap.slideDown(200);
                         return true;
                     }
                 };
                 entry.collapse = function() {
                     if (entry.isExpanded()) {
                         icon.removeClass("expanded");
-                        entry.content.slideUp(200);
+                        entry.container.removeClass("palette-category-expanded");
+                        entry.contentWrap.slideUp(200);
                         return true;
                     }
                 };
                 entry.isExpanded = function() {
-                    return icon.hasClass("expanded");
+                    return entry.container.hasClass("palette-category-expanded");
                 };
-
+                if (options.fill && options.singleExpanded) {
+                    resizeStack();
+                }
                 return entry;
-
             },
 
             hide: function() {
@@ -108,9 +146,13 @@ RED.stack = (function() {
                     entry.container.show();
                 });
                 return this;
+            },
+            resize: function() {
+                if (resizeStack) {
+                    resizeStack();
+                }
             }
         }
-
     }
 
     return {

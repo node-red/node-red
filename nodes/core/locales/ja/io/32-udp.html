@@ -1,0 +1,28 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="udp in">
+    <p>UDP入力ノード。<code>msg.payload</code>にバッファ、文字列、もしくは、Base64エンコーディング文字列を生成します。マルチキャストをサポートしています。</p>
+    <p><code>msg.ip</code>と<code>msg.port</code>に受信したメッセージのIPアドレスとポートを設定します。</p>
+    <p><b>注</b>: 1024番より小さな番号のポートへのアクセス、ブロードキャストを行うにはrootもしくはadministrator権限が必要なシステムもあります。</p>
+</script>
+
+<script type="text/x-red" data-help-name="udp out">
+    <p><code>msg.payload</code>を指定したUDPのホストとポートに送信します。マルチキャストをサポートします。</p>
+    <p><code>msg.ip</code>と<code>msg.port</code>に接続先を設定できますが、ノード設定の方が優先されます。</p>
+    <p>ブロードキャストを行うには、アドレスをローカルブロードキャストIPアドレスに設定するか、グローバルブロードキャストアドレスである255.255.255.255を試してください。</p>
+    <p><b>注</b>: 1024番より小さな番号のポートへのアクセス、ブロードキャストを行うにはrootもしくはadministrator権限が必要なシステムもあります。</p>
+</script>

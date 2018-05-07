@@ -31,8 +31,48 @@ module.exports = function(RED) {
         'false': function(a) { return a === false; },
         'null': function(a) { return (typeof a == "undefined" || a === null); },
         'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
+        'istype': function(a, b) {
+            if (b === "array") { return Array.isArray(a); }
+            else if (b === "buffer") { return Buffer.isBuffer(a); }
+            else if (b === "json") {
+                try { JSON.parse(a); return true; }   // or maybe ??? a !== null; }
+                catch(e) { return false;}
+            }
+            else if (b === "null") { return a === null; }
+            else { return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null; }
+        },
+        'head': function(a, b, c, d, parts) {
+            var count = Number(b);
+            return (parts.index < count);
+        },
+        'tail': function(a, b, c, d, parts) {
+            var count = Number(b);
+            return (parts.count -count <= parts.index);
+        },
+        'index': function(a, b, c, d, parts) {
+            var min = Number(b);
+            var max = Number(c);
+            var index = parts.index;
+            return ((min <= index) && (index <= max));
+        },
+        'jsonata_exp': function(a, b) { return (b === true); },
         'else': function(a) { return a === true; }
     };
+
+    var _max_kept_msgs_count = undefined;
+
+    function max_kept_msgs_count(node) {
+        if (_max_kept_msgs_count === undefined) {
+            var name = "nodeMessageBufferMaxLength";
+            if (RED.settings.hasOwnProperty(name)) {
+                _max_kept_msgs_count = RED.settings[name];
+            }
+            else {
+                _max_kept_msgs_count = 0;
+            }
+        }
+        return _max_kept_msgs_count;
+    }
 
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
@@ -53,8 +93,11 @@ module.exports = function(RED) {
         this.previousValue = null;
         var node = this;
         var valid = true;
+        var repair = n.repair;
+        var needs_count = repair;
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
+            needs_count = needs_count || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
             if (!rule.vt) {
                 if (!isNaN(Number(rule.v))) {
                     rule.vt = 'num';
@@ -99,7 +142,137 @@ module.exports = function(RED) {
             return;
         }
 
-        this.on('input', function (msg) {
+        var pending_count = 0;
+        var pending_id = 0;
+        var pending_in = {};
+        var pending_out = {};
+        var received = {};
+
+        function add2group_in(id, msg, parts) {
+            if (!(id in pending_in)) {
+                pending_in[id] = {
+                    count: undefined,
+                    msgs: [],
+                    seq_no: pending_id++
+                };
+            }
+            var group = pending_in[id];
+            group.msgs.push(msg);
+            pending_count++;
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                clear_pending();
+                node.error(RED._("switch.errors.too-many"), msg);
+            }
+            if (parts.hasOwnProperty("count")) {
+                group.count = parts.count;
+            }
+            return group;
+        }
+
+        function del_group_in(id, group) {
+            pending_count -= group.msgs.length;
+            delete pending_in[id];
+        }
+
+        function add2pending_in(msg) {
+            var parts = msg.parts;
+            if (parts.hasOwnProperty("id") &&
+                parts.hasOwnProperty("index")) {
+                var group = add2group_in(parts.id, msg, parts);
+                var msgs = group.msgs;
+                var count = group.count;
+                if (count === msgs.length) {
+                    for (var i = 0; i < msgs.length; i++) {
+                        var msg = msgs[i];
+                        msg.parts.count = count;
+                        process_msg(msg, false);
+                    }
+                    del_group_in(parts.id, group);
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function send_group(onwards, port_count) {
+            var counts = new Array(port_count).fill(0);
+            for (var i = 0; i < onwards.length; i++) {
+                var onward = onwards[i];
+                for (var j = 0; j < port_count; j++) {
+                    counts[j] += (onward[j] !== null) ? 1 : 0
+                }
+            }
+            var ids = new Array(port_count);
+            for (var j = 0; j < port_count; j++) {
+                ids[j] = RED.util.generateId();
+            }
+            var ports = new Array(port_count);
+            var indexes = new Array(port_count).fill(0);
+            for (var i = 0; i < onwards.length; i++) {
+                var onward = onwards[i];
+                for (var j = 0; j < port_count; j++) {
+                    var msg = onward[j];
+                    if (msg) {
+                        var new_msg = RED.util.cloneMessage(msg);
+                        var parts = new_msg.parts;
+                        parts.id = ids[j];
+                        parts.index = indexes[j];
+                        parts.count = counts[j];
+                        ports[j] = new_msg;
+                        indexes[j]++;
+                    }
+                    else {
+                        ports[j] = null;
+                    }
+                }
+                node.send(ports);
+            }
+        }
+
+        function send2ports(onward, msg) {
+            var parts = msg.parts;
+            var gid = parts.id;
+            received[gid] = ((gid in received) ? received[gid] : 0) +1;
+            var send_ok = (received[gid] === parts.count);
+
+            if (!(gid in pending_out)) {
+                pending_out[gid] = {
+                    onwards: []
+                };
+            }
+            var group = pending_out[gid];
+            var onwards = group.onwards;
+            onwards.push(onward);
+            pending_count++;
+            if (send_ok) {
+                send_group(onwards, onward.length, msg);
+                pending_count -= onward.length;
+                delete pending_out[gid];
+                delete received[gid];
+            }
+            var max_msgs = max_kept_msgs_count(node);
+            if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                clear_pending();
+                node.error(RED._("switch.errors.too-many"), msg);
+            }
+        }
+
+        function msg_has_parts(msg) {
+            if (msg.hasOwnProperty("parts")) {
+                var parts = msg.parts;
+                return (parts.hasOwnProperty("id") &&
+                        parts.hasOwnProperty("index"));
+            }
+            return false;
+        }
+
+        function process_msg(msg, check_parts) {
+            var has_parts = msg_has_parts(msg);
+            if (needs_count && check_parts && has_parts &&
+                add2pending_in(msg)) {
+                return;
+            }
             var onward = [];
             try {
                 var prop;
@@ -117,11 +290,22 @@ module.exports = function(RED) {
                         v1 = node.previousValue;
                     } else if (rule.vt === 'jsonata') {
                         try {
-                            v1 = RED.util.evaluateJSONataExpression(rule.v,msg);
+                            var exp = rule.v;
+                            if (rule.t === 'jsonata_exp') {
+                                if (has_parts) {
+                                    exp.assign("I", msg.parts.index);
+                                    exp.assign("N", msg.parts.count);
+                                }
+                            }
+                            v1 = RED.util.evaluateJSONataExpression(exp,msg);
                         } catch(err) {
                             node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                             return;
                         }
+                    } else if (rule.vt === 'json') {
+                        v1 = "json";
+                    } else if (rule.vt === 'null') {
+                        v1 = "null";
                     } else {
                         try {
                             v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
@@ -147,7 +331,7 @@ module.exports = function(RED) {
                         }
                     }
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
-                    if (operators[rule.t](test,v1,v2,rule.case)) {
+                    if (operators[rule.t](test,v1,v2,rule.case,msg.parts)) {
                         onward.push(msg);
                         elseflag = false;
                         if (node.checkall == "false") { break; }
@@ -156,11 +340,33 @@ module.exports = function(RED) {
                     }
                 }
                 node.previousValue = prop;
-                this.send(onward);
+                if (!repair || !has_parts) {
+                    node.send(onward);
+                }
+                else {
+                    send2ports(onward, msg);
+                }
             } catch(err) {
                 node.warn(err);
             }
+        }
+
+        function clear_pending() {
+            pending_count = 0;
+            pending_id = 0;
+            pending_in = {};
+            pending_out = {};
+            received = {};
+        }
+
+        this.on('input', function(msg) {
+            process_msg(msg, true);
+        });
+
+        this.on('close', function() {
+            clear_pending();
         });
     }
+
     RED.nodes.registerType("switch", SwitchNode);
 }

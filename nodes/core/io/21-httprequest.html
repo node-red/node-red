@@ -85,6 +85,11 @@
         <dd>If set, can be used to send cookies with the request.</dd>
         <dt class="optional">payload</dt>
         <dd>Sent as the body of the request.</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>If set to <code>false</code>, allows requests to be made to https sites that use
+            self signed certificates.</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>If set to <code>false</code> prevent following Redirect (HTTP 301).<code>true</code> by default</dd>
     </dl>
     <h3>Outputs</h3>
     <dl class="message-properties">
@@ -114,7 +119,7 @@
     the response headers. The next node will then use those headers for its request - this
     is not usually the right thing to do. If <code>msg.headers</code> property is left unchanged
     between nodes, it will be ignored by the second node. To set custom headers, <code>msg.headers</code>
-    should first be deleted or reset to an empty object: `{}`.
+    should first be deleted or reset to an empty object: <code>{}</code>.
     <h4>Cookie handling</h4>
     <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
     The value can be either a string to set the value of the cookie or it can be an

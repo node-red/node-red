@@ -225,6 +225,12 @@ function log_helper(self, level, msg) {
         type: self.type,
         msg: msg
     };
+    if (self._alias) {
+        o._alias = self._alias;
+    }
+    if (self.z) {
+        o.z = self.z;
+    }
     if (self.name) {
         o.name = self.name;
     }

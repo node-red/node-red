@@ -24,11 +24,13 @@ module.exports = function(RED) {
         this.maxin = Number(n.maxin);
         this.minout = Number(n.minout);
         this.maxout = Number(n.maxout);
+        this.property = n.property||"payload";
         var node = this;
 
         this.on('input', function (msg) {
-            if (msg.hasOwnProperty("payload")) {
-                var n = Number(msg.payload);
+            var value = RED.util.getMessageProperty(msg,node.property);
+            if (value !== undefined) {
+                var n = Number(value);
                 if (!isNaN(n)) {
                     if (node.action == "clamp") {
                         if (n < node.minin) { n = node.minin; }
@@ -38,11 +40,12 @@ module.exports = function(RED) {
                         var divisor = node.maxin - node.minin;
                         n = ((n - node.minin) % divisor + divisor) % divisor + node.minin;
                     }
-                    msg.payload = ((n - node.minin) / (node.maxin - node.minin) * (node.maxout - node.minout)) + node.minout;
-                    if (node.round) { msg.payload = Math.round(msg.payload); }
+                    value = ((n - node.minin) / (node.maxin - node.minin) * (node.maxout - node.minout)) + node.minout;
+                    if (node.round) { value = Math.round(value); }
+                    RED.util.setMessageProperty(msg,node.property,value);
                     node.send(msg);
                 }
-                else { node.log(RED._("range.errors.notnumber")+": "+msg.payload); }
+                else { node.log(RED._("range.errors.notnumber")+": "+value); }
             }
             else { node.send(msg); } // If no payload - just pass it on.
         });

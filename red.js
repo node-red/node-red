@@ -167,7 +167,16 @@ if (settings.httpNodeRoot !== false) {
     settings.httpNodeAuth = settings.httpNodeAuth || settings.httpAuth;
 }
 
-settings.uiPort = parsedArgs.port||settings.uiPort||1880;
+// if we got a port from command line, use it (even if 0)
+// replicate (settings.uiPort = parsedArgs.port||settings.uiPort||1880;) but allow zero
+if (parsedArgs.port !== undefined){
+    settings.uiPort = parsedArgs.port;
+} else {
+    if (settings.uiPort === undefined){
+        settings.uiPort = 1880;
+    }
+}
+
 settings.uiHost = settings.uiHost||"0.0.0.0";
 
 if (flowFile) {
@@ -183,7 +192,7 @@ try {
     if (err.code == "unsupported_version") {
         console.log("Unsupported version of node.js:",process.version);
         console.log("Node-RED requires node.js v4 or later");
-    } else if  (err.code == "not_built") {
+    } else if (err.code == "not_built") {
         console.log("Node-RED has not been built. See README.md for details");
     } else {
         console.log("Failed to start server:");
@@ -261,9 +270,14 @@ if (settings.httpStatic) {
 }
 
 function getListenPath() {
+    var port = settings.serverPort;
+    if (port === undefined){
+        port = settings.uiPort;
+    }
+
     var listenPath = 'http'+(settings.https?'s':'')+'://'+
-                    (settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost)+
-                    ':'+settings.uiPort;
+                    (settings.uiHost == '::'?'localhost':(settings.uiHost == '0.0.0.0'?'127.0.0.1':settings.uiHost))+
+                    ':'+port;
     if (settings.httpAdminRoot !== false) {
         listenPath += settings.httpAdminRoot;
     } else if (settings.httpStatic) {
@@ -292,6 +306,7 @@ RED.start().then(function() {
             if (settings.httpAdminRoot === false) {
                 RED.log.info(RED.log._("server.admin-ui-disabled"));
             }
+            settings.serverPort = server.address().port;
             process.title = parsedArgs.title || 'node-red';
             RED.log.info(RED.log._("server.now-running", {listenpath:getListenPath()}));
         });
@@ -318,8 +333,7 @@ process.on('uncaughtException',function(err) {
 });
 
 process.on('SIGINT', function () {
-    RED.stop();
-    // TODO: need to allow nodes to close asynchronously before terminating the
-    // process - ie, promises
-    process.exit();
+    RED.stop().then(function() {
+        process.exit();
+    });
 });

@@ -28,6 +28,8 @@ module.exports = function(RED) {
         this.hdrin = n.hdrin || false;
         this.hdrout = n.hdrout || false;
         this.goodtmpl = true;
+        this.skip = parseInt(n.skip || 0);
+        this.store = [];
         var tmpwarn = true;
         var node = this;
 
@@ -72,6 +74,7 @@ module.exports = function(RED) {
                             }
                             else {
                                 if ((node.template.length === 1) && (node.template[0] === '')) {
+                                    /* istanbul ignore else */
                                     if (tmpwarn === true) { // just warn about missing template once
                                         node.warn(RED._("csv.errors.obj_csv"));
                                         tmpwarn = false;
@@ -133,16 +136,26 @@ module.exports = function(RED) {
                         var a = []; // output array is needed for multiline option
                         var first = true; // is this the first line
                         var line = msg.payload;
+                        var linecount = 0;
                         var tmp = "";
                         var reg = /^[-]?[0-9]*\.?[0-9]+$/;
+                        if (msg.hasOwnProperty("parts")) {
+                            linecount = msg.parts.index;
+                            if (msg.parts.index > node.skip) { first = false; }
+                        }
 
                         // For now we are just going to assume that any \r or \n means an end of line...
                         //   got to be a weird csv that has singleton \r \n in it for another reason...
 
                         // Now process the whole file/line
                         for (var i = 0; i < line.length; i++) {
+                            if (first && (linecount < node.skip)) {
+                                if (line[i] === "\n") { linecount += 1; }
+                                continue;
+                            }
                             if ((node.hdrin === true) && first) { // if the template is in the first line
-                                if ((line[i] === "\n")||(line[i] === "\r")) { // look for first line break
+                                if ((line[i] === "\n")||(line[i] === "\r")||(line.length - i === 1)) { // look for first line break
+                                    if (line.length - i === 1) { tmp += line[i]; }
                                     node.template = clean(tmp.split(node.sep));
                                     first = false;
                                 }
@@ -174,12 +187,7 @@ module.exports = function(RED) {
                                         o[node.template[j]] = k[j];
                                     }
                                     if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                                        if (node.multi === "one") {
-                                            var newMessage = RED.util.cloneMessage(msg);
-                                            newMessage.payload = o;
-                                            node.send(newMessage); // either send
-                                        }
-                                        else { a.push(o); } // or add to the array
+                                        a.push(o); // add to the array
                                     }
                                     j = 0;
                                     k = [""];
@@ -200,17 +208,50 @@ module.exports = function(RED) {
                             o[node.template[j]] = k[j];
                         }
                         if (JSON.stringify(o) !== "{}") { // don't send empty objects
-                            if (node.multi === "one") {
-                                var newMessage = RED.util.cloneMessage(msg);
-                                newMessage.payload = o;
-                                node.send(newMessage); // either send
-                            }
-                            else { a.push(o); } // or add to the aray
+                            a.push(o); // add to the array
                         }
+                        var has_parts = msg.hasOwnProperty("parts");
                         if (node.multi !== "one") {
                             msg.payload = a;
-                            node.send(msg); // finally send the array
+                            if (has_parts) {
+                                if (JSON.stringify(o) !== "{}") {
+                                    node.store.push(o);
+                                }
+                                if (msg.parts.index + 1 === msg.parts.count) {
+                                    msg.payload = node.store;
+                                    delete msg.parts;
+                                    node.send(msg);
+                                    node.store = [];
+                                }
+                            }
+                            else {
+                                node.send(msg); // finally send the array
+                            }
                         }
+            			else {
+            			    var len = a.length;
+            			    for (var i = 0; i < len; i++) {
+                                var newMessage = RED.util.cloneMessage(msg);
+                                newMessage.payload = a[i];
+                                if (!has_parts) {
+                				    newMessage.parts = {
+                    				    id: msg._msgid,
+                    				    index: i,
+                    				    count: len
+                    				};
+                                }
+                                else {
+                                    newMessage.parts.index -= node.skip;
+                                    newMessage.parts.count -= node.skip;
+                                    if (node.hdrin) { // if we removed the header line then shift the counts by 1
+                                        newMessage.parts.index -= 1;
+                                        newMessage.parts.count -= 1;
+                                    }
+                                }
+                                node.send(newMessage);
+            			    }
+            			}
+                        node.linecount = 0;
                     }
                     catch(e) { node.error(e,msg); }
                 }

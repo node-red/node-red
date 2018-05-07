@@ -24,29 +24,31 @@
     </div>
     <hr align="middle"/>
     <div class="form-row">
-        <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="csv.label.c2o"></span></label>
+        <label style="width:100%; border-bottom:1px solid #eee;"><span data-i18n="csv.label.c2o"></span></label>
     </div>
-    <div class="form-row" style="padding-left: 20px;">
+    <div class="form-row" style="padding-left:20px;">
         <label><i class="fa fa-sign-in"></i> <span data-i18n="csv.label.input"></span></label>
-        <input style="width:20px; vertical-align:top; margin-right: 5px;" type="checkbox" id="node-input-hdrin"><label style="width: auto;" for="node-input-hdrin"><span data-i18n="csv.label.firstrow"></span>
+        <span data-i18n="csv.label.skip-s"></span>&nbsp;<input type="text" id="node-input-skip" style="width:30px; height:25px;"/>&nbsp;<span data-i18n="csv.label.skip-e"></span><br/>
+        <label>&nbsp;</label>
+        <input style="width:20px; vertical-align:baseline; margin-right:5px;" type="checkbox" id="node-input-hdrin"><label style="width:auto; margin-top:7px;" for="node-input-hdrin"><span data-i18n="csv.label.firstrow"></span>
     </div>
-    <div class="form-row" style="padding-left: 20px;">
+    <div class="form-row" style="padding-left:20px;">
         <label><i class="fa fa-sign-out"></i> <span data-i18n="csv.label.output"></span></label>
-        <select type="text" id="node-input-multi" style="width: 250px;">
+        <select type="text" id="node-input-multi" style="width:250px;">
             <option value="one" data-i18n="csv.output.row"></option>
             <option value="mult" data-i18n="csv.output.array"></option>
         </select>
     </div>
-    <div class="form-row" style="margin-top: 20px">
-        <label style="width:100%; border-bottom: 1px solid #eee;"><span data-i18n="csv.label.o2c"></span></label>
+    <div class="form-row" style="margin-top:20px">
+        <label style="width:100%; border-bottom:1px solid #eee;"><span data-i18n="csv.label.o2c"></span></label>
     </div>
-    <div class="form-row" style="padding-left: 20px;">
+    <div class="form-row" style="padding-left:20px;">
         <label><i class="fa fa-sign-in"></i> <span data-i18n="csv.label.output"></span></label>
-        <input style="width:20px; vertical-align:top; margin-right: 5px;" type="checkbox" id="node-input-hdrout"><label style="width:auto;" for="node-input-hdrout"><span data-i18n="csv.label.includerow"></span></span>
+        <input style="width:20px; vertical-align:top; margin-right:5px;" type="checkbox" id="node-input-hdrout"><label style="width:auto;" for="node-input-hdrout"><span data-i18n="csv.label.includerow"></span></span>
     </div>
-    <div class="form-row" style="padding-left: 20px;">
+    <div class="form-row" style="padding-left:20px;">
         <label></label>
-        <label style="width: auto; margin-right: 10px;" for="node-input-ret"><span data-i18n="csv.label.newline"></span></label>
+        <label style="width:auto; margin-right:10px;" for="node-input-ret"><span data-i18n="csv.label.newline"></span></label>
         <select style="width:150px;" id="node-input-ret">
             <option value='\n' data-i18n="csv.newline.linux"></option>
             <option value='\r' data-i18n="csv.newline.mac"></option>
@@ -80,6 +82,8 @@
     will be used as the property names. Alternatively, the column names can be taken from the first row of the CSV.</p>
     <p>When converting to CSV, the column template is used to identify which properties to extract from the object and in what order.</p>
     <p>If the input is an array then the columns template is only used to optionally generate a row of column titles.</p>
+    <p>The node can accept a multi-part input as long as the <code>parts</code> property is set correctly.</p>
+    <p>If outputting multiple messages they will have their <code>parts</code> property set and form a complete message sequence.</p>
     <p><b>Note:</b> the column template must be comma separated - even if a different separator is chosen for the data.</p>
     </script>
 
@@ -95,7 +99,8 @@
             hdrout: {value:""},
             multi: {value:"one",required:true},
             ret: {value:'\\n'},
-            temp: {value:""}
+            temp: {value:""},
+            skip: {value:"0"}
         },
         inputs:1,
         outputs:1,
@@ -107,6 +112,9 @@
             return this.name?"node_label_italic":"";
         },
         oneditprepare: function() {
+            console.log(this.skip,$("#node-input-skip").val());
+            if (this.skip === undefined) { this.skip = 0; $("#node-input-skip").val("0");}
+            $("#node-input-skip").spinner({ min:0 });
             if (this.sep == "," || this.sep == "\\t" || this.sep == ";" || this.sep == ":" || this.sep == " " || this.sep == "#") {
                 $("#node-input-select-sep").val(this.sep);
                 $("#node-input-sep").hide();

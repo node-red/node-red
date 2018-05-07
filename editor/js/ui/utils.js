@@ -476,7 +476,7 @@ RED.utils = (function() {
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                         var newPath = path;
-                        if (newPath) {
+                        if (newPath !== undefined) {
                             if (/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(keys[i])) {
                                 newPath += (newPath.length > 0?".":"")+keys[i];
                             } else {
@@ -692,18 +692,25 @@ RED.utils = (function() {
         return result;
     }
 
-    function getNodeIcon(def,node) {
-        if (def.category === 'config') {
-            return "icons/node-red/cog.png"
-        } else if (node && node.type === 'tab') {
-            return "icons/node-red/subflow.png"
-        } else if (node && node.type === 'unknown') {
-            return "icons/node-red/alert.png"
-        } else if (node && node.type === 'subflow') {
-            return "icons/node-red/subflow.png"
+    function separateIconPath(icon) {
+        var result = {module: "", file: ""};
+        if (icon) {
+            var index = icon.indexOf('/');
+            if (index !== -1) {
+                result.module = icon.slice(0, index);
+                result.file = icon.slice(index + 1);
+            } else {
+                result.file = icon;
+            }
         }
+        return result;
+    }
+
+    function getDefaultNodeIcon(def,node) {
         var icon_url;
-        if (typeof def.icon === "function") {
+        if (node && node.type === "subflow") {
+            icon_url = "node-red/subflow.png";
+        } else if (typeof def.icon === "function") {
             try {
                 icon_url = def.icon.call(node);
             } catch(err) {
@@ -713,7 +720,50 @@ RED.utils = (function() {
         } else {
             icon_url = def.icon;
         }
-        return "icons/"+def.set.module+"/"+icon_url;
+
+        var iconPath = separateIconPath(icon_url);
+        if (!iconPath.module) {
+            if (def.set) {
+                iconPath.module = def.set.module;
+            } else {
+                // Handle subflow instance nodes that don't have def.set
+                iconPath.module = "node-red";
+            }
+        }
+        return iconPath;
+    }
+
+    function isIconExists(iconPath) {
+        var iconSets = RED.nodes.getIconSets();
+        var iconFileList = iconSets[iconPath.module];
+        if (iconFileList && iconFileList.indexOf(iconPath.file) !== -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getNodeIcon(def,node) {
+        if (def.category === 'config') {
+            return "icons/node-red/cog.png"
+        } else if (node && node.type === 'tab') {
+            return "icons/node-red/subflow.png"
+        } else if (node && node.type === 'unknown') {
+            return "icons/node-red/alert.png"
+        } else if (node && node.icon) {
+            var iconPath = separateIconPath(node.icon);
+            if (isIconExists(iconPath)) {
+                return "icons/" + node.icon;
+            }
+        }
+
+        var iconPath = getDefaultNodeIcon(def, node);
+        if (def.category === 'subflows') {
+            if (!isIconExists(iconPath)) {
+                return "icons/node-red/subflow.png";
+            }
+        }
+        return "icons/"+iconPath.module+"/"+iconPath.file;
     }
 
     function getNodeLabel(node,defaultLabel) {
@@ -733,12 +783,23 @@ RED.utils = (function() {
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
 
+    function addSpinnerOverlay(container,contain) {
+        var spinner = $('<div class="projects-dialog-spinner "><img src="red/images/spin.svg"/></div>').appendTo(container);
+        if (contain) {
+            spinner.addClass('projects-dialog-spinner-contain');
+        }
+        return spinner;
+    }
+
     return {
         createObjectElement: buildMessageElement,
         getMessageProperty: getMessageProperty,
         normalisePropertyExpression: normalisePropertyExpression,
         validatePropertyExpression: validatePropertyExpression,
+        separateIconPath: separateIconPath,
+        getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
+        addSpinnerOverlay: addSpinnerOverlay
     }
 })();

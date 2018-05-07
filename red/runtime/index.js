@@ -117,7 +117,11 @@ function start() {
                 if (nodeErrors.length > 0) {
                     log.warn("------------------------------------------------------");
                     for (i=0;i<nodeErrors.length;i+=1) {
-                        log.warn("["+nodeErrors[i].name+"] "+nodeErrors[i].err);
+                        if (nodeErrors[i].err.code === "type_already_registered") {
+                            log.warn("["+nodeErrors[i].id+"] "+log._("server.type-already-registered",{type:nodeErrors[i].err.details.type,module: nodeErrors[i].err.details.moduleA}));
+                        } else {
+                            log.warn("["+nodeErrors[i].id+"] "+nodeErrors[i].err);
+                        }
                     }
                     log.warn("------------------------------------------------------");
                 }
@@ -158,9 +162,9 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
-                redNodes.loadFlows().then(redNodes.startFlows);
+                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
                 started = true;
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 console.log(err);
             });
         });

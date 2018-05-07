@@ -113,8 +113,8 @@
 
 .debug-message-meta {
     background: #fff;
-    font-size: 10px;
-    color: #777;
+    font-size: 11px;
+    color: #707070;
 }
 .debug-message-date {
     padding: 1px 5px 1px 1px;
@@ -125,7 +125,7 @@
 }
 .debug-message-name {
     padding: 1px 5px;
-    color: #777;
+    color: #707070;
 }
 .debug-message-tools {
     position: absolute;
@@ -159,7 +159,7 @@
 .debug-message-element {
     color: #333;
     font-family: Menlo, monospace;
-    font-size: 12px !important;
+    font-size: 13px !important;
     line-height: 1.3em;
 }
 .debug-message-object-key {
@@ -188,11 +188,9 @@
 .debug-message-element.collapsed>span>.debug-message-object-handle {
     transform: rotate(0deg);
 }
-
 .debug-message-object-entry.collapsed > .debug-message-object-entry {
     display:none;
 }
-
 .debug-message-element.collapsed .debug-message-object-entry {
     display:none;
 }
@@ -202,14 +200,13 @@
 .debug-message-element.collapsed .debug-message-buffer-opts {
     display: none;
 }
-
 .debug-message-element.collapsed .debug-message-object-type-header {
     display:none;
 }
 .debug-message-object-entry pre {
     font-family: Menlo, monospace;
-    font-size: 12px;
-    line-height: 1.4em;
+    font-size: 13px;
+    line-height: 1.2em;
     margin: 0 0 0 -1em;
 }
 

@@ -32,7 +32,11 @@ RED.tray = (function() {
         // var growButton = $('<a class="editor-tray-resize-button" style="cursor: w-resize;"><i class="fa fa-angle-left"></i></a>').appendTo(resizer);
         // var shrinkButton = $('<a class="editor-tray-resize-button" style="cursor: e-resize;"><i style="margin-left: 1px;" class="fa fa-angle-right"></i></a>').appendTo(resizer);
         if (options.title) {
-            $('<div class="editor-tray-titlebar">'+options.title+'</div>').appendTo(header);
+            var titles = stack.map(function(e) { return e.options.title });
+            titles.push(options.title);
+            var title = '<ul class="editor-tray-breadcrumbs"><li>'+titles.join("</li><li>")+'</li></ul>';
+
+            $('<div class="editor-tray-titlebar">'+title+'</div>').appendTo(header);
         }
         if (options.width === Infinity) {
             options.maximized = true;
@@ -115,10 +119,10 @@ RED.tray = (function() {
             $("#editor-shade").show();
             $("#palette-shade").show();
             $(".sidebar-shade").show();
-
             tray.preferredWidth = Math.max(el.width(),500);
-            body.css({"minWidth":tray.preferredWidth-40});
-
+            if (!options.maximized) {
+                body.css({"minWidth":tray.preferredWidth-40});
+            }
             if (options.width) {
                 if (options.width > $("#editor-stack").position().left-8) {
                     options.width = $("#editor-stack").position().left-8;
@@ -210,8 +214,11 @@ RED.tray = (function() {
             });
         },
         show: function show(options) {
-            if (stack.length > 0) {
+            if (stack.length > 0 && !options.overlay) {
                 var oldTray = stack[stack.length-1];
+                if (options.width === "inherit") {
+                    options.width = oldTray.tray.width();
+                }
                 oldTray.tray.css({
                     right: -(oldTray.tray.width()+10)+"px"
                 });
@@ -238,14 +245,21 @@ RED.tray = (function() {
                     tray.tray.remove();
                     if (stack.length > 0) {
                         var oldTray = stack[stack.length-1];
-                        oldTray.tray.appendTo("#editor-stack");
-                        setTimeout(function() {
+                        if (!oldTray.options.overlay) {
+                            oldTray.tray.appendTo("#editor-stack");
+                            setTimeout(function() {
+                                handleWindowResize();
+                                oldTray.tray.css({right:0});
+                                if (oldTray.options.show) {
+                                    oldTray.options.show();
+                                }
+                            },0);
+                        } else {
                             handleWindowResize();
-                            oldTray.tray.css({right:0});
                             if (oldTray.options.show) {
                                 oldTray.options.show();
                             }
-                        },0);
+                        }
                     }
                     if (done) {
                         done();
