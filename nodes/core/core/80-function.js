@@ -205,10 +205,12 @@ module.exports = function(RED) {
         var context = vm.createContext(sandbox);
         try {
             this.script = vm.createScript(functionText, {
-                filename: 'Function: '+this.id+(this.name?' ['+this.name+']':''), // filename for stack traces
-                lineOffset: -11, // line number offset to be used for stack traces
-                columnOffset: 0, // column number offset to be used for stack traces
+                filename: 'Function node:'+this.id+(this.name?' ['+this.name+']':''), // filename for stack traces
                 displayErrors: true
+                // Using the following options causes node 4/6 to not include the line number
+                // in the stack output. So don't use them.
+                // lineOffset: -11, // line number offset to be used for stack traces
+                // columnOffset: 0, // column number offset to be used for stack traces
             });
             this.on("input", function(msg) {
                 try {
@@ -224,14 +226,14 @@ module.exports = function(RED) {
                         this.status({fill:"yellow",shape:"dot",text:""+converted});
                     }
                 } catch(err) {
-                    //remove unwanted part 
+                    //remove unwanted part
                     var index = err.stack.search(/\n\s*at ContextifyScript.Script.runInContext/);
                     err.stack = err.stack.slice(0, index).split('\n').slice(0,-1).join('\n');
                     var stack = err.stack.split(/\r?\n/);
 
                     //store the error in msg to be used in flows
                     msg.error = err;
-                    
+
                     var line = 0;
                     var errorMessage;
                     var stack = err.stack.split(/\r?\n/);
