@@ -13,6 +13,7 @@ New Features
  - Add Prevent Following Redirect to HTTP Request node (#615) (#1684)
  - Add debug and trace functions to function node (#1654)
  - Enable user defined icon for subflow
+ - Add MQTT disconnect message and rework broker node UI (#1719)
 
 Editor Fixes
 
@@ -25,7 +26,7 @@ Editor Fixes
 Node Fixes
 
  - bind to correct port when doing udp broadcast/multicast (#1686)
- - Provide full error stack in Function node log message
+ - Provide full error stack in Function node log message (#1700)
  - Fix http request doc type Fixes #1690
  - Make debug slightly larger to pass WCAG AA rating
  - Make core nodes labels more consistent, to close #1673
