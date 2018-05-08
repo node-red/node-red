@@ -68,11 +68,11 @@ describe('HTTP Request Node', function() {
                     An optional company name []:
                 */
             };
-            testSslServer = https.createServer(sslOptions,testApp);
+            testSslServer = stoppable(https.createServer(sslOptions,testApp));
             testSslServer.listen(testSslPort);
 
             testProxyPort += 1;
-            testProxyServer = httpProxy.createProxyServer({target:'http://localhost:' + testPort});
+            testProxyServer = stoppable(httpProxy.createProxyServer({target:'http://localhost:' + testPort}));
             testProxyServer.on('proxyReq', function(proxyReq, req, res, options) {
                 proxyReq.setHeader('x-testproxy-header', 'foobar');
             });
@@ -217,8 +217,11 @@ describe('HTTP Request Node', function() {
 
     after(function(done) {
         testServer.stop(() => {
-            testProxyServer.close();
-            helper.stopServer(done);
+            testProxyServer.stop(() => {
+                testSslServer.stop(() => {
+                    helper.stopServer(done);
+                });
+            });
         });
     });
 
