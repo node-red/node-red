@@ -16,7 +16,7 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
 var RED = require("../../../../red/red.js");
 

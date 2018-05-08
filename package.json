@@ -108,7 +108,8 @@
     "wdio-chromedriver-service": "^0.1.1",
     "wdio-mocha-framework": "^0.5.11",
     "wdio-spec-reporter": "^0.1.3",
-    "webdriverio": "^4.9.11"
+    "webdriverio": "^4.9.11",
+    "node-red-node-test-helper": "0.1.6"
   },
   "engines": {
     "node": ">=4"

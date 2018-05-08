@@ -17,7 +17,8 @@
 var net = require("net");
 var should = require("should");
 var stoppable = require('stoppable');
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
+
 var tcpinNode = require("../../../../nodes/core/io/31-tcpin.js");
 
 
@@ -46,7 +47,7 @@ describe('TCP in Node', function() {
             sock.end();
         }
     }
-    
+
     function startServer(done) {
         server_port += 1;
         server = stoppable(net.createServer(function(c) {
@@ -59,7 +60,7 @@ describe('TCP in Node', function() {
     function stopServer(done) {
         server.stop(done);
     }
-    
+
     function send(wdata) {
         var opt = {port:port, host:"localhost"};
         var client = net.createConnection(opt, function() {

@@ -16,7 +16,7 @@
 
 var should = require("should");
 var unknown = require("../../../../nodes/core/core/98-unknown.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 
 describe('unknown Node', function() {
 
