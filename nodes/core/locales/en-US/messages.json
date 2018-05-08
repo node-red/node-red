@@ -355,6 +355,7 @@
             "disconnected": "Disconnected from broker: __broker__",
             "connect-failed": "Connection failed to broker: __broker__"
         },
+        "retain": "Retain",
         "true": "true",
         "false": "false",
         "tip": "Tip: Leave topic, qos or retain blank if you want to set them via msg properties.",
