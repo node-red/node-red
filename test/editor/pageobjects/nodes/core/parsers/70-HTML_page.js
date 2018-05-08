@@ -18,29 +18,14 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function debugNode(id) {
+function htmlNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(debugNode, nodePage);
+util.inherits(htmlNode, nodePage);
 
-var target = {
-    "msg": 1,
-    "full": 2
-};
-
-debugNode.prototype.setTarget = function(type, value) {
-    // Open a payload type list.
-    browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
-    // Select a payload type.
-    var xPath = '/html/body/div[11]/a[' + target[type] + ']';
-    browser.clickWithWait(xPath);
-    if (value) {
-        browser.clickWithWait('#node-input-typed-complete');
-        browser.keys(['Control', 'a', 'Control']);
-        browser.keys(['Delete']);
-        browser.setValue('#node-input-typed-complete', value);
-    }
+htmlNode.prototype.setTag = function(value) {
+    browser.setValue('#node-input-tag', value);
 }
 
-module.exports = debugNode;
+module.exports = htmlNode;

@@ -24,6 +24,8 @@ var workspace = require('../../pageobjects/workspace/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
 
 var nodeWidth = 200;
+var nodeHeight = 100;
+var httpNodeRoot = "/api";
 
 // https://cookbook.nodered.org/
 describe('cookbook', function() {
@@ -46,7 +48,7 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2);
 
             changeNode.edit();
-            changeNode.ruleSet("Hello World!");
+            changeNode.ruleSet("payload", "msg", "Hello World!");
             changeNode.clickOk();
 
             injectNode.connect(changeNode);
@@ -150,7 +152,7 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2);
 
             injectNode.edit();
-            injectNode.setPayload("string", "Started!")
+            injectNode.setPayload("str", "Started!")
             injectNode.setOnce(true);
             injectNode.clickOk();
             injectNode.connect(debugNode);
@@ -184,5 +186,271 @@ describe('cookbook', function() {
 
         // skip this case since it needs up to one minite.
         it.skip('trigger a flow at a specific time');
+    });
+
+    describe('HTTP requests', function() {
+        it('simple get request', function() {
+            var injectNode = workspace.addNode("inject");
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth);
+            var htmlNode = workspace.addNode("html", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+
+            httpRequetNode.edit();
+            httpRequetNode.setMethod("get");
+            httpRequetNode.setUrl(helper.url());
+            httpRequetNode.clickOk();
+
+            htmlNode.edit();
+            htmlNode.setTag("title");
+            htmlNode.clickOk();
+
+            injectNode.connect(httpRequetNode);
+            httpRequetNode.connect(htmlNode);
+            htmlNode.connect(debugNode);
+
+            workspace.deploy();
+
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.be.equal('"Node-RED"');
+        });
+
+        it('set the URL of a request', function() {
+            var injectNode = workspace.addNode("inject");
+            var changeNode = workspace.addNode("change", nodeWidth * 1.5);
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2.5);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3.5);
+
+            injectNode.edit();
+            injectNode.setPayload("str", helper.url());
+            injectNode.clickOk();
+
+            changeNode.edit();
+            changeNode.ruleSet("url", "msg", "payload", "msg");
+            changeNode.clickOk();
+
+            injectNode.connect(changeNode);
+            changeNode.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            workspace.deploy();
+
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.containEql('<title>Node-RED</title>');
+        });
+
+        it('set the URL of a request using a template', function() {
+            var injectNode = workspace.addNode("inject");
+            var changeNode = workspace.addNode("change", nodeWidth * 1.5);
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2.5);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3.5);
+
+            injectNode.edit();
+            injectNode.setPayload("str", 'settings');
+            injectNode.clickOk();
+
+            changeNode.edit();
+            changeNode.ruleSet("query", "msg", "payload", "msg");
+            changeNode.clickOk();
+
+            httpRequetNode.edit();
+            httpRequetNode.setUrl(helper.url() + "/{{{query}}}");
+            httpRequetNode.clickOk();
+
+            injectNode.connect(changeNode);
+            changeNode.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            workspace.deploy();
+
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.containEql('httpNodeRoot');
+        });
+
+        it('set the query string parameters', function() {
+            var injectNode = workspace.addNode("inject");
+            var changeNode = workspace.addNode("change", nodeWidth);
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+
+            injectNode.edit();
+            injectNode.setPayload("str", 'Nick');
+            injectNode.clickOk();
+
+            changeNode.edit();
+            changeNode.ruleSet("query", "msg", "payload", "msg");
+            changeNode.clickOk();
+
+            httpRequetNode.edit();
+            httpRequetNode.setUrl(helper.url() + httpNodeRoot + '/set-query?q={{{query}}}');
+            httpRequetNode.clickOk();
+
+            injectNode.connect(changeNode);
+            changeNode.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            // The code for confirmation starts from here.
+            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
+            var templateNode = workspace.addNode("template", nodeWidth, nodeHeight);
+            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2, nodeHeight);
+
+            httpinNode.edit();
+            httpinNode.setMethod("get");
+            httpinNode.setUrl("/set-query");
+            httpinNode.clickOk();
+
+            templateNode.edit();
+            templateNode.setSyntax("mustache");
+            templateNode.setFormat("handlebars");
+            templateNode.setTemplate("Hello {{req.query.q}}");
+            templateNode.clickOk();
+
+            httpinNode.connect(templateNode);
+            templateNode.connect(httpResponseNode);
+            // The code for confirmation ends here.
+
+            workspace.deploy();
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.eql('"Hello Nick"');
+        });
+
+        it('get a parsed JSON response', function() {
+            var injectNode = workspace.addNode("inject");
+            var changeNode_setPost = workspace.addNode("change", nodeWidth);
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+
+            injectNode.edit();
+            injectNode.setPayload("str", "json-response");
+            injectNode.clickOk();
+
+            changeNode_setPost.edit();
+            changeNode_setPost.ruleSet("post", "msg", "payload", "msg");
+            changeNode_setPost.clickOk();
+
+            httpRequetNode.edit();
+            httpRequetNode.setMethod("get");
+            var url = helper.url() + httpNodeRoot + "/{{post}}";
+            httpRequetNode.setUrl(url);
+            httpRequetNode.setRet("obj");
+            httpRequetNode.clickOk();
+
+            debugNode.edit();
+            debugNode.setTarget("msg", "payload.title");
+            debugNode.clickOk();
+
+            injectNode.connect(changeNode_setPost);
+            changeNode_setPost.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            // The code for confirmation starts from here.
+            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
+            var templateNode = workspace.addNode("template", nodeWidth * 1.5, nodeHeight);
+            var changeNode_setHeader = workspace.addNode("change", nodeWidth * 2.5, nodeHeight);
+            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3.5, nodeHeight);
+
+            httpinNode.edit();
+            httpinNode.setMethod("get");
+            httpinNode.setUrl("/json-response");
+            httpinNode.clickOk();
+
+            templateNode.edit();
+            templateNode.setSyntax("mustache");
+            templateNode.setFormat("handlebars");
+            templateNode.setTemplate("{\"title\": \"Hello\"}");
+            templateNode.clickOk();
+
+            changeNode_setHeader.edit();
+            changeNode_setHeader.ruleSet("headers", "msg", "{\"content-type\":\"application/json\"}", "json");
+            changeNode_setHeader.clickOk();
+
+            httpinNode.connect(templateNode);
+            templateNode.connect(changeNode_setHeader);
+            changeNode_setHeader.connect(httpResponseNode);
+            // The code for confirmation ends here.
+
+            workspace.deploy();
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.eql('"Hello"');
+        });
+
+        it('get a binary response', function() {
+            var injectNode = workspace.addNode("inject");
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth);
+            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+
+            httpRequetNode.edit();
+            httpRequetNode.setMethod("get");
+            httpRequetNode.setUrl(helper.url() + "/settings");
+            httpRequetNode.setRet("bin");
+            httpRequetNode.clickOk();
+
+            injectNode.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            workspace.deploy();
+
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+
+            debugTab.getMessage().should.eql(['123', '34', '104', '116', '116', '112', '78', '111', '100', '101']);
+        });
+
+        it('set a request header', function() {
+            var injectNode = workspace.addNode("inject");
+            var functionNode = workspace.addNode("function", nodeWidth);
+            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+
+            functionNode.edit();
+            functionNode.setCode("msg.payload = \"data to post\";");
+            functionNode.clickOk();
+
+            httpRequetNode.edit();
+            httpRequetNode.setMethod("post");
+            var url = helper.url() + httpNodeRoot + "/set-header";
+            httpRequetNode.setUrl(url);
+            httpRequetNode.clickOk();
+
+            injectNode.connect(functionNode);
+            functionNode.connect(httpRequetNode);
+            httpRequetNode.connect(debugNode);
+
+            // The code for confirmation starts from here.
+            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
+            var templateNode = workspace.addNode("template", nodeWidth * 1.5, nodeHeight);
+            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2.5, nodeHeight);
+
+            httpinNode.edit();
+            httpinNode.setMethod("post");
+            httpinNode.setUrl("/set-header");
+            httpinNode.clickOk();
+
+            templateNode.edit();
+            templateNode.setSyntax("mustache");
+            templateNode.setFormat("handlebars");
+            templateNode.setTemplate("{{ payload }}");
+            templateNode.clickOk();
+
+            httpinNode.connect(templateNode);
+            templateNode.connect(httpResponseNode);
+            // The code for confirmation ends here.
+
+            workspace.deploy();
+            debugTab.open();
+            debugTab.clearMessage();
+            injectNode.clickLeftButton();
+            debugTab.getMessage().should.eql('"data to post"');
+        });
     });
 });

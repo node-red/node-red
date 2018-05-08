@@ -27,7 +27,7 @@ util.inherits(injectNode, nodePage);
 var payloadType = {
     "flow": 1,
     "global": 2,
-    "string": 3,
+    "str": 3,
     "num": 4,
     "bool": 5,
     "json": 6,
@@ -48,8 +48,10 @@ injectNode.prototype.setPayload = function(type, value) {
     // Select a payload type.
     var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadType[type] + ']';
     browser.clickWithWait(payloadTypeXPath);
-    // Input a value.
-    browser.setValue('#node-input-payload', value);
+    if (value) {
+        // Input a value.
+        browser.setValue('#node-input-payload', value);
+    }
 }
 
 injectNode.prototype.setTopic = function(value) {
