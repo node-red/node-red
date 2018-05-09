@@ -30,6 +30,16 @@ describe("api/editor/settings", function() {
             sinon.stub(theme,"settings",function() { return { test: 456 };});
             app = express();
             app.get("/settings",info.runtimeSettings);
+            app.get("/settingsWithUser",function(req,res,next) {
+                req.user = {
+                    username: "nick",
+                    permissions: "*",
+                    image: "http://example.com",
+                    anonymous: false,
+                    private: "secret"
+                }
+                next();
+            },info.runtimeSettings);
         });
 
         after(function() {
@@ -68,6 +78,42 @@ describe("api/editor/settings", function() {
                     res.body.should.have.property("testNodeSetting","helloWorld");
                     res.body.should.not.have.property("foo",123);
                     res.body.should.have.property("flowEncryptionType","test-key-type");
+                    res.body.should.not.have.property("user");
+                    done();
+                });
+        });
+        it('returns the filtered user in settings', function(done) {
+            info.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: function(obj) {
+                        obj.testNodeSetting = "helloWorld";
+                    }
+                },
+                nodes: {
+                    paletteEditorEnabled: function() { return true; },
+                    getCredentialKeyType: function() { return "test-key-type"}
+                },
+                log: { error: console.error },
+                storage: {}
+            });
+            request(app)
+                .get("/settingsWithUser")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("user");
+                    res.body.user.should.have.property("username","nick");
+                    res.body.user.should.have.property("permissions","*");
+                    res.body.user.should.have.property("image","http://example.com");
+                    res.body.user.should.have.property("anonymous",false);
+                    res.body.user.should.not.have.property("private");
+
                     done();
                 });
         });
