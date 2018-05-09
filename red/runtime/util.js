@@ -240,7 +240,7 @@ function getMessageProperty(msg,expr) {
     var msgPropParts = normalisePropertyExpression(expr);
     var m;
     msgPropParts.reduce(function(obj, key) {
-        result = ((typeof obj !== "undefined") && (typeof obj[key] !== "undefined") ? obj[key] : undefined);
+        result = (typeof obj[key] !== "undefined" ? obj[key] : undefined);
         return result;
     }, msg);
     return result;

@@ -153,9 +153,11 @@ describe("red/util", function() {
             var v = util.getMessageProperty({a:"foo"},"msg.b");
             should.not.exist(v);
         });
-        it('should return undefined if property parent does not exist', function() {
-            var v = util.getMessageProperty({a:"foo"},"msg.a.b.c");
-            should.not.exist(v);
+        it('should throw error if property parent does not exist', function() {
+            /*jshint immed: false */
+            (function() {
+                util.getMessageProperty({a:"foo"},"msg.a.b.c");
+            }).should.throw();
         });
         it('retrieves a property with array syntax', function() {
             var v = util.getMessageProperty({a:["foo","bar"]},"msg.a[0]");
