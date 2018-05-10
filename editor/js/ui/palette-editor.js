@@ -208,6 +208,8 @@ RED.palette.editor = (function() {
             if (nodeEntry) {
                 var activeTypeCount = 0;
                 var typeCount = 0;
+                var errorCount = 0;
+                nodeEntry.errorList.empty();
                 nodeEntries[module].totalUseCount = 0;
                 nodeEntries[module].setUseCount = {};
 
@@ -216,7 +218,10 @@ RED.palette.editor = (function() {
                         var inUseCount = 0;
                         var set = moduleInfo.sets[setName];
                         var setElements = nodeEntry.sets[setName];
-
+                        if (set.err) {
+                            errorCount++;
+                            $("<li>").text(set.err).appendTo(nodeEntry.errorList);
+                        }
                         if (set.enabled) {
                             activeTypeCount += set.types.length;
                         }
@@ -255,6 +260,13 @@ RED.palette.editor = (function() {
                         setElements.setRow.toggleClass("palette-module-set-disabled",!set.enabled);
                     }
                 }
+
+                if (errorCount === 0) {
+                    nodeEntry.errorRow.hide()
+                } else {
+                    nodeEntry.errorRow.show();
+                }
+
                 var nodeCount = (activeTypeCount === typeCount)?typeCount:activeTypeCount+" / "+typeCount;
                 nodeEntry.setCount.html(RED._('palette.editor.nodeCount',{count:typeCount,label:nodeCount}));
 
@@ -586,6 +598,9 @@ RED.palette.editor = (function() {
                     $('<span>').html(entry.name).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
                     var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
+
+                    var errorRow = $('<div class="palette-module-meta palette-module-errors"><i class="fa fa-warning"></i></div>').hide().appendTo(headerRow);
+                    var errorList = $('<ul class="palette-module-error-list"></ul>').appendTo(errorRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                     var setCount = $('<span>').appendTo(setButton);
@@ -620,6 +635,8 @@ RED.palette.editor = (function() {
                         updateButton: updateButton,
                         removeButton: removeButton,
                         enableButton: enableButton,
+                        errorRow: errorRow,
+                        errorList: errorList,
                         setCount: setCount,
                         container: container,
                         shade: shade,
@@ -651,7 +668,6 @@ RED.palette.editor = (function() {
                             typeSwatches[t] = $('<span>',{class:"palette-module-type-swatch"}).appendTo(typeDiv);
                             $('<span>',{class:"palette-module-type-node"}).html(t).appendTo(typeDiv);
                         })
-
                         var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').appendTo(buttonGroup);
                         enableButton.click(function(evt) {
                             evt.preventDefault();
