@@ -1,5 +1,10 @@
 #### 0.18.5: Maintenance Release
 
+
+ (#1723)
+08727e1938a18c31642c821e1d6de63b95a445cc Show node load errors in the palette manager
+75848209870b269e1b8505745ecb1027d60fb787 Filter req.user in /settings to prevent leaking info
+
 Projects
 
  - Add clone project to welcome screen
@@ -14,6 +19,8 @@ New Features
  - Add debug and trace functions to function node (#1654)
  - Enable user defined icon for subflow
  - Add MQTT disconnect message and rework broker node UI (#1719)
+ - Japanese message catalogue updates (#1723)
+ - Show node load errors in the Palette Manager view
 
 Editor Fixes
 
@@ -45,6 +52,7 @@ Runtime Fixes
  - Log error if settings unavailable when saving user settings Fixes #1645
  - Keep backup of .config.json
  - Add warning if using \_credentialSecret from .config.json
+ - Filter req.user in /settings to prevent potentially leaking info
 
 #### 0.18.4: Maintenance Release
 
