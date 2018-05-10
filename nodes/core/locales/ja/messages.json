@@ -327,17 +327,22 @@
             "verify-server-cert": "サーバの証明書を確認",
             "compatmode": "旧MQTT 3.1のサポート"
         },
+        "sections-label":{
+            "birth-message": "接続時の送信メッセージ(Birthメッセージ)",
+            "will-message":"予期しない切断時の送信メッセージ(Willメッセージ)",
+            "close-message":"切断前の送信メッセージ(Closeメッセージ)"
+        },
         "tabs-label": {
             "connection": "接続",
             "security": "セキュリティ",
-            "will": "Willメッセージ",
-            "birth": "Birthメッセージ"
+            "messages": "メッセージ"
         },
         "placeholder": {
             "clientid": "IDを自動生成する場合は、無記入にしてください",
             "clientid-nonclean": "新規ではないセッションを設定してください",
             "will-topic": "Willメッセージを無効化する場合は、無記入にしてください",
-            "birth-topic": "Birthメッセージを無効化する場合は、無記入にしてください"
+            "birth-topic": "Birthメッセージを無効化する場合は、無記入にしてください",
+            "close-topic": "Closeメッセージを無効化する場合は、無記入にしてください"
         },
         "state": {
             "connected": "ブローカへ接続しました: __broker__",
