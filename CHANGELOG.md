@@ -1,10 +1,5 @@
 #### 0.18.5: Maintenance Release
 
-
- (#1723)
-08727e1938a18c31642c821e1d6de63b95a445cc Show node load errors in the palette manager
-75848209870b269e1b8505745ecb1027d60fb787 Filter req.user in /settings to prevent leaking info
-
 Projects
 
  - Add clone project to welcome screen
