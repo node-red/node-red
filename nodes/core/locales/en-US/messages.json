@@ -323,6 +323,7 @@
             "broker": "Server",
             "example": "e.g. localhost",
             "qos": "QoS",
+            "retain": "Retain",
             "clientid": "Client ID",
             "port": "Port",
             "keepalive": "Keep alive time (s)",
@@ -332,17 +333,22 @@
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"
         },
+        "sections-label":{
+            "birth-message": "Message sent on connection (birth message)",
+            "will-message":"Message sent on an unexpected disconnection (will message)",
+            "close-message":"Message sent before disconnecting (close message)"
+        },
         "tabs-label": {
             "connection": "Connection",
             "security": "Security",
-            "will": "Will Message",
-            "birth": "Birth Message"
+            "messages": "Messages"
         },
         "placeholder": {
             "clientid": "Leave blank for auto generated",
             "clientid-nonclean":"Must be set for non-clean sessions",
             "will-topic": "Leave blank to disable will message",
-            "birth-topic": "Leave blank to disable birth message"
+            "birth-topic": "Leave blank to disable birth message",
+            "close-topic": "Leave blank to disable close message"
         },
         "state": {
             "connected": "Connected to broker: __broker__",
@@ -495,15 +501,15 @@
             "using": "using",
             "output": "Output",
             "group": "Group",
-            "interface": "Local IP",
-            "interfaceprompt": "(optional) local ip address to bind to",
+            "interface": "Local IF",
             "send": "Send a",
             "toport": "to port",
             "address": "Address",
             "decode-base64": "Decode Base64 encoded payload?"
         },
         "placeholder": {
-            "interface": "(optional) ip address of eth0",
+            "interface": "(optional) local interface or address to bind to",
+            "interfaceprompt": "(optional) local interface or address to bind to",
             "address": "destination ip"
         },
         "udpmsgs": "udp messages",
@@ -531,10 +537,11 @@
             "mc-group": "udp multicast group __group__",
             "listener-stopped": "udp listener stopped",
             "output-stopped": "udp output stopped",
-            "mc-ready": "udp multicast ready: __outport__ -> __host__:__port__",
+            "mc-ready": "udp multicast ready: __iface__:__outport__ -> __host__:__port__",
             "bc-ready": "udp broadcast ready: __outport__ -> __host__:__port__",
             "ready": "udp ready: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udp ready: __host__:__port__"
+            "ready-nolocal": "udp ready: __host__:__port__",
+            "re-use": "udp re-use socket: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP access error, you may need root access for ports below 1024",
@@ -544,7 +551,8 @@
             "ip-notset": "udp: ip address not set",
             "port-notset": "udp: port not set",
             "port-invalid": "udp: port number not valid",
-            "alreadyused": "udp: port already in use"
+            "alreadyused": "udp: port __port__ already in use",
+            "ifnotfound": "udp: interface __iface__ not found"
         }
     },
     "switch": {
@@ -566,6 +574,7 @@
             "false":"is false",
             "null":"is null",
             "nnull":"is not null",
+            "istype":"is of type",
             "head":"head",
             "tail":"tail",
             "index":"index between",
@@ -671,7 +680,8 @@
     "html": {
         "label": {
             "select": "Selector",
-            "output": "Output"
+            "output": "Output",
+            "in": "in"
         },
         "output": {
             "html": "the html content of the elements",

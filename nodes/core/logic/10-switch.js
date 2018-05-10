@@ -31,6 +31,16 @@ module.exports = function(RED) {
         'false': function(a) { return a === false; },
         'null': function(a) { return (typeof a == "undefined" || a === null); },
         'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
+        'istype': function(a, b) {
+            if (b === "array") { return Array.isArray(a); }
+            else if (b === "buffer") { return Buffer.isBuffer(a); }
+            else if (b === "json") {
+                try { JSON.parse(a); return true; }   // or maybe ??? a !== null; }
+                catch(e) { return false;}
+            }
+            else if (b === "null") { return a === null; }
+            else { return typeof a === b && !Array.isArray(a) && !Buffer.isBuffer(a) && a !== null; }
+        },
         'head': function(a, b, c, d, parts) {
             var count = Number(b);
             return (parts.index < count);
@@ -292,6 +302,10 @@ module.exports = function(RED) {
                             node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
                             return;
                         }
+                    } else if (rule.vt === 'json') {
+                        v1 = "json";
+                    } else if (rule.vt === 'null') {
+                        v1 = "null";
                     } else {
                         try {
                             v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);

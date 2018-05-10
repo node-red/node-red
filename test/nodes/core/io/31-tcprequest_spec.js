@@ -17,7 +17,7 @@
 var net = require("net");
 var should = require("should");
 var stoppable = require('stoppable');
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var tcpinNode = require("../../../../nodes/core/io/31-tcpin.js");
 
 
@@ -71,7 +71,7 @@ describe('TCP Request Node', function() {
 	    }
         });
     }
-    
+
     it('should send & recv data', function(done) {
         var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
                     {id:"n2", type:"helper"}];

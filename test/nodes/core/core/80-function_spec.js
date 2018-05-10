@@ -16,7 +16,7 @@
 
 var should = require("should");
 var functionNode = require("../../../../nodes/core/core/80-function.js");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 
 describe('function node', function() {
 
@@ -242,7 +242,7 @@ describe('function node', function() {
     });
 
     it('should handle and log script error', function(done) {
-        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"retunr"}];
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"var a = 1;\nretunr"}];
         helper.load(functionNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.receive({payload:"foo",topic: "bar"});
@@ -256,7 +256,7 @@ describe('function node', function() {
                 msg.should.have.property('level', helper.log().ERROR);
                 msg.should.have.property('id', 'n1');
                 msg.should.have.property('type', 'function');
-                msg.should.have.property('msg', 'ReferenceError: retunr is not defined (line 1, col 1)');
+                msg.should.have.property('msg', 'ReferenceError: retunr is not defined (line 2, col 1)');
                 done();
             } catch(err) {
                 done(err);

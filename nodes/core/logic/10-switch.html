@@ -85,6 +85,7 @@
         {v:"false",t:"switch.rules.false",kind:'V'},
         {v:"null",t:"switch.rules.null",kind:'V'},
         {v:"nnull",t:"switch.rules.nnull",kind:'V'},
+        {v:"istype",t:"switch.rules.istype",kind:'V'},
         {v:"head",t:"switch.rules.head",kind:'S'},
         {v:"index",t:"switch.rules.index",kind:'S'},
         {v:"tail",t:"switch.rules.tail",kind:'S'},
@@ -160,6 +161,7 @@
                 var selectField = rule.find("select");
                 var type = selectField.val()||"";
                 var valueField = rule.find(".node-input-rule-value");
+                var typeField = rule.find(".node-input-rule-type-value");
                 var numField = rule.find(".node-input-rule-num-value");
                 var expField = rule.find(".node-input-rule-exp-value");
                 var btwnField1 = rule.find(".node-input-rule-btwn-value");
@@ -180,6 +182,8 @@
                     numField.typedInput("width",(newWidth-selectWidth-70));
                 } else if (type === "jsonata_exp") {
                     expField.typedInput("width",(newWidth-selectWidth-70));
+                } else if (type === "istype") {
+                    typeField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
                     if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                         // valueField.hide();
@@ -232,6 +236,18 @@
                     var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
                     var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var typeValueField = $('<input/>',{class:"node-input-rule-type-value",type:"text",style:"margin-left: 5px;"}).appendTo(row)
+                        .typedInput({default:'string',types:[
+                            {value:"string",label:"string",hasValue:false},
+                            {value:"number",label:"number",hasValue:false},
+                            {value:"boolean",label:"boolean",hasValue:false},
+                            {value:"array",label:"array",hasValue:false},
+                            {value:"buffer",label:"buffer",hasValue:false},
+                            {value:"object",label:"object",hasValue:false},
+                            {value:"json",label:"JSON string",hasValue:false},
+                            {value:"undefined",label:"undefined",hasValue:false},
+                            {value:"null",label:"null",hasValue:false}
+                        ]});
                     var finalspan = $('<span/>',{style:"float: right;margin-top: 6px;"}).appendTo(row);
                     finalspan.append(' &#8594; <span class="node-input-rule-index">'+(i+1)+'</span> ');
                     var caseSensitive = $('<input/>',{id:"node-input-rule-case-"+i,class:"node-input-rule-case",type:"checkbox",style:"width:auto;vertical-align:top"}).appendTo(row2);
@@ -243,26 +259,39 @@
                             valueField.typedInput('hide');
                             expValueField.typedInput('hide');
                             numValueField.typedInput('hide');
+                            typeValueField.typedInput('hide');
                             btwnValueField.typedInput('show');
                         } else if ((type === "head") || (type === "tail")) {
                             btwnValueField.typedInput('hide');
                             btwnValue2Field.typedInput('hide');
                             expValueField.typedInput('hide');
                             numValueField.typedInput('show');
+                            typeValueField.typedInput('hide');
                             valueField.typedInput('hide');
                         } else if (type === "jsonata_exp") {
                             btwnValueField.typedInput('hide');
                             btwnValue2Field.typedInput('hide');
                             expValueField.typedInput('show');
                             numValueField.typedInput('hide');
+                            typeValueField.typedInput('hide');
                             valueField.typedInput('hide');
                         } else {
                             btwnValueField.typedInput('hide');
                             expValueField.typedInput('hide');
                             numValueField.typedInput('hide');
+                            typeValueField.typedInput('hide');
+                            valueField.typedInput('hide');
                             if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
                                 valueField.typedInput('hide');
-                            } else {
+                                typeValueField.typedInput('hide');
+                            }
+                            else
+                            if (type === "istype") {
+                                valueField.typedInput('hide');
+                                typeValueField.typedInput('show');
+                            }
+                            else {
+                                typeValueField.typedInput('hide');
                                 valueField.typedInput('show');
                             }
                         }
@@ -287,6 +316,9 @@
                     } else if ((rule.t === "head") || (rule.t === "tail")) {
                         numValueField.typedInput('value',rule.v);
                         numValueField.typedInput('type',rule.vt||'num');
+                    } else if (rule.t === "istype") {
+                        typeValueField.typedInput('value',rule.vt);
+                        typeValueField.typedInput('type',rule.vt);
                     } else if (rule.t === "jsonata_exp") {
                         expValueField.typedInput('value',rule.v);
                         expValueField.typedInput('type',rule.vt||'jsonata');
@@ -359,6 +391,9 @@
                     } else if ((type === "head") || (type === "tail")) {
                         r.v = rule.find(".node-input-rule-num-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-num-value").typedInput('type');
+                    } else if (type === "istype") {
+                        r.v = rule.find(".node-input-rule-type-value").typedInput('type');
+                        r.vt = rule.find(".node-input-rule-type-value").typedInput('type');
                     } else if (type === "jsonata_exp") {
                         r.v = rule.find(".node-input-rule-exp-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-exp-value").typedInput('type');

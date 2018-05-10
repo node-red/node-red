@@ -2,7 +2,7 @@
 <script type="text/x-red" data-template-name="html">
     <div class="form-row">
         <label for="node-input-property"><i class="fa fa-ellipsis-h"></i> <span data-i18n="node-red:common.label.property"></span></label>
-        <input type="text" id="node-input-property" style="width:70%;"/>
+        <input type="text" id="node-input-property" style="width:70%">
     </div>
     <div class="form-row">
         <label for="node-input-tag"><i class="fa fa-filter"></i> <span data-i18n="html.label.select"></span></label>
@@ -23,6 +23,10 @@
             <option value="single" data-i18n="html.format.single"></option>
             <option value="multi" data-i18n="html.format.multi"></option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-outproperty">&nbsp;</label>
+        <span data-i18n="html.label.in" style="padding-left:8px; padding-right:2px; vertical-align:-1px;"></span> <input type="text" id="node-input-outproperty" style="width:64%">
     </div>
     <br/>
     <div class="form-row">
@@ -59,6 +63,7 @@
         defaults: {
             name: {value:""},
             property: {value:"payload"},
+            outproperty: {value:"payload"},
             tag: {value:""},
             ret: {value:"html"},
             as: {value:"single"}
@@ -74,6 +79,7 @@
         },
         oneditprepare: function() {
             $("#node-input-property").typedInput({default:'msg',types:['msg']});
+            $("#node-input-outproperty").typedInput({default:'msg',types:['msg']});
         }
     });
 </script>

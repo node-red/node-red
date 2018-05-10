@@ -139,16 +139,17 @@
         }
     }
     button.editor-button {
-        width: calc(50% - 40px);
+        width: calc(50% - 80px);
         margin: 20px;
-        height: 175px;
+        height: auto;
         line-height: 2em;
-        font-size: 1.5em !important;
+        padding: 10px;
+        border-color: #aaa;
         i {
-            color: #ccc;
+            color: #aaa;
         }
         &:hover i {
-            color: #aaa;
+            color: #999;
         }
     }
     .button-group {
@@ -160,7 +161,6 @@
     button.projects-dialog-screen-create-type {
         height: auto;
         padding: 10px;
-
     }
     .button-group {
         text-align: center;

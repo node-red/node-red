@@ -68,10 +68,17 @@ var api = module.exports = {
             try {
                 var safeSettings = {
                     httpNodeRoot: runtime.settings.httpNodeRoot||"/",
-                    version: runtime.settings.version,
-                    user: opts.user
+                    version: runtime.settings.version
                 }
-
+                if (opts.user) {
+                    safeSettings.user = {}
+                    var props = ["anonymous","username","image","permissions"];
+                    props.forEach(prop => {
+                        if (opts.user.hasOwnProperty(prop)) {
+                            safeSettings.user[prop] = opts.user[prop];
+                        }
+                    })
+                }
                 if (util.isArray(runtime.settings.paletteCategories)) {
                     safeSettings.paletteCategories = runtime.settings.paletteCategories;
                 }

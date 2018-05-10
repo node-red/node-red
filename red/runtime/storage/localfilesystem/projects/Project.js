@@ -53,15 +53,13 @@ function getGitUser(user) {
     }
     return null;
 }
-function Project(name) {
-    this.name = name;
-    this.path = fspath.join(projectsDir,name);
+function Project(path) {
+    this.path = path;
+    this.name = fspath.basename(path);
     this.paths = {};
     this.files = {};
     this.auth = {origin:{}};
-
     this.missingFiles = [];
-
     this.credentialSecret = null;
 }
 Project.prototype.load = function () {
@@ -70,7 +68,9 @@ Project.prototype.load = function () {
 // console.log(globalProjectSettings)
     var projectSettings = {};
     if (globalProjectSettings) {
-        projectSettings = globalProjectSettings.projects[this.name]||{};
+        if (globalProjectSettings.projects.hasOwnProperty(this.name)) {
+            projectSettings = globalProjectSettings.projects[this.name] || {};
+        }
     }
 
     this.credentialSecret = projectSettings.credentialSecret;
@@ -81,9 +81,7 @@ Project.prototype.load = function () {
 
     var promises = [];
     return checkProjectFiles(project).then(function(missingFiles) {
-        if (missingFiles.length > 0) {
-            project.missingFiles = missingFiles;
-        }
+        project.missingFiles = missingFiles;
         if (missingFiles.indexOf('package.json') === -1) {
             project.paths['package.json'] = fspath.join(project.path,"package.json");
             promises.push(fs.readFile(project.paths['package.json'],"utf8").then(function(content) {
@@ -135,9 +133,9 @@ Project.prototype.load = function () {
 
 Project.prototype.initialise = function(user,data) {
     var project = this;
-    if (!this.empty) {
-        throw new Error("Cannot initialise non-empty project");
-    }
+    // if (!this.empty) {
+    //     throw new Error("Cannot initialise non-empty project");
+    // }
     var files = Object.keys(defaultFileSet);
     var promises = [];
 
@@ -148,17 +146,25 @@ Project.prototype.initialise = function(user,data) {
         promises.push(settings.set('projects',projects));
     }
 
-    project.files.flow = data.files.flow;
-    project.files.credentials = data.files.credentials;
-    var flowFilePath = fspath.join(project.path,project.files.flow);
-    var credsFilePath = getCredentialsFilename(flowFilePath);
-    promises.push(util.writeFile(flowFilePath,"[]"));
-    promises.push(util.writeFile(credsFilePath,"{}"));
-    files.push(project.files.flow);
-    files.push(project.files.credentials);
+    if (data.hasOwnProperty('files')) {
+        if (data.files.hasOwnProperty('flow') && data.files.hasOwnProperty('credentials')) {
+            project.files.flow = data.files.flow;
+            project.files.credentials = data.files.credentials;
+            var flowFilePath = fspath.join(project.path,project.files.flow);
+            var credsFilePath = getCredentialsFilename(flowFilePath);
+            promises.push(util.writeFile(flowFilePath,"[]"));
+            promises.push(util.writeFile(credsFilePath,"{}"));
+            files.push(project.files.flow);
+            files.push(project.files.credentials);
+        }
+    }
     for (var file in defaultFileSet) {
         if (defaultFileSet.hasOwnProperty(file)) {
-            promises.push(util.writeFile(fspath.join(project.path,file),defaultFileSet[file](project)));
+            var path = fspath.join(project.path,file);
+            if (!fs.existsSync(path)) {
+                promises.push(util.writeFile(path,defaultFileSet[file](project)));
+            }
+
         }
     }
 
@@ -740,7 +746,7 @@ Project.prototype.getCredentialsFileBackup = function() {
     return getBackupFilename(this.getCredentialsFile());
 }
 
-Project.prototype.toJSON = function () {
+Project.prototype.export = function () {
 
     return {
         name: this.name,
@@ -780,26 +786,16 @@ function getBackupFilename(filename) {
     return fspath.join(ffDir,"."+ffName+".backup");
 }
 
-function checkProjectExists(project) {
-    var projectPath = fspath.join(projectsDir,project);
+function checkProjectExists(projectPath) {
     return fs.pathExists(projectPath).then(function(exists) {
         if (!exists) {
-            var e = new Error("Project not found: "+project);
+            var e = new Error("Project not found");
             e.code = "project_not_found";
-            e.project = project;
+            var name = fspath.basename(projectPath);
+            e.project = name;
             throw e;
         }
     });
-}
-
-function createProjectDirectory(project) {
-    var projectPath = fspath.join(projectsDir,project);
-    return fs.ensureDir(projectPath);
-}
-
-function deleteProjectDirectory(project) {
-    var projectPath = fspath.join(projectsDir,project);
-    return fs.remove(projectPath);
 }
 
 function createDefaultProject(user, project) {
@@ -904,17 +900,23 @@ function createProject(user, metadata) {
     } else {
         username = user.username;
     }
+    if (!metadata.path) {
+        throw new Error("Project missing path property");
+    }
+    if (!metadata.name) {
+        throw new Error("Project missing name property");
+    }
 
     var project = metadata.name;
+    var projectPath = metadata.path;
     return new Promise(function(resolve,reject) {
-        var projectPath = fspath.join(projectsDir,project);
         fs.stat(projectPath, function(err,stat) {
             if (!err) {
                 var e = new Error("NLS: Project already exists");
                 e.code = "project_exists";
                 return reject(e);
             }
-            createProjectDirectory(project).then(function() {
+            fs.ensureDir(projectPath).then(function() {
                 var projects = settings.get('projects');
                 if (!projects) {
                     projects = {
@@ -951,7 +953,7 @@ function createProject(user, metadata) {
                     return createDefaultProject(user, metadata);
                 }
             }).then(function() {
-                resolve(getProject(project))
+                resolve(loadProject(projectPath))
             }).catch(function(err) {
                 fs.remove(projectPath,function() {
                     reject(err);
@@ -961,50 +963,21 @@ function createProject(user, metadata) {
     })
 }
 
-function deleteProject(user, name) {
-    return checkProjectExists(name).then(function() {
-        if (currentProject && currentProject.name === name) {
-            var e = new Error("NLS: Can't delete the active project");
-            e.code = "cannot_delete_active_project";
-            throw e;
-        }
-        else {
-            return deleteProjectDirectory(name).then(function() {
-                var projects = settings.get('projects');
-                delete projects.projects[name];
-                return settings.set('projects', projects);
-            });
-        }
-    });
-}
-
-var currentProject;
-
-function getProject(name) {
-    return checkProjectExists(name).then(function() {
-        if (currentProject && currentProject.name === name) {
-            return currentProject;
-        }
-        currentProject = new Project(name);
-        return currentProject.load();
-    });
-}
-
-function listProjects() {
-    return fs.readdir(projectsDir).then(function(fns) {
-        var dirs = [];
-        fns.sort(function(A,B) {
-            return A.toLowerCase().localeCompare(B.toLowerCase());
-        }).filter(function(fn) {
-            var fullPath = fspath.join(projectsDir,fn);
-            if (fn[0] != ".") {
-                var stats = fs.lstatSync(fullPath);
-                if (stats.isDirectory()) {
-                    dirs.push(fn);
-                }
-            }
+function deleteProject(user, projectPath) {
+    return checkProjectExists(projectPath).then(function() {
+        return fs.remove(projectPath).then(function() {
+            var name = fspath.basename(projectPath);
+            var projects = settings.get('projects');
+            delete projects.projects[name];
+            return settings.set('projects', projects);
         });
-        return dirs;
+    });
+}
+
+function loadProject(projectPath) {
+    return checkProjectExists(projectPath).then(function() {
+        var project = new Project(projectPath);
+        return project.load();
     });
 }
 
@@ -1018,9 +991,7 @@ function init(_settings, _runtime) {
 
 module.exports = {
     init: init,
-    get: getProject,
+    load: loadProject,
     create: createProject,
-    delete: deleteProject,
-    list: listProjects
-
+    delete: deleteProject
 }

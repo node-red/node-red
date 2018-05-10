@@ -1,3 +1,54 @@
+#### 0.18.5: Maintenance Release
+
+Projects
+
+ - Add clone project to welcome screen
+ - Handle cloning a project without package.json
+ - Keep remote branch state in sync between editor and runtime
+
+New Features
+
+ - Add type checks to switch node options (#1714)
+ - add output property select to HTML parse node (#1701)
+ - Add Prevent Following Redirect to HTTP Request node (#615) (#1684)
+ - Add debug and trace functions to function node (#1654)
+ - Enable user defined icon for subflow
+ - Add MQTT disconnect message and rework broker node UI (#1719)
+ - Japanese message catalogue updates (#1723)
+ - Show node load errors in the Palette Manager view
+
+Editor Fixes
+
+ - Highlight subflow node when log msg comes from inside Fixes #1698
+ - Ensure node wires array is not longer than outputs value Fixes #1678
+ - Allow importing an unknown config node to be undone Fixes #1681
+ - Ensure keyboard shortcuts get saved in runtime settings Fixes #1696
+ - Don't mark a subflow changed when actually modified nothing (#1665)
+
+Node Fixes
+
+ - bind to correct port when doing udp broadcast/multicast (#1686)
+ - Provide full error stack in Function node log message (#1700)
+ - Fix http request doc type Fixes #1690
+ - Make debug slightly larger to pass WCAG AA rating
+ - Make core nodes labels more consistent, to close #1673
+ - Allow template node to be updated more than once Fixes #1671
+ - Fix the problem that output labels of switch node sometimes disappear (#1664)
+ - Chinese translations for core nodes (#1607)
+
+Runtime Fixes
+
+ - Handle and display for invalid flow credentials when project is disabled #1689 (#1694)
+ - node-red-pi: fix behavior with old bash version (#1713)
+ - Fix ENOENT error on first start when no user dir (#1711)
+ - Handle null error object in Flow.handleError Fixes #1721
+ - update settings comments to describe how to setup for ipv6 (#1675)
+ - Remove credential props after diffing flow to prevent future false positives Fixes #1359
+ - Log error if settings unavailable when saving user settings Fixes #1645
+ - Keep backup of .config.json
+ - Add warning if using \_credentialSecret from .config.json
+ - Filter req.user in /settings to prevent potentially leaking info
+
 #### 0.18.4: Maintenance Release
 
 Projects

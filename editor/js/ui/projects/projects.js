@@ -80,6 +80,26 @@ RED.projects = (function() {
                     $('<p>').text("To get started you can create your first project or clone an existing project from a git repository.").appendTo(body);
                     $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu at any time.").appendTo(body);
 
+                    var row = $('<div style="text-align: center"></div>').appendTo(body);
+                    var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>Create Project</button>').appendTo(row);
+                    var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-git"></i><br/>Clone Repository</button>').appendTo(row);
+
+                    createAsEmpty.click(function(e) {
+                        e.preventDefault();
+                        createProjectOptions = {
+                            action: "create"
+                        }
+                        show('git-config');
+                    })
+
+                    createAsClone.click(function(e) {
+                        e.preventDefault();
+                        createProjectOptions = {
+                            action: "clone"
+                        }
+                        show('git-config');
+                    })
+
                     return container;
                 },
                 buttons: [
@@ -89,13 +109,6 @@ RED.projects = (function() {
                         click: function() {
                             createProjectOptions = {};
                             $( this ).dialog( "close" );
-                        }
-                    },
-                    {
-                        text: "Create your first project", // TODO: nls
-                        class: "primary",
-                        click: function() {
-                            show('git-config');
                         }
                     }
                 ]
@@ -170,7 +183,11 @@ RED.projects = (function() {
                                 currentGitSettings.user.name = gitUsernameInput.val();
                                 currentGitSettings.user.email = gitEmailInput.val();
                                 RED.settings.set('git', currentGitSettings);
-                                show('project-details');
+                                if (createProjectOptions.action === "create") {
+                                    show('project-details');
+                                } else if (createProjectOptions.action === "clone") {
+                                    show('clone-project');
+                                }
                             }
                         }
                     ]
@@ -302,6 +319,366 @@ RED.projects = (function() {
                         ]
                     }
                 };
+            })(),
+            'clone-project': (function() {
+                var projectNameInput;
+                var projectSummaryInput;
+                var projectFlowFileInput;
+                var projectSecretInput;
+                var projectSecretSelect;
+                var copyProject;
+                var projectRepoInput;
+                var projectCloneSecret;
+                var emptyProjectCredentialInput;
+                var projectRepoUserInput;
+                var projectRepoPasswordInput;
+                var projectNameSublabel;
+                var projectRepoSSHKeySelect;
+                var projectRepoPassphrase;
+                var projectRepoRemoteName
+                var projectRepoBranch;
+                var selectedProject;
+
+                return {
+                    content: function(options) {
+                        var container = $('<div class="projects-dialog-screen-start"></div>');
+                        migrateProjectHeader.appendTo(container);
+                        var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
+                        $('<p>').text("Clone a project").appendTo(body);
+                        $('<p>').text("If you already have a git repository containing a project, you can clone it to get started.").appendTo(body);
+
+                        var projectList = null;
+                        var pendingFormValidation = false;
+                        $.getJSON("projects", function(data) {
+                            projectList = {};
+                            data.projects.forEach(function(p) {
+                                projectList[p] = true;
+                                if (pendingFormValidation) {
+                                    pendingFormValidation = false;
+                                    validateForm();
+                                }
+                            })
+                        });
+
+
+                        var validateForm = function() {
+                            var projectName = projectNameInput.val();
+                            var valid = true;
+                            if (projectNameInputChanged) {
+                                if (projectList === null) {
+                                    pendingFormValidation = true;
+                                    return;
+                                }
+                                projectNameStatus.empty();
+                                if (!/^[a-zA-Z0-9\-_]+$/.test(projectName) || projectList[projectName]) {
+                                    projectNameInput.addClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-exclamation-triangle"></i>').appendTo(projectNameStatus);
+                                    projectNameValid = false;
+                                    valid = false;
+                                    if (projectList[projectName]) {
+                                        projectNameSublabel.text("Project already exists");
+                                    } else {
+                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    }
+                                } else {
+                                    projectNameInput.removeClass("input-error");
+                                    $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
+                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameValid = true;
+                                }
+                                projectNameLastChecked = projectName;
+                            }
+                            valid = projectNameValid;
+
+                            var repo = projectRepoInput.val();
+
+                            // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
+                            var validRepo = repo.length > 0 && !/\s/.test(repo);
+                            if (/^https?:\/\/[^/]+@/i.test(repo)) {
+                                $("#projects-dialog-screen-create-project-repo-label small").text("Do not include the username/password in the url");
+                                validRepo = false;
+                            }
+                            if (!validRepo) {
+                                if (projectRepoChanged) {
+                                    projectRepoInput.addClass("input-error");
+                                }
+                                valid = false;
+                            } else {
+                                projectRepoInput.removeClass("input-error");
+                            }
+                            if (/^https?:\/\//.test(repo)) {
+                                $(".projects-dialog-screen-create-row-creds").show();
+                                $(".projects-dialog-screen-create-row-sshkey").hide();
+                            } else if (/^(?:ssh|[\S]+?@[\S]+?):(?:\/\/)?/.test(repo)) {
+                                $(".projects-dialog-screen-create-row-creds").hide();
+                                $(".projects-dialog-screen-create-row-sshkey").show();
+                                // if ( !getSelectedSSHKey(projectRepoSSHKeySelect) ) {
+                                //     valid = false;
+                                // }
+                            } else {
+                                $(".projects-dialog-screen-create-row-creds").hide();
+                                $(".projects-dialog-screen-create-row-sshkey").hide();
+                            }
+
+                            $("#projects-dialog-clone-project").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
+                        }
+
+                        var row;
+
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty projects-dialog-screen-create-row-clone"></div>').appendTo(body);
+                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
+
+                        var subrow = $('<div style="position:relative;"></div>').appendTo(row);
+                        projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').appendTo(subrow);
+                        var projectNameStatus = $('<div class="projects-dialog-screen-input-status"></div>').appendTo(subrow);
+
+                        var projectNameInputChanged = false;
+                        var projectNameLastChecked = "";
+                        var projectNameValid;
+                        var checkProjectName;
+                        var autoInsertedName = "";
+
+
+                        projectNameInput.on("change keyup paste",function() {
+                            projectNameInputChanged = (projectNameInput.val() !== projectNameLastChecked);
+                            if (checkProjectName) {
+                                clearTimeout(checkProjectName);
+                            } else if (projectNameInputChanged) {
+                                projectNameStatus.empty();
+                                $('<img src="red/images/spin.svg"/>').appendTo(projectNameStatus);
+                                if (projectNameInput.val() === '') {
+                                    validateForm();
+                                    return;
+                                }
+                            }
+                            checkProjectName = setTimeout(function() {
+                                validateForm();
+                                checkProjectName = null;
+                            },300)
+                        });
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(body);
+                        $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
+                        projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
+                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
+                        var projectRepoChanged = false;
+                        var lastProjectRepo = "";
+                        projectRepoInput.on("change keyup paste",function() {
+                            projectRepoChanged = true;
+                            var repo = $(this).val();
+                            if (lastProjectRepo !== repo) {
+                                $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                            }
+                            lastProjectRepo = repo;
+
+                            var m = /\/([^/]+?)(?:\.git)?$/.exec(repo);
+                            if (m) {
+                                var projectName = projectNameInput.val();
+                                if (projectName === "" || projectName === autoInsertedName) {
+                                    autoInsertedName = m[1];
+                                    projectNameInput.val(autoInsertedName);
+                                    projectNameInput.change();
+                                }
+                            }
+                            validateForm();
+                        });
+
+                        var cloneAuthRows = $('<div class="projects-dialog-screen-create-row"></div>').appendTo(body);
+                        row = $('<div class="form-row projects-dialog-screen-create-row-auth-error"></div>').hide().appendTo(cloneAuthRows);
+                        $('<div><i class="fa fa-warning"></i> Authentication failed</div>').appendTo(row);
+
+                        // Repo credentials - username/password ----------------
+                        row = $('<div class="hide form-row projects-dialog-screen-create-row-creds"></div>').hide().appendTo(cloneAuthRows);
+
+                        var subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-user">Username</label>').appendTo(subrow);
+                        projectRepoUserInput = $('<input id="projects-dialog-screen-create-project-repo-user" type="text"></input>').appendTo(subrow);
+
+                        subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-pass">Password</label>').appendTo(subrow);
+                        projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
+                        // -----------------------------------------------------
+
+                        // Repo credentials - key/passphrase -------------------
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(cloneAuthRows);
+                        subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Key</label>').appendTo(subrow);
+                        projectRepoSSHKeySelect = $("<select>",{style:"width: 100%"}).appendTo(subrow);
+
+                        $.getJSON("settings/user/keys", function(data) {
+                            var count = 0;
+                            data.keys.forEach(function(key) {
+                                projectRepoSSHKeySelect.append($("<option></option>").val(key.name).text(key.name));
+                                count++;
+                            });
+                            if (count === 0) {
+                                projectRepoSSHKeySelect.addClass("input-error");
+                                projectRepoSSHKeySelect.attr("disabled",true);
+                                sshwarningRow.show();
+                            } else {
+                                projectRepoSSHKeySelect.removeClass("input-error");
+                                projectRepoSSHKeySelect.attr("disabled",false);
+                                sshwarningRow.hide();
+                            }
+                        });
+                        subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">Passphrase</label>').appendTo(subrow);
+                        projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password"></input>').appendTo(subrow);
+
+                        subrow = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').appendTo(cloneAuthRows);
+                        var sshwarningRow = $('<div class="projects-dialog-screen-create-row-auth-error-no-keys"></div>').hide().appendTo(subrow);
+                        $('<div class="form-row"><i class="fa fa-warning"></i> Before you can clone a repository over ssh you must add an SSH key to access it.</div>').appendTo(sshwarningRow);
+                        subrow = $('<div style="text-align: center">').appendTo(sshwarningRow);
+                        $('<button class="editor-button">Add an ssh key</button>').appendTo(subrow).click(function(e) {
+                            e.preventDefault();
+                            $('#projects-dialog-cancel').click();
+                            RED.userSettings.show('gitconfig');
+                            setTimeout(function() {
+                                $("#user-settings-gitconfig-add-key").click();
+                            },500);
+                        });
+                        // -----------------------------------------------------
+
+
+                        // Secret - clone
+                        row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(body);
+                        $('<label>Credentials encryption key</label>').appendTo(row);
+                        projectSecretInput = $('<input type="password"></input>').appendTo(row);
+
+
+
+                        return container;
+                    },
+                    buttons: function(options) {
+                        return [
+                            {
+                                text: "Back",
+                                click: function() {
+                                    show('git-config');
+                                }
+                            },
+                            {
+                                id: "projects-dialog-clone-project",
+                                disabled: true,
+                                text: "Clone project", // TODO: nls
+                                class: "primary disabled",
+                                click: function() {
+                                    var projectType = $(".projects-dialog-screen-create-type.selected").data('type');
+                                    var projectData = {
+                                        name: projectNameInput.val(),
+                                    }
+                                    projectData.credentialSecret = projectSecretInput.val();
+                                    var repoUrl = projectRepoInput.val();
+                                    var metaData = {};
+                                    if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(repoUrl)) {
+                                        var selected = projectRepoSSHKeySelect.val();//false;//getSelectedSSHKey(projectRepoSSHKeySelect);
+                                        if ( selected ) {
+                                            projectData.git = {
+                                                remotes: {
+                                                    'origin': {
+                                                        url: repoUrl,
+                                                        keyFile: selected,
+                                                        passphrase: projectRepoPassphrase.val()
+                                                    }
+                                                }
+                                            };
+                                        }
+                                        else {
+                                            console.log("Error! Can't get selected SSH key path.");
+                                            return;
+                                        }
+                                    }
+                                    else {
+                                        projectData.git = {
+                                            remotes: {
+                                                'origin': {
+                                                    url: repoUrl,
+                                                    username: projectRepoUserInput.val(),
+                                                    password: projectRepoPasswordInput.val()
+                                                }
+                                            }
+                                        };
+                                    }
+
+                                    $(".projects-dialog-screen-create-row-auth-error").hide();
+                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+
+                                    projectRepoUserInput.removeClass("input-error");
+                                    projectRepoPasswordInput.removeClass("input-error");
+                                    projectRepoSSHKeySelect.removeClass("input-error");
+                                    projectRepoPassphrase.removeClass("input-error");
+
+                                    RED.deploy.setDeployInflight(true);
+                                    RED.projects.settings.switchProject(projectData.name);
+
+                                    sendRequest({
+                                        url: "projects",
+                                        type: "POST",
+                                        handleAuthFail: false,
+                                        responses: {
+                                            200: function(data) {
+                                                dialog.dialog( "close" );
+                                            },
+                                            400: {
+                                                'project_exists': function(error) {
+                                                    console.log("already exists");
+                                                },
+                                                'git_error': function(error) {
+                                                    console.log("git error",error);
+                                                },
+                                                'git_connection_failed': function(error) {
+                                                    projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Connection failed");
+                                                },
+                                                'git_not_a_repository': function(error) {
+                                                    projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Not a git repository");
+                                                },
+                                                'git_repository_not_found': function(error) {
+                                                    projectRepoInput.addClass("input-error");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Repository not found");
+                                                },
+                                                'git_auth_failed': function(error) {
+                                                    $(".projects-dialog-screen-create-row-auth-error").show();
+
+                                                    projectRepoUserInput.addClass("input-error");
+                                                    projectRepoPasswordInput.addClass("input-error");
+                                                    // getRepoAuthDetails(req);
+                                                    projectRepoSSHKeySelect.addClass("input-error");
+                                                    projectRepoPassphrase.addClass("input-error");
+                                                },
+                                                'missing_flow_file': function(error) {
+                                                    // This is handled via a runtime notification.
+                                                    dialog.dialog("close");
+                                                },
+                                                'project_empty': function(error) {
+                                                    // This is handled via a runtime notification.
+                                                    dialog.dialog("close");
+                                                },
+                                                'credentials_load_failed': function(error) {
+                                                    // This is handled via a runtime notification.
+                                                    dialog.dialog("close");
+                                                },
+                                                '*': function(error) {
+                                                    reportUnexpectedError(error);
+                                                    $( dialog ).dialog( "close" );
+                                                }
+                                            }
+                                        }
+                                    },projectData).then(function() {
+                                        RED.events.emit("project:change", {name:name});
+                                    }).always(function() {
+                                        setTimeout(function() {
+                                            RED.deploy.setDeployInflight(false);
+                                        },500);
+                                    })
+
+                                }
+                            }
+                        ]
+                    }
+                }
             })(),
             'default-files': (function() {
                 var projectFlowFileInput;
@@ -1127,6 +1504,7 @@ RED.projects = (function() {
                                     }
 
                                     $(".projects-dialog-screen-create-row-auth-error").hide();
+                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
 
                                     projectRepoUserInput.removeClass("input-error");
                                     projectRepoPasswordInput.removeClass("input-error");
@@ -1873,6 +2251,43 @@ RED.projects = (function() {
         createProjectOptions = {};
         show('default-files',{existingProject: true});
     }
+    function createDefaultPackageFile() {
+        RED.deploy.setDeployInflight(true);
+        RED.projects.settings.switchProject(activeProject.name);
+
+        var method = "PUT";
+        var url = "projects/"+activeProject.name;
+        var createProjectOptions = {
+            initialise: true
+        };
+        sendRequest({
+            url: url,
+            type: method,
+            requireCleanWorkspace: true,
+            handleAuthFail: false,
+            responses: {
+                200: function(data) { },
+                400: {
+                    'git_error': function(error) {
+                        console.log("git error",error);
+                    },
+                    'missing_flow_file': function(error) {
+                        // This is a natural next error - but let the runtime event
+                        // trigger the dialog rather than double-report it.
+                        $( dialog ).dialog( "close" );
+                    },
+                    '*': function(error) {
+                        reportUnexpectedError(error);
+                        $( dialog ).dialog( "close" );
+                    }
+                }
+            }
+        },createProjectOptions).always(function() {
+            setTimeout(function() {
+                RED.deploy.setDeployInflight(false);
+            },500);
+        })
+    }
 
     function refresh(done) {
         $.getJSON("projects",function(data) {
@@ -1952,6 +2367,7 @@ RED.projects = (function() {
             RED.projects.settings.show('deps');
         },
         createDefaultFileSet: createDefaultFileSet,
+        createDefaultPackageFile: createDefaultPackageFile,
         // showSidebar: showSidebar,
         refresh: refresh,
         editProject: function() {

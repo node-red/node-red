@@ -592,7 +592,10 @@ RED.sidebar.versionControl = (function() {
                     closeBranchBox();
                     localCommitListShade.show();
                     $(this).addClass('selected');
+                    var activeProject = RED.projects.getActiveProject();
+                    $("#sidebar-version-control-repo-toolbar-set-upstream-row").toggle(!!activeProject.git.branches.remoteAlt);
                     remoteBox.show();
+
                     setTimeout(function() {
                         remoteBox.css("height","265px");
                     },100);
@@ -868,7 +871,8 @@ RED.sidebar.versionControl = (function() {
                 if (activeProject.git.branches.remoteAlt) {
                     url+="/"+activeProject.git.branches.remoteAlt;
                 }
-                if ($("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked')) {
+                var setUpstream = $("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked');
+                if (setUpstream) {
                     url+="?u=true"
                 }
                 utils.sendRequest({
@@ -880,6 +884,10 @@ RED.sidebar.versionControl = (function() {
                             // done(error,null);
                         },
                         200: function(data) {
+                            if (setUpstream && activeProject.git.branches.remoteAlt) {
+                                activeProject.git.branches.remote = activeProject.git.branches.remoteAlt;
+                                delete activeProject.git.branches.remoteAlt;
+                            }
                             refresh(true);
                             closeRemoteBox();
                         },
@@ -928,6 +936,10 @@ RED.sidebar.versionControl = (function() {
                         // done(error,null);
                     },
                     200: function(data) {
+                        if (options.setUpstream && activeProject.git.branches.remoteAlt) {
+                            activeProject.git.branches.remote = activeProject.git.branches.remoteAlt;
+                            delete activeProject.git.branches.remoteAlt;
+                        }
                         refresh(true);
                         closeRemoteBox();
                     },

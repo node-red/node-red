@@ -21,6 +21,7 @@ module.exports = function(RED) {
     function CheerioNode(n) {
         RED.nodes.createNode(this,n);
         this.property = n.property||"payload";
+        this.outproperty = n.outproperty||this.property||"payload";
         this.tag = n.tag;
         this.ret = n.ret || "html";
         this.as = n.as || "single";
@@ -48,7 +49,7 @@ module.exports = function(RED) {
                             /* istanbul ignore else */
                             if (pay2) {
                                 var new_msg = RED.util.cloneMessage(msg);
-                                RED.util.setMessageProperty(new_msg,node.property,pay2);
+                                RED.util.setMessageProperty(new_msg,node.outproperty,pay2);
                                 new_msg.parts = {
                                     id: msg._msgid,
                                     index: index,
@@ -68,7 +69,7 @@ module.exports = function(RED) {
                         index++;
                     });
                     if (node.as === "single") {  // Always return an array - even if blank
-                        RED.util.setMessageProperty(msg,node.property,pay);
+                        RED.util.setMessageProperty(msg,node.outproperty,pay);
                         node.send(msg);
                     }
                 }

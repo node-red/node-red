@@ -31,7 +31,7 @@ done
 # Find the real location of this script
 CURRENT_PATH=`pwd`
 SCRIPT_PATH="${BASH_SOURCE[0]}";
-while([ -h "${SCRIPT_PATH}" ]); do
+while [ -h "${SCRIPT_PATH}" ]; do
     cd "`dirname "${SCRIPT_PATH}"`"
     SCRIPT_PATH="$(readlink "`basename "${SCRIPT_PATH}"`")";
 done

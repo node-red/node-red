@@ -48,7 +48,9 @@ function runGitCommand(args,cwd,env) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
                 err.stderr = stderr;
-                if (/fatal: could not read/i.test(stderr)) {
+                if(/Connection refused/i.test(stderr)) {
+                    err.code = "git_connection_failed";
+                } else if (/fatal: could not read/i.test(stderr)) {
                     // Username/Password
                     err.code = "git_auth_failed";
                 } else if(/HTTP Basic: Access denied/i.test(stderr)) {
@@ -58,8 +60,6 @@ function runGitCommand(args,cwd,env) {
                 } else if(/Host key verification failed/i.test(stderr)) {
                     // TODO: handle host key verification errors separately
                     err.code = "git_auth_failed";
-                } else if(/Connection refused/i.test(stderr)) {
-                    err.code = "git_connection_failed";
                 } else if (/commit your changes or stash/i.test(stderr)) {
                     err.code = "git_local_overwrite";
                 } else if (/CONFLICT/.test(err.stdout)) {

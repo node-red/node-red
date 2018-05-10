@@ -327,17 +327,22 @@
             "verify-server-cert": "サーバの証明書を確認",
             "compatmode": "旧MQTT 3.1のサポート"
         },
+        "sections-label":{
+            "birth-message": "接続時の送信メッセージ(Birthメッセージ)",
+            "will-message":"予期しない切断時の送信メッセージ(Willメッセージ)",
+            "close-message":"切断前の送信メッセージ(Closeメッセージ)"
+        },
         "tabs-label": {
             "connection": "接続",
             "security": "セキュリティ",
-            "will": "Willメッセージ",
-            "birth": "Birthメッセージ"
+            "messages": "メッセージ"
         },
         "placeholder": {
             "clientid": "IDを自動生成する場合は、無記入にしてください",
             "clientid-nonclean": "新規ではないセッションを設定してください",
             "will-topic": "Willメッセージを無効化する場合は、無記入にしてください",
-            "birth-topic": "Birthメッセージを無効化する場合は、無記入にしてください"
+            "birth-topic": "Birthメッセージを無効化する場合は、無記入にしてください",
+            "close-topic": "Closeメッセージを無効化する場合は、無記入にしてください"
         },
         "state": {
             "connected": "ブローカへ接続しました: __broker__",
@@ -488,14 +493,14 @@
             "output": "出力",
             "group": "グループ",
             "interface": "ローカルIP",
-            "interfaceprompt": "(任意) 使用するローカルIPアドレス",
             "send": "送信",
             "toport": "ポート",
             "address": "アドレス",
             "decode-base64": "Base64形式のペイロードを復号"
         },
         "placeholder": {
-            "interface": "(任意) eth0のIPアドレス",
+            "interface": "(任意) 使用するローカルインターフェイスもしくはアドレス",
+            "interfaceprompt": "(任意) 使用するローカルインターフェイスもしくはアドレス",
             "address": "宛先IPアドレス"
         },
         "udpmsgs": "UDPメッセージ",
@@ -523,10 +528,11 @@
             "mc-group": "udpノードがグループ __group__ へマルチキャストしました",
             "listener-stopped": "udpノードが待ち受けを停止しました",
             "output-stopped": "udpノードが出力を停止しました",
-            "mc-ready": "udpノードはマルチキャストの準備ができています: __outport__ -> __host__:__port__",
+            "mc-ready": "udpノードはマルチキャストの準備ができています: __iface__:__outport__ -> __host__:__port__",
             "bc-ready": "udpノードはブロードキャストの準備ができています: __outport__ -> __host__:__port__",
             "ready": "udpノードは準備ができています: __outport__ -> __host__:__port__",
-            "ready-nolocal": "udpノードは準備ができています: __host__:__port__"
+            "ready-nolocal": "udpノードは準備ができています: __host__:__port__",
+            "re-use": "udp再利用ソケット: __outport__ -> __host__:__port__"
         },
         "errors": {
             "access-error": "UDP接続エラー 管理者権限で1024未満のポート番号にアクセスできる必要があります",
@@ -536,6 +542,8 @@
             "ip-notset": "udp: IPアドレスが設定されていません",
             "port-notset": "udp: ポートが設定されていません",
             "port-invalid": "udp: ポート番号が不正です",
+            "alreadyused": "udp: 既に__port__番ポートが使用されています",
+            "ifnotfound": "udp: インターフェイス __iface__ がありません",
             "alreadyused": "udp: 既にポートが使用されています"
         }
     },
@@ -661,7 +669,8 @@
     "html": {
         "label": {
             "select": "抽出する要素",
-            "output": "出力"
+            "output": "出力",
+	    "in": "対象:"
         },
         "output": {
             "html": "要素内のHTML",
@@ -761,7 +770,9 @@
         "status": {
             "stopped": "停止",
             "closed": "切断",
-            "not-running": "停止中"
+            "not-running": "停止中",
+            "not-available": "利用不可",
+            "na": "N/A : __value__"
         },
         "errors": {
             "ignorenode": "Raspberry Pi固有のノードを無視しました",
