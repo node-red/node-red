@@ -669,7 +669,8 @@
     "html": {
         "label": {
             "select": "抽出する要素",
-            "output": "出力"
+            "output": "出力",
+	    "in": "対象:"
         },
         "output": {
             "html": "要素内のHTML",
