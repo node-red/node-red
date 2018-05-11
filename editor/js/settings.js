@@ -89,18 +89,22 @@ RED.settings = (function () {
         userSettings = data;
     }
 
-    var init = function (done) {
+    var init = function (options, done) {
         var accessTokenMatch = /[?&]access_token=(.*?)(?:$|&)/.exec(window.location.search);
         if (accessTokenMatch) {
             var accessToken = accessTokenMatch[1];
             RED.settings.set("auth-tokens",{access_token: accessToken});
             window.location.search = "";
         }
+        RED.settings.apiRootUrl = options.apiRootUrl;
 
         $.ajaxSetup({
             beforeSend: function(jqXHR,settings) {
                 // Only attach auth header for requests to relative paths
                 if (!/^\s*(https?:|\/|\.)/.test(settings.url)) {
+                    if (options.apiRootUrl) {
+                        settings.url = options.apiRootUrl+settings.url;
+                    }
                     var auth_tokens = RED.settings.get("auth-tokens");
                     if (auth_tokens) {
                         jqXHR.setRequestHeader("Authorization","Bearer "+auth_tokens.access_token);

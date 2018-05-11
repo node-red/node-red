@@ -463,12 +463,21 @@ var RED = (function() {
         loadNodeList();
     }
 
+    var initialised = false;
 
-    function init() {
+    function init(options) {
+        if (initialised) {
+            throw new Error("RED already initialised");
+        }
+        initialised = true;
         ace.require("ace/ext/language_tools");
-
-        RED.i18n.init(function() {
-            RED.settings.init(loadEditor);
+        options = options || {};
+        options.apiRootUrl = options.apiRootUrl || "";
+        if (options.apiRootUrl && !/\/$/.test(options.apiRootUrl)) {
+            options.apiRootUrl = options.apiRootUrl+"/";
+        }
+        RED.i18n.init(options, function() {
+            RED.settings.init(options, loadEditor);
         })
     }
 

@@ -18,5 +18,7 @@ $(function() {
     if ((window.location.hostname !== "localhost") && (window.location.hostname !== "127.0.0.1")) {
         document.title = document.title+" : "+window.location.hostname;
     }
-    RED.init();
+    RED.init({
+        apiRootUrl: ""
+    });
 });

@@ -16,10 +16,13 @@
 
 RED.i18n = (function() {
 
+    var apiRootUrl;
+
     return {
-        init: function(done) {
+        init: function(options, done) {
+            apiRootUrl = options.apiRootUrl||"";
             i18n.init({
-                resGetPath: 'locales/__ns__?lng=__lng__',
+                resGetPath: apiRootUrl+'locales/__ns__?lng=__lng__',
                 dynamicLoad: false,
                 load:'current',
                 ns: {
@@ -45,7 +48,7 @@ RED.i18n = (function() {
                         "Accept":"application/json"
                     },
                     cache: false,
-                    url: 'nodes/'+namespace+'/messages?lng='+lang,
+                    url: apiRootUrl+'nodes/'+namespace+'/messages?lng='+lang,
                     success: function(data) {
                         i18n.addResourceBundle(lang,namespace,data);
                         toLoad--;
@@ -68,7 +71,7 @@ RED.i18n = (function() {
                         "Accept":"application/json"
                     },
                     cache: false,
-                    url: 'nodes/messages?lng='+lang,
+                    url: apiRootUrl+'nodes/messages?lng='+lang,
                     success: function(data) {
                         var namespaces = Object.keys(data);
                         namespaces.forEach(function(ns) {

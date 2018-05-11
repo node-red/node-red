@@ -745,25 +745,25 @@ RED.utils = (function() {
 
     function getNodeIcon(def,node) {
         if (def.category === 'config') {
-            return "icons/node-red/cog.png"
+            return RED.settings.apiRootUrl+"icons/node-red/cog.png"
         } else if (node && node.type === 'tab') {
-            return "icons/node-red/subflow.png"
+            return RED.settings.apiRootUrl+"icons/node-red/subflow.png"
         } else if (node && node.type === 'unknown') {
-            return "icons/node-red/alert.png"
+            return RED.settings.apiRootUrl+"icons/node-red/alert.png"
         } else if (node && node.icon) {
             var iconPath = separateIconPath(node.icon);
             if (isIconExists(iconPath)) {
-                return "icons/" + node.icon;
+                return RED.settings.apiRootUrl+"icons/" + node.icon;
             }
         }
 
         var iconPath = getDefaultNodeIcon(def, node);
         if (def.category === 'subflows') {
             if (!isIconExists(iconPath)) {
-                return "icons/node-red/subflow.png";
+                return RED.settings.apiRootUrl+"icons/node-red/subflow.png";
             }
         }
-        return "icons/"+iconPath.module+"/"+iconPath.file;
+        return RED.settings.apiRootUrl+"icons/"+iconPath.module+"/"+iconPath.file;
     }
 
     function getNodeLabel(node,defaultLabel) {
