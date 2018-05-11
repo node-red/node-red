@@ -174,7 +174,7 @@ RED.search = (function() {
             addItem: function(container,i,object) {
                 var node = object.node;
                 if (node === undefined) {
-                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
+                    $('<div>',{class:"red-ui-search-empty"}).text(RED._('search.empty')).appendTo(container);
 
                 } else {
                     var def = node._def;
@@ -200,12 +200,12 @@ RED.search = (function() {
                         } else {
                             workspace = "flow:"+workspace.label;
                         }
-                        $('<div>',{class:"red-ui-search-result-node-flow"}).html(workspace).appendTo(contentDiv);
+                        $('<div>',{class:"red-ui-search-result-node-flow"}).text(workspace).appendTo(contentDiv);
                     }
 
-                    $('<div>',{class:"red-ui-search-result-node-label"}).html(object.label || node.id).appendTo(contentDiv);
-                    $('<div>',{class:"red-ui-search-result-node-type"}).html(node.type).appendTo(contentDiv);
-                    $('<div>',{class:"red-ui-search-result-node-id"}).html(node.id).appendTo(contentDiv);
+                    $('<div>',{class:"red-ui-search-result-node-label"}).text(object.label || node.id).appendTo(contentDiv);
+                    $('<div>',{class:"red-ui-search-result-node-type"}).text(node.type).appendTo(contentDiv);
+                    $('<div>',{class:"red-ui-search-result-node-id"}).text(node.id).appendTo(contentDiv);
 
                     div.click(function(evt) {
                         evt.preventDefault();

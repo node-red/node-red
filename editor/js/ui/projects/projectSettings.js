@@ -444,9 +444,9 @@ RED.projects.settings = (function() {
                     }
                     var icon = $('<i class="fa '+iconClass+'"></i>').appendTo(titleRow);
                     entry.icon = icon;
-                    $('<span>').html(entry.id).appendTo(titleRow);
+                    $('<span>').text(entry.id).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
-                    var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
+                    var versionSpan = $('<span>').text(entry.version).appendTo(metaRow);
                     metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
                     var buttons = $('<div class="palette-module-button-group"></div>').appendTo(metaRow);
                     if (RED.user.hasPermission("projects.write")) {

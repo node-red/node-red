@@ -167,7 +167,7 @@ RED.sidebar.info = (function() {
                 $(propRow.children()[1]).text(node.label||node.name||"");
                 if (node.type === "tab") {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
-                    $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+                    $(propRow.children()[1]).text((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
                 }
             } else {
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.node")+"</td><td></td></tr>").appendTo(tableBody);
@@ -175,10 +175,12 @@ RED.sidebar.info = (function() {
 
 
                 if (node.type !== "subflow" && node.name) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td></td></tr>').appendTo(tableBody);
+                    $('<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'"></span>').text(node.name).appendTo(propRow.children()[1]);
                 }
                 if (!m) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>"+node.type+"</td></tr>").appendTo(tableBody);
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td></td></tr>").appendTo(tableBody);
+                    $(propRow.children()[1]).text(node.type);
                 }
 
                 if (!m && node.type != "subflow" && node.type != "comment") {
@@ -206,7 +208,7 @@ RED.sidebar.info = (function() {
                                         nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
                                         var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
                                         $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
-                                        var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).html(configLabel).appendTo(container);
+                                        var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).text(configLabel).appendTo(container);
 
                                         nodeDiv.on('dblclick',function() {
                                             RED.editor.editConfig("", configNode.type, configNode.id);
@@ -236,19 +238,19 @@ RED.sidebar.info = (function() {
 
             var infoText = "";
             if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
-                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
                 var helpText = $("script[data-help-name='"+node.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
                 infoText = helpText;
             } else if (node.type === "tab") {
-                infoSection.title.html(RED._("sidebar.info.flowDesc"));
+                infoSection.title.text(RED._("sidebar.info.flowDesc"));
                 infoText = marked(node.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
             }
 
             if (subflowNode) {
                 infoText = infoText + (marked(subflowNode.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>'));
-                infoSection.title.html(RED._("sidebar.info.subflowDesc"));
+                infoSection.title.text(RED._("sidebar.info.subflowDesc"));
             } else if (node._def && node._def.info) {
-                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
                 var info = node._def.info;
                 var textInfo = (typeof info === "function" ? info.call(node) : info);
                 // TODO: help

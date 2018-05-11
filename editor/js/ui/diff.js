@@ -51,11 +51,11 @@ RED.diff = (function() {
                 var tabForLabel = (object.newTab || object.tab).n;
                 var titleSpan = $('<span>',{class:"node-diff-tab-title-meta"}).appendTo(originalCell);
                 if (tabForLabel.type === 'tab') {
-                    titleSpan.html(tabForLabel.label||tabForLabel.id);
+                    titleSpan.text(tabForLabel.label||tabForLabel.id);
                 } else if (tab.type === 'subflow') {
-                    titleSpan.html((tabForLabel.name||tabForLabel.id));
+                    titleSpan.text((tabForLabel.name||tabForLabel.id));
                 } else {
-                    titleSpan.html(RED._("diff.globalNodes"));
+                    titleSpan.text(RED._("diff.globalNodes"));
                 }
                 var flowStats = {
                     local: {
@@ -131,7 +131,7 @@ RED.diff = (function() {
                             }
                         }
                         $('<span class="node-diff-chevron"><i class="fa fa-angle-down"></i></span>').appendTo(originalNodeDiv);
-                        $('<span>').html(RED._("diff.flowProperties")).appendTo(originalNodeDiv);
+                        $('<span>').text(RED._("diff.flowProperties")).appendTo(originalNodeDiv);
 
                         row.click(function(evt) {
                             evt.preventDefault();
@@ -206,7 +206,7 @@ RED.diff = (function() {
                             }
                         }
                         var localStats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(localCell);
-                        $('<span class="node-diff-status"></span>').html(RED._('diff.nodeCount',{count:localNodeCount})).appendTo(localStats);
+                        $('<span class="node-diff-status"></span>').text(RED._('diff.nodeCount',{count:localNodeCount})).appendTo(localStats);
 
                         if (flowStats.conflicts + flowStats.local.addedCount + flowStats.local.changedCount + flowStats.local.deletedCount > 0) {
                             $('<span class="node-diff-status"> [ </span>').appendTo(localStats);
@@ -245,7 +245,7 @@ RED.diff = (function() {
                                 }
                             }
                             var remoteStats = $('<span>',{class:"node-diff-tab-stats"}).appendTo(remoteCell);
-                            $('<span class="node-diff-status"></span>').html(RED._('diff.nodeCount',{count:remoteNodeCount})).appendTo(remoteStats);
+                            $('<span class="node-diff-status"></span>').text(RED._('diff.nodeCount',{count:remoteNodeCount})).appendTo(remoteStats);
                             if (flowStats.conflicts + flowStats.remote.addedCount + flowStats.remote.changedCount + flowStats.remote.deletedCount > 0) {
                                 $('<span class="node-diff-status"> [ </span>').appendTo(remoteStats);
                                 if (flowStats.conflicts > 0) {
@@ -464,7 +464,7 @@ RED.diff = (function() {
         wires.forEach(function(p,i) {
             var port = $("<li>").appendTo(list);
             if (p && p.length > 0) {
-                $("<span>").html(i+1).appendTo(port);
+                $("<span>").text(i+1).appendTo(port);
                 var links = $("<ul>").appendTo(port);
                 p.forEach(function(d) {
                     c++;
@@ -474,15 +474,15 @@ RED.diff = (function() {
                         var def = RED.nodes.getType(node.type)||{};
                         createNode(node,def).appendTo(entry);
                     } else {
-                        entry.html(d);
+                        entry.text(d);
                     }
                 })
             } else {
-                port.html('none');
+                port.text('none');
             }
         })
         if (c === 0) {
-            result.html("none");
+            result.text("none");
         } else {
             list.appendTo(result);
         }
@@ -507,7 +507,7 @@ RED.diff = (function() {
         createNodeIcon(node,def).appendTo(nodeTitleDiv);
         var contentDiv = $('<div>',{class:"node-diff-node-description"}).appendTo(nodeTitleDiv);
         var nodeLabel = node.label || node.name || node.id;
-        $('<span>',{class:"node-diff-node-label"}).html(nodeLabel).appendTo(contentDiv);
+        $('<span>',{class:"node-diff-node-label"}).text(nodeLabel).appendTo(contentDiv);
         return nodeTitleDiv;
     }
     function createNodeDiffRow(node,stats,CurrentDiff) {
@@ -739,7 +739,7 @@ RED.diff = (function() {
         var status;
 
         row = $("<tr>").appendTo(nodePropertiesTableBody);
-        $("<td>",{class:"node-diff-property-cell-label"}).html("id").appendTo(row);
+        $("<td>",{class:"node-diff-property-cell-label"}).text("id").appendTo(row);
         localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
         if (localNode) {
             localCell.addClass("node-diff-node-unchanged");
@@ -782,7 +782,7 @@ RED.diff = (function() {
                 conflict = true;
             }
             row = $("<tr>").appendTo(nodePropertiesTableBody);
-            $("<td>",{class:"node-diff-property-cell-label"}).html("position").appendTo(row);
+            $("<td>",{class:"node-diff-property-cell-label"}).text("position").appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 localCell.addClass("node-diff-node-"+(localChanged?"changed":"unchanged"));
@@ -850,7 +850,7 @@ RED.diff = (function() {
                 conflict = true;
             }
             row = $("<tr>").appendTo(nodePropertiesTableBody);
-            $("<td>",{class:"node-diff-property-cell-label"}).html("wires").appendTo(row);
+            $("<td>",{class:"node-diff-property-cell-label"}).text("wires").appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 if (!conflict) {
@@ -917,7 +917,7 @@ RED.diff = (function() {
             }
 
             row = $("<tr>").appendTo(nodePropertiesTableBody);
-            var propertyNameCell = $("<td>",{class:"node-diff-property-cell-label"}).html(d).appendTo(row);
+            var propertyNameCell = $("<td>",{class:"node-diff-property-cell-label"}).text(d).appendTo(row);
             localCell = $("<td>",{class:"node-diff-property-cell node-diff-node-local"}).appendTo(row);
             if (localNode) {
                 if (!conflict) {

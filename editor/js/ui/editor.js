@@ -660,7 +660,7 @@ RED.editor = (function() {
                 return A.i-B.i;
             })
             rows.forEach(function(r,i) {
-                r.r.find("label").html((i+1)+".");
+                r.r.find("label").text((i+1)+".");
                 r.r.appendTo(outputsDiv);
             })
             if (rows.length === 0) {
@@ -696,12 +696,12 @@ RED.editor = (function() {
     function buildLabelRow(type, index, value, placeHolder) {
         var result = $('<div>',{class:"node-label-form-row"});
         if (type === undefined) {
-            $('<span>').html(RED._("editor.noDefaultLabel")).appendTo(result);
+            $('<span>').text(RED._("editor.noDefaultLabel")).appendTo(result);
             result.addClass("node-label-form-none");
         } else {
             result.addClass("");
             var id = "node-label-form-"+type+"-"+index;
-            $('<label>',{for:id}).html((index+1)+".").appendTo(result);
+            $('<label>',{for:id}).text((index+1)+".").appendTo(result);
             var input = $('<input>',{type:"text",id:id, placeholder: placeHolder}).val(value).appendTo(result);
             var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(result);
             clear.click(function(evt) {
@@ -1366,7 +1366,7 @@ RED.editor = (function() {
 
                     dialogForm.i18n();
                     if (node_def.hasUsers !== false) {
-                        $("#node-config-dialog-user-count").find("span").html(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
+                        $("#node-config-dialog-user-count").find("span").text(RED._("editor.nodesUse", {count:editing_config_node.users.length})).parent().show();
                     }
                     done();
                 });
@@ -1796,7 +1796,7 @@ RED.editor = (function() {
                         userCount++;
                     }
                 });
-                $("#subflow-dialog-user-count").html(RED._("subflow.subflowInstances", {count:userCount})).show();
+                $("#subflow-dialog-user-count").text(RED._("subflow.subflowInstances", {count:userCount})).show();
 
                 buildLabelForm(portLabels.content,subflow);
                 validateIcon(subflow);
@@ -1853,7 +1853,7 @@ RED.editor = (function() {
                     text: RED._("common.label.done"),
                     class: "primary",
                     click: function() {
-                        $("#node-input-expression-help").html("");
+                        $("#node-input-expression-help").text("");
                         onComplete(expressionEditor.getValue());
                         RED.tray.close();
                     }
