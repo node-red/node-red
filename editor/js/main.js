@@ -15,6 +15,25 @@
  **/
 (function() {
 
+    function appendNodeConfig(nodeConfig) {
+        var m = /<!-- --- \[red-module:(\S+)\] --- -->/.exec(nodeConfig.trim());
+        var moduleId;
+        if (m) {
+            moduleId = m[1];
+        } else {
+            moduleId = "unknown";
+        }
+        try {
+            $("body").append(nodeConfig);
+        } catch(err) {
+            RED.notify(RED._("notification.errors.failedToAppendNode",{module:moduleId, error:err.toString()}),{
+                type: "error",
+                timeout: 10000
+            });
+            console.log("["+moduleId+"] "+err.toString());
+        }
+    }
+
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -55,7 +74,11 @@
             cache: false,
             url: 'nodes',
             success: function(data) {
-                $("body").append(data);
+                var configs = data.trim().split(/(?=<!-- --- \[red-module:\S+\] --- -->)/);
+                configs.forEach(function(data) {
+                    appendNodeConfig(data);
+                });
+
                 $("body").i18n();
                 $("#palette > .palette-spinner").hide();
                 $(".palette-scroll").removeClass("hide");
@@ -296,7 +319,7 @@
                     addedTypes = addedTypes.concat(m.types);
                     RED.i18n.loadCatalog(id, function() {
                         $.get('nodes/'+id, function(data) {
-                            $("body").append(data);
+                            appendNodeConfig(data);
                         });
                     });
                 });
@@ -324,7 +347,7 @@
                         RED.notify(RED._("palette.event.nodeEnabled", {count:msg.types.length})+typeList,"success");
                     } else {
                         $.get('nodes/'+msg.id, function(data) {
-                            $("body").append(data);
+                            appendNodeConfig(data);
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeAdded", {count:msg.types.length})+typeList,"success");
                         });

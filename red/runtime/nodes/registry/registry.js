@@ -426,6 +426,7 @@ function getAllNodeConfigs(lang) {
             var id = nodeList[i];
             var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
             if (config.enabled && !config.err) {
+                result += "\n<!-- --- [red-module:"+id+"] --- -->\n";
                 result += config.config;
                 result += loader.getNodeHelp(config,lang||"en-US")||"";
                 //script += config.script;
@@ -448,7 +449,7 @@ function getNodeConfig(id,lang) {
     }
     config = config.nodes[getNode(id)];
     if (config) {
-        var result = config.config;
+        var result = "<!-- --- [red-module:"+id+"] --- -->\n"+config.config;
         result += loader.getNodeHelp(config,lang||"en-US")
 
         //if (config.script) {
