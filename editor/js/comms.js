@@ -28,14 +28,24 @@ RED.comms = (function() {
 
     function connectWS() {
         active = true;
-        var path = location.hostname;
-        var port = location.port;
-        if (port.length !== 0) {
-            path = path+":"+port;
+        var wspath;
+
+        if (RED.settings.apiRootUrl) {
+            var m = /^(https?):\/\/(.*)$/.exec(RED.settings.apiRootUrl);
+            if (m) {
+                console.log(m);
+                wspath = "ws"+(m[1]==="https"?"s":"")+"://"+m[2]+"comms";
+            }
+        } else {
+            var path = location.hostname;
+            var port = location.port;
+            if (port.length !== 0) {
+                path = path+":"+port;
+            }
+            path = path+document.location.pathname;
+            path = path+(path.slice(-1) == "/"?"":"/")+"comms";
+            wspath = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
         }
-        path = path+document.location.pathname;
-        path = path+(path.slice(-1) == "/"?"":"/")+"comms";
-        path = "ws"+(document.location.protocol=="https:"?"s":"")+"://"+path;
 
         var auth_tokens = RED.settings.get("auth-tokens");
         pendingAuth = (auth_tokens!=null);
@@ -48,7 +58,7 @@ RED.comms = (function() {
             }
         }
 
-        ws = new WebSocket(path);
+        ws = new WebSocket(wspath);
         ws.onopen = function() {
             reconnectAttempts = 0;
             if (errornotification) {
