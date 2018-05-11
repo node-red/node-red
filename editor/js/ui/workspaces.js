@@ -172,12 +172,12 @@ RED.workspaces = (function() {
                         i.addClass('fa-toggle-on');
                         i.removeClass('fa-toggle-off');
                         $("#node-input-disabled").prop("checked",false);
-                        $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
+                        $("#node-input-disabled-label").text(RED._("editor:workspace.enabled"));
                     } else {
                         i.addClass('fa-toggle-off');
                         i.removeClass('fa-toggle-on');
                         $("#node-input-disabled").prop("checked",true);
-                        $("#node-input-disabled-label").html(RED._("editor:workspace.disabled"));
+                        $("#node-input-disabled-label").text(RED._("editor:workspace.disabled"));
                     }
                 })
 
@@ -185,13 +185,13 @@ RED.workspaces = (function() {
                     $("#node-input-disabled").prop("checked",workspace.disabled);
                     if (workspace.disabled) {
                         dialogForm.find("#node-input-disabled-btn i").removeClass('fa-toggle-on').addClass('fa-toggle-off');
-                        $("#node-input-disabled-label").html(RED._("editor:workspace.disabled"));
+                        $("#node-input-disabled-label").text(RED._("editor:workspace.disabled"));
                     } else {
-                        $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
+                        $("#node-input-disabled-label").text(RED._("editor:workspace.enabled"));
                     }
                 } else {
                     workspace.disabled = false;
-                    $("#node-input-disabled-label").html(RED._("editor:workspace.enabled"));
+                    $("#node-input-disabled-label").text(RED._("editor:workspace.enabled"));
                 }
 
                 $('<input type="text" style="display: none;" />').prependTo(dialogForm);

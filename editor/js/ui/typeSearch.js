@@ -147,7 +147,7 @@ RED.typeSearch = (function() {
                 var label = object.label;
                 object.index += "|"+label.toLowerCase();
 
-                $('<div>',{class:"red-ui-search-result-node-label"}).html(label).appendTo(contentDiv);
+                $('<div>',{class:"red-ui-search-result-node-label"}).text(label).appendTo(contentDiv);
 
                 div.click(function(evt) {
                     evt.preventDefault();

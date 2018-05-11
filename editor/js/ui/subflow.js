@@ -143,7 +143,7 @@ RED.subflow = (function() {
         RED.view.select();
         RED.nodes.dirty(true);
         RED.view.redraw();
-        $("#workspace-subflow-output .spinner-value").html(subflow.out.length);
+        $("#workspace-subflow-output .spinner-value").text(subflow.out.length);
     }
 
     function removeSubflowOutput(removedSubflowOutputs) {
@@ -220,7 +220,7 @@ RED.subflow = (function() {
             $("#workspace-subflow-input-add").toggleClass("active", activeSubflow.in.length !== 0);
             $("#workspace-subflow-input-remove").toggleClass("active",activeSubflow.in.length === 0);
 
-            $("#workspace-subflow-output .spinner-value").html(activeSubflow.out.length);
+            $("#workspace-subflow-output .spinner-value").text(activeSubflow.out.length);
         }
     }
 

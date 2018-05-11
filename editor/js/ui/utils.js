@@ -26,14 +26,14 @@ RED.utils = (function() {
     function buildMessageSummaryValue(value) {
         var result;
         if (Array.isArray(value)) {
-            result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('array['+value.length+']');
+            result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
         } else if (value === null) {
             result = $('<span class="debug-message-object-value debug-message-type-null">null</span>');
         } else if (typeof value === 'object') {
             if (value.hasOwnProperty('type') && value.type === 'Buffer' && value.hasOwnProperty('data')) {
-                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('buffer['+value.length+']');
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('buffer['+value.length+']');
             } else if (value.hasOwnProperty('type') && value.type === 'array' && value.hasOwnProperty('data')) {
-                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('array['+value.length+']');
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
             } else {
                 result = $('<span class="debug-message-object-value debug-message-type-meta">object</span>');
             }
@@ -304,7 +304,7 @@ RED.utils = (function() {
                 element.addClass('collapsed');
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header, function() {
-                    $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
+                    $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text(typeHint||'string').appendTo(header);
                     var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                     $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
                 },function(state) {if (ontoggle) { ontoggle(path,state);}}, checkExpanded(strippedKey,expandPaths));
@@ -358,7 +358,7 @@ RED.utils = (function() {
                 element.addClass('debug-message-buffer-raw');
             }
             if (key) {
-                headerHead = $('<span class="debug-message-type-meta"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
+                headerHead = $('<span class="debug-message-type-meta"></span>').text(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
             } else {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
                 $('<span>[ </span>').appendTo(headerHead);
@@ -381,7 +381,7 @@ RED.utils = (function() {
 
                 makeExpandable(header,function() {
                     if (!key) {
-                        headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
+                        headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text(typeHint||(type+'['+originalLength+']')).appendTo(header);
                     }
                     if (type === 'buffer') {
                         var stringRow = $('<div class="debug-message-string-rows"></div>').appendTo(element);
@@ -394,7 +394,7 @@ RED.utils = (function() {
                         }
                         $('<pre class="debug-message-type-string"></pre>').text(stringEncoding).appendTo(sr);
                         var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
-                        var switchFormat = $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
+                        var switchFormat = $('<a href="#"></a>').addClass('selected').text('raw').appendTo(bufferOpts).click(function(e) {
                             e.preventDefault();
                             e.stopPropagation();
                             formatBuffer(element,$(this),sourceId,path,true);
@@ -471,7 +471,7 @@ RED.utils = (function() {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header, function() {
                     if (!key) {
-                        $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html('object').appendTo(header);
+                        $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text('object').appendTo(header);
                     }
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
@@ -507,7 +507,7 @@ RED.utils = (function() {
                 checkExpanded(strippedKey,expandPaths));
             }
             if (key) {
-                $('<span class="debug-message-type-meta"></span>').html('object').appendTo(entryObj);
+                $('<span class="debug-message-type-meta"></span>').text('object').appendTo(entryObj);
             } else {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
                 $('<span>{ </span>').appendTo(headerHead);

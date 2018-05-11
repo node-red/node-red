@@ -50,7 +50,7 @@ RED.editor.types._expression = (function() {
                         text: RED._("common.label.done"),
                         class: "primary",
                         click: function() {
-                            $("#node-input-expression-help").html("");
+                            $("#node-input-expression-help").text("");
                             onComplete(expressionEditor.getValue());
                             RED.tray.close();
                         }
