@@ -1035,8 +1035,8 @@ RED.nodes = (function() {
                             node.outputs = n.outputs||node._def.outputs;
                             // If 'wires' is longer than outputs, clip wires
                             if (node.hasOwnProperty('wires') && node.wires.length > node.outputs) {
+                                console.log("Warning: node.wires longer than node.outputs - trimming wires:",node.id," wires:",node.wires.length," outputs:",node.outputs);
                                 node.wires = node.wires.slice(0,node.outputs);
-                                wireClippedNodes.push(node);
                             }
                             for (d in node._def.defaults) {
                                 if (node._def.defaults.hasOwnProperty(d)) {
