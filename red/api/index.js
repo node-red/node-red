@@ -32,6 +32,14 @@ function init(_server,settings,storage,runtimeAPI) {
     server = _server;
     if (settings.httpAdminRoot !== false) {
         adminApp = express();
+
+        var cors = require('cors');
+        var corsHandler = cors({
+           origin: "*",
+           methods: "GET,PUT,POST,DELETE"
+        });
+        adminApp.use(corsHandler);
+
         auth.init(settings,storage);
 
         var maxApiRequestSize = settings.apiMaxLength || '5mb';

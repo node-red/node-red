@@ -15,7 +15,8 @@
  **/
 var RED = (function() {
 
-    function appendNodeConfig(nodeConfig) {
+    function appendNodeConfig(nodeConfig,done) {
+        done = done || function(){};
         var m = /<!-- --- \[red-module:(\S+)\] --- -->/.exec(nodeConfig.trim());
         var moduleId;
         if (m) {
@@ -24,13 +25,31 @@ var RED = (function() {
             moduleId = "unknown";
         }
         try {
-            $("body").append(nodeConfig);
+            var hasDeferred = false;
+
+            var nodeConfigEls = $("<div>"+nodeConfig+"</div>");
+            nodeConfigEls.find("script").each(function(i,el) {
+                var srcUrl = $(el).attr('src');
+                if (srcUrl && !/^\s*(https?:|\/|\.)/.test(srcUrl)) {
+                    $(el).remove();
+                    var newScript = document.createElement("script");
+                    newScript.onload = function() { $("body").append(nodeConfigEls); done() }
+                    $('body').append(newScript);
+                    newScript.src = RED.settings.apiRootUrl+srcUrl;
+                    hasDeferred = true;
+                }
+            })
+            if (!hasDeferred) {
+                $("body").append(nodeConfigEls);
+                done();
+            }
         } catch(err) {
             RED.notify(RED._("notification.errors.failedToAppendNode",{module:moduleId, error:err.toString()}),{
                 type: "error",
                 timeout: 10000
             });
             console.log("["+moduleId+"] "+err.toString());
+            done();
         }
     }
 
@@ -75,36 +94,40 @@ var RED = (function() {
             url: 'nodes',
             success: function(data) {
                 var configs = data.trim().split(/(?=<!-- --- \[red-module:\S+\] --- -->)/);
-                configs.forEach(function(data) {
-                    appendNodeConfig(data);
-                });
-
-                $("body").i18n();
-                $("#palette > .palette-spinner").hide();
-                $(".palette-scroll").removeClass("hide");
-                $("#palette-search").removeClass("hide");
-                loadFlows(function() {
-                    if (RED.settings.theme("projects.enabled",false)) {
-                        RED.projects.refresh(function(activeProject) {
-                            RED.sidebar.info.refresh()
-                            if (!activeProject) {
-                                // Projects enabled but no active project
-                                RED.menu.setDisabled('menu-item-projects-open',true);
-                                RED.menu.setDisabled('menu-item-projects-settings',true);
-                                if (activeProject === false) {
-                                    // User previously decline the migration to projects.
-                                } else { // null/undefined
-                                    RED.projects.showStartup();
-                                }
+                var stepConfig = function() {
+                    if (configs.length === 0) {
+                        $("body").i18n();
+                        $("#palette > .palette-spinner").hide();
+                        $(".palette-scroll").removeClass("hide");
+                        $("#palette-search").removeClass("hide");
+                        loadFlows(function() {
+                            if (RED.settings.theme("projects.enabled",false)) {
+                                RED.projects.refresh(function(activeProject) {
+                                    RED.sidebar.info.refresh()
+                                    if (!activeProject) {
+                                        // Projects enabled but no active project
+                                        RED.menu.setDisabled('menu-item-projects-open',true);
+                                        RED.menu.setDisabled('menu-item-projects-settings',true);
+                                        if (activeProject === false) {
+                                            // User previously decline the migration to projects.
+                                        } else { // null/undefined
+                                            RED.projects.showStartup();
+                                        }
+                                    }
+                                    completeLoad();
+                                });
+                            } else {
+                                // Projects disabled by the user
+                                RED.sidebar.info.refresh()
+                                completeLoad();
                             }
-                            completeLoad();
                         });
                     } else {
-                        // Projects disabled by the user
-                        RED.sidebar.info.refresh()
-                        completeLoad();
+                        var config = configs.shift();
+                        appendNodeConfig(config,stepConfig);
                     }
-                });
+                }
+                stepConfig();
             }
         });
     }
