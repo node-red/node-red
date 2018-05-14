@@ -381,9 +381,9 @@ describe("red/nodes/registry/registry",function() {
                     types: [ "test-c","test-d"]
                 }
             }});
-            typeRegistry.getNodeConfig("test-module/test-name").should.eql('configAHEtest-nameLP');
-            typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('configBHEtest-name-2LP');
-            typeRegistry.getAllNodeConfigs().should.eql('configAHEtest-nameLPconfigBHEtest-name-2LP');
+            typeRegistry.getNodeConfig("test-module/test-name").should.eql('<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP');
+            typeRegistry.getNodeConfig("test-module/test-name-2").should.eql('<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
+            typeRegistry.getAllNodeConfigs().should.eql('\n<!-- --- [red-module:test-module/test-name] --- -->\nconfigAHEtest-nameLP\n<!-- --- [red-module:test-module/test-name-2] --- -->\nconfigBHEtest-name-2LP');
         });
     });
     describe('#getModuleInfo', function() {
