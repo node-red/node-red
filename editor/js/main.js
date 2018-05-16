@@ -412,7 +412,8 @@
         ]});
         menuOptions.push({id:"menu-item-export",label:RED._("menu.label.export"),disabled:true,options:[
             {id:"menu-item-export-clipboard",label:RED._("menu.label.clipboard"),disabled:true,onselect:"core:show-export-dialog"},
-            {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:"core:library-export"}
+            {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:"core:library-export"},
+            {id:"menu-item-creating-nodes",label:RED._("menu.label.creatingNodes"),onselect:"core:show-creating-nodes"}
         ]});
         menuOptions.push(null);
         menuOptions.push({id:"menu-item-search",label:RED._("menu.label.search"),onselect:"core:search"});
@@ -446,6 +447,7 @@
 
         RED.view.init();
         RED.userSettings.init();
+        RED.creatingNodes.init();
         RED.user.init();
         RED.library.init();
         RED.keyboard.init();

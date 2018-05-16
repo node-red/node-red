@@ -15,16 +15,20 @@
  **/
 
 var when = require("when");
+var fs = require("fs");
 var apiUtils = require("../util");
+var nodegen = require('node-red-nodegen');
 var redNodes;
 var log;
 var settings;
+var util;
 
 module.exports = {
     init: function(runtime) {
         redNodes = runtime.nodes;
         log = runtime.log;
         settings = runtime.settings;
+        util = runtime.util;
     },
     getAll: function(req,res) {
         if (req.get("accept") == "application/json") {
@@ -85,7 +89,79 @@ module.exports = {
             }
         });
     },
-
+    create: function(req,res) {
+        if (!settings.available()) {
+            log.audit({event: "nodes.create",error:"settings_unavailable"},req);
+            res.status(400).json({error:"settings_unavailable", message:"Settings unavailable"});
+            return;
+        }
+        var options = { tgz: true };
+        var body = req.body;
+        var userDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+        var id = util.generateId();
+        try {
+            fs.mkdirSync(userDir + '/nodegen');
+        } catch (error) {
+            if (error.code !== 'EEXIST') {
+                console.log(error);
+            }
+        }
+        try {
+            fs.mkdirSync(userDir + '/nodegen/' + id);
+        } catch (error) {
+            if (error.code !== 'EEXIST') {
+                console.log(error);
+            }
+        }
+        var data = {
+            prefix: 'node-red-contrib-',
+            name: body.data.name,
+            version: body.data.version,
+            src: body.data.src,
+            dst: userDir + '/nodegen/' + id
+        };
+        if (body.type === 'swagger') {
+            nodegen.swagger2node(data, options).then(function (result) {
+                res.json({
+                    id: id,
+                    module: result.replace(userDir + '/nodegen/' + id + '/', '')
+                });
+            }).catch(function (error) {
+                console.log('Error: ' + error);
+            });
+        } else if (body.type === 'function') {
+            nodegen.function2node(data, options).then(function (result) {
+                res.json({
+                    id: id,
+                    module: result.replace(userDir + '/nodegen/' + id + '/', '')
+                });
+            }).catch(function (error) {
+                console.log('Error: ' + error);
+            });
+        } else {
+            console.log('Unsupported type: ' + body.type);
+        }
+        return;
+    },
+    download: function(req,res) {
+        if (!settings.available()) {
+            log.audit({event: "nodes.download",error:"settings_unavailable"},req);
+            res.status(400).json({error:"settings_unavailable", message:"Settings unavailable"});
+            return;
+        }
+        var userDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+        var file = fs.readdirSync(userDir + '/nodegen/' + req.params.id);
+        var flag = true;
+        for (var i = 0; i < file.length; i++) {
+            if (file[i].endsWith('.tgz')) {
+                flag = false;
+                res.download(userDir + '/nodegen/' + req.params.id + '/' + file[i]);
+            }
+        }
+        if (flag) {
+            res.status(400).json({error:"not_found", message:"Not found"});
+        }
+    },
     delete: function(req,res) {
         if (!settings.available()) {
             log.audit({event: "nodes.remove",error:"settings_unavailable"},req);

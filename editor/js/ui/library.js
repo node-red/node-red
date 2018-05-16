@@ -414,7 +414,7 @@ RED.library = (function() {
 
             RED.events.on("view:selection-changed",function(selection) {
                 if (!selection.nodes) {
-                    RED.menu.setDisabled("menu-item-export",true);
+                    RED.menu.setDisabled("menu-item-export",false);
                     RED.menu.setDisabled("menu-item-export-clipboard",true);
                     RED.menu.setDisabled("menu-item-export-library",true);
                 } else {

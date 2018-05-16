@@ -53,6 +53,7 @@
             "searchInput": "ノードを検索",
             "clipboard": "クリップボード",
             "library": "ライブラリ",
+            "creatingNodes": "ノードを生成",
             "examples": "サンプル",
             "subflows": "サブフロー",
             "createSubflow": "サブフローを作成",
@@ -271,6 +272,21 @@
         "fullFilenamePlaceholder": "a/b/file",
         "folderPlaceholder": "a/b",
         "breadcrumb": "ライブラリ"
+    },
+    "creatingNodes": {
+        "label": {
+            "build": "ビルド",
+            "type": "種類",
+            "target": "対象",
+            "name": "ノード名",
+            "nameExample": "例) lower-case",
+            "source": "ソース",
+            "version": "バージョン",
+            "versionExample": "0.0.1",
+            "success": "ノード生成が正常に完了しました",
+            "error": "ノード生成エラー",
+            "download": "ダウンロード"
+        }
     },
     "palette": {
         "noInfo": "情報がありません",

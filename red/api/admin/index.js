@@ -46,6 +46,8 @@ module.exports = {
         // Nodes
         adminApp.get("/nodes",needsPermission("nodes.read"),nodes.getAll,apiUtil.errorHandler);
         adminApp.post("/nodes",needsPermission("nodes.write"),nodes.post,apiUtil.errorHandler);
+        adminApp.post("/nodes/create",needsPermission("nodes.write"),nodes.create,apiUtil.errorHandler);
+        adminApp.get("/nodes/download/:id",needsPermission("nodes.read"),nodes.download,apiUtil.errorHandler);
         adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.read"),nodes.getModule,apiUtil.errorHandler);
         adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.putModule,apiUtil.errorHandler);
         adminApp.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.delete,apiUtil.errorHandler);
