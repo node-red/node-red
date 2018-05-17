@@ -1,3 +1,13 @@
+#### 0.18.6: Maintenance Release
+
+Editor Fixes
+
+ - Handle a node having wires in the editor on ports it no longer has Fixes #1724
+ - Add missing ACE snippet files
+ - Fix wireClippedNodes is not defined Fixes #1726
+ - Split node html to isolate bad nodes when loading
+ - Avoid unnecessary use of .html() where .text() will do
+
 #### 0.18.5: Maintenance Release
 
 Projects
