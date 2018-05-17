@@ -8,7 +8,9 @@ If your issue is:
   - a feature request or suggestion for a change,
   - or problems with 3rd party (`node-red-contrib-`) nodes
 
-please use the [mailing list](https://groups.google.com/forum/#!forum/node-red), [slack team](https://nodered.org/slack) or ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/node-red) and tag it `node-red`.
+please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
+
+You could also consider asking a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/node-red) and tag it `node-red`.
 
 That way the whole Node-RED user community can help, rather than rely on the core development team.
 
