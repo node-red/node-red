@@ -8,6 +8,8 @@ Editor Fixes
  - Split node html to isolate bad nodes when loading
  - Avoid unnecessary use of .html() where .text() will do
 
+ - Add editorTheme.projects.enabled to default settings.js"
+
 #### 0.18.5: Maintenance Release
 
 Projects
