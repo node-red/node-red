@@ -508,6 +508,34 @@ describe('function node', function() {
         });
     });
 
+    it('should allow accessing node.id', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = node.id; return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('payload', n1.id);
+                done();
+            });
+            n1.receive({payload:"foo",topicb: "bar"});
+        });
+    });
+
+    it('should allow accessing node.name', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = node.name; return msg;", "name":"name of node"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('payload', n1.name);
+                done();
+            });
+            n1.receive({payload:"foo",topicb: "bar"});
+        });
+    });
+
     describe('Logger', function () {
         it('should log an Info Message', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.log('test');"}];
