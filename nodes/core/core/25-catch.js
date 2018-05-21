@@ -21,6 +21,8 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.scope = n.scope;
+        this.nodesWithoutCatch = n.nodesWithoutCatch;
+        
         this.on("input",function(msg) {
             this.send(msg);
         });

@@ -4,6 +4,7 @@
         <label style="width: auto" for="node-input-scope" data-i18n="catch.label.source"></label>
         <select id="node-input-scope-select">
             <option value="all" data-i18n="catch.scope.all"></option>
+            <option value="nodesWithoutCatch" data-i18n="catch.scope.nodesWithoutCatch"></option>
             <option value="target" data-i18n="catch.scope.selected"></options>
         </select>
     </div>
@@ -88,13 +89,15 @@
         color:"#e49191",
         defaults: {
             name: {value:""},
-            scope: {value:null}
+            scope: {value:null},
+            nodesWithoutCatch: {value:null}
         },
         inputs:0,
         outputs:1,
         icon: "alert.png",
         label: function() {
-            return this.name||(this.scope?this._("catch.catchNodes",{number:this.scope.length}):this._("catch.catch"));
+            return this.name||(this.scope?this._("catch.catchNodes",{number:this.scope.length}):
+                                (this.nodesWithoutCatch?this._("catch.nodesWithoutCatch"):this._("catch.catch")));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -240,7 +243,10 @@
                 node.resize();
             });
             if (this.scope === null) {
-                $("#node-input-scope-select").val("all");
+                if( this.nodesWithoutCatch )
+                    $("#node-input-scope-select").val("nodesWithoutCatch");
+                else
+                    $("#node-input-scope-select").val("all");
             } else {
                 $("#node-input-scope-select").val("target");
             }
@@ -250,6 +256,10 @@
             var scope = $("#node-input-scope-select").val();
             if (scope === 'all') {
                 this.scope = null;
+                this.nodesWithoutCatch = false;
+            } else if (scope === 'nodesWithoutCatch') {
+                this.scope = null;
+                this.nodesWithoutCatch = true;
             } else {
                 var node = this;
                 node.scope = [];

@@ -113,12 +113,30 @@ function Flow(global,flow) {
             if (activeNodes.hasOwnProperty(id)) {
                 node = activeNodes[id];
                 if (node.type === "catch") {
+                    if (node.scope == null) {
+                        if ( node.nodesWithoutCatch == true ) {
+                            node.catchPrecedence = 10;
+                        }
+                        else {
+                            node.catchPrecedence = 5;
+                        };
+                    } else {
+                        node.catchPrecedence = 1;
+                    };
                     catchNodeMap[node.z] = catchNodeMap[node.z] || [];
                     catchNodeMap[node.z].push(node);
                 } else if (node.type === "status") {
                     statusNodeMap[node.z] = statusNodeMap[node.z] || [];
                     statusNodeMap[node.z].push(node);
                 }
+            }
+        }
+        var z;
+        for (z in catchNodeMap) {
+            if (catchNodeMap.hasOwnProperty(z)) {
+                catchNodeMap[z].sort(function(a, b) {
+                return a.catchPrecedence - b.catchPrecedence;
+                });
             }
         }
     }
@@ -255,6 +273,9 @@ function Flow(global,flow) {
             if (targetCatchNodes) {
                 targetCatchNodes.forEach(function(targetCatchNode) {
                     if (targetCatchNode.scope && targetCatchNode.scope.indexOf(throwingNode.id) === -1) {
+                        return;
+                    }
+                    if (handled && targetCatchNode.nodesWithoutCatch == true ) {
                         return;
                     }
                     var errorMessage;
