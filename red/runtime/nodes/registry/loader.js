@@ -62,6 +62,17 @@ function copyObjectProperties(src,dst,copyList,blockList) {
         }
     }
 }
+function requireModule(name) {
+    var moduleInfo = registry.getModuleInfo(name);
+    if (moduleInfo && moduleInfo.path) {
+        var relPath = path.relative(__dirname, moduleInfo.path);
+        return require(relPath);
+    } else {
+        var err = new Error(`Cannot find module '${name}'`);
+        err.code = "MODULE_NOT_FOUND";
+        throw err;
+    }
+}
 
 function createNodeApi(node) {
     var red = {
@@ -71,6 +82,7 @@ function createNodeApi(node) {
         events: runtime.events,
         util: runtime.util,
         version: runtime.version,
+        require: requireModule
     }
     copyObjectProperties(runtime.nodes,red.nodes,["createNode","getNode","eachNode","addCredentials","getCredentials","deleteCredentials" ]);
     red.nodes.registerType = function(type,constructor,opts) {
@@ -112,6 +124,7 @@ function createNodeApi(node) {
 
 function loadNodeFiles(nodeFiles) {
     var promises = [];
+    var nodes = [];
     for (var module in nodeFiles) {
         /* istanbul ignore else */
         if (nodeFiles.hasOwnProperty(module)) {
@@ -119,6 +132,7 @@ function loadNodeFiles(nodeFiles) {
                 !semver.satisfies(runtime.version().replace(/(\-[1-9A-Za-z-][0-9A-Za-z-\.]*)?(\+[0-9A-Za-z-\.]+)?$/,""), nodeFiles[module].redVersion)) {
                 //TODO: log it
                 runtime.log.warn("["+module+"] "+runtime.log._("server.node-version-mismatch",{version:nodeFiles[module].redVersion}));
+                nodeFiles[module].err = "version_mismatch";
                 continue;
             }
             if (module == "node-red" || !registry.getModuleInfo(module)) {
@@ -148,7 +162,14 @@ function loadNodeFiles(nodeFiles) {
                         }
 
                         try {
-                            promises.push(loadNodeConfig(nodeFiles[module].nodes[node]))
+                            promises.push(loadNodeConfig(nodeFiles[module].nodes[node]).then((function() {
+                                var m = module;
+                                var n = node;
+                                return function(nodeSet) {
+                                    nodeFiles[m].nodes[n] = nodeSet;
+                                    nodes.push(nodeSet);
+                                }
+                            })()));
                         } catch(err) {
                             //
                         }
@@ -158,16 +179,19 @@ function loadNodeFiles(nodeFiles) {
         }
     }
     return when.settle(promises).then(function(results) {
-        var nodes = results.map(function(r) {
-            registry.addNodeSet(r.value.id,r.value,r.value.version);
-            return r.value;
-        });
+        for (var module in nodeFiles) {
+            if (nodeFiles.hasOwnProperty(module)) {
+                if (!nodeFiles[module].err) {
+                    registry.addModule(nodeFiles[module]);
+                }
+            }
+        }
         return loadNodeSetList(nodes);
     });
 }
 
 function loadNodeConfig(fileInfo) {
-    return when.promise(function(resolve) {
+    return new Promise(function(resolve) {
         var file = fileInfo.file;
         var module = fileInfo.module;
         var name = fileInfo.name;
@@ -292,7 +316,7 @@ function loadNodeSet(node) {
     var nodeDir = path.dirname(node.file);
     var nodeFn = path.basename(node.file);
     if (!node.enabled) {
-        return when.resolve(node);
+        return Promise.resolve(node);
     } else {
     }
     try {
@@ -316,7 +340,7 @@ function loadNodeSet(node) {
         if (loadPromise == null) {
             node.enabled = true;
             node.loaded = true;
-            loadPromise = when.resolve(node);
+            loadPromise = Promise.resolve(node);
         }
         return loadPromise;
     } catch(err) {
@@ -333,7 +357,7 @@ function loadNodeSet(node) {
                 }
             }
         }
-        return when.resolve(node);
+        return Promise.resolve(node);
     }
 }
 
@@ -365,19 +389,19 @@ function addModule(module) {
         // TODO: nls
         var e = new Error("module_already_loaded");
         e.code = "module_already_loaded";
-        return when.reject(e);
+        return Promise.reject(e);
     }
     try {
         var moduleFiles = localfilesystem.getModuleFiles(module);
         return loadNodeFiles(moduleFiles);
     } catch(err) {
-        return when.reject(err);
+        return Promise.reject(err);
     }
 }
 
 function loadNodeHelp(node,lang) {
     var base = path.basename(node.template);
-    var localePath = undefined;
+    var localePath;
     if (node.module === 'node-red') {
         var cat_dir = path.dirname(node.template);
         var cat = path.basename(cat_dir);
