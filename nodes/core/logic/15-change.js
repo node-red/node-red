@@ -93,6 +93,8 @@ module.exports = function(RED) {
                     valid = false;
                     this.error(RED._("change.errors.invalid-expr",{error:e.message}));
                 }
+            } else if (rule.tot === 'env') {
+                rule.to = RED.util.evaluateNodeProperty(rule.to,'env');
             }
         }
 

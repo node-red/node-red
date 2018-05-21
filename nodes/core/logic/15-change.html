@@ -146,7 +146,7 @@
                         .appendTo(row2);
                     var propertyValue = $('<input/>',{class:"node-input-rule-property-value",type:"text"})
                         .appendTo(row2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata','env']});
 
                     var row3_1 = $('<div/>').appendTo(row3);
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
@@ -154,7 +154,7 @@
                         .appendTo(row3_1);
                     var fromValue = $('<input/>',{class:"node-input-rule-property-search-value",type:"text"})
                         .appendTo(row3_1)
-                        .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool','env']});
 
                     var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
@@ -162,7 +162,7 @@
                         .appendTo(row3_2);
                     var toValue = $('<input/>',{class:"node-input-rule-property-replace-value",type:"text"})
                         .appendTo(row3_2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','env']});
 
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(to)

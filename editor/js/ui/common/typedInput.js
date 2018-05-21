@@ -76,6 +76,11 @@
                     }
                 })
             }
+        },
+        env: {
+            value: "env",
+            label: "env variable",
+            icon: "red/images/typedInput/env.png"
         }
     };
     var nlsd = false;
