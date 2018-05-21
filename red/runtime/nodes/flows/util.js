@@ -37,7 +37,8 @@ function diffNodes(oldNode,newNode) {
     return false;
 }
 
-var EnvVarPropertyRE = /^\$\((\S+)\)$/;
+var EnvVarPropertyRE_old = /^\$\((\S+)\)$/;
+var EnvVarPropertyRE = /^\${(\S+)}$/;
 
 function mapEnvVarProperties(obj,prop) {
     if (Buffer.isBuffer(obj[prop])) {
@@ -47,11 +48,9 @@ function mapEnvVarProperties(obj,prop) {
             mapEnvVarProperties(obj[prop],i);
         }
     } else if (typeof obj[prop] === 'string') {
-        var m;
-        if ( (m = EnvVarPropertyRE.exec(obj[prop])) !== null) {
-            if (process.env.hasOwnProperty(m[1])) {
-                obj[prop] = process.env[m[1]];
-            }
+        if (obj[prop][0] === "$" && (EnvVarPropertyRE_old.test(obj[prop]) || EnvVarPropertyRE.test(obj[prop])) ) {
+            var envVar = obj[prop].substring(2,obj[prop].length-1);
+            obj[prop] = process.env.hasOwnProperty(envVar)?process.env[envVar]:obj[prop];
         }
     } else {
         for (var p in obj[prop]) {
@@ -203,7 +202,7 @@ module.exports = {
         var linkMap = {};
 
         var changedTabs = {};
-        
+
         // Look for tabs that have been removed
         for (id in oldConfig.flows) {
             if (oldConfig.flows.hasOwnProperty(id) && (!newConfig.flows.hasOwnProperty(id))) {
