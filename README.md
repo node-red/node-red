@@ -22,8 +22,7 @@ started.
 
 More documentation can be found [here](http://nodered.org/docs).
 
-For further help, or general discussion, please use the
-[mailing list](https://groups.google.com/forum/#!forum/node-red).
+For further help, or general discussion, please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
 
 ## Developers
 

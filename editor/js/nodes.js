@@ -491,7 +491,9 @@ RED.nodes = (function() {
             for (var j=0;j<wires.length;j++) {
                 var w = wires[j];
                 if (w.target.type != "subflow") {
-                    node.wires[w.sourcePort].push(w.target.id);
+                    if (w.sourcePort < node.wires.length) {
+                        node.wires[w.sourcePort].push(w.target.id);
+                    }
                 }
             }
 

@@ -233,5 +233,13 @@ module.exports = {
             // Whether or not to include audit events in the log output
             audit: false
         }
+    },
+
+    // Customising the editor
+    editorTheme: {
+        projects: {
+            // To enable the Projects feature, set this value to true
+            enabled: false
+        }
     }
 }
