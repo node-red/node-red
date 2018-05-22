@@ -786,7 +786,7 @@
             "na": "N/A : __value__"
         },
         "errors": {
-            "ignorenode": "Ignoring Raspberry Pi specific node",
+            "ignorenode": "Raspberry Pi specific node set inactive",
             "version": "Failed to get version from Pi",
             "sawpitype": "Saw Pi Type",
             "libnotfound": "Cannot find Pi RPi.GPIO python library",

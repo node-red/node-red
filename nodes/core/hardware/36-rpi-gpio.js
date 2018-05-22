@@ -340,20 +340,22 @@ module.exports = function(RED) {
     RED.nodes.registerType("rpi-keyboard",PiKeyboardNode);
 
     var pitype = { type:"" };
-    exec(gpioCommand+" info", function(err,stdout,stderr) {
-        if (err) {
-            RED.log.info(RED._("rpi-gpio.errors.version"));
-        }
-        else {
-            try {
-                var info = JSON.parse( stdout.trim().replace(/\'/g,"\"") );
-                pitype.type = info["TYPE"];
+    if (allOK === true) {
+        exec(gpioCommand+" info", function(err,stdout,stderr) {
+            if (err) {
+                RED.log.info(RED._("rpi-gpio.errors.version"));
             }
-            catch(e) {
-                RED.log.info(RED._("rpi-gpio.errors.sawpitype"),stdout.trim());
+            else {
+                try {
+                    var info = JSON.parse( stdout.trim().replace(/\'/g,"\"") );
+                    pitype.type = info["TYPE"];
+                }
+                catch(e) {
+                    RED.log.info(RED._("rpi-gpio.errors.sawpitype"),stdout.trim());
+                }
             }
-        }
-    });
+        });
+    }
 
     RED.httpAdmin.get('/rpi-gpio/:id', RED.auth.needsPermission('rpi-gpio.read'), function(req,res) {
         res.json(pitype);
