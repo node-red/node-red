@@ -72,7 +72,8 @@ var localfilesystem = {
                     var defaultPackage = {
                         "name": "node-red-project",
                         "description": "A Node-RED Project",
-                        "version": "0.0.1"
+                        "version": "0.0.1",
+                        "private": true
                     };
                     return util.writeFile(packageFile,JSON.stringify(defaultPackage,"",4));
                 }
