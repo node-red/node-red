@@ -25,36 +25,36 @@ describe('memory',function() {
 
     describe('#get/set',function() {
         it('should store property',function() {
-            should.not.exist(context.get("foo","nodeX"));
-            context.set("foo","test","nodeX");
-            context.get("foo","nodeX").should.eql("test");
+            should.not.exist(context.get("nodeX","foo"));
+            context.set("nodeX","foo","test");
+            context.get("nodeX","foo").should.eql("test");
         });
 
         it('should store property - creates parent properties',function() {
-            context.set("foo.bar","test","nodeX");
-            context.get("foo","nodeX").should.eql({bar:"test"});
+            context.set("nodeX","foo.bar","test");
+            context.get("nodeX","foo").should.eql({bar:"test"});
         });
 
         it('should delete property',function() {
-            context.set("foo.abc.bar1","test1","nodeX");
-            context.set("foo.abc.bar2","test2","nodeX");
-            context.get("foo.abc","nodeX").should.eql({bar1:"test1",bar2:"test2"});
-            context.set("foo.abc.bar1",undefined,"nodeX");
-            context.get("foo.abc","nodeX").should.eql({bar2:"test2"});
-            context.set("foo.abc",undefined,"nodeX");
-            should.not.exist(context.get("foo.abc","nodeX"));
-            context.set("foo",undefined,"nodeX");
-            should.not.exist(context.get("foo","nodeX"));
+            context.set("nodeX","foo.abc.bar1","test1");
+            context.set("nodeX","foo.abc.bar2","test2");
+            context.get("nodeX","foo.abc").should.eql({bar1:"test1",bar2:"test2"});
+            context.set("nodeX","foo.abc.bar1",undefined);
+            context.get("nodeX","foo.abc").should.eql({bar2:"test2"});
+            context.set("nodeX","foo.abc",undefined);
+            should.not.exist(context.get("nodeX","foo.abc"));
+            context.set("nodeX","foo",undefined);
+            should.not.exist(context.get("nodeX","foo"));
         });
 
         it('should not shared context with other scope', function() {
-            should.not.exist(context.get("foo","nodeX"));
-            should.not.exist(context.get("foo","nodeY"));
-            context.set("foo","testX","nodeX");
-            context.set("foo","testY","nodeY");
+            should.not.exist(context.get("nodeX","foo"));
+            should.not.exist(context.get("nodeY","foo"));
+            context.set("nodeX","foo","testX");
+            context.set("nodeY","foo","testY");
 
-            context.get("foo","nodeX").should.eql("testX");
-            context.get("foo","nodeY").should.eql("testY");
+            context.get("nodeX","foo").should.eql("testX");
+            context.get("nodeY","foo").should.eql("testY");
         });
     });
 
@@ -64,12 +64,12 @@ describe('memory',function() {
             keys.should.be.an.Array();
             keys.should.be.empty();
 
-            context.set("foo","bar","nodeX");
+            context.set("nodeX","foo","bar");
             keys = context.keys("nodeX");
             keys.should.have.length(1);
             keys[0].should.eql("foo");
 
-            context.set("abc.def","bar","nodeX");
+            context.set("nodeX","abc.def","bar");
             keys = context.keys("nodeX");
             keys.should.have.length(2);
             keys[1].should.eql("abc");
@@ -84,8 +84,8 @@ describe('memory',function() {
             keysY.should.be.an.Array();
             keysY.should.be.empty();
 
-            context.set("foo","bar","nodeX");
-            context.set("hoge","piyo","nodeY");
+            context.set("nodeX","foo","bar");
+            context.set("nodeY","hoge","piyo");
             keysX = context.keys("nodeX");
             keysX.should.have.length(1);
             keysX[0].should.eql("foo");
@@ -112,16 +112,16 @@ describe('memory',function() {
 
     describe('#delete',function() {
         it('should delete context',function() {
-            should.not.exist(context.get("foo","nodeX"));
-            should.not.exist(context.get("foo","nodeY"));
-            context.set("foo","abc","nodeX");
-            context.set("foo","abc","nodeY");
-            context.get("foo","nodeX").should.eql("abc");
-            context.get("foo","nodeY").should.eql("abc");
+            should.not.exist(context.get("nodeX","foo"));
+            should.not.exist(context.get("nodeY","foo"));
+            context.set("nodeX","foo","abc");
+            context.set("nodeY","foo","abc");
+            context.get("nodeX","foo").should.eql("abc");
+            context.get("nodeY","foo").should.eql("abc");
 
             context.delete("nodeX");
-            should.not.exist(context.get("foo","nodeX"));
-            should.exist(context.get("foo","nodeY"));
+            should.not.exist(context.get("nodeX","foo"));
+            should.exist(context.get("nodeY","foo"));
         });
     });
 
@@ -135,7 +135,7 @@ describe('memory',function() {
                 foo: "bar"
             }
             context.setGlobalContext(data);
-            context.get("foo","global").should.eql("bar");
+            context.get("global","foo").should.eql("bar");
         });
     });
 });

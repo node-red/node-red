@@ -335,7 +335,7 @@ describe('context', function() {
                     contextStorage:{
                         "#%&":{module:"memory"},
                         \u3042:{module:"memory"},
-                        1:{module:"localfilesystem"},
+                        1:{module:"memory"},
                     }
                 });
                 try {

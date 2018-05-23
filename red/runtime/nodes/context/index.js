@@ -145,12 +145,12 @@ function createContext(id,seed) {
     obj.get = function(key) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.get(keyPath.key, scope);
+        return context.get(scope, keyPath.key);
     };
     obj.set = function(key, value) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.set(keyPath.key, value, scope);
+        return context.set(scope, keyPath.key, value);
     };
     obj.keys = function(storage) {
         //TODO: discuss about keys() behavior

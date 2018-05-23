@@ -66,7 +66,7 @@ var localfilesystem = {
             storageBaseDir = configs.dir;
         }
     },
-    get: function (key, scope) {
+    get: function (scope, key) {
         if(!storages[scope]){
             createStorage(scope);
         }
@@ -82,7 +82,7 @@ var localfilesystem = {
         }
     },
 
-    set: function (key, value, scope) {
+    set: function (scope, key, value) {
         if(!storages[scope]){
             createStorage(scope);
         }

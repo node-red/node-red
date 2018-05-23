@@ -17,19 +17,18 @@
 var util = require("../../util");
 
 var data;
-var seedFlg = false;
 
 var memory = {
     init: function(config) {
         data = {};
     },
-    get: function(key, scope) {
+    get: function(scope, key) {
         if(!data[scope]){
             data[scope] = {};
         }
         return util.getMessageProperty(data[scope],key);
     },
-    set: function(key, value, scope) {
+    set: function(scope, key, value) {
         if(!data[scope]){
             data[scope] = {};
         }
