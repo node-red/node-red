@@ -309,18 +309,6 @@ RED.clipboard = (function() {
 
             $('<input type="text" id="clipboard-hidden">').appendTo("body");
 
-            RED.events.on("view:selection-changed",function(selection) {
-                if (!selection.nodes) {
-                    RED.menu.setDisabled("menu-item-export",true);
-                    RED.menu.setDisabled("menu-item-export-clipboard",true);
-                    RED.menu.setDisabled("menu-item-export-library",true);
-                } else {
-                    RED.menu.setDisabled("menu-item-export",false);
-                    RED.menu.setDisabled("menu-item-export-clipboard",false);
-                    RED.menu.setDisabled("menu-item-export-library",false);
-                }
-            });
-
             RED.actions.add("core:show-export-dialog",exportNodes);
             RED.actions.add("core:show-import-dialog",importNodes);
 

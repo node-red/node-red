@@ -83,7 +83,9 @@ RED.sidebar.info = (function() {
             id: "info",
             label: RED._("sidebar.info.label"),
             name: RED._("sidebar.info.name"),
+            iconClass: "fa fa-info",
             content: content,
+            pinned: true,
             enableOnEdit: true
         });
         if (tips.enabled()) {

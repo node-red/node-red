@@ -303,6 +303,23 @@ function setMessageProperty(msg,prop,value,createMissing) {
     }
 }
 
+function evaluteEnvProperty(value) {
+    if (/^\${[^}]+}$/.test(value)) {
+        // ${ENV_VAR}
+        value = value.substring(2,value.length-1);
+        value = process.env.hasOwnProperty(value)?process.env[value]:""
+    } else if (!/\${\S+}/.test(value)) {
+        // ENV_VAR
+        value = process.env.hasOwnProperty(value)?process.env[value]:""
+    } else {
+        // FOO${ENV_VAR}BAR
+        value = value.replace(/\${([^}]+)}/g, function(match, v) {
+            return process.env.hasOwnProperty(v)?process.env[v]:""
+        });
+    }
+    return value;
+}
+
 function evaluateNodeProperty(value, type, node, msg) {
     if (type === 'str') {
         return ""+value;
@@ -328,6 +345,8 @@ function evaluateNodeProperty(value, type, node, msg) {
     } else if (type === 'jsonata') {
         var expr = prepareJSONataExpression(value,node);
         return evaluateJSONataExpression(expr,msg);
+    } else if (type === 'env') {
+        return evaluteEnvProperty(value);
     }
     return value;
 }
@@ -340,6 +359,9 @@ function prepareJSONataExpression(value,node) {
     expr.assign('globalContext',function(val) {
         return node.context().global.get(val);
     });
+    expr.assign('env', function(val) {
+        return process.env[val];
+    })
     expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
     expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
     return expr;

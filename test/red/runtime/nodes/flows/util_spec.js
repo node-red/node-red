@@ -35,11 +35,27 @@ describe('flows/util', function() {
     });
 
     describe('#mapEnvVarProperties',function() {
-        it('handles ENV substitutions in an object', function() {
+        before(function() {
             process.env.foo1 = "bar1";
             process.env.foo2 = "bar2";
             process.env.foo3 = "bar3";
+        })
+        after(function() {
+            delete process.env.foo1;
+            delete process.env.foo2;
+            delete process.env.foo3;
+        })
+        it('handles ENV substitutions in an object - $()', function() {
             var foo = {a:"$(foo1)",b:"$(foo2)",c:{d:"$(foo3)"}};
+            for (var p in foo) {
+                if (foo.hasOwnProperty(p)) {
+                    flowUtil.mapEnvVarProperties(foo,p);
+                }
+            }
+            foo.should.eql({ a: 'bar1', b: 'bar2', c: { d: 'bar3' } } );
+        });
+        it('handles ENV substitutions in an object - ${}', function() {
+            var foo = {a:"${foo1}",b:"${foo2}",c:{d:"${foo3}"}};
             for (var p in foo) {
                 if (foo.hasOwnProperty(p)) {
                     flowUtil.mapEnvVarProperties(foo,p);

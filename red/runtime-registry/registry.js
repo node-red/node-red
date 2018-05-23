@@ -339,6 +339,7 @@ function getModuleInfo(module) {
             name: module,
             version: moduleConfigs[module].version,
             local: moduleConfigs[module].local,
+            path: moduleConfigs[module].path,
             nodes: []
         };
         for (var i = 0; i < nodes.length; ++i) {
@@ -560,30 +561,6 @@ var icon_paths = {
 var iconCache = {};
 var defaultIcon = path.resolve(__dirname + '/../../public/icons/arrow-in.png');
 
-function nodeIconDir(dir) {
-    icon_paths[dir.name] = icon_paths[dir.name] || [];
-    icon_paths[dir.name].push(path.resolve(dir.path));
-
-    if (dir.icons) {
-        if (!moduleConfigs[dir.name]) {
-            moduleConfigs[dir.name] = {
-                name: dir.name,
-                nodes: {},
-                icons: []
-            };
-        }
-        var module = moduleConfigs[dir.name];
-        if (module.icons === undefined) {
-            module.icons = [];
-        }
-        dir.icons.forEach(function(icon) {
-            if (module.icons.indexOf(icon) === -1) {
-                module.icons.push(icon);
-            }
-        });
-    }
-}
-
 function getNodeIconPath(module,icon) {
     if (/\.\./.test(icon)) {
         throw new Error();
@@ -624,7 +601,6 @@ function getNodeIcons() {
             }
         }
     }
-
     return iconList;
 }
 

@@ -88,7 +88,7 @@ function getLocalNodeFiles(dir) {
     try {
         files = fs.readdirSync(dir);
     } catch(err) {
-        return result;
+        return {files: [], icons: []};
     }
     files.sort();
     files.forEach(function(fn) {
@@ -296,6 +296,7 @@ function getNodeFiles(disableNodePathScan) {
             nodeList[moduleFile.package.name] = {
                 name: moduleFile.package.name,
                 version: moduleFile.package.version,
+                path: moduleFile.dir,
                 local: moduleFile.local||false,
                 nodes: {},
                 icons: nodeModuleFiles.icons,

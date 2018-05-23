@@ -64,6 +64,17 @@ function copyObjectProperties(src,dst,copyList,blockList) {
         }
     }
 }
+function requireModule(name) {
+    var moduleInfo = registry.getModuleInfo(name);
+    if (moduleInfo && moduleInfo.path) {
+        var relPath = path.relative(__dirname, moduleInfo.path);
+        return require(relPath);
+    } else {
+        var err = new Error(`Cannot find module '${name}'`);
+        err.code = "MODULE_NOT_FOUND";
+        throw err;
+    }
+}
 
 function createNodeApi(node) {
     var red = {
@@ -73,6 +84,7 @@ function createNodeApi(node) {
         events: runtime.events,
         util: runtime.util,
         version: runtime.version,
+        require: requireModule,
         comms: {
             publish: function(topic,data,retain) {
                 runtime.events.emit("comms",{
