@@ -88,7 +88,7 @@ function getLocalNodeFiles(dir) {
     try {
         files = fs.readdirSync(dir);
     } catch(err) {
-        return result;
+        return {files: [], icons: []};
     }
     files.sort();
     files.forEach(function(fn) {
