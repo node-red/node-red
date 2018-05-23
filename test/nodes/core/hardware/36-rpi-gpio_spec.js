@@ -39,7 +39,6 @@ describe('RPI GPIO Node', function() {
                 var logEvents = helper.log().args.filter(function(evt) {
                     return ((evt[0].level == 30) && (evt[0].msg.indexOf("rpi-gpio")===0));
                 });
-                logEvents.should.have.length(1);
                 logEvents[0][0].should.have.a.property('msg');
                 logEvents[0][0].msg.toString().should.startWith("rpi-gpio : rpi-gpio.errors.ignorenode");
                 done();
