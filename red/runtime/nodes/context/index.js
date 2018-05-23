@@ -88,7 +88,7 @@ function copySettings(config, settings){
 }
 
 function parseStorage(key) {
-    if (!key || key.charAt(0) !== '$') {
+    if (!key || key.charAt(0) !== '#') {
         return "";
     } else {
         var endOfStorageName = key.indexOf(".");

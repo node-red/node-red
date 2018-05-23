@@ -194,32 +194,32 @@ describe('context', function() {
                 Context.clean({allNodes:{}});
             });
             it('should work correctly with the valid key name',function() {
-                context.set("$memory.azAZ09$_","valid");
-                context.get("$memory.azAZ09$_").should.eql("valid");
-                context.set("$memory.a.b","ab");
-                context.get("$memory.a.b").should.eql("ab");
+                context.set("#memory.azAZ09#_","valid");
+                context.get("#memory.azAZ09#_").should.eql("valid");
+                context.set("#memory.a.b","ab");
+                context.get("#memory.a.b").should.eql("ab");
             });
             it('should treat the key name without dot as a normal context',function() {
-                context.set("$memory","normal");
-                context.get("$memory").should.eql("normal");
+                context.set("#memory","normal");
+                context.get("#memory").should.eql("normal");
             });
             it('should fail when specifying invalid characters',function() {
                 (function() {
-                    context.set("$memory.a.-","invalid1");
+                    context.set("#memory.a.-","invalid1");
                 }).should.throw();
                 (function() {
-                    context.set("$memory.'abc","invalid2");
+                    context.set("#memory.'abc","invalid2");
                 }).should.throw();
             });
             it('should fail when specifying unnecesary space characters for key name',function() {
                 (function() {
-                    context.set("$ memory.space","space1");
+                    context.set("# memory.space","space1");
                 }).should.throw();
                 (function() {
-                    context.set("$memory .space","space2");
+                    context.set("#memory .space","space2");
                 }).should.throw();
                 (function() {
-                    context.set("$memory. space","space3");
+                    context.set("#memory. space","space3");
                 }).should.throw();
             });
         });
@@ -243,30 +243,30 @@ describe('context', function() {
 
             it('should store local property to external context storage',function() {
                 initializeContext();
-                should.not.exist(context.get("$test.foo"));
-                context.set("$test.foo","test");
-                context.get("$test.foo");
-                context.keys("$test");
+                should.not.exist(context.get("#test.foo"));
+                context.set("#test.foo","test");
+                context.get("#test.foo");
+                context.keys("#test");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
             });
             it('should store flow property to external context storage',function() {
                 initializeContext();
-                should.not.exist(context.flow.get("$test.foo"));
-                context.flow.set("$test.foo","test");
-                context.flow.get("$test.foo");
-                context.flow.keys("$test");
+                should.not.exist(context.flow.get("#test.foo"));
+                context.flow.set("#test.foo","test");
+                context.flow.get("#test.foo");
+                context.flow.keys("#test");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
             });
             it('should store global property to external context storage',function() {
                 initializeContext();
-                should.not.exist(context.global.get("$test.foo"));
-                context.global.set("$test.foo","test");
-                context.global.get("$test.foo");
-                context.global.keys("$test");
+                should.not.exist(context.global.get("#test.foo"));
+                context.global.set("#test.foo","test");
+                context.global.get("#test.foo");
+                context.global.keys("#test");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
@@ -275,10 +275,10 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load();
                 context =  Context.get("1","flow");
-                should.not.exist(context.get("$nonexist.foo"));
-                context.set("$nonexist.foo","test");
-                context.get("$nonexist.foo");
-                context.keys("$nonexist");
+                should.not.exist(context.get("#nonexist.foo"));
+                context.set("#nonexist.foo","test");
+                context.get("#nonexist.foo");
+                context.keys("#nonexist");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
@@ -287,10 +287,10 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load();
                 context =  Context.get("1","flow");
-                should.not.exist(context.get("$default.foo"));
-                context.set("$default.foo","default");
-                context.get("$default.foo");
-                context.keys("$default");
+                should.not.exist(context.get("#default.foo"));
+                context.set("#default.foo","default");
+                context.get("#default.foo");
+                context.keys("#default");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
@@ -299,10 +299,10 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load();
                 context =  Context.get("1","flow");
-                should.not.exist(context.get("$.foo"));
-                context.set("$.foo","alias");
-                context.get("$.foo");
-                context.keys("$");
+                should.not.exist(context.get("#.foo"));
+                context.set("#.foo","alias");
+                context.get("#.foo");
+                context.keys("#");
                 stubGet.called.should.be.true();
                 stubSet.called.should.be.true();
                 stubKeys.called.should.be.true();
@@ -311,9 +311,9 @@ describe('context', function() {
                 Context.init({ contextStorage: { _: {}}});
                 try {
                     Context.load();
-                    context.set("$_.foo","mem1");
-                    context.get("$_.foo").should.eql("mem1");
-                    var keys = context.keys("$_");
+                    context.set("#_.foo","mem1");
+                    context.get("#_.foo").should.eql("mem1");
+                    var keys = context.keys("#_");
                     keys.should.have.length(1);
                     keys[0].should.eql("foo");
                     done();
@@ -340,12 +340,12 @@ describe('context', function() {
                 });
                 try {
                     Context.load();
-                    context.set("$#%&.sign","sign1");
-                    context.get("$#%&.sign").should.eql("sign1");
-                    context.set("$\u3042.file2","file2");
-                    context.get("$\u3042.file2").should.eql("file2");
-                    context.set("$1.num","num3");
-                    context.get("$1.num").should.eql("num3");
+                    context.set("##%&.sign","sign1");
+                    context.get("##%&.sign").should.eql("sign1");
+                    context.set("#\u3042.file2","file2");
+                    context.get("#\u3042.file2").should.eql("file2");
+                    context.set("#1.num","num3");
+                    context.get("#1.num").should.eql("num3");
                     done();
                 } catch (err) {
                     done(err);
@@ -357,7 +357,7 @@ describe('context', function() {
             it('should throw an error using undefined storage for local context', function(done) {
                 initializeContext();
                 try {
-                    context.get("$nonexist.local");
+                    context.get("#nonexist.local");
                     should.fail(null, null, "An error was not thrown using undefined storage for local context");
                 } catch (err) {
                     if (err.name === "ContextError") {
@@ -370,7 +370,7 @@ describe('context', function() {
             it('should throw an error using undefined storage for flow context', function(done) {
                 initializeContext();
                 try {
-                    context.flow.set("$nonexist.flow");
+                    context.flow.set("#nonexist.flow");
                     should.fail(null, null, "An error was not thrown using undefined storage for flow context");
                 } catch (err) {
                     if (err.name === "ContextError") {
@@ -390,12 +390,12 @@ describe('context', function() {
                 Context.init({});
                 Context.load();
                 context =  Context.get("1","flow");
-                context.set("$nonexist.key1", "val1");
-                context.get("$nonexist.key1").should.eql("val1");
-                context.flow.set("$nonexist.key2", "val2");
-                context.flow.get("$nonexist.key2").should.eql("val2");
-                context.global.set("$nonexist.key1", "val3");
-                context.global.get("$nonexist.key1").should.eql("val3");
+                context.set("#nonexist.key1", "val1");
+                context.get("#nonexist.key1").should.eql("val1");
+                context.flow.set("#nonexist.key2", "val2");
+                context.flow.get("#nonexist.key2").should.eql("val2");
+                context.global.set("#nonexist.key1", "val3");
+                context.global.get("#nonexist.key1").should.eql("val3");
             });
             it('should fail for the storage with no module', function() {
                 Context.init({ contextStorage: { test: {}}});
@@ -422,30 +422,30 @@ describe('context', function() {
         }
 
         it('should return module and key', function() {
-            returnModuleAndKey("$test.aaa","test","aaa");
-            returnModuleAndKey("$test.aaa.bbb","test","aaa.bbb");
-            returnModuleAndKey("$1.234","1","234");
-            returnModuleAndKey("$$test.foo","$test","foo");
-            returnModuleAndKey("$test.$foo","test","$foo"); 
-            returnModuleAndKey("$test.$foo.$bar","test","$foo.$bar"); 
-            returnModuleAndKey("$test..foo","test",".foo");
-            returnModuleAndKey("$test..","test",".");
-            returnModuleAndKey("$te-_st.aaa","te-_st","aaa");
-            returnModuleAndKey("$te{st.a2","te{st","a2");
-            returnModuleAndKey("$te[st.a3","te[st","a3");
-            returnModuleAndKey("$te'st.a4","te'st","a4");
-            returnModuleAndKey("$te\"st.a5","te\"st","a5");
+            returnModuleAndKey("#test.aaa","test","aaa");
+            returnModuleAndKey("#test.aaa.bbb","test","aaa.bbb");
+            returnModuleAndKey("#1.234","1","234");
+            returnModuleAndKey("##test.foo","#test","foo");
+            returnModuleAndKey("#test.#foo","test","#foo"); 
+            returnModuleAndKey("#test.#foo.#bar","test","#foo.#bar"); 
+            returnModuleAndKey("#test..foo","test",".foo");
+            returnModuleAndKey("#test..","test",".");
+            returnModuleAndKey("#te-_st.aaa","te-_st","aaa");
+            returnModuleAndKey("#te{st.a2","te{st","a2");
+            returnModuleAndKey("#te[st.a3","te[st","a3");
+            returnModuleAndKey("#te'st.a4","te'st","a4");
+            returnModuleAndKey("#te\"st.a5","te\"st","a5");
         });
 
         it('should return module as default', function() {
-            returnModuleAndKey("$default.foo","default","foo");
-            returnModuleAndKey("$.foo","default","foo");
+            returnModuleAndKey("#default.foo","default","foo");
+            returnModuleAndKey("#.foo","default","foo");
         });
 
         it('should return only keys', function() {
             returnModuleAndKey("test.aaa", "", "test.aaa");
             returnModuleAndKey("test", "", "test");
-            returnModuleAndKey("$test", "", "$test");
+            returnModuleAndKey("#test", "", "#test");
         });
 
         it('should fail with null key', function() {
@@ -460,17 +460,17 @@ describe('context', function() {
 
         it('should fail with space character', function() {
             (function() {
-                parseKey(" $test");
+                parseKey(" #test");
             }).should.throw();
 
             (function() {
-                parseKey("$test .a");
+                parseKey("#test .a");
             }).should.throw();
         });
 
         it('should fail with empty key', function() {
             (function() {
-                parseKey("$test.");
+                parseKey("#test.");
             }).should.throw();
         });
     });
