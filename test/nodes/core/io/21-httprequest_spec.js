@@ -825,7 +825,13 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('statusCode','ECONNRESET');
+                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(1);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().ERROR, id:'n1',type:'http request',msg:'common.notification.errors.no-response', timestamp:tstmp});
                         done();
                     } catch(err) {
                         done(err);
