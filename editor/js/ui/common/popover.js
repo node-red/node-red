@@ -19,12 +19,14 @@ RED.popover = (function() {
         "default": {
             top: 10,
             leftRight: 17,
-            leftLeft: 25
+            leftLeft: 25,
+            leftBottom: 8,
         },
         "small": {
             top: 5,
             leftRight: 17,
-            leftLeft: 16
+            leftLeft: 16,
+            leftBottom: 3,
         }
     }
     function createPopover(options) {
@@ -69,6 +71,8 @@ RED.popover = (function() {
                     div.css({top: targetPos.top+targetHeight/2-divHeight/2-deltaSizes[size].top,left:targetPos.left+targetWidth+deltaSizes[size].leftRight});
                 } else if (direction === 'left') {
                     div.css({top: targetPos.top+targetHeight/2-divHeight/2-deltaSizes[size].top,left:targetPos.left-deltaSizes[size].leftLeft-divWidth});
+                } else if (direction === 'bottom') {
+                    div.css({top: targetPos.top+targetHeight+deltaSizes[size].top,left:targetPos.left+targetWidth/2-divWidth/2 - deltaSizes[size].leftBottom});
                 }
                 if (instant) {
                     div.show();
