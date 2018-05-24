@@ -428,13 +428,14 @@ describe('trigger node', function() {
             n2.on("input", function(msg) {
                 try {
                     if (c === 0) {
+                        console.log(c,Date.now() - ss,msg);
                         msg.should.have.a.property("payload", "Hello");
                         c += 1;
                     }
                     else {
+                        console.log(c,Date.now() - ss,msg);
                         msg.should.have.a.property("payload", "World");
-                        //console.log(Date.now() - ss);
-                        (Date.now() - ss).should.be.greaterThan(140);
+                        (Date.now() - ss).should.be.greaterThan(150);
                         done();
                     }
                 }
@@ -444,7 +445,7 @@ describe('trigger node', function() {
             n1.emit("input", {payload:"Hello"});
             setTimeout( function() {
                 n1.emit("input", {payload:"Error"});
-            },20);
+            },30);
             setTimeout( function() {
                 n1.emit("input", {payload:"World"});
             },150);
