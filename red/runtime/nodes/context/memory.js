@@ -16,43 +16,53 @@
 
 var util = require("../../util");
 
-var data;
+function Memory(config){
+    this.data = {};
+}
 
-var memory = {
-    init: function(config) {
-        data = {};
-    },
-    get: function(scope, key) {
-        if(!data[scope]){
-            data[scope] = {};
-        }
-        return util.getMessageProperty(data[scope],key);
-    },
-    set: function(scope, key, value) {
-        if(!data[scope]){
-            data[scope] = {};
-        }
-        util.setMessageProperty(data[scope],key,value);
-    },
-    keys: function(scope){
-        if(!data[scope]){
-            data[scope] = {};
-        }
-        var keysData = Object.keys(data[scope]);
-        if (scope !== "global") {
-            return keysData;
-        } else {
-            return keysData.filter(function (key) {
-                return key !== "set" && key !== "get" && key !== "keys";
-            });
-        }
-    },
-    delete: function(scope){
-        delete data[scope];
-    },
-    setGlobalContext: function(seed){
-        data["global"] = seed;
+Memory.prototype.get = function(scope, key) {
+    if(!this.data[scope]){
+        return undefined;
+    }
+    return util.getMessageProperty(this.data[scope],key);
+};
+
+Memory.prototype.set =function(scope, key, value) {
+    if(!this.data[scope]){
+        this.data[scope] = {};
+    }
+    util.setMessageProperty(this.data[scope],key,value);
+};
+
+Memory.prototype.keys = function(scope){
+    if(!this.data[scope]){
+        return [];
+    } 
+    if (scope !== "global") {
+        return Object.keys(this.data[scope]);
+    } else {
+        return Object.keys(this.data[scope]).filter(function (key) {
+            return key !== "set" && key !== "get" && key !== "keys";
+        });
     }
 };
 
-module.exports = memory;
+Memory.prototype.delete = function(scope){
+    delete this.data[scope];
+};
+
+Memory.prototype.open = function(){
+    return true;
+};
+
+Memory.prototype.close = function(){
+    delete this.data;
+};
+
+Memory.prototype.setGlobalContext= function(seed){
+    this.data["global"] = seed;
+};
+
+module.exports = function(config){
+    return new Memory(config);
+};

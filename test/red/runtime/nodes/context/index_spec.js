@@ -151,14 +151,13 @@ describe('context', function() {
         var stubDelete = sinon.stub();
         var contextStorage={
             test:{
-                module: {
-                    init: function() {
-                        return true;
-                    },
-                    get: stubGet,
-                    set: stubSet,
-                    keys: stubKeys,
-                    delete: stubDelete
+                module: function(config){
+                    function Test(){}
+                    Test.prototype.get = stubGet;
+                    Test.prototype.set = stubSet;
+                    Test.prototype.keys = stubKeys;
+                    Test.prototype.delete = stubDelete;
+                    return new Test(config);
                 },
                 config:{}
             }
@@ -228,14 +227,13 @@ describe('context', function() {
             var contextDefaultStorage={
                 default: "test",
                 test:{
-                    module: {
-                        init: function() {
-                            return true;
-                        },
-                        get: stubGet,
-                        set: stubSet,
-                        keys: stubKeys,
-                        delete: stubDelete
+                    module: function(config){
+                        function Test(){}
+                        Test.prototype.get = stubGet;
+                        Test.prototype.set = stubSet;
+                        Test.prototype.keys = stubKeys;
+                        Test.prototype.delete = stubDelete;
+                        return new Test(config);
                     },
                     config:{}
                 }

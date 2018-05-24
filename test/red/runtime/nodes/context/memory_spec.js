@@ -15,12 +15,13 @@
  **/
 
 var should = require('should');
-var context = require('../../../../../red/runtime/nodes/context/memory');
+var Memory = require('../../../../../red/runtime/nodes/context/memory');
 
 describe('memory',function() {
+    var context;
 
     beforeEach(function() {
-        context.init({});
+        context = Memory({});
     });
 
     describe('#get/set',function() {

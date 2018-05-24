@@ -17,23 +17,21 @@
 var should = require('should');
 var fs = require('fs-extra');
 var path = require("path");
-var context = require('../../../../../red/runtime/nodes/context/localfilesystem');
+var LocalFileSystem = require('../../../../../red/runtime/nodes/context/localfilesystem');
 
 var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
 
 describe('localfilesystem',function() {
+    var context;
 
     beforeEach(function() {
-        context.init({dir: resourcesDir});
+        context = LocalFileSystem({dir: resourcesDir});
     });
 
-    afterEach(function() {
-        context.delete("nodeX");
-        context.delete("nodeY");
-    });
-
-    after(function() {
-        fs.removeSync(resourcesDir);
+    afterEach(function(done) {
+        fs.remove(resourcesDir).then(function(result){
+            return done(result);
+        });
     });
 
     describe('#get/set',function() {

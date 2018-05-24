@@ -18,102 +18,109 @@ var JsonDB = require('node-json-db');
 var fs = require('fs-extra');
 var path = require("path");
 
-var configs;
-var storageBaseDir;
-var storages;
-
-function createStorage(scope) {
+function createStorage(storageBaseDir, scope) {
     var i = scope.indexOf(":")
     
     if(i === -1){
         if(scope === "global"){
-            storages[scope] = new JsonDB(path.join(storageBaseDir,"global",scope), true, true); 
+            return new JsonDB(path.join(storageBaseDir,"global",scope), true, true); 
         }else{ // scope:flow
-            storages[scope] = new JsonDB(path.join(storageBaseDir,scope,"flow"), true, true);
+            return new JsonDB(path.join(storageBaseDir,scope,"flow"), true, true);
         }
     }else{ // scope:local
         var ids = scope.split(":")
-        storages[scope] = new JsonDB(path.join(storageBaseDir,ids[1],ids[0]), true, true);
+        return new JsonDB(path.join(storageBaseDir,ids[1],ids[0]), true, true);
     }
 }
 
-var localfilesystem = {
-    init: function(_configs) {
-        configs = _configs;
-        storages = {};
-        if (!configs.dir) {
-            if(configs.settings && configs.settings.userDir){
-                storageBaseDir = path.join(configs.settings.userDir,"contexts");
-            }else{
+function getStoragePath(config) {
+    var base = config.base || "contexts";
+    var storageBaseDir;
+    if (!config.dir) {
+        if(config.settings && config.settings.userDir){
+            storageBaseDir = path.join(config.settings.userDir, base);
+        }else{
+            try {
+                fs.statSync(path.join(process.env.NODE_RED_HOME,".config.json"));
+                storageBaseDir = path.join(process.env.NODE_RED_HOME, base);
+            } catch(err) {
                 try {
-                    fs.statSync(path.join(process.env.NODE_RED_HOME,".config.json"));
-                    storageBaseDir = path.join(process.env.NODE_RED_HOME,"contexts");
+                    // Consider compatibility for older versions
+                    if (process.env.HOMEPATH) {
+                        fs.statSync(path.join(process.env.HOMEPATH,".node-red",".config.json"));
+                        storageBaseDir = path.join(process.env.HOMEPATH, ".node-red", base);
+                    }
                 } catch(err) {
-                    try {
-                        // Consider compatibility for older versions
-                        if (process.env.HOMEPATH) {
-                            fs.statSync(path.join(process.env.HOMEPATH,".node-red",".config.json"));
-                            storageBaseDir = path.join(process.env.HOMEPATH,".node-red","contexts");
-                        }
-                    } catch(err) {
-                    }
-                    if (!storageBaseDir) {
-                        storageBaseDir = path.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red","contexts");
-                    }
+                }
+                if (!storageBaseDir) {
+                    storageBaseDir = path.join(process.env.HOME || process.env.USERPROFILE || process.env.HOMEPATH || process.env.NODE_RED_HOME,".node-red", base);
                 }
             }
-        }else{
-            storageBaseDir = configs.dir;
         }
-    },
-    get: function (scope, key) {
-        if(!storages[scope]){
-            createStorage(scope);
-        }
-        try{
-            storages[scope].reload();
-            return storages[scope].getData("/" + key.replace(/\./g,"/"));
-        }catch(err){
-            if(err.name === "DataError"){
-                return undefined;
-            }else{
-                throw err;
-            }
-        }
-    },
+    }else{
+        storageBaseDir = path.join(config.dir, base);
+    }
+    return storageBaseDir;
+}
 
-    set: function (scope, key, value) {
-        if(!storages[scope]){
-            createStorage(scope);
-        }
-        if(value){
-            storages[scope].push("/" + key.replace(/\./g,"/"), value);
+function LocalFileSystem(config){
+    this.config = config;
+    this.storageBaseDir = getStoragePath(this.config);
+    this.storages = {};
+}
+
+LocalFileSystem.prototype.get = function (scope, key) {
+    if(!this.storages[scope]){
+        return undefined;
+    }
+    try{
+        this.storages[scope].reload();
+        return this.storages[scope].getData("/" + key.replace(/\./g,"/"));
+    }catch(err){
+        if(err.name === "DataError"){
+            return undefined;
         }else{
-            storages[scope].delete("/" + key.replace(/\./g,"/"));
-        }
-    },
-    keys: function (scope) {
-        if(!storages[scope]){
-            return [];
-        }
-        return Object.keys(storages[scope].getData("/"));
-    },
-    delete: function(scope){
-        if(storages[scope]){
-            storages[scope].delete("/");
-            if(scope.indexOf(":") === -1){
-                fs.removeSync(path.dirname(storages[scope].filename));
-            }else{
-                try{
-                    fs.statSync(storages[scope].filename);
-                    fs.unlinkSync(storages[scope].filename);
-                }catch(err){
-                    console.log("deleted");
-                }
-            }
-            delete storages[scope];
+            throw err;
         }
     }
+}
+
+LocalFileSystem.prototype.set = function(scope, key, value) {
+    if(!this.storages[scope]){
+        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
+    }
+    if(value){
+        this.storages[scope].push("/" + key.replace(/\./g,"/"), value);
+    }else{
+        this.storages[scope].delete("/" + key.replace(/\./g,"/"));
+    }
+}
+
+LocalFileSystem.prototype.keys = function(scope) {
+    if(!this.storages[scope]){
+        return [];
+    }
+    return Object.keys(this.storages[scope].getData("/"));
+}
+
+LocalFileSystem.prototype.delete = function(scope){
+    if(this.storages[scope]){
+        this.storages[scope].delete("/");
+        if(scope.indexOf(":") === -1){
+            fs.removeSync(path.dirname(this.storages[scope].filename));
+        }else{
+            try{
+                fs.statSync(this.storages[scope].filename);
+                fs.unlinkSync(this.storages[scope].filename);
+            }catch(err){
+                    console.log("deleted");
+            }
+        }
+        delete this.storages[scope];
+    }
+}
+
+module.exports = function(config){
+    return new LocalFileSystem(config);
 };
 
-module.exports = localfilesystem;

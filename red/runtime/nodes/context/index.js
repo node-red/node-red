@@ -29,8 +29,8 @@ function init(_settings) {
     externalContexts = {};
 
     // init memory plugin
-    externalContexts["_"] = require("./memory");
-    externalContexts["_"].init();
+    var memory = require("./memory");
+    externalContexts["_"] = memory();
     globalContext = createContext("global",settings.functionGlobalContext || {});
 }
 
@@ -61,8 +61,7 @@ function load() {
                 } else {
                     plugin = plugins[pluginName].module;
                 }
-                plugin.init(config);
-                externalContexts[pluginName] = plugin;
+                externalContexts[pluginName] = plugin(config);
             }else{
                 throw new Error(log._("context.error-module-not-defined", {storage:pluginName}));
             }
