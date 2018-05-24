@@ -563,7 +563,7 @@ describe("red/nodes/registry/registry",function() {
                 }
             },icons: [{path:testIcon,icons:['test_icon.png']}]});
             var iconPath = typeRegistry.getNodeIconPath('test-module','test_icon.png');
-            iconPath.should.eql(testIcon+"/test_icon.png");
+            iconPath.should.eql(path.resolve(testIcon+"/test_icon.png"));
         });
 
         it('returns the debug icon when getting an unknown module', function() {
