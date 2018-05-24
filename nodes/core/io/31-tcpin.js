@@ -130,6 +130,8 @@ module.exports = function(RED) {
                 socket.setKeepAlive(true,120000);
                 if (socketTimeout !== null) { socket.setTimeout(socketTimeout); }
                 var id = (1+Math.random()*4294967295).toString(16);
+                var fromi;
+                var fromp;
                 connectionPool[id] = socket;
                 count++;
                 node.status({text:RED._("tcpin.status.connections",{count:count})});
@@ -155,18 +157,21 @@ module.exports = function(RED) {
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
-                    } else {
+                    }
+                    else {
                         if ((typeof data) === "string") {
                             buffer = buffer+data;
                         } else {
                             buffer = Buffer.concat([buffer,data],buffer.length+data.length);
                         }
+                        fromi = socket.remoteAddress;
+                        fromp = socket.remotePort;
                     }
                 });
                 socket.on('end', function() {
                     if (!node.stream || (node.datatype === "utf8" && node.newline !== "")) {
                         if (buffer.length > 0) {
-                            var msg = {topic:node.topic, payload:buffer, ip:socket.remoteAddress, port:socket.remotePort};
+                            var msg = {topic:node.topic, payload:buffer, ip:fromi, port:fromp};
                             msg._session = {type:"tcp",id:id};
                             node.send(msg);
                         }
