@@ -1,3 +1,21 @@
+#### 0.18.7: Maintenance Release
+
+
+Editor Fixes
+
+ -  - Do not trim wires if node declares outputs in defaults but misses value Fixes #1737
+
+Node Fixes
+
+ - Relax twitter node version ready for major version bump
+ - Pass Date into the Function node sandbox to fix instanceof tests
+ - let TCP in node report remote ip and port when in single packet mode
+ - typo fix in node help (#1735)
+
+Other Fixes
+ - Tidy up default grunt task and fixup test break due to reorder Fixes #1738
+ - Bump jsonata version
+
 #### 0.18.6: Maintenance Release
 
 Editor Fixes
