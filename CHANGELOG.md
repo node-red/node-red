@@ -1,9 +1,8 @@
 #### 0.18.7: Maintenance Release
 
-
 Editor Fixes
 
- -  - Do not trim wires if node declares outputs in defaults but misses value Fixes #1737
+ - Do not trim wires if node declares outputs in defaults but misses value Fixes #1737
 
 Node Fixes
 
