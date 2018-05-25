@@ -82,6 +82,7 @@ module.exports = function(RED) {
             console:console,
             util:util,
             Buffer:Buffer,
+            Date: Date,
             RED: {
                 util: RED.util
             },

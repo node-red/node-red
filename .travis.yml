@@ -4,7 +4,7 @@ matrix:
   include:
     - node_js: "10"
       script:
-        - istanbul cover ./node_modules/.bin/grunt --report lcovonly && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
+        - ./node_modules/.bin/grunt && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
       before_script:
         - npm install -g istanbul coveralls
     - node_js: "8"
