@@ -55,7 +55,7 @@ module.exports = function(grunt) {
                 reportFormats: ['lcov','html'],
                 print: 'both'
             },
-            all: { src: ['test/**/*_spec.js'] },
+            all: { src: ["test/_spec.js","test/red/**/*_spec.js","test/nodes/**/*_spec.js"] },
             core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
@@ -474,7 +474,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
-        ['build','test-core','test-editor','test-nodes']);
+        ['build','jshint:editor','mocha_istanbul:all']);
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
