@@ -508,6 +508,22 @@ describe('function node', function() {
         });
     });
 
+
+    it('should use the same Date object from outside the sandbox', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.get('typeTest')(new Date());return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().global.set("typeTest",function(d) { return d instanceof Date });
+            n2.on("input", function(msg) {
+                msg.should.have.property('payload', true);
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     describe('Logger', function () {
         it('should log an Info Message', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.log('test');"}];
