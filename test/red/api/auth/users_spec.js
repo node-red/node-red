@@ -194,8 +194,7 @@ describe("api/auth/users", function() {
             it('should fail to return user fred',function(done) {
                 Users.get("fred").then(function(userf) {
                     try {
-                        userf.should.not.have.a.property("username","fred");
-                        userf.should.not.have.a.property("permissions","*");
+                        should.not.exist(userf);
                         done();
                     } catch(err) {
                         done(err);
@@ -212,9 +211,12 @@ describe("api/auth/users", function() {
                 default: function() { return("Done"); }
             });
         });
+        after(function() {
+            Users.init({});
+        });
         describe('#default',function() {
             it('handles api.default being a function',function(done) {
-                Users.should.have.property('default').which.is.a.Function;
+                Users.should.have.property('default').which.is.a.Function();
                 (Users.default()).should.equal("Done");
                 done();
             });
