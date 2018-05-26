@@ -81,16 +81,32 @@ var MessageFileLoader = {
 
 }
 
+function current_locale() {
+    var env = process.env;
+    for (var name of ['LC_ALL', 'LC_MESSAGES', 'LANG']) {
+        if (name in env) {
+            var val = env[name];
+            return val.substring(0, 2);
+        }
+    }
+    return undefined;
+}
+
 function init() {
     return when.promise(function(resolve,reject) {
         i18n.backend(MessageFileLoader);
-        i18n.init({
+        var opt = {
             ns: {
                 namespaces: [],
                 defaultNs: "runtime"
             },
             fallbackLng: [defaultLang]
-        },function() {
+        };
+        var lang = current_locale();
+        if (lang) {
+            opt.lng = lang;
+        }
+        i18n.init(opt ,function() {
             resolve();
         });
     });
