@@ -1233,7 +1233,7 @@ RED.diff = (function() {
         // currentDiff = diff;
 
         var trayOptions = {
-            title: options.title||"Review Changes", //TODO: nls
+            title: options.title||RED._("diff.reviewChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -1416,7 +1416,7 @@ RED.diff = (function() {
 
     function showTextDiff(textA,textB) {
         var trayOptions = {
-            title: "Compare Changes", //TODO: nls
+            title: RED._("diff.compareChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -1797,7 +1797,7 @@ RED.diff = (function() {
             if (isBinary) {
                 var diffBinaryRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
                 var binaryContent = $('<td colspan="3"></td>').appendTo(diffBinaryRow);
-                $('<span></span>').text("Cannot show binary file contents").appendTo(binaryContent);
+                $('<span></span>').text(RED._("diff.noBinaryFileShowed")).appendTo(binaryContent);
 
             } else {
                 if (commitOptions.unmerged) {
@@ -1946,7 +1946,7 @@ RED.diff = (function() {
     function showCommitDiff(options) {
         var commit = parseCommitDiff(options.commit);
         var trayOptions = {
-            title: "View Commit Changes", //TODO: nls
+            title: RED._("diff.viewCommitDiff"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -2008,7 +2008,7 @@ RED.diff = (function() {
         }
 
         var trayOptions = {
-            title: title||"Compare Changes", //TODO: nls
+            title: title|| RED._("diff.compareChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -2041,7 +2041,7 @@ RED.diff = (function() {
             trayOptions.buttons.push(
                 {
                     id: "node-diff-view-resolve-diff",
-                    text: "Save conflict resolution",
+                    text: RED._("diff.saveConflict"),
                     class: "primary disabled",
                     click: function() {
                         if (!$("#node-diff-view-resolve-diff").hasClass('disabled')) {

@@ -188,7 +188,12 @@
         "nodeCount": "__count__ 個のノード",
         "nodeCount_plural": "__count__ 個のノード",
         "local": "ローカルの変更",
-        "remote": "リモートの変更"
+        "remote": "リモートの変更",
+        "reviewChanges": "変更を表示",
+        "noBinaryFileShowed": "バイナリファイルの中身は表示することができません",
+        "viewCommitDiff": "コミットの内容を表示",
+        "compareChanges": "変更を比較",
+        "saveConflict": "解決して保存"
     },
     "subflow": {
         "editSubflow": "フローのテンプレートを編集: __name__",

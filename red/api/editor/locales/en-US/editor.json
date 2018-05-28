@@ -193,8 +193,12 @@
         "nodeCount": "__count__ node",
         "nodeCount_plural": "__count__ nodes",
         "local":"Local changes",
-        "remote":"Remote changes"
-
+        "remote":"Remote changes",
+        "reviewChanges": "Review Changes",
+        "noBinaryFileShowed": "Cannot show binary file contents",
+        "viewCommitDiff": "View Commit Changes",
+        "compareChanges": "Compare Changes",
+        "saveConflict": "Save conflict resolution"
     },
     "subflow": {
         "editSubflow": "Edit flow template: __name__",
