@@ -897,6 +897,7 @@ RED.sidebar.versionControl = (function() {
                         },
                         400: {
                             'git_push_failed': function(err) {
+                                // TODO: better message
                                 RED.notify(RED._("sidebar.project.versionControl.pushFailed"),"error");
                             },
                             'unexpected_error': function(error) {

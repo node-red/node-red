@@ -495,7 +495,7 @@
                 "createRemoteBranchPlaceholder": "Find or create a remote branch",
                 "trackedUpstreamBranch": "The created branch will be set as the tracked upstream branch.",
                 "selectUpstreamBranch": "The branch will be created. Select below to set it as the tracked upstream branch.",
-                "pushFailed": "Push failed as the remote has more recent commits. Pull and merge first, then push again.", // TODO: better message
+                "pushFailed": "Push failed as the remote has more recent commits. Pull and merge first, then push again.",
                 "push": "push",
                 "pull": "pull",
                 "unablePull": "<p>Unable to pull remote changes; your unstaged local changes would be overwritten.</p><p>Commit your changes and try again.</p>",
