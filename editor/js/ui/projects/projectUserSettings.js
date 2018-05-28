@@ -27,7 +27,7 @@ RED.projects.userSettings = (function() {
         var title = $('<h3></h3>').text(RED._("editor:sidebar.project.userSettings.committerDetail")).appendTo(pane);
 
         var gitconfigContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        $('<div style="color:#aaa;"></div>').appendTo(gitconfigContainer).text(RED._("editor:sidebar.project.userSettings.committer-tip"));
+        $('<div style="color:#aaa;"></div>').appendTo(gitconfigContainer).text(RED._("editor:sidebar.project.userSettings.committerTip"));
 
         var row = $('<div class="user-settings-row"></div>').appendTo(gitconfigContainer);
         $('<label for=""></label>').text(RED._("editor:sidebar.project.userSettings.userName")).appendTo(row);
@@ -45,7 +45,7 @@ RED.projects.userSettings = (function() {
         var container = $('<div class="user-settings-section"></div>').appendTo(pane);
         var popover;
         var title = $('<h3></h3>').text(RED._("editor:sidebar.project.userSettings.sshKeys")).appendTo(container);
-        var subtitle = $('<div style="color:#aaa;"></div>').appendTo(container).text(RED._("editor:sidebar.project.userSettings.sshKeys-tip"));
+        var subtitle = $('<div style="color:#aaa;"></div>').appendTo(container).text(RED._("editor:sidebar.project.userSettings.sshKeysTip"));
 
         var addKeyButton = $('<button id="user-settings-gitconfig-add-key" class="editor-button editor-button-small" style="float: right; margin-right: 10px;">'+RED._("editor:sidebar.project.userSettings.add")+'</button>')
             .appendTo(subtitle)
@@ -72,7 +72,7 @@ RED.projects.userSettings = (function() {
                 var validPassphrase = passphrase.length === 0 || passphrase.length >= 8;
                 passphraseInput.toggleClass('input-error',!validPassphrase);
                 if (!validPassphrase) {
-                    passphraseInputSubLabel.text(RED._("editor:sidebar.project.userSettings.passphrase-short"));
+                    passphraseInputSubLabel.text(RED._("editor:sidebar.project.userSettings.passphraseShort"));
                 } else if (passphrase.length === 0) {
                     passphraseInputSubLabel.text(RED._("editor:sidebar.project.userSettings.optional"));
                 } else {
@@ -91,11 +91,11 @@ RED.projects.userSettings = (function() {
 
         var row = $('<div class="user-settings-row"></div>').appendTo(container);
         var addKeyDialog = $('<div class="projects-dialog-list-dialog"></div>').hide().appendTo(row);
-        $('<div class="projects-dialog-list-dialog-header">').text(RED._("editor:sidebar.project.userSettings.add-sshKey")).appendTo(addKeyDialog);
+        $('<div class="projects-dialog-list-dialog-header">').text(RED._("editor:sidebar.project.userSettings.addSshKey")).appendTo(addKeyDialog);
         var addKeyDialogBody = $('<div>').appendTo(addKeyDialog);
 
         row = $('<div class="user-settings-row"></div>').appendTo(addKeyDialogBody);
-        $('<div style="color:#aaa;"></div>').appendTo(row).text(RED._("editor:sidebar.project.userSettings.add-sshKey-tip"));
+        $('<div style="color:#aaa;"></div>').appendTo(row).text(RED._("editor:sidebar.project.userSettings.addSshKeyTip"));
         // var bg = $('<div></div>',{class:"button-group", style:"text-align: center"}).appendTo(row);
         // var addLocalButton = $('<button class="editor-button toggle selected">use local key</button>').appendTo(bg);
         // var uploadButton = $('<button class="editor-button toggle">upload key</button>').appendTo(bg);
@@ -264,7 +264,7 @@ RED.projects.userSettings = (function() {
             utils.sendRequest(options);
 
             var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>').appendTo(row);
-            $('<button class="editor-button editor-button-small">'+RED._("editor:sidebar.project.userSettings.copy-publicKey")+'</button>')
+            $('<button class="editor-button editor-button-small">'+RED._("editor:sidebar.project.userSettings.copyPublicKey")+'</button>')
                 .appendTo(formButtons)
                 .click(function(evt) {
                     try {
@@ -289,7 +289,7 @@ RED.projects.userSettings = (function() {
                 var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
                 if (entry.empty) {
                     container.addClass('red-ui-search-empty');
-                    container.text(RED._("editor:sidebar.project.userSettings.no-sshKeys"));
+                    container.text(RED._("editor:sidebar.project.userSettings.noSshKeys"));
                     return;
                 }
                 var topRow = $('<div class="projects-dialog-ssh-key-header">').appendTo(container);
@@ -400,7 +400,7 @@ RED.projects.userSettings = (function() {
         utils = _utils;
         RED.userSettings.add({
             id:'gitconfig',
-            title: RED._("editor:sidebar.project.userSettings.git-config"), // TODO: nls
+            title: RED._("editor:sidebar.project.userSettings.gitConfig"),
             get: createSettingsPane,
             close: function() {
                 var currentGitSettings = RED.settings.get('git') || {};
