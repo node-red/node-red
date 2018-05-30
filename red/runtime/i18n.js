@@ -81,7 +81,7 @@ var MessageFileLoader = {
 
 }
 
-function current_locale() {
+function getCurrentLocale() {
     var env = process.env;
     for (var name of ['LC_ALL', 'LC_MESSAGES', 'LANG']) {
         if (name in env) {
@@ -102,7 +102,7 @@ function init() {
             },
             fallbackLng: [defaultLang]
         };
-        var lang = current_locale();
+        var lang = getCurrentLocale();
         if (lang) {
             opt.lng = lang;
         }
