@@ -71,7 +71,11 @@
             "editPalette":"Manage palette",
             "other": "Other",
             "showTips": "Show tips",
-            "help": "Node-RED website"
+            "help": "Node-RED website",
+            "projects": "Projects",
+            "projects-new": "New",
+            "projects-open": "Open",
+            "projects-settings": "Project Settings"
         }
     },
     "user": {
@@ -112,6 +116,24 @@
             "cannotAddCircularReference": "Cannot add subflow - circular reference detected",
             "unsupportedVersion": "<p>Using an unsupported version of Node.js</p><p>You should upgrade to the latest Node.js LTS release</p>",
             "failedToAppendNode": "<p>Failed to load '__module__'</p><p>__error__</p>"
+        },
+        "project": {
+            "change-branch": "Change to local branch '__project__'",
+            "merge-abort": "Git merge aborted",
+            "loaded": "Project '__project__' loaded",
+            "updated": "Project '__project__' updated",
+            "pull": "Project '__project__' reloaded",
+            "revert": "Project '__project__' reloaded",
+            "merge-complete": "Git merge completed"
+        },
+        "label": {
+            "manage-project-dep": "Manage project dependencies",
+            "setup-cred": "Setup credentials",
+            "setup-project": "Setup project files",
+            "create-default-package": "Create default package file",
+            "no-thanks": "No thanks",
+            "create-default-project": "Create default project files",
+            "show-merge-conflicts": "Show merge conflicts"
         }
     },
     "clipboard": {

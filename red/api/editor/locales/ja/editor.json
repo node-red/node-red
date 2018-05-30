@@ -71,7 +71,11 @@
             "editPalette": "パレットの管理",
             "other": "その他",
             "showTips": "ヒントを表示",
-            "help": "Node-REDウェブサイト"
+            "help": "Node-REDウェブサイト",
+            "projects": "プロジェクト",
+            "projects-new": "新規",
+            "projects-open": "開く",
+            "projects-settings": "設定"
         }
     },
     "user": {
@@ -106,7 +110,26 @@
             "lostConnectionTry": "すぐに接続",
             "cannotAddSubflowToItself": "サブフロー自身を追加できません",
             "cannotAddCircularReference": "循環参照を検出したため、サブフローを追加できません",
-            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。"
+            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。",
+            "failedToAppendNode": "<p>'__module__'がロードできませんでした。</p><p>__error__</p>"
+        },
+        "project": {
+            "change-branch": "ローカルブランチ'__project__'に変更しました",
+            "merge-abort": "Gitマージを中止しました",
+            "loaded": "プロジェクト'__project__'をロードしました",
+            "updated": "プロジェクト'__project__'を更新しました",
+            "pull": "プロジェクト'__project__'を再ロードしました",
+            "revert": "プロジェクト'__project__'を再ロードしました",
+            "merge-complete": "Gitマージが完了しました"
+        },
+        "label": {
+            "manage-project-dep": "プロジェクトの依存関係の管理",
+            "setup-cred": "認証情報の設定",
+            "setup-project": "プロジェクトファイルの設定",
+            "create-default-package": "デフォルトパッケージファイルの作成",
+            "no-thanks": "不要",
+            "create-default-project": "デフォルトプロジェクトファイルの作成",
+            "show-merge-conflicts": "マージ競合を表示"
         }
     },
     "clipboard": {
