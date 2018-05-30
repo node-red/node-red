@@ -17,6 +17,7 @@
 var should = require('should');
 var fs = require('fs-extra');
 var path = require("path");
+var when = require("when");
 var LocalFileSystem = require('../../../../../red/runtime/nodes/context/localfilesystem');
 
 var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
@@ -26,11 +27,12 @@ describe('localfilesystem',function() {
 
     beforeEach(function() {
         context = LocalFileSystem({dir: resourcesDir});
+        return context.open();
     });
 
-    afterEach(function(done) {
-        fs.remove(resourcesDir).then(function(result){
-            return done(result);
+    afterEach(function() {
+        return context.close().then(function(){
+            return fs.remove(resourcesDir);
         });
     });
 

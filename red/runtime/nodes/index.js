@@ -219,5 +219,6 @@ module.exports = {
     getCredentialKeyType: credentials.getKeyType,
 
     // Contexts
-    loadContextsPlugin: context.load
+    loadContextsPlugin: context.load,
+    closeContextsPlugin: context.close
 };

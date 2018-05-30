@@ -15,10 +15,19 @@
  **/
 
 var util = require("../../util");
+var when = require("when");
 
 function Memory(config){
     this.data = {};
 }
+
+Memory.prototype.open = function(){
+    return when.resolve();
+};
+
+Memory.prototype.close = function(){
+    return when.resolve();
+};
 
 Memory.prototype.get = function(scope, key) {
     if(!this.data[scope]){
@@ -49,14 +58,7 @@ Memory.prototype.keys = function(scope){
 
 Memory.prototype.delete = function(scope){
     delete this.data[scope];
-};
 
-Memory.prototype.open = function(){
-    return true;
-};
-
-Memory.prototype.close = function(){
-    delete this.data;
 };
 
 Memory.prototype.setGlobalContext= function(seed){

@@ -17,11 +17,10 @@
 var JsonDB = require('node-json-db');
 var fs = require('fs-extra');
 var path = require("path");
+var when = require("when");
 
 function createStorage(storageBaseDir, scope) {
-    var i = scope.indexOf(":")
-    
-    if(i === -1){
+    if(scope.indexOf(":") === -1){
         if(scope === "global"){
             return new JsonDB(path.join(storageBaseDir,"global",scope), true, true); 
         }else{ // scope:flow
@@ -67,6 +66,14 @@ function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getStoragePath(this.config);
     this.storages = {};
+}
+
+LocalFileSystem.prototype.open = function(){
+    return when.resolve();
+}
+
+LocalFileSystem.prototype.close = function(){
+    return when.resolve();
 }
 
 LocalFileSystem.prototype.get = function (scope, key) {

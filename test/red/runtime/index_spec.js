@@ -92,7 +92,7 @@ describe("runtime", function() {
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
             redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return when.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
-            redNodesLoadContextsPlugin = sinon.stub(redNodes,"loadContextsPlugin",function() {});
+            redNodesLoadContextsPlugin = sinon.stub(redNodes,"loadContextsPlugin",function() {return when.resolve()});
         });
         afterEach(function() {
             storageInit.restore();
@@ -186,7 +186,7 @@ describe("runtime", function() {
         });
 
         it("reports runtime metrics",function(done) {
-            var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
+            var stopFlows = sinon.stub(redNodes,"stopFlows",function() { return when.resolve();} );
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             logMetric.restore();
             logMetric = sinon.stub(log,"metric",function() { return true; });
@@ -217,10 +217,18 @@ describe("runtime", function() {
 
     });
 
-    it("stops components", function() {
-        var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
-        runtime.stop();
-        stopFlows.called.should.be.true();
-        stopFlows.restore();
+    it("stops components", function(done) {
+        var stopFlows = sinon.stub(redNodes,"stopFlows",function() { return when.resolve();} );
+        var closeContextsPlugin = sinon.stub(redNodes,"closeContextsPlugin",function() { return when.resolve();} );
+        runtime.stop().then(function(){
+            stopFlows.called.should.be.true();
+            closeContextsPlugin.called.should.be.true();
+            done();
+        }).catch(function(err){
+            return done(err)
+        }).finally(function(){
+            stopFlows.restore();
+            closeContextsPlugin.restore();
+        });
     });
 });

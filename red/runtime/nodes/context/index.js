@@ -17,6 +17,7 @@
 var clone = require("clone");
 var util = require("../../util");
 var log = require("../../log");
+var when = require("when");
 
 var settings;
 var contexts = {};
@@ -30,8 +31,10 @@ function init(_settings) {
 
     // init memory plugin
     var memory = require("./memory");
+    var seed = settings.functionGlobalContext || {};
     externalContexts["_"] = memory();
-    globalContext = createContext("global",settings.functionGlobalContext || {});
+    externalContexts["_"].setGlobalContext(seed);
+    globalContext = createContext("global",seed);
 }
 
 function load() {
@@ -39,6 +42,7 @@ function load() {
     var plugins = settings.contextStorage;
     var isAlias = false;
     if (plugins) {
+        var promises = [];
         noContextStorage = false;
         for(var pluginName in plugins){
             if(pluginName === "_"){
@@ -56,25 +60,32 @@ function load() {
                     try{
                         plugin = require("./"+plugins[pluginName].module);
                     }catch(err){
-                        throw new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module}));
+                        return when.reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
                     }
                 } else {
                     plugin = plugins[pluginName].module;
                 }
                 externalContexts[pluginName] = plugin(config);
             }else{
-                throw new Error(log._("context.error-module-not-defined", {storage:pluginName}));
+                return when.reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
             }
         }
         if(isAlias){
             if(externalContexts.hasOwnProperty(plugins["default"])){
                 externalContexts["default"] =  externalContexts[plugins["default"]];
             }else{
-                throw new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]}));
+                return when.reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
             }
         }
+        for(var plugin in externalContexts){
+            if(externalContexts.hasOwnProperty(plugin)){
+                promises.push(externalContexts[plugin].open());
+            }
+        }
+        return when.all(promises);
     } else {
         noContextStorage = true;
+        return externalContexts["_"].open();
     }
 }
 
@@ -157,9 +168,6 @@ function createContext(id,seed) {
         var context = getContextStorage(storageName);
         return context.keys(scope);
     };
-    if(id === "global"){
-        externalContexts["_"].setGlobalContext(seed);
-    }
     return obj;
 }
 
@@ -210,10 +218,21 @@ function clean(flowConfig) {
     }
 }
 
+function close() {
+    var promises = [];
+    for(var plugin in externalContexts){
+        if(externalContexts.hasOwnProperty(plugin)){
+            promises.push(externalContexts[plugin].close());
+        }
+    }
+    return when.all(promises);
+}
+
 module.exports = {
     init: init,
     load: load,
     get: getContext,
     delete: deleteContext,
-    clean:clean
+    clean: clean,
+    close: close
 };

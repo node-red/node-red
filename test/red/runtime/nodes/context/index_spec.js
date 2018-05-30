@@ -16,18 +16,18 @@
 
 var should = require("should");
 var sinon = require('sinon');
-var path = require('path');
-var fs = require('fs-extra');
 var rewire = require("rewire");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
 describe('context', function() {
-    describe('localmemory',function() {
+    describe('local memory',function() {
         beforeEach(function() {
             Context.init({});
+            return Context.load();
         });
         afterEach(function() {
             Context.clean({allNodes:{}});
+            return Context.close();
         });
         it('stores local property',function() {
             var context1 = Context.get("1","flowA");
@@ -140,57 +140,261 @@ describe('context', function() {
             keys.should.have.length(2);
             keys[1].should.eql("abc");
         });
+
+        it('should store data on memory when contextStorage is not defined', function() {
+            var context =  Context.get("1","flow");
+            context.set("#nonexist.key1", "val1");
+            context.get("#nonexist.key1").should.eql("val1");
+            context.flow.set("#nonexist.key2", "val2");
+            context.flow.get("#nonexist.key2").should.eql("val2");
+            context.global.set("#nonexist.key1", "val3");
+            context.global.get("#nonexist.key1").should.eql("val3");
+        });
     });
 
     describe('external context storage',function() {
-        var testDir = path.join(__dirname,".testUserHome");
-        var context;
-        var stubGet = sinon.stub();
-        var stubSet = sinon.stub();
-        var stubKeys = sinon.stub();
-        var stubDelete = sinon.stub();
-        var contextStorage={
-            test:{
-                module: function(config){
-                    function Test(){}
-                    Test.prototype.get = stubGet;
-                    Test.prototype.set = stubSet;
-                    Test.prototype.keys = stubKeys;
-                    Test.prototype.delete = stubDelete;
-                    return new Test(config);
-                },
-                config:{}
-            }
-        };
+        describe('load modules',function(){
+            afterEach(function() {
+                Context.clean({allNodes:{}});
+                return Context.close();
+            });
 
-        afterEach(function(done) {
-            stubGet.reset();
-            stubSet.reset();
-            stubKeys.reset();
-            stubDelete.reset();
-            Context.clean({allNodes:{}});
-            fs.remove(testDir,done);
+            it('should load memory module', function() {
+                Context.init({contextStorage:{memory:{module:"memory"}}});
+                return Context.load();
+            });
+            it('should load localfilesystem module', function() {
+                Context.init({contextStorage:{file:{module:"localfilesystem"}}});
+                return Context.load();
+            });
+            it('should accept special storage name', function() {
+                Context.init({
+                    contextStorage:{
+                        "#%&":{module:"memory"},
+                        \u3042:{module:"memory"},
+                        1:{module:"memory"},
+                    }
+                });
+                return Context.load().then(function(){
+                    var context = Context.get("1","flow");
+                    context.set("##%&.sign","sign1");
+                    context.get("##%&.sign").should.eql("sign1");
+                    context.set("#\u3042.file2","file2");
+                    context.get("#\u3042.file2").should.eql("file2");
+                    context.set("#1.num","num3");
+                    context.get("#1.num").should.eql("num3");
+                });
+            });
+            it('should fail when using invalid default context', function(done) {
+                Context.init({contextStorage:{default:"noexist"}});
+                Context.load().then(function(){
+                    done("An error was not thrown");
+                }).catch(function(){
+                    done();
+                });
+            });
+            it('should fail for the storage with no module', function(done) {
+                Context.init({ contextStorage: { test: {}}});
+                Context.load().then(function(){
+                    done("An error was not thrown");
+                }).catch(function(){
+                    done();
+                });
+            });
+            it('should fail to load non-existent module', function(done) {
+                Context.init({contextStorage:{ file:{module:"nonexistent"} }});
+                Context.load().then(function(){
+                    done("An error was not thrown");
+                }).catch(function(){
+                    done();
+                });
+            });
         });
 
-        function initializeContext() {
-            Context.init({contextStorage:contextStorage});
-            Context.load();
-            context =  Context.get("1","flow");
-        }
-
-        describe('key name',function() {
-            var memoryStorage = {
-                memory: {
-                    module: "memory"
+        describe('store data',function() {
+            var sandbox = sinon.sandbox.create();
+            var stubGet = sandbox.stub();
+            var stubSet = sandbox.stub();
+            var stubKeys = sandbox.stub();
+            var stubDelete = sandbox.stub();
+            var stubOpen = sandbox.stub().returns(Promise.resolve());
+            var stubClose = sandbox.stub().returns(Promise.resolve());
+            var stubGet2 = sandbox.stub();
+            var stubSet2 = sandbox.stub();
+            var stubKeys2 = sandbox.stub();
+            var stubDelete2 = sandbox.stub();
+            var stubOpen2 = sandbox.stub().returns(Promise.resolve());
+            var stubClose2 = sandbox.stub().returns(Promise.resolve());
+            var testPlugin = function(config){
+                function Test(){}
+                Test.prototype.get = stubGet;
+                Test.prototype.set = stubSet;
+                Test.prototype.keys = stubKeys;
+                Test.prototype.delete = stubDelete;
+                Test.prototype.open = stubOpen;
+                Test.prototype.close = stubClose;
+                return new Test(config);
+            };
+            var testPlugin2 = function(config){
+                function Test2(){}
+                Test2.prototype.get = stubGet2;
+                Test2.prototype.set = stubSet2;
+                Test2.prototype.keys = stubKeys2;
+                Test2.prototype.delete = stubDelete2;
+                Test2.prototype.open = stubOpen2;
+                Test2.prototype.close = stubClose2;
+                return new Test2(config);
+            };
+            var contextStorage={
+                test:{
+                    module: testPlugin,
+                    config:{}
                 }
             };
+            var contextDefaultStorage={
+                default: {
+                    module: testPlugin2,
+                    config:{}
+                },
+                test:{
+                    module: testPlugin,
+                    config:{}
+                }
+            };
+
+            afterEach(function() {
+                sandbox.reset();
+                Context.clean({allNodes:{}});
+                return Context.close();
+            });
+    
+            it('should store local property to external context storage',function() {
+                Context.init({contextStorage:contextStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.get("#test.foo"));
+                    context.set("#test.foo","test");
+                    context.get("#test.foo");
+                    context.keys("#test");
+                    stubSet.calledWithExactly("1:flow","foo","test").should.be.true();
+                    stubGet.calledWithExactly("1:flow","foo").should.be.true();
+                    stubKeys.calledWithExactly("1:flow").should.be.true();
+                });
+            });
+            it('should store flow property to external context storage',function() {
+                Context.init({contextStorage:contextStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.flow.get("#test.foo"));
+                    context.flow.set("#test.foo","test");
+                    context.flow.get("#test.foo");
+                    context.flow.keys("#test");
+                    stubSet.calledWithExactly("flow","foo","test").should.be.true();
+                    stubGet.calledWithExactly("flow","foo").should.be.true();
+                    stubKeys.calledWithExactly("flow").should.be.true();
+                });
+            });
+            it('should store global property to external context storage',function() {
+                Context.init({contextStorage:contextStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.global.get("#test.foo"));
+                    context.global.set("#test.foo","test");
+                    context.global.get("#test.foo");
+                    context.global.keys("#test");
+                    stubSet.calledWithExactly("global","foo","test").should.be.true();
+                    stubGet.calledWithExactly("global","foo").should.be.true();
+                    stubKeys.calledWithExactly("global").should.be.true();
+                });
+            });
+            it('should store data to the default context when non-existent context storage was specified', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.get("#nonexist.foo"));
+                    context.set("#nonexist.foo","test");
+                    context.get("#nonexist.foo");
+                    context.keys("#nonexist");
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","test").should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                });
+            });
+            it('should use the default context', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.get("#default.foo"));
+                    context.set("#default.foo","default");
+                    context.get("#default.foo");
+                    context.keys("#default");
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","default").should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                });
+            });
+            it('should use the alias of default context', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    should.not.exist(context.get("#.foo"));
+                    context.set("#.foo","alias");
+                    context.get("#.foo");
+                    context.keys("#");
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","alias").should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                });
+            });
+            it('should throw an error using undefined storage for local context', function(done) {
+                Context.init({contextStorage:contextStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.get("#nonexist.local");
+                    should.fail(null, null, "An error was not thrown using undefined storage for local context");
+                }).catch(function(err) {
+                    if (err.name === "ContextError") {
+                        done();
+                    } else {
+                        done(err);
+                    }
+                });
+            });
+            it('should throw an error using undefined storage for flow context', function(done) {
+                Context.init({contextStorage:contextStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.flow.set("#nonexist.flow");
+                    should.fail(null, null, "An error was not thrown using undefined storage for flow context");
+                }).catch(function(err) {
+                    if (err.name === "ContextError") {
+                        done();
+                    } else {
+                        done(err);
+                    }
+                });
+            });
+        });
+
+        describe('key name',function() {
             beforeEach(function() {
-                Context.init({contextStorage:memoryStorage});
-                Context.load();
-                context =  Context.get("1","flow");
+                Context.init({contextStorage:{memory:{module:"memory"}}});
+                return Context.load().then(function(){
+                    context =  Context.get("1","flow");
+                });
             });
             afterEach(function() {
                 Context.clean({allNodes:{}});
+                return Context.close();
             });
             it('should work correctly with the valid key name',function() {
                 context.set("#memory.azAZ09#_","valid");
@@ -219,192 +423,6 @@ describe('context', function() {
                 }).should.throw();
                 (function() {
                     context.set("#memory. space","space3");
-                }).should.throw();
-            });
-        });
-
-        describe('if external context storage exists',function() {
-            var contextDefaultStorage={
-                default: "test",
-                test:{
-                    module: function(config){
-                        function Test(){}
-                        Test.prototype.get = stubGet;
-                        Test.prototype.set = stubSet;
-                        Test.prototype.keys = stubKeys;
-                        Test.prototype.delete = stubDelete;
-                        return new Test(config);
-                    },
-                    config:{}
-                }
-            };
-
-            it('should store local property to external context storage',function() {
-                initializeContext();
-                should.not.exist(context.get("#test.foo"));
-                context.set("#test.foo","test");
-                context.get("#test.foo");
-                context.keys("#test");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should store flow property to external context storage',function() {
-                initializeContext();
-                should.not.exist(context.flow.get("#test.foo"));
-                context.flow.set("#test.foo","test");
-                context.flow.get("#test.foo");
-                context.flow.keys("#test");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should store global property to external context storage',function() {
-                initializeContext();
-                should.not.exist(context.global.get("#test.foo"));
-                context.global.set("#test.foo","test");
-                context.global.get("#test.foo");
-                context.global.keys("#test");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should store data when non-existent context storage was specified', function() {
-                Context.init({contextStorage:contextDefaultStorage});
-                Context.load();
-                context =  Context.get("1","flow");
-                should.not.exist(context.get("#nonexist.foo"));
-                context.set("#nonexist.foo","test");
-                context.get("#nonexist.foo");
-                context.keys("#nonexist");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should use the default context', function() {
-                Context.init({contextStorage:contextDefaultStorage});
-                Context.load();
-                context =  Context.get("1","flow");
-                should.not.exist(context.get("#default.foo"));
-                context.set("#default.foo","default");
-                context.get("#default.foo");
-                context.keys("#default");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should use the alias of default context', function() {
-                Context.init({contextStorage:contextDefaultStorage});
-                Context.load();
-                context =  Context.get("1","flow");
-                should.not.exist(context.get("#.foo"));
-                context.set("#.foo","alias");
-                context.get("#.foo");
-                context.keys("#");
-                stubGet.called.should.be.true();
-                stubSet.called.should.be.true();
-                stubKeys.called.should.be.true();
-            });
-            it('should load memory module', function(done) {
-                Context.init({ contextStorage: { _: {}}});
-                try {
-                    Context.load();
-                    context.set("#_.foo","mem1");
-                    context.get("#_.foo").should.eql("mem1");
-                    var keys = context.keys("#_");
-                    keys.should.have.length(1);
-                    keys[0].should.eql("foo");
-                    done();
-                } catch (err) {
-                    done(err);
-                }
-            });
-            it('should load localfilesystem module', function(done) {
-                Context.init({contextStorage:{ file:{module:"localfilesystem"} }});
-                try {
-                    Context.load();
-                    done();
-                } catch (err) {
-                    done(err);
-                }
-            });
-            it('should accept special storage name', function(done) {
-                Context.init({
-                    contextStorage:{
-                        "#%&":{module:"memory"},
-                        \u3042:{module:"memory"},
-                        1:{module:"memory"},
-                    }
-                });
-                try {
-                    Context.load();
-                    context.set("##%&.sign","sign1");
-                    context.get("##%&.sign").should.eql("sign1");
-                    context.set("#\u3042.file2","file2");
-                    context.get("#\u3042.file2").should.eql("file2");
-                    context.set("#1.num","num3");
-                    context.get("#1.num").should.eql("num3");
-                    done();
-                } catch (err) {
-                    done(err);
-                }
-            });
-        });
-
-        describe('if external context storage does not exist',function() {
-            it('should throw an error using undefined storage for local context', function(done) {
-                initializeContext();
-                try {
-                    context.get("#nonexist.local");
-                    should.fail(null, null, "An error was not thrown using undefined storage for local context");
-                } catch (err) {
-                    if (err.name === "ContextError") {
-                        done();
-                    } else {
-                        done(err);
-                    }
-                }
-            });
-            it('should throw an error using undefined storage for flow context', function(done) {
-                initializeContext();
-                try {
-                    context.flow.set("#nonexist.flow");
-                    should.fail(null, null, "An error was not thrown using undefined storage for flow context");
-                } catch (err) {
-                    if (err.name === "ContextError") {
-                        done();
-                    } else {
-                        done(err);
-                    }
-                }
-            });
-            it('should fail when using invalid default context', function() {
-                Context.init({contextStorage:{default:"noexist"}});
-                (function() {
-                    Context.load();
-                }).should.throw();
-            });
-            it('should store data on memory when contextStorage is not defined', function() {
-                Context.init({});
-                Context.load();
-                context =  Context.get("1","flow");
-                context.set("#nonexist.key1", "val1");
-                context.get("#nonexist.key1").should.eql("val1");
-                context.flow.set("#nonexist.key2", "val2");
-                context.flow.get("#nonexist.key2").should.eql("val2");
-                context.global.set("#nonexist.key1", "val3");
-                context.global.get("#nonexist.key1").should.eql("val3");
-            });
-            it('should fail for the storage with no module', function() {
-                Context.init({ contextStorage: { test: {}}});
-                (function() {
-                    Context.load();
-                }).should.throw();
-            });
-            it('should fail to load non-existent module', function() {
-                Context.init({contextStorage:{ file:{module:"nonexistent"} }});
-                (function() {
-                    Context.load();
                 }).should.throw();
             });
         });
