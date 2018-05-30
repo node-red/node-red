@@ -198,7 +198,11 @@
         "noBinaryFileShowed": "Cannot show binary file contents",
         "viewCommitDiff": "View Commit Changes",
         "compareChanges": "Compare Changes",
-        "saveConflict": "Save conflict resolution"
+        "saveConflict": "Save conflict resolution",
+        "conflictHeader": "<span>__resolved__</span> of <span>__unresolved__</span> conflicts resolved",
+        "commonVersionError": "Common Version doesn't contain valid JSON:",
+        "oldVersionError": "Old Version doesn't contain valid JSON:",
+        "newVersionError": "New Version doesn't contain valid JSON:"
     },
     "subflow": {
         "editSubflow": "Edit flow template: __name__",

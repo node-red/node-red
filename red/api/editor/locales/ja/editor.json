@@ -193,7 +193,11 @@
         "noBinaryFileShowed": "バイナリファイルの中身は表示することができません",
         "viewCommitDiff": "コミットの内容を表示",
         "compareChanges": "変更を比較",
-        "saveConflict": "解決して保存"
+        "saveConflict": "解決して保存",
+        "conflictHeader": "<span>__unresolved__</span> 個中 <span>__resolved__</span> 個のコンフリクトを解決",
+        "commonVersionError": "共通バージョンは正しいJSON形式ではありません:",
+        "oldVersionError": "古いバージョンは正しいJSON形式ではありません:",
+        "newVersionError": "新しいバージョンは正しいJSON形式ではありません:"
     },
     "subflow": {
         "editSubflow": "フローのテンプレートを編集: __name__",

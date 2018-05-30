@@ -1747,7 +1747,7 @@ RED.diff = (function() {
                         try {
                             commonFlow = JSON.parse(commonVersion.content||"[]");
                         } catch(err) {
-                            console.log("Common Version doesn't contain valid JSON:",commonVersionUrl);
+                            console.log(RED._("diff.commonVersionError"),commonVersionUrl);
                             console.log(err);
                             return;
                         }
@@ -1755,7 +1755,7 @@ RED.diff = (function() {
                     try {
                         oldFlow = JSON.parse(oldVersion.content||"[]");
                     } catch(err) {
-                        console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                        console.log(RED._("diff.oldVersionError"),oldVersionUrl);
                         console.log(err);
                         return;
                     }
@@ -1765,7 +1765,7 @@ RED.diff = (function() {
                     try {
                         newFlow = JSON.parse(newVersion.content||"[]");
                     } catch(err) {
-                        console.log("New Version doesn't contain valid JSON:",newFlow);
+                        console.log(RED._("diff.newVersionError"),newFlow);
                         console.log(err);
                         return;
                     }
@@ -1801,7 +1801,7 @@ RED.diff = (function() {
 
             } else {
                 if (commitOptions.unmerged) {
-                    conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
+                    conflictHeader = $('<span style="float: right;">'+RED._("diff.conflictHeader",{resolved:resolvedConflicts, unresolved:unresolvedConflicts})+'</span>').appendTo(content);
                 }
                 hunks.forEach(function(hunk) {
                     var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
@@ -1914,7 +1914,7 @@ RED.diff = (function() {
                                         diffRow.remove();
                                         addedRows.find(".linetext").addClass('added');
                                         conflictHeader.empty();
-                                        $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
+                                        $('<span>'+RED._("diff.conflictHeader",{resolved:resolvedConflicts, unresolved:unresolvedConflicts})+'</span>').appendTo(conflictHeader);
 
                                         conflictResolutions[file.file] = conflictResolutions[file.file] || {};
                                         conflictResolutions[file.file][hunk.localChangeStart] = {
