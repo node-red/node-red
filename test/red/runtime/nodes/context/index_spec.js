@@ -118,9 +118,10 @@ describe('context', function() {
             context.set("foo","abc");
             context.get("foo").should.eql("abc");
 
-            Context.delete("1","flowA");
-            context = Context.get("1","flowA");
-            should.not.exist(context.get("foo"));
+            return Context.delete("1","flowA").then(function(){
+                context = Context.get("1","flowA");
+                should.not.exist(context.get("foo"));                
+            });
         });
 
         it('enumerates context keys', function() {
@@ -153,12 +154,75 @@ describe('context', function() {
     });
 
     describe('external context storage',function() {
-        describe('load modules',function(){
-            afterEach(function() {
-                Context.clean({allNodes:{}});
+        var sandbox = sinon.sandbox.create();
+        var stubGet = sandbox.stub();
+        var stubSet = sandbox.stub();
+        var stubKeys = sandbox.stub();
+        var stubDelete = sandbox.stub().returns(Promise.resolve());
+        var stubClean = sandbox.stub().returns(Promise.resolve());
+        var stubOpen = sandbox.stub().returns(Promise.resolve());
+        var stubClose = sandbox.stub().returns(Promise.resolve());
+        var stubGet2 = sandbox.stub();
+        var stubSet2 = sandbox.stub();
+        var stubKeys2 = sandbox.stub();
+        var stubDelete2 = sandbox.stub().returns(Promise.resolve());
+        var stubClean2 = sandbox.stub().returns(Promise.resolve());
+        var stubOpen2 = sandbox.stub().returns(Promise.resolve());
+        var stubClose2 = sandbox.stub().returns(Promise.resolve());
+        var testPlugin = function(config){
+            function Test(){}
+            Test.prototype.get = stubGet;
+            Test.prototype.set = stubSet;
+            Test.prototype.keys = stubKeys;
+            Test.prototype.delete = stubDelete;
+            Test.prototype.clean = stubClean;
+            Test.prototype.open = stubOpen;
+            Test.prototype.close = stubClose;
+            return new Test(config);
+        };
+        var testPlugin2 = function(config){
+            function Test2(){}
+            Test2.prototype.get = stubGet2;
+            Test2.prototype.set = stubSet2;
+            Test2.prototype.keys = stubKeys2;
+            Test2.prototype.delete = stubDelete2;
+            Test2.prototype.clean = stubClean2;
+            Test2.prototype.open = stubOpen2;
+            Test2.prototype.close = stubClose2;
+            return new Test2(config);
+        };
+        var contextStorage={
+            test:{
+                module: testPlugin,
+                config:{}
+            }
+        };
+        var contextDefaultStorage={
+            default: {
+                module: testPlugin2,
+                config:{}
+            },
+            test:{
+                module: testPlugin,
+                config:{}
+            }
+        };
+
+        afterEach(function() {
+            sandbox.reset();
+            return Context.clean({allNodes:{}}).then(function(){
                 return Context.close();
             });
-
+        });
+    
+        describe('load modules',function(){
+            it('should call open()', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    stubOpen.called.should.be.true();
+                    stubOpen2.called.should.be.true();
+                });
+            });
             it('should load memory module', function() {
                 Context.init({contextStorage:{memory:{module:"memory"}}});
                 return Context.load();
@@ -183,6 +247,18 @@ describe('context', function() {
                     context.get("#\u3042.file2").should.eql("file2");
                     context.set("#1.num","num3");
                     context.get("#1.num").should.eql("num3");
+                });
+            });
+            it('should ignore reserved storage name `_`', function() {
+                Context.init({contextStorage:{_:{module:testPlugin}}});
+                return Context.load().then(function(){
+                    var context = Context.get("1","flow");
+                    context.set("#_.foo","bar");
+                    context.get("#_.foo");
+                    context.keys("#_");
+                    stubSet.called.should.be.false();
+                    stubGet.called.should.be.false();
+                    stubKeys.called.should.be.false();
                 });
             });
             it('should fail when using invalid default context', function(done) {
@@ -211,63 +287,19 @@ describe('context', function() {
             });
         });
 
-        describe('store data',function() {
-            var sandbox = sinon.sandbox.create();
-            var stubGet = sandbox.stub();
-            var stubSet = sandbox.stub();
-            var stubKeys = sandbox.stub();
-            var stubDelete = sandbox.stub();
-            var stubOpen = sandbox.stub().returns(Promise.resolve());
-            var stubClose = sandbox.stub().returns(Promise.resolve());
-            var stubGet2 = sandbox.stub();
-            var stubSet2 = sandbox.stub();
-            var stubKeys2 = sandbox.stub();
-            var stubDelete2 = sandbox.stub();
-            var stubOpen2 = sandbox.stub().returns(Promise.resolve());
-            var stubClose2 = sandbox.stub().returns(Promise.resolve());
-            var testPlugin = function(config){
-                function Test(){}
-                Test.prototype.get = stubGet;
-                Test.prototype.set = stubSet;
-                Test.prototype.keys = stubKeys;
-                Test.prototype.delete = stubDelete;
-                Test.prototype.open = stubOpen;
-                Test.prototype.close = stubClose;
-                return new Test(config);
-            };
-            var testPlugin2 = function(config){
-                function Test2(){}
-                Test2.prototype.get = stubGet2;
-                Test2.prototype.set = stubSet2;
-                Test2.prototype.keys = stubKeys2;
-                Test2.prototype.delete = stubDelete2;
-                Test2.prototype.open = stubOpen2;
-                Test2.prototype.close = stubClose2;
-                return new Test2(config);
-            };
-            var contextStorage={
-                test:{
-                    module: testPlugin,
-                    config:{}
-                }
-            };
-            var contextDefaultStorage={
-                default: {
-                    module: testPlugin2,
-                    config:{}
-                },
-                test:{
-                    module: testPlugin,
-                    config:{}
-                }
-            };
-
-            afterEach(function() {
-                sandbox.reset();
-                Context.clean({allNodes:{}});
-                return Context.close();
+        describe('close modules',function(){
+            it('should call close()', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    return Context.close().then(function(){
+                        stubClose.called.should.be.true();
+                        stubClose2.called.should.be.true();
+                    });
+                });
             });
-    
+        });
+
+        describe('store context',function() {
             it('should store local property to external context storage',function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
@@ -381,6 +413,31 @@ describe('context', function() {
                     } else {
                         done(err);
                     }
+                });
+            });
+        });
+
+        describe('delete context',function(){
+            it('should not call delete()', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    Context.get("flowA");
+                    return Context.delete("flowA").then(function(){
+                        stubDelete.called.should.be.false();
+                        stubDelete2.called.should.be.false();
+                    });
+                });
+            });
+        });
+
+        describe('clean context',function(){
+            it('should call clean()', function() {
+                Context.init({contextStorage:contextDefaultStorage});
+                return Context.load().then(function(){
+                    return Context.clean({allNodes:{}}).then(function(){
+                        stubClean.calledWithExactly([]).should.be.true();
+                        stubClean2.calledWithExactly([]).should.be.true();
+                    });
                 });
             });
         });

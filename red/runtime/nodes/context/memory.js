@@ -58,8 +58,20 @@ Memory.prototype.keys = function(scope){
 
 Memory.prototype.delete = function(scope){
     delete this.data[scope];
-
+    return Promise.resolve();
 };
+
+Memory.prototype.clean = function(activeNodes){
+    for(var id in this.data){
+        if(this.data.hasOwnProperty(id) && id !== "global"){
+            var idParts = id.split(":");
+            if(!activeNodes.includes(idParts[0])){
+                delete this.data[id];
+            }
+        }
+    }
+    return Promise.resolve();
+}
 
 Memory.prototype.setGlobalContext= function(seed){
     this.data["global"] = seed;

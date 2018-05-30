@@ -78,7 +78,7 @@ LocalFileSystem.prototype.close = function(){
 
 LocalFileSystem.prototype.get = function (scope, key) {
     if(!this.storages[scope]){
-        return undefined;
+        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
     }
     try{
         this.storages[scope].reload();
@@ -105,27 +105,37 @@ LocalFileSystem.prototype.set = function(scope, key, value) {
 
 LocalFileSystem.prototype.keys = function(scope) {
     if(!this.storages[scope]){
-        return [];
+        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
     }
     return Object.keys(this.storages[scope].getData("/"));
 }
 
 LocalFileSystem.prototype.delete = function(scope){
+    var self = this;
     if(this.storages[scope]){
+        var promise;
         this.storages[scope].delete("/");
-        if(scope.indexOf(":") === -1){
-            fs.removeSync(path.dirname(this.storages[scope].filename));
-        }else{
-            try{
-                fs.statSync(this.storages[scope].filename);
-                fs.unlinkSync(this.storages[scope].filename);
-            }catch(err){
-                    console.log("deleted");
-            }
-        }
-        delete this.storages[scope];
+        return fs.remove(this.storages[scope].filename).then(function(){
+            delete self.storages[scope];
+            return when.resolve();
+        });
+    }else{
+        return when.resolve();
     }
 }
+
+LocalFileSystem.prototype.clean = function(activeNodes){
+    var self = this;
+    return fs.readdir(self.storageBaseDir).then(function(dirs){
+        return when.all(dirs.reduce(function(result, item){
+            if(item !== "global" && !activeNodes.includes(item)){
+                result.push(fs.remove(path.join(self.storageBaseDir,item)));
+                delete self.storages[item];
+            }
+            return result;
+        },[]));
+    });
+ }
 
 module.exports = function(config){
     return new LocalFileSystem(config);

@@ -70,16 +70,16 @@ function load() {
                 return when.reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
             }
         }
+        for(var plugin in externalContexts){
+            if(externalContexts.hasOwnProperty(plugin)){
+                promises.push(externalContexts[plugin].open());
+            }
+        }
         if(isAlias){
             if(externalContexts.hasOwnProperty(plugins["default"])){
                 externalContexts["default"] =  externalContexts[plugins["default"]];
             }else{
                 return when.reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
-            }
-        }
-        for(var plugin in externalContexts){
-            if(externalContexts.hasOwnProperty(plugin)){
-                promises.push(externalContexts[plugin].open());
             }
         }
         return when.all(promises);
@@ -191,31 +191,35 @@ function getContext(localId,flowId) {
 }
 
 function deleteContext(id,flowId) {
-    var contextId = id;
-    if (flowId) {
-        contextId = id+":"+flowId;
+    if(noContextStorage){
+        var promises = [];
+        var contextId = id;
+        if (flowId) {
+            contextId = id+":"+flowId;
+        }
+        delete contexts[contextId];
+        return externalContexts["_"].delete(contextId);
+    }else{
+        return when.resolve();
     }
-    for(var plugin in externalContexts){
-        externalContexts[plugin].delete(contextId);
-    }
-    delete contexts[contextId];
 }
 
 function clean(flowConfig) {
-    var activeIds = {};
-    var contextId;
-    var node;
+    var promises = [];
+    for(var plugin in externalContexts){
+        if(externalContexts.hasOwnProperty(plugin)){
+            promises.push(externalContexts[plugin].clean(Object.keys(flowConfig.allNodes)));
+        }
+    }
     for (var id in contexts) {
         if (contexts.hasOwnProperty(id)) {
             var idParts = id.split(":");
             if (!flowConfig.allNodes.hasOwnProperty(idParts[0])) {
-                for(var plugin in externalContexts){
-                    externalContexts[plugin].delete(id);
-                }
                 delete contexts[id];
             }
         }
     }
+    return when.all(promises);
 }
 
 function close() {

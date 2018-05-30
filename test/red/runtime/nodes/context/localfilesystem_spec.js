@@ -31,8 +31,10 @@ describe('localfilesystem',function() {
     });
 
     afterEach(function() {
-        return context.close().then(function(){
-            return fs.remove(resourcesDir);
+        return context.clean([]).then(function(){
+            return context.close().then(function(){
+                return fs.remove(resourcesDir);
+            });
         });
     });
 
@@ -118,9 +120,39 @@ describe('localfilesystem',function() {
             context.get("nodeX","foo").should.eql("abc");
             context.get("nodeY","foo").should.eql("abc");
 
-            context.delete("nodeX");
+            return context.delete("nodeX").then(function(){
+                should.not.exist(context.get("nodeX","foo"));
+                should.exist(context.get("nodeY","foo"));  
+            })
+        });
+    });
+
+    describe('#clean',function() {
+        it('should clean unnecessary context',function() {
             should.not.exist(context.get("nodeX","foo"));
-            should.exist(context.get("nodeY","foo"));
+            should.not.exist(context.get("nodeY","foo"));
+            context.set("nodeX","foo","abc");
+            context.set("nodeY","foo","abc");
+            context.get("nodeX","foo").should.eql("abc");
+            context.get("nodeY","foo").should.eql("abc");
+
+            return context.clean([]).then(function(){
+                should.not.exist(context.get("nodeX","foo"));
+                should.not.exist(context.get("nodeY","foo"));
+            });
+        });
+        it('should not clean active context',function() {
+            should.not.exist(context.get("nodeX","foo"));
+            should.not.exist(context.get("nodeY","foo"));
+            context.set("nodeX","foo","abc");
+            context.set("nodeY","foo","abc");
+            context.get("nodeX","foo").should.eql("abc");
+            context.get("nodeY","foo").should.eql("abc");
+
+            return context.clean(["nodeX"]).then(function(){
+                should.exist(context.get("nodeX","foo"));
+                should.not.exist(context.get("nodeY","foo"));
+            });
         });
     });
 });
