@@ -133,6 +133,12 @@ LocalFileSystem.prototype.clean = function(activeNodes){
             }
             return result;
         },[]));
+    }).catch(function(err){
+        if(err.code == 'ENOENT') {
+            return when.resolve();
+        }else{
+            return when.reject(err);
+        }
     });
  }
 
