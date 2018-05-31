@@ -142,6 +142,16 @@ describe('context', function() {
             keys[1].should.eql("abc");
         });
 
+        it('should enumerate only context keys when GlobalContext was given', function() {
+            Context.init({functionGlobalContext: {foo:"bar"}});
+            return Context.load().then(function(){
+                var context = Context.get("1","flowA");
+                var keys = context.global.keys("global");
+                keys.should.have.length(1);
+                keys[0].should.eql("foo");
+            });
+        });
+
         it('should store data on memory when contextStorage is not defined', function() {
             var context =  Context.get("1","flow");
             context.set("#nonexist.key1", "val1");
