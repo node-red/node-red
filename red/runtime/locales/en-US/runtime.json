@@ -150,7 +150,9 @@
                 "disabled": "Projects disabled : editorTheme.projects.enabled=false",
                 "disabledNoFlag": "Projects disabled : set editorTheme.projects.enabled=true to enable",
                 "git-not-found": "Projects disabled : git command not found",
-                "git-version-old": "Projects disabled : git __version__ not supported. Requires 2.x"
+                "git-version-old": "Projects disabled : git __version__ not supported. Requires 2.x",
+                "summary": "A Node-RED Project",
+                "readme": "### About\n\nThis is your project's README.md file. It helps users understand what your\nproject does, how to use it and anything else they may need to know."
             }
         }
     }
