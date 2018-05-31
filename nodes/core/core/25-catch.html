@@ -4,8 +4,8 @@
         <label style="width: auto" for="node-input-scope" data-i18n="catch.label.source"></label>
         <select id="node-input-scope-select">
             <option value="all" data-i18n="catch.scope.all"></option>
-            <option value="nodesWithoutCatch" data-i18n="catch.scope.nodesWithoutCatch"></option>
             <option value="target" data-i18n="catch.scope.selected"></options>
+            <option value="unselectedNodes" data-i18n="catch.scope.unselectedNodes"></option>
         </select>
     </div>
     <div class="form-row node-input-target-row" style="display: none;">
@@ -43,7 +43,7 @@
        halt. This node can be used to catch those errors and handle them with a
        dedicated flow.</p>
     <p>By default, the node will catch errors thrown by any node on the same tab. Alternatively
-    it can be targetted at specific nodes.</p>
+    it can be targetted at specific nodes or targetted to nodes without specific catch.</p>
     <p>When an error is thrown, all matching catch nodes will receive the message.</p>
     <p>If an error is thrown within a subflow, the error will get handled by any
        catch nodes within the subflow. If none exists, the error will be propagated
@@ -90,14 +90,14 @@
         defaults: {
             name: {value:""},
             scope: {value:null},
-            nodesWithoutCatch: {value:null}
+            unselectedNodes: {value:null}
         },
         inputs:0,
         outputs:1,
         icon: "alert.png",
         label: function() {
             return this.name||(this.scope?this._("catch.catchNodes",{number:this.scope.length}):
-                                (this.nodesWithoutCatch?this._("catch.nodesWithoutCatch"):this._("catch.catch")));
+                                (this.unselectedNodes?this._("catch.unselectedNodes"):this._("catch.catch")));
         },
         labelStyle: function() {
             return this.name?"node_label_italic":"";
@@ -243,8 +243,8 @@
                 node.resize();
             });
             if (this.scope === null) {
-                if( this.nodesWithoutCatch )
-                    $("#node-input-scope-select").val("nodesWithoutCatch");
+                if( this.unselectedNodes )
+                    $("#node-input-scope-select").val("unselectedNodes");
                 else
                     $("#node-input-scope-select").val("all");
             } else {
@@ -256,10 +256,10 @@
             var scope = $("#node-input-scope-select").val();
             if (scope === 'all') {
                 this.scope = null;
-                this.nodesWithoutCatch = false;
-            } else if (scope === 'nodesWithoutCatch') {
+                this.unselectedNodes = false;
+            } else if (scope === 'unselectedNodes') {
                 this.scope = null;
-                this.nodesWithoutCatch = true;
+                this.unselectedNodes = true;
             } else {
                 var node = this;
                 node.scope = [];

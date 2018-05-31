@@ -114,11 +114,11 @@ function Flow(global,flow) {
                 node = activeNodes[id];
                 if (node.type === "catch") {
                     if (node.scope == null) {
-                        if ( node.nodesWithoutCatch == true ) {
-                            node.catchPrecedence = 10;
+                        if ( node.unselectedNodes == true ) {
+                            node.catchPrecedence = 5;
                         }
                         else {
-                            node.catchPrecedence = 5;
+                            node.catchPrecedence = 10;
                         };
                     } else {
                         node.catchPrecedence = 1;
@@ -135,7 +135,7 @@ function Flow(global,flow) {
         for (z in catchNodeMap) {
             if (catchNodeMap.hasOwnProperty(z)) {
                 catchNodeMap[z].sort(function(a, b) {
-                return a.catchPrecedence - b.catchPrecedence;
+                    return a.catchPrecedence - b.catchPrecedence;
                 });
             }
         }
@@ -268,6 +268,7 @@ function Flow(global,flow) {
         var targetCatchNodes = null;
         var throwingNode = node;
         var handled = false;
+        var handled_selected = false;
         while (throwingNode && !handled) {
             targetCatchNodes = catchNodeMap[throwingNode.z];
             if (targetCatchNodes) {
@@ -275,7 +276,7 @@ function Flow(global,flow) {
                     if (targetCatchNode.scope && targetCatchNode.scope.indexOf(throwingNode.id) === -1) {
                         return;
                     }
-                    if (handled && targetCatchNode.nodesWithoutCatch == true ) {
+                    if (handled_selected && targetCatchNode.unselectedNodes == true ) {
                         return;
                     }
                     var errorMessage;
@@ -301,6 +302,9 @@ function Flow(global,flow) {
                     }
                     targetCatchNode.receive(errorMessage);
                     handled = true;
+                    if (targetCatchNode.scope) {
+                        handled_selected = true;
+                    }
                 });
             }
             if (!handled) {

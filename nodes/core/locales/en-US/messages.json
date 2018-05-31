@@ -71,8 +71,8 @@
     },
     "catch": {
         "catch": "catch: all",
-        "nodesWithoutCatch": "catch: nodes without catch",
         "catchNodes": "catch: __number__",
+        "unselectedNodes": "catch: unselected",
         "label": {
             "source": "Catch errors from",
             "node": "node",
@@ -83,8 +83,8 @@
         },
         "scope": {
             "all": "all nodes",
-            "nodesWithoutCatch": "nodes without catch",
-            "selected": "selected nodes"
+            "selected": "selected nodes",
+            "unselectedNodes": "unselected nodes"
         }
     },
     "status": {
