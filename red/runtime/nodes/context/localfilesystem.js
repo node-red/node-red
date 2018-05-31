@@ -113,7 +113,6 @@ LocalFileSystem.prototype.keys = function(scope) {
 LocalFileSystem.prototype.delete = function(scope){
     var self = this;
     if(this.storages[scope]){
-        var promise;
         this.storages[scope].delete("/");
         return fs.remove(this.storages[scope].filename).then(function(){
             delete self.storages[scope];

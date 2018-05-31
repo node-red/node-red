@@ -15,7 +15,6 @@
  **/
 
 var clone = require("clone");
-var util = require("../../util");
 var log = require("../../log");
 var when = require("when");
 
@@ -163,7 +162,6 @@ function createContext(id,seed) {
         return context.set(scope, keyPath.key, value);
     };
     obj.keys = function(storage) {
-        //TODO: discuss about keys() behavior
         var storageName = parseStorage(storage);
         var context = getContextStorage(storageName);
         return context.keys(scope);
@@ -192,7 +190,6 @@ function getContext(localId,flowId) {
 
 function deleteContext(id,flowId) {
     if(noContextStorage){
-        var promises = [];
         var contextId = id;
         if (flowId) {
             contextId = id+":"+flowId;
