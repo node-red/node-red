@@ -110,6 +110,18 @@ LocalFileSystem.prototype.keys = function(scope) {
     return Object.keys(this.storages[scope].getData("/"));
 }
 
+LocalFileSystem.prototype.getAsync = function(scope, key) {
+    return when.resolve(this.get(scope, key));
+};
+
+LocalFileSystem.prototype.setAsync =function(scope, key, value) {
+    return when.resolve(this.set(scope, key, value));
+};
+
+LocalFileSystem.prototype.keysAsync = function(scope){
+    return when.resolve(this.keys(scope));
+};
+
 LocalFileSystem.prototype.delete = function(scope){
     var self = this;
     if(this.storages[scope]){

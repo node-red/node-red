@@ -118,7 +118,7 @@ function parseKey(key) {
     }
     var keyPath = { storage: "", key: "" };
     var indexDot = key.indexOf(".");
-    // The key of "$file" should be treated as a key without persistable context.
+    // The key of "#file" should be treated as a key without persistable context.
     if (indexDot != -1) {
         keyPath.storage = parseStorage(key);
     }
@@ -154,17 +154,44 @@ function createContext(id,seed) {
     obj.get = function(key) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.get(scope, keyPath.key);
+        if(key === keyPath.key){
+            return context.get(scope, keyPath.key);
+        }else{
+            return context.getAsync(scope, keyPath.key);
+        }
     };
     obj.set = function(key, value) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.set(scope, keyPath.key, value);
+        if(key === keyPath.key){
+            return context.set(scope, keyPath.key, value);
+        }else{
+            return context.setAsync(scope, keyPath.key, value);
+        }
     };
     obj.keys = function(storage) {
         var storageName = parseStorage(storage);
         var context = getContextStorage(storageName);
-        return context.keys(scope);
+        if(!storage){
+            return context.keys(scope);
+        }else{
+            return context.keysAsync(scope);
+        }
+    };
+    obj.getAsync = function(key) {
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath.storage);
+        return context.getAsync(scope, keyPath.key);
+    };
+    obj.setAsync = function(key, value) {
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath.storage);
+        return context.setAsync(scope, keyPath.key, value);
+    };
+    obj.keysAsync = function(storage) {
+        var storageName = parseStorage(storage);
+        var context = getContextStorage(storageName);
+        return context.keysAsync(scope);
     };
     return obj;
 }
