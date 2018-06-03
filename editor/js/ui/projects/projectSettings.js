@@ -1360,8 +1360,7 @@ RED.projects.settings = (function() {
             remoteURLInputChanged = true;
             validateForm()
         });
-        var remoteURLLabel = $('<label class="projects-edit-form-sublabel"><small>'
-        + RED._("sidebar.project.projectSettings.urlRule") +'</small></label>').appendTo(row).find("small");
+        var remoteURLLabel = $('<label class="projects-edit-form-sublabel"><small>' + RED._("sidebar.project.projectSettings.urlRule") +'</small></label>').appendTo(row).find("small");
 
         var hideEditForm = function() {
             editRepoButton.attr('disabled',false);
