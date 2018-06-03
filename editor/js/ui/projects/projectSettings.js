@@ -235,8 +235,7 @@ RED.projects.settings = (function() {
         var summaryContent = $('<div></div>',{style:"color: #999"}).appendTo(summary);
         updateProjectSummary(activeProject.summary, summaryContent);
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">'
-            + RED._('sidebar.project.editDescription') + '</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.editDescription') + '</button>')
                 .prependTo(summary)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -251,8 +250,7 @@ RED.projects.settings = (function() {
         updateProjectDescription(activeProject, descriptionContent);
 
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">'
-            + RED._('sidebar.project.editReadme') + '</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.editReadme') + '</button>')
                 .prependTo(description)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -383,8 +381,7 @@ RED.projects.settings = (function() {
     function createDependenciesPane(activeProject) {
         var pane = $('<div id="project-settings-tab-deps" class="project-settings-tab-pane node-help"></div>');
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">'
-            + RED._("sidebar.project.projectSettings.edit") + '</button>')
+            $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">' + RED._("sidebar.project.projectSettings.edit") + '</button>')
                 .appendTo(pane)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -454,8 +451,7 @@ RED.projects.settings = (function() {
                     var buttons = $('<div class="palette-module-button-group"></div>').appendTo(metaRow);
                     if (RED.user.hasPermission("projects.write")) {
                         if (!entry.installed && RED.settings.theme('palette.editable') !== false) {
-                            $('<a href="#" class="editor-button editor-button-small">'
-                            + RED._("sidebar.project.projectSettings.install") + '</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.install") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     RED.palette.editor.install(entry,row,function(err) {
@@ -472,8 +468,7 @@ RED.projects.settings = (function() {
                                     });
                                 })
                         } else if (entry.known && entry.count === 0) {
-                            $('<a href="#" class="editor-button editor-button-small">'
-                            + RED._("sidebar.project.projectSettings.removeFromProject") + '</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.removeFromProject") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     var deps = $.extend(true, {}, activeProject.dependencies);
@@ -489,8 +484,7 @@ RED.projects.settings = (function() {
                                     });
                                 });
                         } else if (!entry.known) {
-                            $('<a href="#" class="editor-button editor-button-small">'
-                            + RED._("sidebar.project.projectSettings.addToProject") + '</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.addToProject") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     var deps = $.extend(true, {}, activeProject.dependencies);
@@ -732,8 +726,7 @@ RED.projects.settings = (function() {
         var title = $('<h3></h3>').text(RED._("sidebar.project.projectSettings.files")).appendTo(pane);
         var filesContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
         if (RED.user.hasPermission("projects.write")) {
-            var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">'
-            + RED._('sidebar.project.projectSettings.edit') + '</button>')
+            var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.projectSettings.edit') + '</button>')
                 .appendTo(title)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -906,12 +899,9 @@ RED.projects.settings = (function() {
 
         var credentialFormRows = $('<div>',{style:"margin-top:10px"}).hide().appendTo(credentialStateLabel);
 
-        var credentialSetLabel = $('<div style="margin: 20px 0 10px 5px;">'
-        + RED._("sidebar.project.projectSettings.setTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
-        var credentialChangeLabel = $('<div style="margin: 20px 0 10px 5px;">'
-        + RED._("sidebar.project.projectSettings.changeTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
-        var credentialResetLabel = $('<div style="margin: 20px 0 10px 5px;">'
-        + RED._("sidebar.project.projectSettings.resetTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialSetLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.setTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialChangeLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.changeTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialResetLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.resetTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
 
         var credentialSecretExistingRow = $('<div class="user-settings-row user-settings-row-credentials"></div>').appendTo(credentialFormRows);
         $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.currentKey")).appendTo(credentialSecretExistingRow);
@@ -930,8 +920,7 @@ RED.projects.settings = (function() {
         $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.newKey")).appendTo(credentialSecretNewRow);
         var credentialSecretNewInput = $('<input type="password">').appendTo(credentialSecretNewRow).on("change keyup paste",checkFiles);
 
-        var credentialResetWarning = $('<div class="form-tips form-warning" style="margin: 10px;"><i class="fa fa-warning"></i>'
-        + RED._("sidebar.project.projectSettings.credentialsAlert") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialResetWarning = $('<div class="form-tips form-warning" style="margin: 10px;"><i class="fa fa-warning"></i>' + RED._("sidebar.project.projectSettings.credentialsAlert") + '</div>').hide().appendTo(credentialFormRows);
 
 
         var hideEditForm = function() {
@@ -1201,8 +1190,7 @@ RED.projects.settings = (function() {
         var repoContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
         var title = $('<h4></h4>').text(RED._("sidebar.project.projectSettings.gitRemotes")).appendTo(repoContainer);
 
-        var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">'
-        + RED._("sidebar.project.projectSettings.addRemote") + '</button>')
+        var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">' + RED._("sidebar.project.projectSettings.addRemote") + '</button>')
             .appendTo(title)
             .click(function(evt) {
                 editRepoButton.attr('disabled',true);
@@ -1352,8 +1340,7 @@ RED.projects.settings = (function() {
             remoteNameInputChanged = true;
             validateForm();
         });
-        $('<label class="projects-edit-form-sublabel"><small>'
-        + RED._("sidebar.project.projectSettings.nameRule") + '</small></label>').appendTo(row).find("small");
+        $('<label class="projects-edit-form-sublabel"><small>' + RED._("sidebar.project.projectSettings.nameRule") + '</small></label>').appendTo(row).find("small");
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
         $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.url")).appendTo(row);
         var remoteURLInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
