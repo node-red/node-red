@@ -77,7 +77,7 @@ Memory.prototype.clean = function(activeNodes){
     for(var id in this.data){
         if(this.data.hasOwnProperty(id) && id !== "global"){
             var idParts = id.split(":");
-            if(!activeNodes.includes(idParts[0])){
+            if(!activeNodes.indexOf(idParts[0])){
                 delete this.data[id];
             }
         }

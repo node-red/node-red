@@ -139,7 +139,7 @@ LocalFileSystem.prototype.clean = function(activeNodes){
     var self = this;
     return fs.readdir(self.storageBaseDir).then(function(dirs){
         return when.all(dirs.reduce(function(result, item){
-            if(item !== "global" && !activeNodes.includes(item)){
+            if(item !== "global" && activeNodes.indexOf(item) === -1){
                 result.push(fs.remove(path.join(self.storageBaseDir,item)));
                 delete self.storages[item];
             }
