@@ -771,8 +771,8 @@ RED.view = (function() {
 
                 drag_line.el.attr("d",
                     "M "+(drag_line.node.x+sc*drag_line.node.w/2)+" "+(drag_line.node.y+portY)+
-                    " C "+(drag_line.node.x+sc*(drag_line.node.w/2+node_width*scale))+" "+(drag_line.node.y+portY+scaleY*node_height)+" "+
-                    (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
+                    " C "+(drag_line.node.x+sc*(drag_line.node.w/2+node_width*scale))+" "+( (dx + 10 > 0 && sc>0) || (dx - 10 < 0 && sc<0 )  || Math.abs(dy)>(2*node_height) ? drag_line.node.y+portY+scaleY*node_height: mousePos[1]+scaleY*node_height )+" "+
+					(mousePos[0]-sc*(scale)*node_width)+" "+( (dx + 10 > 0 && sc>0) || (dx - 10 < 0 && sc<0 ) || Math.abs(dy)>(2*node_height) ? mousePos[1]-scaleY*node_height : drag_line.node.y+portY-scaleY*node_height )+" "+
                     mousePos[0]+" "+mousePos[1]
                     );
             }
@@ -2364,8 +2364,8 @@ RED.view = (function() {
                         d.y2 = d.target.y;
 
                         return "M "+d.x1+" "+d.y1+
-                            " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
-                            (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
+                            " C "+(d.x1+scale*node_width)+" "+(d.x1-10<d.x2 ||Math.abs(dy)>(2*node_height) ? d.y1+scaleY*node_height: d.y2+scaleY*node_height )+" "+
+							(d.x2-scale*node_width)+" "+(d.x1-10<d.x2 || Math.abs(dy)>(2*node_height) ? d.y2-scaleY*node_height : d.y1-scaleY*node_height )+" "+
                             d.x2+" "+d.y2;
                     });
                 }
