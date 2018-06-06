@@ -58,7 +58,8 @@ RED.view = (function() {
         lastClickNode = null,
         dblClickPrimed = null,
         clickTime = 0,
-        clickElapsed = 0;
+        clickElapsed = 0,
+        scroll_position;
 
     var clipboard = "";
 
@@ -72,6 +73,8 @@ RED.view = (function() {
 
     var PORT_TYPE_INPUT = 1;
     var PORT_TYPE_OUTPUT = 0;
+
+    var chart = $("#chart");
 
     var outer = d3.select("#chart")
         .append("svg:svg")
@@ -94,6 +97,16 @@ RED.view = (function() {
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
+        .on("mouseenter", function() {
+            if (lasso) {
+                if (d3.event.buttons !== 1) {
+                    lasso.remove();
+                    lasso = null;
+                }
+            } else if (mouse_mode === RED.state.PANNING && d3.event.buttons !== 4) {
+                resetMouseVars();
+            }
+        })
         .on("touchend", function() {
             clearTimeout(touchStartTime);
             touchStartTime = null;
@@ -283,7 +296,6 @@ RED.view = (function() {
     function init() {
 
         RED.events.on("workspace:change",function(event) {
-            var chart = $("#chart");
             if (event.old !== 0) {
                 workspaceScrollPositions[event.old] = {
                     left:chart.scrollLeft(),
@@ -526,6 +538,15 @@ RED.view = (function() {
     function canvasMouseDown() {
         var point;
 
+        if (d3.event.button === 1) {
+            // Middle Click pan
+            mouse_mode = RED.state.PANNING;
+            mouse_position = [d3.event.pageX,d3.event.pageY]
+            scroll_position = [chart.scrollLeft(),chart.scrollTop()];
+
+            return;
+        }
+
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
@@ -644,7 +665,6 @@ RED.view = (function() {
     function canvasMouseMove() {
         var i;
         var node;
-        mouse_position = d3.touches(this)[0]||d3.mouse(this);
         // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
         //    d3.event.preventDefault();
@@ -654,6 +674,22 @@ RED.view = (function() {
         //var point = d3.mouse(this);
         //if (point[0]-container.scrollLeft < 30 && container.scrollLeft > 0) { container.scrollLeft -= 15; }
         //console.log(d3.mouse(this),container.offsetWidth,container.offsetHeight,container.scrollLeft,container.scrollTop);
+
+        if (mouse_mode === RED.state.PANNING) {
+
+            var pos = [d3.event.pageX,d3.event.pageY];
+            var deltaPos = [
+                mouse_position[0]-pos[0],
+                mouse_position[1]-pos[1]
+            ];
+
+            chart.scrollLeft(scroll_position[0]+deltaPos[0])
+            chart.scrollTop(scroll_position[1]+deltaPos[1])
+            return
+        }
+
+        mouse_position = d3.touches(this)[0]||d3.mouse(this);
+
 
         if (lasso) {
             var ox = parseInt(lasso.attr("ox"));
@@ -906,6 +942,10 @@ RED.view = (function() {
     function canvasMouseUp() {
         var i;
         var historyEvent;
+        if (mouse_mode === RED.state.PANNING) {
+            resetMouseVars();
+            return
+        }
         if (mouse_mode === RED.state.QUICK_JOINING) {
             return;
         }
