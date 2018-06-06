@@ -1033,15 +1033,31 @@ RED.nodes = (function() {
                             node.type = "unknown";
                         }
                         if (node._def.category != "config") {
-                            node.inputs = n.inputs||node._def.inputs;
-                            node.outputs = n.outputs||node._def.outputs;
-                            // If 'wires' is longer than outputs, clip wires
+                            if (n.hasOwnProperty('inputs')) {
+                                node.inputs = n.inputs;
+                                node._config.inputs = JSON.stringify(n.inputs);
+                            } else {
+                                node.inputs = node._def.inputs;
+                            }
+                            if (n.hasOwnProperty('outputs')) {
+                                node.outputs = n.outputs;
+                                node._config.outputs = JSON.stringify(n.outputs);
+                            } else {
+                                node.outputs = node._def.outputs;
+                            }
                             if (node.hasOwnProperty('wires') && node.wires.length > node.outputs) {
-                                console.log("Warning: node.wires longer than node.outputs - trimming wires:",node.id," wires:",node.wires.length," outputs:",node.outputs);
-                                node.wires = node.wires.slice(0,node.outputs);
+                                if (!node._def.defaults.hasOwnProperty("outputs") || !isNaN(parseInt(n.outputs))) {
+                                    // If 'wires' is longer than outputs, clip wires
+                                    console.log("Warning: node.wires longer than node.outputs - trimming wires:",node.id," wires:",node.wires.length," outputs:",node.outputs);
+                                    node.wires = node.wires.slice(0,node.outputs);
+                                } else {
+                                    // The node declares outputs in its defaults, but has not got a valid value
+                                    // Defer to the length of the wires array
+                                    node.outputs = node.wires.length;
+                                }
                             }
                             for (d in node._def.defaults) {
-                                if (node._def.defaults.hasOwnProperty(d)) {
+                                if (node._def.defaults.hasOwnProperty(d) && d !== 'inputs' && d !== 'outputs') {
                                     node[d] = n[d];
                                     node._config[d] = JSON.stringify(n[d]);
                                 }

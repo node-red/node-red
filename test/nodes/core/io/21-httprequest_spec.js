@@ -796,6 +796,25 @@ describe('HTTP Request Node', function() {
             });
         });
 
+        it('should prevent following redirect when msg.followRedirects is false', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getTestURL('/redirectToText')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',302);
+                        msg.should.have.property('responseUrl', getTestURL('/redirectToText'));
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",followRedirects:false});
+            });
+        });
+
         it('shuold output an error when request timeout occurred', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout')},
                 {id:"n2", type:"helper"}];
@@ -806,7 +825,13 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('statusCode','ECONNRESET');
+                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(1);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().ERROR, id:'n1',type:'http request',msg:'common.notification.errors.no-response', timestamp:tstmp});
                         done();
                     } catch(err) {
                         done(err);

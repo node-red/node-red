@@ -176,13 +176,13 @@ var RED = (function() {
                     loadFlows(function() {
                         var project = RED.projects.getActiveProject();
                         var message = {
-                            "change-branch":"Change to local branch '"+project.git.branches.local+"'",
-                            "merge-abort":"Git merge aborted",
-                            "loaded":"Project '"+msg.project+"' loaded",
-                            "updated":"Project '"+msg.project+"' updated",
-                            "pull":"Project '"+msg.project+"' reloaded",
-                            "revert": "Project '"+msg.project+"' reloaded",
-                            "merge-complete":"Git merge completed"
+                            "change-branch": RED._("notification.project.change-branch", {project: project.git.branches.local}),
+                            "merge-abort": RED._("notification.project.merge-abort"),
+                            "loaded": RED._("notification.project.loaded", {project: msg.project}),
+                            "updated": RED._("notification.project.updated", {project: msg.project}),
+                            "pull": RED._("notification.project.pull", {project: msg.project}),
+                            "revert": RED._("notification.project.revert", {project: msg.project}),
+                            "merge-complete": RED._("notification.project.merge-complete")
                         }[msg.action];
                         RED.notify("<p>"+message+"</p>");
                         RED.sidebar.info.refresh()
@@ -206,7 +206,7 @@ var RED = (function() {
                         if (!!RED.projects.getActiveProject()) {
                             options.buttons = [
                                 {
-                                    text: "Manage project dependencies",
+                                    text: RED._("notification.label.manage-project-dep"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.settings.show('deps');
@@ -217,7 +217,7 @@ var RED = (function() {
                         } else {
                             options.buttons = [
                                 {
-                                    text: "Close",
+                                    text: RED._("common.label.close"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                     }

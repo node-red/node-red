@@ -84,17 +84,33 @@ var MessageFileLoader = {
 
 }
 
+function getCurrentLocale() {
+    var env = process.env;
+    for (var name of ['LC_ALL', 'LC_MESSAGES', 'LANG']) {
+        if (name in env) {
+            var val = env[name];
+            return val.substring(0, 2);
+        }
+    }
+    return undefined;
+}
+
 function init() {
     if (!initPromise) {
         initPromise = when.promise(function(resolve,reject) {
             i18n.backend(MessageFileLoader);
-            i18n.init({
+            var opt = {
                 ns: {
                     namespaces: [],
                     defaultNs: "runtime"
                 },
                 fallbackLng: [defaultLang]
-            },function() {
+            };
+            var lang = getCurrentLocale();
+            if (lang) {
+                opt.lng = lang;
+            }
+            i18n.init(opt,function() {
                 resolve();
             });
         });

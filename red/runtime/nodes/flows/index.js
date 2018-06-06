@@ -480,11 +480,19 @@ function addFlow(flow) {
     }
     flow.id = redUtil.generateId();
 
-    var nodes = [{
+    var tabNode = {
         type:'tab',
         label:flow.label,
         id:flow.id
-    }];
+    }
+    if (flow.hasOwnProperty('info')) {
+        tabNode.info = flow.info;
+    }
+    if (flow.hasOwnProperty('disabled')) {
+        tabNode.disabled = flow.disabled;
+    }
+
+    var nodes = [tabNode];
 
     for (i=0;i<flow.nodes.length;i++) {
         node = flow.nodes[i];
@@ -536,6 +544,12 @@ function getFlow(id) {
     };
     if (flow.label) {
         result.label = flow.label;
+    }
+    if (flow.disabled) {
+        result.disabled = flow.disabled;
+    }
+    if (flow.hasOwnProperty('info')) {
+        result.info = flow.info;
     }
     if (id !== 'global') {
         result.nodes = [];
@@ -626,6 +640,13 @@ function updateFlow(id,newFlow) {
             label:newFlow.label,
             id:id
         }
+        if (newFlow.hasOwnProperty('info')) {
+            tabNode.info = newFlow.info;
+        }
+        if (newFlow.hasOwnProperty('disabled')) {
+            tabNode.disabled = newFlow.disabled;
+        }
+
         nodes = [tabNode].concat(newFlow.nodes||[]).concat(newFlow.configs||[]);
         nodes.forEach(function(n) {
             n.z = id;
