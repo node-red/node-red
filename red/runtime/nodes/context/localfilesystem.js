@@ -14,25 +14,25 @@
  * limitations under the License.
  **/
 
-var JsonDB = require('node-json-db');
 var fs = require('fs-extra');
 var path = require("path");
 var when = require("when");
+var util = require("../../util");
 
-function createStorage(storageBaseDir, scope) {
+function getStoragePath(storageBaseDir, scope) {
     if(scope.indexOf(":") === -1){
         if(scope === "global"){
-            return new JsonDB(path.join(storageBaseDir,"global",scope), true, true); 
+            return path.join(storageBaseDir,"global",scope); 
         }else{ // scope:flow
-            return new JsonDB(path.join(storageBaseDir,scope,"flow"), true, true);
+            return path.join(storageBaseDir,scope,"flow");
         }
     }else{ // scope:local
         var ids = scope.split(":")
-        return new JsonDB(path.join(storageBaseDir,ids[1],ids[0]), true, true);
+        return path.join(storageBaseDir,ids[1],ids[0]);
     }
 }
 
-function getStoragePath(config) {
+function getBasePath(config) {
     var base = config.base || "contexts";
     var storageBaseDir;
     if (!config.dir) {
@@ -62,10 +62,21 @@ function getStoragePath(config) {
     return storageBaseDir;
 }
 
+function loadFile(storagePath){
+    return fs.pathExists(storagePath).then(function(exists){
+        if(exists === true){
+            return fs.readFile(storagePath, "utf8");
+        }else{
+            return when.resolve(undefined);
+        }
+    }).catch(function(err){
+        throw when.reject(err);
+    });
+}
+
 function LocalFileSystem(config){
     this.config = config;
-    this.storageBaseDir = getStoragePath(this.config);
-    this.storages = {};
+    this.storageBaseDir = getBasePath(this.config);
 }
 
 LocalFileSystem.prototype.open = function(){
@@ -76,63 +87,49 @@ LocalFileSystem.prototype.close = function(){
     return when.resolve();
 }
 
-LocalFileSystem.prototype.get = function (scope, key) {
-    if(!this.storages[scope]){
-        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
-    }
-    try{
-        this.storages[scope].reload();
-        return this.storages[scope].getData("/" + key.replace(/\./g,"/"));
-    }catch(err){
-        if(err.name === "DataError"){
-            return undefined;
-        }else{
-            throw err;
-        }
-    }
-}
-
-LocalFileSystem.prototype.set = function(scope, key, value) {
-    if(!this.storages[scope]){
-        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
-    }
-    if(value){
-        this.storages[scope].push("/" + key.replace(/\./g,"/"), value);
-    }else{
-        this.storages[scope].delete("/" + key.replace(/\./g,"/"));
-    }
-}
-
-LocalFileSystem.prototype.keys = function(scope) {
-    if(!this.storages[scope]){
-        this.storages[scope] = createStorage(this.storageBaseDir ,scope);
-    }
-    return Object.keys(this.storages[scope].getData("/"));
-}
-
 LocalFileSystem.prototype.getAsync = function(scope, key) {
-    return when.resolve(this.get(scope, key));
+    var storagePath = getStoragePath(this.storageBaseDir ,scope);
+    return loadFile(storagePath).then(function(data){
+        if(data){
+            return util.getMessageProperty(JSON.parse(data),key);
+        }else{
+            return undefined
+        }
+    }).catch(function(err){
+        return when.reject(err);
+    });
 };
 
 LocalFileSystem.prototype.setAsync =function(scope, key, value) {
-    return when.resolve(this.set(scope, key, value));
+    var storagePath = getStoragePath(this.storageBaseDir ,scope);
+    return loadFile(storagePath).then(function(data){
+        var obj = data ? JSON.parse(data) : {}
+        util.setMessageProperty(obj,key,value);
+        return obj;
+    }).then(function(obj){
+        var str = JSON.stringify(obj, undefined, 4);
+        return fs.outputFile(storagePath, str, "utf8");
+    }).catch(function(err){
+        return when.reject(err);
+    });
 };
 
 LocalFileSystem.prototype.keysAsync = function(scope){
-    return when.resolve(this.keys(scope));
+    var storagePath = getStoragePath(this.storageBaseDir ,scope);
+    return loadFile(storagePath).then(function(data){
+        if(data){
+            return Object.keys(JSON.parse(data));
+        }else{
+            return []
+        }
+    }).catch(function(err){
+        return when.reject(err);
+    });
 };
 
 LocalFileSystem.prototype.delete = function(scope){
-    var self = this;
-    if(this.storages[scope]){
-        this.storages[scope].delete("/");
-        return fs.remove(this.storages[scope].filename).then(function(){
-            delete self.storages[scope];
-            return when.resolve();
-        });
-    }else{
-        return when.resolve();
-    }
+    var storagePath = getStoragePath(this.storageBaseDir ,scope);
+    return fs.remove(storagePath);
 }
 
 LocalFileSystem.prototype.clean = function(activeNodes){
@@ -141,7 +138,6 @@ LocalFileSystem.prototype.clean = function(activeNodes){
         return when.all(dirs.reduce(function(result, item){
             if(item !== "global" && activeNodes.indexOf(item) === -1){
                 result.push(fs.remove(path.join(self.storageBaseDir,item)));
-                delete self.storages[item];
             }
             return result;
         },[]));
