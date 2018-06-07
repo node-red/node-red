@@ -16,6 +16,7 @@
 
 var should = require("should");
 var sinon = require('sinon');
+var when = require("when")
 var rewire = require("rewire");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
@@ -33,7 +34,7 @@ describe('context', function() {
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.get("foo"));
             context1.set("foo","test");
-            context1.get("foo").should.eql("test");
+            context1.get("foo").should.equal("test");
         });
         it('stores local property - creates parent properties',function() {
             var context1 = Context.get("1","flowA");
@@ -56,13 +57,13 @@ describe('context', function() {
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.flow.get("foo"));
             context1.flow.set("foo","test");
-            context1.flow.get("foo").should.eql("test");
+            context1.flow.get("foo").should.equal("test");
         });
         it('stores global property',function() {
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.global.get("foo"));
             context1.global.set("foo","test");
-            context1.global.get("foo").should.eql("test");
+            context1.global.get("foo").should.equal("test");
         });
 
         it('keeps local context local', function() {
@@ -73,7 +74,7 @@ describe('context', function() {
             should.not.exist(context2.get("foo"));
             context1.set("foo","test");
 
-            context1.get("foo").should.eql("test");
+            context1.get("foo").should.equal("test");
             should.not.exist(context2.get("foo"));
         });
         it('flow context accessible to all flow nodes', function() {
@@ -84,8 +85,8 @@ describe('context', function() {
             should.not.exist(context2.flow.get("foo"));
 
             context1.flow.set("foo","test");
-            context1.flow.get("foo").should.eql("test");
-            context2.flow.get("foo").should.eql("test");
+            context1.flow.get("foo").should.equal("test");
+            context2.flow.get("foo").should.equal("test");
         });
 
         it('flow context not shared to nodes on other flows', function() {
@@ -96,7 +97,7 @@ describe('context', function() {
             should.not.exist(context2.flow.get("foo"));
 
             context1.flow.set("foo","test");
-            context1.flow.get("foo").should.eql("test");
+            context1.flow.get("foo").should.equal("test");
             should.not.exist(context2.flow.get("foo"));
         });
 
@@ -108,15 +109,15 @@ describe('context', function() {
             should.not.exist(context2.global.get("foo"));
 
             context1.global.set("foo","test");
-            context1.global.get("foo").should.eql("test");
-            context2.global.get("foo").should.eql("test");
+            context1.global.get("foo").should.equal("test");
+            context2.global.get("foo").should.equal("test");
         });
 
         it('deletes context',function() {
             var context = Context.get("1","flowA");
             should.not.exist(context.get("foo"));
             context.set("foo","abc");
-            context.get("foo").should.eql("abc");
+            context.get("foo").should.equal("abc");
 
             return Context.delete("1","flowA").then(function(){
                 context = Context.get("1","flowA");
@@ -134,12 +135,12 @@ describe('context', function() {
             context.set("foo","bar");
             keys = context.keys();
             keys.should.have.length(1);
-            keys[0].should.eql("foo");
+            keys[0].should.equal("foo");
 
             context.set("abc.def","bar");
             keys = context.keys();
             keys.should.have.length(2);
-            keys[1].should.eql("abc");
+            keys[1].should.equal("abc");
         });
 
         it('should enumerate only context keys when GlobalContext was given', function() {
@@ -148,42 +149,45 @@ describe('context', function() {
                 var context = Context.get("1","flowA");
                 var keys = context.global.keys("global");
                 keys.should.have.length(1);
-                keys[0].should.eql("foo");
+                keys[0].should.equal("foo");
             });
         });
 
-        it('should store data on memory when contextStorage is not defined', function() {
+        it('should throw error when persistable key is passed', function() {
             var context =  Context.get("1","flow");
-            context.set("#nonexist.key1", "val1");
-            context.get("#nonexist.key1").should.eql("val1");
-            context.flow.set("#nonexist.key2", "val2");
-            context.flow.get("#nonexist.key2").should.eql("val2");
-            context.global.set("#nonexist.key1", "val3");
-            context.global.get("#nonexist.key1").should.eql("val3");
+            (function() {
+                context.set("#nonexist.key1", "val1");
+            }).should.throw();
+            (function() {
+                context.get("#nonexist.key1");
+            }).should.throw();
+            (function() {
+                context.keys("#nonexist");
+            }).should.throw();
         });
     });
 
     describe('external context storage',function() {
         var sandbox = sinon.sandbox.create();
-        var stubGet = sandbox.stub();
-        var stubSet = sandbox.stub();
-        var stubKeys = sandbox.stub();
-        var stubDelete = sandbox.stub().returns(Promise.resolve());
-        var stubClean = sandbox.stub().returns(Promise.resolve());
-        var stubOpen = sandbox.stub().returns(Promise.resolve());
-        var stubClose = sandbox.stub().returns(Promise.resolve());
-        var stubGet2 = sandbox.stub();
-        var stubSet2 = sandbox.stub();
-        var stubKeys2 = sandbox.stub();
-        var stubDelete2 = sandbox.stub().returns(Promise.resolve());
-        var stubClean2 = sandbox.stub().returns(Promise.resolve());
-        var stubOpen2 = sandbox.stub().returns(Promise.resolve());
-        var stubClose2 = sandbox.stub().returns(Promise.resolve());
+        var stubGetAsync = sandbox.stub().returns(when.resolve());
+        var stubSetAsync = sandbox.stub().returns(when.resolve());
+        var stubKeysAsync = sandbox.stub().returns(when.resolve());
+        var stubDelete = sandbox.stub().returns(when.resolve());
+        var stubClean = sandbox.stub().returns(when.resolve());
+        var stubOpen = sandbox.stub().returns(when.resolve());
+        var stubClose = sandbox.stub().returns(when.resolve());
+        var stubGetAsync2 = sandbox.stub().returns(when.resolve());
+        var stubSetAsync2 = sandbox.stub().returns(when.resolve());
+        var stubKeysAsync2 = sandbox.stub().returns(when.resolve());
+        var stubDelete2 = sandbox.stub().returns(when.resolve());
+        var stubClean2 = sandbox.stub().returns(when.resolve());
+        var stubOpen2 = sandbox.stub().returns(when.resolve());
+        var stubClose2 = sandbox.stub().returns(when.resolve());
         var testPlugin = function(config){
             function Test(){}
-            Test.prototype.get = stubGet;
-            Test.prototype.set = stubSet;
-            Test.prototype.keys = stubKeys;
+            Test.prototype.getAsync = stubGetAsync;
+            Test.prototype.setAsync = stubSetAsync;
+            Test.prototype.keysAsync = stubKeysAsync;
             Test.prototype.delete = stubDelete;
             Test.prototype.clean = stubClean;
             Test.prototype.open = stubOpen;
@@ -192,9 +196,9 @@ describe('context', function() {
         };
         var testPlugin2 = function(config){
             function Test2(){}
-            Test2.prototype.get = stubGet2;
-            Test2.prototype.set = stubSet2;
-            Test2.prototype.keys = stubKeys2;
+            Test2.prototype.getAsync = stubGetAsync2;
+            Test2.prototype.setAsync = stubSetAsync2;
+            Test2.prototype.keysAsync = stubKeysAsync2;
             Test2.prototype.delete = stubDelete2;
             Test2.prototype.clean = stubClean2;
             Test2.prototype.open = stubOpen2;
@@ -251,24 +255,32 @@ describe('context', function() {
                 });
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    context.set("##%&.sign","sign1");
-                    context.get("##%&.sign").should.eql("sign1");
-                    context.set("#\u3042.file2","file2");
-                    context.get("#\u3042.file2").should.eql("file2");
-                    context.set("#1.num","num3");
-                    context.get("#1.num").should.eql("num3");
+                    return when.all([
+                        context.setAsync("##%&.sign","sign1").then(function(){
+                            return context.getAsync("##%&.sign").should.finally.equal("sign1");
+                        }),
+                        context.setAsync("#\u3042.file2","file2").then(function(){
+                            return context.getAsync("#\u3042.file2").should.finally.equal("file2");
+                        }),
+                        context.setAsync("#1.num","num3").then(function(){
+                            return context.getAsync("#1.num").should.finally.equal("num3");
+                        })
+                    ]);
                 });
             });
             it('should ignore reserved storage name `_`', function() {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    context.set("#_.foo","bar");
-                    context.get("#_.foo");
-                    context.keys("#_");
-                    stubSet.called.should.be.false();
-                    stubGet.called.should.be.false();
-                    stubKeys.called.should.be.false();
+                    return when.all([
+                        context.setAsync("#_.foo","bar"),
+                        context.getAsync("#_.foo"),
+                        context.keysAsync("#_")
+                    ]).then(function(){
+                        stubSetAsync.called.should.be.false();
+                        stubGetAsync.called.should.be.false();
+                        stubKeysAsync.called.should.be.false();
+                    });
                 });
             });
             it('should fail when using invalid default context', function(done) {
@@ -314,94 +326,106 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.get("#test.foo"));
-                    context.set("#test.foo","test");
-                    context.get("#test.foo");
-                    context.keys("#test");
-                    stubSet.calledWithExactly("1:flow","foo","test").should.be.true();
-                    stubGet.calledWithExactly("1:flow","foo").should.be.true();
-                    stubKeys.calledWithExactly("1:flow").should.be.true();
+                    return when.all([
+                        context.setAsync("#test.foo","test"),
+                        context.getAsync("#test.foo"),
+                        context.keysAsync("#test")
+                    ]).then(function(){
+                        stubSetAsync.calledWithExactly("1:flow","foo","test").should.be.true();
+                        stubGetAsync.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeysAsync.calledWithExactly("1:flow").should.be.true();
+                    });
                 });
             });
             it('should store flow property to external context storage',function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.flow.get("#test.foo"));
-                    context.flow.set("#test.foo","test");
-                    context.flow.get("#test.foo");
-                    context.flow.keys("#test");
-                    stubSet.calledWithExactly("flow","foo","test").should.be.true();
-                    stubGet.calledWithExactly("flow","foo").should.be.true();
-                    stubKeys.calledWithExactly("flow").should.be.true();
+                    return when.all([
+                        context.flow.setAsync("#test.foo","test"),
+                        context.flow.getAsync("#test.foo"),
+                        context.flow.keysAsync("#test")
+                    ]).then(function(){
+                        stubSetAsync.calledWithExactly("flow","foo","test").should.be.true();
+                        stubGetAsync.calledWithExactly("flow","foo").should.be.true();
+                        stubKeysAsync.calledWithExactly("flow").should.be.true();
+                    });
                 });
             });
             it('should store global property to external context storage',function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.global.get("#test.foo"));
-                    context.global.set("#test.foo","test");
-                    context.global.get("#test.foo");
-                    context.global.keys("#test");
-                    stubSet.calledWithExactly("global","foo","test").should.be.true();
-                    stubGet.calledWithExactly("global","foo").should.be.true();
-                    stubKeys.calledWithExactly("global").should.be.true();
+                    return when.all([
+                        context.global.setAsync("#test.foo","test"),
+                        context.global.getAsync("#test.foo"),
+                        context.global.keysAsync("#test")
+                    ]).then(function(){
+                        stubSetAsync.calledWithExactly("global","foo","test").should.be.true();
+                        stubGetAsync.calledWithExactly("global","foo").should.be.true();
+                        stubKeysAsync.calledWithExactly("global").should.be.true();
+                    });
                 });
             });
             it('should store data to the default context when non-existent context storage was specified', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.get("#nonexist.foo"));
-                    context.set("#nonexist.foo","test");
-                    context.get("#nonexist.foo");
-                    context.keys("#nonexist");
-                    stubGet.called.should.be.false();
-                    stubSet.called.should.be.false();
-                    stubKeys.called.should.be.false();
-                    stubSet2.calledWithExactly("1:flow","foo","test").should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                    return when.all([
+                        context.setAsync("#nonexist.foo","test"),
+                        context.getAsync("#nonexist.foo"),
+                        context.keysAsync("#nonexist")
+                    ]).then(function(){
+                        stubGetAsync.called.should.be.false();
+                        stubSetAsync.called.should.be.false();
+                        stubKeysAsync.called.should.be.false();
+                        stubSetAsync2.calledWithExactly("1:flow","foo","test").should.be.true();
+                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                    });
                 });
             });
             it('should use the default context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.get("#default.foo"));
-                    context.set("#default.foo","default");
-                    context.get("#default.foo");
-                    context.keys("#default");
-                    stubGet.called.should.be.false();
-                    stubSet.called.should.be.false();
-                    stubKeys.called.should.be.false();
-                    stubSet2.calledWithExactly("1:flow","foo","default").should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                    return when.all([
+                        context.setAsync("#default.foo","default"),
+                        context.getAsync("#default.foo"),
+                        context.keysAsync("#default")
+                    ]).then(function(){
+                        stubGetAsync.called.should.be.false();
+                        stubSetAsync.called.should.be.false();
+                        stubKeysAsync.called.should.be.false();
+                        stubSetAsync2.calledWithExactly("1:flow","foo","default").should.be.true();
+                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                    });
                 });
             });
             it('should use the alias of default context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    should.not.exist(context.get("#.foo"));
-                    context.set("#.foo","alias");
-                    context.get("#.foo");
-                    context.keys("#");
-                    stubGet.called.should.be.false();
-                    stubSet.called.should.be.false();
-                    stubKeys.called.should.be.false();
-                    stubSet2.calledWithExactly("1:flow","foo","alias").should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                    stubKeys2.calledWithExactly("1:flow").should.be.true();
+                    return when.all([
+                        context.setAsync("#.foo","alias"),
+                        context.getAsync("#.foo"),
+                        context.keysAsync("#")
+                    ]).then(function(){
+                        stubGetAsync.called.should.be.false();
+                        stubSetAsync.called.should.be.false();
+                        stubKeysAsync.called.should.be.false();
+                        stubSetAsync2.calledWithExactly("1:flow","foo","alias").should.be.true();
+                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                    });
                 });
             });
             it('should throw an error using undefined storage for local context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.get("#nonexist.local");
+                    context.getAsync("#nonexist.local");
                     should.fail(null, null, "An error was not thrown using undefined storage for local context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -415,7 +439,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.flow.set("#nonexist.flow");
+                    context.flow.setAsync("#nonexist.flow");
                     should.fail(null, null, "An error was not thrown using undefined storage for flow context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -464,32 +488,36 @@ describe('context', function() {
                 return Context.close();
             });
             it('should work correctly with the valid key name',function() {
-                context.set("#memory.azAZ09#_","valid");
-                context.get("#memory.azAZ09#_").should.eql("valid");
-                context.set("#memory.a.b","ab");
-                context.get("#memory.a.b").should.eql("ab");
+                return when.all([
+                    context.setAsync("#memory.azAZ09#_","valid"),
+                    context.setAsync("#memory.a.b","ab")
+                ]).then(function(){
+                    context.getAsync("#memory.azAZ09#_").should.finally.equal("valid");
+                    context.getAsync("#memory.a.b").should.finally.equal("ab");
+                });
             });
             it('should treat the key name without dot as a normal context',function() {
-                context.set("#memory","normal");
-                context.get("#memory").should.eql("normal");
+                return context.setAsync("#memory","normal").then(function(){
+                    return context.getAsync("#memory").should.finally.equal("normal");
+                });
             });
             it('should fail when specifying invalid characters',function() {
                 (function() {
-                    context.set("#memory.a.-","invalid1");
+                    context.setAsync("#memory.a.-","invalid1");
                 }).should.throw();
                 (function() {
-                    context.set("#memory.'abc","invalid2");
+                    context.setAsync("#memory.'abc","invalid2");
                 }).should.throw();
             });
             it('should fail when specifying unnecesary space characters for key name',function() {
                 (function() {
-                    context.set("# memory.space","space1");
+                    context.setAsync("# memory.space","space1");
                 }).should.throw();
                 (function() {
-                    context.set("#memory .space","space2");
+                    context.setAsync("#memory .space","space2");
                 }).should.throw();
                 (function() {
-                    context.set("#memory. space","space3");
+                    context.setAsync("#memory. space","space3");
                 }).should.throw();
             });
         });
@@ -500,8 +528,8 @@ describe('context', function() {
 
         function returnModuleAndKey(input, expectedModule, expectedKey) {
             var result = parseKey(input);
-            result.storage.should.eql(expectedModule);
-            result.key.should.eql(expectedKey);
+            result.storage.should.equal(expectedModule);
+            result.key.should.equal(expectedKey);
         }
 
         it('should return module and key', function() {

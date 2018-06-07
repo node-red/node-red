@@ -154,29 +154,44 @@ function createContext(id,seed) {
     obj.get = function(key) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        if(key === keyPath.key){
+        if(!keyPath.storage){
             return context.get(scope, keyPath.key);
         }else{
-            return context.getAsync(scope, keyPath.key);
+            throw new Error(keyPath.storage + " does not support get(). Use getAsync()");
         }
     };
     obj.set = function(key, value) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        if(key === keyPath.key){
+        if(!keyPath.storage){
             return context.set(scope, keyPath.key, value);
         }else{
-            return context.setAsync(scope, keyPath.key, value);
+            throw new Error(keyPath.storage + " does not support set(). Use setAsync()");
         }
     };
     obj.keys = function(storage) {
         var storageName = parseStorage(storage);
         var context = getContextStorage(storageName);
-        if(!storage){
+        if(!storageName){
             return context.keys(scope);
         }else{
-            return context.keysAsync(scope);
+            throw new Error(storageName + " does not support keys(). Use keysAsync()");
         }
+    };
+    obj.getAsync = function(key) {
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath.storage);
+        return context.getAsync(scope, keyPath.key);
+    };
+    obj.setAsync  = function(key, value) {
+        var keyPath = parseKey(key);
+        var context = getContextStorage(keyPath.storage);
+        return context.setAsync(scope, keyPath.key, value);
+    };
+    obj.keysAsync  = function(storage) {
+        var storageName = parseStorage(storage);
+        var context = getContextStorage(storageName);
+        return context.keysAsync(scope);
     };
     return obj;
 }

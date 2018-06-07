@@ -35,7 +35,7 @@ describe('memory',function() {
         it('should store property',function() {
             should.not.exist(context.get("nodeX","foo"));
             context.set("nodeX","foo","test");
-            context.get("nodeX","foo").should.eql("test");
+            context.get("nodeX","foo").should.equal("test");
         });
 
         it('should store property - creates parent properties',function() {
@@ -61,8 +61,8 @@ describe('memory',function() {
             context.set("nodeX","foo","testX");
             context.set("nodeY","foo","testY");
 
-            context.get("nodeX","foo").should.eql("testX");
-            context.get("nodeY","foo").should.eql("testY");
+            context.get("nodeX","foo").should.equal("testX");
+            context.get("nodeY","foo").should.equal("testY");
         });
     });
 
@@ -75,12 +75,12 @@ describe('memory',function() {
             context.set("nodeX","foo","bar");
             keys = context.keys("nodeX");
             keys.should.have.length(1);
-            keys[0].should.eql("foo");
+            keys[0].should.equal("foo");
 
             context.set("nodeX","abc.def","bar");
             keys = context.keys("nodeX");
             keys.should.have.length(2);
-            keys[1].should.eql("abc");
+            keys[1].should.equal("abc");
         });
 
         it('should enumerate context keys in each scopes', function() {
@@ -96,11 +96,11 @@ describe('memory',function() {
             context.set("nodeY","hoge","piyo");
             keysX = context.keys("nodeX");
             keysX.should.have.length(1);
-            keysX[0].should.eql("foo");
+            keysX[0].should.equal("foo");
 
             keysY = context.keys("nodeY");
             keysY.should.have.length(1);
-            keysY[0].should.eql("hoge");
+            keysY[0].should.equal("hoge");
         });
 
         it('should enumerate only context keys when GlobalContext was given', function() {
@@ -114,7 +114,7 @@ describe('memory',function() {
             context.setGlobalContext(data);
             keys = context.keys("global");
             keys.should.have.length(1);
-            keys[0].should.eql("foo");
+            keys[0].should.equal("foo");
         });
     });
 
@@ -124,8 +124,8 @@ describe('memory',function() {
             should.not.exist(context.get("nodeY","foo"));
             context.set("nodeX","foo","abc");
             context.set("nodeY","foo","abc");
-            context.get("nodeX","foo").should.eql("abc");
-            context.get("nodeY","foo").should.eql("abc");
+            context.get("nodeX","foo").should.equal("abc");
+            context.get("nodeY","foo").should.equal("abc");
 
             return context.delete("nodeX").then(function(){
                 should.not.exist(context.get("nodeX","foo"));
@@ -140,8 +140,8 @@ describe('memory',function() {
             should.not.exist(context.get("nodeY","foo"));
             context.set("nodeX","foo","abc");
             context.set("nodeY","foo","abc");
-            context.get("nodeX","foo").should.eql("abc");
-            context.get("nodeY","foo").should.eql("abc");
+            context.get("nodeX","foo").should.equal("abc");
+            context.get("nodeY","foo").should.equal("abc");
 
             return context.clean([]).then(function(){
                 should.not.exist(context.get("nodeX","foo"));
@@ -153,8 +153,8 @@ describe('memory',function() {
             should.not.exist(context.get("nodeY","foo"));
             context.set("nodeX","foo","abc");
             context.set("nodeY","foo","abc");
-            context.get("nodeX","foo").should.eql("abc");
-            context.get("nodeY","foo").should.eql("abc");
+            context.get("nodeX","foo").should.equal("abc");
+            context.get("nodeY","foo").should.equal("abc");
 
             return context.clean(["nodeX"]).then(function(){
                 should.exist(context.get("nodeX","foo"));
@@ -173,7 +173,7 @@ describe('memory',function() {
                 foo: "bar"
             }
             context.setGlobalContext(data);
-            context.get("global","foo").should.eql("bar");
+            context.get("global","foo").should.equal("bar");
         });
     });
 });
