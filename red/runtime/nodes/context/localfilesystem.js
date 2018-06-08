@@ -22,7 +22,7 @@ var util = require("../../util");
 function getStoragePath(storageBaseDir, scope) {
     if(scope.indexOf(":") === -1){
         if(scope === "global"){
-            return path.join(storageBaseDir,"global",scope); 
+            return path.join(storageBaseDir,"global",scope);
         }else{ // scope:flow
             return path.join(storageBaseDir,scope,"flow");
         }
@@ -89,7 +89,7 @@ LocalFileSystem.prototype.close = function(){
 
 LocalFileSystem.prototype.getAsync = function(scope, key) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath).then(function(data){
+    return loadFile(storagePath + ".json").then(function(data){
         if(data){
             return util.getMessageProperty(JSON.parse(data),key);
         }else{
@@ -102,13 +102,13 @@ LocalFileSystem.prototype.getAsync = function(scope, key) {
 
 LocalFileSystem.prototype.setAsync =function(scope, key, value) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath).then(function(data){
+    return loadFile(storagePath + ".json").then(function(data){
         var obj = data ? JSON.parse(data) : {}
         util.setMessageProperty(obj,key,value);
         return obj;
     }).then(function(obj){
         var str = JSON.stringify(obj, undefined, 4);
-        return fs.outputFile(storagePath, str, "utf8");
+        return fs.outputFile(storagePath + ".json", str, {encoding:"utf8",flag:"w+"});
     }).catch(function(err){
         return when.reject(err);
     });
@@ -116,7 +116,7 @@ LocalFileSystem.prototype.setAsync =function(scope, key, value) {
 
 LocalFileSystem.prototype.keysAsync = function(scope){
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath).then(function(data){
+    return loadFile(storagePath + ".json").then(function(data){
         if(data){
             return Object.keys(JSON.parse(data));
         }else{
@@ -129,7 +129,7 @@ LocalFileSystem.prototype.keysAsync = function(scope){
 
 LocalFileSystem.prototype.delete = function(scope){
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return fs.remove(storagePath);
+    return fs.remove(storagePath + ".json");
 }
 
 LocalFileSystem.prototype.clean = function(activeNodes){
@@ -148,7 +148,7 @@ LocalFileSystem.prototype.clean = function(activeNodes){
             return when.reject(err);
         }
     });
- }
+}
 
 module.exports = function(config){
     return new LocalFileSystem(config);
