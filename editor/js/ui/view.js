@@ -332,6 +332,8 @@ RED.view = (function() {
             redraw();
         });
 
+        RED.view.navigator.init();
+
         $("#btn-zoom-out").click(function() {zoomOut();});
         $("#btn-zoom-zero").click(function() {zoomZero();});
         $("#btn-zoom-in").click(function() {zoomIn();});
@@ -1060,17 +1062,20 @@ RED.view = (function() {
     function zoomIn() {
         if (scaleFactor < 2) {
             scaleFactor += 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomOut() {
         if (scaleFactor > 0.3) {
             scaleFactor -= 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomZero() {
         scaleFactor = 1;
+        RED.view.navigator.resize();
         redraw();
     }
 
@@ -2542,7 +2547,7 @@ RED.view = (function() {
                 }
             ).classed("link_selected", false);
         }
-
+        RED.view.navigator.refresh();
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2816,7 +2821,9 @@ RED.view = (function() {
                 gridSize = Math.max(5,v);
                 updateGrid();
             }
+        },
+        getActiveNodes: function() {
+            return activeNodes;
         }
-
     };
 })();

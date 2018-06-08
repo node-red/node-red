@@ -203,7 +203,7 @@
     height: 25px;
     line-height: 23px;
     padding: 0 10px;
-
+    user-select: none;
 
     .button-group:not(:last-child) {
         margin-right: 5px;
@@ -227,6 +227,7 @@
     font-size: 11px;
     line-height: 17px;
     height: 18px;
+    width: 18px;
     &.text-button {
         width: auto;
         padding: 0 5px;
