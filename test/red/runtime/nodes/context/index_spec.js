@@ -121,7 +121,7 @@ describe('context', function() {
 
             return Context.delete("1","flowA").then(function(){
                 context = Context.get("1","flowA");
-                should.not.exist(context.get("foo"));                
+                should.not.exist(context.get("foo"));
             });
         });
 
@@ -221,6 +221,13 @@ describe('context', function() {
                 config:{}
             }
         };
+        var contextAlias={
+            default: "test",
+            test:{
+                module: testPlugin,
+                config:{}
+            }
+        };
 
         afterEach(function() {
             sandbox.reset();
@@ -228,7 +235,7 @@ describe('context', function() {
                 return Context.close();
             });
         });
-    
+
         describe('load modules',function(){
             it('should call open()', function() {
                 Context.init({contextStorage:contextDefaultStorage});
@@ -421,6 +428,21 @@ describe('context', function() {
                     });
                 });
             });
+            it('should use default as the alias of other context', function() {
+                Context.init({contextStorage:contextAlias});
+                return Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    return when.all([
+                        context.setAsync("#.foo","alias"),
+                        context.getAsync("#.foo"),
+                        context.keysAsync("#")
+                    ]).then(function(){
+                        stubSetAsync.calledWithExactly("1:flow","foo","alias").should.be.true();
+                        stubGetAsync.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeysAsync.calledWithExactly("1:flow").should.be.true();
+                    });
+                });
+            });
             it('should throw an error using undefined storage for local context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
@@ -537,8 +559,8 @@ describe('context', function() {
             returnModuleAndKey("#test.aaa.bbb","test","aaa.bbb");
             returnModuleAndKey("#1.234","1","234");
             returnModuleAndKey("##test.foo","#test","foo");
-            returnModuleAndKey("#test.#foo","test","#foo"); 
-            returnModuleAndKey("#test.#foo.#bar","test","#foo.#bar"); 
+            returnModuleAndKey("#test.#foo","test","#foo");
+            returnModuleAndKey("#test.#foo.#bar","test","#foo.#bar");
             returnModuleAndKey("#test..foo","test",".foo");
             returnModuleAndKey("#test..","test",".");
             returnModuleAndKey("#te-_st.aaa","te-_st","aaa");
