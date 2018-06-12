@@ -170,6 +170,10 @@ RED.sidebar.info = (function() {
                 if (node.type === "tab") {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
                     $(propRow.children()[1]).text((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+                } else if (node.type === "subflow") {
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("subflow.category")+'</td><td></td></tr>').appendTo(tableBody);
+                    var category = node.category||"subflows";
+                    $(propRow.children()[1]).text(RED._("palette.label."+category,{defaultValue:category}))
                 }
             } else {
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.node")+"</td><td></td></tr>").appendTo(tableBody);
@@ -235,6 +239,9 @@ RED.sidebar.info = (function() {
                 }
             }
             if (m) {
+                propRow = $('<tr class="node-info-node-row"><td>'+RED._("subflow.category")+'</td><td></td></tr>').appendTo(tableBody);
+                var category = subflowNode.category||"subflows";
+                $(propRow.children()[1]).text(RED._("palette.label."+category,{defaultValue:category}))
                 $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+subflowUserCount+'</td></tr>').appendTo(tableBody);
             }
 

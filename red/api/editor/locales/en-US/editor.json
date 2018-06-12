@@ -240,6 +240,7 @@
         "output": "outputs:",
         "deleteSubflow": "delete subflow",
         "info": "Description",
+        "category": "Category",
         "format":"markdown format",
         "errors": {
             "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",
@@ -318,6 +319,7 @@
         "noInfo": "no information available",
         "filter": "filter nodes",
         "search": "search modules",
+        "addCategory": "Add new...",
         "label": {
             "subflows": "subflows",
             "input": "input",

@@ -1701,6 +1701,21 @@ RED.editor = (function() {
                             editing_node.icon = icon;
                             changed = true;
                         }
+                        var newCategory = $("#subflow-input-category").val().trim();
+                        if (newCategory === "_custom_") {
+                            newCategory = $("#subflow-input-custom-category").val().trim();
+                            if (newCategory === "") {
+                                newCategory = editing_node.category;
+                            }
+                        }
+                        if (newCategory === 'subflows') {
+                            newCategory = '';
+                        }
+                        if (newCategory != editing_node.category) {
+                            changes['category'] = editing_node.category;
+                            editing_node.category = newCategory;
+                            changed = true;
+                        }
 
                         RED.palette.refresh();
 
@@ -1773,8 +1788,6 @@ RED.editor = (function() {
                 });
                 portLabels.content.addClass("editor-tray-content");
 
-
-
                 if (editing_node) {
                     RED.sidebar.info.refresh(editing_node);
                 }
@@ -1787,6 +1800,33 @@ RED.editor = (function() {
 
                 $("#subflow-input-name").val(subflow.name);
                 RED.text.bidi.prepareInput($("#subflow-input-name"));
+
+                $("#subflow-input-category").empty();
+                var categories = RED.palette.getCategories();
+                categories.sort(function(A,B) {
+                    return A.label.localeCompare(B.label);
+                })
+                categories.forEach(function(cat) {
+                    $("#subflow-input-category").append($("<option></option>").val(cat.id).text(cat.label));
+                })
+                $("#subflow-input-category").append($("<option></option>").attr('disabled',true).text("---"));
+                $("#subflow-input-category").append($("<option></option>").val("_custom_").text(RED._("palette.addCategory")));
+
+
+                $("#subflow-input-category").change(function() {
+                    var val = $(this).val();
+                    if (val === "_custom_") {
+                        $("#subflow-input-category").width(120);
+                        $("#subflow-input-custom-category").show();
+                    } else {
+                        $("#subflow-input-category").width(250);
+                        $("#subflow-input-custom-category").hide();
+                    }
+                })
+
+
+                $("#subflow-input-category").val(subflow.category||"subflows");
+
                 subflowEditor.getSession().setValue(subflow.info||"",-1);
                 var userCount = 0;
                 var subflowType = "subflow:"+editing_node.id;
