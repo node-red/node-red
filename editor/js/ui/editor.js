@@ -108,17 +108,6 @@ RED.editor = (function() {
                 }
             }
         }
-        if (node.icon) {
-            var iconPath = RED.utils.separateIconPath(node.icon);
-            if (!iconPath.module) {
-                return isValid;
-            }
-            var iconSets = RED.nodes.getIconSets();
-            var iconFileList = iconSets[iconPath.module];
-            if (!iconFileList || iconFileList.indexOf(iconPath.file) === -1) {
-                isValid = false;
-            }
-        }
         return isValid;
     }
 
@@ -168,27 +157,6 @@ RED.editor = (function() {
                 if (node._def.credentials.hasOwnProperty(prop)) {
                     validateNodeEditorProperty(node,node._def.credentials,prop,prefix);
                 }
-            }
-        }
-        validateIcon(node);
-    }
-
-    function validateIcon(node) {
-        if (node._def.hasOwnProperty("defaults") && !node._def.defaults.hasOwnProperty("icon") && node.icon) {
-            var iconPath = RED.utils.separateIconPath(node.icon);
-            var iconSets = RED.nodes.getIconSets();
-            var iconFileList = iconSets[iconPath.module];
-            var iconModule = $("#node-settings-icon-module");
-            var iconFile = $("#node-settings-icon-file");
-            if (!iconFileList) {
-                iconModule.addClass("input-error");
-                iconFile.removeClass("input-error");
-            } else if (iconFileList.indexOf(iconPath.file) === -1) {
-                iconModule.removeClass("input-error");
-                iconFile.addClass("input-error");
-            } else {
-                iconModule.removeClass("input-error");
-                iconFile.removeClass("input-error");
             }
         }
     }
@@ -711,6 +679,97 @@ RED.editor = (function() {
         }
         return result;
     }
+    function showIconPicker(container, node, iconPath, done) {
+        var containerPos = container.offset();
+        var pickerBackground = $('<div>').css({
+            position: "absolute",top:0,bottom:0,left:0,right:0,zIndex:20
+        }).appendTo("body");
+
+        var top = containerPos.top - 30;
+
+        if (top+280 > $( window ).height()) {
+            top = $( window ).height() - 280;
+        }
+        var picker = $('<div class="red-ui-icon-picker">').css({
+            top: top+"px",
+            left: containerPos.left+"px",
+        }).appendTo("body");
+
+        var hide = function() {
+            pickerBackground.remove();
+            picker.remove();
+            RED.keyboard.remove("escape");
+        }
+        RED.keyboard.add("*","escape",function(){hide()});
+        pickerBackground.on("mousedown", hide);
+
+        var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(picker);
+        searchInput = $('<input type="text">').attr("placeholder","Search icons").appendTo(searchDiv).searchBox({
+            delay: 50,
+            change: function() {
+                var searchTerm = $(this).val().trim();
+                if (searchTerm === "") {
+                    iconList.find(".red-ui-icon-list-module").show();
+                    iconList.find(".red-ui-icon-list-icon").show();
+                } else {
+                    iconList.find(".red-ui-icon-list-module").hide();
+                    iconList.find(".red-ui-icon-list-icon").each(function(i,n) {
+                        if ($(n).data('icon').indexOf(searchTerm) === -1) {
+                            $(n).hide();
+                        } else {
+                            $(n).show();
+                        }
+                    });
+                }
+            }
+        });
+
+        var row = $('<div>').appendTo(picker);
+        var iconList = $('<div class="red-ui-icon-list">').appendTo(picker);
+        var metaRow = $('<div class="red-ui-icon-meta"></div>').appendTo(picker);
+        var summary = $('<span>').appendTo(metaRow);
+        var resetButton = $('<button class="editor-button editor-button-small">use default</button>').appendTo(metaRow).click(function(e) {
+            e.preventDefault();
+            hide();
+            done(null);
+        });
+        var iconSets = RED.nodes.getIconSets();
+        Object.keys(iconSets).forEach(function(moduleName) {
+            var icons = iconSets[moduleName];
+            if (icons.length > 0) {
+                // selectIconModule.append($("<option></option>").val(moduleName).text(moduleName));
+                var header = $('<div class="red-ui-icon-list-module"></div>').text(moduleName).appendTo(iconList);
+                $('<i class="fa fa-cube"></i>').prependTo(header);
+                icons.forEach(function(icon) {
+                    var iconDiv = $('<div>',{class:"red-ui-icon-list-icon"}).appendTo(iconList);
+                    var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(iconDiv);
+                    var colour = node._def.color;
+                    var icon_url = "icons/"+moduleName+"/"+icon;
+                    iconDiv.data('icon',icon_url)
+                    nodeDiv.css('backgroundColor',colour);
+                    var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
+                    $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
+
+                    if (iconPath.module === moduleName && iconPath.file === icon) {
+                        iconDiv.addClass("selected");
+                    }
+                    iconDiv.on("mouseover", function() {
+                        summary.text(icon);
+                    })
+                    iconDiv.on("mouseout", function() {
+                        summary.html("&nbsp;");
+                    })
+                    iconDiv.click(function() {
+                        hide();
+                        done(moduleName+"/"+icon);
+                    })
+                })
+            }
+        });
+        picker.slideDown(100);
+        searchInput.focus();
+    }
+
     function buildLabelForm(container,node) {
         var dialogForm = $('<form class="dialog-form form-horizontal" autocomplete="off"></form>').appendTo(container);
 
@@ -748,81 +807,36 @@ RED.editor = (function() {
         }
 
         if ((!node._def.defaults || !node._def.defaults.hasOwnProperty("icon"))) {
-            $('<div class="form-row"><div id="node-settings-icon"></div></div>').appendTo(dialogForm);
-            var iconDiv = $("#node-settings-icon");
-            $('<label data-i18n="editor.settingIcon">').appendTo(iconDiv);
-            var iconForm = $('<div>',{class:"node-label-form-row"});
-            iconForm.appendTo(iconDiv);
-            $('<label>').appendTo(iconForm);
+            $('<hr>').appendTo(dialogForm);
+            var iconRow = $('<div class="form-row"></div>').appendTo(dialogForm);
+            $('<label style="width: 50px" data-i18n="editor.settingIcon">').appendTo(iconRow);
 
-            var selectIconModule = $('<select id="node-settings-icon-module"><option value=""></option></select>').appendTo(iconForm);
-            var iconPath;
-            if (node.icon) {
-                iconPath = RED.utils.separateIconPath(node.icon);
-            } else {
-                iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
-            }
-            var iconSets = RED.nodes.getIconSets();
-            Object.keys(iconSets).forEach(function(moduleName) {
-                selectIconModule.append($("<option></option>").val(moduleName).text(moduleName));
-            });
-            if (iconPath.module && !iconSets[iconPath.module]) {
-                selectIconModule.append($("<option disabled></option>").val(iconPath.module).text(iconPath.module));
-            }
-            selectIconModule.val(iconPath.module);
-            var iconModuleHidden = $('<input type="hidden" id="node-settings-icon-module-hidden"></input>').appendTo(iconForm);
-            iconModuleHidden.val(iconPath.module);
+            var iconButton = $('<button class="editor-button">').appendTo(iconRow);
 
-            var selectIconFile = $('<select id="node-settings-icon-file"><option value=""></option></select>').appendTo(iconForm);
-            selectIconModule.change(function() {
-                moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
-            });
-            var iconFileHidden = $('<input type="hidden" id="node-settings-icon-file-hidden"></input>').appendTo(iconForm);
-            iconFileHidden.val(iconPath.file);
-            selectIconFile.change(function() {
-                selectIconFile.removeClass("input-error");
-                var fileName = selectIconFile.val();
-                iconFileHidden.val(fileName);
-            });
-            var clear = $('<button class="editor-button editor-button-small"><i class="fa fa-times"></i></button>').appendTo(iconForm);
-            clear.click(function(evt) {
-                evt.preventDefault();
-                var iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
-                selectIconModule.val(iconPath.module);
-                moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, true);
-                selectIconFile.removeClass("input-error");
-                selectIconFile.val(iconPath.file);
-                iconFileHidden.val(iconPath.file);
-            });
+            var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(iconButton);
+            var colour = node._def.color;
+            var icon_url = RED.utils.getNodeIcon(node._def,node);
+            nodeDiv.css('backgroundColor',colour);
+            var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
+            var iconDiv = $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
 
-            moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, false);
-            var iconFileList = iconSets[selectIconModule.val()];
-            if (!iconFileList || iconFileList.indexOf(iconPath.file) === -1) {
-                selectIconFile.append($("<option disabled></option>").val(iconPath.file).text(iconPath.file));
-            }
-            selectIconFile.val(iconPath.file);
-        }
-    }
-
-    function moduleChange(selectIconModule, selectIconFile, iconModuleHidden, iconFileHidden, iconSets, updateIconFile) {
-        selectIconFile.children().remove();
-        var moduleName = selectIconModule.val();
-        if (moduleName !== null) {
-            iconModuleHidden.val(moduleName);
-        }
-        var iconFileList = iconSets[moduleName];
-        if (iconFileList) {
-            iconFileList.forEach(function(fileName) {
-                if (updateIconFile) {
-                    updateIconFile = false;
-                    iconFileHidden.val(fileName);
+            iconButton.click(function(e) {
+                e.preventDefault();
+                var iconPath;
+                var icon = $("#node-settings-icon").text()||"";
+                if (icon) {
+                    iconPath = RED.utils.separateIconPath(icon);
+                } else {
+                    iconPath = RED.utils.getDefaultNodeIcon(node._def, node);
                 }
-                selectIconFile.append($("<option></option>").val(fileName).text(fileName));
-            });
+                showIconPicker(iconRow,node,iconPath,function(newIcon) {
+                    $("#node-settings-icon").text(newIcon||"");
+                    var icon_url = RED.utils.getNodeIcon(node._def,{type:node.type,icon:newIcon});
+                    iconDiv.css("backgroundImage","url("+icon_url+")");
+                });
+            })
+            $('<div class="uneditable-input" id="node-settings-icon">').text(node.icon).appendTo(iconRow);
         }
-        selectIconFile.prop("disabled", !iconFileList);
-        selectIconFile.removeClass("input-error");
-        selectIconModule.removeClass("input-error");
     }
 
     function updateLabels(editing_node, changes, outputMap) {
@@ -1086,9 +1100,7 @@ RED.editor = (function() {
                         }
 
                         if (!editing_node._def.defaults || !editing_node._def.defaults.hasOwnProperty("icon")) {
-                            var iconModule = $("#node-settings-icon-module-hidden").val();
-                            var iconFile = $("#node-settings-icon-file-hidden").val();
-                            var icon = (iconModule && iconFile) ? iconModule+"/"+iconFile : "";
+                            var icon = $("#node-settings-icon").text()||""
                             if (!isDefaultIcon) {
                                 if (icon !== editing_node.icon) {
                                     changes.icon = editing_node.icon;
@@ -1692,9 +1704,7 @@ RED.editor = (function() {
                         if (updateLabels(editing_node, changes, null)) {
                             changed = true;
                         }
-                        var iconModule = $("#node-settings-icon-module-hidden").val();
-                        var iconFile = $("#node-settings-icon-file-hidden").val();
-                        var icon = (iconModule && iconFile) ? iconModule+"/"+iconFile : "";
+                        var icon = $("#node-settings-icon").text()||"";
                         if ((editing_node.icon === undefined && icon !== "node-red/subflow.png") ||
                             (editing_node.icon !== undefined && editing_node.icon !== icon)) {
                             changes.icon = editing_node.icon;
@@ -1839,7 +1849,6 @@ RED.editor = (function() {
                 $("#subflow-dialog-user-count").text(RED._("subflow.subflowInstances", {count:userCount})).show();
 
                 buildLabelForm(portLabels.content,subflow);
-                validateIcon(subflow);
                 trayBody.i18n();
             },
             close: function() {
