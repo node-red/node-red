@@ -28,6 +28,8 @@ var idMap = {
     "range": "#palette_node_range",
     "httpRequest": "#palette_node_http_request",
     "html": "#palette_node_html",
+    // storage
+    "filein": "#palette_node_file_in",
 };
 
 function getId(type) {

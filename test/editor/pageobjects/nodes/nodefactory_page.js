@@ -24,6 +24,7 @@ var changeNode = require('./core/logic/15-change_page');
 var rangeNode = require('./core/logic/16-range_page');
 var httpRequestNode = require('./core/io/21-httprequest_page');
 var htmlNode = require('./core/parsers/70-HTML_page');
+var fileinNode = require('./core/storage/50-filein_page');
 
 
 var nodeCatalog = {
@@ -40,6 +41,8 @@ var nodeCatalog = {
     "range": rangeNode,
     "httpRequest": httpRequestNode,
     "html": htmlNode,
+    // storage
+    "filein": fileinNode,
 }
 
 function create(type, id) {
