@@ -1697,7 +1697,9 @@ RED.view = (function() {
         clickElapsed = now-clickTime;
         clickTime = now;
 
-        dblClickPrimed = (lastClickNode == mousedown_node);
+        dblClickPrimed = (lastClickNode == mousedown_node &&
+            d3.event.buttons === 1 &&
+            !d3.event.shiftKey && !d3.event.metaKey && !d3.event.altKey && !d3.event.ctrlKey);
         lastClickNode = mousedown_node;
 
         var i;
