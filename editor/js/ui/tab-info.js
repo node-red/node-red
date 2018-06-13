@@ -180,19 +180,31 @@ RED.sidebar.info = (function() {
                 RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
 
 
-                if (node.type !== "subflow" && node.name) {
+                if (node.type !== "subflow" && node.type !== "unknown" && node.name) {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td></td></tr>').appendTo(tableBody);
                     $('<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'"></span>').text(node.name).appendTo(propRow.children()[1]);
                 }
                 if (!m) {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td></td></tr>").appendTo(tableBody);
-                    $(propRow.children()[1]).text(node.type);
+                    $(propRow.children()[1]).text((node.type === "unknown")?node._orig.type:node.type);
+                    if (node.type === "unknown") {
+                        $('<span style="float: right; font-size: 0.8em"><i class="fa fa-warning"></i></span>').prependTo($(propRow.children()[1]))
+                    }
                 }
-
                 if (!m && node.type != "subflow" && node.type != "comment") {
-                    if (node._def) {
+                    var defaults;
+                    if (node.type === 'unknown') {
+                        defaults = {};
+                        Object.keys(node._orig).forEach(function(k) {
+                            if (k !== 'type') {
+                                defaults[k] = {};
+                            }
+                        })
+                    } else if (node._def) {
+                        defaults = node._def.defaults;
+                    }
+                    if (defaults) {
                         var count = 0;
-                        var defaults = node._def.defaults;
                         for (var n in defaults) {
                             if (n != "name" && defaults.hasOwnProperty(n)) {
                                 var val = node[n];
