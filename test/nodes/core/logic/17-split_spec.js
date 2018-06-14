@@ -818,6 +818,57 @@ describe('JOIN node', function() {
         });
     });
 
+        it('should manually join things into an array, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"array"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Array();
+                        msg.payload.length.should.equal(3);
+                        msg.payload[0].should.equal(1);
+                        msg.payload[1].should.equal(2);
+                        msg.payload[2].should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
+
+        it('should manually join things into an object, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"object"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Object();
+                        Object.keys(msg.payload).length.should.equal(3);
+                        msg.payload.A.should.equal(1);
+                        msg.payload.B.should.equal(2);
+                        msg.payload.C.should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
     it('should join split strings back into a word', function(done) {
         var flow = [{id:"n1", type:"join", mode:"auto", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
@@ -861,7 +912,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages', function(done) {
+    it('should reduce messages', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -889,7 +940,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages using $I', function(done) {
+    it('should reduce messages using $I', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+$I",
@@ -917,7 +968,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with fixup', function(done) {
+    it('should reduce messages with fixup', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -946,7 +997,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (left)', function(done) {
+    it('should reduce messages (left)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -975,7 +1026,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (right)', function(done) {
+    it('should reduce messages (right)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:true,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -1004,7 +1055,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with array result', function(done) {
+    it('should reduce messages with array result', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$append($A,[payload])",
