@@ -6,7 +6,8 @@
             "name": "Name",
             "username": "Username",
             "password": "Password",
-            "property": "Property"
+            "property": "Property",
+            "language": "Language"
         },
         "status": {
             "connected": "connected",
