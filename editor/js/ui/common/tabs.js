@@ -170,8 +170,8 @@ RED.tabs = (function() {
                 ul.children().css({"transition": "width 100ms"});
                 link.parent().addClass("active");
                 var parentId = link.parent().attr('id');
-                wrapper.find(".red-ui-tab-link-button").removeClass("active");
-                $("#"+parentId+"-link-button").addClass("active");
+                wrapper.find(".red-ui-tab-link-button").removeClass("active selected");
+                $("#"+parentId+"-link-button").addClass("active selected");
                 if (options.scrollable) {
                     var pos = link.parent().position().left;
                     if (pos-21 < 0) {
