@@ -134,15 +134,18 @@
     color: $workspace-button-toggle-color !important;
     background:$workspace-button-background-active;
     margin-bottom: 1px;
-    &.selected:not(.disabled) {
+
+    &.selected:not(.disabled):not(:disabled) {
         color: $workspace-button-toggle-color-selected !important;
         background: $workspace-button-background;
         border-bottom-width: 2px;
         border-bottom-color: $form-input-border-selected-color;
         margin-bottom: 0;
-        cursor: default;
+        &:not(.single) {
+            cursor: default;
+        }
     }
-    &.disabled {
+    &.disabled,&:disabled {
         color: $workspace-button-toggle-color-disabled !important;
     }
 }
