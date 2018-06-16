@@ -49,7 +49,7 @@ RED.projects.settings = (function() {
         var tabContainer;
 
         var trayOptions = {
-            title: "Project Settings",// RED._("menu.label.userSettings"),, // TODO: nls
+            title: RED._("menu.label.userSettings"),
             buttons: [
                 {
                     id: "node-dialog-ok",
@@ -173,14 +173,14 @@ RED.projects.settings = (function() {
         container.empty();
         var bg = $('<span class="button-row" style="position: relative; float: right; margin-right:0;"></span>').appendTo(container);
         var input = $('<input type="text" style="width: calc(100% - 150px); margin-right: 10px;">').val(summary||"").appendTo(container);
-        $('<button class="editor-button">Cancel</button>')
+        $('<button class="editor-button">' + RED._("common.label.cancel") + '</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
                 updateProjectSummary(activeProject.summary, container);
                 editButton.show();
             });
-        $('<button class="editor-button">Save</button>')
+        $('<button class="editor-button">' + RED._("common.label.save") + '</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -223,7 +223,7 @@ RED.projects.settings = (function() {
         if (summary) {
             container.text(summary).removeClass('node-info-node');
         } else {
-            container.text("No summary available").addClass('node-info-none');// TODO: nls
+            container.text(RED._("sidebar.project.projectSettings.noSummaryAvailable")).addClass('node-info-none');
         }
     }
 
@@ -235,7 +235,7 @@ RED.projects.settings = (function() {
         var summaryContent = $('<div></div>',{style:"color: #999"}).appendTo(summary);
         updateProjectSummary(activeProject.summary, summaryContent);
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">edit description</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.editDescription') + '</button>')
                 .prependTo(summary)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -250,7 +250,7 @@ RED.projects.settings = (function() {
         updateProjectDescription(activeProject, descriptionContent);
 
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="float: right;">edit README.md</button>')
+            $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.editReadme') + '</button>')
                 .prependTo(description)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -316,7 +316,7 @@ RED.projects.settings = (function() {
         //     depsList.editableList('addItem',{index:3, label:"Unused dependencies"}); // TODO: nls
         // }
         if (totalCount === 0) {
-            depsList.editableList('addItem',{index:0, label:"None"}); // TODO: nls
+            depsList.editableList('addItem',{index:0, label:RED._("sidebar.project.projectSettings.none")});
         }
 
     }
@@ -381,7 +381,7 @@ RED.projects.settings = (function() {
     function createDependenciesPane(activeProject) {
         var pane = $('<div id="project-settings-tab-deps" class="project-settings-tab-pane node-help"></div>');
         if (RED.user.hasPermission("projects.write")) {
-            $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">edit</button>')
+            $('<button class="editor-button editor-button-small" style="margin-top:10px;float: right;">' + RED._("sidebar.project.projectSettings.edit") + '</button>')
                 .appendTo(pane)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -451,7 +451,7 @@ RED.projects.settings = (function() {
                     var buttons = $('<div class="palette-module-button-group"></div>').appendTo(metaRow);
                     if (RED.user.hasPermission("projects.write")) {
                         if (!entry.installed && RED.settings.theme('palette.editable') !== false) {
-                            $('<a href="#" class="editor-button editor-button-small">install</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.install") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     RED.palette.editor.install(entry,row,function(err) {
@@ -468,7 +468,7 @@ RED.projects.settings = (function() {
                                     });
                                 })
                         } else if (entry.known && entry.count === 0) {
-                            $('<a href="#" class="editor-button editor-button-small">remove from project</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.removeFromProject") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     var deps = $.extend(true, {}, activeProject.dependencies);
@@ -484,7 +484,7 @@ RED.projects.settings = (function() {
                                     });
                                 });
                         } else if (!entry.known) {
-                            $('<a href="#" class="editor-button editor-button-small">add to project</a>').appendTo(buttons)
+                            $('<a href="#" class="editor-button editor-button-small">' + RED._("sidebar.project.projectSettings.addToProject") + '</a>').appendTo(buttons)
                                 .click(function(evt) {
                                     evt.preventDefault();
                                     var deps = $.extend(true, {}, activeProject.dependencies);
@@ -723,10 +723,10 @@ RED.projects.settings = (function() {
     // }
 
     function createFilesSection(activeProject,pane) {
-        var title = $('<h3></h3>').text("Files").appendTo(pane);
+        var title = $('<h3></h3>').text(RED._("sidebar.project.projectSettings.files")).appendTo(pane);
         var filesContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
         if (RED.user.hasPermission("projects.write")) {
-            var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">edit</button>')
+            var editFilesButton = $('<button class="editor-button editor-button-small" style="float: right;">' + RED._('sidebar.project.projectSettings.edit') + '</button>')
                 .appendTo(title)
                 .click(function(evt) {
                     evt.preventDefault();
@@ -750,7 +750,7 @@ RED.projects.settings = (function() {
 
         // Flow files
         row = $('<div class="user-settings-row"></div>').appendTo(filesContainer);
-        $('<label for=""></label>').text('Flow').appendTo(row);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.flow")).appendTo(row);
         var flowFileLabel = $('<div class="uneditable-input" style="padding:0">').appendTo(row);
         var flowFileLabelText = $('<span style="display:inline-block; padding: 6px">').text(activeProject.files.flow).appendTo(flowFileLabel);
 
@@ -787,7 +787,7 @@ RED.projects.settings = (function() {
             })
 
         row = $('<div class="user-settings-row"></div>').appendTo(filesContainer);
-        $('<label for=""></label>').text('Credentials').appendTo(row);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.credentials")).appendTo(row);
         var credFileLabel = $('<div class="uneditable-input">').text(activeProject.files.credentials).appendTo(row);
         var credFileInput = $('<div class="uneditable-input">').text(activeProject.files.credentials).hide().insertAfter(credFileLabel);
 
@@ -899,12 +899,12 @@ RED.projects.settings = (function() {
 
         var credentialFormRows = $('<div>',{style:"margin-top:10px"}).hide().appendTo(credentialStateLabel);
 
-        var credentialSetLabel = $('<div style="margin: 20px 0 10px 5px;">Set the encryption key:</div>').hide().appendTo(credentialFormRows);
-        var credentialChangeLabel = $('<div style="margin: 20px 0 10px 5px;">Change the encryption key:</div>').hide().appendTo(credentialFormRows);
-        var credentialResetLabel = $('<div style="margin: 20px 0 10px 5px;">Reset the encryption key:</div>').hide().appendTo(credentialFormRows);
+        var credentialSetLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.setTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialChangeLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.changeTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
+        var credentialResetLabel = $('<div style="margin: 20px 0 10px 5px;">' + RED._("sidebar.project.projectSettings.resetTheEncryptionKey") + '</div>').hide().appendTo(credentialFormRows);
 
         var credentialSecretExistingRow = $('<div class="user-settings-row user-settings-row-credentials"></div>').appendTo(credentialFormRows);
-        $('<label for=""></label>').text('Current key').appendTo(credentialSecretExistingRow);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.currentKey")).appendTo(credentialSecretExistingRow);
         var credentialSecretExistingInput = $('<input type="password">').appendTo(credentialSecretExistingRow)
             .on("change keyup paste",function() {
                 if (popover) {
@@ -917,10 +917,10 @@ RED.projects.settings = (function() {
         var credentialSecretNewRow = $('<div class="user-settings-row user-settings-row-credentials"></div>').appendTo(credentialFormRows);
 
 
-        $('<label for=""></label>').text('New key').appendTo(credentialSecretNewRow);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.newKey")).appendTo(credentialSecretNewRow);
         var credentialSecretNewInput = $('<input type="password">').appendTo(credentialSecretNewRow).on("change keyup paste",checkFiles);
 
-        var credentialResetWarning = $('<div class="form-tips form-warning" style="margin: 10px;"><i class="fa fa-warning"></i> This will delete all existing credentials</div>').hide().appendTo(credentialFormRows);
+        var credentialResetWarning = $('<div class="form-tips form-warning" style="margin: 10px;"><i class="fa fa-warning"></i>' + RED._("sidebar.project.projectSettings.credentialsAlert") + '</div>').hide().appendTo(credentialFormRows);
 
 
         var hideEditForm = function() {
@@ -950,13 +950,13 @@ RED.projects.settings = (function() {
         }
 
         var formButtons = $('<span class="button-row" style="position: relative; float: right; margin-right:0;"></span>').hide().appendTo(filesContainer);
-        $('<button class="editor-button">Cancel</button>')
+        $('<button class="editor-button">' + RED._("common.label.cancel") + '</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
                 hideEditForm();
             });
-        var saveButton = $('<button class="editor-button">Save</button>')
+        var saveButton = $('<button class="editor-button">' + RED._("common.label.save") + '</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
@@ -1032,13 +1032,13 @@ RED.projects.settings = (function() {
         var updateForm = function() {
             if (activeProject.settings.credentialSecretInvalid) {
                 credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-warning");
-                credentialStateLabel.find(".user-settings-credentials-state").text("Invalid encryption key");
+                credentialStateLabel.find(".user-settings-credentials-state").text(RED._("sidebar.project.projectSettings.invalidEncryptionKey"));
             } else if (activeProject.settings.credentialsEncrypted) {
                 credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-lock");
-                credentialStateLabel.find(".user-settings-credentials-state").text("Encryption enabled");
+                credentialStateLabel.find(".user-settings-credentials-state").text(RED._("sidebar.project.projectSettings.encryptionEnabled"));
             } else {
                 credentialStateLabel.find(".user-settings-credentials-state-icon").removeClass().addClass("user-settings-credentials-state-icon fa fa-unlock");
-                credentialStateLabel.find(".user-settings-credentials-state").text("Encryption disabled");
+                credentialStateLabel.find(".user-settings-credentials-state").text(RED._("sidebar.project.projectSettings.encryptionDisabled"));
             }
             credentialSecretResetButton.toggleClass('disabled',!activeProject.settings.credentialSecretInvalid && !activeProject.settings.credentialsEncrypted);
             credentialSecretResetButton.prop('disabled',!activeProject.settings.credentialSecretInvalid && !activeProject.settings.credentialsEncrypted);
@@ -1050,7 +1050,7 @@ RED.projects.settings = (function() {
 
     function createLocalBranchListSection(activeProject,pane) {
         var localBranchContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        $('<h4></h4>').text("Branches").appendTo(localBranchContainer);
+        $('<h4></h4>').text(RED._("sidebar.project.projectSettings.branches")).appendTo(localBranchContainer);
 
         var row = $('<div class="user-settings-row projects-dialog-list"></div>').appendTo(localBranchContainer);
 
@@ -1063,7 +1063,7 @@ RED.projects.settings = (function() {
                 var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
                 if (entry.empty) {
                     container.addClass('red-ui-search-empty');
-                    container.text("No branches");
+                    container.text(RED._("sidebar.project.projectSettings.noBranches"));
                     return;
                 }
                 if (entry.current) {
@@ -1095,7 +1095,7 @@ RED.projects.settings = (function() {
                         .click(function(e) {
                             e.preventDefault();
                             var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
-                            var notification = RED.notify("Are you sure you want to delete the local branch '"+entry.name+"'? This cannot be undone.", {
+                            var notification = RED.notify(RED._("sidebar.project.projectSettings.deleteConfirm", { name: entry.name }), {
                                 type: "warning",
                                 modal: true,
                                 fixed: true,
@@ -1123,7 +1123,7 @@ RED.projects.settings = (function() {
                                                     },
                                                     400: {
                                                         'git_delete_branch_unmerged': function(error) {
-                                                            notification = RED.notify("The local branch '"+entry.name+"' has unmerged changes that will be lost. Are you sure you want to delete it?", {
+                                                            notification = RED.notify(RED._("sidebar.project.projectSettings.unmergedConfirm", { name: entry.name }), {
                                                                 type: "warning",
                                                                 modal: true,
                                                                 fixed: true,
@@ -1135,7 +1135,7 @@ RED.projects.settings = (function() {
                                                                             notification.close();
                                                                         }
                                                                     },{
-                                                                        text: 'Delete unmerged branch',
+                                                                        text: RED._("sidebar.project.projectSettings.deleteUnmergedBranch"),
                                                                         click: function() {
                                                                             options.url += "?force=true";
                                                                             notification.close();
@@ -1183,14 +1183,14 @@ RED.projects.settings = (function() {
     }
 
     function createRemoteRepositorySection(activeProject,pane) {
-        $('<h3></h3>').text("Version Control").appendTo(pane);
+        $('<h3></h3>').text(RED._("sidebar.project.projectSettings.versionControl")).appendTo(pane);
 
         createLocalBranchListSection(activeProject,pane);
 
         var repoContainer = $('<div class="user-settings-section"></div>').appendTo(pane);
-        var title = $('<h4></h4>').text("Git remotes").appendTo(repoContainer);
+        var title = $('<h4></h4>').text(RED._("sidebar.project.projectSettings.gitRemotes")).appendTo(repoContainer);
 
-        var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">add remote</button>')
+        var editRepoButton = $('<button class="editor-button editor-button-small" style="float: right; margin-right: 10px;">' + RED._("sidebar.project.projectSettings.addRemote") + '</button>')
             .appendTo(title)
             .click(function(evt) {
                 editRepoButton.attr('disabled',true);
@@ -1221,7 +1221,7 @@ RED.projects.settings = (function() {
                 var container = $('<div class="projects-dialog-list-entry">').appendTo(row);
                 if (entry.empty) {
                     container.addClass('red-ui-search-empty');
-                    container.text("No remotes");
+                    container.text(RED._("sidebar.project.projectSettings.noRemotes"));
                     return;
                 } else {
                     $('<span class="entry-icon"><i class="fa fa-globe"></i></span>').appendTo(container);
@@ -1240,7 +1240,7 @@ RED.projects.settings = (function() {
                         .click(function(e) {
                             e.preventDefault();
                             var spinner = utils.addSpinnerOverlay(row).addClass('projects-dialog-spinner-contain');
-                            var notification = RED.notify("Are you sure you want to delete the remote '"+entry.name+"'?", {
+                            var notification = RED.notify(RED._("sidebar.project.projectSettings.deleteRemoteConfrim", { name: entry.name }), {
                                 type: "warning",
                                 modal: true,
                                 fixed: true,
@@ -1252,7 +1252,7 @@ RED.projects.settings = (function() {
                                             notification.close();
                                         }
                                     },{
-                                        text: 'Delete remote',
+                                        text: RED._("sidebar.project.projectSettings.deleteRemote"),
                                         click: function() {
                                             notification.close();
 
@@ -1315,10 +1315,10 @@ RED.projects.settings = (function() {
             // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\.git)?(?:\/?|\#[\d\w\.\-_]+?)$/.test(remoteURLInput.val());
             var validRepo = repo.length > 0 && !/\s/.test(repo);
             if (/^https?:\/\/[^/]+@/i.test(repo)) {
-                remoteURLLabel.text("Do not include the username/password in the url");
+                remoteURLLabel.text(RED._("sidebar.project.projectSettings.urlRule2"));
                 validRepo = false;
             } else {
-                remoteURLLabel.text("https://, ssh:// or file://");
+                remoteURLLabel.text(RED._("sidebar.project.projectSettings.urlRule"));
             }
             saveButton.attr('disabled',(!validName || !validRepo))
             remoteNameInput.toggleClass('input-error',remoteNameInputChanged&&!validName);
@@ -1332,22 +1332,22 @@ RED.projects.settings = (function() {
         var remoteNameInputChanged = false;
         var remoteURLInputChanged = false;
 
-        $('<div class="projects-dialog-list-dialog-header">').text('Add remote').appendTo(addRemoteDialog);
+        $('<div class="projects-dialog-list-dialog-header">').text(RED._('sidebar.project.projectSettings.addRemote2')).appendTo(addRemoteDialog);
 
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
-        $('<label for=""></label>').text('Remote name').appendTo(row);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.remoteName")).appendTo(row);
         var remoteNameInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
             remoteNameInputChanged = true;
             validateForm();
         });
-        $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+        $('<label class="projects-edit-form-sublabel"><small>' + RED._("sidebar.project.projectSettings.nameRule") + '</small></label>').appendTo(row).find("small");
         row = $('<div class="user-settings-row"></div>').appendTo(addRemoteDialog);
-        $('<label for=""></label>').text('URL').appendTo(row);
+        $('<label for=""></label>').text(RED._("sidebar.project.projectSettings.url")).appendTo(row);
         var remoteURLInput = $('<input type="text">').appendTo(row).on("change keyup paste",function() {
             remoteURLInputChanged = true;
             validateForm()
         });
-        var remoteURLLabel = $('<label class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row).find("small");
+        var remoteURLLabel = $('<label class="projects-edit-form-sublabel"><small>' + RED._("sidebar.project.projectSettings.urlRule") +'</small></label>').appendTo(row).find("small");
 
         var hideEditForm = function() {
             editRepoButton.attr('disabled',false);
@@ -1361,13 +1361,13 @@ RED.projects.settings = (function() {
         }
         var formButtons = $('<span class="button-row" style="position: relative; float: right; margin: 10px;"></span>')
             .appendTo(addRemoteDialog);
-        $('<button class="editor-button">Cancel</button>')
+        $('<button class="editor-button">' + RED._("common.label.cancel") + '</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
                 hideEditForm();
             });
-        var saveButton = $('<button class="editor-button">Add remote</button>')
+        var saveButton = $('<button class="editor-button">' + RED._("sidebar.project.projectSettings.addRemote2") + '</button>')
             .appendTo(formButtons)
             .click(function(evt) {
                 evt.preventDefault();
@@ -1484,19 +1484,19 @@ RED.projects.settings = (function() {
         utils = _utils;
         addPane({
             id:'main',
-            title: "Project", // TODO: nls
+            title: RED._("sidebar.project.name"),
             get: createMainPane,
             close: function() { }
         });
         addPane({
             id:'deps',
-            title: "Dependencies", // TODO: nls
+            title: RED._("sidebar.project.dependencies"),
             get: createDependenciesPane,
             close: function() { }
         });
         addPane({
             id:'settings',
-            title: "Settings", // TODO: nls
+            title: RED._("sidebar.project.settings"),
             get: createSettingsPane,
             close: function() {
                 if (popover) {

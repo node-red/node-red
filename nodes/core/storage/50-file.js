@@ -39,14 +39,20 @@ module.exports = function(RED) {
                     node.tout = null;
                 },333);
             }
-            if (filename === "") { node.warn(RED._("file.errors.nofilename")); }
-            else if (node.overwriteFile === "delete") {
+            if (filename === "") {
+                node.warn(RED._("file.errors.nofilename"));
+            } else if (node.overwriteFile === "delete") {
                 fs.unlink(filename, function (err) {
-                    if (err) { node.error(RED._("file.errors.deletefail",{error:err.toString()}),msg); }
-                    else if (RED.settings.verbose) { node.log(RED._("file.status.deletedfile",{file:filename})); }
+                    if (err) {
+                        node.error(RED._("file.errors.deletefail",{error:err.toString()}),msg);
+                    } else {
+                        if (RED.settings.verbose) {
+                            node.log(RED._("file.status.deletedfile",{file:filename}));
+                        }
+                        node.send(msg);
+                    }
                 });
-            }
-            else if (msg.hasOwnProperty("payload") && (typeof msg.payload !== "undefined")) {
+            } else if (msg.hasOwnProperty("payload") && (typeof msg.payload !== "undefined")) {
                 var dir = path.dirname(filename);
                 if (node.createDir) {
                     try {
@@ -64,15 +70,21 @@ module.exports = function(RED) {
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
                 if ((node.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
-                node.data.push(Buffer.from(data));
+                node.data.push({msg:msg,data:Buffer.from(data)});
 
                 while (node.data.length > 0) {
                     if (node.overwriteFile === "true") {
-                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
-                        node.wstream.on("error", function(err) {
-                            node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
-                        });
-                        node.wstream.end(node.data.shift());
+                        (function(packet) {
+                            node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
+                            node.wstream.on("error", function(err) {
+                                node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
+                            });
+                            node.wstream.on("open", function() {
+                                node.wstream.end(packet.data, function() {
+                                    node.send(packet.msg);
+                                });
+                            })
+                        })(node.data.shift());
                     }
                     else {
                         // Append mode
@@ -115,10 +127,17 @@ module.exports = function(RED) {
                         }
                         if (node.filename) {
                             // Static filename - write and reuse the stream next time
-                            node.wstream.write(node.data.shift());
+                            var packet = node.data.shift()
+                            node.wstream.write(packet.data, function() {
+                                node.send(packet.msg);
+                            });
+
                         } else {
                             // Dynamic filename - write and close the stream
-                            node.wstream.end(node.data.shift());
+                            var packet = node.data.shift()
+                            node.wstream.end(packet.data, function() {
+                                node.send(packet.msg);
+                            });
                             delete node.wstream;
                             delete node.wstreamIno;
                         }

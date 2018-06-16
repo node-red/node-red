@@ -58,7 +58,10 @@ RED.view = (function() {
         lastClickNode = null,
         dblClickPrimed = null,
         clickTime = 0,
-        clickElapsed = 0;
+        clickElapsed = 0,
+        scroll_position = [],
+        quickAddActive = false,
+        quickAddLink = null;
 
     var clipboard = "";
 
@@ -72,6 +75,8 @@ RED.view = (function() {
 
     var PORT_TYPE_INPUT = 1;
     var PORT_TYPE_OUTPUT = 0;
+
+    var chart = $("#chart");
 
     var outer = d3.select("#chart")
         .append("svg:svg")
@@ -94,6 +99,16 @@ RED.view = (function() {
         .on("mousemove", canvasMouseMove)
         .on("mousedown", canvasMouseDown)
         .on("mouseup", canvasMouseUp)
+        .on("mouseenter", function() {
+            if (lasso) {
+                if (d3.event.buttons !== 1) {
+                    lasso.remove();
+                    lasso = null;
+                }
+            } else if (mouse_mode === RED.state.PANNING && d3.event.buttons !== 4) {
+                resetMouseVars();
+            }
+        })
         .on("touchend", function() {
             clearTimeout(touchStartTime);
             touchStartTime = null;
@@ -283,7 +298,6 @@ RED.view = (function() {
     function init() {
 
         RED.events.on("workspace:change",function(event) {
-            var chart = $("#chart");
             if (event.old !== 0) {
                 workspaceScrollPositions[event.old] = {
                     left:chart.scrollLeft(),
@@ -319,6 +333,8 @@ RED.view = (function() {
             updateActiveNodes();
             redraw();
         });
+
+        RED.view.navigator.init();
 
         $("#btn-zoom-out").click(function() {zoomOut();});
         $("#btn-zoom-zero").click(function() {zoomZero();});
@@ -526,6 +542,15 @@ RED.view = (function() {
     function canvasMouseDown() {
         var point;
 
+        if (d3.event.button === 1) {
+            // Middle Click pan
+            mouse_mode = RED.state.PANNING;
+            mouse_position = [d3.event.pageX,d3.event.pageY]
+            scroll_position = [chart.scrollLeft(),chart.scrollTop()];
+
+            return;
+        }
+
         if (!mousedown_node && !mousedown_link) {
             selected_link = null;
             updateSelection();
@@ -546,14 +571,16 @@ RED.view = (function() {
                     mouse_mode = RED.state.QUICK_JOINING;
                     $(window).on('keyup',disableQuickJoinEventHandler);
                 }
-
+                quickAddActive = true;
                 RED.typeSearch.show({
                     x:d3.event.clientX-mainPos.left-node_width/2,
                     y:d3.event.clientY-mainPos.top-node_height/2,
                     cancel: function() {
+                        quickAddActive = false;
                         resetMouseVars();
                     },
                     add: function(type) {
+                        quickAddActive = false;
                         var result = addNode(type);
                         if (!result) {
                             return;
@@ -562,11 +589,10 @@ RED.view = (function() {
                         var historyEvent = result.historyEvent;
                         nn.x = point[0];
                         nn.y = point[1];
-                        if (mouse_mode === RED.state.QUICK_JOINING) {
-                            if (drag_lines.length > 0) {
-                                var drag_line = drag_lines[0];
+                        if (mouse_mode === RED.state.QUICK_JOINING || quickAddLink) {
+                            if (quickAddLink || drag_lines.length > 0) {
+                                var drag_line = quickAddLink||drag_lines[0];
                                 var src = null,dst,src_port;
-
                                 if (drag_line.portType === PORT_TYPE_OUTPUT && nn.inputs > 0) {
                                     src = drag_line.node;
                                     src_port = drag_line.port;
@@ -581,9 +607,9 @@ RED.view = (function() {
                                     RED.nodes.addLink(link);
                                     historyEvent.links = [link];
                                     hideDragLines();
-                                    if (drag_line.portType === PORT_TYPE_OUTPUT && nn.outputs > 0) {
+                                    if (!quickAddLink && drag_line.portType === PORT_TYPE_OUTPUT && nn.outputs > 0) {
                                         showDragLines([{node:nn,port:0,portType:PORT_TYPE_OUTPUT}]);
-                                    } else if (drag_line.portType === PORT_TYPE_INPUT && nn.inputs > 0) {
+                                    } else if (!quickAddLink && drag_line.portType === PORT_TYPE_INPUT && nn.inputs > 0) {
                                         showDragLines([{node:nn,port:0,portType:PORT_TYPE_INPUT}]);
                                     } else {
                                         resetMouseVars();
@@ -601,8 +627,8 @@ RED.view = (function() {
                                     resetMouseVars();
                                 }
                             }
+                            quickAddLink = null;
                         }
-
 
                         RED.history.push(historyEvent);
                         RED.nodes.add(nn);
@@ -644,7 +670,6 @@ RED.view = (function() {
     function canvasMouseMove() {
         var i;
         var node;
-        mouse_position = d3.touches(this)[0]||d3.mouse(this);
         // Prevent touch scrolling...
         //if (d3.touches(this)[0]) {
         //    d3.event.preventDefault();
@@ -654,6 +679,22 @@ RED.view = (function() {
         //var point = d3.mouse(this);
         //if (point[0]-container.scrollLeft < 30 && container.scrollLeft > 0) { container.scrollLeft -= 15; }
         //console.log(d3.mouse(this),container.offsetWidth,container.offsetHeight,container.scrollLeft,container.scrollTop);
+
+        if (mouse_mode === RED.state.PANNING) {
+
+            var pos = [d3.event.pageX,d3.event.pageY];
+            var deltaPos = [
+                mouse_position[0]-pos[0],
+                mouse_position[1]-pos[1]
+            ];
+
+            chart.scrollLeft(scroll_position[0]+deltaPos[0])
+            chart.scrollTop(scroll_position[1]+deltaPos[1])
+            return
+        }
+
+        mouse_position = d3.touches(this)[0]||d3.mouse(this);
+
 
         if (lasso) {
             var ox = parseInt(lasso.attr("ox"));
@@ -906,6 +947,10 @@ RED.view = (function() {
     function canvasMouseUp() {
         var i;
         var historyEvent;
+        if (mouse_mode === RED.state.PANNING) {
+            resetMouseVars();
+            return
+        }
         if (mouse_mode === RED.state.QUICK_JOINING) {
             return;
         }
@@ -1020,17 +1065,20 @@ RED.view = (function() {
     function zoomIn() {
         if (scaleFactor < 2) {
             scaleFactor += 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomOut() {
         if (scaleFactor > 0.3) {
             scaleFactor -= 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomZero() {
         scaleFactor = 1;
+        RED.view.navigator.resize();
         redraw();
     }
 
@@ -1367,6 +1415,9 @@ RED.view = (function() {
     function disableQuickJoinEventHandler(evt) {
         // Check for ctrl (all browsers), "Meta" (Chrome/FF), keyCode 91 (Safari)
         if (evt.keyCode === 17 || evt.key === "Meta" || evt.keyCode === 91) {
+            if (quickAddActive && drag_lines.length > 0) {
+                quickAddLink = drag_lines[0];
+            }
             resetMouseVars();
             hideDragLines();
             redraw();
@@ -1652,7 +1703,9 @@ RED.view = (function() {
         clickElapsed = now-clickTime;
         clickTime = now;
 
-        dblClickPrimed = (lastClickNode == mousedown_node);
+        dblClickPrimed = (lastClickNode == mousedown_node &&
+            d3.event.buttons === 1 &&
+            !d3.event.shiftKey && !d3.event.metaKey && !d3.event.altKey && !d3.event.ctrlKey);
         lastClickNode = mousedown_node;
 
         var i;
@@ -2502,7 +2555,7 @@ RED.view = (function() {
                 }
             ).classed("link_selected", false);
         }
-
+        RED.view.navigator.refresh();
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2776,7 +2829,9 @@ RED.view = (function() {
                 gridSize = Math.max(5,v);
                 updateGrid();
             }
+        },
+        getActiveNodes: function() {
+            return activeNodes;
         }
-
     };
 })();
