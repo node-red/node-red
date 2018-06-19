@@ -90,12 +90,12 @@ RED.tabs = (function() {
                     collapsibleMenu.on('mouseleave', function(){ $(this).hide() });
                     collapsibleMenu.on('mouseup', function() { $(this).hide() });
                     collapsibleMenu.appendTo("body");
-                    var elementPos = selectButton.offset();
-                    collapsibleMenu.css({
-                        top: (elementPos.top+selectButton.height()-20)+"px",
-                        left: (elementPos.left - collapsibleMenu.width() + selectButton.width())+"px"
-                    })
                 }
+                var elementPos = selectButton.offset();
+                collapsibleMenu.css({
+                    top: (elementPos.top+selectButton.height()-20)+"px",
+                    left: (elementPos.left - collapsibleMenu.width() + selectButton.width())+"px"
+                })
                 collapsibleMenu.toggle();
             })
 
