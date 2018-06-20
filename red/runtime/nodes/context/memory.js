@@ -55,18 +55,6 @@ Memory.prototype.keys = function(scope){
     }
 };
 
-Memory.prototype.getAsync = function(scope, key) {
-    return Promise.resolve(this.get(scope, key));
-};
-
-Memory.prototype.setAsync =function(scope, key, value) {
-    return Promise.resolve(this.set(scope, key, value));
-};
-
-Memory.prototype.keysAsync = function(scope){
-    return Promise.resolve(this.keys(scope));
-};
-
 Memory.prototype.delete = function(scope){
     delete this.data[scope];
     return Promise.resolve();

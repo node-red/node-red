@@ -180,17 +180,17 @@ function createContext(id,seed) {
     obj.getAsync = function(key) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.getAsync(scope, keyPath.key);
+        return context.get(scope, keyPath.key);
     };
     obj.setAsync  = function(key, value) {
         var keyPath = parseKey(key);
         var context = getContextStorage(keyPath.storage);
-        return context.setAsync(scope, keyPath.key, value);
+        return context.set(scope, keyPath.key, value);
     };
     obj.keysAsync  = function(storage) {
         var storageName = parseStorage(storage);
         var context = getContextStorage(storageName);
-        return context.keysAsync(scope);
+        return context.keys(scope);
     };
     return obj;
 }

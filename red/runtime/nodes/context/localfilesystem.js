@@ -86,7 +86,7 @@ LocalFileSystem.prototype.close = function(){
     return Promise.resolve();
 }
 
-LocalFileSystem.prototype.getAsync = function(scope, key) {
+LocalFileSystem.prototype.get = function(scope, key) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     return loadFile(storagePath + ".json").then(function(data){
         if(data){
@@ -99,7 +99,7 @@ LocalFileSystem.prototype.getAsync = function(scope, key) {
     });
 };
 
-LocalFileSystem.prototype.setAsync =function(scope, key, value) {
+LocalFileSystem.prototype.set =function(scope, key, value) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     return loadFile(storagePath + ".json").then(function(data){
         var obj = data ? JSON.parse(data) : {}
@@ -113,7 +113,7 @@ LocalFileSystem.prototype.setAsync =function(scope, key, value) {
     });
 };
 
-LocalFileSystem.prototype.keysAsync = function(scope){
+LocalFileSystem.prototype.keys = function(scope){
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     return loadFile(storagePath + ".json").then(function(data){
         if(data){

@@ -168,25 +168,25 @@ describe('context', function() {
 
     describe('external context storage',function() {
         var sandbox = sinon.sandbox.create();
-        var stubGetAsync = sandbox.stub().returns(Promise.resolve());
-        var stubSetAsync = sandbox.stub().returns(Promise.resolve());
-        var stubKeysAsync = sandbox.stub().returns(Promise.resolve());
+        var stubGet = sandbox.stub().returns(Promise.resolve());
+        var stubSet = sandbox.stub().returns(Promise.resolve());
+        var stubKeys = sandbox.stub().returns(Promise.resolve());
         var stubDelete = sandbox.stub().returns(Promise.resolve());
         var stubClean = sandbox.stub().returns(Promise.resolve());
         var stubOpen = sandbox.stub().returns(Promise.resolve());
         var stubClose = sandbox.stub().returns(Promise.resolve());
-        var stubGetAsync2 = sandbox.stub().returns(Promise.resolve());
-        var stubSetAsync2 = sandbox.stub().returns(Promise.resolve());
-        var stubKeysAsync2 = sandbox.stub().returns(Promise.resolve());
+        var stubGet2 = sandbox.stub().returns(Promise.resolve());
+        var stubSet2 = sandbox.stub().returns(Promise.resolve());
+        var stubKeys2 = sandbox.stub().returns(Promise.resolve());
         var stubDelete2 = sandbox.stub().returns(Promise.resolve());
         var stubClean2 = sandbox.stub().returns(Promise.resolve());
         var stubOpen2 = sandbox.stub().returns(Promise.resolve());
         var stubClose2 = sandbox.stub().returns(Promise.resolve());
         var testPlugin = function(config){
             function Test(){}
-            Test.prototype.getAsync = stubGetAsync;
-            Test.prototype.setAsync = stubSetAsync;
-            Test.prototype.keysAsync = stubKeysAsync;
+            Test.prototype.get = stubGet;
+            Test.prototype.set = stubSet;
+            Test.prototype.keys = stubKeys;
             Test.prototype.delete = stubDelete;
             Test.prototype.clean = stubClean;
             Test.prototype.open = stubOpen;
@@ -195,9 +195,9 @@ describe('context', function() {
         };
         var testPlugin2 = function(config){
             function Test2(){}
-            Test2.prototype.getAsync = stubGetAsync2;
-            Test2.prototype.setAsync = stubSetAsync2;
-            Test2.prototype.keysAsync = stubKeysAsync2;
+            Test2.prototype.get = stubGet2;
+            Test2.prototype.set = stubSet2;
+            Test2.prototype.keys = stubKeys2;
             Test2.prototype.delete = stubDelete2;
             Test2.prototype.clean = stubClean2;
             Test2.prototype.open = stubOpen2;
@@ -262,14 +262,14 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("##%&.sign","sign1").then(function(){
-                            return context.getAsync("##%&.sign").should.finally.equal("sign1");
+                        context.set("##%&.sign","sign1").then(function(){
+                            return context.get("##%&.sign").should.finally.equal("sign1");
                         }),
-                        context.setAsync("#\u3042.file2","file2").then(function(){
-                            return context.getAsync("#\u3042.file2").should.finally.equal("file2");
+                        context.set("#\u3042.file2","file2").then(function(){
+                            return context.get("#\u3042.file2").should.finally.equal("file2");
                         }),
-                        context.setAsync("#1.num","num3").then(function(){
-                            return context.getAsync("#1.num").should.finally.equal("num3");
+                        context.set("#1.num","num3").then(function(){
+                            return context.get("#1.num").should.finally.equal("num3");
                         })
                     ]);
                 });
@@ -279,13 +279,13 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#_.foo","bar"),
-                        context.getAsync("#_.foo"),
-                        context.keysAsync("#_")
+                        context.set("#_.foo","bar"),
+                        context.get("#_.foo"),
+                        context.keys("#_")
                     ]).then(function(){
-                        stubSetAsync.called.should.be.false();
-                        stubGetAsync.called.should.be.false();
-                        stubKeysAsync.called.should.be.false();
+                        stubSet.called.should.be.false();
+                        stubGet.called.should.be.false();
+                        stubKeys.called.should.be.false();
                     });
                 });
             });
@@ -333,13 +333,13 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#test.foo","test"),
-                        context.getAsync("#test.foo"),
-                        context.keysAsync("#test")
+                        context.set("#test.foo","test"),
+                        context.get("#test.foo"),
+                        context.keys("#test")
                     ]).then(function(){
-                        stubSetAsync.calledWithExactly("1:flow","foo","test").should.be.true();
-                        stubGetAsync.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeysAsync.calledWithExactly("1:flow").should.be.true();
+                        stubSet.calledWithExactly("1:flow","foo","test").should.be.true();
+                        stubGet.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeys.calledWithExactly("1:flow").should.be.true();
                     });
                 });
             });
@@ -348,13 +348,13 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.flow.setAsync("#test.foo","test"),
-                        context.flow.getAsync("#test.foo"),
-                        context.flow.keysAsync("#test")
+                        context.flow.set("#test.foo","test"),
+                        context.flow.get("#test.foo"),
+                        context.flow.keys("#test")
                     ]).then(function(){
-                        stubSetAsync.calledWithExactly("flow","foo","test").should.be.true();
-                        stubGetAsync.calledWithExactly("flow","foo").should.be.true();
-                        stubKeysAsync.calledWithExactly("flow").should.be.true();
+                        stubSet.calledWithExactly("flow","foo","test").should.be.true();
+                        stubGet.calledWithExactly("flow","foo").should.be.true();
+                        stubKeys.calledWithExactly("flow").should.be.true();
                     });
                 });
             });
@@ -363,13 +363,13 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.global.setAsync("#test.foo","test"),
-                        context.global.getAsync("#test.foo"),
-                        context.global.keysAsync("#test")
+                        context.global.set("#test.foo","test"),
+                        context.global.get("#test.foo"),
+                        context.global.keys("#test")
                     ]).then(function(){
-                        stubSetAsync.calledWithExactly("global","foo","test").should.be.true();
-                        stubGetAsync.calledWithExactly("global","foo").should.be.true();
-                        stubKeysAsync.calledWithExactly("global").should.be.true();
+                        stubSet.calledWithExactly("global","foo","test").should.be.true();
+                        stubGet.calledWithExactly("global","foo").should.be.true();
+                        stubKeys.calledWithExactly("global").should.be.true();
                     });
                 });
             });
@@ -378,16 +378,16 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#nonexist.foo","test"),
-                        context.getAsync("#nonexist.foo"),
-                        context.keysAsync("#nonexist")
+                        context.set("#nonexist.foo","test"),
+                        context.get("#nonexist.foo"),
+                        context.keys("#nonexist")
                     ]).then(function(){
-                        stubGetAsync.called.should.be.false();
-                        stubSetAsync.called.should.be.false();
-                        stubKeysAsync.called.should.be.false();
-                        stubSetAsync2.calledWithExactly("1:flow","foo","test").should.be.true();
-                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                        stubGet.called.should.be.false();
+                        stubSet.called.should.be.false();
+                        stubKeys.called.should.be.false();
+                        stubSet2.calledWithExactly("1:flow","foo","test").should.be.true();
+                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeys2.calledWithExactly("1:flow").should.be.true();
                     });
                 });
             });
@@ -396,16 +396,16 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#default.foo","default"),
-                        context.getAsync("#default.foo"),
-                        context.keysAsync("#default")
+                        context.set("#default.foo","default"),
+                        context.get("#default.foo"),
+                        context.keys("#default")
                     ]).then(function(){
-                        stubGetAsync.called.should.be.false();
-                        stubSetAsync.called.should.be.false();
-                        stubKeysAsync.called.should.be.false();
-                        stubSetAsync2.calledWithExactly("1:flow","foo","default").should.be.true();
-                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                        stubGet.called.should.be.false();
+                        stubSet.called.should.be.false();
+                        stubKeys.called.should.be.false();
+                        stubSet2.calledWithExactly("1:flow","foo","default").should.be.true();
+                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeys2.calledWithExactly("1:flow").should.be.true();
                     });
                 });
             });
@@ -414,16 +414,16 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#.foo","alias"),
-                        context.getAsync("#.foo"),
-                        context.keysAsync("#")
+                        context.set("#.foo","alias"),
+                        context.get("#.foo"),
+                        context.keys("#")
                     ]).then(function(){
-                        stubGetAsync.called.should.be.false();
-                        stubSetAsync.called.should.be.false();
-                        stubKeysAsync.called.should.be.false();
-                        stubSetAsync2.calledWithExactly("1:flow","foo","alias").should.be.true();
-                        stubGetAsync2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeysAsync2.calledWithExactly("1:flow").should.be.true();
+                        stubGet.called.should.be.false();
+                        stubSet.called.should.be.false();
+                        stubKeys.called.should.be.false();
+                        stubSet2.calledWithExactly("1:flow","foo","alias").should.be.true();
+                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeys2.calledWithExactly("1:flow").should.be.true();
                     });
                 });
             });
@@ -432,13 +432,13 @@ describe('context', function() {
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     return Promise.all([
-                        context.setAsync("#.foo","alias"),
-                        context.getAsync("#.foo"),
-                        context.keysAsync("#")
+                        context.set("#.foo","alias"),
+                        context.get("#.foo"),
+                        context.keys("#")
                     ]).then(function(){
-                        stubSetAsync.calledWithExactly("1:flow","foo","alias").should.be.true();
-                        stubGetAsync.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeysAsync.calledWithExactly("1:flow").should.be.true();
+                        stubSet.calledWithExactly("1:flow","foo","alias").should.be.true();
+                        stubGet.calledWithExactly("1:flow","foo").should.be.true();
+                        stubKeys.calledWithExactly("1:flow").should.be.true();
                     });
                 });
             });
@@ -446,7 +446,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.getAsync("#nonexist.local");
+                    context.get("#nonexist.local");
                     should.fail(null, null, "An error was not thrown using undefined storage for local context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -460,7 +460,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.flow.setAsync("#nonexist.flow");
+                    context.flow.set("#nonexist.flow");
                     should.fail(null, null, "An error was not thrown using undefined storage for flow context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -510,35 +510,35 @@ describe('context', function() {
             });
             it('should work correctly with the valid key name',function() {
                 return Promise.all([
-                    context.setAsync("#memory.azAZ09#_","valid"),
-                    context.setAsync("#memory.a.b","ab")
+                    context.set("#memory.azAZ09#_","valid"),
+                    context.set("#memory.a.b","ab")
                 ]).then(function(){
-                    context.getAsync("#memory.azAZ09#_").should.finally.equal("valid");
-                    context.getAsync("#memory.a.b").should.finally.equal("ab");
+                    context.get("#memory.azAZ09#_").should.finally.equal("valid");
+                    context.get("#memory.a.b").should.finally.equal("ab");
                 });
             });
             it('should treat the key name without dot as a normal context',function() {
-                return context.setAsync("#memory","normal").then(function(){
-                    return context.getAsync("#memory").should.finally.equal("normal");
+                return context.set("#memory","normal").then(function(){
+                    return context.get("#memory").should.finally.equal("normal");
                 });
             });
             it('should fail when specifying invalid characters',function() {
                 (function() {
-                    context.setAsync("#memory.a.-","invalid1");
+                    context.set("#memory.a.-","invalid1");
                 }).should.throw();
                 (function() {
-                    context.setAsync("#memory.'abc","invalid2");
+                    context.set("#memory.'abc","invalid2");
                 }).should.throw();
             });
             it('should fail when specifying unnecesary space characters for key name',function() {
                 (function() {
-                    context.setAsync("# memory.space","space1");
+                    context.set("# memory.space","space1");
                 }).should.throw();
                 (function() {
-                    context.setAsync("#memory .space","space2");
+                    context.set("#memory .space","space2");
                 }).should.throw();
                 (function() {
-                    context.setAsync("#memory. space","space3");
+                    context.set("#memory. space","space3");
                 }).should.throw();
             });
         });
