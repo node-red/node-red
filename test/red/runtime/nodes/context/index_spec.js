@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require('sinon');
-var rewire = require("rewire");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
 describe('context', function() {
@@ -166,7 +165,7 @@ describe('context', function() {
         });
     });
 
-    describe('external context storage',function() {
+    describe.skip('external context storage',function() {
         var sandbox = sinon.sandbox.create();
         var stubGet = sandbox.stub().returns(Promise.resolve());
         var stubSet = sandbox.stub().returns(Promise.resolve());
@@ -543,68 +542,4 @@ describe('context', function() {
             });
         });
     });
-
-    describe('#parseKey()', function() {
-        var parseKey = rewire("../../../../../red/runtime/nodes/context/index").__get__("parseKey");
-
-        function returnModuleAndKey(input, expectedModule, expectedKey) {
-            var result = parseKey(input);
-            result.storage.should.equal(expectedModule);
-            result.key.should.equal(expectedKey);
-        }
-
-        it('should return module and key', function() {
-            returnModuleAndKey("#test.aaa","test","aaa");
-            returnModuleAndKey("#test.aaa.bbb","test","aaa.bbb");
-            returnModuleAndKey("#1.234","1","234");
-            returnModuleAndKey("##test.foo","#test","foo");
-            returnModuleAndKey("#test.#foo","test","#foo");
-            returnModuleAndKey("#test.#foo.#bar","test","#foo.#bar");
-            returnModuleAndKey("#test..foo","test",".foo");
-            returnModuleAndKey("#test..","test",".");
-            returnModuleAndKey("#te-_st.aaa","te-_st","aaa");
-            returnModuleAndKey("#te{st.a2","te{st","a2");
-            returnModuleAndKey("#te[st.a3","te[st","a3");
-            returnModuleAndKey("#te'st.a4","te'st","a4");
-            returnModuleAndKey("#te\"st.a5","te\"st","a5");
-        });
-
-        it('should return module as default', function() {
-            returnModuleAndKey("#default.foo","default","foo");
-            returnModuleAndKey("#.foo","default","foo");
-        });
-
-        it('should return only keys', function() {
-            returnModuleAndKey("test.aaa", "", "test.aaa");
-            returnModuleAndKey("test", "", "test");
-            returnModuleAndKey("#test", "", "#test");
-        });
-
-        it('should fail with null key', function() {
-            (function() {
-                parseKey("");
-            }).should.throw();
-
-            (function() {
-                parseKey(null);
-            }).should.throw();
-        });
-
-        it('should fail with space character', function() {
-            (function() {
-                parseKey(" #test");
-            }).should.throw();
-
-            (function() {
-                parseKey("#test .a");
-            }).should.throw();
-        });
-
-        it('should fail with empty key', function() {
-            (function() {
-                parseKey("#test.");
-            }).should.throw();
-        });
-    });
-
 });
