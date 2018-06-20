@@ -16,7 +16,6 @@
 
 var clone = require("clone");
 var log = require("../../log");
-var when = require("when");
 
 var settings;
 var contexts = {};
@@ -59,14 +58,14 @@ function load() {
                     try{
                         plugin = require("./"+plugins[pluginName].module);
                     }catch(err){
-                        return when.reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
+                        return Promise.reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
                     }
                 } else {
                     plugin = plugins[pluginName].module;
                 }
                 externalContexts[pluginName] = plugin(config);
             }else{
-                return when.reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
+                return Promise.reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
             }
         }
         for(var plugin in externalContexts){
@@ -78,10 +77,10 @@ function load() {
             if(externalContexts.hasOwnProperty(plugins["default"])){
                 externalContexts["default"] =  externalContexts[plugins["default"]];
             }else{
-                return when.reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
+                return Promise.reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
             }
         }
-        return when.all(promises);
+        return Promise.all(promises);
     } else {
         noContextStorage = true;
         return externalContexts["_"].open();
@@ -224,7 +223,7 @@ function deleteContext(id,flowId) {
         delete contexts[contextId];
         return externalContexts["_"].delete(contextId);
     }else{
-        return when.resolve();
+        return Promise.resolve();
     }
 }
 
@@ -243,7 +242,7 @@ function clean(flowConfig) {
             }
         }
     }
-    return when.all(promises);
+    return Promise.all(promises);
 }
 
 function close() {
@@ -253,7 +252,7 @@ function close() {
             promises.push(externalContexts[plugin].close());
         }
     }
-    return when.all(promises);
+    return Promise.all(promises);
 }
 
 module.exports = {

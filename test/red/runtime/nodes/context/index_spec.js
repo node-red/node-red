@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require('sinon');
-var when = require("when")
 var rewire = require("rewire");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
@@ -169,20 +168,20 @@ describe('context', function() {
 
     describe('external context storage',function() {
         var sandbox = sinon.sandbox.create();
-        var stubGetAsync = sandbox.stub().returns(when.resolve());
-        var stubSetAsync = sandbox.stub().returns(when.resolve());
-        var stubKeysAsync = sandbox.stub().returns(when.resolve());
-        var stubDelete = sandbox.stub().returns(when.resolve());
-        var stubClean = sandbox.stub().returns(when.resolve());
-        var stubOpen = sandbox.stub().returns(when.resolve());
-        var stubClose = sandbox.stub().returns(when.resolve());
-        var stubGetAsync2 = sandbox.stub().returns(when.resolve());
-        var stubSetAsync2 = sandbox.stub().returns(when.resolve());
-        var stubKeysAsync2 = sandbox.stub().returns(when.resolve());
-        var stubDelete2 = sandbox.stub().returns(when.resolve());
-        var stubClean2 = sandbox.stub().returns(when.resolve());
-        var stubOpen2 = sandbox.stub().returns(when.resolve());
-        var stubClose2 = sandbox.stub().returns(when.resolve());
+        var stubGetAsync = sandbox.stub().returns(Promise.resolve());
+        var stubSetAsync = sandbox.stub().returns(Promise.resolve());
+        var stubKeysAsync = sandbox.stub().returns(Promise.resolve());
+        var stubDelete = sandbox.stub().returns(Promise.resolve());
+        var stubClean = sandbox.stub().returns(Promise.resolve());
+        var stubOpen = sandbox.stub().returns(Promise.resolve());
+        var stubClose = sandbox.stub().returns(Promise.resolve());
+        var stubGetAsync2 = sandbox.stub().returns(Promise.resolve());
+        var stubSetAsync2 = sandbox.stub().returns(Promise.resolve());
+        var stubKeysAsync2 = sandbox.stub().returns(Promise.resolve());
+        var stubDelete2 = sandbox.stub().returns(Promise.resolve());
+        var stubClean2 = sandbox.stub().returns(Promise.resolve());
+        var stubOpen2 = sandbox.stub().returns(Promise.resolve());
+        var stubClose2 = sandbox.stub().returns(Promise.resolve());
         var testPlugin = function(config){
             function Test(){}
             Test.prototype.getAsync = stubGetAsync;
@@ -262,7 +261,7 @@ describe('context', function() {
                 });
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("##%&.sign","sign1").then(function(){
                             return context.getAsync("##%&.sign").should.finally.equal("sign1");
                         }),
@@ -279,7 +278,7 @@ describe('context', function() {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
                 return Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#_.foo","bar"),
                         context.getAsync("#_.foo"),
                         context.keysAsync("#_")
@@ -333,7 +332,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#test.foo","test"),
                         context.getAsync("#test.foo"),
                         context.keysAsync("#test")
@@ -348,7 +347,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.flow.setAsync("#test.foo","test"),
                         context.flow.getAsync("#test.foo"),
                         context.flow.keysAsync("#test")
@@ -363,7 +362,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.global.setAsync("#test.foo","test"),
                         context.global.getAsync("#test.foo"),
                         context.global.keysAsync("#test")
@@ -378,7 +377,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#nonexist.foo","test"),
                         context.getAsync("#nonexist.foo"),
                         context.keysAsync("#nonexist")
@@ -396,7 +395,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#default.foo","default"),
                         context.getAsync("#default.foo"),
                         context.keysAsync("#default")
@@ -414,7 +413,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#.foo","alias"),
                         context.getAsync("#.foo"),
                         context.keysAsync("#")
@@ -432,7 +431,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextAlias});
                 return Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return when.all([
+                    return Promise.all([
                         context.setAsync("#.foo","alias"),
                         context.getAsync("#.foo"),
                         context.keysAsync("#")
@@ -510,7 +509,7 @@ describe('context', function() {
                 return Context.close();
             });
             it('should work correctly with the valid key name',function() {
-                return when.all([
+                return Promise.all([
                     context.setAsync("#memory.azAZ09#_","valid"),
                     context.setAsync("#memory.a.b","ab")
                 ]).then(function(){

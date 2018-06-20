@@ -17,7 +17,6 @@
 var should = require('should');
 var fs = require('fs-extra');
 var path = require("path");
-var when = require("when");
 var LocalFileSystem = require('../../../../../red/runtime/nodes/context/localfilesystem');
 
 var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
@@ -76,14 +75,14 @@ describe('localfilesystem',function() {
         });
 
         it('should not shared context with other scope', function() {
-            return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                             context.getAsync("nodeY","foo").should.be.finally.undefined()
+            return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                context.getAsync("nodeY","foo").should.be.finally.undefined()
             ]).then(function(){
-                return when.all([context.setAsync("nodeX","foo","testX"),
-                                 context.setAsync("nodeY","foo","testY")])
+                return Promise.all([context.setAsync("nodeX","foo","testX"),
+                                    context.setAsync("nodeY","foo","testY")])
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.equal("testX"),
-                                 context.getAsync("nodeY","foo").should.be.finally.equal("testY")]);
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.equal("testX"),
+                                    context.getAsync("nodeY","foo").should.be.finally.equal("testY")]);
             });
         });
 
@@ -234,19 +233,19 @@ describe('localfilesystem',function() {
         });
 
         it('should enumerate context keys in each scopes', function() {
-            return when.all([context.keysAsync("nodeX"),
-                             context.keysAsync("nodeY")
+            return Promise.all([context.keysAsync("nodeX"),
+                                context.keysAsync("nodeY")
             ]).then(function(results){
                 results[0].should.be.an.Array();
                 results[0].should.be.empty();
                 results[1].should.be.an.Array();
                 results[1].should.be.empty();
             }).then(function(){
-                return when.all([context.setAsync("nodeX","foo","bar"),
-                                 context.setAsync("nodeY","hoge","piyo")]);
+                return Promise.all([context.setAsync("nodeX","foo","bar"),
+                                    context.setAsync("nodeY","hoge","piyo")]);
             }).then(function(){
-                return when.all([context.keysAsync("nodeX"),
-                                 context.keysAsync("nodeY")]);
+                return Promise.all([context.keysAsync("nodeX"),
+                                    context.keysAsync("nodeY")]);
             }).then(function(results){
                 results[0].should.have.length(1);
                 results[0][0].should.equal("foo");
@@ -258,55 +257,55 @@ describe('localfilesystem',function() {
 
     describe('#delete',function() {
         it('should delete context',function() {
-            return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                             context.getAsync("nodeY","foo").should.be.finally.undefined()
+            return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                context.getAsync("nodeY","foo").should.be.finally.undefined()
             ]).then(function(){
-                return when.all([context.setAsync("nodeX","foo","abc"),
-                                 context.setAsync("nodeY","foo","abc")]);
+                return Promise.all([context.setAsync("nodeX","foo","abc"),
+                                    context.setAsync("nodeY","foo","abc")]);
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
-                                 context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
+                                    context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
             }).then(function(){
                 return context.delete("nodeX");
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                                 context.getAsync("nodeY","foo").should.be.finally.equal("abc")]);
-            });  
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                    context.getAsync("nodeY","foo").should.be.finally.equal("abc")]);
+            });
         });
     });
 
     describe('#clean',function() {
         it('should clean unnecessary context',function() {
-            return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                             context.getAsync("nodeY","foo").should.be.finally.undefined()
-            ]).then(function(values){
-                return when.all([context.setAsync("nodeX","foo","abc"),
-                                 context.setAsync("nodeY","foo","abc")]);
+            return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                context.getAsync("nodeY","foo").should.be.finally.undefined()
+            ]).then(function(){
+                return Promise.all([context.setAsync("nodeX","foo","abc"),
+                                    context.setAsync("nodeY","foo","abc")]);
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
-                                 context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
+                                    context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
             }).then(function(){
                 return context.clean([]);
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                                 context.getAsync("nodeY","foo").should.be.finally.undefined()]);
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                    context.getAsync("nodeY","foo").should.be.finally.undefined()]);
             });
         });
 
         it('should not clean active context',function() {
-            return when.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
-                             context.getAsync("nodeY","foo").should.be.finally.undefined()
+            return Promise.all([context.getAsync("nodeX","foo").should.be.finally.undefined(),
+                                context.getAsync("nodeY","foo").should.be.finally.undefined()
             ]).then(function(){
-                return when.all([context.setAsync("nodeX","foo","abc"),
-                                 context.setAsync("nodeY","foo","abc")]);
+                return Promise.all([context.setAsync("nodeX","foo","abc"),
+                                    context.setAsync("nodeY","foo","abc")]);
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
-                                 context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
+                                    context.getAsync("nodeY","foo").should.be.finally.equal("abc")])
             }).then(function(){
                 return context.clean(["nodeX"]);
             }).then(function(){
-                return when.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
-                                 context.getAsync("nodeY","foo").should.be.finally.undefined()]);
+                return Promise.all([context.getAsync("nodeX","foo").should.be.finally.equal("abc"),
+                                    context.getAsync("nodeY","foo").should.be.finally.undefined()]);
             });
         });
     });

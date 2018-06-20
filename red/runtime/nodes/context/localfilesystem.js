@@ -16,7 +16,6 @@
 
 var fs = require('fs-extra');
 var path = require("path");
-var when = require("when");
 var util = require("../../util");
 
 function getStoragePath(storageBaseDir, scope) {
@@ -67,10 +66,10 @@ function loadFile(storagePath){
         if(exists === true){
             return fs.readFile(storagePath, "utf8");
         }else{
-            return when.resolve(undefined);
+            return Promise.resolve(undefined);
         }
     }).catch(function(err){
-        throw when.reject(err);
+        throw Promise.reject(err);
     });
 }
 
@@ -80,11 +79,11 @@ function LocalFileSystem(config){
 }
 
 LocalFileSystem.prototype.open = function(){
-    return when.resolve();
+    return Promise.resolve();
 }
 
 LocalFileSystem.prototype.close = function(){
-    return when.resolve();
+    return Promise.resolve();
 }
 
 LocalFileSystem.prototype.getAsync = function(scope, key) {
@@ -96,7 +95,7 @@ LocalFileSystem.prototype.getAsync = function(scope, key) {
             return undefined
         }
     }).catch(function(err){
-        return when.reject(err);
+        return Promise.reject(err);
     });
 };
 
@@ -110,7 +109,7 @@ LocalFileSystem.prototype.setAsync =function(scope, key, value) {
         var str = JSON.stringify(obj, undefined, 4);
         return fs.outputFile(storagePath + ".json", str, {encoding:"utf8",flag:"w+"});
     }).catch(function(err){
-        return when.reject(err);
+        return Promise.reject(err);
     });
 };
 
@@ -123,7 +122,7 @@ LocalFileSystem.prototype.keysAsync = function(scope){
             return []
         }
     }).catch(function(err){
-        return when.reject(err);
+        return Promise.reject(err);
     });
 };
 
@@ -135,7 +134,7 @@ LocalFileSystem.prototype.delete = function(scope){
 LocalFileSystem.prototype.clean = function(activeNodes){
     var self = this;
     return fs.readdir(self.storageBaseDir).then(function(dirs){
-        return when.all(dirs.reduce(function(result, item){
+        return Promise.all(dirs.reduce(function(result, item){
             if(item !== "global" && activeNodes.indexOf(item) === -1){
                 result.push(fs.remove(path.join(self.storageBaseDir,item)));
             }
@@ -143,9 +142,9 @@ LocalFileSystem.prototype.clean = function(activeNodes){
         },[]));
     }).catch(function(err){
         if(err.code == 'ENOENT') {
-            return when.resolve();
+            return Promise.resolve();
         }else{
-            return when.reject(err);
+            return Promise.reject(err);
         }
     });
 }

@@ -15,18 +15,17 @@
  **/
 
 var util = require("../../util");
-var when = require("when");
 
 function Memory(config){
     this.data = {};
 }
 
 Memory.prototype.open = function(){
-    return when.resolve();
+    return Promise.resolve();
 };
 
 Memory.prototype.close = function(){
-    return when.resolve();
+    return Promise.resolve();
 };
 
 Memory.prototype.get = function(scope, key) {
@@ -46,7 +45,7 @@ Memory.prototype.set =function(scope, key, value) {
 Memory.prototype.keys = function(scope){
     if(!this.data[scope]){
         return [];
-    } 
+    }
     if (scope !== "global") {
         return Object.keys(this.data[scope]);
     } else {
@@ -57,15 +56,15 @@ Memory.prototype.keys = function(scope){
 };
 
 Memory.prototype.getAsync = function(scope, key) {
-    return when.resolve(this.get(scope, key));
+    return Promise.resolve(this.get(scope, key));
 };
 
 Memory.prototype.setAsync =function(scope, key, value) {
-    return when.resolve(this.set(scope, key, value));
+    return Promise.resolve(this.set(scope, key, value));
 };
 
 Memory.prototype.keysAsync = function(scope){
-    return when.resolve(this.keys(scope));
+    return Promise.resolve(this.keys(scope));
 };
 
 Memory.prototype.delete = function(scope){
