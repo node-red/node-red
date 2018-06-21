@@ -1,0 +1,23 @@
+{
+    "info": {
+        "tip0" : "You can remove the selected nodes or links with {{core:delete-selection}}",
+        "tip1" : "Search for nodes using {{core:search}}",
+        "tip2" : "{{core:toggle-sidebar}} will toggle the view of this sidebar",
+        "tip3" : "You can manage your palette of nodes with {{core:manage-palette}}",
+        "tip4" : "Your flow configuration nodes are listed in the sidebar panel. It can been accessed from the menu or with {{core:show-config-tab}}",
+        "tip5" : "Enable or disable these tips from the option in the settings",
+        "tip6" : "Move the selected nodes using the [left] [up] [down] and [right] keys. Hold [shift] to nudge them further",
+        "tip7" : "Dragging a node onto a wire will splice it into the link",
+        "tip8" : "Export the selected nodes, or the current tab with {{core:show-export-dialog}}",
+        "tip9" : "Import a flow by dragging its JSON into the editor, or with {{core:show-import-dialog}}",
+        "tip10" : "[shift] [click] and drag on a node port to move all of the attached wires or just the selected one",
+        "tip11" : "Show the Info tab with {{core:show-info-tab}} or the Debug tab with {{core:show-debug-tab}}",
+        "tip12" : "[ctrl] [click] in the workspace to open the quick-add dialog",
+        "tip13" : "Hold down [ctrl] when you [click] on a node port to enable quick-wiring",
+        "tip14" : "Hold down [shift] when you [click] on a node to also select all of its connected nodes",
+        "tip15" : "Hold down [ctrl] when you [click] on a node to add or remove it from the current selection",
+        "tip16" : "Switch flow tabs with {{core:show-previous-tab}} and {{core:show-next-tab}}",
+        "tip17" : "You can confirm your changes in the node edit tray with {{core:confirm-edit-tray}} or cancel them with {{core:cancel-edit-tray}}",
+        "tip18" : "Pressing {{core:edit-selected-node}} will edit the first node in the current selection"
+    }
+}

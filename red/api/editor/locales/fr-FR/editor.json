@@ -1,0 +1,487 @@
+{
+    "common": {
+        "label": {
+            "name": "Nom",
+            "ok": "Ok",
+            "done":"Sauver",
+            "cancel": "Annuler",
+            "delete": "Supprimer",
+            "close": "Fermer",
+            "load": "Ouvrir",
+            "save": "Sauver",
+            "import": "Importer",
+            "export": "Exporter"
+        }
+    },
+    "workspace": {
+        "defaultName": "Flow __number__",
+        "editFlow": "Editer le flux: __name__",
+        "confirmDelete": "Voulez vous vraiement supprimer ?",
+        "delete": "Voulez vous vraiement supprimer ? '__label__'?",
+        "dropFlowHere": "Glisser déposer le flux ici",
+        "status": "Status",
+        "enabled": "activé",
+        "disabled":"désactivé",
+        "info": "Description",
+        "tip": "La description accepte les Markdown et apparaîtra dans l'onglet Info."
+    },
+    "menu": {
+        "label": {
+            "view": {
+                "view": "Affichage",
+                "grid": "Grille ",
+                "showGrid": "Afficher la grille",
+                "snapGrid": "Ancrer à la grille",
+                "gridSize": "Taille de la grille ",
+                "textDir": "Direction du Text ",
+                "defaultDir": "Défaut",
+                "ltr": "De gauche à droite",
+                "rtl": "De droite à gauche",
+                "auto": "Contextuel"
+            },
+            "sidebar": {
+                "show": "Afficher l'onglet latéral"
+            },
+            "settings": "Configuration",
+            "userSettings": "Configuration utilisateur",
+            "nodes": "Nodes",
+            "displayStatus": "Afficher le status du node",
+            "displayConfig": "Configuration des nodes",
+            "import": "Importer",
+            "export": "Exporter",
+            "search": "Rechercher les flux",
+            "searchInput": "Rechercher vos flux",
+            "clipboard": "Presse papier",
+            "library": "Bibliothèques",
+            "examples": "Exemples",
+            "subflows": "Flux secondaires",
+            "createSubflow": "Créer un flux secondaire",
+            "selectionToSubflow": "Selection to Subflow",
+            "flows": "Flux",
+            "add": "Ajouter",
+            "rename": "Renommer",
+            "delete": "Supprimer",
+            "keyboardShortcuts": "Raccourcis clavier",
+            "login": "Login",
+            "logout": "Logout",
+            "editPalette":"Éditer la palette",
+            "other": "Autres",
+            "showTips": "Afficher les astuces",
+            "help": "Node-RED website"
+        }
+    },
+    "user": {
+        "loggedInAs": "Connecté en tant que __name__",
+        "username": "Utilisateur",
+        "password": "Mot de passe",
+        "login": "Login",
+        "loginFailed": "Echec de connection",
+        "notAuthorized": "Erreur de connexion, vérifier le nom d'utilisateur et le mot de passe",
+        "errors": {
+            "settings": "Vous devez être connecté pour accéder aux paramètres de configuration",
+            "deploy": "Vous devez être connecté pour déployer les modifications",
+            "notAuthorized": "Vous devez être connecté pour effectuer cette action"
+        }
+    },
+    "notification": {
+        "warning": "<strong>Attention</strong>: __message__",
+        "warnings": {
+            "undeployedChanges": "le node a des modifications non déployées",
+            "nodeActionDisabled": "actions de node désactivées dans le flux secondaire",
+            "missing-types": "<p>Flux interrompus en raison de types de nodes manquants.</p>",
+            "restartRequired": "Node-RED doit être redémarré pour activer les modules mis à niveau",
+            "credentials_load_failed": "<p>Les flux ont été arrêtés car les informations d'identification n'ont pas pu être déchiffrées.</p><p>Le fichier de données d'identification de flux est chiffré, mais la clé de chiffrement du projet est manquante ou non valide.</p>",
+            "missing_flow_file": "<p>Fichier de flux de projet non trouvé.</p><p>Le projet n'est pas configuré avec un fichier de flux.</p>",
+            "project_empty": "<p>Le projet est vide.</p><p>Voulez-vous créer un ensemble de fichiers de projet par défaut?<br/>Sinon, vous devrez ajouter manuellement des fichiers au projet en dehors de l'éditeur.</p>",
+            "project_not_found": "<p>Projet '__project__' non trouvé.</p>",
+            "git_merge_conflict": "<p>La fusion automatique des modifications a échoué.</p><p>Corrigez les conflits non fusionnés puis validez les résultats.</p>"
+        },
+
+        "error": "<strong>Erreur</strong>: __message__",
+        "errors": {
+            "lostConnection": "Connexion perdue au serveur, reconnexion ...",
+            "lostConnectionReconnect": "Connexion perdue au serveur, reconnexion dans __time__s.",
+            "lostConnectionTry": "Essayer maintenant",
+            "cannotAddSubflowToItself": "Impossible d'ajouter un flux secondaire à lui-même",
+            "cannotAddCircularReference": "Impossible d'ajouter un flux secondaire - référence circulaire détectée",
+            "unsupportedVersion": "Utilisation d'une version non prise en charge de Node.js <br/> Vous devez effectuer la mise à niveau vers la dernière version LTS de Node.js"
+        }
+    },
+    "clipboard": {
+        "nodes": "Nodes",
+        "selectNodes": "Sélectionnez le texte ci-dessus et copiez-le dans le presse-papiers.",
+        "pasteNodes": "Copier /coller vos nodes ici",
+        "importNodes": "Importer des nodes",
+        "exportNodes": "Exporter nodes dans le presse papier",
+        "importUnrecognised": "type inconnu:",
+        "importUnrecognised_plural": "type non reconnu:",
+        "nodesExported": "Nodes exportées dans le presse papier",
+        "nodeCopied": "__count__ node copié",
+        "nodeCopied_plural": "__count__ nodes copiés",
+        "invalidFlow": "Flux invalide: __message__",
+        "export": {
+            "selected":"nodes sélectionés",
+            "current":"flux courant",
+            "all":"tous les flux",
+            "compact":"compacte",
+            "formatted":"formatté",
+            "copy": "copier dans le presse papier"
+        },
+        "import": {
+            "import": "Importer",
+            "newFlow": "nouveau flux"
+        },
+        "copyMessagePath": "Chemin copié",
+        "copyMessageValue": "Valeur copiée",
+        "copyMessageValue_truncated": "Valeur tronquée copiée"
+    },
+    "deploy": {
+        "deploy": "Déployer",
+        "full": "Tout",
+        "fullDesc": "Seulement l'espace de travail courant",
+        "modifiedFlows": "Juste les flux modifiés",
+        "modifiedFlowsDesc": "Seulement déployer les flux modifiées",
+        "modifiedNodes": "nodes modifiées",
+        "modifiedNodesDesc": "Seulement déployer les nodes modifiées",
+        "successfulDeploy": "Déploiement réussit !",
+        "deployFailed": "Echec du déploiement: __message__",
+        "unusedConfigNodes":"Vous avez des nodes non configurées",
+        "unusedConfigNodesLink":"Cliquez ici pour les voir",
+        "errors": {
+            "noResponse": "Pas de réponses du serveur, il doit être hors ligne"
+        },
+        "confirm": {
+            "button": {
+                "ignore": "Ignorer",
+                "confirm": "Confirmer le déploiement",
+                "review": "Voir les changements",
+                "cancel": "Annuler",
+                "merge": "Fusionner",
+                "overwrite": "Ignorer & deployer"
+            },
+            "undeployedChanges": "Vous avez des changements non déployés. \n\n Quitter cette page entraînera une perte de ces changements.",
+            "improperlyConfigured": "L'espace de travail contient des nodes qui ne sont pas correctement configurés:",
+            "unknown": "L'espace de travail contient des types de nodes inconnus:",
+            "confirm": "Êtes-vous sûr de vouloir déployer?",
+            "doNotWarn": "Ne pas avertir à ce sujet",
+            "conflict": "Le serveur exécute un ensemble de flux plus récent.",
+            "backgroundUpdate": "Les flux sur le serveur ont été mis à jour.",
+            "conflictChecking": "Vérifier pour voir si les modifications peuvent être fusionnées automatiquement",
+            "conflictAutoMerge": "Les modifications n'incluent aucun conflit et peuvent être fusionnées automatiquement.",
+            "conflictManualMerge": "Les modifications incluent les conflits qui doivent être résolus avant de pouvoir être déployés.",
+            "plusNMore": "+ __count__ plus"
+        }
+    },
+    "diff": {
+        "unresolvedCount": "__count__ conflit non résolu",
+        "unresolvedCount_plural": "__count__ conflits non résolus",
+        "globalNodes": "Nodes globales",
+        "flowProperties": "Proprietés des flux",
+        "type": {
+            "added": "ajouté",
+            "changed": "modifié",
+            "unchanged": "non modifié",
+            "deleted": "supprimé",
+            "flowDeleted": "flux supprimé",
+            "flowAdded": "flux ajouté",
+            "movedTo": "déplacé __id__",
+            "movedFrom": "déplacé depuis __id__"
+        },
+        "nodeCount": "__count__ node",
+        "nodeCount_plural": "__count__ nodes",
+        "local":"Modifications locales",
+        "remote":"Modifications à distance"
+
+    },
+    "subflow": {
+        "editSubflow": "Modifier le modèle de flux secondaire: __name__",
+        "edit": "Modifier le modèle de flux",
+        "subflowInstances": "Il y a is __count__ instance de ce modèle de flux secondaire",
+        "subflowInstances_plural": "Il y a __count__ instances de ce modèle de flux secondaire",
+        "editSubflowProperties": "éditer les proprietés",
+        "input": "entrées:",
+        "output": "sorties:",
+        "deleteSubflow": "Supprimer le flux secondaire",
+        "info": "Description",
+        "format":"Format Markdown",
+        "errors": {
+            "noNodesSelected": "<strong>Impossibe de créer un flux secondaire</strong>: Aucun node sélectionné",
+            "multipleInputsToSelection": "<strong>Impossibe de créer un flux secondaire</strong>: plusieures entrées sélectionées"
+        }
+    },
+    "editor": {
+        "configEdit": "Editer",
+        "configAdd": "Ajouter",
+        "configUpdate": "Mettre à jour",
+        "configDelete": "Supprimer",
+        "nodesUse": "__count__ node utilise cette configuration",
+        "nodesUse_plural": "__count__ nodes utilisent cette configuration",
+        "addNewConfig": "Ajouter une nouvelle __type__ configuration de node",
+        "editNode": "Editer __type__ node",
+        "editConfig": "Editer __type__ configuration de node",
+        "addNewType": "Ajouter un nouveau __type__...",
+        "nodeProperties": "proprietés du node",
+        "portLabels": "étiquettes du node",
+        "labelInputs": "Entrées",
+        "labelOutputs": "Sorties",
+        "settingIcon": "Icone",
+        "noDefaultLabel": "aucune",
+        "defaultLabel": "utiliser l'étiquette par défaut",
+        "errors": {
+            "scopeChange": "La modification du scope le rendra indisponible pour les nodes des autres flux qui l'utilisent"
+        }
+    },
+    "keyboard": {
+        "title": "Raccourcis clavier",
+        "keyboard": "Clavier",
+        "filterActions": "filtrer les actions",
+        "shortcut": "Raccourci",
+        "scope": "scope",
+        "unassigned": "non assigné",
+        "global": "globale",
+        "workspace": "espace de travail",
+        "selectAll": "Selectionner tous les nodes",
+        "selectAllConnected": "Selectionner tous les nodes connectés",
+        "addRemoveNode": "Ajouter/supprimer un node de la sélection",
+        "editSelected": "Editer le node sélectionné",
+        "deleteSelected": "Supprimer le node ou le lien sélectionné",
+        "importNode": "Importer des nodes",
+        "exportNode": "Exporter des nodes",
+        "nudgeNode": "Déplacer les nodes sélectionnés(1px)",
+        "moveNode": "Déplacer les nodes sélectionnés (20px)",
+        "toggleSidebar": "Basculer la barre latérale",
+        "copyNode": "Copier les nodes sélectionnés",
+        "cutNode": "Couper les nodes sélectionnés",
+        "pasteNode": "Coller les nodes",
+        "undoChange": "Annuler le dernier changement effectué",
+        "searchBox": "Fenêtre de recherche",
+        "managePalette": "Gérer la palette"
+    },
+    "library": {
+        "openLibrary": "Ouvrir une bibliothèque...",
+        "saveToLibrary": "Enregistrer dans la bibliothèque...",
+        "typeLibrary": "__type__ bibliothèque",
+        "unnamedType": "Anonyme __type__",
+        "exportToLibrary": "Exporter nodes vers la bibliothèque",
+        "dialogSaveOverwrite": "Une __libraryType__ nommée __libraryName__ existe déjà, voulez vous l'écraser?",
+        "invalidFilename": "Nom de fichier non valide",
+        "savedNodes": "Nodes enregistrés",
+        "savedType": "__type__ enregistrés",
+        "saveFailed": "Erreur d'enregistrement: __message__",
+
+        "filename": "Nom de fichier",
+        "folder": "Répertoire",
+        "filenamePlaceholder": "fichier",
+        "fullFilenamePlaceholder": "a/b/fichier",
+        "folderPlaceholder": "a/b",
+
+        "breadcrumb": "Bibliothèque"
+    },
+    "palette": {
+        "noInfo": "aucune information disponible",
+        "filter": "filtrer les nodes",
+        "search": "recherche de modules",
+        "label": {
+            "subflows": "Flux secondaires",
+            "input": "Entrées",
+            "output": "Sorties",
+            "function": "Fonctions",
+            "social": "Social",
+            "storage": "Enregistrements",
+            "analysis": "Analyse",
+            "advanced": "Avancé"
+        },
+        "event": {
+            "nodeAdded": "Node ajouté à la palette:",
+            "nodeAdded_plural": "Nodes ajoutés à la palette",
+            "nodeRemoved": "Node supprimé de la palette:",
+            "nodeRemoved_plural": "Nodes supprimés de la palette:",
+            "nodeEnabled": "Node activé:",
+            "nodeEnabled_plural": "Nodes activés:",
+            "nodeDisabled": "Node désactivé:",
+            "nodeDisabled_plural": "Nodes désactivés:",
+            "nodeUpgraded": "Node module __module__ mis à jour vers la version __version__"
+        },
+        "editor": {
+            "title": "Gérer la palette",
+            "palette": "Palette",
+            "times": {
+                "seconds": "secondes",
+                "minutes": "minutes",
+                "minutesV": "__count__ minutes ago",
+                "hoursV": "__count__ hour ago",
+                "hoursV_plural": "__count__ hours ago",
+                "daysV": "__count__ jour ago",
+                "daysV_plural": "__count__ jours ago",
+                "weeksV": "__count__ semaine ago",
+                "weeksV_plural": "__count__ semaines ago",
+                "monthsV": "__count__ mois ago",
+                "monthsV_plural": "__count__ mois ago",
+                "yearsV": "__count__ année ago",
+                "yearsV_plural": "__count__ années ago",
+
+                "yearMonthsV": "__y__ année, __count__ mois ago",
+                "yearMonthsV_plural": "__y__ année, __count__ mois ago",
+                "yearsMonthsV": "__y__ année, __count__ mois ago",
+                "yearsMonthsV_plural": "__y__ années, __count__ mois ago"
+            },
+            "nodeCount": "__label__ node",
+            "nodeCount_plural": "__label__ nodes",
+            "moduleCount": "__count__ module disponible",
+            "moduleCount_plural": "__count__ modules disponibles",
+            "inuse": "en cours d'utilisation",
+            "enableall": "tout activer",
+            "disableall": "tout désactiver",
+            "enable": "activer",
+            "disable": "desactiver",
+            "remove": "supprimer",
+            "update": "mettre à jour vers __version__",
+            "updated": "mis à jour",
+            "install": "installer",
+            "installed": "installé",
+            "loading": "Chargement des catalogues...",
+            "tab-nodes": "Nodes",
+            "tab-install": "Installer",
+            "sort": "trier:",
+            "sortAZ": "a-z",
+            "sortRecent": "récent",
+            "more": "+ __count__ en plus",
+            "errors": {
+                "catalogLoadFailed": "<p>Echec de chargement du catalogue</p><p>Vérifiez les logs de votre navigateur pour plus d'informations ou votre connexion</p>",
+                "installFailed": "<p>Echec d'installation: __module__</p><p>__message__</p><p>Vérifiez les logs pour plus d'informations</p>",
+                "removeFailed": "<p>Echec de suppression: __module__</p><p>__message__</p><p>Vérifiez les logs pour plus d'informations</p>",
+                "updateFailed": "<p>Echec de mise à jour: __module__</p><p>__message__</p><p>Vérifiez les logs pour plus d'informations</p>",
+                "enableFailed": "<p>Echec d'activation: __module__</p><p>__message__</p><p>Vérifiez les logs pour plus d'informations</p>",
+                "disableFailed": "<p>Echec de désactivation: __module__</p><p>__message__</p><p>Vérifiez les logs pour plus d'informations</p>"
+            },
+            "confirm": {
+                "install": {
+                    "body":"<p>Installation '__module__'</p><p>Avant l'installation, veuillez lire la documentation du node. Certains nœuds ont des dépendances qui ne peuvent pas être résolues automatiquement et peuvent nécessiter un redémarrage de Node-RED.</p>",
+                    "title": "Install nodes"
+                },
+                "remove": {
+                    "body":"<p>Suppression '__module__'</p><p>Supprimer le node le désinstalle de Node-RED. Le node peut continuer à utiliser des ressources jusqu'à ce que Node-RED soit redémarré. </p>",
+                    "title": "Supprimer les nodes"
+                },
+                "update": {
+                    "body":"<p>Mise à jour '__module__'</p><p>La mise à jour du node nécessitera un redémarrage de Node-RED pour terminer la mise à jour. Cela doit être fait manuellement.</p>",
+                    "title": "Mise à jour des nodes"
+                },
+                "cannotUpdate": {
+                    "body":"une mise à jour pour ce node est disponible, mais elle n'est pas installée dans un emplacement que le gestionnaire de palettes peut mettre à jour.<br/><br/>Reportez-vous à la documentation pour savoir comment mettre à jour ce node."
+                },
+                "button": {
+                    "review": "Information sur le node",
+                    "install": "Installer",
+                    "remove": "Supprimer",
+                    "update": "Mettre à jour"
+                }
+            }
+
+        }
+    },
+    "sidebar": {
+        "info": {
+            "name": "Information sur le node",
+            "tabName": "Nom",
+            "label": "info",
+            "node": "Node",
+            "type": "Type",
+            "id": "ID",
+            "status": "Status",
+            "enabled": "Activé",
+            "disabled": "Désactivé",
+            "subflow": "Flux secondaire",
+            "instances": "Instances",
+            "properties": "Proprietés",
+            "info": "Information",
+            "blank": "blank",
+            "null": "null",
+            "showMore": "Afficher plus",
+            "showLess": "afficher moins",
+            "flow": "Flux",
+            "selection":"Sélection",
+            "nodes":"__count__ nodes",
+            "flowDesc": "Description du flux",
+            "subflowDesc": "Description du flux secondaire",
+            "nodeHelp": "Aide Node",
+            "none":"Non",
+            "arrayItems": "__count__ items",
+            "showTips":"Vous pouvez ouvrir les astuces à partir du panneau des paramètres"
+        },
+        "config": {
+            "name": "Configuration des nodes",
+            "label": "config",
+            "global": "On all flows",
+            "none": "none",
+            "subflows": "flux secondaire",
+            "flows": "flux",
+            "filterUnused":"non utilisé",
+            "filterAll":"tout",
+            "filtered": "__count__ hidden"
+        },
+        "palette": {
+            "name": "Gérer la palette",
+            "label": "palette"
+        },
+        "project": {
+            "label": "projet",
+            "name": "Projet",
+            "description": "Description",
+            "dependencies": "Dépendences",
+            "settings": "Configuration",
+            "editDescription": "Editer la description du projet",
+            "editDependencies": "Editer les dépendances du projet"
+        }
+    },
+    "typedInput": {
+        "type": {
+            "str": "chaîne de caractères",
+            "num": "nombre",
+            "re": "regular expression",
+            "bool": "booléen",
+            "json": "JSON",
+            "bin": "buffer",
+            "date": "timestamp"
+        }
+    },
+    "editableList": {
+        "add": "ajouter"
+    },
+    "search": {
+        "empty": "Aucun résultat",
+        "addNode": "ajouter un node..."
+    },
+    "expressionEditor": {
+        "functions": "Fonctions",
+        "functionReference": "Fonction reference",
+        "insert": "Inserer",
+        "title": "Éditeur JSONata",
+        "test": "Tester",
+        "data": "Message d'exemple",
+        "result": "Resultat",
+        "format": "formater",
+        "compatMode": "Mode compatibilité activé",
+        "compatModeDesc": "<h3>Mode compatibilité JSONata</h3><p> The current expression appears to still reference <code>msg</code> so will be evaluated in compatibility mode. Please update the expression to not use <code>msg</code> as this mode will be removed in the future.</p><p> When JSONata support was first added to Node-RED, it required the expression to reference the <code>msg</code> object. For example <code>msg.payload</code> would be used to access the payload.</p><p> That is no longer necessary as the expression will be evaluated against the message directly. To access the payload, the expression should be just <code>payload</code>.</p>",
+        "noMatch": "Aucun résultat",
+        "errors": {
+            "invalid-expr": "Expression JSONata invalide:\n  __message__",
+            "invalid-msg": "Message JSON invalide:\n  __message__",
+            "context-unsupported": "Cannot test context functions\n $flowContext or $globalContext",
+            "eval": "Error evaluating expression:\n  __message__"
+        }
+    },
+    "jsonEditor": {
+        "title": "éditeur JSON",
+        "format": "formater JSON"
+    },
+    "markdownEditor": {
+        "title": "Éditeur de Markdown"
+    },
+    "bufferEditor": {
+        "title": "Éditeur de Buffer",
+        "modeString": "Handle as UTF-8 String",
+        "modeArray": "Handle as JSON array",
+        "modeDesc":"<h3>Buffer editor</h3><p>The Buffer type is stored as a JSON array of byte values. The editor will attempt to parse the entered value as a JSON array. If it is not valid JSON, it will be treated as a UTF-8 String and converted to an array of the individual character code points.</p><p>For example, a value of <code>Hello World</code> will be converted to the JSON array:<pre>[72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]</pre></p>"
+    }
+}
