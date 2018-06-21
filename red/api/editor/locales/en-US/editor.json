@@ -459,6 +459,10 @@
             "filterAll":"all",
             "filtered": "__count__ hidden"
         },
+        "context": {
+            "name":"Context",
+            "label":"context"
+        },
         "palette": {
             "name": "Palette management",
             "label": "palette"
