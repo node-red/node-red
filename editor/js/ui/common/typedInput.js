@@ -418,6 +418,9 @@
             this.menu = this._createMenu(this.typeList, function(v) { that.type(v) });
             if (currentType && !this.typeMap.hasOwnProperty(currentType)) {
                 this.type(this.typeList[0].value);
+            } else {
+                this.propertyType = null;
+                this.type(currentType);
             }
             setTimeout(function() {that._resize();},0);
         },
