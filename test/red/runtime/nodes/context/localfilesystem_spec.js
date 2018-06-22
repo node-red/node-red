@@ -24,6 +24,10 @@ var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"))
 describe('localfilesystem',function() {
     var context;
 
+    before(function() {
+        return fs.remove(resourcesDir);
+    });
+
     beforeEach(function() {
         context = LocalFileSystem({dir: resourcesDir});
         return context.open();
@@ -38,274 +42,336 @@ describe('localfilesystem',function() {
     });
 
     describe('#get/set',function() {
-        it('should store property',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo","test");
-            }).then(function(){
-                return context.get("nodeX","foo").should.be.finally.equal("test");
-            });
-        });
-
-        it('should store property - creates parent properties',function() {
-            return context.set("nodeX","foo.bar","test").then(function(){
-                return context.get("nodeX","foo").should.be.finally.eql({bar:"test"});
-            });
-        });
-
-        it('should delete property',function() {
-            return context.set("nodeX","foo.abc.bar1","test1")
-            .then(function(){
-                return context.set("nodeX","foo.abc.bar2","test2")
-            }).then(function(){
-                return context.get("nodeX","foo.abc").should.be.finally.eql({bar1:"test1",bar2:"test2"});
-            }).then(function(){
-                return context.set("nodeX","foo.abc.bar1",undefined).then(function(){
-                   return context.get("nodeX","foo.abc").should.be.finally.eql({bar2:"test2"});
-                });
-            }).then(function(){
-                return context.set("nodeX","foo.abc",undefined).then(function(){
-                    return context.get("nodeX","foo.abc").should.be.finally.undefined();
-                });
-            }).then(function(){
-                return context.set("nodeX","foo",undefined).then(function(){
-                    return context.get("nodeX","foo").should.be.finally.undefined();
+        it('should store property',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo","test",function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.equal("test");
+                        done();
+                    });
                 });
             });
         });
 
-        it('should not shared context with other scope', function() {
-            return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                context.get("nodeY","foo").should.be.finally.undefined()
-            ]).then(function(){
-                return Promise.all([context.set("nodeX","foo","testX"),
-                                    context.set("nodeY","foo","testY")])
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.equal("testX"),
-                                    context.get("nodeY","foo").should.be.finally.equal("testY")]);
+        it('should store property - creates parent properties',function(done) {
+            context.set("nodeX","foo.bar","test",function(err){
+                context.get("nodeX","foo",function(err, value){
+                    value.should.be.eql({bar:"test"});
+                    done();
+                });
             });
         });
 
-        it('should store string',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo","bar");
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.String();
-                result.should.be.equal("bar");
-            }).then(function(){
-                return context.set("nodeX","foo","1");
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.String();
-                result.should.be.equal("1");
+        it('should delete property',function(done) {
+            context.set("nodeX","foo.abc.bar1","test1",function(err){
+                context.set("nodeX","foo.abc.bar2","test2",function(err){
+                    context.get("nodeX","foo.abc",function(err, value){
+                        value.should.be.eql({bar1:"test1",bar2:"test2"});
+                        context.set("nodeX","foo.abc.bar1",undefined,function(err){
+                            context.get("nodeX","foo.abc",function(err, value){
+                                value.should.be.eql({bar2:"test2"});
+                                context.set("nodeX","foo.abc",undefined,function(err){
+                                    context.get("nodeX","foo.abc",function(err, value){
+                                        should.not.exist(value);
+                                        context.set("nodeX","foo",undefined,function(err){
+                                            context.get("nodeX","foo",function(err, value){
+                                                should.not.exist(value);
+                                                done();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
 
-        it('should store number',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",1);
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.Number();
-                result.should.be.equal(1);
+        it('should not shared context with other scope', function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.get("nodeY","foo",function(err, value){
+                    should.not.exist(value);
+                    context.set("nodeX","foo","testX",function(err){
+                        context.set("nodeY","foo","testY",function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.equal("testX"),
+                                context.get("nodeY","foo",function(err, value){
+                                    value.should.be.equal("testY");
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
 
-        it('should store null',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",null);
-            }).then(function(){
-                return context.get("nodeX","foo").should.be.finally.null();
+        it('should store string',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo","bar",function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.String();
+                        value.should.be.equal("bar");
+                        context.set("nodeX","foo","1",function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.String();
+                                value.should.be.equal("1");
+                                done();
+                            });
+                        });
+                    });
+                });
             });
         });
 
-        it('should store boolean',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",true);
-            }).then(function(){
-                return context.get("nodeX","foo").should.be.finally.Boolean().and.true();
-            }).then(function(){
-                return context.set("nodeX","foo",false);
-            }).then(function(){
-                return context.get("nodeX","foo").should.be.finally.Boolean().and.false();
+        it('should store number',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",1,function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Number();
+                        value.should.be.equal(1);
+                        done();
+                    });
+                });
             });
         });
 
-        it('should store object',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",{obj:"bar"});
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.Object();
-                result.should.eql({obj:"bar"});
+        it('should store null',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",null,function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        should(value).be.null();
+                        done();
+                    });
+                });
             });
         });
 
-        it('should store array',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",["a","b","c"]);
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.Array();
-                result.should.eql(["a","b","c"]);
-            }).then(function(){
-                return context.get("nodeX","foo[1]")
-            }).then(function(result){
-                result.should.be.String();
-                result.should.equal("b");
+        it('should store boolean',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",true,function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Boolean().and.true();
+                        context.set("nodeX","foo",false,function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.Boolean().and.false();
+                                done();
+                            });
+                        });
+                    });
+                });
             });
         });
 
-        it('should store array of arrays',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",[["a","b","c"],[1,2,3,4],[true,false]]);
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.Array();
-                result.should.have.length(3);
-                result[0].should.have.length(3);
-                result[1].should.have.length(4);
-                result[2].should.have.length(2);
-            }).then(function(){
-                return context.get("nodeX","foo[1]")
-            }).then(function(result){
-                result.should.be.Array();
-                result.should.have.length(4);
-                result.should.be.eql([1,2,3,4]);
+        it('should store object',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",{obj:"bar"},function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Object();
+                        value.should.eql({obj:"bar"});
+                        done();
+                    });
+                });
             });
         });
 
-        it('should store array of objects',function() {
-            return context.get("nodeX","foo").should.be.finally.undefined()
-            .then(function(){
-                return context.set("nodeX","foo",[{obj:"bar1"},{obj:"bar2"},{obj:"bar3"}]);
-            }).then(function(){
-                return context.get("nodeX","foo")
-            }).then(function(result){
-                result.should.be.Array();
-                result.should.have.length(3);
-                result[0].should.be.Object();
-                result[1].should.be.Object();
-                result[2].should.be.Object();
-            }).then(function(){
-                return context.get("nodeX","foo[1]")
-            }).then(function(result){
-                result.should.be.Object();
-                result.should.be.eql({obj:"bar2"});
+        it('should store array',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",["a","b","c"],function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Array();
+                        value.should.eql(["a","b","c"]);
+                        context.get("nodeX","foo[1]",function(err, value){
+                            value.should.be.String();
+                            value.should.equal("b");
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should store array of arrays',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",[["a","b","c"],[1,2,3,4],[true,false]],function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Array();
+                        value.should.have.length(3);
+                        value[0].should.have.length(3);
+                        value[1].should.have.length(4);
+                        value[2].should.have.length(2);
+                        context.get("nodeX","foo[1]",function(err, value){
+                            value.should.be.Array();
+                            value.should.have.length(4);
+                            value.should.be.eql([1,2,3,4]);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should store array of objects',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.set("nodeX","foo",[{obj:"bar1"},{obj:"bar2"},{obj:"bar3"}],function(err){
+                    context.get("nodeX","foo",function(err, value){
+                        value.should.be.Array();
+                        value.should.have.length(3);
+                        value[0].should.be.Object();
+                        value[1].should.be.Object();
+                        value[2].should.be.Object();
+                        context.get("nodeX","foo[1]",function(err, value){
+                            value.should.be.Object();
+                            value.should.be.eql({obj:"bar2"});
+                            done();
+                        });
+                    });
+                });
             });
         });
     });
 
     describe('#keys',function() {
-        it('should enumerate context keys', function() {
-            return context.keys("nodeX").then(function(result){
-                result.should.be.an.Array();
-                result.should.be.empty();
-            }).then(function(){
-                return context.set("nodeX","foo","bar");
-            }).then(function(){
-                return context.keys("nodeX").then(function(result){
-                    result.should.have.length(1);
-                    result[0].should.equal("foo");
-                });
-            }).then(function(){
-                return context.set("nodeX","abc.def","bar");
-            }).then(function(){
-                return context.keys("nodeX").then(function(result){
-                    result.should.have.length(2);
-                    result[1].should.equal("abc");
+        it('should enumerate context keys', function(done) {
+            context.keys("nodeX",function(err, value){
+                value.should.be.an.Array();
+                value.should.be.empty();
+                context.set("nodeX","foo","bar",function(err){
+                    context.keys("nodeX",function(err, value){
+                        value.should.have.length(1);
+                        value[0].should.equal("foo");
+                        context.set("nodeX","abc.def","bar",function(err){
+                            context.keys("nodeX",function(err, value){
+                                value.should.have.length(2);
+                                value[1].should.equal("abc");
+                                done();
+                            });
+                        });
+                    });
                 });
             });
         });
 
-        it('should enumerate context keys in each scopes', function() {
-            return Promise.all([context.keys("nodeX"),
-                                context.keys("nodeY")
-            ]).then(function(results){
-                results[0].should.be.an.Array();
-                results[0].should.be.empty();
-                results[1].should.be.an.Array();
-                results[1].should.be.empty();
-            }).then(function(){
-                return Promise.all([context.set("nodeX","foo","bar"),
-                                    context.set("nodeY","hoge","piyo")]);
-            }).then(function(){
-                return Promise.all([context.keys("nodeX"),
-                                    context.keys("nodeY")]);
-            }).then(function(results){
-                results[0].should.have.length(1);
-                results[0][0].should.equal("foo");
-                results[1].should.have.length(1);
-                results[1][0].should.equal("hoge");
+        it('should enumerate context keys in each scopes', function(done) {
+            context.keys("nodeX",function(err, value){
+                value.should.be.an.Array();
+                value.should.be.empty();
+                context.keys("nodeY",function(err, value){
+                    value.should.be.an.Array();
+                    value.should.be.empty();
+                    context.set("nodeX","foo","bar",function(err){
+                        context.set("nodeY","hoge","piyo",function(err){
+                            context.keys("nodeX",function(err, value){
+                                value.should.have.length(1);
+                                value[0].should.equal("foo");
+                                context.keys("nodeY",function(err, value){
+                                    value.should.have.length(1);
+                                    value[0].should.equal("hoge");
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
     });
 
     describe('#delete',function() {
-        it('should delete context',function() {
-            return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                context.get("nodeY","foo").should.be.finally.undefined()
-            ]).then(function(){
-                return Promise.all([context.set("nodeX","foo","abc"),
-                                    context.set("nodeY","foo","abc")]);
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.equal("abc"),
-                                    context.get("nodeY","foo").should.be.finally.equal("abc")])
-            }).then(function(){
-                return context.delete("nodeX");
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                    context.get("nodeY","foo").should.be.finally.equal("abc")]);
+        it('should delete context',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.get("nodeY","foo",function(err, value){
+                    should.not.exist(value);
+                    context.set("nodeX","foo","testX",function(err){
+                        context.set("nodeY","foo","testY",function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.equal("testX");
+                                context.get("nodeY","foo",function(err, value){
+                                    value.should.be.equal("testY");
+                                    context.delete("nodeX").then(function(){
+                                        context.get("nodeX","foo",function(err, value){
+                                            should.not.exist(value);
+                                            context.get("nodeY","foo",function(err, value){
+                                                value.should.be.equal("testY");
+                                                done();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
     });
 
     describe('#clean',function() {
-        it('should clean unnecessary context',function() {
-            return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                context.get("nodeY","foo").should.be.finally.undefined()
-            ]).then(function(){
-                return Promise.all([context.set("nodeX","foo","abc"),
-                                    context.set("nodeY","foo","abc")]);
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.equal("abc"),
-                                    context.get("nodeY","foo").should.be.finally.equal("abc")])
-            }).then(function(){
-                return context.clean([]);
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                    context.get("nodeY","foo").should.be.finally.undefined()]);
+        it('should clean unnecessary context',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.get("nodeY","foo",function(err, value){
+                    should.not.exist(value);
+                    context.set("nodeX","foo","testX",function(err){
+                        context.set("nodeY","foo","testY",function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.equal("testX");
+                                context.get("nodeY","foo",function(err, value){
+                                    value.should.be.equal("testY");
+                                    context.clean([]).then(function(){
+                                        context.get("nodeX","foo",function(err, value){
+                                            should.not.exist(value);
+                                            context.get("nodeY","foo",function(err, value){
+                                                should.not.exist(value);
+                                                done();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
 
-        it('should not clean active context',function() {
-            return Promise.all([context.get("nodeX","foo").should.be.finally.undefined(),
-                                context.get("nodeY","foo").should.be.finally.undefined()
-            ]).then(function(){
-                return Promise.all([context.set("nodeX","foo","abc"),
-                                    context.set("nodeY","foo","abc")]);
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.equal("abc"),
-                                    context.get("nodeY","foo").should.be.finally.equal("abc")])
-            }).then(function(){
-                return context.clean(["nodeX"]);
-            }).then(function(){
-                return Promise.all([context.get("nodeX","foo").should.be.finally.equal("abc"),
-                                    context.get("nodeY","foo").should.be.finally.undefined()]);
+        it('should not clean active context',function(done) {
+            context.get("nodeX","foo",function(err, value){
+                should.not.exist(value);
+                context.get("nodeY","foo",function(err, value){
+                    should.not.exist(value);
+                    context.set("nodeX","foo","testX",function(err){
+                        context.set("nodeY","foo","testY",function(err){
+                            context.get("nodeX","foo",function(err, value){
+                                value.should.be.equal("testX");
+                                context.get("nodeY","foo",function(err, value){
+                                    value.should.be.equal("testY");
+                                    context.clean(["nodeX"]).then(function(){
+                                        context.get("nodeX","foo",function(err, value){
+                                            value.should.be.equal("testX");
+                                            context.get("nodeY","foo",function(err, value){
+                                                should.not.exist(value);
+                                                done();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
             });
         });
     });

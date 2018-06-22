@@ -16,6 +16,7 @@
 
 var should = require("should");
 var sinon = require('sinon');
+var path = require("path");
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
 describe('context', function() {
@@ -145,38 +146,26 @@ describe('context', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
             return Context.load().then(function(){
                 var context = Context.get("1","flowA");
-                var keys = context.global.keys("global");
+                var keys = context.global.keys();
                 keys.should.have.length(1);
                 keys[0].should.equal("foo");
             });
         });
-
-        it('should throw error when persistable key is passed', function() {
-            var context =  Context.get("1","flow");
-            (function() {
-                context.set("#nonexist.key1", "val1");
-            }).should.throw();
-            (function() {
-                context.get("#nonexist.key1");
-            }).should.throw();
-            (function() {
-                context.keys("#nonexist");
-            }).should.throw();
-        });
     });
 
-    describe.skip('external context storage',function() {
+    describe('external context storage',function() {
+        var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
         var sandbox = sinon.sandbox.create();
-        var stubGet = sandbox.stub().returns(Promise.resolve());
-        var stubSet = sandbox.stub().returns(Promise.resolve());
-        var stubKeys = sandbox.stub().returns(Promise.resolve());
+        var stubGet = sandbox.stub();
+        var stubSet = sandbox.stub();
+        var stubKeys = sandbox.stub();
         var stubDelete = sandbox.stub().returns(Promise.resolve());
         var stubClean = sandbox.stub().returns(Promise.resolve());
         var stubOpen = sandbox.stub().returns(Promise.resolve());
         var stubClose = sandbox.stub().returns(Promise.resolve());
-        var stubGet2 = sandbox.stub().returns(Promise.resolve());
-        var stubSet2 = sandbox.stub().returns(Promise.resolve());
-        var stubKeys2 = sandbox.stub().returns(Promise.resolve());
+        var stubGet2 = sandbox.stub();
+        var stubSet2 = sandbox.stub();
+        var stubKeys2 = sandbox.stub();
         var stubDelete2 = sandbox.stub().returns(Promise.resolve());
         var stubClean2 = sandbox.stub().returns(Promise.resolve());
         var stubOpen2 = sandbox.stub().returns(Promise.resolve());
@@ -247,45 +236,41 @@ describe('context', function() {
                 return Context.load();
             });
             it('should load localfilesystem module', function() {
-                Context.init({contextStorage:{file:{module:"localfilesystem"}}});
+                Context.init({contextStorage:{file:{module:"localfilesystem",config:{dir:resourcesDir}}}});
                 return Context.load();
             });
-            it('should accept special storage name', function() {
+            it('should accept special storage name', function(done) {
                 Context.init({
                     contextStorage:{
-                        "#%&":{module:"memory"},
-                        \u3042:{module:"memory"},
-                        1:{module:"memory"},
+                        "#%&":{module:testPlugin},
+                        \u3042:{module:testPlugin},
+                        1:{module:testPlugin},
                     }
                 });
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    return Promise.all([
-                        context.set("##%&.sign","sign1").then(function(){
-                            return context.get("##%&.sign").should.finally.equal("sign1");
-                        }),
-                        context.set("#\u3042.file2","file2").then(function(){
-                            return context.get("#\u3042.file2").should.finally.equal("file2");
-                        }),
-                        context.set("#1.num","num3").then(function(){
-                            return context.get("#1.num").should.finally.equal("num3");
-                        })
-                    ]);
+                    var cb = function(){done("An error occurred")}
+                    context.set("sign","sign1","#%&",cb);
+                    context.set("file","file2","\u3042",cb);
+                    context.set("num","num3","1",cb);
+                    stubSet.calledWithExactly("1:flow","sign","sign1",cb).should.be.true();
+                    stubSet.calledWithExactly("1:flow","file","file2",cb).should.be.true();
+                    stubSet.calledWithExactly("1:flow","num","num3",cb).should.be.true();
+                    done();
                 });
             });
-            it('should ignore reserved storage name `_`', function() {
+            it('should ignore reserved storage name `_`', function(done) {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#_.foo","bar"),
-                        context.get("#_.foo"),
-                        context.keys("#_")
-                    ]).then(function(){
-                        stubSet.called.should.be.false();
-                        stubGet.called.should.be.false();
-                        stubKeys.called.should.be.false();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.set("foo","bar","_",cb);
+                    context.get("foo","_",cb);
+                    context.keys("_",cb);
+                    stubSet.called.should.be.false();
+                    stubGet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    done();
                 });
             });
             it('should fail when using invalid default context', function(done) {
@@ -327,125 +312,119 @@ describe('context', function() {
         });
 
         describe('store context',function() {
-            it('should store local property to external context storage',function() {
+            it('should store local property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
-                return Context.load().then(function(){
+                var cb = function(){done("An error occurred")}
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#test.foo","test"),
-                        context.get("#test.foo"),
-                        context.keys("#test")
-                    ]).then(function(){
-                        stubSet.calledWithExactly("1:flow","foo","test").should.be.true();
-                        stubGet.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeys.calledWithExactly("1:flow").should.be.true();
-                    });
+                    context.set("foo","bar","test",cb);
+                    context.get("foo","test",cb);
+                    context.keys("test",cb);
+                    stubSet.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
+                    stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubKeys.calledWithExactly("1:flow",cb).should.be.true();
+                    done();
                 });
             });
-            it('should store flow property to external context storage',function() {
+            it('should store flow property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.flow.set("#test.foo","test"),
-                        context.flow.get("#test.foo"),
-                        context.flow.keys("#test")
-                    ]).then(function(){
-                        stubSet.calledWithExactly("flow","foo","test").should.be.true();
-                        stubGet.calledWithExactly("flow","foo").should.be.true();
-                        stubKeys.calledWithExactly("flow").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.flow.set("foo","bar","test",cb);
+                    context.flow.get("foo","test",cb);
+                    context.flow.keys("test",cb);
+                    stubSet.calledWithExactly("flow","foo","bar",cb).should.be.true();
+                    stubGet.calledWithExactly("flow","foo",cb).should.be.true();
+                    stubKeys.calledWithExactly("flow",cb).should.be.true();
+                    done();
                 });
             });
-            it('should store global property to external context storage',function() {
+            it('should store global property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.global.set("#test.foo","test"),
-                        context.global.get("#test.foo"),
-                        context.global.keys("#test")
-                    ]).then(function(){
-                        stubSet.calledWithExactly("global","foo","test").should.be.true();
-                        stubGet.calledWithExactly("global","foo").should.be.true();
-                        stubKeys.calledWithExactly("global").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.global.set("foo","bar","test",cb);
+                    context.global.get("foo","test",cb);
+                    context.global.keys("test",cb);
+                    stubSet.calledWithExactly("global","foo","bar",cb).should.be.true();
+                    stubGet.calledWithExactly("global","foo",cb).should.be.true();
+                    stubKeys.calledWithExactly("global",cb).should.be.true();
+                    done();
                 });
             });
-            it('should store data to the default context when non-existent context storage was specified', function() {
+            it('should store data to the default context when non-existent context storage was specified', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#nonexist.foo","test"),
-                        context.get("#nonexist.foo"),
-                        context.keys("#nonexist")
-                    ]).then(function(){
-                        stubGet.called.should.be.false();
-                        stubSet.called.should.be.false();
-                        stubKeys.called.should.be.false();
-                        stubSet2.calledWithExactly("1:flow","foo","test").should.be.true();
-                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeys2.calledWithExactly("1:flow").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.set("foo","bar","nonexist",cb);
+                    context.get("foo","nonexist",cb);
+                    context.keys("nonexist",cb);
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
+                    done();
                 });
             });
-            it('should use the default context', function() {
+            it('should use the default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#default.foo","default"),
-                        context.get("#default.foo"),
-                        context.keys("#default")
-                    ]).then(function(){
-                        stubGet.called.should.be.false();
-                        stubSet.called.should.be.false();
-                        stubKeys.called.should.be.false();
-                        stubSet2.calledWithExactly("1:flow","foo","default").should.be.true();
-                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeys2.calledWithExactly("1:flow").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.set("foo","bar","defaultt",cb);
+                    context.get("foo","default",cb);
+                    context.keys("default",cb);
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
+                    done();
                 });
             });
-            it('should use the alias of default context', function() {
+            it('should use the alias of default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#.foo","alias"),
-                        context.get("#.foo"),
-                        context.keys("#")
-                    ]).then(function(){
-                        stubGet.called.should.be.false();
-                        stubSet.called.should.be.false();
-                        stubKeys.called.should.be.false();
-                        stubSet2.calledWithExactly("1:flow","foo","alias").should.be.true();
-                        stubGet2.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeys2.calledWithExactly("1:flow").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.set("foo","alias",cb);
+                    context.get("foo",cb);
+                    context.keys(cb);
+                    stubGet.called.should.be.false();
+                    stubSet.called.should.be.false();
+                    stubKeys.called.should.be.false();
+                    stubSet2.calledWithExactly("1:flow","foo","alias",cb).should.be.true();
+                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
+                    done();
                 });
             });
-            it('should use default as the alias of other context', function() {
+            it('should use default as the alias of other context', function(done) {
                 Context.init({contextStorage:contextAlias});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    return Promise.all([
-                        context.set("#.foo","alias"),
-                        context.get("#.foo"),
-                        context.keys("#")
-                    ]).then(function(){
-                        stubSet.calledWithExactly("1:flow","foo","alias").should.be.true();
-                        stubGet.calledWithExactly("1:flow","foo").should.be.true();
-                        stubKeys.calledWithExactly("1:flow").should.be.true();
-                    });
+                    var cb = function(){done("An error occurred")}
+                    context.set("foo","alias",cb);
+                    context.get("foo",cb);
+                    context.keys(cb);
+                    stubSet.calledWithExactly("1:flow","foo","alias",cb).should.be.true();
+                    stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubKeys.calledWithExactly("1:flow",cb).should.be.true();
+                    done();
                 });
             });
             it('should throw an error using undefined storage for local context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.get("#nonexist.local");
+                    var cb = function(){done("An error occurred")}
+                    context.get("local","nonexist",cb);
                     should.fail(null, null, "An error was not thrown using undefined storage for local context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -459,7 +438,8 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.flow.set("#nonexist.flow");
+                    var cb = function(){done("An error occurred")}
+                    context.flow.get("flow","nonexist",cb);
                     should.fail(null, null, "An error was not thrown using undefined storage for flow context");
                 }).catch(function(err) {
                     if (err.name === "ContextError") {
@@ -472,7 +452,7 @@ describe('context', function() {
         });
 
         describe('delete context',function(){
-            it('should not call delete()', function() {
+            it('should not call delete() when external context storage is used', function() {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     Context.get("flowA");
@@ -493,52 +473,6 @@ describe('context', function() {
                         stubClean2.calledWithExactly([]).should.be.true();
                     });
                 });
-            });
-        });
-
-        describe('key name',function() {
-            beforeEach(function() {
-                Context.init({contextStorage:{memory:{module:"memory"}}});
-                return Context.load().then(function(){
-                    context =  Context.get("1","flow");
-                });
-            });
-            afterEach(function() {
-                Context.clean({allNodes:{}});
-                return Context.close();
-            });
-            it('should work correctly with the valid key name',function() {
-                return Promise.all([
-                    context.set("#memory.azAZ09#_","valid"),
-                    context.set("#memory.a.b","ab")
-                ]).then(function(){
-                    context.get("#memory.azAZ09#_").should.finally.equal("valid");
-                    context.get("#memory.a.b").should.finally.equal("ab");
-                });
-            });
-            it('should treat the key name without dot as a normal context',function() {
-                return context.set("#memory","normal").then(function(){
-                    return context.get("#memory").should.finally.equal("normal");
-                });
-            });
-            it('should fail when specifying invalid characters',function() {
-                (function() {
-                    context.set("#memory.a.-","invalid1");
-                }).should.throw();
-                (function() {
-                    context.set("#memory.'abc","invalid2");
-                }).should.throw();
-            });
-            it('should fail when specifying unnecesary space characters for key name',function() {
-                (function() {
-                    context.set("# memory.space","space1");
-                }).should.throw();
-                (function() {
-                    context.set("#memory .space","space2");
-                }).should.throw();
-                (function() {
-                    context.set("#memory. space","space3");
-                }).should.throw();
             });
         });
     });

@@ -16,6 +16,7 @@
 
 var clone = require("clone");
 var log = require("../../log");
+var memory = require("./memory");
 
 var settings;
 var contexts = {};
@@ -28,7 +29,6 @@ function init(_settings) {
     externalContexts = {};
 
     // init memory plugin
-    var memory = require("./memory");
     var seed = settings.functionGlobalContext || {};
     externalContexts["_"] = memory();
     externalContexts["_"].setGlobalContext(seed);
@@ -95,43 +95,6 @@ function copySettings(config, settings){
     });
 }
 
-function parseStorage(key) {
-    if (!key || key.charAt(0) !== '#') {
-        return "";
-    } else {
-        var endOfStorageName = key.indexOf(".");
-        if (endOfStorageName == -1) {
-            endOfStorageName = key.length;
-        }
-        return key.substring(1,endOfStorageName)||"default";
-    }
-}
-
-function parseKey(key) {
-    if (!key) {
-        throw new Error(log._("context.error-key-zero-length"));
-    }
-    var indexSpace = key.indexOf(" ");
-    if (indexSpace != -1) {
-        throw new Error(log._("context.error-unexpected-space-character", {index:indexSpace}));
-    }
-    var keyPath = { storage: "", key: "" };
-    var indexDot = key.indexOf(".");
-    // The key of "#file" should be treated as a key without persistable context.
-    if (indexDot != -1) {
-        keyPath.storage = parseStorage(key);
-    }
-    if (keyPath.storage) {
-        keyPath.key = key.substring(indexDot + 1);
-    } else {
-        keyPath.key = key;
-    }
-    if(!keyPath.key) {
-        throw new Error(log._("context.error-empty-key"));
-    }
-    return keyPath;
-}
-
 function getContextStorage(storage) {
     if (noContextStorage || !storage) {
         return externalContexts["_"];
@@ -150,47 +113,30 @@ function createContext(id,seed) {
     var scope = id;
     var obj = seed || {};
 
-    obj.get = function(key) {
-        var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath.storage);
-        if(!keyPath.storage){
-            return context.get(scope, keyPath.key);
-        }else{
-            throw new Error(keyPath.storage + " does not support get(). Use getAsync()");
+    obj.get = function(key, storage, callback) {
+        if (typeof storage === 'function') {
+            callback = storage;
+            storage = "default";
+        } else if(typeof storage === "string" && typeof callback !== 'function'){
+            throw new Error("Callback must be a function");
         }
+        return getContextStorage(storage).get(scope, key, callback);
     };
-    obj.set = function(key, value) {
-        var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath.storage);
-        if(!keyPath.storage){
-            return context.set(scope, keyPath.key, value);
-        }else{
-            throw new Error(keyPath.storage + " does not support set(). Use setAsync()");
+    obj.set = function(key, value, storage, callback) {
+        if (typeof storage === 'function') {
+            callback = storage;
+            storage = "default";
         }
+        getContextStorage(storage).set(scope, key, value, callback);
     };
-    obj.keys = function(storage) {
-        var storageName = parseStorage(storage);
-        var context = getContextStorage(storageName);
-        if(!storageName){
-            return context.keys(scope);
-        }else{
-            throw new Error(storageName + " does not support keys(). Use keysAsync()");
+    obj.keys = function(storage, callback) {
+        if (typeof storage === 'function') {
+            callback = storage;
+            storage = "default";
+        } else if(typeof storage === "string" && typeof callback !== 'function'){
+            throw new Error("Callback must be a function");
         }
-    };
-    obj.getAsync = function(key) {
-        var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath.storage);
-        return context.get(scope, keyPath.key);
-    };
-    obj.setAsync  = function(key, value) {
-        var keyPath = parseKey(key);
-        var context = getContextStorage(keyPath.storage);
-        return context.set(scope, keyPath.key, value);
-    };
-    obj.keysAsync  = function(storage) {
-        var storageName = parseStorage(storage);
-        var context = getContextStorage(storageName);
-        return context.keys(scope);
+        return getContextStorage(storage).keys(scope, callback);
     };
     return obj;
 }

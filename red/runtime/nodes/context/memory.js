@@ -50,7 +50,7 @@ Memory.prototype.keys = function(scope){
         return Object.keys(this.data[scope]);
     } else {
         return Object.keys(this.data[scope]).filter(function (key) {
-            return key !== "set" && key !== "get" && key !== "keys" && key !== "setAsync" && key !== "getAsync" && key !== "keysAsync";
+            return key !== "set" && key !== "get" && key !== "keys";
         });
     }
 };

@@ -86,43 +86,52 @@ LocalFileSystem.prototype.close = function(){
     return Promise.resolve();
 }
 
-LocalFileSystem.prototype.get = function(scope, key) {
+LocalFileSystem.prototype.get = function(scope, key, callback) {
+    if(typeof callback !== "function"){
+        throw new Error("Callback must be a function");
+    }
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath + ".json").then(function(data){
+    loadFile(storagePath + ".json").then(function(data){
         if(data){
-            return util.getMessageProperty(JSON.parse(data),key);
+            callback(null, util.getMessageProperty(JSON.parse(data),key));
         }else{
-            return undefined
+            callback(null, undefined);
         }
     }).catch(function(err){
-        return Promise.reject(err);
+        callback(err);
     });
 };
 
-LocalFileSystem.prototype.set =function(scope, key, value) {
+LocalFileSystem.prototype.set =function(scope, key, value, callback) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath + ".json").then(function(data){
+    loadFile(storagePath + ".json").then(function(data){
         var obj = data ? JSON.parse(data) : {}
         util.setMessageProperty(obj,key,value);
-        return obj;
-    }).then(function(obj){
-        var str = JSON.stringify(obj, undefined, 4);
-        return fs.outputFile(storagePath + ".json", str, {encoding:"utf8",flag:"w+"});
+        return fs.outputFile(storagePath + ".json", JSON.stringify(obj, undefined, 4), "utf8");
+    }).then(function(){
+        if(typeof callback === "function"){
+            callback(null);
+        }
     }).catch(function(err){
-        return Promise.reject(err);
+        if(typeof callback === "function"){
+            callback(err);
+        }
     });
 };
 
-LocalFileSystem.prototype.keys = function(scope){
+LocalFileSystem.prototype.keys = function(scope, callback){
+    if(typeof callback !== "function"){
+        throw new Error("Callback must be a function");
+    }
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return loadFile(storagePath + ".json").then(function(data){
+    loadFile(storagePath + ".json").then(function(data){
         if(data){
-            return Object.keys(JSON.parse(data));
+            callback(null, Object.keys(JSON.parse(data)));
         }else{
-            return []
+            callback(null, []);
         }
     }).catch(function(err){
-        return Promise.reject(err);
+        callback(err);
     });
 };
 
