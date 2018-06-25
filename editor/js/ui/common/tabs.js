@@ -349,14 +349,7 @@ RED.tabs = (function() {
                         pinnedLink.addClass("red-ui-tab-link-button-pinned");
                         pinnedTabsCount++;
                     }
-                    RED.popover.create({
-                        target:$(pinnedLink),
-                        trigger: "hover",
-                        size: "small",
-                        direction: "bottom",
-                        content: tab.name,
-                        delay: { show: 550, hide: 10 }
-                    });
+                    RED.popover.tooltip($(pinnedLink), tab.name);
 
                 }
                 link.on("click",onTabClick);
