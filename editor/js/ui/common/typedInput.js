@@ -496,7 +496,11 @@
                                 } else {
                                     that.activeOptions[o.value] = o;
                                 }
-                            })
+                            });
+
+                            if (!that.activeOptions.hasOwnProperty(that.optionValue)) {
+                                that.optionValue = null;
+                            }
                             this.optionMenu = this._createMenu(opt.options,function(v){
                                 that._updateOptionSelectLabel(that.activeOptions[v]);
                                 if (!opt.hasValue) {
