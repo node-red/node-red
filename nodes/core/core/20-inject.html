@@ -237,10 +237,13 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
                 } else {
                     return this._("inject.timestamp")+suffix;
                 }
-            } else if (this.payloadType === 'flow' && this.payload.length < 19) {
-                return 'flow.'+this.payload+suffix;
-            } else if (this.payloadType === 'global' && this.payload.length < 17) {
-                return 'global.'+this.payload+suffix;
+            } else if (this.payloadType === 'flow' || this.payloadType === 'global') {
+                var key = this.payload;
+                var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+                if (m) {
+                    key = m[2];
+                }
+                return 'flow.'+key+suffix;
             } else {
                 return this._("inject.inject")+suffix;
             }

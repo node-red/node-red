@@ -14,10 +14,40 @@
  * limitations under the License.
  **/
 (function($) {
+    var contextParse = function(v) {
+        var parts = {};
+        var m = /^#:\((\S+?)\)::(.*)$/.exec(v);
+        if (m) {
+            parts.option = m[1];
+            parts.value = m[2];
+        } else {
+            parts.value = v;
+        }
+        return parts;
+    }
+    var contextExport = function(v,opt) {
+        return "#:("+((typeof opt === "string")?opt:opt.value)+")::"+v;
+    }
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
-        flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
-        global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
+        flow: {value:"flow",label:"flow.",hasValue:true,
+            options:[
+                {value:"memory",label: "memory", icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #ddd"></i>'}//,
+                // {value:"redis",label:"redis",icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #777"></i>'}
+            ],
+            validate:RED.utils.validatePropertyExpression,
+            parse: contextParse,
+            export: contextExport
+        },
+        global: {value:"global",label:"global.",hasValue:true,
+            options:[
+                {value:"memory",label: "memory", icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #ddd"></i>'},
+                {value:"redis",label:"redis",icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #777"></i>'}
+            ],
+            validate:RED.utils.validatePropertyExpression,
+            parse: contextParse,
+            export: contextExport
+        },
         str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
         num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
