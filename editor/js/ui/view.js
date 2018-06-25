@@ -1484,6 +1484,10 @@ RED.view = (function() {
         //console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
+        if (d3.event.button === 1) {
+            return;
+        }
+
         mousedown_node = d;
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
@@ -1715,6 +1719,9 @@ RED.view = (function() {
 
     function nodeMouseDown(d) {
         focusView();
+        if (d3.event.button === 1) {
+            return;
+        }
         //var touch0 = d3.event;
         //var pos = [touch0.pageX,touch0.pageY];
         //RED.touch.radialMenu.show(d3.select(this),pos);
