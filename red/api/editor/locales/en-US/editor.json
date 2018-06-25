@@ -795,6 +795,7 @@
             "username": "Username",
             "password": "Password",
             "passphrase": "Passphrase",
+            "retry": "Retry",
             "update-failed": "Failed to update auth",
             "unhandled": "Unhandled error response"
         },

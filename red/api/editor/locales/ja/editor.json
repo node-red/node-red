@@ -785,6 +785,7 @@
             "username": "ユーザ名",
             "password": "パスワード",
             "passphrase": "パスフレーズ",
+            "retry": "リトライ",
             "update-failed": "認証の更新に失敗しました",
             "unhandled": "エラー応答が処理されませんでした"
         },

@@ -1983,7 +1983,7 @@ RED.projects = (function() {
                                     notification.close();
                                 }
                             },{
-                                text: $('<span><i class="fa fa-refresh"></i> Retry</span>'),
+                                text: '<span><i class="fa fa-refresh"></i> ' +RED._("projects.send-req.retry") +'</span>',
                                 click: function() {
                                     body = body || {};
                                     var authBody = {};
