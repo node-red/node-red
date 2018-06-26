@@ -102,7 +102,7 @@
     "istanbul": "0.4.5",
     "mocha": "^5.2.0",
     "should": "^13.2.1",
-    "sinon": "6.0.1",
+    "sinon": "1.17.7",
     "stoppable": "^1.0.6",
     "supertest": "3.1.0",
     "wdio-chromedriver-service": "^0.1.3",
