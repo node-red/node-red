@@ -28,30 +28,67 @@ Memory.prototype.close = function(){
     return Promise.resolve();
 };
 
-Memory.prototype.get = function(scope, key) {
-    if(!this.data[scope]){
-        return undefined;
+Memory.prototype.get = function(scope, key, callback) {
+    var value;
+    try{
+        if(this.data[scope]){
+            value = util.getMessageProperty(this.data[scope], key);
+        }
+    }catch(err){
+        if(callback){
+            callback(err);
+        }else{
+            throw err;
+        }
     }
-    return util.getMessageProperty(this.data[scope],key);
+    if(callback){
+        callback(null, value);
+    } else {
+        return value;
+    }
 };
 
-Memory.prototype.set =function(scope, key, value) {
+Memory.prototype.set =function(scope, key, value, callback) {
     if(!this.data[scope]){
         this.data[scope] = {};
     }
-    util.setMessageProperty(this.data[scope],key,value);
+    try{
+        util.setMessageProperty(this.data[scope],key,value);
+    }catch(err){
+        if(callback){
+            callback(err);
+        }else{
+            throw err;
+        }
+    }
+    if(callback){
+        callback(null);
+    }
 };
 
-Memory.prototype.keys = function(scope){
-    if(!this.data[scope]){
-        return [];
+Memory.prototype.keys = function(scope, callback){
+    var values = [];
+    try{
+        if(this.data[scope]){
+            if (scope !== "global") {
+                values = Object.keys(this.data[scope]);
+            } else {
+                values = Object.keys(this.data[scope]).filter(function (key) {
+                    return key !== "set" && key !== "get" && key !== "keys";
+                });
+            }
+        }
+    }catch(err){
+        if(callback){
+            callback(err);
+        }else{
+            throw err;
+        }
     }
-    if (scope !== "global") {
-        return Object.keys(this.data[scope]);
+    if(callback){
+        callback(null, values);
     } else {
-        return Object.keys(this.data[scope]).filter(function (key) {
-            return key !== "set" && key !== "get" && key !== "keys";
-        });
+        return values;
     }
 };
 
