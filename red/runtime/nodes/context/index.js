@@ -22,7 +22,7 @@ var settings;
 var contexts = {};
 var globalContext = null;
 var externalContexts = {};
-var noContextStorage = false;
+var noContextStorage = true;
 
 function init(_settings) {
     settings = _settings;
@@ -96,9 +96,7 @@ function copySettings(config, settings){
 }
 
 function getContextStorage(storage) {
-    if (noContextStorage || !storage) {
-        return externalContexts["_"];
-    } else if (externalContexts.hasOwnProperty(storage)) {
+    if (externalContexts.hasOwnProperty(storage)) {
         return externalContexts[storage];
     } else if (externalContexts.hasOwnProperty("default")) {
         return externalContexts["default"];
@@ -114,29 +112,52 @@ function createContext(id,seed) {
     var obj = seed || {};
 
     obj.get = function(key, storage, callback) {
-        if (typeof storage === 'function') {
-            callback = storage;
-            storage = "default";
-        } else if(typeof storage === "string" && typeof callback !== 'function'){
-            throw new Error("Callback must be a function");
+        var context;
+        if (!storage && !callback) {
+            context = externalContexts["_"];
+        } else {
+            if (typeof storage === 'function') {
+                callback = storage;
+                storage = "default";
+            }
+            if (typeof callback !== 'function'){
+                throw new Error("Callback must be a function");
+            }
+            context = getContextStorage(storage);
         }
-        return getContextStorage(storage).get(scope, key, callback);
+        return context.get(scope, key, callback);
     };
     obj.set = function(key, value, storage, callback) {
-        if (typeof storage === 'function') {
-            callback = storage;
-            storage = "default";
+        var context;
+        if (!storage && !callback) {
+            context = externalContexts["_"];
+        } else {
+            if (typeof storage === 'function') {
+                callback = storage;
+                storage = "default";
+            }
+            if (callback && typeof callback !== 'function') {
+                throw new Error("Callback must be a function");
+            }
+            context = getContextStorage(storage);
         }
-        getContextStorage(storage).set(scope, key, value, callback);
+        context.set(scope, key, value, callback);
     };
     obj.keys = function(storage, callback) {
-        if (typeof storage === 'function') {
-            callback = storage;
-            storage = "default";
-        } else if(typeof storage === "string" && typeof callback !== 'function'){
-            throw new Error("Callback must be a function");
+        var context;
+        if (!storage && !callback) {
+            context = externalContexts["_"];
+        } else {
+            if (typeof storage === 'function') {
+                callback = storage;
+                storage = "default";
+            }
+            if (typeof callback !== 'function') {
+                throw new Error("Callback must be a function");
+            }
+            context = getContextStorage(storage);
         }
-        return getContextStorage(storage).keys(scope, callback);
+        return context.keys(scope, callback);
     };
     return obj;
 }

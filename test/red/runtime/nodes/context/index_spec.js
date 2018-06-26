@@ -263,7 +263,7 @@ describe('context', function() {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
                 Context.load().then(function(){
                     var context = Context.get("1","flow");
-                    var cb = function(){done("An error occurred")}
+                    var cb = function(){}
                     context.set("foo","bar","_",cb);
                     context.get("foo","_",cb);
                     context.keys("_",cb);
