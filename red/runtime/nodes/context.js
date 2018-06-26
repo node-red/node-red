@@ -84,6 +84,7 @@ function clean(flowConfig) {
 module.exports = {
     init: function(settings) {
         globalContext = createContext("global",settings.functionGlobalContext || {});
+        contexts['global'] = globalContext;
     },
     get: getContext,
     delete: deleteContext,

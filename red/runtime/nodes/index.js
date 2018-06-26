@@ -167,6 +167,8 @@ module.exports = {
     createNode: createNode,
     getNode: flows.get,
     eachNode: flows.eachNode,
+    getContext: context.get,
+
 
     paletteEditorEnabled: registry.paletteEditorEnabled,
     installModule: installModule,
