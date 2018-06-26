@@ -34,7 +34,7 @@ function registerMessageCatalogs(catalogs) {
 function registerMessageCatalog(namespace,dir,file) {
     return when.promise(function(resolve,reject) {
         resourceMap[namespace] = { basedir:dir, file:file};
-        i18n.loadNamespace(namespace,function() {
+        i18n.loadNamespaces(namespace,function() {
             resolve();
         });
     });
@@ -83,13 +83,11 @@ var MessageFileLoader = {
 
 function init() {
     return when.promise(function(resolve,reject) {
-        i18n.backend(MessageFileLoader);
+        i18n.use(MessageFileLoader);
         i18n.init({
-            ns: {
-                namespaces: [],
-                defaultNs: "runtime"
-            },
-            fallbackLng: [defaultLang]
+            defaultNs: "runtime",
+            ns:  [],
+            fallbackLng: defaultLang
         },function() {
             resolve();
         });
@@ -126,5 +124,5 @@ obj['_'] = function() {
     //    opts.defaultValue = def;
     //}
     //console.log(arguments);
-    return i18n.t.apply(null,arguments);
+    return i18n.t.apply(i18n,arguments);
 }
