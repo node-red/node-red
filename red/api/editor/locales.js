@@ -29,13 +29,13 @@ module.exports = {
         var lngs = req.query.lng;
         namespace = namespace.replace(/\.json$/,"");
         var lang = req.query.lng; //apiUtil.determineLangFromHeaders(req.acceptsLanguages() || []);
-        var prevLang = i18n.i.lng();
+        var prevLang = i18n.i.language;
         // Trigger a load from disk of the language if it is not the default
-        i18n.i.setLng(lang, function(){
-            var catalog = i18n.catalog(namespace,lang);
+        i18n.i.changeLanguage(lang, function(){
+            var catalog = i18n.i.getResourceBundle(lang, namespace);
             res.json(catalog||{});
         });
-        i18n.i.setLng(prevLang);
+        i18n.i.changeLanguage(prevLang);
 
     },
     getAllNodes: function(req,res) {
@@ -44,7 +44,7 @@ module.exports = {
         var result = {};
         nodeList.forEach(function(n) {
             if (n.module !== "node-red") {
-                result[n.id] = i18n.catalog(n.id,lngs)||{};
+                result[n.id] = i18n.i.getResourceBundle(lngs, n.id)||{};
             }
         });
         res.json(result);
