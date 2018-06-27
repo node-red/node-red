@@ -56,6 +56,7 @@ RED.sidebar.context = (function() {
         });
         nodeSection.expand();
         nodeSection.content.css({height:"100%"});
+        nodeSection.timestamp = $('<div class="sidebar-context-updated">&nbsp;</div>').appendTo(nodeSection.content);
         var table = $('<table class="node-info"></table>').appendTo(nodeSection.content);
         nodeSection.table = $('<tbody>').appendTo(table);
         var bg = $('<div style="float: right"></div>').appendTo(nodeSection.header);
@@ -89,6 +90,7 @@ RED.sidebar.context = (function() {
         });
         flowSection.expand();
         flowSection.content.css({height:"100%"});
+        flowSection.timestamp = $('<div class="sidebar-context-updated">&nbsp;</div>').appendTo(flowSection.content);
         var table = $('<table class="node-info"></table>').appendTo(flowSection.content);
         flowSection.table = $('<tbody>').appendTo(table);
         bg = $('<div style="float: right"></div>').appendTo(flowSection.header);
@@ -106,6 +108,7 @@ RED.sidebar.context = (function() {
         });
         globalSection.expand();
         globalSection.content.css({height:"100%"});
+        globalSection.timestamp = $('<div class="sidebar-context-updated">&nbsp;</div>').appendTo(globalSection.content);
         var table = $('<table class="node-info"></table>').appendTo(globalSection.content);
         globalSection.table = $('<tbody>').appendTo(table);
 
@@ -185,10 +188,10 @@ RED.sidebar.context = (function() {
             $(nodeSection.table).empty();
             if (node) {
                 $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>refresh to load</td></tr>').appendTo(nodeSection.table);
-
             } else {
                 $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>none selected</td></tr>').appendTo(nodeSection.table);
             }
+            nodeSection.timestamp.html("&nbsp;");
 
         }
     }
@@ -244,6 +247,7 @@ RED.sidebar.context = (function() {
             if (l === 0) {
                 $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>empty</td></tr>').appendTo(container);
             }
+            $(section.timestamp).text(new Date().toLocaleString());
         });
     }
     function updateEntry(section,baseUrl,id) {

@@ -73,7 +73,7 @@ function clean(flowConfig) {
     var contextId;
     var node;
     for (var id in contexts) {
-        if (contexts.hasOwnProperty(id)) {
+        if (contexts.hasOwnProperty(id) && id !== "global") {
             var idParts = id.split(":");
             if (!flowConfig.allNodes.hasOwnProperty(idParts[0])) {
                 delete contexts[id];
