@@ -155,5 +155,13 @@
                 "readme": "### About\n\nThis is your project's README.md file. It helps users understand what your\nproject does, how to use it and anything else they may need to know."
             }
         }
+    },
+
+    "context": {
+        "error-module-not-loaded": "'__module__' could not be loaded",
+        "error-module-not-defined": "'module' is not defined in '__storage__' of settings.contextStorage",
+        "error-invalid-default-module": "Invalid storage '__storage__' is specified as a default storage",
+        "error-use-undefined-storage": "Undefined storage '__storage__' is specified"
     }
+
 }
