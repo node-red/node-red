@@ -33,6 +33,7 @@ var payloadType = {
     "json": 6,
     "bin": 7,
     "date": 8,
+    "env": 9,
 };
 
 injectNode.prototype.setPayload = function(type, value) {
@@ -42,7 +43,7 @@ injectNode.prototype.setPayload = function(type, value) {
     var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadType[type] + ']';
     browser.clickWithWait(payloadTypeXPath);
     // Input a value.
-    browser.setValue('#node-input-payload', value);
+    browser.setValue('//*[@class="red-ui-typedInput-input"]/input', value);
 }
 
 injectNode.prototype.setTopic = function(value) {
