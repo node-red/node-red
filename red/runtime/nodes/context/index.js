@@ -22,7 +22,7 @@ var settings;
 var contexts = {};
 var globalContext = null;
 var externalContexts = {};
-var noContextStorage = true;
+var hasExternalContext = false;
 
 function init(_settings) {
     settings = _settings;
@@ -37,55 +37,80 @@ function init(_settings) {
 }
 
 function load() {
-    // load & init plugins in settings.contextStorage
-    var plugins = settings.contextStorage;
-    var isAlias = false;
-    if (plugins) {
+    return new Promise(function(resolve,reject) {
+        // load & init plugins in settings.contextStorage
+        var plugins = settings.contextStorage;
+        var defaultIsAlias = false;
         var promises = [];
-        noContextStorage = false;
-        for(var pluginName in plugins){
-            if(pluginName === "_"){
-                continue;
-            }
-            if(pluginName === "default" && typeof plugins[pluginName] === "string"){
-                isAlias = true;
-                continue;
-            }
-            var plugin;
-            if(plugins[pluginName].hasOwnProperty("module")){
-                var config = plugins[pluginName].config || {};
-                copySettings(config, settings);
-                if(typeof plugins[pluginName].module === "string") {
-                    try{
-                        plugin = require("./"+plugins[pluginName].module);
-                    }catch(err){
-                        return Promise.reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
+        if (plugins) {
+            for (var pluginName in plugins) {
+                if (plugins.hasOwnProperty(pluginName)) {
+                    // "_" is a reserved name - do not allow it to be overridden
+                    if (pluginName === "_") {
+                        continue;
                     }
-                } else {
-                    plugin = plugins[pluginName].module;
+
+                    // Check if this is setting the 'default' context to be a named plugin
+                    if (pluginName === "default" && typeof plugins[pluginName] === "string") {
+                        // Check the 'default' alias exists before initialising anything
+                        if (!plugins.hasOwnProperty(plugins[pluginName])) {
+                            return reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
+                        }
+                        defaultIsAlias = true;
+                        continue;
+                    }
+                    var plugin;
+                    if (plugins[pluginName].hasOwnProperty("module")) {
+                        // Get the provided config and copy in the 'approved' top-level settings (eg userDir)
+                        var config = plugins[pluginName].config || {};
+                        copySettings(config, settings);
+
+                        if (typeof plugins[pluginName].module === "string") {
+                            // This config identifies the module by name - assume it is a built-in one
+                            // TODO: check it exists locally, if not, try to require it as-is
+                            try {
+                                plugin = require("./"+plugins[pluginName].module);
+                            } catch(err) {
+                                return reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
+                            }
+                        } else {
+                            // Assume `module` is an already-required module we can use
+                            plugin = plugins[pluginName].module;
+                        }
+                        try {
+                            // Create a new instance of the plugin by calling its module function
+                            externalContexts[pluginName] = plugin(config);
+                        } catch(err) {
+                            return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
+                        }
+                    } else {
+                        // Plugin does not specify a 'module'
+                        return reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
+                    }
                 }
-                externalContexts[pluginName] = plugin(config);
-            }else{
-                return Promise.reject(new Error(log._("context.error-module-not-defined", {storage:pluginName})));
             }
-        }
-        for(var plugin in externalContexts){
-            if(externalContexts.hasOwnProperty(plugin)){
-                promises.push(externalContexts[plugin].open());
+
+            // Open all of the configured contexts
+            for (var plugin in externalContexts) {
+                if (externalContexts.hasOwnProperty(plugin)) {
+                    promises.push(externalContexts[plugin].open());
+                }
             }
-        }
-        if(isAlias){
-            if(externalContexts.hasOwnProperty(plugins["default"])){
+
+            // If 'default' is an alias, point it at the right module - we have already
+            // checked that it exists
+            if (defaultIsAlias) {
                 externalContexts["default"] =  externalContexts[plugins["default"]];
-            }else{
-                return Promise.reject(new Error(log._("context.error-invalid-default-module", {storage:plugins["default"]})));
             }
         }
-        return Promise.all(promises);
-    } else {
-        noContextStorage = true;
-        return externalContexts["_"].open();
-    }
+
+        if (promises.length === 0) {
+            promises.push(externalContexts["_"].open())
+        } else {
+            hasExternalContext = true;
+        }
+        return resolve(Promise.all(promises));
+    });
 }
 
 function copySettings(config, settings){
@@ -98,10 +123,13 @@ function copySettings(config, settings){
 
 function getContextStorage(storage) {
     if (externalContexts.hasOwnProperty(storage)) {
+        // A known context
         return externalContexts[storage];
     } else if (externalContexts.hasOwnProperty("default")) {
+        // Not known, but we have a default to fall back to
         return externalContexts["default"];
     } else {
+        // Not known and no default configured
         var contextError = new Error(log._("context.error-use-undefined-storage", {storage:storage}));
         contextError.name = "ContextError";
         throw contextError;
@@ -183,7 +211,7 @@ function getContext(localId,flowId) {
 }
 
 function deleteContext(id,flowId) {
-    if(noContextStorage){
+    if(!hasExternalContext){
         var contextId = id;
         if (flowId) {
             contextId = id+":"+flowId;
