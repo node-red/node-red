@@ -469,6 +469,14 @@ function encodeObject(msg,opts) {
                             __encoded__: true,
                             type: "function"
                         }
+                    } else if (typeof value === 'number') {
+                        if (isNaN(value) || value === Infinity || value === -Infinity) {
+                            value = {
+                                __encoded__: true,
+                                type: "number",
+                                data: value.toString()
+                            }
+                        }
                     } else if (value && value.constructor) {
                         if (value.type === "Buffer") {
                             value.__encoded__ = true;

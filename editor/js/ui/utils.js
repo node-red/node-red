@@ -36,6 +36,8 @@ RED.utils = (function() {
                 result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
             } else if (value.hasOwnProperty('type') && value.type === 'function') {
                 result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('function');
+            } else if (value.hasOwnProperty('type') && value.type === 'number') {
+                result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(value.data);
             } else {
                 result = $('<span class="debug-message-object-value debug-message-type-meta">object</span>');
             }
@@ -47,6 +49,8 @@ RED.utils = (function() {
                 subvalue = sanitize(value);
             }
             result = $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"');
+        } else if (typeof value === 'number') {
+            result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(""+value);
         } else {
             result = $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value);
         }
@@ -300,6 +304,8 @@ RED.utils = (function() {
         }
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
+        } else if (obj.__encoded__ && obj.type === 'number') {
+            e = $('<span class="debug-message-type-number debug-message-object-header"></span>').text(obj.data).appendTo(entryObj);
         } else if (typeHint === "function" || (obj.__encoded__ && obj.type === 'function')) {
             e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("function").appendTo(entryObj);
         } else if (typeHint === "internal" || (obj.__encoded__ && obj.type === 'internal')) {
@@ -799,6 +805,10 @@ RED.utils = (function() {
     function decodeObject(payload,format) {
         if ((format === 'number') && (payload === "NaN")) {
             payload = Number.NaN;
+        } else if ((format === 'number') && (payload === "Infinity")) {
+            payload = Infinity;
+        } else if ((format === 'number') && (payload === "-Infinity")) {
+            payload = -Infinity;
         } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
             payload = JSON.parse(payload);
         } else if (/error/i.test(format)) {
