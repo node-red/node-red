@@ -123,7 +123,7 @@ module.exports = function(RED) {
                     try{
                         value = RED.util.evaluateJSONataExpression(rule.to,msg);
                     } catch(err) {
-                        node.error(RED._("change.errors.invalid-expr",{error:err.message}));
+                        node.error(RED._("change.errors.invalid-expr",{error:err.message}),msg);
                         return;
                     }
                 }
@@ -150,11 +150,11 @@ module.exports = function(RED) {
                                 fromRE = new RegExp(fromRE, "g");
                             } catch (e) {
                                 valid = false;
-                                node.error(RED._("change.errors.invalid-from",{error:e.message}));
+                                node.error(RED._("change.errors.invalid-from",{error:e.message}),msg);
                                 return;
                             }
                         } else {
-                            node.error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)}));
+                            node.error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)}),msg);
                             return
                         }
                     } else {
