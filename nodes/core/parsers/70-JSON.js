@@ -16,21 +16,57 @@
 
 module.exports = function(RED) {
     "use strict";
+    const Ajv = require('ajv');
+    const ajv = new Ajv({allErrors: true, schemaId: 'auto'});
+    ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
 
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
         this.indent = n.pretty ? 4 : 0;
         this.action = n.action||"";
         this.property = n.property||"payload";
+        this.schema = null;
+        this.compiledSchema = null;
+
         var node = this;
         this.on("input", function(msg) {
+            var validate = false;
+            if (msg.schema) {
+                if (typeof msg.schema === "object") {
+                    // If input schema is different, re-compile it
+                    if (JSON.stringify(this.schema) != JSON.stringify(msg.schema)) {
+                        node.warn('Schema different, compiling');
+                        try {
+                            this.compiledSchema = ajv.compile(msg.schema);
+                            this.schema = msg.schema;
+                        } catch(e) {
+                            this.schema = null;
+                            this.compiledSchema = null;
+                            node.error("JSON Schema error: failed to compile schema", msg);
+                            return;
+                        }
+                    }
+                    validate = true;
+                } else {
+                    node.warn("Schema present but not an object, ignoring schema");
+                }
+            }
             var value = RED.util.getMessageProperty(msg,node.property);
             if (value !== undefined) {
                 if (typeof value === "string") {
                     if (node.action === "" || node.action === "obj") {
                         try {
                             RED.util.setMessageProperty(msg,node.property,JSON.parse(value));
-                            node.send(msg);
+                            if (validate) {
+                                if (this.compiledSchema(msg[node.property])) {
+                                    node.send(msg);
+                                } else {
+                                    msg.schemaError = this.compiledSchema.errors;
+                                    node.error(`JSON Schema error: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                                }
+                            } else  {
+                                node.send(msg);
+                            }
                         }
                         catch(e) { node.error(e.message,msg); }
                     } else {
@@ -41,8 +77,19 @@ module.exports = function(RED) {
                     if (node.action === "" || node.action === "str") {
                         if (!Buffer.isBuffer(value)) {
                             try {
-                                RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
-                                node.send(msg);
+                                if (validate) {
+                                    if (this.compiledSchema(value)) {
+                                        RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
+                                        node.send(msg);
+                                    } else {
+                                        msg.schemaError = this.compiledSchema.errors;
+                                        node.error(`JSON Schema error: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                                    }
+                                } else {
+                                    RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
+                                    node.send(msg);
+                                }
+
                             }
                             catch(e) { node.error(RED._("json.errors.dropped-error")); }
                         }
