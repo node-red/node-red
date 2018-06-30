@@ -32,24 +32,19 @@ module.exports = function(RED) {
         this.on("input", function(msg) {
             var validate = false;
             if (msg.schema) {
-                if (typeof msg.schema === "object") {
-                    // If input schema is different, re-compile it
-                    if (JSON.stringify(this.schema) != JSON.stringify(msg.schema)) {
-                        node.warn('Schema different, compiling');
-                        try {
-                            this.compiledSchema = ajv.compile(msg.schema);
-                            this.schema = msg.schema;
-                        } catch(e) {
-                            this.schema = null;
-                            this.compiledSchema = null;
-                            node.error("JSON Schema error: failed to compile schema", msg);
-                            return;
-                        }
+                // If input schema is different, re-compile it
+                if (JSON.stringify(this.schema) != JSON.stringify(msg.schema)) {
+                    try {
+                        this.compiledSchema = ajv.compile(msg.schema);
+                        this.schema = msg.schema;
+                    } catch(e) {
+                        this.schema = null;
+                        this.compiledSchema = null;
+                        node.error(RED._("json.errors.schema-error-compile"), msg);
+                        return;
                     }
-                    validate = true;
-                } else {
-                    node.warn("Schema present but not an object, ignoring schema");
                 }
+                validate = true;
             }
             var value = RED.util.getMessageProperty(msg,node.property);
             if (value !== undefined) {
@@ -62,7 +57,7 @@ module.exports = function(RED) {
                                     node.send(msg);
                                 } else {
                                     msg.schemaError = this.compiledSchema.errors;
-                                    node.error(`JSON Schema error: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                                    node.error(`${RED._("json.errors.schema-error")}: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
                                 }
                             } else  {
                                 node.send(msg);
@@ -83,7 +78,7 @@ module.exports = function(RED) {
                                         node.send(msg);
                                     } else {
                                         msg.schemaError = this.compiledSchema.errors;
-                                        node.error(`JSON Schema error: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                                        node.error(`${RED._("json.errors.schema-error")}: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
                                     }
                                 } else {
                                     RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
