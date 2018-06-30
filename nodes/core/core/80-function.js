@@ -62,6 +62,8 @@ module.exports = function(RED) {
                            "results = (function(msg){ "+
                               "var __msgid__ = msg._msgid;"+
                               "var node = {"+
+                                 "id:__node__.id,"+
+                                 "name:__node__.name,"+
                                  "log:__node__.log,"+
                                  "error:__node__.error,"+
                                  "warn:__node__.warn,"+
@@ -85,6 +87,8 @@ module.exports = function(RED) {
                 util: RED.util
             },
             __node__: {
+                id: node.id,
+                name: node.name,
                 log: function() {
                     node.log.apply(node, arguments);
                 },

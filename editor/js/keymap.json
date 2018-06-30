@@ -10,6 +10,7 @@
         "ctrl-g i": "core:show-info-tab",
         "ctrl-g d": "core:show-debug-tab",
         "ctrl-g c": "core:show-config-tab",
+        "ctrl-g x": "core:show-context-tab",
         "ctrl-e": "core:show-export-dialog",
         "ctrl-i": "core:show-import-dialog",
         "ctrl-space": "core:toggle-sidebar",

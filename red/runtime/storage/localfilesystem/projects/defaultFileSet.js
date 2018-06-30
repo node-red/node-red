@@ -15,10 +15,11 @@
  **/
 
 module.exports = {
-    "package.json": function(project) {
+    "package.json": function(project, runtime) {
+        var i18n = runtime.i18n;
         var package = {
             "name": project.name,
-            "description": project.summary||"A Node-RED Project",
+            "description": project.summary||i18n._("storage.localfilesystem.projects.summary"),
             "version": "0.0.1",
             "dependencies": {},
             "node-red": {
@@ -34,13 +35,13 @@ module.exports = {
         }
         return JSON.stringify(package,"",4);
     },
-    "README.md": function(project) {
+    "README.md": function(project, runtime) {
+        var i18n = runtime.i18n;
         var content = project.name+"\n"+("=".repeat(project.name.length))+"\n\n";
         if (project.summary) {
             content += project.summary+"\n\n";
         }
-        content += "### About\n\nThis is your project's README.md file. It helps users understand what your\nproject does, how to use it and anything else they may need to know.";
-
+        content += i18n._("storage.localfilesystem.projects.readme");
         return content;
     },
     ".gitignore": function() { return "*.backup" ;}

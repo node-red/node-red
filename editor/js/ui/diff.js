@@ -1233,7 +1233,7 @@ RED.diff = (function() {
         // currentDiff = diff;
 
         var trayOptions = {
-            title: options.title||"Review Changes", //TODO: nls
+            title: options.title||RED._("diff.reviewChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -1416,7 +1416,7 @@ RED.diff = (function() {
 
     function showTextDiff(textA,textB) {
         var trayOptions = {
-            title: "Compare Changes", //TODO: nls
+            title: RED._("diff.compareChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -1747,7 +1747,7 @@ RED.diff = (function() {
                         try {
                             commonFlow = JSON.parse(commonVersion.content||"[]");
                         } catch(err) {
-                            console.log("Common Version doesn't contain valid JSON:",commonVersionUrl);
+                            console.log(RED._("diff.commonVersionError"),commonVersionUrl);
                             console.log(err);
                             return;
                         }
@@ -1755,7 +1755,7 @@ RED.diff = (function() {
                     try {
                         oldFlow = JSON.parse(oldVersion.content||"[]");
                     } catch(err) {
-                        console.log("Old Version doesn't contain valid JSON:",oldVersionUrl);
+                        console.log(RED._("diff.oldVersionError"),oldVersionUrl);
                         console.log(err);
                         return;
                     }
@@ -1765,7 +1765,7 @@ RED.diff = (function() {
                     try {
                         newFlow = JSON.parse(newVersion.content||"[]");
                     } catch(err) {
-                        console.log("New Version doesn't contain valid JSON:",newFlow);
+                        console.log(RED._("diff.newVersionError"),newFlow);
                         console.log(err);
                         return;
                     }
@@ -1797,11 +1797,11 @@ RED.diff = (function() {
             if (isBinary) {
                 var diffBinaryRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
                 var binaryContent = $('<td colspan="3"></td>').appendTo(diffBinaryRow);
-                $('<span></span>').text("Cannot show binary file contents").appendTo(binaryContent);
+                $('<span></span>').text(RED._("diff.noBinaryFileShowed")).appendTo(binaryContent);
 
             } else {
                 if (commitOptions.unmerged) {
-                    conflictHeader = $('<span style="float: right;"><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(content);
+                    conflictHeader = $('<span style="float: right;">'+RED._("diff.conflictHeader",{resolved:resolvedConflicts, unresolved:unresolvedConflicts})+'</span>').appendTo(content);
                 }
                 hunks.forEach(function(hunk) {
                     var diffRow = $('<tr class="node-text-diff-header">').appendTo(codeBody);
@@ -1914,7 +1914,7 @@ RED.diff = (function() {
                                         diffRow.remove();
                                         addedRows.find(".linetext").addClass('added');
                                         conflictHeader.empty();
-                                        $('<span><span>'+resolvedConflicts+'</span> of <span>'+unresolvedConflicts+'</span> conflicts resolved</span>').appendTo(conflictHeader);
+                                        $('<span>'+RED._("diff.conflictHeader",{resolved:resolvedConflicts, unresolved:unresolvedConflicts})+'</span>').appendTo(conflictHeader);
 
                                         conflictResolutions[file.file] = conflictResolutions[file.file] || {};
                                         conflictResolutions[file.file][hunk.localChangeStart] = {
@@ -1946,7 +1946,7 @@ RED.diff = (function() {
     function showCommitDiff(options) {
         var commit = parseCommitDiff(options.commit);
         var trayOptions = {
-            title: "View Commit Changes", //TODO: nls
+            title: RED._("diff.viewCommitDiff"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -2008,7 +2008,7 @@ RED.diff = (function() {
         }
 
         var trayOptions = {
-            title: title||"Compare Changes", //TODO: nls
+            title: title|| RED._("diff.compareChanges"),
             width: Infinity,
             overlay: true,
             buttons: [
@@ -2041,7 +2041,7 @@ RED.diff = (function() {
             trayOptions.buttons.push(
                 {
                     id: "node-diff-view-resolve-diff",
-                    text: "Save conflict resolution",
+                    text: RED._("diff.saveConflict"),
                     class: "primary disabled",
                     click: function() {
                         if (!$("#node-diff-view-resolve-diff").hasClass('disabled')) {

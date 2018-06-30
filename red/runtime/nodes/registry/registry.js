@@ -181,45 +181,42 @@ function loadNodeConfigs() {
     }
 }
 
-function addNodeSet(id,set,version) {
-    if (!set.err) {
-        set.types.forEach(function(t) {
-            if (nodeTypeToId.hasOwnProperty(t)) {
-                set.err = new Error("Type already registered");
-                set.err.code = "type_already_registered";
-                set.err.details = {
-                    type: t,
-                    moduleA: getNodeInfo(t).module,
-                    moduleB: set.module
-                }
+function addModule(module) {
+    moduleNodes[module.name] = [];
+    moduleConfigs[module.name] = module;
+    for (var setName in module.nodes) {
+        if (module.nodes.hasOwnProperty(setName)) {
+            var set = module.nodes[setName];
+            moduleNodes[module.name].push(set.name);
+            nodeList.push(set.id);
+            if (!set.err) {
+                set.types.forEach(function(t) {
+                    if (nodeTypeToId.hasOwnProperty(t)) {
+                        set.err = new Error("Type already registered");
+                        set.err.code = "type_already_registered";
+                        set.err.details = {
+                            type: t,
+                            moduleA: getNodeInfo(t).module,
+                            moduleB: set.module
+                        }
 
+                    }
+                });
+                if (!set.err) {
+                    set.types.forEach(function(t) {
+                        nodeTypeToId[t] = set.id;
+                    });
+                }
             }
-        });
-        if (!set.err) {
-            set.types.forEach(function(t) {
-                nodeTypeToId[t] = id;
-            });
         }
     }
-    moduleNodes[set.module] = moduleNodes[set.module]||[];
-    moduleNodes[set.module].push(set.name);
-
-    if (!moduleConfigs[set.module]) {
-        moduleConfigs[set.module] = {
-            name: set.module,
-            nodes: {}
-        };
+    if (module.icons) {
+        icon_paths[module.name] = [];
+        module.icons.forEach(icon=>icon_paths[module.name].push(path.resolve(icon.path)) )
     }
-
-    if (version) {
-        moduleConfigs[set.module].version = version;
-    }
-    moduleConfigs[set.module].local = set.local;
-
-    moduleConfigs[set.module].nodes[set.name] = set;
-    nodeList.push(id);
     nodeConfigCache = null;
 }
+
 
 function removeNode(id) {
     var config = moduleConfigs[getModule(id)].nodes[getNode(id)];
@@ -346,6 +343,7 @@ function getModuleInfo(module) {
             name: module,
             version: moduleConfigs[module].version,
             local: moduleConfigs[module].local,
+            path: moduleConfigs[module].path,
             nodes: []
         };
         for (var i = 0; i < nodes.length; ++i) {
@@ -592,6 +590,7 @@ var iconCache = {};
 var defaultIcon = path.resolve(__dirname + '/../../../../public/icons/arrow-in.png');
 
 function nodeIconDir(dir) {
+    return;
     icon_paths[dir.name] = icon_paths[dir.name] || [];
     icon_paths[dir.name].push(path.resolve(dir.path));
 
@@ -647,11 +646,11 @@ function getNodeIcons() {
     for (var module in moduleConfigs) {
         if (moduleConfigs.hasOwnProperty(module)) {
             if (moduleConfigs[module].icons) {
-                iconList[module] = moduleConfigs[module].icons;
+                iconList[module] = [];
+                moduleConfigs[module].icons.forEach(icon=>{ iconList[module] = iconList[module].concat(icon.icons) });
             }
         }
     }
-
     return iconList;
 }
 
@@ -663,7 +662,9 @@ var registry = module.exports = {
     registerNodeConstructor: registerNodeConstructor,
     getNodeConstructor: getNodeConstructor,
 
-    addNodeSet: addNodeSet,
+
+    addModule: addModule,
+
     enableNodeSet: enableNodeSet,
     disableNodeSet: disableNodeSet,
 

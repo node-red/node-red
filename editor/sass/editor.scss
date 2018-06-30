@@ -353,3 +353,64 @@
     }
 
 }
+#node-settings-icon {
+    margin-left: 10px;
+    width: calc(100% - 163px);
+}
+.red-ui-icon-picker {
+    position: absolute;
+    border: 1px solid $primary-border-color;
+    box-shadow: 0 1px 6px -3px black;
+    background: white;
+    z-Index: 21;
+    display: none;
+    select {
+        box-sizing: border-box;
+        margin: 3px;
+        width: calc(100% - 6px);
+    }
+}
+.red-ui-icon-list {
+    width: 308px;
+    height: 200px;
+    overflow-y: scroll;
+    line-height: 0px;
+}
+.red-ui-icon-list-icon {
+    display: inline-block;
+    margin: 2px;
+    padding: 4px;
+    cursor: pointer;
+    border-radius: 4px;
+    &:hover {
+        background: lighten($node-selected-color,20%);
+    }
+    &.selected {
+        background: lighten($node-selected-color,20%);
+        .red-ui-search-result-node {
+            border-color: white;
+        }
+    }
+}
+.red-ui-icon-list-module {
+    background: $palette-header-background;
+    font-size: 0.9em;
+    padding: 3px;
+    color: #666;
+    clear: both;
+    i {
+        margin-right: 5px;
+    }
+}
+.red-ui-icon-meta {
+    border-top: 1px solid $secondary-border-color;
+    span {
+        padding: 4px;
+        color: #666;
+        font-size: 0.9em;
+    }
+    button {
+        float: right;
+        margin: 2px;
+    }
+}

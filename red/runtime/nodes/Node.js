@@ -105,12 +105,12 @@ Node.prototype.close = function(removed) {
     if (promises.length > 0) {
         return when.settle(promises).then(function() {
             if (this._context) {
-                 context.delete(this._alias||this.id,this.z);
+               return context.delete(this._alias||this.id,this.z);
             }
         });
     } else {
         if (this._context) {
-             context.delete(this._alias||this.id,this.z);
+            return context.delete(this._alias||this.id,this.z);
         }
         return;
     }

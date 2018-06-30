@@ -47,7 +47,9 @@
 .workspace-footer-button {
     @include component-footer-button;
 }
-
+.workspace-footer-button-toggle {
+    @include component-footer-button-toggle;
+}
 #workspace-footer {
     @include component-footer;
 }
