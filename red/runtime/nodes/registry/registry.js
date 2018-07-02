@@ -193,6 +193,7 @@ function addModule(module) {
                 set.types.forEach(function(t) {
                     if (nodeTypeToId.hasOwnProperty(t)) {
                         set.err = new Error("Type already registered");
+                        set.err.msg = set.err.toString();
                         set.err.code = "type_already_registered";
                         set.err.details = {
                             type: t,
