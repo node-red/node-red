@@ -29,7 +29,6 @@ module.exports = {
         var scope = req.params.scope;
         var id = req.params.id;
         var key = req.params[0];
-        var result = {};
         var ctx;
         if (scope === 'global') {
             ctx = redNodes.getContext('global');
@@ -43,19 +42,28 @@ module.exports = {
         }
         if (ctx) {
             if (key) {
-                result = util.encodeObject({msg:ctx.get(key)});
+                ctx.get(key,function(err, v) {
+                    console.log(key,v);
+                    res.json(util.encodeObject({msg:v}));
+                });
+                return;
             } else {
-                var keys = ctx.keys();
-
-                var i = 0;
-                var l = keys.length;
-                while(i < l) {
-                    var k = keys[i];
-                    result[k] = util.encodeObject({msg:ctx.get(k)});
-                    i++;
-                }
+                ctx.keys(function(err, keys) {
+                    var result = {};
+                    var c = keys.length;
+                    keys.forEach(function(key) {
+                        ctx.get(key,function(err, v) {
+                            result[key] = util.encodeObject({msg:v});
+                            c--;
+                            if (c === 0) {
+                                res.json(result);
+                            }
+                        });
+                    });
+                });
             }
+        } else {
+            res.json({});
         }
-        res.json(result);
     }
 }
