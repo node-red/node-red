@@ -43,7 +43,6 @@ module.exports = {
         if (ctx) {
             if (key) {
                 ctx.get(key,function(err, v) {
-                    console.log(key,v);
                     res.json(util.encodeObject({msg:v}));
                 });
                 return;
