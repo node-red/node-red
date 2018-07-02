@@ -124,7 +124,7 @@ describe('context', function() {
             });
         });
 
-        it('enumerates context keys', function() {
+        it('enumerates context keys - sync', function() {
             var context = Context.get("1","flowA");
 
             var keys = context.keys();
@@ -142,15 +142,63 @@ describe('context', function() {
             keys[1].should.equal("abc");
         });
 
-        it('should enumerate only context keys when GlobalContext was given', function() {
+        it('enumerates context keys - async', function(done) {
+            var context = Context.get("1","flowA");
+
+            var keys = context.keys(function(err,keys) {
+                keys.should.be.an.Array();
+                keys.should.be.empty();
+                context.set("foo","bar");
+                keys = context.keys(function(err,keys) {
+                    keys.should.have.length(1);
+                    keys[0].should.equal("foo");
+
+                    context.set("abc.def","bar");
+                    keys = context.keys(function(err,keys) {
+                        keys.should.have.length(2);
+                        keys[1].should.equal("abc");
+                        done();
+                    });
+                });
+            });
+        });
+
+        it('should enumerate only context keys when GlobalContext was given - sync', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
             return Context.load().then(function(){
                 var context = Context.get("1","flowA");
+                context.global.set("foo2","bar2");
                 var keys = context.global.keys();
-                keys.should.have.length(1);
+                keys.should.have.length(2);
                 keys[0].should.equal("foo");
+                keys[1].should.equal("foo2");
             });
         });
+
+        it('should enumerate only context keys when GlobalContext was given - async', function(done) {
+            Context.init({functionGlobalContext: {foo:"bar"}});
+            return Context.load().then(function(){
+                var context = Context.get("1","flowA");
+                context.global.set("foo2","bar2");
+                context.global.keys(function(err,keys) {
+                    keys.should.have.length(2);
+                    keys[0].should.equal("foo");
+                    keys[1].should.equal("foo2");
+                    done();
+                });
+            }).catch(done);
+        });
+
+
+
+        it('returns functionGlobalContext value if store value undefined', function() {
+            Context.init({functionGlobalContext: {foo:"bar"}});
+            return Context.load().then(function(){
+                var context = Context.get("1","flowA");
+                var v = context.global.get('foo');
+                v.should.equal('bar');
+            });
+        })
     });
 
     describe('external context storage',function() {
@@ -215,6 +263,11 @@ describe('context', function() {
                 config:{}
             }
         };
+        var memoryStorage ={
+            memory:{
+                module: "memory"
+            }
+        };
 
         afterEach(function() {
             sandbox.reset();
@@ -257,7 +310,7 @@ describe('context', function() {
                     stubSet.calledWithExactly("1:flow","file","file2",cb).should.be.true();
                     stubSet.calledWithExactly("1:flow","num","num3",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should ignore reserved storage name `_`', function(done) {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
@@ -271,7 +324,7 @@ describe('context', function() {
                     stubGet.called.should.be.false();
                     stubKeys.called.should.be.false();
                     done();
-                });
+                }).catch(done);
             });
             it('should fail when using invalid default context', function(done) {
                 Context.init({contextStorage:{default:"noexist"}});
@@ -300,14 +353,15 @@ describe('context', function() {
         });
 
         describe('close modules',function(){
-            it('should call close()', function() {
+            it('should call close()', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     return Context.close().then(function(){
                         stubClose.called.should.be.true();
                         stubClose2.called.should.be.true();
+                        done();
                     });
-                });
+                }).catch(done);
             });
         });
 
@@ -324,7 +378,7 @@ describe('context', function() {
                     stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
                     stubKeys.calledWithExactly("1:flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should store flow property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
@@ -338,7 +392,7 @@ describe('context', function() {
                     stubGet.calledWithExactly("flow","foo",cb).should.be.true();
                     stubKeys.calledWithExactly("flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should store global property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
@@ -349,10 +403,10 @@ describe('context', function() {
                     context.global.get("foo","test",cb);
                     context.global.keys("test",cb);
                     stubSet.calledWithExactly("global","foo","bar",cb).should.be.true();
-                    stubGet.calledWithExactly("global","foo",cb).should.be.true();
-                    stubKeys.calledWithExactly("global",cb).should.be.true();
+                    stubGet.calledWith("global","foo").should.be.true();
+                    stubKeys.calledWith("global").should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should store data to the default context when non-existent context storage was specified', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
@@ -369,7 +423,7 @@ describe('context', function() {
                     stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should use the default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
@@ -386,7 +440,7 @@ describe('context', function() {
                     stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should use the alias of default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
@@ -403,7 +457,7 @@ describe('context', function() {
                     stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
             it('should use default as the alias of other context', function(done) {
                 Context.init({contextStorage:contextAlias});
@@ -417,22 +471,16 @@ describe('context', function() {
                     stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
                     stubKeys.calledWithExactly("1:flow",cb).should.be.true();
                     done();
-                });
+                }).catch(done);
             });
-            it('should throw an error using undefined storage for local context', function(done) {
+            it('should not throw an error using undefined storage for local context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.get("local","nonexist",cb);
-                    should.fail(null, null, "An error was not thrown using undefined storage for local context");
-                }).catch(function(err) {
-                    if (err.name === "ContextError") {
-                        done();
-                    } else {
-                        done(err);
-                    }
-                });
+                    done()
+                }).catch(done);
             });
             it('should throw an error using undefined storage for flow context', function(done) {
                 Context.init({contextStorage:contextStorage});
@@ -440,39 +488,89 @@ describe('context', function() {
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.flow.get("flow","nonexist",cb);
-                    should.fail(null, null, "An error was not thrown using undefined storage for flow context");
-                }).catch(function(err) {
-                    if (err.name === "ContextError") {
-                        done();
-                    } else {
-                        done(err);
-                    }
-                });
+                    done();
+                }).catch(done);
             });
+
+            it('should return functionGlobalContext value as a default - synchronous', function(done) {
+                var fGC = { "foo": 456 };
+                Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
+                Context.load().then(function() {
+                    var context = Context.get("1","flow");
+                    // Get foo - should be value from fGC
+                    var v = context.global.get("foo");
+                    v.should.equal(456);
+
+                    // Update foo - should not touch fGC object
+                    context.global.set("foo","new value");
+                    fGC.foo.should.equal(456);
+
+                    // Get foo - should be the updated value
+                    v = context.global.get("foo");
+                    v.should.equal("new value");
+                    done();
+                }).catch(done);
+            })
+
+            it('should return functionGlobalContext value as a default - async', function(done) {
+                var fGC = { "foo": 456 };
+                Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
+                Context.load().then(function() {
+                    var context = Context.get("1","flow");
+                    // Get foo - should be value from fGC
+                    context.global.get("foo", function(err, v) {
+                        if (err) {
+                            done(err)
+                        } else {
+                            v.should.equal(456);
+                            // Update foo - should not touch fGC object
+                            context.global.set("foo","new value", function(err) {
+                                if (err) {
+                                    done(err)
+                                } else {
+                                    fGC.foo.should.equal(456);
+                                    // Get foo - should be the updated value
+                                    context.global.get("foo", function(err, v) {
+                                        if (err) {
+                                            done(err)
+                                        } else {
+                                            v.should.equal("new value");
+                                            done();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }).catch(done);
+            })
+
         });
 
         describe('delete context',function(){
-            it('should not call delete() when external context storage is used', function() {
+            it('should not call delete() when external context storage is used', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     Context.get("flowA");
                     return Context.delete("flowA").then(function(){
                         stubDelete.called.should.be.false();
                         stubDelete2.called.should.be.false();
+                        done();
                     });
-                });
+                }).catch(done);
             });
         });
 
         describe('clean context',function(){
-            it('should call clean()', function() {
+            it('should call clean()', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 return Context.load().then(function(){
                     return Context.clean({allNodes:{}}).then(function(){
                         stubClean.calledWithExactly([]).should.be.true();
                         stubClean2.calledWithExactly([]).should.be.true();
+                        done();
                     });
-                });
+                }).catch(done);
             });
         });
     });

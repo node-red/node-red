@@ -103,19 +103,6 @@ describe('memory',function() {
             keysY[0].should.equal("hoge");
         });
 
-        it('should enumerate only context keys when GlobalContext was given', function() {
-            var keys = context.keys("global");
-            keys.should.be.an.Array();
-            keys.should.be.empty();
-
-            var data = {
-                foo: "bar"
-            }
-            context.setGlobalContext(data);
-            keys = context.keys("global");
-            keys.should.have.length(1);
-            keys[0].should.equal("foo");
-        });
     });
 
     describe('#delete',function() {
@@ -163,17 +150,4 @@ describe('memory',function() {
         });
     });
 
-    describe('#setGlobalContext',function() {
-        it('should initialize global context with argument', function() {
-            var keys = context.keys("global");
-            keys.should.be.an.Array();
-            keys.should.be.empty();
-
-            var data = {
-                foo: "bar"
-            }
-            context.setGlobalContext(data);
-            context.get("global","foo").should.equal("bar");
-        });
-    });
 });
