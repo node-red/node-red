@@ -23,7 +23,7 @@ describe('context', function() {
     describe('local memory',function() {
         beforeEach(function() {
             Context.init({});
-            return Context.load();
+            Context.load();
         });
         afterEach(function() {
             Context.clean({allNodes:{}});
@@ -165,7 +165,7 @@ describe('context', function() {
 
         it('should enumerate only context keys when GlobalContext was given - sync', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
-            return Context.load().then(function(){
+            Context.load().then(function(){
                 var context = Context.get("1","flowA");
                 context.global.set("foo2","bar2");
                 var keys = context.global.keys();
@@ -177,7 +177,7 @@ describe('context', function() {
 
         it('should enumerate only context keys when GlobalContext was given - async', function(done) {
             Context.init({functionGlobalContext: {foo:"bar"}});
-            return Context.load().then(function(){
+            Context.load().then(function(){
                 var context = Context.get("1","flowA");
                 context.global.set("foo2","bar2");
                 context.global.keys(function(err,keys) {
@@ -193,7 +193,7 @@ describe('context', function() {
 
         it('returns functionGlobalContext value if store value undefined', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
-            return Context.load().then(function(){
+            Context.load().then(function(){
                 var context = Context.get("1","flowA");
                 var v = context.global.get('foo');
                 v.should.equal('bar');
@@ -279,18 +279,18 @@ describe('context', function() {
         describe('load modules',function(){
             it('should call open()', function() {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     stubOpen.called.should.be.true();
                     stubOpen2.called.should.be.true();
                 });
             });
             it('should load memory module', function() {
                 Context.init({contextStorage:{memory:{module:"memory"}}});
-                return Context.load();
+                Context.load();
             });
             it('should load localfilesystem module', function() {
                 Context.init({contextStorage:{file:{module:"localfilesystem",config:{dir:resourcesDir}}}});
-                return Context.load();
+                Context.load();
             });
             it('should accept special storage name', function(done) {
                 Context.init({
@@ -355,7 +355,7 @@ describe('context', function() {
         describe('close modules',function(){
             it('should call close()', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     return Context.close().then(function(){
                         stubClose.called.should.be.true();
                         stubClose2.called.should.be.true();
@@ -550,7 +550,7 @@ describe('context', function() {
         describe('delete context',function(){
             it('should not call delete() when external context storage is used', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     Context.get("flowA");
                     return Context.delete("flowA").then(function(){
                         stubDelete.called.should.be.false();
@@ -564,7 +564,7 @@ describe('context', function() {
         describe('clean context',function(){
             it('should call clean()', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
-                return Context.load().then(function(){
+                Context.load().then(function(){
                     return Context.clean({allNodes:{}}).then(function(){
                         stubClean.calledWithExactly([]).should.be.true();
                         stubClean2.calledWithExactly([]).should.be.true();

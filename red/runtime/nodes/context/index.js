@@ -36,6 +36,7 @@ function init(_settings) {
     stores = {};
     var seed = settings.functionGlobalContext || {};
     contexts['global'] = createContext("global",seed);
+    stores["_"] = new memory();
 }
 
 function load() {
