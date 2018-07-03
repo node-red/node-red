@@ -50,15 +50,19 @@ module.exports = {
                 ctx.keys(function(err, keys) {
                     var result = {};
                     var c = keys.length;
-                    keys.forEach(function(key) {
-                        ctx.get(key,function(err, v) {
-                            result[key] = util.encodeObject({msg:v});
-                            c--;
-                            if (c === 0) {
-                                res.json(result);
-                            }
+                    if (c === 0) {
+                        res.json(result);
+                    } else {
+                        keys.forEach(function(key) {
+                            ctx.get(key,function(err, v) {
+                                result[key] = util.encodeObject({msg:v});
+                                c--;
+                                if (c === 0) {
+                                    res.json(result);
+                                }
+                            });
                         });
-                    });
+                    }
                 });
             }
         } else {
