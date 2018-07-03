@@ -192,8 +192,10 @@ LocalFileSystem.prototype._set = function(scope, key, value, callback) {
 LocalFileSystem.prototype.set = function(scope, key, value, callback) {
     if (this.cache) {
         this.cache.set(scope,key,value,callback);
-        this._set(scope,key,value, function(err) {
-            // TODO: log any errors
+        // With cache enabled, no need to re-read the file prior to writing.
+        var newContext = this.cache._export()[scope];
+        var storagePath = getStoragePath(this.storageBaseDir ,scope);
+        fs.outputFile(storagePath + ".json", JSON.stringify(newContext, undefined, 4), "utf8").catch(function(err) {
         });
     } else {
         this._set(scope,key,value,callback);
