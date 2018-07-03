@@ -48,12 +48,15 @@ RED.popover = (function() {
 
         var openPopup = function(instant) {
             if (active) {
-                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>').appendTo("body");
+                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>');
                 if (size !== "default") {
                     div.addClass("red-ui-popover-size-"+size);
                 }
                 if (typeof content === 'function') {
                     var result = content.call(res);
+                    if (result === null) {
+                        return;
+                    }
                     if (typeof result === 'string') {
                         div.text(result);
                     } else {
@@ -65,7 +68,7 @@ RED.popover = (function() {
                 if (width !== "auto") {
                     div.width(width);
                 }
-
+                div.appendTo("body");
 
                 var targetPos = target.offset();
                 var targetWidth = target.outerWidth();
