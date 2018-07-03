@@ -25,11 +25,12 @@ var contexts = {};
 
 // A map of store name to instance
 var stores = {};
+var storeList = [];
+var defaultStore;
 
 // Whether there context storage has been configured or left as default
 var hasConfiguredStore = false;
 
-var defaultStore = "_";
 
 function init(_settings) {
     settings = _settings;
@@ -37,15 +38,16 @@ function init(_settings) {
     var seed = settings.functionGlobalContext || {};
     contexts['global'] = createContext("global",seed);
     stores["_"] = new memory();
+    defaultStore = "memory";
 }
 
 function load() {
     return new Promise(function(resolve,reject) {
         // load & init plugins in settings.contextStorage
-        var plugins = settings.contextStorage;
+        var plugins = settings.contextStorage || {};
         var defaultIsAlias = false;
         var promises = [];
-        if (plugins) {
+        if (plugins && Object.keys(plugins).length > 0) {
             var hasDefault = plugins.hasOwnProperty('default');
             var defaultName;
             for (var pluginName in plugins) {
@@ -104,34 +106,36 @@ function load() {
                     promises.push(stores[plugin].open());
                 }
             }
-
             // There is a 'default' listed in the configuration
             if (hasDefault) {
                 // If 'default' is an alias, point it at the right module - we have already
                 // checked that it exists. If it isn't an alias, then it will
                 // already be set to a configured store
                 if (defaultIsAlias) {
-                    stores["default"] =  stores[plugins["default"]];
+                    stores["_"] =  stores[plugins["default"]];
+                    defaultStore = plugins["default"];
+                } else {
+                    stores["_"] = stores["default"];
+                    defaultStore = "default";
                 }
-                stores["_"] = stores["default"];
             } else if (defaultName) {
                 // No 'default' listed, so pick first in list as the default
-                stores["default"] = stores[defaultName];
-                stores["_"] = stores["default"];
-            } // else there were no stores list the config object - fall through
-              // to below where we default to a memory store
-        }
-
-        if (promises.length === 0) {
-            // No stores have been configured. Setup the default as an instance
-            // of memory storage
-            stores["_"] = memory();
-            stores["default"] = stores["_"];
-            promises.push(stores["_"].open())
-        } else {
-            // if there's configured storage then the lifecycle is slightly different
-            // - specifically, we don't delete node context on redeploy
+                stores["_"] = stores[defaultName];
+                defaultStore = defaultName;
+                defaultIsAlias = true;
+            } else {
+                // else there were no stores list the config object - fall through
+                // to below where we default to a memory store
+                storeList = ["memory"];
+                defaultStore = "memory";
+            }
             hasConfiguredStore = true;
+            storeList = Object.keys(stores).filter(n=>!(defaultIsAlias && n==="default") && n!== "_");
+        } else {
+            // No configured plugins
+            promises.push(stores["_"].open())
+            storeList = ["memory"];
+            defaultStore = "memory";
         }
         return resolve(Promise.all(promises));
     });
@@ -149,9 +153,9 @@ function getContextStorage(storage) {
     if (stores.hasOwnProperty(storage)) {
         // A known context
         return stores[storage];
-    } else if (stores.hasOwnProperty("default")) {
+    } else if (stores.hasOwnProperty("_")) {
         // Not known, but we have a default to fall back to
-        return stores["default"];
+        return stores["_"];
     } else {
         // Not known and no default configured
         var contextError = new Error(log._("context.error-use-undefined-storage", {storage:storage}));
@@ -176,7 +180,7 @@ function createContext(id,seed) {
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (typeof callback !== 'function'){
                 throw new Error("Callback must be a function");
@@ -214,7 +218,7 @@ function createContext(id,seed) {
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (callback && typeof callback !== 'function') {
                 throw new Error("Callback must be a function");
@@ -230,7 +234,7 @@ function createContext(id,seed) {
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (typeof callback !== 'function') {
                 throw new Error("Callback must be a function");
@@ -312,9 +316,14 @@ function close() {
     return Promise.all(promises);
 }
 
+function listStores() {
+    return {default:defaultStore,stores:storeList};
+}
+
 module.exports = {
     init: init,
     load: load,
+    listStores: listStores,
     get: getContext,
     delete: deleteContext,
     clean: clean,
