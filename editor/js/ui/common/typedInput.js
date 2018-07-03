@@ -22,28 +22,28 @@
             parts.value = m[2];
         } else {
             parts.value = v;
+            parts.option = RED.settings.context.default;
         }
         return parts;
     }
     var contextExport = function(v,opt) {
-        return "#:("+((typeof opt === "string")?opt:opt.value)+")::"+v;
+        var store = ((typeof opt === "string")?opt:opt.value)
+        if (store !== RED.settings.context.default) {
+            return "#:("+store+")::"+v;
+        } else {
+            return v;
+        }
     }
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
         flow: {value:"flow",label:"flow.",hasValue:true,
-            options:[
-                {value:"memory",label: "memory", icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #ddd"></i>'}//,
-                // {value:"redis",label:"redis",icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #777"></i>'}
-            ],
+            options:[],
             validate:RED.utils.validatePropertyExpression,
             parse: contextParse,
             export: contextExport
         },
         global: {value:"global",label:"global.",hasValue:true,
-            options:[
-                {value:"memory",label: "memory", icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #ddd"></i>'},
-                {value:"redis",label:"redis",icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #777"></i>'}
-            ],
+            options:[],
             validate:RED.utils.validatePropertyExpression,
             parse: contextParse,
             export: contextExport
@@ -117,12 +117,19 @@
 
     $.widget( "nodered.typedInput", {
         _create: function() {
+            try {
             if (!nlsd && RED && RED._) {
                 for (var i in allOptions) {
                     if (allOptions.hasOwnProperty(i)) {
                         allOptions[i].label = RED._("typedInput.type."+i,{defaultValue:allOptions[i].label});
                     }
                 }
+                var contextStores = RED.settings.context.stores;
+                var contextOptions = contextStores.map(function(store) {
+                    return {value:store,label: store, icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #'+(store==='memory'?'ddd':'777')+'"></i>'}
+                })
+                allOptions.flow.options = contextOptions;
+                allOptions.global.options = contextOptions;
             }
             nlsd = true;
             var that = this;
@@ -200,6 +207,9 @@
             // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
             this.optionSelectTrigger = $('<button tabindex="0" class="red-ui-typedInput-option-trigger" style="display:inline-block"><span class="red-ui-typedInput-option-caret"><i class="red-ui-typedInput-icon fa fa-sort-desc"></i></span></button>').appendTo(this.uiSelect);
             this.optionSelectLabel = $('<span class="red-ui-typedInput-option-label"></span>').prependTo(this.optionSelectTrigger);
+            RED.popover.tooltip(this.optionSelectLabel,function() {
+                return that.optionValue;
+            });
             this.optionSelectTrigger.click(function(event) {
                 event.preventDefault();
                 that._showOptionSelectMenu();
@@ -216,6 +226,9 @@
 
             this.optionExpandButton = $('<button tabindex="0" class="red-ui-typedInput-option-expand" style="display:inline-block"><i class="red-ui-typedInput-icon fa fa-ellipsis-h"></i></button>').appendTo(this.uiSelect);
             this.type(this.options.default||this.typeList[0].value);
+        }catch(err) {
+            console.log(err.stack);
+        }
         },
         _showTypeMenu: function() {
             if (this.typeList.length > 1) {
@@ -578,6 +591,9 @@
 
                                 if (typeof selectedOption === "string") {
                                     this.optionValue = selectedOption;
+                                    if (!this.activeOptions.hasOwnProperty(selectedOption)) {
+                                        selectedOption = Object.keys(this.activeOptions)[0];
+                                    }
                                     this._updateOptionSelectLabel(this.activeOptions[selectedOption]);
                                 } else {
                                     this.optionValue = selectedOption.value;
