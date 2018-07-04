@@ -27,6 +27,9 @@
         return parts;
     }
     var contextExport = function(v,opt) {
+        if (!opt) {
+            return v;
+        }
         var store = ((typeof opt === "string")?opt:opt.value)
         if (store !== RED.settings.context.default) {
             return "#:("+store+")::"+v;
@@ -128,8 +131,13 @@
                 var contextOptions = contextStores.map(function(store) {
                     return {value:store,label: store, icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #'+(store==='memory'?'ddd':'777')+'"></i>'}
                 })
-                allOptions.flow.options = contextOptions;
-                allOptions.global.options = contextOptions;
+                if (contextOptions.length < 2) {
+                    delete allOptions.flow.options;
+                    delete allOptions.global.options
+                } else {
+                    allOptions.flow.options = contextOptions;
+                    allOptions.global.options = contextOptions;
+                }
             }
             nlsd = true;
             var that = this;
