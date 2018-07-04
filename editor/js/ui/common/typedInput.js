@@ -132,8 +132,8 @@
                     return {value:store,label: store, icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #'+(store==='memory'?'ddd':'777')+'"></i>'}
                 })
                 if (contextOptions.length < 2) {
-                    delete allOptions.flow.options;
-                    delete allOptions.global.options
+                    allOptions.flow.options = [];
+                    allOptions.global.options = [];
                 } else {
                     allOptions.flow.options = contextOptions;
                     allOptions.global.options = contextOptions;
@@ -592,22 +592,31 @@
                                     var parts = opt.parse(this.input.val());
                                     if (parts.option) {
                                         selectedOption = parts.option;
+                                        if (!this.activeOptions.hasOwnProperty(selectedOption)) {
+                                            parts.option = Object.keys(this.activeOptions)[0];
+                                            selectedOption = parts.option
+                                        }
                                     }
                                     this.input.val(parts.value);
                                     if (opt.export) {
                                         this.element.val(opt.export(parts.value,parts.option||selectedOption));
                                     }
                                 }
-
                                 if (typeof selectedOption === "string") {
                                     this.optionValue = selectedOption;
                                     if (!this.activeOptions.hasOwnProperty(selectedOption)) {
                                         selectedOption = Object.keys(this.activeOptions)[0];
                                     }
-                                    this._updateOptionSelectLabel(this.activeOptions[selectedOption]);
-                                } else {
+                                    if (!selectedOption) {
+                                        this.optionSelectTrigger.hide();
+                                    } else {
+                                        this._updateOptionSelectLabel(this.activeOptions[selectedOption]);
+                                    }
+                                } else if (selectedOption) {
                                     this.optionValue = selectedOption.value;
                                     this._updateOptionSelectLabel(selectedOption);
+                                } else {
+                                    this.optionSelectTrigger.hide();
                                 }
                             }
                         }
