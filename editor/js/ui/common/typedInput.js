@@ -518,7 +518,9 @@
                 var opt = this.typeMap[type];
                 if (opt && this.propertyType !== type) {
                     this.propertyType = type;
-                    this.typeField.val(type);
+                    if (this.typeField) {
+                        this.typeField.val(type);
+                    }
                     this.selectLabel.empty();
                     var image;
                     if (opt.icon) {
@@ -628,15 +630,17 @@
                             }
                             this.elementDiv.show();
                         }
-                        if (opt.expand && typeof opt.expand === 'function') {
-                            this.optionExpandButton.show();
-                            this.optionExpandButton.off('click');
-                            this.optionExpandButton.on('click',function(evt) {
-                                evt.preventDefault();
-                                opt.expand.call(that);
-                            })
-                        } else {
-                            this.optionExpandButton.hide();
+                        if (this.optionExpandButton) {
+                            if (opt.expand && typeof opt.expand === 'function') {
+                                this.optionExpandButton.show();
+                                this.optionExpandButton.off('click');
+                                this.optionExpandButton.on('click',function(evt) {
+                                    evt.preventDefault();
+                                    opt.expand.call(that);
+                                })
+                            } else {
+                                this.optionExpandButton.hide();
+                            }
                         }
                         this.input.trigger('change',this.propertyType,this.value());
                     }
