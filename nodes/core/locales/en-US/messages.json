@@ -420,6 +420,10 @@
             "url1": "URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.",
             "url2": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The client can be configured to send or receive the entire message object as a JSON formatted string."
         },
+        "status": {
+            "connected": "connected __count__",
+            "connected_plural": "connected __count__"
+        },
         "errors": {
             "connect-error": "An error occured on the ws connection: ",
             "send-error": "An error occurred while sending: ",
