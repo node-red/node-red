@@ -322,35 +322,54 @@ function evaluteEnvProperty(value) {
     return value;
 }
 
-function evaluateNodeProperty(value, type, node, msg) {
+var parseContextStore = function(key) {
+    var parts = {};
+    var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+    if (m) {
+        parts.store = m[1];
+        parts.key = m[2];
+    } else {
+        parts.key = key;
+    }
+    return parts;
+}
+
+function evaluateNodeProperty(value, type, node, msg, callback) {
+    var result;
     if (type === 'str') {
-        return ""+value;
+        result = ""+value;
     } else if (type === 'num') {
-        return Number(value);
+        result = Number(value);
     } else if (type === 'json') {
-        return JSON.parse(value);
+        result = JSON.parse(value);
     } else if (type === 're') {
-        return new RegExp(value);
+        result = new RegExp(value);
     } else if (type === 'date') {
-        return Date.now();
+        result = Date.now();
     } else if (type === 'bin') {
         var data = JSON.parse(value);
-        return Buffer.from(data);
+        result = Buffer.from(data);
     } else if (type === 'msg' && msg) {
-        return getMessageProperty(msg,value);
-    } else if (type === 'flow' && node) {
-        return node.context().flow.get(value);
-    } else if (type === 'global' && node) {
-        return node.context().global.get(value);
+        result = getMessageProperty(msg,value);
+    } else if ((type === 'flow' || type === 'global') && node) {
+        var contextKey = parseContextStore(value);
+        result = node.context()[type].get(contextKey.key,contextKey.store,callback);
+        if (callback) {
+            return;
+        }
     } else if (type === 'bool') {
-        return /^true$/i.test(value);
+        result = /^true$/i.test(value);
     } else if (type === 'jsonata') {
         var expr = prepareJSONataExpression(value,node);
-        return evaluateJSONataExpression(expr,msg);
+        result = evaluateJSONataExpression(expr,msg);
     } else if (type === 'env') {
-        return evaluteEnvProperty(value);
+        result = evaluteEnvProperty(value);
     }
-    return value;
+    if (callback) {
+        callback(result);
+    } else {
+        return value;
+    }
 }
 
 function prepareJSONataExpression(value,node) {
