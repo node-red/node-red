@@ -307,6 +307,38 @@ describe("red/util", function() {
             },{});
             result.should.eql("123");
         });
+        describe('environment variable', function() {
+            before(function() {
+                process.env.NR_TEST_A = "foo";
+                process.env.NR_TEST_B = "${NR_TEST_A}";
+            })
+            after(function() {
+                delete process.env.NR_TEST_A;
+                delete process.env.NR_TEST_B;
+            })
+
+            it('returns an environment variable - NR_TEST_A', function() {
+                var result = util.evaluateNodeProperty('NR_TEST_A','env');
+                result.should.eql('foo');
+            });
+            it('returns an environment variable - ${NR_TEST_A}', function() {
+                var result = util.evaluateNodeProperty('${NR_TEST_A}','env');
+                result.should.eql('foo');
+            });
+            it('returns an environment variable - ${NR_TEST_A', function() {
+                var result = util.evaluateNodeProperty('${NR_TEST_A','env');
+                result.should.eql('');
+            });
+            it('returns an environment variable - foo${NR_TEST_A}bar', function() {
+                var result = util.evaluateNodeProperty('123${NR_TEST_A}456','env');
+                result.should.eql('123foo456');
+            });
+            it('returns an environment variable - foo${NR_TEST_B}bar', function() {
+                var result = util.evaluateNodeProperty('123${NR_TEST_B}456','env');
+                result.should.eql('123${NR_TEST_A}456');
+            });
+
+        });
     });
 
     describe('normalisePropertyExpression', function() {

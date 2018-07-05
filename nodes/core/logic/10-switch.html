@@ -230,12 +230,12 @@
                             selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
                         }
                     }
-                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
-                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata']});
+                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
+                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata','env']});
                     var expValueField = $('<input/>',{class:"node-input-rule-exp-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'jsonata',types:['jsonata']});
-                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
                     var typeValueField = $('<input/>',{class:"node-input-rule-type-value",type:"text",style:"margin-left: 5px;"}).appendTo(row)
                         .typedInput({default:'string',types:[
                             {value:"string",label:"string",hasValue:false},

@@ -79,6 +79,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version": "1.2.3",
                     "nodes": {
                         "TestNode1": {
                             "file": path.join(resourcesDir,"TestNode1","TestNode1.js"),
@@ -91,34 +92,39 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(1);
-                registry.addNodeSet.lastCall.args[1].types[0].should.eql('test-node-1');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("TestNode1");
+                module.nodes.TestNode1.should.have.property("id","node-red/TestNode1");
+                module.nodes.TestNode1.should.have.property("module","node-red");
+                module.nodes.TestNode1.should.have.property("name","TestNode1");
+                module.nodes.TestNode1.should.have.property("file");
+                module.nodes.TestNode1.should.have.property("template");
+                module.nodes.TestNode1.should.have.property("enabled",true);
+                module.nodes.TestNode1.should.have.property("loaded",true);
+                module.nodes.TestNode1.should.have.property("types");
+                module.nodes.TestNode1.types.should.have.a.length(1);
+                module.nodes.TestNode1.types[0].should.eql('test-node-1');
+                module.nodes.TestNode1.should.have.property("config");
+                module.nodes.TestNode1.should.have.property("help");
+                module.nodes.TestNode1.should.have.property("namespace","node-red");
 
                 nodes.registerType.calledOnce.should.be.true();
                 nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode1');
                 nodes.registerType.lastCall.args[1].should.eql('test-node-1');
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -128,6 +134,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version": "4.5.6",
                     "nodes": {
                         "MultipleNodes1": {
                             "file": path.join(resourcesDir,"MultipleNodes1","MultipleNodes1.js"),
@@ -140,27 +147,33 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/MultipleNodes1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/MultipleNodes1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(2);
-                registry.addNodeSet.lastCall.args[1].types[0].should.eql('test-node-multiple-1a');
-                registry.addNodeSet.lastCall.args[1].types[1].should.eql('test-node-multiple-1b');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
+
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","4.5.6");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("MultipleNodes1");
+                module.nodes.MultipleNodes1.should.have.property("id","node-red/MultipleNodes1");
+                module.nodes.MultipleNodes1.should.have.property("module","node-red");
+                module.nodes.MultipleNodes1.should.have.property("name","MultipleNodes1");
+                module.nodes.MultipleNodes1.should.have.property("file");
+                module.nodes.MultipleNodes1.should.have.property("template");
+                module.nodes.MultipleNodes1.should.have.property("enabled",true);
+                module.nodes.MultipleNodes1.should.have.property("loaded",true);
+                module.nodes.MultipleNodes1.should.have.property("types");
+                module.nodes.MultipleNodes1.types.should.have.a.length(2);
+                module.nodes.MultipleNodes1.types[0].should.eql('test-node-multiple-1a');
+                module.nodes.MultipleNodes1.types[1].should.eql('test-node-multiple-1b');
+                module.nodes.MultipleNodes1.should.have.property("config");
+                module.nodes.MultipleNodes1.should.have.property("help");
+                module.nodes.MultipleNodes1.should.have.property("namespace","node-red");
 
                 nodes.registerType.calledTwice.should.be.true();
                 nodes.registerType.firstCall.args[0].should.eql('node-red/MultipleNodes1');
@@ -168,8 +181,9 @@ describe("red/nodes/registry/loader",function() {
                 nodes.registerType.secondCall.args[0].should.eql('node-red/MultipleNodes1');
                 nodes.registerType.secondCall.args[1].should.eql('test-node-multiple-1b');
 
+
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -180,6 +194,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version":"2.4.6",
                     "nodes": {
                         "TestNode2": {
                             "file": path.join(resourcesDir,"TestNode2","TestNode2.js"),
@@ -192,34 +207,41 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode2");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode2");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(1);
-                registry.addNodeSet.lastCall.args[1].types[0].should.eql('test-node-2');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
+
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","2.4.6");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("TestNode2");
+                module.nodes.TestNode2.should.have.property("id","node-red/TestNode2");
+                module.nodes.TestNode2.should.have.property("module","node-red");
+                module.nodes.TestNode2.should.have.property("name","TestNode2");
+                module.nodes.TestNode2.should.have.property("file");
+                module.nodes.TestNode2.should.have.property("template");
+                module.nodes.TestNode2.should.have.property("enabled",true);
+                module.nodes.TestNode2.should.have.property("loaded",true);
+                module.nodes.TestNode2.should.have.property("types");
+                module.nodes.TestNode2.types.should.have.a.length(1);
+                module.nodes.TestNode2.types[0].should.eql('test-node-2');
+                module.nodes.TestNode2.should.have.property("config");
+                module.nodes.TestNode2.should.have.property("help");
+                module.nodes.TestNode2.should.have.property("namespace","node-red");
+                module.nodes.TestNode2.should.not.have.property('err');
 
                 nodes.registerType.calledOnce.should.be.true();
                 nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode2');
                 nodes.registerType.lastCall.args[1].should.eql('test-node-2');
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -230,6 +252,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version":"1.2.3",
                     "nodes": {
                         "TestNode3": {
                             "file": path.join(resourcesDir,"TestNode3","TestNode3.js"),
@@ -242,32 +265,38 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/TestNode3");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/TestNode3");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',false);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(1);
-                registry.addNodeSet.lastCall.args[1].types[0].should.eql('test-node-3');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('err','fail');
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("TestNode3");
+                module.nodes.TestNode3.should.have.property("id","node-red/TestNode3");
+                module.nodes.TestNode3.should.have.property("module","node-red");
+                module.nodes.TestNode3.should.have.property("name","TestNode3");
+                module.nodes.TestNode3.should.have.property("file");
+                module.nodes.TestNode3.should.have.property("template");
+                module.nodes.TestNode3.should.have.property("enabled",true);
+                module.nodes.TestNode3.should.have.property("loaded",false);
+                module.nodes.TestNode3.should.have.property("types");
+                module.nodes.TestNode3.types.should.have.a.length(1);
+                module.nodes.TestNode3.types[0].should.eql('test-node-3');
+                module.nodes.TestNode3.should.have.property("config");
+                module.nodes.TestNode3.should.have.property("help");
+                module.nodes.TestNode3.should.have.property("namespace","node-red");
+                module.nodes.TestNode3.should.have.property('err','fail');
 
-                nodes.registerType.calledOnce.should.be.false();
+                nodes.registerType.called.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -277,6 +306,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version":"1.2.3",
                     "nodes": {
                         "DoesNotExist": {
                             "file": path.join(resourcesDir,"doesnotexist"),
@@ -289,31 +319,37 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/DoesNotExist");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/DoesNotExist");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',false);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(0);
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('err');
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("DoesNotExist");
+                module.nodes.DoesNotExist.should.have.property("id","node-red/DoesNotExist");
+                module.nodes.DoesNotExist.should.have.property("module","node-red");
+                module.nodes.DoesNotExist.should.have.property("name","DoesNotExist");
+                module.nodes.DoesNotExist.should.have.property("file");
+                module.nodes.DoesNotExist.should.have.property("template");
+                module.nodes.DoesNotExist.should.have.property("enabled",true);
+                module.nodes.DoesNotExist.should.have.property("loaded",false);
+                module.nodes.DoesNotExist.should.have.property("types");
+                module.nodes.DoesNotExist.types.should.have.a.length(0);
+                module.nodes.DoesNotExist.should.not.have.property("config");
+                module.nodes.DoesNotExist.should.not.have.property("help");
+                module.nodes.DoesNotExist.should.not.have.property("namespace","node-red");
+                module.nodes.DoesNotExist.should.have.property('err');
 
-                nodes.registerType.calledOnce.should.be.false();
+                nodes.registerType.called.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -323,6 +359,7 @@ describe("red/nodes/registry/loader",function() {
                 var result = {};
                 result["node-red"] = {
                     "name": "node-red",
+                    "version": "1.2.3",
                     "nodes": {
                         "DuffNode": {
                             "file": path.join(resourcesDir,"DuffNode","DuffNode.js"),
@@ -335,32 +372,39 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             // This module isn't already loaded
             stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
 
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.load().then(function(result) {
-                registry.addNodeSet.called.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("node-red/DuffNode");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"node-red/DuffNode");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"node-red");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',false);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',undefined);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(0);
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('namespace','node-red');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('err');
-                registry.addNodeSet.lastCall.args[1].err.should.endWith("DuffNode.html does not exist");
 
-                nodes.registerType.calledOnce.should.be.false();
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("DuffNode");
+                module.nodes.DuffNode.should.have.property("id","node-red/DuffNode");
+                module.nodes.DuffNode.should.have.property("module","node-red");
+                module.nodes.DuffNode.should.have.property("name","DuffNode");
+                module.nodes.DuffNode.should.have.property("file");
+                module.nodes.DuffNode.should.have.property("template");
+                module.nodes.DuffNode.should.have.property("enabled",true);
+                module.nodes.DuffNode.should.have.property("loaded",false);
+                module.nodes.DuffNode.should.have.property("types");
+                module.nodes.DuffNode.types.should.have.a.length(0);
+                module.nodes.DuffNode.should.not.have.property("config");
+                module.nodes.DuffNode.should.not.have.property("help");
+                module.nodes.DuffNode.should.not.have.property("namespace","node-red");
+                module.nodes.DuffNode.should.have.property('err');
+                module.nodes.DuffNode.err.should.endWith("DuffNode.html does not exist");
+
+                nodes.registerType.called.should.be.false();
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -379,7 +423,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(registry,"getModuleInfo",function(){return{}}));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
 
-            loader.addModule("test-module").otherwise(function(err) {
+            loader.addModule("test-module").catch(function(err) {
                 err.code.should.eql("module_already_loaded");
                 done();
             });
@@ -390,7 +434,7 @@ describe("red/nodes/registry/loader",function() {
                 throw new Error("failure");
             }));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
-            loader.addModule("test-module").otherwise(function(err) {
+            loader.addModule("test-module").catch(function(err) {
                 err.message.should.eql("failure");
                 done();
             });
@@ -419,29 +463,36 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return "a node list" }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
-                registry.addNodeSet.calledOnce.should.be.true();
-                registry.addNodeSet.lastCall.args[0].should.eql("TestNodeModule/TestNode1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('id',"TestNodeModule/TestNode1");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('module',"TestNodeModule");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('enabled',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('loaded',true);
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('version',"1.2.3");
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('types');
-                registry.addNodeSet.lastCall.args[1].types.should.have.a.length(1);
-                registry.addNodeSet.lastCall.args[1].types[0].should.eql('test-node-mod-1');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('config');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('help');
-                registry.addNodeSet.lastCall.args[1].should.have.a.property('namespace','TestNodeModule');
-                registry.addNodeSet.lastCall.args[1].should.not.have.a.property('err');
+
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","TestNodeModule");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("TestNode1");
+                module.nodes.TestNode1.should.have.property("id","TestNodeModule/TestNode1");
+                module.nodes.TestNode1.should.have.property("module","TestNodeModule");
+                module.nodes.TestNode1.should.have.property("name","TestNode1");
+                module.nodes.TestNode1.should.have.property("file");
+                module.nodes.TestNode1.should.have.property("template");
+                module.nodes.TestNode1.should.have.property("enabled",true);
+                module.nodes.TestNode1.should.have.property("loaded",true);
+                module.nodes.TestNode1.should.have.property("types");
+                module.nodes.TestNode1.types.should.have.a.length(1);
+                module.nodes.TestNode1.types[0].should.eql('test-node-mod-1');
+                module.nodes.TestNode1.should.have.property("config");
+                module.nodes.TestNode1.should.have.property("help");
+                module.nodes.TestNode1.should.have.property("namespace","TestNodeModule");
+                module.nodes.TestNode1.should.not.have.property('err');
 
                 nodes.registerType.calledOnce.should.be.true();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -469,15 +520,15 @@ describe("red/nodes/registry/loader",function() {
             }));
 
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return "a node list" }));
-            stubs.push(sinon.stub(registry,"addNodeSet", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({log:{"_":function(){},warn:function(){}},nodes:nodes,i18n:{defaultLang:"en-US"},events:{on:function(){},removeListener:function(){}},version: function() { return "0.12.0"}, settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
                 result.should.eql("a node list");
-                registry.addNodeSet.called.should.be.false();
+                registry.addModule.called.should.be.false();
                 nodes.registerType.called.should.be.false();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -498,7 +549,7 @@ describe("red/nodes/registry/loader",function() {
                 node.enabled.should.be.false();
                 nodes.registerType.called.should.be.false();
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -517,7 +568,7 @@ describe("red/nodes/registry/loader",function() {
                 node.err.toString().should.eql("Error: fail to require (line:1)");
 
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });

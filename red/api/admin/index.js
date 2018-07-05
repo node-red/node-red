@@ -19,6 +19,7 @@ var express = require("express");
 var nodes = require("./nodes");
 var flows = require("./flows");
 var flow = require("./flow");
+var context = require("./context");
 var auth = require("../auth");
 
 var apiUtil = require("../util");
@@ -28,6 +29,7 @@ module.exports = {
         flows.init(runtime);
         flow.init(runtime);
         nodes.init(runtime);
+        context.init(runtime);
 
         var needsPermission = auth.needsPermission;
 
@@ -51,6 +53,12 @@ module.exports = {
         adminApp.delete(/\/nodes\/((@[^\/]+\/)?[^\/]+)$/,needsPermission("nodes.write"),nodes.delete,apiUtil.errorHandler);
         adminApp.get(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.read"),nodes.getSet,apiUtil.errorHandler);
         adminApp.put(/\/nodes\/((@[^\/]+\/)?[^\/]+)\/([^\/]+)$/,needsPermission("nodes.write"),nodes.putSet,apiUtil.errorHandler);
+
+        // Context
+        adminApp.get("/context/:scope(global)",needsPermission("context.read"),context.get,apiUtil.errorHandler);
+        adminApp.get("/context/:scope(global)/*",needsPermission("context.read"),context.get,apiUtil.errorHandler);
+        adminApp.get("/context/:scope(node|flow)/:id",needsPermission("context.read"),context.get,apiUtil.errorHandler);
+        adminApp.get("/context/:scope(node|flow)/:id/*",needsPermission("context.read"),context.get,apiUtil.errorHandler);
 
         return adminApp;
     }

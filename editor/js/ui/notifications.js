@@ -96,7 +96,7 @@ RED.notifications = (function() {
         if (options.buttons) {
             var buttonSet = $('<div style="margin-top: 20px;" class="ui-dialog-buttonset"></div>').appendTo(n)
             options.buttons.forEach(function(buttonDef) {
-                var b = $('<button>').text(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
+                var b = $('<button>').html(buttonDef.text).click(buttonDef.click).appendTo(buttonSet);
                 if (buttonDef.id) {
                     b.attr('id',buttonDef.id);
                 }

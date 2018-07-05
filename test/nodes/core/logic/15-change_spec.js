@@ -390,7 +390,7 @@ describe('change Node', function() {
                 changeNode1.receive({payload:""});
             });
         });
- 
+
         it('sets the value of the message property to the current timestamp', function(done) {
             var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"set","p":"ts","pt":"msg","to":"","tot":"date"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -408,6 +408,33 @@ describe('change Node', function() {
                 changeNode1.receive({payload:Date.now()});
             });
         });
+
+        describe('env var', function() {
+            before(function() {
+                process.env.NR_TEST_A = 'foo';
+            })
+            after(function() {
+                delete process.env.NR_TEST_A;
+            })
+            it('sets the value using env property', function(done) {
+                var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
+                {id:"helperNode1", type:"helper", wires:[]}];
+                helper.load(changeNode, flow, function() {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.equal("foo");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"123",topic:"ABC"});
+                });
+            });
+        });
+
 
         it('changes the value using jsonata', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$length(payload)","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]]},
@@ -872,6 +899,33 @@ describe('change Node', function() {
                 changeNode1.receive({payload:""});
             });
         });
+
+        describe('env var', function() {
+            before(function() {
+                process.env.NR_TEST_A = 'foo';
+            })
+            after(function() {
+                delete process.env.NR_TEST_A;
+            })
+            it('changes the value using env property', function(done) {
+                var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"topic","to":"NR_TEST_A","fromt":"msg","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
+                {id:"helperNode1", type:"helper", wires:[]}];
+                helper.load(changeNode, flow, function() {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.equal("abcfooabc");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"abcABCabc",topic:"ABC"});
+                });
+            });
+        });
+
     });
 
     describe("#delete", function() {

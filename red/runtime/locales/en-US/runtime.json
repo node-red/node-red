@@ -150,8 +150,19 @@
                 "disabled": "Projects disabled : editorTheme.projects.enabled=false",
                 "disabledNoFlag": "Projects disabled : set editorTheme.projects.enabled=true to enable",
                 "git-not-found": "Projects disabled : git command not found",
-                "git-version-old": "Projects disabled : git __version__ not supported. Requires 2.x"
+                "git-version-old": "Projects disabled : git __version__ not supported. Requires 2.x",
+                "summary": "A Node-RED Project",
+                "readme": "### About\n\nThis is your project's README.md file. It helps users understand what your\nproject does, how to use it and anything else they may need to know."
             }
         }
+    },
+
+    "context": {
+        "error-module-not-loaded": "'__module__' could not be loaded",
+        "error-loading-module": "Error loading context module '__module__': __message__ ",
+        "error-module-not-defined": "'module' is not defined in '__storage__' of settings.contextStorage",
+        "error-invalid-default-module": "Invalid storage '__storage__' is specified as a default storage",
+        "error-use-undefined-storage": "Undefined storage '__storage__' is specified"
     }
+
 }

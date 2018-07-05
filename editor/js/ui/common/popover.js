@@ -19,12 +19,14 @@ RED.popover = (function() {
         "default": {
             top: 10,
             leftRight: 17,
-            leftLeft: 25
+            leftLeft: 25,
+            leftBottom: 8,
         },
         "small": {
             top: 5,
             leftRight: 17,
-            leftLeft: 16
+            leftLeft: 16,
+            leftBottom: 3,
         }
     }
     function createPopover(options) {
@@ -46,29 +48,39 @@ RED.popover = (function() {
 
         var openPopup = function(instant) {
             if (active) {
-                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>').appendTo("body");
+                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>');
                 if (size !== "default") {
                     div.addClass("red-ui-popover-size-"+size);
                 }
                 if (typeof content === 'function') {
-                    content.call(res).appendTo(div);
+                    var result = content.call(res);
+                    if (result === null) {
+                        return;
+                    }
+                    if (typeof result === 'string') {
+                        div.text(result);
+                    } else {
+                        div.append(result);
+                    }
                 } else {
                     div.html(content);
                 }
                 if (width !== "auto") {
                     div.width(width);
                 }
-
+                div.appendTo("body");
 
                 var targetPos = target.offset();
-                var targetWidth = target.width();
-                var targetHeight = target.height();
+                var targetWidth = target.outerWidth();
+                var targetHeight = target.outerHeight();
                 var divHeight = div.height();
                 var divWidth = div.width();
                 if (direction === 'right') {
                     div.css({top: targetPos.top+targetHeight/2-divHeight/2-deltaSizes[size].top,left:targetPos.left+targetWidth+deltaSizes[size].leftRight});
                 } else if (direction === 'left') {
                     div.css({top: targetPos.top+targetHeight/2-divHeight/2-deltaSizes[size].top,left:targetPos.left-deltaSizes[size].leftLeft-divWidth});
+                } else if (direction === 'bottom') {
+                    div.css({top: targetPos.top+targetHeight+deltaSizes[size].top,left:targetPos.left+targetWidth/2-divWidth/2 - deltaSizes[size].leftBottom});
                 }
                 if (instant) {
                     div.show();
@@ -143,7 +155,17 @@ RED.popover = (function() {
     }
 
     return {
-        create: createPopover
+        create: createPopover,
+        tooltip: function(target,content) {
+            RED.popover.create({
+                target:target,
+                trigger: "hover",
+                size: "small",
+                direction: "bottom",
+                content: content,
+                delay: { show: 550, hide: 10 }
+            });
+        }
     }
 
 })();

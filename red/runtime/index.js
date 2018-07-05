@@ -90,6 +90,7 @@ function start() {
         })
         .then(function() { return storage.init(runtime)})
         .then(function() { return settings.load(storage)})
+        .then(function() { return redNodes.loadContextsPlugin()})
         .then(function() {
 
             if (log.metric()) {
@@ -229,7 +230,9 @@ function stop() {
         clearTimeout(reinstallTimeout);
     }
     started = false;
-    return redNodes.stopFlows();
+    return redNodes.stopFlows().then(function(){
+        return redNodes.closeContextsPlugin();
+    });
 }
 
 var runtime = module.exports = {
