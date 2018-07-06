@@ -145,7 +145,7 @@ LocalFileSystem.prototype.open = function(){
             });
         }).catch(function(err){
             if(err.code == 'ENOENT') {
-                return Promise.resolve();
+                return fs.mkdir(self.storageBaseDir);
             }else{
                 return Promise.reject(err);
             }
