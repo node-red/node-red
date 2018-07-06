@@ -19,6 +19,7 @@ var oauth2orize = require("oauth2orize");
 
 var strategies = require("./strategies");
 var Tokens = require("./tokens");
+var apiAccessTokens = require("./api-access-tokens");
 var Users = require("./users");
 var permissions = require("./permissions");
 
@@ -42,6 +43,7 @@ function init(runtime) {
     if (settings.adminAuth) {
         Users.init(settings.adminAuth);
         Tokens.init(settings.adminAuth,runtime.storage);
+        apiAccessTokens.init(settings.apiAccessTokens);
         strategies.init(runtime);
     }
 }
