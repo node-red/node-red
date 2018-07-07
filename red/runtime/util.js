@@ -368,7 +368,7 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
     if (callback) {
         callback(result);
     } else {
-        return value;
+        return result;
     }
 }
 
