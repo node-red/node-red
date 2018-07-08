@@ -59,19 +59,19 @@ module.exports = function(RED) {
         'else': function(a) { return a === true; }
     };
 
-    var _max_kept_msgs_count = undefined;
+    var _maxKeptCount;
 
-    function max_kept_msgs_count(node) {
-        if (_max_kept_msgs_count === undefined) {
+    function getMaxKeptCount() {
+        if (_maxKeptCount === undefined) {
             var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
-                _max_kept_msgs_count = RED.settings[name];
+                _maxKeptCount = RED.settings[name];
             }
             else {
-                _max_kept_msgs_count = 0;
+                _maxKeptCount = 0;
             }
         }
-        return _max_kept_msgs_count;
+        return _maxKeptCount;
     }
 
     function SwitchNode(n) {
@@ -94,10 +94,10 @@ module.exports = function(RED) {
         var node = this;
         var valid = true;
         var repair = n.repair;
-        var needs_count = repair;
+        var needsCount = repair;
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
-            needs_count = needs_count || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
+            needsCount = needsCount || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
             if (!rule.vt) {
                 if (!isNaN(Number(rule.v))) {
                     rule.vt = 'num';
@@ -142,26 +142,26 @@ module.exports = function(RED) {
             return;
         }
 
-        var pending_count = 0;
-        var pending_id = 0;
-        var pending_in = {};
-        var pending_out = {};
+        var pendingCount = 0;
+        var pendingId = 0;
+        var pendingIn = {};
+        var pendingOut = {};
         var received = {};
 
-        function add2group_in(id, msg, parts) {
-            if (!(id in pending_in)) {
-                pending_in[id] = {
+        function addMessageToGroup(id, msg, parts) {
+            if (!(id in pendingIn)) {
+                pendingIn[id] = {
                     count: undefined,
                     msgs: [],
-                    seq_no: pending_id++
+                    seq_no: pendingId++
                 };
             }
-            var group = pending_in[id];
+            var group = pendingIn[id];
             group.msgs.push(msg);
-            pending_count++;
-            var max_msgs = max_kept_msgs_count(node);
-            if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                clear_pending();
+            pendingCount++;
+            var max_msgs = getMaxKeptCount();
+            if ((max_msgs > 0) && (pendingCount > max_msgs)) {
+                clearPending();
                 node.error(RED._("switch.errors.too-many"), msg);
             }
             if (parts.hasOwnProperty("count")) {
@@ -170,32 +170,29 @@ module.exports = function(RED) {
             return group;
         }
 
-        function del_group_in(id, group) {
-            pending_count -= group.msgs.length;
-            delete pending_in[id];
-        }
 
-        function add2pending_in(msg) {
+        function addMessageToPending(msg) {
             var parts = msg.parts;
             if (parts.hasOwnProperty("id") &&
                 parts.hasOwnProperty("index")) {
-                var group = add2group_in(parts.id, msg, parts);
+                var group = addMessageToGroup(parts.id, msg, parts);
                 var msgs = group.msgs;
                 var count = group.count;
                 if (count === msgs.length) {
                     for (var i = 0; i < msgs.length; i++) {
                         var msg = msgs[i];
                         msg.parts.count = count;
-                        process_msg(msg, false);
+                        processMessage(msg, false);
                     }
-                    del_group_in(parts.id, group);
+                    pendingCount -= group.msgs.length;
+                    delete pendingIn[parts.id];
                 }
                 return true;
             }
             return false;
         }
 
-        function send_group(onwards, port_count) {
+        function sendGroup(onwards, port_count) {
             var counts = new Array(port_count).fill(0);
             for (var i = 0; i < onwards.length; i++) {
                 var onward = onwards[i];
@@ -230,47 +227,41 @@ module.exports = function(RED) {
             }
         }
 
-        function send2ports(onward, msg) {
+        function sendMessages(onward, msg) {
             var parts = msg.parts;
             var gid = parts.id;
             received[gid] = ((gid in received) ? received[gid] : 0) +1;
             var send_ok = (received[gid] === parts.count);
 
-            if (!(gid in pending_out)) {
-                pending_out[gid] = {
+            if (!(gid in pendingOut)) {
+                pendingOut[gid] = {
                     onwards: []
                 };
             }
-            var group = pending_out[gid];
+            var group = pendingOut[gid];
             var onwards = group.onwards;
             onwards.push(onward);
-            pending_count++;
+            pendingCount++;
             if (send_ok) {
-                send_group(onwards, onward.length, msg);
-                pending_count -= onward.length;
-                delete pending_out[gid];
+                sendGroup(onwards, onward.length, msg);
+                pendingCount -= onward.length;
+                delete pendingOut[gid];
                 delete received[gid];
             }
-            var max_msgs = max_kept_msgs_count(node);
-            if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                clear_pending();
+            var max_msgs = getMaxKeptCount();
+            if ((max_msgs > 0) && (pendingCount > max_msgs)) {
+                clearPending();
                 node.error(RED._("switch.errors.too-many"), msg);
             }
         }
 
-        function msg_has_parts(msg) {
-            if (msg.hasOwnProperty("parts")) {
-                var parts = msg.parts;
-                return (parts.hasOwnProperty("id") &&
-                        parts.hasOwnProperty("index"));
-            }
-            return false;
-        }
+        function processMessage(msg, check_parts) {
+            var has_parts = msg.hasOwnProperty("parts") &&
+                            msg.parts.hasOwnProperty("id") &&
+                            msg.parts.hasOwnProperty("index");
 
-        function process_msg(msg, check_parts) {
-            var has_parts = msg_has_parts(msg);
-            if (needs_count && check_parts && has_parts &&
-                add2pending_in(msg)) {
+            if (needsCount && check_parts && has_parts &&
+                addMessageToPending(msg)) {
                 return;
             }
             var onward = [];
@@ -344,27 +335,27 @@ module.exports = function(RED) {
                     node.send(onward);
                 }
                 else {
-                    send2ports(onward, msg);
+                    sendMessages(onward, msg);
                 }
             } catch(err) {
                 node.warn(err);
             }
         }
 
-        function clear_pending() {
-            pending_count = 0;
-            pending_id = 0;
-            pending_in = {};
-            pending_out = {};
+        function clearPending() {
+            pendingCount = 0;
+            pendingId = 0;
+            pendingIn = {};
+            pendingOut = {};
             received = {};
         }
 
         this.on('input', function(msg) {
-            process_msg(msg, true);
+            processMessage(msg, true);
         });
 
         this.on('close', function() {
-            clear_pending();
+            clearPending();
         });
     }
 
