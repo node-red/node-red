@@ -74,6 +74,81 @@ module.exports = function(RED) {
         return _maxKeptCount;
     }
 
+    function getProperty(node,msg) {
+        return new Promise((resolve,reject) => {
+            if (node.propertyType === 'jsonata') {
+                try {
+                    resolve(RED.util.evaluateJSONataExpression(node.property,msg));
+                } catch(err) {
+                    // TODO: proper invalid expr message
+                    reject(err);
+                }
+            } else {
+                resolve(RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg));
+            }
+        });
+    }
+
+    function getV1(node,msg,rule,hasParts) {
+        return new Promise( (resolve,reject) => {
+            if (rule.vt === 'prev') {
+                resolve(node.previousValue);
+            } else if (rule.vt === 'jsonata') {
+                try {
+                    var exp = rule.v;
+                    if (rule.t === 'jsonata_exp') {
+                        if (hasParts) {
+                            exp.assign("I", msg.parts.index);
+                            exp.assign("N", msg.parts.count);
+                        }
+                    }
+                    resolve(RED.util.evaluateJSONataExpression(exp,msg));
+                } catch(err) {
+                    reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                }
+            } else if (rule.vt === 'json') {
+                resolve("json");
+            } else if (rule.vt === 'null') {
+                resolve("null");
+            } else {
+                RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg, function(err,value) {
+                    if (err) {
+                        resolve(undefined);
+                    } else {
+                        resolve(value);
+                    }
+                });
+            }
+        });
+    }
+
+    function getV2(node,msg,rule) {
+        return new Promise((resolve,reject) => {
+            var v2 = rule.v2;
+            if (rule.v2t === 'prev') {
+                resolve(node.previousValue);
+            } else if (rule.v2t === 'jsonata') {
+                try {
+                    resolve(RED.util.evaluateJSONataExpression(rule.v2,msg));
+                } catch(err) {
+                    reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                }
+            } else if (typeof v2 !== 'undefined') {
+                RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg, function(err,value) {
+                    if (err) {
+                        resolve(undefined);
+                    } else {
+                        resolve(value);
+                    }
+                });
+            } else {
+                resolve(v2);
+            }
+        })
+    }
+
+
+
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
         this.rules = n.rules || [];
@@ -227,7 +302,7 @@ module.exports = function(RED) {
             }
         }
 
-        function sendMessages(onward, msg) {
+        function sendGroupMessages(onward, msg) {
             var parts = msg.parts;
             var gid = parts.id;
             received[gid] = ((gid in received) ? received[gid] : 0) +1;
@@ -255,35 +330,43 @@ module.exports = function(RED) {
             }
         }
 
-        function processMessage(msg, check_parts) {
-            var has_parts = msg.hasOwnProperty("parts") &&
+
+
+        function processMessage(msg, checkParts) {
+            var hasParts = msg.hasOwnProperty("parts") &&
                             msg.parts.hasOwnProperty("id") &&
                             msg.parts.hasOwnProperty("index");
 
-            if (needsCount && check_parts && has_parts &&
+            if (needsCount && checkParts && hasParts &&
                 addMessageToPending(msg)) {
                 return;
             }
             var onward = [];
             try {
                 var prop;
+
+                // getProperty
                 if (node.propertyType === 'jsonata') {
                     prop = RED.util.evaluateJSONataExpression(node.property,msg);
                 } else {
                     prop = RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
                 }
+                // end getProperty
+
                 var elseflag = true;
                 for (var i=0; i<node.rules.length; i+=1) {
                     var rule = node.rules[i];
                     var test = prop;
                     var v1,v2;
+
+                    //// getV1
                     if (rule.vt === 'prev') {
                         v1 = node.previousValue;
                     } else if (rule.vt === 'jsonata') {
                         try {
                             var exp = rule.v;
                             if (rule.t === 'jsonata_exp') {
-                                if (has_parts) {
+                                if (hasParts) {
                                     exp.assign("I", msg.parts.index);
                                     exp.assign("N", msg.parts.count);
                                 }
@@ -304,6 +387,9 @@ module.exports = function(RED) {
                             v1 = undefined;
                         }
                     }
+                    //// end getV1
+
+                    //// getV2
                     v2 = rule.v2;
                     if (rule.v2t === 'prev') {
                         v2 = node.previousValue;
@@ -321,6 +407,9 @@ module.exports = function(RED) {
                             v2 = undefined;
                         }
                     }
+                    //// end getV2
+
+
                     if (rule.t == "else") { test = elseflag; elseflag = true; }
                     if (operators[rule.t](test,v1,v2,rule.case,msg.parts)) {
                         onward.push(msg);
@@ -331,11 +420,11 @@ module.exports = function(RED) {
                     }
                 }
                 node.previousValue = prop;
-                if (!repair || !has_parts) {
+                if (!repair || !hasParts) {
                     node.send(onward);
                 }
                 else {
-                    sendMessages(onward, msg);
+                    sendGroupMessages(onward, msg);
                 }
             } catch(err) {
                 node.warn(err);
