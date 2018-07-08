@@ -100,6 +100,7 @@ function init(runtime) {
     registry.init(runtime);
     context.init(runtime.settings);
     library.init(runtime);
+    Node.init(runtime.settings);
 }
 
 function disableNode(id) {
@@ -158,6 +159,14 @@ function uninstallModule(module) {
     }
 }
 
+function getNodeTimeout() {
+    return Node.getTimeout();
+}
+
+function setNodeTimeout(val) {
+    Node.setTimeout(val);
+}
+
 module.exports = {
     // Lifecycle
     init: init,
@@ -210,6 +219,9 @@ module.exports = {
     // disableFlow: flows.disableFlow,
     // enableFlow:  flows.enableFlow,
 
+    getNodeTimeout: getNodeTimeout,
+    setNodeTimeout: setNodeTimeout,
+    
     // Credentials
     addCredentials: credentials.add,
     getCredentials: credentials.get,

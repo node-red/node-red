@@ -86,7 +86,7 @@ describe('Node', function() {
             p.then(function() {
                 testdone();
             });
-        })
+        });
         it('allows multiple close handlers to be registered',function(testdone) {
             var n = new RedNode({id:'123',type:'abc'});
             var callbacksClosed = 0;
@@ -385,7 +385,7 @@ describe('Node', function() {
             var receiver1 = new RedNode({id:'n2',type:'abc'});
             var receiver2 = new RedNode({id:'n3',type:'abc'});
             sender.send({"some": "message"});
-        })
+        });
     });
 
 
@@ -496,9 +496,7 @@ describe('Node', function() {
             Log.log.restore();
             done();
         });
-    });
 
-    describe('#metric', function() {
         it('returns metric value if eventname undefined', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var loginfo = {};
@@ -523,6 +521,170 @@ describe('Node', function() {
             Log.log.restore();
             done();
         });
+
+        it('produces metrics for send/recv (single, old handler, no corr.)', function(done) {
+            var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2']]});
+            var n2 = new RedNode({id:'n2', type:'abc'});
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':n1,'n2':n2}[id];
+            });
+            var loginfo = {};
+            var count = 0;
+            sinon.stub(Log, 'log', function(msg) {
+                msg.should.have.property('level');
+                msg.should.have.property('nodeid');
+                if (msg.nodeid === 'n1') {
+                    msg.should.have.property('event', 'node.abc.send');
+                }
+                else if(msg.nodeid === 'n2') {
+                    msg.should.have.property('event', 'node.abc.receive');
+                }
+                else {
+                    should.fail();
+                }
+                count++;
+                if (count == 2) {
+                    flowGet.restore();
+                    Log.log.restore();
+                    done();
+                }
+            });
+
+            n2.on('input',function(msg) {
+            });
+
+            n1.send({_msgid:"xyz", payload:"foo"});
+        });
+
+        it('produces metrics for send/recv (multi, old handler, no corr.)', function(done) {
+            var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2', 'n3']]});
+            var n2 = new RedNode({id:'n2', type:'abc'});
+            var n3 = new RedNode({id:'n3', type:'abc'});
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':n1,'n2':n2,'n3':n3}[id];
+            });
+            var loginfo = {};
+            var count = 0;
+            sinon.stub(Log, 'log', function(msg) {
+                msg.should.have.property('level');
+                msg.should.have.property('nodeid');
+                if (msg.nodeid === 'n1') {
+                    msg.should.have.property('event', 'node.abc.send');
+                }
+                else if((msg.nodeid === 'n2') ||
+                        (msg.nodeid === 'n3')) {
+                    msg.should.have.property('event', 'node.abc.receive');
+                }
+                else {
+                    should.fail();
+                }
+                count++;
+                if (count == 3) {
+                    flowGet.restore();
+                    Log.log.restore();
+                    done();
+                }
+            });
+
+            n2.on('input',function(msg) {
+            });
+
+            n1.send({_msgid:"xyz", payload:"foo"});
+        });
+
+        it('produces metrics for send/recv (single, new handler, corr.)', function(done) {
+            Log.init({logging:{correlate_msg_in_out: true}});
+            var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2']]});
+            var n2 = new RedNode({id:'n2', type:'abc'});
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':n1,'n2':n2}[id];
+            });
+            var loginfo = {};
+            var count = 0;
+            sinon.stub(Log, 'log', function(msg) {
+                msg.should.have.property('level');
+                msg.should.have.property('nodeid');
+                if (msg.nodeid === 'n1') {
+                    msg.should.have.property('event');
+                    if (msg.event === 'node.abc.receive') {
+                        ; // OK
+                    }
+                    else if (msg.event === 'node.abc.send') {
+                        msg.should.have.property('in_msgid');
+                    }
+                    else {
+                        should.fail();
+                    }
+                }
+                else if(msg.nodeid === 'n2') {
+                    msg.should.have.property('event', 'node.abc.receive');
+                }
+                else {
+                    should.fail();
+                }
+                count++;
+                if (count == 3) {
+                    flowGet.restore();
+                    Log.log.restore();
+                    done();
+                }
+            });
+
+            n1.on('input',function(msg, send, n1_done) {
+                send({payload:"bar"});
+                n1_done();
+            });
+            n1.receive({_msgid:"xyz", payload:"foo"});
+        });
+
+        it('produces metrics for send/recv (multi, new handler, corr.)', function(done) {
+            Log.init({logging:{correlate_msg_in_out: true}});
+            var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2', 'n3']]});
+            var n2 = new RedNode({id:'n2', type:'abc'});
+            var n3 = new RedNode({id:'n3', type:'abc'});
+            var flowGet = sinon.stub(flows,"get",function(id) {
+                return {'n1':n1,'n2':n2,'n3':n3}[id];
+            });
+            var loginfo = {};
+            var count = 0;
+            sinon.stub(Log, 'log', function(msg) {
+                msg.should.have.property('level');
+                msg.should.have.property('nodeid');
+                if (msg.nodeid === 'n1') {
+                    msg.should.have.property('event');
+                    if (msg.event === 'node.abc.receive') {
+                        ; // OK
+                    }
+                    else if (msg.event === 'node.abc.send') {
+                        msg.should.have.property('in_msgid');
+                    }
+                    else {
+                        should.fail();
+                    }
+                }
+                else if((msg.nodeid === 'n2') ||
+                        (msg.nodeid === 'n3')) {
+                    msg.should.have.property('event', 'node.abc.receive');
+                }
+                else {
+                    should.fail();
+                }
+                count++;
+                if (count == 4) {
+                    flowGet.restore();
+                    Log.log.restore();
+                    done();
+                }
+            });
+
+            n1.on('input',function(msg, send, n1_done) {
+                var msg = {payload:"bar"};
+                send([msg, msg]);
+                n1_done();
+            });
+            n1.receive({_msgid:"xyz", payload:"foo"});
+        });
+
     });
 
     describe('#status', function() {

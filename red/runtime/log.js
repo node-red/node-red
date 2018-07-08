@@ -48,6 +48,8 @@ var verbose;
 
 var metricsEnabled = false;
 
+var _correlate_in_out = false;
+
 var LogHandler = function(settings) {
     this.logLevel  = settings ? levels[settings.level]||levels.info : levels.info;
     this.metricsOn = settings ? settings.metrics||false : false;
@@ -97,17 +99,18 @@ var log = module.exports = {
     METRIC: 99,
 
     init: function(settings) {
+        var logging = settings.logging;
         metricsEnabled = false;
         logHandlers = [];
         var loggerSettings = {};
         verbose = settings.verbose;
-        if (settings.logging) {
-            var keys = Object.keys(settings.logging);
+        if (logging) {
+            var keys = Object.keys(logging);
             if (keys.length === 0) {
                 log.addHandler(new LogHandler());
             } else {
                 for (var i=0, l=keys.length; i<l; i++) {
-                    var config = settings.logging[keys[i]];
+                    var config = logging[keys[i]];
                     loggerSettings = config || {};
                     if ((keys[i] === "console") || config.handler) {
                         log.addHandler(new LogHandler(loggerSettings));
@@ -117,6 +120,12 @@ var log = module.exports = {
         } else {
             log.addHandler(new LogHandler());
         }
+        if (logging && logging.hasOwnProperty("correlate_msg_in_out")) {
+            _correlate_in_out = logging.correlate_msg_in_out;
+        }
+    },
+    correlate_msg_in_out: function() {
+        return _correlate_in_out;
     },
     addHandler: function(func) {
         logHandlers.push(func);

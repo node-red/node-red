@@ -101,6 +101,17 @@
             "selected": "selected nodes"
         }
     },
+    "success": {
+        "successNodes": "success: __number__",
+        "label": {
+            "source": "Report completion of",
+            "node": "node",
+            "type": "type",
+            "selectAll": "select all",
+            "sortByLabel": "sort by label",
+            "sortByType": "sort by type"
+        }
+    },
     "debug": {
         "output": "Output",
         "msgprop": "message property",

@@ -31,6 +31,7 @@ function Flow(global,flow) {
     var subflowInstanceNodes = {};
     var catchNodeMap = {};
     var statusNodeMap = {};
+    var succNodeMap = {};
 
     this.start = function(diff) {
         var node;
@@ -38,6 +39,7 @@ function Flow(global,flow) {
         var id;
         catchNodeMap = {};
         statusNodeMap = {};
+        succNodeMap = {};
 
         var configNodes = Object.keys(flow.configs);
         var configNodeAttempts = {};
@@ -118,10 +120,28 @@ function Flow(global,flow) {
                 } else if (node.type === "status") {
                     statusNodeMap[node.z] = statusNodeMap[node.z] || [];
                     statusNodeMap[node.z].push(node);
+                } else if (node.type === "success") {
+                    succNodeMap[node.z] = succNodeMap[node.z] || [];
+                    succNodeMap[node.z].push(node);
                 }
             }
         }
-    }
+        for (id in activeNodes) {
+            node.setCanSendSuccess(false);
+        }
+        for (id in activeNodes) {
+            var node = activeNodes[id];
+            if ((node.type === "success") && node.hasOwnProperty("scope")) {
+                var scope = node.scope;
+                if (scope) {
+                    for (var src_id of scope) {
+                        var src = activeNodes[src_id];
+                        src.setCanSendSuccess(true);
+                    }
+                }
+            }
+        }
+    };
 
     this.stop = function(stopList, removedList) {
         return when.promise(function(resolve) {
@@ -185,20 +205,20 @@ function Flow(global,flow) {
                 resolve();
             });
         });
-    }
+    };
 
     this.update = function(_global,_flow) {
         global = _global;
         flow = _flow;
-    }
+    };
 
     this.getNode = function(id) {
         return activeNodes[id];
-    }
+    };
 
     this.getActiveNodes = function() {
         return activeNodes;
-    }
+    };
 
     this.handleStatus = function(node,statusMessage) {
         var targetStatusNodes = null;
@@ -232,7 +252,7 @@ function Flow(global,flow) {
                 reportingNode = activeNodes[reportingNode.z];
             }
         }
-    }
+    };
 
     this.handleError = function(node,logMessage,msg) {
         var count = 1;
@@ -287,7 +307,39 @@ function Flow(global,flow) {
             }
         }
         return handled;
-    }
+    };
+
+    this.handleSuccess = function(node, msg) {
+        var sourceNode = node;
+        var targetSuccNodes = succNodeMap[sourceNode.z];
+        var has_target = false;
+        if (targetSuccNodes) {
+            targetSuccNodes.forEach(function(targetSuccNode) {
+                if (targetSuccNode.scope && targetSuccNode.scope.indexOf(sourceNode.id) === -1) {
+                    return;
+                }
+                var succMessage;
+                if (msg) {
+                    succMessage = redUtil.cloneMessage(msg);
+                } else {
+                    succMessage = {};
+                }
+                if (succMessage.hasOwnProperty("success")) {
+                    succMessage._success = succMessage.success;
+                }
+                succMessage.success = {
+                    source: {
+                        id: node.id,
+                        type: node.type,
+                        name: node.name
+                    }
+                };
+                targetSuccNode.receive(succMessage);
+                has_target = true;
+            });
+        }
+        node.setCanSendSuccess(has_target);
+    };
 }
 
 function createNode(type,config) {

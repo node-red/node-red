@@ -235,6 +235,14 @@ function stop() {
     });
 }
 
+function getNodeTimeout() {
+    return redNodes.getNodeTimeout();
+}
+
+function setNodeTimeout(val) {
+    redNodes.setNodeTimeout(val);
+}
+
 var runtime = module.exports = {
     init: init,
     start: start,
@@ -253,5 +261,7 @@ var runtime = module.exports = {
     get nodeApp() { return nodeApp },
     isStarted: function() {
         return started;
-    }
+    },
+    getNodeTimeout: getNodeTimeout,
+    setNodeTimeout: setNodeTimeout
 }

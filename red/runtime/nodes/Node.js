@@ -23,11 +23,14 @@ var Log = require("../log");
 var context = require("./context");
 var flows = require("./flows");
 
+var _timeout = undefined;
+
 function Node(n) {
     this.id = n.id;
     this.type = n.type;
     this.z = n.z;
     this._closeCallbacks = [];
+    this._msg_in = undefined;
 
     if (n.name) {
         this.name = n.name;
@@ -77,7 +80,57 @@ Node.prototype.on = function(event, callback) {
     if (event == "close") {
         this._closeCallbacks.push(callback);
     } else {
-        this._on(event, callback);
+        if (callback.length === 3) {
+            this._on(event, function(msg_in) {
+                var done = undefined;
+                var timer = undefined;
+                function setupNodeTimeout() {
+                    var timeout = node.getTimeout();
+                    if (timeout) {
+                        timer = setTimeout(function() {
+                            node.error(new Error("node execution timeout"),
+                                       msg_in);
+                        }, timeout);
+                    }
+                }
+                function clearNodeTimeout() {
+                    if (timer) {
+                        clearTimeout(timer);
+                    }
+                }
+                if (node.maySendSuccess()) {
+                    done = function (err, msg) {
+                        clearNodeTimeout();
+                        if (err) {
+                            node.error(err, msg ? msg : msg_in);
+                        }
+                        else {
+                            node.success(msg ? msg : msg_in);
+                        }
+                    };
+                }
+                else {
+                    done = function (err, msg) {
+                        clearNodeTimeout();
+                    }
+                }
+                var send = function(msg_out) {
+                    node.send(msg_out, msg_in);
+                }
+                setupNodeTimeout();
+                node._msg_in = msg_in;
+                callback.call(node, msg_in, send, done);
+            });
+        }
+        else {
+            this._on(event, function(msg) {
+                node._msg_in = msg;
+                callback.call(node, msg);
+                if (node.maySendSuccess()) {
+                    node.success(msg);
+                }
+            });
+        }
     }
 };
 
@@ -116,7 +169,7 @@ Node.prototype.close = function(removed) {
     }
 };
 
-Node.prototype.send = function(msg) {
+Node.prototype.send = function(msg, in_msg) {
     var msgSent = false;
     var node;
 
@@ -130,7 +183,7 @@ Node.prototype.send = function(msg) {
             if (!msg._msgid) {
                 msg._msgid = redUtil.generateId();
             }
-            this.metric("send",msg);
+            this.metric("send",msg, undefined, in_msg);
             node = flows.get(this._wire);
             /* istanbul ignore else */
             if (node) {
@@ -191,7 +244,8 @@ Node.prototype.send = function(msg) {
     if (!sentMessageId) {
         sentMessageId = redUtil.generateId();
     }
-    this.metric("send",{_msgid:sentMessageId});
+    var msg_in = in_msg || this._msg_in;
+    this.metric("send",{_msgid:sentMessageId}, undefined, msg_in);
 
     for (i=0;i<sendEvents.length;i++) {
         var ev = sendEvents[i];
@@ -217,6 +271,10 @@ Node.prototype.receive = function(msg) {
         this.error(err,msg);
     }
 };
+
+Node.prototype.setTimeout = function(value) {
+    this._timeout = value;
+}
 
 function log_helper(self, level, msg) {
     var o = {
@@ -258,6 +316,28 @@ Node.prototype.error = function(logMessage,msg) {
     }
 };
 
+Node.prototype.setCanSendSuccess = function(val) {
+    this._can_send_success = val;
+}
+
+Node.prototype.canSendSuccess = function() {
+    return (this._can_send_success === true);
+}
+
+Node.prototype.maySendSuccess = function() {
+    return (this._can_send_success !== false);
+}
+
+Node.prototype.success = function(msg) {
+    try {
+        flows.handleSuccess(this, msg);
+    }
+    catch(e) {
+        console.log(e.stack);
+        console.log(e);
+    }
+}
+
 Node.prototype.debug = function(msg) {
     log_helper(this, Log.DEBUG, msg);
 }
@@ -269,7 +349,7 @@ Node.prototype.trace = function(msg) {
 /**
  * If called with no args, returns whether metric collection is enabled
  */
-Node.prototype.metric = function(eventname, msg, metricValue) {
+Node.prototype.metric = function(eventname, msg, metricValue, msg_in) {
     if (typeof eventname === "undefined") {
         return Log.metric();
     }
@@ -278,6 +358,9 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
     metrics.nodeid = this.id;
     metrics.event = "node."+this.type+"."+eventname;
     metrics.msgid = msg._msgid;
+    if (msg_in && Log.correlate_msg_in_out()) {
+        metrics.in_msgid = msg_in._msgid;
+    }
     metrics.value = metricValue;
     Log.log(metrics);
 }
@@ -288,4 +371,32 @@ Node.prototype.metric = function(eventname, msg, metricValue) {
 Node.prototype.status = function(status) {
     flows.handleStatus(this,status);
 };
+
+
+/**
+ * timoeut set/get functions
+ */
+
+Node.prototype.getTimeout = function() {
+    return this._timeout || Node.getTimeout();
+}
+
+Node.prototype.setTimeout = function(val) {
+    this._timeout = val;
+}
+
+Node.getTimeout = function() {
+    return _timeout;
+}
+
+Node.setTimeout = function(val) {
+    _timeout = val;
+}
+
+Node.init = function(settings) {
+    if (settings && settings.hasOwnProperty("node_timeout")) {
+        _timeout = settings.node_timeout;
+    }
+}
+
 module.exports = Node;

@@ -111,6 +111,9 @@ module.exports = {
     library: api.library,
     auth: api.auth,
 
+    getNodeTimeout: runtime.getNodeTimeout,
+    setNodeTimeout: runtime.setNodeTimeout,
+
     get app() { console.log("Deprecated use of RED.app - use RED.httpAdmin instead"); return runtime.app },
     get httpAdmin() { return adminApp },
     get httpNode() { return nodeApp },

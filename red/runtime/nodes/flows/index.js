@@ -254,6 +254,28 @@ function handleStatus(node,statusMessage) {
     }
 }
 
+function delegateSuccess( node,msg) {
+    if (activeFlows[node.z]) {
+        activeFlows[node.z].handleSuccess(node, msg);
+    } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
+        activeFlows[activeNodesToFlow[node.z]].handleSuccess(node, msg);
+    }
+}
+
+function handleSuccess(node, msg) {
+    if (node.z) {
+        delegateSuccess(node, msg);
+    } else {
+        if (activeFlowConfig &&
+            activeFlowConfig.configs &&
+            activeFlowConfig.configs[node.id]) {
+            activeFlowConfig.configs[node.id]._users.forEach(function(id) {
+                var userNode = activeFlowConfig.allNodes[id];
+                delegateSuccess(userNode, msg);
+            })
+        }
+    }
+}
 
 function start(type,diff,muteLog) {
     //dumpActiveNodes();
@@ -719,6 +741,7 @@ module.exports = {
 
     handleError: handleError,
     handleStatus: handleStatus,
+    handleSuccess: handleSuccess,
 
     checkTypeInUse: checkTypeInUse,
 
