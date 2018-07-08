@@ -280,8 +280,8 @@ module.exports = function(RED) {
         msgs.sort(function(x,y) {
             var ix = x.parts.index;
             var iy = y.parts.index;
-            if (ix < iy) return -flag;
-            if (ix > iy) return flag;
+            if (ix < iy) { return -flag; }
+            if (ix > iy) { return flag; }
             return 0;
         });
         for(var msg of msgs) {
@@ -437,7 +437,8 @@ module.exports = function(RED) {
                     newArray = newArray.concat(n);
                 })
                 group.payload = newArray;
-            } else if (group.type === 'buffer') {
+            }
+            else if (group.type === 'buffer') {
                 var buffers = [];
                 var bufferLen = 0;
                 if (group.joinChar !== undefined) {
@@ -450,7 +451,8 @@ module.exports = function(RED) {
                         buffers.push(group.payload[i]);
                         bufferLen += group.payload[i].length;
                     }
-                } else {
+                }
+                else {
                     bufferLen = group.bufferLen;
                     buffers = group.payload;
                 }
@@ -463,7 +465,8 @@ module.exports = function(RED) {
                     groupJoinChar = group.joinChar.toString();
                 }
                 RED.util.setMessageProperty(group.msg,node.property,group.payload.join(groupJoinChar));
-            } else {
+            }
+            else {
                 if (node.propertyType === 'full') {
                     group.msg = RED.util.cloneMessage(group.msg);
                 }
@@ -471,7 +474,8 @@ module.exports = function(RED) {
             }
             if (group.msg.hasOwnProperty('parts') && group.msg.parts.hasOwnProperty('parts')) {
                 group.msg.parts = group.msg.parts.parts;
-            } else {
+            }
+            else {
                 delete group.msg.parts;
             }
             delete group.msg.complete;
@@ -525,7 +529,7 @@ module.exports = function(RED) {
                     payloadType = node.build;
                     targetCount = node.count;
                     joinChar = node.joiner;
-                    if (targetCount === 0 && msg.hasOwnProperty('parts')) {
+                    if (n.count === "" && msg.hasOwnProperty('parts')) {
                         targetCount = msg.parts.count || 0;
                     }
                     if (node.build === 'object') {
@@ -554,7 +558,7 @@ module.exports = function(RED) {
                             payload:{},
                             targetCount:targetCount,
                             type:"object",
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         };
                     }
                     else if (node.accumulate === true) {
@@ -564,7 +568,7 @@ module.exports = function(RED) {
                             payload:{},
                             targetCount:targetCount,
                             type:payloadType,
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         }
                         if (payloadType === 'string' || payloadType === 'array' || payloadType === 'buffer') {
                             inflight[partId].payload = [];
@@ -576,7 +580,7 @@ module.exports = function(RED) {
                             payload:[],
                             targetCount:targetCount,
                             type:payloadType,
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         };
                         if (payloadType === 'string') {
                             inflight[partId].joinChar = joinChar;
@@ -624,14 +628,14 @@ module.exports = function(RED) {
                     }
                     group.currentCount++;
                 }
-                // TODO: currently reuse the last received - add option to pick first received
-                group.msg = msg;
+                group.msg = Object.assign(group.msg, msg);
                 var tcnt = group.targetCount;
                 if (msg.hasOwnProperty("parts")) { tcnt = group.targetCount || msg.parts.count; }
                 if ((tcnt > 0 && group.currentCount >= tcnt) || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
-            } catch(err) {
+            }
+            catch(err) {
                 console.log(err.stack);
             }
         });
