@@ -335,7 +335,7 @@ var parseContextStore = function(key) {
 }
 
 function evaluateNodeProperty(value, type, node, msg, callback) {
-    var result;
+    var result = value;
     if (type === 'str') {
         result = ""+value;
     } else if (type === 'num') {

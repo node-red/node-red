@@ -307,6 +307,10 @@ describe("red/util", function() {
             },{});
             result.should.eql("123");
         });
+        it('returns null', function() {
+            var result = util.evaluateNodeProperty(null,'null');
+            (result === null).should.be.true();
+        })
         describe('environment variable', function() {
             before(function() {
                 process.env.NR_TEST_A = "foo";
