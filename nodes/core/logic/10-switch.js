@@ -77,12 +77,13 @@ module.exports = function(RED) {
     function getProperty(node,msg) {
         return new Promise((resolve,reject) => {
             if (node.propertyType === 'jsonata') {
-                try {
-                    resolve(RED.util.evaluateJSONataExpression(node.property,msg));
-                } catch(err) {
-                    // TODO: proper invalid expr message
-                    reject(err);
-                }
+                RED.util.evaluateJSONataExpression(node.property,msg,(err,value) => {
+                    if (err) {
+                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                    } else {
+                        resolve(value);
+                    }
+                });
             } else {
                 RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg,(err,value) => {
                     if (err) {
@@ -100,18 +101,20 @@ module.exports = function(RED) {
             if (rule.vt === 'prev') {
                 resolve(node.previousValue);
             } else if (rule.vt === 'jsonata') {
-                try {
-                    var exp = rule.v;
-                    if (rule.t === 'jsonata_exp') {
-                        if (hasParts) {
-                            exp.assign("I", msg.parts.index);
-                            exp.assign("N", msg.parts.count);
-                        }
+                var exp = rule.v;
+                if (rule.t === 'jsonata_exp') {
+                    if (hasParts) {
+                        exp.assign("I", msg.parts.index);
+                        exp.assign("N", msg.parts.count);
                     }
-                    resolve(RED.util.evaluateJSONataExpression(exp,msg));
-                } catch(err) {
-                    reject(RED._("switch.errors.invalid-expr",{error:err.message}));
                 }
+                RED.util.evaluateJSONataExpression(exp,msg,(err,value) => {
+                    if (err) {
+                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                    } else {
+                        resolve(value);
+                    }
+                });
             } else if (rule.vt === 'json') {
                 resolve("json");
             } else if (rule.vt === 'null') {
@@ -134,11 +137,13 @@ module.exports = function(RED) {
             if (rule.v2t === 'prev') {
                 resolve(node.previousValue);
             } else if (rule.v2t === 'jsonata') {
-                try {
-                    resolve(RED.util.evaluateJSONataExpression(rule.v2,msg));
-                } catch(err) {
-                    reject(RED._("switch.errors.invalid-expr",{error:err.message}));
-                }
+                RED.util.evaluateJSONataExpression(rule.v2,msg,(err,value) => {
+                    if (err) {
+                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                    } else {
+                        resolve(value);
+                    }
+                });
             } else if (typeof v2 !== 'undefined') {
                 RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg, function(err,value) {
                     if (err) {
