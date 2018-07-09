@@ -451,7 +451,7 @@ module.exports = function(RED) {
         }
 
         this.on('input', function(msg) {
-            processMessageQueue(msg, true);
+            processMessageQueue(msg);
         });
 
         this.on('close', function() {
