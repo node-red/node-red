@@ -350,7 +350,16 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
         var data = JSON.parse(value);
         result = Buffer.from(data);
     } else if (type === 'msg' && msg) {
-        result = getMessageProperty(msg,value);
+        try {
+            result = getMessageProperty(msg,value);
+        } catch(err) {
+            if (callback) {
+                callback(err);
+            } else {
+                throw err;
+            }
+            return;
+        }
     } else if ((type === 'flow' || type === 'global') && node) {
         var contextKey = parseContextStore(value);
         result = node.context()[type].get(contextKey.key,contextKey.store,callback);
@@ -366,7 +375,7 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
         result = evaluteEnvProperty(value);
     }
     if (callback) {
-        callback(result);
+        callback(null,result);
     } else {
         return result;
     }
