@@ -99,11 +99,17 @@
         }
         return v;
     }
+    function prop2name(key) {
+        var result = RED.utils.parseContextKey(key);
+        return result.key;
+    }
     function getValueLabel(t,v) {
         if (t === 'str') {
             return '"'+clipValueLength(v)+'"';
-        } else if (t === 'msg' || t==='flow' || t==='global') {
+        } else if (t === 'msg') {
             return t+"."+clipValueLength(v);
+        } else if (t === 'flow' || t === 'global') {
+            return t+"."+clipValueLength(prop2name(v));
         }
         return clipValueLength(v);
     }
