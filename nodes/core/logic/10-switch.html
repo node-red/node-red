@@ -99,15 +99,9 @@
         }
         return v;
     }
-    function prop2name(prop) {
-        var len = prop.length;
-        if((len > 6) && (prop[0] === '#') && (prop[1] === ':')) {
-            var pos = prop.indexOf(")::", 2);
-            if (pos > 0) {
-                return prop.substring(pos +3);
-            }
-        }
-        return prop;
+    function prop2name(key) {
+        var result = RED.utils.parseContextKey(key);
+        return result.key;
     }
     function getValueLabel(t,v) {
         if (t === 'str') {
