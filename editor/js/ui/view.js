@@ -491,7 +491,7 @@ RED.view = (function() {
             var midX = Math.floor(destX-dx/2);
             var midY = Math.floor(destY-dy/2);
             //
-            if (dy == 0) {
+            if (dy === 0) {
                 midY = destY + node_height;
             }
             var cp_height = node_height/2;

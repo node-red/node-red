@@ -322,35 +322,63 @@ function evaluteEnvProperty(value) {
     return value;
 }
 
-function evaluateNodeProperty(value, type, node, msg) {
+var parseContextStore = function(key) {
+    var parts = {};
+    var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+    if (m) {
+        parts.store = m[1];
+        parts.key = m[2];
+    } else {
+        parts.key = key;
+    }
+    return parts;
+}
+
+function evaluateNodeProperty(value, type, node, msg, callback) {
+    var result = value;
     if (type === 'str') {
-        return ""+value;
+        result = ""+value;
     } else if (type === 'num') {
-        return Number(value);
+        result = Number(value);
     } else if (type === 'json') {
-        return JSON.parse(value);
+        result = JSON.parse(value);
     } else if (type === 're') {
-        return new RegExp(value);
+        result = new RegExp(value);
     } else if (type === 'date') {
-        return Date.now();
+        result = Date.now();
     } else if (type === 'bin') {
         var data = JSON.parse(value);
-        return Buffer.from(data);
+        result = Buffer.from(data);
     } else if (type === 'msg' && msg) {
-        return getMessageProperty(msg,value);
-    } else if (type === 'flow' && node) {
-        return node.context().flow.get(value);
-    } else if (type === 'global' && node) {
-        return node.context().global.get(value);
+        try {
+            result = getMessageProperty(msg,value);
+        } catch(err) {
+            if (callback) {
+                callback(err);
+            } else {
+                throw err;
+            }
+            return;
+        }
+    } else if ((type === 'flow' || type === 'global') && node) {
+        var contextKey = parseContextStore(value);
+        result = node.context()[type].get(contextKey.key,contextKey.store,callback);
+        if (callback) {
+            return;
+        }
     } else if (type === 'bool') {
-        return /^true$/i.test(value);
+        result = /^true$/i.test(value);
     } else if (type === 'jsonata') {
         var expr = prepareJSONataExpression(value,node);
-        return evaluateJSONataExpression(expr,msg);
+        result = evaluateJSONataExpression(expr,msg);
     } else if (type === 'env') {
-        return evaluteEnvProperty(value);
+        result = evaluteEnvProperty(value);
     }
-    return value;
+    if (callback) {
+        callback(null,result);
+    } else {
+        return result;
+    }
 }
 
 function prepareJSONataExpression(value,node) {
@@ -366,15 +394,44 @@ function prepareJSONataExpression(value,node) {
     })
     expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
     expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
+    expr._node = node;
     return expr;
 }
 
-function evaluateJSONataExpression(expr,msg) {
+function evaluateJSONataExpression(expr,msg,callback) {
     var context = msg;
     if (expr._legacyMode) {
         context = {msg:msg};
     }
-    return expr.evaluate(context);
+    var bindings = {};
+
+    if (callback) {
+        // If callback provided, need to override the pre-assigned sync
+        // context functions to be their async variants
+        bindings.flowContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().flow.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+        bindings.globalContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().global.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+    }
+    return expr.evaluate(context, bindings, callback);
 }
 
 

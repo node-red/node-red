@@ -109,9 +109,10 @@ Memory.prototype.clean = function(activeNodes){
     return Promise.resolve();
 }
 
-Memory.prototype.setGlobalContext= function(seed){
-    this.data["global"] = seed;
-};
+Memory.prototype._export = function() {
+    return this.data;
+}
+
 
 module.exports = function(config){
     return new Memory(config);

@@ -76,8 +76,43 @@ module.exports = function(RED) {
         var node = this;
         node.topics = {};
 
-        this.on("input", function(msg) {
+        var pendingMessages = [];
+        var activeMessagePromise = null;
+        var processMessageQueue = function(msg) {
+            if (msg) {
+                // A new message has arrived - add it to the message queue
+                pendingMessages.push(msg);
+                if (activeMessagePromise !== null) {
+                    // The node is currently processing a message, so do nothing
+                    // more with this message
+                    return;
+                }
+            }
+            if (pendingMessages.length === 0) {
+                // There are no more messages to process, clear the active flag
+                // and return
+                activeMessagePromise = null;
+                return;
+            }
+
+            // There are more messages to process. Get the next message and
+            // start processing it. Recurse back in to check for any more
+            var nextMsg = pendingMessages.shift();
+            activeMessagePromise = processMessage(nextMsg)
+                .then(processMessageQueue)
+                .catch((err) => {
+                    node.error(err,nextMsg);
+                    return processMessageQueue();
+                });
+        }
+
+        this.on('input', function(msg) {
+            processMessageQueue(msg);
+        });
+
+        var processMessage = function(msg) {
             var topic = msg.topic || "_none";
+            var promise;
             if (node.bytopic === "all") { topic = "_none"; }
             node.topics[topic] = node.topics[topic] || {};
             if (msg.hasOwnProperty("reset") || ((node.reset !== '') && msg.hasOwnProperty("payload") && (msg.payload !== null) && msg.payload.toString && (msg.payload.toString() == node.reset)) ) {
@@ -88,48 +123,88 @@ module.exports = function(RED) {
             }
             else {
                 if (((!node.topics[topic].tout) && (node.topics[topic].tout !== 0)) || (node.loop === true)) {
+                    promise = Promise.resolve();
                     if (node.op2type === "pay" || node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
                     else if (node.op2Templated) { node.topics[topic].m2 = mustache.render(node.op2,msg); }
                     else if (node.op2type !== "nul") {
-                        node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
-                    }
-
-                    if (node.op1type === "pay") { }
-                    else if (node.op1Templated) { msg.payload = mustache.render(node.op1,msg); }
-                    else if (node.op1type !== "nul") {
-                        msg.payload = RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg);
-                    }
-
-                    if (node.duration === 0) { node.topics[topic].tout = 0; }
-                    else if (node.loop === true) {
-                        /* istanbul ignore else  */
-                        if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
-                        /* istanbul ignore else  */
-                        if (node.op1type !== "nul") {
-                            var msg2 = RED.util.cloneMessage(msg);
-                            node.topics[topic].tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); }, node.duration);
-                        }
-                    }
-                    else {
-                        if (!node.topics[topic].tout) {
-                            node.topics[topic].tout = setTimeout(function() {
-                                var msg2 = null;
-                                if (node.op2type !== "nul") {
-                                    msg2 = RED.util.cloneMessage(msg);
-                                    if (node.op2type === "flow" || node.op2type === "global") {
-                                        node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
-                                    }
-                                    msg2.payload = node.topics[topic].m2;
-                                    delete node.topics[topic];
-                                    node.send(msg2);
+                        promise = new Promise((resolve,reject) => {
+                            RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg,(err,value) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    node.topics[topic].m2 = value;
+                                    resolve();
                                 }
-                                else { delete node.topics[topic]; }
-                                node.status({});
-                            }, node.duration);
-                        }
+                            });
+                        });
                     }
-                    node.status({fill:"blue",shape:"dot",text:" "});
-                    if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
+
+                    return promise.then(() => {
+                        promise = Promise.resolve();
+                        if (node.op1type === "pay") { }
+                        else if (node.op1Templated) { msg.payload = mustache.render(node.op1,msg); }
+                        else if (node.op1type !== "nul") {
+                            promise = new Promise((resolve,reject) => {
+                                RED.util.evaluateNodeProperty(node.op1,node.op1type,node,msg,(err,value) => {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        msg.payload = value;
+                                        resolve();
+                                    }
+                                });
+                            });
+                        }
+                        return promise.then(() => {
+                            if (node.duration === 0) { node.topics[topic].tout = 0; }
+                            else if (node.loop === true) {
+                                /* istanbul ignore else  */
+                                if (node.topics[topic].tout) { clearInterval(node.topics[topic].tout); }
+                                /* istanbul ignore else  */
+                                if (node.op1type !== "nul") {
+                                    var msg2 = RED.util.cloneMessage(msg);
+                                    node.topics[topic].tout = setInterval(function() { node.send(RED.util.cloneMessage(msg2)); }, node.duration);
+                                }
+                            }
+                            else {
+                                if (!node.topics[topic].tout) {
+                                    node.topics[topic].tout = setTimeout(function() {
+                                        var msg2 = null;
+                                        if (node.op2type !== "nul") {
+                                            var promise = Promise.resolve();
+                                            msg2 = RED.util.cloneMessage(msg);
+                                            if (node.op2type === "flow" || node.op2type === "global") {
+                                                promise = new Promise((resolve,reject) => {
+                                                    RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg,(err,value) => {
+                                                        if (err) {
+                                                            reject(err);
+                                                        } else {
+                                                            node.topics[topic].m2 = value;
+                                                            resolve();
+                                                        }
+                                                    });
+                                                });
+                                            }
+                                            promise.then(() => {
+                                                msg2.payload = node.topics[topic].m2;
+                                                delete node.topics[topic];
+                                                node.send(msg2);
+                                                node.status({});
+                                            }).catch(err => {
+                                                node.error(err);
+                                            });
+                                        } else {
+                                            delete node.topics[topic];
+                                            node.status({});
+                                        }
+
+                                    }, node.duration);
+                                }
+                            }
+                            node.status({fill:"blue",shape:"dot",text:" "});
+                            if (node.op1type !== "nul") { node.send(RED.util.cloneMessage(msg)); }
+                        });
+                    });
                 }
                 else if ((node.extend === "true" || node.extend === true) && (node.duration > 0)) {
                     /* istanbul ignore else  */
@@ -138,25 +213,43 @@ module.exports = function(RED) {
                     if (node.topics[topic].tout) { clearTimeout(node.topics[topic].tout); }
                     node.topics[topic].tout = setTimeout(function() {
                         var msg2 = null;
+                        var promise = Promise.resolve();
+
                         if (node.op2type !== "nul") {
                             if (node.op2type === "flow" || node.op2type === "global") {
-                                node.topics[topic].m2 = RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg);
-                            }
-                            if (node.topics[topic] !== undefined) {
-                                msg2 = RED.util.cloneMessage(msg);
-                                msg2.payload = node.topics[topic].m2;
+                                promise = new Promise((resolve,reject) => {
+                                    RED.util.evaluateNodeProperty(node.op2,node.op2type,node,msg,(err,value) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            node.topics[topic].m2 = value;
+                                            resolve();
+                                        }
+                                    });
+                                });
                             }
                         }
-                        delete node.topics[topic];
-                        node.status({});
-                        node.send(msg2);
+                        promise.then(() => {
+                            if (node.op2type !== "nul") {
+                                if (node.topics[topic] !== undefined) {
+                                    msg2 = RED.util.cloneMessage(msg);
+                                    msg2.payload = node.topics[topic].m2;
+                                }
+                            }
+                            delete node.topics[topic];
+                            node.status({});
+                            node.send(msg2);
+                        }).catch(err => {
+                            node.error(err);
+                        });
                     }, node.duration);
                 }
                 else {
                     if (node.op2type === "payl") { node.topics[topic].m2 = RED.util.cloneMessage(msg.payload); }
                 }
             }
-        });
+            return Promise.resolve();
+        }
         this.on("close", function() {
             for (var t in node.topics) {
                 /* istanbul ignore else  */

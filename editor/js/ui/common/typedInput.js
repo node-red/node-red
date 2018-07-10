@@ -14,10 +14,38 @@
  * limitations under the License.
  **/
 (function($) {
+    var contextParse = function(v) {
+        var parts = RED.utils.parseContextKey(v);
+        return {
+            option: parts.store,
+            value: parts.key
+        }
+    }
+    var contextExport = function(v,opt) {
+        if (!opt) {
+            return v;
+        }
+        var store = ((typeof opt === "string")?opt:opt.value)
+        if (store !== RED.settings.context.default) {
+            return "#:("+store+")::"+v;
+        } else {
+            return v;
+        }
+    }
     var allOptions = {
         msg: {value:"msg",label:"msg.",validate:RED.utils.validatePropertyExpression},
-        flow: {value:"flow",label:"flow.",validate:RED.utils.validatePropertyExpression},
-        global: {value:"global",label:"global.",validate:RED.utils.validatePropertyExpression},
+        flow: {value:"flow",label:"flow.",hasValue:true,
+            options:[],
+            validate:RED.utils.validatePropertyExpression,
+            parse: contextParse,
+            export: contextExport
+        },
+        global: {value:"global",label:"global.",hasValue:true,
+            options:[],
+            validate:RED.utils.validatePropertyExpression,
+            parse: contextParse,
+            export: contextExport
+        },
         str: {value:"str",label:"string",icon:"red/images/typedInput/az.png"},
         num: {value:"num",label:"number",icon:"red/images/typedInput/09.png",validate:/^[+-]?[0-9]*\.?[0-9]*([eE][-+]?[0-9]+)?$/},
         bool: {value:"bool",label:"boolean",icon:"red/images/typedInput/bool.png",options:["true","false"]},
@@ -87,11 +115,23 @@
 
     $.widget( "nodered.typedInput", {
         _create: function() {
+            try {
             if (!nlsd && RED && RED._) {
                 for (var i in allOptions) {
                     if (allOptions.hasOwnProperty(i)) {
                         allOptions[i].label = RED._("typedInput.type."+i,{defaultValue:allOptions[i].label});
                     }
+                }
+                var contextStores = RED.settings.context.stores;
+                var contextOptions = contextStores.map(function(store) {
+                    return {value:store,label: store, icon:'<i class="red-ui-typedInput-icon fa fa-database" style="color: #'+(store==='memory'?'ddd':'777')+'"></i>'}
+                })
+                if (contextOptions.length < 2) {
+                    allOptions.flow.options = [];
+                    allOptions.global.options = [];
+                } else {
+                    allOptions.flow.options = contextOptions;
+                    allOptions.global.options = contextOptions;
                 }
             }
             nlsd = true;
@@ -170,6 +210,9 @@
             // explicitly set optionSelectTrigger display to inline-block otherwise jQ sets it to 'inline'
             this.optionSelectTrigger = $('<button tabindex="0" class="red-ui-typedInput-option-trigger" style="display:inline-block"><span class="red-ui-typedInput-option-caret"><i class="red-ui-typedInput-icon fa fa-sort-desc"></i></span></button>').appendTo(this.uiSelect);
             this.optionSelectLabel = $('<span class="red-ui-typedInput-option-label"></span>').prependTo(this.optionSelectTrigger);
+            RED.popover.tooltip(this.optionSelectLabel,function() {
+                return that.optionValue;
+            });
             this.optionSelectTrigger.click(function(event) {
                 event.preventDefault();
                 that._showOptionSelectMenu();
@@ -186,6 +229,9 @@
 
             this.optionExpandButton = $('<button tabindex="0" class="red-ui-typedInput-option-expand" style="display:inline-block"><i class="red-ui-typedInput-icon fa fa-ellipsis-h"></i></button>').appendTo(this.uiSelect);
             this.type(this.options.default||this.typeList[0].value);
+        }catch(err) {
+            console.log(err.stack);
+        }
         },
         _showTypeMenu: function() {
             if (this.typeList.length > 1) {
@@ -467,7 +513,9 @@
                 var opt = this.typeMap[type];
                 if (opt && this.propertyType !== type) {
                     this.propertyType = type;
-                    this.typeField.val(type);
+                    if (this.typeField) {
+                        this.typeField.val(type);
+                    }
                     this.selectLabel.empty();
                     var image;
                     if (opt.icon) {
@@ -539,19 +587,31 @@
                                     var parts = opt.parse(this.input.val());
                                     if (parts.option) {
                                         selectedOption = parts.option;
+                                        if (!this.activeOptions.hasOwnProperty(selectedOption)) {
+                                            parts.option = Object.keys(this.activeOptions)[0];
+                                            selectedOption = parts.option
+                                        }
                                     }
                                     this.input.val(parts.value);
                                     if (opt.export) {
                                         this.element.val(opt.export(parts.value,parts.option||selectedOption));
                                     }
                                 }
-
                                 if (typeof selectedOption === "string") {
                                     this.optionValue = selectedOption;
-                                    this._updateOptionSelectLabel(this.activeOptions[selectedOption]);
-                                } else {
+                                    if (!this.activeOptions.hasOwnProperty(selectedOption)) {
+                                        selectedOption = Object.keys(this.activeOptions)[0];
+                                    }
+                                    if (!selectedOption) {
+                                        this.optionSelectTrigger.hide();
+                                    } else {
+                                        this._updateOptionSelectLabel(this.activeOptions[selectedOption]);
+                                    }
+                                } else if (selectedOption) {
                                     this.optionValue = selectedOption.value;
                                     this._updateOptionSelectLabel(selectedOption);
+                                } else {
+                                    this.optionSelectTrigger.hide();
                                 }
                             }
                         }
@@ -574,15 +634,17 @@
                             }
                             this.elementDiv.show();
                         }
-                        if (opt.expand && typeof opt.expand === 'function') {
-                            this.optionExpandButton.show();
-                            this.optionExpandButton.off('click');
-                            this.optionExpandButton.on('click',function(evt) {
-                                evt.preventDefault();
-                                opt.expand.call(that);
-                            })
-                        } else {
-                            this.optionExpandButton.hide();
+                        if (this.optionExpandButton) {
+                            if (opt.expand && typeof opt.expand === 'function') {
+                                this.optionExpandButton.show();
+                                this.optionExpandButton.off('click');
+                                this.optionExpandButton.on('click',function(evt) {
+                                    evt.preventDefault();
+                                    opt.expand.call(that);
+                                })
+                            } else {
+                                this.optionExpandButton.hide();
+                            }
                         }
                         this.input.trigger('change',this.propertyType,this.value());
                     }

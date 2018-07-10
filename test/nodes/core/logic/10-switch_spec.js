@@ -460,7 +460,7 @@ describe('switch Node', function() {
                 } catch(err) {
                     done(err);
                 }
-            },100)
+            },500)
         });
     });
 
@@ -599,7 +599,7 @@ describe('switch Node', function() {
     it('should take head of message sequence (w. context)', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"head","v":"count",vt:"global"}],checkall:false,repair:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [0, 1, 2], true, 
+        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [0, 1, 2], true,
                                      function(node) {
                                          node.context().global.set("count", 3);
                                      }, done);
@@ -642,7 +642,7 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, true, 9, done);
     });
-    
+
     it('should be able to use $I in JSONata expression', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"jsonata_exp","v":"$I % 2 = 1",vt:"jsonata"}],checkall:true,repair:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -821,4 +821,24 @@ describe('switch Node', function() {
             n1.receive({payload:1, parts:{index:0, count:4, id:222}});
         });
     });
+
+    it('should handle invalid jsonata expression', function(done) {
+
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$invalidExpression(payload)",propertyType:"jsonata",rules:[{"t":"btwn","v":"$sqrt(16)","vt":"jsonata","v2":"$sqrt(36)","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("switchNode1");
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "switch";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "switchNode1");
+                evt.should.have.property('type', "switch");
+                done();
+            }, 150);
+            n1.receive({payload:1});
+        });
+    });
+
 });

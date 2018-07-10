@@ -19,30 +19,37 @@ var log = require("../../log");
 var memory = require("./memory");
 
 var settings;
+
+// A map of scope id to context instance
 var contexts = {};
-var globalContext = null;
-var externalContexts = {};
-var hasExternalContext = false;
+
+// A map of store name to instance
+var stores = {};
+var storeList = [];
+var defaultStore;
+
+// Whether there context storage has been configured or left as default
+var hasConfiguredStore = false;
+
 
 function init(_settings) {
     settings = _settings;
-    externalContexts = {};
-
-    // init memory plugin
+    stores = {};
     var seed = settings.functionGlobalContext || {};
-    externalContexts["_"] = memory();
-    externalContexts["_"].setGlobalContext(seed);
-    globalContext = createContext("global",seed);
-    contexts['global'] = globalContext;
+    contexts['global'] = createContext("global",seed);
+    stores["_"] = new memory();
+    defaultStore = "memory";
 }
 
 function load() {
     return new Promise(function(resolve,reject) {
         // load & init plugins in settings.contextStorage
-        var plugins = settings.contextStorage;
+        var plugins = settings.contextStorage || {};
         var defaultIsAlias = false;
         var promises = [];
-        if (plugins) {
+        if (plugins && Object.keys(plugins).length > 0) {
+            var hasDefault = plugins.hasOwnProperty('default');
+            var defaultName;
             for (var pluginName in plugins) {
                 if (plugins.hasOwnProperty(pluginName)) {
                     // "_" is a reserved name - do not allow it to be overridden
@@ -58,6 +65,9 @@ function load() {
                         }
                         defaultIsAlias = true;
                         continue;
+                    }
+                    if (!hasDefault && !defaultName) {
+                        defaultName = pluginName;
                     }
                     var plugin;
                     if (plugins[pluginName].hasOwnProperty("module")) {
@@ -79,7 +89,7 @@ function load() {
                         }
                         try {
                             // Create a new instance of the plugin by calling its module function
-                            externalContexts[pluginName] = plugin(config);
+                            stores[pluginName] = plugin(config);
                         } catch(err) {
                             return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
                         }
@@ -91,23 +101,41 @@ function load() {
             }
 
             // Open all of the configured contexts
-            for (var plugin in externalContexts) {
-                if (externalContexts.hasOwnProperty(plugin)) {
-                    promises.push(externalContexts[plugin].open());
+            for (var plugin in stores) {
+                if (stores.hasOwnProperty(plugin)) {
+                    promises.push(stores[plugin].open());
                 }
             }
-
-            // If 'default' is an alias, point it at the right module - we have already
-            // checked that it exists
-            if (defaultIsAlias) {
-                externalContexts["default"] =  externalContexts[plugins["default"]];
+            // There is a 'default' listed in the configuration
+            if (hasDefault) {
+                // If 'default' is an alias, point it at the right module - we have already
+                // checked that it exists. If it isn't an alias, then it will
+                // already be set to a configured store
+                if (defaultIsAlias) {
+                    stores["_"] =  stores[plugins["default"]];
+                    defaultStore = plugins["default"];
+                } else {
+                    stores["_"] = stores["default"];
+                    defaultStore = "default";
+                }
+            } else if (defaultName) {
+                // No 'default' listed, so pick first in list as the default
+                stores["_"] = stores[defaultName];
+                defaultStore = defaultName;
+                defaultIsAlias = true;
+            } else {
+                // else there were no stores list the config object - fall through
+                // to below where we default to a memory store
+                storeList = ["memory"];
+                defaultStore = "memory";
             }
-        }
-
-        if (promises.length === 0) {
-            promises.push(externalContexts["_"].open())
+            hasConfiguredStore = true;
+            storeList = Object.keys(stores).filter(n=>!(defaultIsAlias && n==="default") && n!== "_");
         } else {
-            hasExternalContext = true;
+            // No configured plugins
+            promises.push(stores["_"].open())
+            storeList = ["memory"];
+            defaultStore = "memory";
         }
         return resolve(Promise.all(promises));
     });
@@ -122,12 +150,12 @@ function copySettings(config, settings){
 }
 
 function getContextStorage(storage) {
-    if (externalContexts.hasOwnProperty(storage)) {
+    if (stores.hasOwnProperty(storage)) {
         // A known context
-        return externalContexts[storage];
-    } else if (externalContexts.hasOwnProperty("default")) {
+        return stores[storage];
+    } else if (stores.hasOwnProperty("_")) {
         // Not known, but we have a default to fall back to
-        return externalContexts["default"];
+        return stores["_"];
     } else {
         // Not known and no default configured
         var contextError = new Error(log._("context.error-use-undefined-storage", {storage:storage}));
@@ -136,34 +164,61 @@ function getContextStorage(storage) {
     }
 }
 
+
 function createContext(id,seed) {
+    // Seed is only set for global context - sourced from functionGlobalContext
     var scope = id;
     var obj = seed || {};
-
+    var seedKeys;
+    if (seed) {
+        seedKeys = Object.keys(seed);
+    }
     obj.get = function(key, storage, callback) {
         var context;
         if (!storage && !callback) {
-            context = externalContexts["_"];
+            context = stores["_"];
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (typeof callback !== 'function'){
                 throw new Error("Callback must be a function");
             }
             context = getContextStorage(storage);
         }
-        return context.get(scope, key, callback);
+        if (seed) {
+            // Get the value from the underlying store. If it is undefined,
+            // check the seed for a default value.
+            if (callback) {
+                context.get(scope,key,function(err, v) {
+                    if (v === undefined) {
+                        callback(err, seed[key]);
+                    } else {
+                        callback(err, v);
+                    }
+                })
+            } else {
+                // No callback, attempt to do this synchronously
+                var storeValue = context.get(scope,key);
+                if (storeValue === undefined) {
+                    return seed[key];
+                } else {
+                    return storeValue;
+                }
+            }
+        } else {
+            return context.get(scope, key, callback);
+        }
     };
     obj.set = function(key, value, storage, callback) {
         var context;
         if (!storage && !callback) {
-            context = externalContexts["_"];
+            context = stores["_"];
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (callback && typeof callback !== 'function') {
                 throw new Error("Callback must be a function");
@@ -175,18 +230,29 @@ function createContext(id,seed) {
     obj.keys = function(storage, callback) {
         var context;
         if (!storage && !callback) {
-            context = externalContexts["_"];
+            context = stores["_"];
         } else {
             if (typeof storage === 'function') {
                 callback = storage;
-                storage = "default";
+                storage = "_";
             }
             if (typeof callback !== 'function') {
                 throw new Error("Callback must be a function");
             }
             context = getContextStorage(storage);
         }
-        return context.keys(scope, callback);
+        if (seed) {
+            if (callback) {
+                context.keys(scope, function(err,keys) {
+                    callback(err,Array.from(new Set(seedKeys.concat(keys)).keys()));
+                });
+            } else {
+                var keys = context.keys(scope);
+                return Array.from(new Set(seedKeys.concat(keys)).keys())
+            }
+        } else {
+            return context.keys(scope, callback);
+        }
     };
     return obj;
 }
@@ -203,21 +269,20 @@ function getContext(localId,flowId) {
     if (flowId) {
         newContext.flow = getContext(flowId);
     }
-    if (globalContext) {
-        newContext.global = globalContext;
-    }
+    newContext.global = contexts['global'];
     contexts[contextId] = newContext;
     return newContext;
 }
 
 function deleteContext(id,flowId) {
-    if(!hasExternalContext){
+    if(!hasConfiguredStore){
+        // only delete context if there's no configured storage.
         var contextId = id;
         if (flowId) {
             contextId = id+":"+flowId;
         }
         delete contexts[contextId];
-        return externalContexts["_"].delete(contextId);
+        return stores["_"].delete(contextId);
     }else{
         return Promise.resolve();
     }
@@ -225,9 +290,9 @@ function deleteContext(id,flowId) {
 
 function clean(flowConfig) {
     var promises = [];
-    for(var plugin in externalContexts){
-        if(externalContexts.hasOwnProperty(plugin)){
-            promises.push(externalContexts[plugin].clean(Object.keys(flowConfig.allNodes)));
+    for(var plugin in stores){
+        if(stores.hasOwnProperty(plugin)){
+            promises.push(stores[plugin].clean(Object.keys(flowConfig.allNodes)));
         }
     }
     for (var id in contexts) {
@@ -243,17 +308,22 @@ function clean(flowConfig) {
 
 function close() {
     var promises = [];
-    for(var plugin in externalContexts){
-        if(externalContexts.hasOwnProperty(plugin)){
-            promises.push(externalContexts[plugin].close());
+    for(var plugin in stores){
+        if(stores.hasOwnProperty(plugin)){
+            promises.push(stores[plugin].close());
         }
     }
     return Promise.all(promises);
 }
 
+function listStores() {
+    return {default:defaultStore,stores:storeList};
+}
+
 module.exports = {
     init: init,
     load: load,
+    listStores: listStores,
     get: getContext,
     delete: deleteContext,
     clean: clean,

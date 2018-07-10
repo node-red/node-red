@@ -29,7 +29,7 @@ describe('localfilesystem',function() {
     });
 
     beforeEach(function() {
-        context = LocalFileSystem({dir: resourcesDir});
+        context = LocalFileSystem({dir: resourcesDir, cache: false});
         return context.open();
     });
 
@@ -308,7 +308,7 @@ describe('localfilesystem',function() {
                                                 done();
                                             });
                                         });
-                                    });
+                                    }).catch(done);
                                 });
                             });
                         });

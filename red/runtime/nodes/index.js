@@ -222,5 +222,6 @@ module.exports = {
 
     // Contexts
     loadContextsPlugin: context.load,
-    closeContextsPlugin: context.close
+    closeContextsPlugin: context.close,
+    listContextStores: context.listStores
 };

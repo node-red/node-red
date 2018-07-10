@@ -14,9 +14,38 @@
  * limitations under the License.
  **/
 
+/**
+ * Local file-system based context storage
+ *
+ * Configuration options:
+ * {
+ *    base: "contexts",        // the base directory to use
+ *                             // default: "contexts"
+ *    dir: "/path/to/storage", // the directory to create the base directory in
+ *                             // default: settings.userDir
+ *    cache: true              // whether to cache contents in memory
+ *                             // default: true
+ *  }
+ *
+ *
+ *  $HOME/.node-red/contexts
+ *  ├── global
+ *  │     └── global_context.json
+ *  ├── <id of Flow 1>
+ *  │     ├── flow_context.json
+ *  │     ├── <id of Node a>.json
+ *  │     └── <id of Node b>.json
+ *  └── <id of Flow 2>
+ *         ├── flow_context.json
+ *         ├── <id of Node x>.json
+ *         └── <id of Node y>.json
+ */
+
 var fs = require('fs-extra');
 var path = require("path");
 var util = require("../../util");
+
+var MemoryStore = require("./memory");
 
 function getStoragePath(storageBaseDir, scope) {
     if(scope.indexOf(":") === -1){
@@ -76,10 +105,54 @@ function loadFile(storagePath){
 function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getBasePath(this.config);
+    if (config.hasOwnProperty('cache')?config.cache:true) {
+        this.cache = MemoryStore({});
+    }
 }
 
 LocalFileSystem.prototype.open = function(){
-    return Promise.resolve();
+    var self = this;
+    if (this.cache) {
+        var scopes = [];
+        var promises = [];
+        var subdirs = [];
+        var subdirPromises = [];
+        return fs.readdir(self.storageBaseDir).then(function(dirs){
+            dirs.forEach(function(fn) {
+                var p = getStoragePath(self.storageBaseDir ,fn)+".json";
+                scopes.push(fn);
+                promises.push(loadFile(p));
+                subdirs.push(path.join(self.storageBaseDir,fn));
+                subdirPromises.push(fs.readdir(path.join(self.storageBaseDir,fn)));
+            })
+            return Promise.all(subdirPromises);
+        }).then(function(dirs) {
+            dirs.forEach(function(files,i) {
+                files.forEach(function(fn) {
+                    if (fn !== 'flow.json' && fn !== 'global.json') {
+                        scopes.push(fn.substring(0,fn.length-5)+":"+scopes[i]);
+                        promises.push(loadFile(path.join(subdirs[i],fn)))
+                    }
+                });
+            })
+            return Promise.all(promises);
+        }).then(function(res) {
+            scopes.forEach(function(scope,i) {
+                var data = res[i]?JSON.parse(res[i]):{};
+                Object.keys(data).forEach(function(key) {
+                    self.cache.set(scope,key,data[key]);
+                })
+            });
+        }).catch(function(err){
+            if(err.code == 'ENOENT') {
+                return fs.mkdir(self.storageBaseDir);
+            }else{
+                return Promise.reject(err);
+            }
+        });
+    } else {
+        return Promise.resolve();
+    }
 }
 
 LocalFileSystem.prototype.close = function(){
@@ -87,6 +160,9 @@ LocalFileSystem.prototype.close = function(){
 }
 
 LocalFileSystem.prototype.get = function(scope, key, callback) {
+    if (this.cache) {
+        return this.cache.get(scope,key,callback);
+    }
     if(typeof callback !== "function"){
         throw new Error("Callback must be a function");
     }
@@ -102,7 +178,7 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
     });
 };
 
-LocalFileSystem.prototype.set =function(scope, key, value, callback) {
+LocalFileSystem.prototype._set = function(scope, key, value, callback) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     loadFile(storagePath + ".json").then(function(data){
         var obj = data ? JSON.parse(data) : {}
@@ -117,9 +193,25 @@ LocalFileSystem.prototype.set =function(scope, key, value, callback) {
             callback(err);
         }
     });
+}
+
+LocalFileSystem.prototype.set = function(scope, key, value, callback) {
+    if (this.cache) {
+        this.cache.set(scope,key,value,callback);
+        // With cache enabled, no need to re-read the file prior to writing.
+        var newContext = this.cache._export()[scope];
+        var storagePath = getStoragePath(this.storageBaseDir ,scope);
+        fs.outputFile(storagePath + ".json", JSON.stringify(newContext, undefined, 4), "utf8").catch(function(err) {
+        });
+    } else {
+        this._set(scope,key,value,callback);
+    }
 };
 
 LocalFileSystem.prototype.keys = function(scope, callback){
+    if (this.cache) {
+        return this.cache.keys(scope,callback);
+    }
     if(typeof callback !== "function"){
         throw new Error("Callback must be a function");
     }
@@ -136,29 +228,45 @@ LocalFileSystem.prototype.keys = function(scope, callback){
 };
 
 LocalFileSystem.prototype.delete = function(scope){
-    var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    return fs.remove(storagePath + ".json");
+    var cachePromise;
+    if (this.cache) {
+        cachePromise = this.cache.delete(scope);
+    } else {
+        cachePromise = Promise.resolve();
+    }
+    var that = this;
+    return cachePromise.then(function() {
+        var storagePath = getStoragePath(that.storageBaseDir,scope);
+        return fs.remove(storagePath + ".json");
+    });
 }
 
 LocalFileSystem.prototype.clean = function(activeNodes){
     var self = this;
-    return fs.readdir(self.storageBaseDir).then(function(dirs){
-        return Promise.all(dirs.reduce(function(result, item){
-            if(item !== "global" && activeNodes.indexOf(item) === -1){
-                result.push(fs.remove(path.join(self.storageBaseDir,item)));
+    var cachePromise;
+    if (this.cache) {
+        cachePromise = this.cache.clean(activeNodes);
+    } else {
+        cachePromise = Promise.resolve();
+    }
+    return cachePromise.then(function() {
+        return fs.readdir(self.storageBaseDir).then(function(dirs){
+            return Promise.all(dirs.reduce(function(result, item){
+                if(item !== "global" && activeNodes.indexOf(item) === -1){
+                    result.push(fs.remove(path.join(self.storageBaseDir,item)));
+                }
+                return result;
+            },[]));
+        }).catch(function(err){
+            if(err.code == 'ENOENT') {
+                return Promise.resolve();
+            }else{
+                return Promise.reject(err);
             }
-            return result;
-        },[]));
-    }).catch(function(err){
-        if(err.code == 'ENOENT') {
-            return Promise.resolve();
-        }else{
-            return Promise.reject(err);
-        }
+        });
     });
 }
 
 module.exports = function(config){
     return new LocalFileSystem(config);
 };
-

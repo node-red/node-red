@@ -59,7 +59,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {}
@@ -73,6 +74,7 @@ describe("api/editor/settings", function() {
                     }
                     res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
                     res.body.should.have.property("version","testVersion");
+                    res.body.should.have.property("context",{default: "foo", stores: ["foo","bar"]});
                     res.body.should.have.property("paletteCategories",["red","blue","green"]);
                     res.body.should.have.property("editorTheme",{test:456});
                     res.body.should.have.property("testNodeSetting","helloWorld");
@@ -95,7 +97,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {}
@@ -130,7 +133,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {
@@ -169,7 +173,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {
@@ -211,7 +216,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {
@@ -248,8 +254,8 @@ describe("api/editor/settings", function() {
                 },
                 nodes: {
                     paletteEditorEnabled: function() { return false; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-
+                    getCredentialKeyType: function() { return "test-key-type"},
+                    listContextStores: function() { return {default: "foo", stores: ["foo","bar"]}}
                 },
                 log: { error: console.error },
                 storage: {}
