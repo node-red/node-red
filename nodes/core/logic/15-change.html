@@ -54,16 +54,9 @@
         outputs: 1,
         icon: "swap.png",
         label: function() {
-            function prop2name(type, prop) {
-                var len = prop.length;
-                if(((type === 'flow') || (type === 'global')) &&
-                   (len > 6) && (prop[0] === '#') && (prop[1] === ':')) {
-                    var pos = prop.indexOf(")::", 2);
-                    if (pos > 0) {
-                        return type+"."+prop.substring(pos +3);
-                    }
-                }
-                return type+"."+prop;
+            function prop2name(type, key) {
+                var result = RED.utils.parseContextKey(key);
+                return type +"." +result.key;
             }
             if (this.name) {
                 return this.name;
