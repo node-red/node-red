@@ -99,11 +99,23 @@
         }
         return v;
     }
+    function prop2name(prop) {
+        var len = prop.length;
+        if((len > 6) && (prop[0] === '#') && (prop[1] === ':')) {
+            var pos = prop.indexOf(")::", 2);
+            if (pos > 0) {
+                return prop.substring(pos +3);
+            }
+        }
+        return prop;
+    }
     function getValueLabel(t,v) {
         if (t === 'str') {
             return '"'+clipValueLength(v)+'"';
-        } else if (t === 'msg' || t==='flow' || t==='global') {
+        } else if (t === 'msg') {
             return t+"."+clipValueLength(v);
+        } else if (t === 'flow' || t === 'global') {
+            return t+"."+clipValueLength(prop2name(v));
         }
         return clipValueLength(v);
     }
