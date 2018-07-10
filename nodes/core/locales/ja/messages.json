@@ -414,6 +414,10 @@
             "url1": "URLには ws:&#47;&#47; または wss:&#47;&#47; スキーマを使用して、存在するwebsocketリスナを設定してください。",
             "url2": "標準では <code>payload</code> がwebsocketから送信、受信されるデータを持ちます。クライアントはJSON形式の文字列としてメッセージ全体を送信、受信するよう設定できます。"
         },
+        "status": {
+            "connected": "接続数 __count__",
+            "connected_plural": "接続数 __count__"
+        },
         "errors": {
             "connect-error": "ws接続でエラーが発生しました: ",
             "send-error": "送信中にエラーが発生しました: ",

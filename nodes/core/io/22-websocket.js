@@ -212,11 +212,11 @@ module.exports = function(RED) {
         if (this.serverConfig) {
             this.serverConfig.registerInputNode(this);
             // TODO: nls
-            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
-            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:RED._("websocket.status.connected",{count:n})}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"common.status.error"}); });
             this.serverConfig.on('closed', function(n) {
-                if (n > 0) { node.status({fill:"green",shape:"dot",text:"connected "+n}); }
-                else { node.status({fill:"red",shape:"ring",text:"disconnected"}); }
+                if (n > 0) { node.status({fill:"green",shape:"dot",text:RED._("websocket.status.connected",{count:n})}); }
+                else { node.status({fill:"red",shape:"ring",text:"common.status.disconnected"}); }
             });
         } else {
             this.error(RED._("websocket.errors.missing-conf"));
@@ -240,11 +240,11 @@ module.exports = function(RED) {
         }
         else {
             // TODO: nls
-            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:"connected "+n}); });
-            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"error"}); });
+            this.serverConfig.on('opened', function(n) { node.status({fill:"green",shape:"dot",text:RED._("websocket.status.connected",{count:n})}); });
+            this.serverConfig.on('erro', function() { node.status({fill:"red",shape:"ring",text:"common.status.error"}); });
             this.serverConfig.on('closed', function(n) {
-                if (n > 0) { node.status({fill:"green",shape:"dot",text:"connected "+n}); }
-                else { node.status({fill:"red",shape:"ring",text:"disconnected"}); }
+                if (n > 0) { node.status({fill:"green",shape:"dot",text:RED._("websocket.status.connected",{count:n})}); }
+                else { node.status({fill:"red",shape:"ring",text:"common.status.disconnected"}); }
             });
         }
         this.on("input", function(msg) {
