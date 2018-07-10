@@ -926,8 +926,8 @@
         "ascending" : "ascending",
         "descending" : "descending",
         "as-number" : "as number",
-        "invalid-exp" : "invalid JSONata expression in sort node",
-        "too-many" : "too many pending messages in sort node",
+        "invalid-exp" : "Invalid JSONata expression in sort node: __message__",
+        "too-many" : "Too many pending messages in sort node",
         "clear" : "clear pending message in sort node"
     },
     "batch" : {

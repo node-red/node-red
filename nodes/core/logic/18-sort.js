@@ -61,7 +61,7 @@ module.exports = function(RED) {
                 key_exp = RED.util.prepareJSONataExpression(key_exp, this);
             }
             catch (e) {
-                node.error(RED._("sort.invalid-exp"));
+                node.error(RED._("sort.invalid-exp",{message:e.toString()}));
                 return;
             }
         }
@@ -86,10 +86,14 @@ module.exports = function(RED) {
                 var evaluatedDataPromises = msgs.map(msg => {
                     return new Promise((resolve,reject) => {
                         RED.util.evaluateJSONataExpression(key_exp, msg, (err, result) => {
-                            resolve({
-                                item: msg,
-                                sortValue: result
-                            })
+                            if (err) {
+                                reject(RED._("sort.invalid-exp",{message:err.toString()}));
+                            } else {
+                                resolve({
+                                    item: msg,
+                                    sortValue: result
+                                })
+                            }
                         });
                     })
                 });
@@ -130,10 +134,14 @@ module.exports = function(RED) {
                     var evaluatedDataPromises = data.map(elem => {
                         return new Promise((resolve,reject) => {
                             RED.util.evaluateJSONataExpression(key_exp, elem, (err, result) => {
-                                resolve({
-                                    item: elem,
-                                    sortValue: result
-                                })
+                                if (err) {
+                                    reject(RED._("sort.invalid-exp",{message:err.toString()}));
+                                } else {
+                                    resolve({
+                                        item: elem,
+                                        sortValue: result
+                                    })
+                                }
                             });
                         })
                     })
@@ -186,6 +194,7 @@ module.exports = function(RED) {
                         node.send(msg);
                     }
                 }).catch(err => {
+                    node.error(err,msg);
                 });
             }
             var parts = msg.parts;
@@ -209,7 +218,9 @@ module.exports = function(RED) {
             pending_count++;
             if (group.count === msgs.length) {
                 delete pending[gid]
-                sortMessageGroup(group);
+                sortMessageGroup(group).catch(err => {
+                    node.error(err,msg);
+                });
                 pending_count -= msgs.length;
             } else {
                 var max_msgs = max_kept_msgs_count(node);
