@@ -20,6 +20,8 @@ var joinNode = require("../../../../nodes/core/logic/17-split.js");
 var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
 
+var TimeoutForErrorCase = 20; 
+
 describe('SPLIT node', function() {
 
     before(function(done) {
@@ -261,6 +263,126 @@ describe('SPLIT node', function() {
             var b2 = new Buffer.from("341234");
             sn1.receive({payload:b1});
             sn1.receive({payload:b2});
+        });
+    });
+
+    it('should handle invalid spltType (not an array)', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "1", spltType: "bin", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle invalid splt length', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: 0, spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle invalid array splt length', function (done) {
+        var flow = [{ id: "sn1", type: "split", arraySplt: 0, arraySpltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should ceil count value when msg.payload type is string', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle spltBufferString value of undefined', function (done) {
+        var flow = [{ id: "sn1", type: "split", wires: [["sn2"]], splt: "[52]", spltType: "bin" },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("parts");
+                    msg.parts.should.have.property("index");
+                    if (msg.parts.index === 0) { msg.payload.toString().should.equal("123"); done(); }
+                } catch (err) {
+                    done(err);
+                }
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should ceil count value when msg.payload type is Buffer', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            var b = new Buffer.from("123");
+            sn1.receive({ payload: b });
+        });
+    });
+
+    it('should set msg.parts.ch when node.spltType is str', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "str", stream: false, wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            var b = new Buffer.from("123");
+            sn1.receive({ payload: b });
         });
     });
 
@@ -696,6 +818,57 @@ describe('JOIN node', function() {
         });
     });
 
+        it('should manually join things into an array, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"array"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Array();
+                        msg.payload.length.should.equal(3);
+                        msg.payload[0].should.equal(1);
+                        msg.payload[1].should.equal(2);
+                        msg.payload[2].should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
+
+        it('should manually join things into an object, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"object"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Object();
+                        Object.keys(msg.payload).length.should.equal(3);
+                        msg.payload.A.should.equal(1);
+                        msg.payload.B.should.equal(2);
+                        msg.payload.C.should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
     it('should join split strings back into a word', function(done) {
         var flow = [{id:"n1", type:"join", mode:"auto", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
@@ -739,7 +912,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages', function(done) {
+    it('should reduce messages', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -767,7 +940,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages using $I', function(done) {
+    it('should reduce messages using $I', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+$I",
@@ -795,7 +968,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with fixup', function(done) {
+    it('should reduce messages with fixup', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -824,7 +997,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (left)', function(done) {
+    it('should reduce messages (left)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -853,7 +1026,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (right)', function(done) {
+    it('should reduce messages (right)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:true,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -882,7 +1055,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with array result', function(done) {
+    it('should reduce messages with array result', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$append($A,[payload])",
@@ -942,11 +1115,116 @@ describe('JOIN node', function() {
                 evt.should.have.property('type', "join");
                 evt.should.have.property('msg', "join.too-many");
                 done();
-            }, 150);
+            }, TimeoutForErrorCase);
             n1.receive({payload:3, parts:{index:2, count:4, id:222}});
             n1.receive({payload:2, parts:{index:1, count:4, id:222}});
             n1.receive({payload:4, parts:{index:3, count:4, id:222}});
             n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should handle invalid JSON expression"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "invalid expr",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: undefined,
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should concat payload when group.type is array', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.equal("ab");
+                    msg.payload[1].should.equal("cd");
+                    msg.payload[2].should.equal("ef");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "ab", parts: { id: 1, type: "array", ch: ",", index: 0, count: 3, len:2}});
+            n1.receive({ payload: "cd", parts: { id: 1, type: "array", ch: ",", index: 1, count: 3, len:2}});
+            n1.receive({ payload: "ef", parts: { id: 1, type: "array", ch: ",", index: 2, count: 3, len:2}});
+        });
+    });
+
+    it('should concat payload when group.type is buffer and group.joinChar is undefined', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: ",", build: "buffer", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.toString().should.equal("ABC");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: Buffer.from("A"), parts: { id: 1, type: "buffer", index: 0, count: 3 } });
+            n1.receive({ payload: Buffer.from("B"), parts: { id: 1, type: "buffer", index: 1, count: 3 } });
+            n1.receive({ payload: Buffer.from("C"), parts: { id: 1, type: "buffer", index: 2, count: 3 } });
+        });
+    });
+
+    it('should concat payload when group.type is string and group.joinChar is not string', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: ",", build: "buffer", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.toString().should.equal("A0B0C");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: Buffer.from("A"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 0, count: 3 } });
+            n1.receive({ payload: Buffer.from("B"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 1, count: 3 } });
+            n1.receive({ payload: Buffer.from("C"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 2, count: 3 } });
+        });
+    });
+
+    it('should handle msg.parts property when mode is auto and parts or id are missing', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "string", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { type: "string", ch: ",", index: 0, count: 2 } });
+            n1.receive({ payload: "B", parts: { type: "string", ch: ",", index: 1, count: 2 } });
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
         });
     });
 

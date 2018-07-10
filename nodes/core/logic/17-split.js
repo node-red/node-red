@@ -686,10 +686,13 @@ module.exports = function(RED) {
                 } else {
                     if (!isNaN(propertyIndex)) {
                         group.payload[propertyIndex] = property;
+                        group.currentCount++;
                     } else {
-                        group.payload.push(property);
+                        if (property !== undefined) {
+                            group.payload.push(property);
+                            group.currentCount++;
+                        }
                     }
-                    group.currentCount++;
                 }
                 group.msg = Object.assign(group.msg, msg);
                 var tcnt = group.targetCount;

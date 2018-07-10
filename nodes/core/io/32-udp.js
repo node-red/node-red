@@ -63,7 +63,7 @@ module.exports = function(RED) {
             udpInputPortsInUse[this.port] = server;
         }
         else {
-            node.warn(RED._("udp.errors.alreadyused",{port:node.port}));
+            node.log(RED._("udp.errors.alreadyused",{port:node.port}));
             server = udpInputPortsInUse[this.port];  // re-use existing
         }
 
@@ -172,8 +172,7 @@ module.exports = function(RED) {
         if (process.version.indexOf("v0.10") === 0) { opts = node.ipv; }
 
         var sock;
-        var p = this.port;
-        if (node.multicast != "false") { p = this.outport||"0"; }
+        var p = this.outport || this.port || "0";
         if (udpInputPortsInUse[p]) {
             sock = udpInputPortsInUse[p];
             node.log(RED._("udp.status.re-use",{outport:node.outport,host:node.addr,port:node.port}));

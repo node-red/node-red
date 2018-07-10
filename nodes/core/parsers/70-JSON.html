@@ -31,6 +31,8 @@
     <dl class="message-properties">
         <dt>payload<span class="property-type">object | string</span></dt>
         <dd>A JavaScript object or JSON string.</dd>
+        <dt>schema<span class="property-type">object</span></dt>
+        <dd>An optional JSON Schema object to validate the payload against.</dd>
     </dl>
     <h3>Outputs</h3>
     <dl class="message-properties">
@@ -41,6 +43,9 @@
                 <li>If the input is a JavaScript object it creates a JSON string. The string can optionally be well-formatted.</li>
             </ul>
         </dd>
+        <dt>schemaError<span class="property-type">array</span></dt>
+        <dd>If JSON schema validation fails, the catch node will have a <code>schemaError</code> property
+            containing an array of errors.</dd>
     </dl>
     <h3>Details</h3>
     <p>By default, the node operates on <code>msg.payload</code>, but can be configured
@@ -53,6 +58,8 @@
        receives a String, no further checks will be made of the property. It will
        not check the String is valid JSON nor will it reformat it if the format option
        is selected.</p>
+    <p>For more details about JSON Schema you can consult the specification
+    <a href="http://json-schema.org/latest/json-schema-validation.html">here</a>.</p>
 </script>
 
 <script type="text/javascript">

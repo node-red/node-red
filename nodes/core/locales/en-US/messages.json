@@ -697,7 +697,9 @@
         "errors": {
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",
-            "dropped-error": "Failed to convert payload"
+            "dropped-error": "Failed to convert payload",
+            "schema-error": "JSON Schema error",
+            "schema-error-compile": "JSON Schema error: failed to compile schema"
         },
         "label": {
             "o2j": "Object to JSON options",
