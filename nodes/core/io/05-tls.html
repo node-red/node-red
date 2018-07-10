@@ -64,6 +64,11 @@
         <label for="node-config-input-verifyservercert" style="width: calc(100% - 170px);" data-i18n="tls.label.verify-server-cert"></label>
     </div>
     <div class="form-row">
+        <label style="width: 120px;" for="node-config-input-servername"><i class="fa fa-server"></i> <span data-i18n="tls.label.servername"></span></label>
+        <input style="width: calc(100% - 170px);" type="text" id="node-config-input-servername" data-i18n="[placeholder]tls.placeholder.servername">
+    </div>
+    <hr>
+    <div class="form-row">
         <label style="width: 120px;" for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
         <input style="width: calc(100% - 170px);" type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
     </div>
@@ -96,6 +101,7 @@
             certname: {value:""},
             keyname: {value:""},
             caname: {value:""},
+            servername: {value:""},
             verifyservercert: {value: true}
         },
         credentials: {
