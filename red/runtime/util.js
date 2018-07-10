@@ -394,15 +394,44 @@ function prepareJSONataExpression(value,node) {
     })
     expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
     expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
+    expr._node = node;
     return expr;
 }
 
-function evaluateJSONataExpression(expr,msg) {
+function evaluateJSONataExpression(expr,msg,callback) {
     var context = msg;
     if (expr._legacyMode) {
         context = {msg:msg};
     }
-    return expr.evaluate(context);
+    var bindings = {};
+
+    if (callback) {
+        // If callback provided, need to override the pre-assigned sync
+        // context functions to be their async variants
+        bindings.flowContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().flow.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+        bindings.globalContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().global.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+    }
+    return expr.evaluate(context, bindings, callback);
 }
 
 

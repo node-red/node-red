@@ -288,7 +288,7 @@ describe('trigger node', function() {
 
     it('should be able to return things from flow and global context variables', function(done) {
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
-            function(arg1, arg2, arg3, arg4) { return arg1; }
+            function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"flow", op2:"bar", op2type:"global", duration:"20", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -386,7 +386,7 @@ describe('trigger node', function() {
     it('should be able to extend the delay', function(done) {
         this.timeout(5000); // add extra time for flake
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
-            function(arg1, arg2, arg3, arg4) { return arg1; }
+            function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"flow", op1:"foo",  op2:"bar", op2type:"global", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -428,12 +428,10 @@ describe('trigger node', function() {
             n2.on("input", function(msg) {
                 try {
                     if (c === 0) {
-                        console.log(c,Date.now() - ss,msg);
                         msg.should.have.a.property("payload", "Hello");
                         c += 1;
                     }
                     else {
-                        console.log(c,Date.now() - ss,msg);
                         msg.should.have.a.property("payload", "World");
                         (Date.now() - ss).should.be.greaterThan(150);
                         done();

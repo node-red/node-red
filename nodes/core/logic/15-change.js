@@ -98,137 +98,182 @@ module.exports = function(RED) {
             }
         }
 
-        function applyRule(msg,rule) {
-            return new Promise(function(resolve, reject){
-                try {
-                    var property = rule.p;
-                    var value = rule.to;
-                    if (rule.tot === 'json') {
-                        value = JSON.parse(rule.to);
-                    } else if (rule.tot === 'bin') {
-                        value = Buffer.from(JSON.parse(rule.to))
-                    }
-                    var current;
-                    var fromValue;
-                    var fromType;
-                    var fromRE;
-                    if (rule.tot === "msg") {
-                        value = RED.util.getMessageProperty(msg,rule.to);
-                    } else if (rule.tot === 'flow') {
-                        value = node.context().flow.get(rule.to);
-                    } else if (rule.tot === 'global') {
-                        value = node.context().global.get(rule.to);
-                    } else if (rule.tot === 'date') {
-                        value = Date.now();
-                    } else if (rule.tot === 'jsonata') {
-                        try{
-                            value = RED.util.evaluateJSONataExpression(rule.to,msg);
-                        } catch(err) {
-                            node.error(RED._("change.errors.invalid-expr",{error:err.message}),msg);
-                            return;
+        function getToValue(msg,rule) {
+            var value = rule.to;
+            if (rule.tot === 'json') {
+                value = JSON.parse(rule.to);
+            } else if (rule.tot === 'bin') {
+                value = Buffer.from(JSON.parse(rule.to))
+            }
+            if (rule.tot === "msg") {
+                value = RED.util.getMessageProperty(msg,rule.to);
+            } else if (rule.tot === 'flow') {
+                value = node.context().flow.get(rule.to);
+            } else if (rule.tot === 'global') {
+                value = node.context().global.get(rule.to);
+            } else if (rule.tot === 'date') {
+                value = Date.now();
+            } else if (rule.tot === 'jsonata') {
+                return new Promise((resolve,reject) => {
+                    RED.util.evaluateJSONataExpression(rule.to,msg, (err, value) => {
+                        if (err) {
+                            reject(RED._("change.errors.invalid-expr",{error:err.message}))
+                        } else {
+                            resolve(value);
                         }
-                    }
-                    if (rule.t === 'change') {
-                        if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
-                            if (rule.fromt === "msg") {
-                                fromValue = RED.util.getMessageProperty(msg,rule.from);
-                            } else if (rule.fromt === 'flow') {
-                                fromValue = node.context().flow.get(rule.from);
-                            } else if (rule.fromt === 'global') {
-                                fromValue = node.context().global.get(rule.from);
-                            }
-                            if (typeof fromValue === 'number' || fromValue instanceof Number) {
-                                fromType = 'num';
-                            } else if (typeof fromValue === 'boolean') {
-                                fromType = 'bool'
-                            } else if (fromValue instanceof RegExp) {
-                                fromType = 're';
-                                fromRE = fromValue;
-                            } else if (typeof fromValue === 'string') {
-                                fromType = 'str';
-                                fromRE = fromValue.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-                                try {
-                                    fromRE = new RegExp(fromRE, "g");
-                                } catch (e) {
-                                    valid = false;
-                                    reject(RED._("change.errors.invalid-from",{error:e.message}));
-                                    return;
+                    });
+                });
+            }
+            return Promise.resolve(value);
+        }
+        function getFromValue(msg,rule) {
+            var fromValue;
+            var fromType;
+            var fromRE;
+            if (rule.t === 'change') {
+                if (rule.fromt === 'msg' || rule.fromt === 'flow' || rule.fromt === 'global') {
+                    return new Promise((resolve,reject) => {
+                        if (rule.fromt === "msg") {
+                            resolve(RED.util.getMessageProperty(msg,rule.from));
+                        } else if (rule.fromt === 'flow' || rule.fromt === 'global') {
+                            node.context()[rule.fromt].get(rule.from,(err,fromValue) => {
+                                if (err) {
+                                    reject(err);
+                                } else {
+                                    resolve(fromValue);
                                 }
-                            } else {
-                                reject(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)}));
-                                return
+                            });
+                        }
+                    }).then(fromValue => {
+                        if (typeof fromValue === 'number' || fromValue instanceof Number) {
+                            fromType = 'num';
+                        } else if (typeof fromValue === 'boolean') {
+                            fromType = 'bool'
+                        } else if (fromValue instanceof RegExp) {
+                            fromType = 're';
+                            fromRE = fromValue;
+                        } else if (typeof fromValue === 'string') {
+                            fromType = 'str';
+                            fromRE = fromValue.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+                            try {
+                                fromRE = new RegExp(fromRE, "g");
+                            } catch (e) {
+                                reject(new Error(RED._("change.errors.invalid-from",{error:e.message})));
+                                return;
                             }
                         } else {
-                            fromType = rule.fromt;
-                            fromValue = rule.from;
-                            fromRE = rule.fromRE;
+                            reject(new Error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)})));
+                            return;
                         }
-                    }
-                    if (rule.pt === 'msg') {
-                        if (rule.t === 'delete') {
-                            RED.util.setMessageProperty(msg,property,undefined);
-                        } else if (rule.t === 'set') {
-                            RED.util.setMessageProperty(msg,property,value);
-                        } else if (rule.t === 'change') {
-                            current = RED.util.getMessageProperty(msg,property);
-                            if (typeof current === 'string') {
-                                if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
-                                    // str representation of exact from number/boolean
-                                    // only replace if they match exactly
-                                    RED.util.setMessageProperty(msg,property,value);
-                                } else {
-                                    current = current.replace(fromRE,value);
-                                    RED.util.setMessageProperty(msg,property,current);
-                                }
-                            } else if ((typeof current === 'number' || current instanceof Number) && fromType === 'num') {
-                                if (current == Number(fromValue)) {
-                                    RED.util.setMessageProperty(msg,property,value);
-                                }
-                            } else if (typeof current === 'boolean' && fromType === 'bool') {
-                                if (current.toString() === fromValue) {
-                                    RED.util.setMessageProperty(msg,property,value);
-                                }
-                            }
+                        return {
+                            fromType,
+                            fromValue,
+                            fromRE
                         }
-                    }
-                    else {
-                        var target;
-                        if (rule.pt === 'flow') {
-                            target = node.context().flow;
-                        } else if (rule.pt === 'global') {
-                            target = node.context().global;
-                        }
-                        if (target) {
-                            if (rule.t === 'delete') {
-                                target.set(property,undefined);
-                            } else if (rule.t === 'set') {
-                                target.set(property,value);
-                            } else if (rule.t === 'change') {
-                                current = target.get(property);
-                                if (typeof current === 'string') {
-                                    if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
-                                        // str representation of exact from number/boolean
-                                        // only replace if they match exactly
-                                        target.set(property,value);
-                                    } else {
-                                        current = current.replace(fromRE,value);
-                                        target.set(property,current);
-                                    }
-                                } else if ((typeof current === 'number' || current instanceof Number) && fromType === 'num') {
-                                    if (current == Number(fromValue)) {
-                                        target.set(property,value);
-                                    }
-                                } else if (typeof current === 'boolean' && fromType === 'bool') {
-                                    if (current.toString() === fromValue) {
-                                        target.set(property,value);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch(err) {/*console.log(err.stack)*/}
-                resolve(msg);
+                    });
+                } else {
+                    fromType = rule.fromt;
+                    fromValue = rule.from;
+                    fromRE = rule.fromRE;
+                }
+            }
+            return Promise.resolve({
+                fromType,
+                fromValue,
+                fromRE
             });
+        }
+        function applyRule(msg,rule) {
+                var property = rule.p;
+                var current;
+                var fromValue;
+                var fromType;
+                var fromRE;
+                try {
+                return getToValue(msg,rule).then(value => {
+                    return getFromValue(msg,rule).then(fromParts => {
+                        fromValue = fromParts.fromValue;
+                        fromType = fromParts.fromType;
+                        fromRE = fromParts.fromRE;
+                        if (rule.pt === 'msg') {
+                            try {
+                                if (rule.t === 'delete') {
+                                    RED.util.setMessageProperty(msg,property,undefined);
+                                } else if (rule.t === 'set') {
+                                    RED.util.setMessageProperty(msg,property,value);
+                                } else if (rule.t === 'change') {
+                                    current = RED.util.getMessageProperty(msg,property);
+                                    if (typeof current === 'string') {
+                                        if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
+                                            // str representation of exact from number/boolean
+                                            // only replace if they match exactly
+                                            RED.util.setMessageProperty(msg,property,value);
+                                        } else {
+                                            current = current.replace(fromRE,value);
+                                            RED.util.setMessageProperty(msg,property,current);
+                                        }
+                                    } else if ((typeof current === 'number' || current instanceof Number) && fromType === 'num') {
+                                        if (current == Number(fromValue)) {
+                                            RED.util.setMessageProperty(msg,property,value);
+                                        }
+                                    } else if (typeof current === 'boolean' && fromType === 'bool') {
+                                        if (current.toString() === fromValue) {
+                                            RED.util.setMessageProperty(msg,property,value);
+                                        }
+                                    }
+                                }
+                            } catch(err) {}
+                            return msg;
+                        } else if (rule.pt === 'flow' || rule.pt === 'global') {
+                            return new Promise((resolve,reject) => {
+                                var target = node.context()[rule.pt];
+                                var callback = err => {
+                                    if (err) {
+                                        reject(err);
+                                    } else {
+                                        resolve(msg);
+                                    }
+                                }
+                                if (rule.t === 'delete') {
+                                    target.set(property,undefined,callback);
+                                } else if (rule.t === 'set') {
+                                    target.set(property,value,callback);
+                                } else if (rule.t === 'change') {
+                                    target.get(property,(err,current) => {
+                                        if (err) {
+                                            reject(err);
+                                            return;
+                                        }
+                                        if (typeof current === 'string') {
+                                            if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
+                                                // str representation of exact from number/boolean
+                                                // only replace if they match exactly
+                                                target.set(property,value,callback);
+                                            } else {
+                                                current = current.replace(fromRE,value);
+                                                target.set(property,current,callback);
+                                            }
+                                        } else if ((typeof current === 'number' || current instanceof Number) && fromType === 'num') {
+                                            if (current == Number(fromValue)) {
+                                                target.set(property,value,callback);
+                                            }
+                                        } else if (typeof current === 'boolean' && fromType === 'bool') {
+                                            if (current.toString() === fromValue) {
+                                                target.set(property,value,callback);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }).catch(err => {
+                    node.error(err, msg);
+                    return null;
+                });
+            } catch(err) {
+                return Promise.resolve(msg);
+            }
         }
         function applyRules(msg, currentRule) {
             var r = node.rules[currentRule];
