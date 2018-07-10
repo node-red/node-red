@@ -54,6 +54,10 @@
         outputs: 1,
         icon: "swap.png",
         label: function() {
+            function prop2name(type, key) {
+                var result = RED.utils.parseContextKey(key);
+                return type +"." +result.key;
+            }
             if (this.name) {
                 return this.name;
             }
@@ -70,13 +74,13 @@
             } else {
                 if (this.rules.length == 1) {
                     if (this.rules[0].t === "set") {
-                        return this._("change.label.set",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.set",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else if (this.rules[0].t === "change") {
-                        return this._("change.label.change",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.change",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else if (this.rules[0].t === "move") {
-                        return this._("change.label.move",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.move",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else {
-                        return this._("change.label.delete",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.delete",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     }
                 } else {
                     return this._("change.label.changeCount",{count:this.rules.length});
