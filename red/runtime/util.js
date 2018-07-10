@@ -335,7 +335,7 @@ var parseContextStore = function(key) {
 }
 
 function evaluateNodeProperty(value, type, node, msg, callback) {
-    var result;
+    var result = value;
     if (type === 'str') {
         result = ""+value;
     } else if (type === 'num') {
@@ -350,7 +350,16 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
         var data = JSON.parse(value);
         result = Buffer.from(data);
     } else if (type === 'msg' && msg) {
-        result = getMessageProperty(msg,value);
+        try {
+            result = getMessageProperty(msg,value);
+        } catch(err) {
+            if (callback) {
+                callback(err);
+            } else {
+                throw err;
+            }
+            return;
+        }
     } else if ((type === 'flow' || type === 'global') && node) {
         var contextKey = parseContextStore(value);
         result = node.context()[type].get(contextKey.key,contextKey.store,callback);
@@ -366,9 +375,9 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
         result = evaluteEnvProperty(value);
     }
     if (callback) {
-        callback(result);
+        callback(null,result);
     } else {
-        return value;
+        return result;
     }
 }
 
@@ -385,15 +394,44 @@ function prepareJSONataExpression(value,node) {
     })
     expr.registerFunction('clone', cloneMessage, '<(oa)-:o>');
     expr._legacyMode = /(^|[^a-zA-Z0-9_'"])msg([^a-zA-Z0-9_'"]|$)/.test(value);
+    expr._node = node;
     return expr;
 }
 
-function evaluateJSONataExpression(expr,msg) {
+function evaluateJSONataExpression(expr,msg,callback) {
     var context = msg;
     if (expr._legacyMode) {
         context = {msg:msg};
     }
-    return expr.evaluate(context);
+    var bindings = {};
+
+    if (callback) {
+        // If callback provided, need to override the pre-assigned sync
+        // context functions to be their async variants
+        bindings.flowContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().flow.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+        bindings.globalContext = function(val) {
+            return new Promise((resolve,reject) => {
+                expr._node.context().global.get(val, function(err,value) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                })
+            });
+        }
+    }
+    return expr.evaluate(context, bindings, callback);
 }
 
 

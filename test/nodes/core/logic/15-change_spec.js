@@ -15,6 +15,7 @@
  **/
 
 var should = require("should");
+var sinon = require("sinon");
 
 var changeNode = require("../../../../nodes/core/logic/15-change.js");
 var helper = require("node-red-node-test-helper");
@@ -451,6 +452,28 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:"Hello World!"});
+            });
+        });
+
+        it('reports invalid jsonata expression', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$invalid(payload)","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                sinon.spy(changeNode1,"error");
+                helperNode1.on("input", function(msg) {
+                    done("Invalid jsonata expression passed message through");
+                });
+                changeNode1.receive({payload:"Hello World!"});
+                setTimeout(function() {
+                    try {
+                        changeNode1.error.called.should.be.true();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },50);
             });
         });
 

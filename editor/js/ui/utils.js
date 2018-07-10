@@ -828,6 +828,20 @@ RED.utils = (function() {
         return payload;
     }
 
+    function parseContextKey(key) {
+        var parts = {};
+        var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+        if (m) {
+            parts.store = m[1];
+            parts.key = m[2];
+        } else {
+            parts.key = key;
+            if (RED.settings.context) {
+                parts.store = RED.settings.context.default;
+            }
+        }
+        return parts;
+    }
 
     return {
         createObjectElement: buildMessageElement,
@@ -839,6 +853,7 @@ RED.utils = (function() {
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
         addSpinnerOverlay: addSpinnerOverlay,
-        decodeObject: decodeObject
+        decodeObject: decodeObject,
+        parseContextKey: parseContextKey
     }
 })();

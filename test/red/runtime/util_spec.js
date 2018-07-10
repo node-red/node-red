@@ -307,6 +307,10 @@ describe("red/util", function() {
             },{});
             result.should.eql("123");
         });
+        it('returns null', function() {
+            var result = util.evaluateNodeProperty(null,'null');
+            (result === null).should.be.true();
+        })
         describe('environment variable', function() {
             before(function() {
                 process.env.NR_TEST_A = "foo";
@@ -454,6 +458,30 @@ describe("red/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);
           });
+          it('handles async flow context access', function(done) {
+              var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
+          it('handles async global context access', function(done) {
+              var expr = util.prepareJSONataExpression('$globalContext("foo")',{context:function() { return {global:{get: function(key,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
 
       });
 

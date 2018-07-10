@@ -233,7 +233,7 @@ module.exports = function(RED) {
     RED.nodes.registerType("split",SplitNode);
 
 
-    var _max_kept_msgs_count = undefined;
+    var _max_kept_msgs_count;
 
     function max_kept_msgs_count(node) {
         if (_max_kept_msgs_count === undefined) {
@@ -252,7 +252,15 @@ module.exports = function(RED) {
         exp.assign("I", index);
         exp.assign("N", count);
         exp.assign("A", accum);
-        return RED.util.evaluateJSONataExpression(exp, msg);
+        return new Promise((resolve,reject) => {
+            RED.util.evaluateJSONataExpression(exp, msg, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
     }
 
     function apply_f(exp, accum, count) {
@@ -269,32 +277,37 @@ module.exports = function(RED) {
         return exp
     }
 
-    function reduce_and_send_group(node, group) {
+    function reduceAndSendGroup(node, group) {
         var is_right = node.reduce_right;
         var flag = is_right ? -1 : 1;
         var msgs = group.msgs;
-        var accum = eval_exp(node, node.exp_init, node.exp_init_type);
-        var reduce_exp = node.reduce_exp;
-        var reduce_fixup = node.reduce_fixup;
-        var count = group.count;
-        msgs.sort(function(x,y) {
-            var ix = x.parts.index;
-            var iy = y.parts.index;
-            if (ix < iy) return -flag;
-            if (ix > iy) return flag;
-            return 0;
+        return getInitialReduceValue(node, node.exp_init, node.exp_init_type).then(accum => {
+            var reduce_exp = node.reduce_exp;
+            var reduce_fixup = node.reduce_fixup;
+            var count = group.count;
+            msgs.sort(function(x,y) {
+                var ix = x.parts.index;
+                var iy = y.parts.index;
+                if (ix < iy) {return -flag;}
+                if (ix > iy) {return flag;}
+                return 0;
+            });
+
+            return msgs.reduce((promise, msg) => promise.then(accum => apply_r(reduce_exp, accum, msg, msg.parts.index, count)), Promise.resolve(accum))
+                .then(accum => {
+                    if(reduce_fixup !== undefined) {
+                        accum = apply_f(reduce_fixup, accum, count);
+                    }
+                    node.send({payload: accum});
+                });
+        }).catch(err => {
+            throw new Error(RED._("join.errors.invalid-expr",{error:e.message}));
         });
-        for(var msg of msgs) {
-            accum = apply_r(reduce_exp, accum, msg, msg.parts.index, count);
-        }
-        if(reduce_fixup !== undefined) {
-            accum = apply_f(reduce_fixup, accum, count);
-        }
-        node.send({payload: accum});
     }
 
     function reduce_msg(node, msg) {
-        if(msg.hasOwnProperty('parts')) {
+        var promise;
+        if (msg.hasOwnProperty('parts')) {
             var parts = msg.parts;
             var pending = node.pending;
             var pending_count = node.pending_count;
@@ -312,65 +325,82 @@ module.exports = function(RED) {
             var group = pending[gid];
             var msgs = group.msgs;
             if(parts.hasOwnProperty('count') &&
-               (group.count === undefined)) {
+            (group.count === undefined)) {
                 group.count = count;
             }
             msgs.push(msg);
             pending_count++;
+            var completeProcess = function() {
+                node.pending_count = pending_count;
+                var max_msgs = max_kept_msgs_count(node);
+                if ((max_msgs > 0) && (pending_count > max_msgs)) {
+                    node.pending = {};
+                    node.pending_count = 0;
+                    var promise = Promise.reject(RED._("join.too-many"));
+                    promise.catch(()=>{});
+                    return promise;
+                }
+                return Promise.resolve();
+            }
             if(msgs.length === group.count) {
                 delete pending[gid];
-                try {
-                    pending_count -= msgs.length;
-                    reduce_and_send_group(node, group);
-                } catch(e) {
-                    node.error(RED._("join.errors.invalid-expr",{error:e.message}));            }
+                pending_count -= msgs.length;
+                promise = reduceAndSendGroup(node, group).then(completeProcess);
+            } else {
+                promise = completeProcess();
             }
-            node.pending_count = pending_count;
-            var max_msgs = max_kept_msgs_count(node);
-            if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                node.pending = {};
-                node.pending_count = 0;
-                node.error(RED._("join.too-many"), msg);
-            }
-        }
-        else {
+        } else {
             node.send(msg);
         }
+        if (!promise) {
+            promise = Promise.resolve();
+        }
+        return promise;
     }
 
-    function eval_exp(node, exp, exp_type) {
-        if(exp_type === "flow") {
-            return node.context().flow.get(exp);
-        }
-        else if(exp_type === "global") {
-            return node.context().global.get(exp);
-        }
-        else if(exp_type === "str") {
-            return exp;
-        }
-        else if(exp_type === "num") {
-            return Number(exp);
-        }
-        else if(exp_type === "bool") {
-            if (exp === 'true') {
-                return true;
+    function getInitialReduceValue(node, exp, exp_type) {
+        return new Promise((resolve,reject) => {
+            if(exp_type === "flow" || exp_type === "global") {
+                node.context()[exp_type].get(exp,(err,value) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                });
+                return;
+            } else if(exp_type === "jsonata") {
+                var jexp = RED.util.prepareJSONataExpression(exp, node);
+                RED.util.evaluateJSONataExpression(jexp, {},(err,value) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(value);
+                    }
+                });
+                return;
             }
-            else if (exp === 'false') {
-                return false;
+            var result;
+            if(exp_type === "str") {
+                result = exp;
+            } else if(exp_type === "num") {
+                result = Number(exp);
+            } else if(exp_type === "bool") {
+                if (exp === 'true') {
+                    result = true;
+                } else if (exp === 'false') {
+                    result = false;
+                }
+            } else if ((exp_type === "bin") || (exp_type === "json")) {
+                result = JSON.parse(exp);
+            } else if(exp_type === "date") {
+                result = Date.now();
+            } else {
+                reject(new Error("unexpected initial value type"));
+                return;
             }
-        }
-        else if ((exp_type === "bin") ||
-                 (exp_type === "json")) {
-            return JSON.parse(exp);
-        }
-        else if(exp_type === "date") {
-            return Date.now();
-        }
-        else if(exp_type === "jsonata") {
-            var jexp = RED.util.prepareJSONataExpression(exp, node);
-            return RED.util.evaluateJSONataExpression(jexp, {});
-        }
-        throw new Error("unexpected initial value type");
+            resolve(result);
+        });
     }
 
     function JoinNode(n) {
@@ -437,7 +467,8 @@ module.exports = function(RED) {
                     newArray = newArray.concat(n);
                 })
                 group.payload = newArray;
-            } else if (group.type === 'buffer') {
+            }
+            else if (group.type === 'buffer') {
                 var buffers = [];
                 var bufferLen = 0;
                 if (group.joinChar !== undefined) {
@@ -450,7 +481,8 @@ module.exports = function(RED) {
                         buffers.push(group.payload[i]);
                         bufferLen += group.payload[i].length;
                     }
-                } else {
+                }
+                else {
                     bufferLen = group.bufferLen;
                     buffers = group.payload;
                 }
@@ -463,7 +495,8 @@ module.exports = function(RED) {
                     groupJoinChar = group.joinChar.toString();
                 }
                 RED.util.setMessageProperty(group.msg,node.property,group.payload.join(groupJoinChar));
-            } else {
+            }
+            else {
                 if (node.propertyType === 'full') {
                     group.msg = RED.util.cloneMessage(group.msg);
                 }
@@ -471,11 +504,46 @@ module.exports = function(RED) {
             }
             if (group.msg.hasOwnProperty('parts') && group.msg.parts.hasOwnProperty('parts')) {
                 group.msg.parts = group.msg.parts.parts;
-            } else {
+            }
+            else {
                 delete group.msg.parts;
             }
             delete group.msg.complete;
             node.send(group.msg);
+        }
+
+        var pendingMessages = [];
+        var activeMessagePromise = null;
+        // In reduce mode, we must process messages fully in order otherwise
+        // groups may overlap and cause unexpected results. The use of JSONata
+        // means some async processing *might* occur if flow/global context is
+        // accessed.
+        var processReduceMessageQueue = function(msg) {
+            if (msg) {
+                // A new message has arrived - add it to the message queue
+                pendingMessages.push(msg);
+                if (activeMessagePromise !== null) {
+                    // The node is currently processing a message, so do nothing
+                    // more with this message
+                    return;
+                }
+            }
+            if (pendingMessages.length === 0) {
+                // There are no more messages to process, clear the active flag
+                // and return
+                activeMessagePromise = null;
+                return;
+            }
+
+            // There are more messages to process. Get the next message and
+            // start processing it. Recurse back in to check for any more
+            var nextMsg = pendingMessages.shift();
+            activeMessagePromise = reduce_msg(node, nextMsg)
+                .then(processReduceMessageQueue)
+                .catch((err) => {
+                    node.error(err,nextMsg);
+                    return processReduceMessageQueue();
+                });
         }
 
         this.on("input", function(msg) {
@@ -516,8 +584,7 @@ module.exports = function(RED) {
                     propertyIndex = msg.parts.index;
                 }
                 else if (node.mode === 'reduce') {
-                    reduce_msg(node, msg);
-                    return;
+                    return processReduceMessageQueue(msg);
                 }
                 else {
                     // Use the node configuration to identify all of the group information
@@ -525,7 +592,7 @@ module.exports = function(RED) {
                     payloadType = node.build;
                     targetCount = node.count;
                     joinChar = node.joiner;
-                    if (targetCount === 0 && msg.hasOwnProperty('parts')) {
+                    if (n.count === "" && msg.hasOwnProperty('parts')) {
                         targetCount = msg.parts.count || 0;
                     }
                     if (node.build === 'object') {
@@ -554,7 +621,7 @@ module.exports = function(RED) {
                             payload:{},
                             targetCount:targetCount,
                             type:"object",
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         };
                     }
                     else if (node.accumulate === true) {
@@ -564,7 +631,7 @@ module.exports = function(RED) {
                             payload:{},
                             targetCount:targetCount,
                             type:payloadType,
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         }
                         if (payloadType === 'string' || payloadType === 'array' || payloadType === 'buffer') {
                             inflight[partId].payload = [];
@@ -576,7 +643,7 @@ module.exports = function(RED) {
                             payload:[],
                             targetCount:targetCount,
                             type:payloadType,
-                            msg:msg
+                            msg:RED.util.cloneMessage(msg)
                         };
                         if (payloadType === 'string') {
                             inflight[partId].joinChar = joinChar;
@@ -627,14 +694,14 @@ module.exports = function(RED) {
                         }
                     }
                 }
-                // TODO: currently reuse the last received - add option to pick first received
-                group.msg = msg;
+                group.msg = Object.assign(group.msg, msg);
                 var tcnt = group.targetCount;
                 if (msg.hasOwnProperty("parts")) { tcnt = group.targetCount || msg.parts.count; }
                 if ((tcnt > 0 && group.currentCount >= tcnt) || msg.hasOwnProperty('complete')) {
                     completeSend(partId);
                 }
-            } catch(err) {
+            }
+            catch(err) {
                 console.log(err.stack);
             }
         });

@@ -143,7 +143,13 @@ LocalFileSystem.prototype.open = function(){
                     self.cache.set(scope,key,data[key]);
                 })
             });
-        })
+        }).catch(function(err){
+            if(err.code == 'ENOENT') {
+                return fs.mkdir(self.storageBaseDir);
+            }else{
+                return Promise.reject(err);
+            }
+        });
     } else {
         return Promise.resolve();
     }
