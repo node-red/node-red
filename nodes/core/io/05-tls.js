@@ -25,6 +25,7 @@ module.exports = function(RED) {
         var certPath = n.cert.trim();
         var keyPath = n.key.trim();
         var caPath = n.ca.trim();
+        this.servername = (n.servername||"").trim();
 
         if ((certPath.length > 0) || (keyPath.length > 0)) {
 
@@ -101,6 +102,9 @@ module.exports = function(RED) {
             }
             if (this.credentials && this.credentials.passphrase) {
                 opts.passphrase = this.credentials.passphrase;
+            }
+            if (this.servername) {
+                opts.servername = this.servername;
             }
             opts.rejectUnauthorized = this.verifyservercert;
         }
