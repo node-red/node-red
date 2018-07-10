@@ -15,16 +15,11 @@
  **/
 (function($) {
     var contextParse = function(v) {
-        var parts = {};
-        var m = /^#:\((\S+?)\)::(.*)$/.exec(v);
-        if (m) {
-            parts.option = m[1];
-            parts.value = m[2];
-        } else {
-            parts.value = v;
-            parts.option = RED.settings.context.default;
+        var parts = RED.utils.parseContextKey(v);
+        return {
+            option: parts.store,
+            value: parts.key
         }
-        return parts;
     }
     var contextExport = function(v,opt) {
         if (!opt) {
