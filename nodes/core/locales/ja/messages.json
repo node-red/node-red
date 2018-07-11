@@ -543,8 +543,7 @@
             "port-notset": "udp: ポートが設定されていません",
             "port-invalid": "udp: ポート番号が不正です",
             "alreadyused": "udp: 既に__port__番ポートが使用されています",
-            "ifnotfound": "udp: インターフェイス __iface__ がありません",
-            "alreadyused": "udp: 既にポートが使用されています"
+            "ifnotfound": "udp: インターフェイス __iface__ がありません"
         }
     },
     "switch": {
@@ -670,7 +669,7 @@
         "label": {
             "select": "抽出する要素",
             "output": "出力",
-	    "in": "対象:"
+            "in": "対象:"
         },
         "output": {
             "html": "要素内のHTML",
