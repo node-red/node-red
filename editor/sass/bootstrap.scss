@@ -19,3 +19,7 @@
 div.btn-group, a.btn {
    @include disable-selection;
 }
+
+.dropdown-menu>li>a {
+    color: #444;
+}

@@ -17,6 +17,9 @@
 
 
 RED.tabs = (function() {
+
+    var defaultTabIcon = "fa fa-lemon-o";
+
     function createTabs(options) {
         var tabs = {};
         var pinnedTabsCount = 0;
@@ -71,6 +74,7 @@ RED.tabs = (function() {
                         var id = $(el).data('tabId');
                         var opt = {
                             id:"red-ui-tabs-menu-option-"+id,
+                            icon: tabs[id].iconClass || defaultTabIcon,
                             label: tabs[id].name,
                             onselect: function() {
                                 activateTab(id);
@@ -339,7 +343,7 @@ RED.tabs = (function() {
                     if (tab.iconClass) {
                         $('<i>',{class:tab.iconClass}).appendTo(pinnedLink);
                     } else {
-                        $('<i>',{class:"fa fa-lemon-o"}).appendTo(pinnedLink);
+                        $('<i>',{class:defaultTabIcon}).appendTo(pinnedLink);
                     }
                     pinnedLink.click(function(evt) {
                         evt.preventDefault();
@@ -363,7 +367,6 @@ RED.tabs = (function() {
                         removeTab(tab.id);
                     });
                 }
-                updateTabWidths();
                 if (options.onadd) {
                     options.onadd(tab);
                 }
@@ -448,6 +451,9 @@ RED.tabs = (function() {
                         }
                     })
                 }
+                setTimeout(function() {
+                    updateTabWidths();
+                },10);
                 collapsibleMenu = null;
             },
             removeTab: removeTab,
