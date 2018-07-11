@@ -107,10 +107,17 @@ module.exports = function(RED) {
             }
             if (rule.tot === "msg") {
                 value = RED.util.getMessageProperty(msg,rule.to);
-            } else if (rule.tot === 'flow') {
-                value = node.context().flow.get(rule.to);
-            } else if (rule.tot === 'global') {
-                value = node.context().global.get(rule.to);
+            } else if ((rule.tot === 'flow') ||
+                       (rule.tot === 'global')) {
+                return new Promise((resolve,reject) => {
+                    RED.util.evaluateNodeProperty(rule.to, rule.tot, node, msg, (err,value) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                });
             } else if (rule.tot === 'date') {
                 value = Date.now();
             } else if (rule.tot === 'jsonata') {
@@ -136,7 +143,8 @@ module.exports = function(RED) {
                         if (rule.fromt === "msg") {
                             resolve(RED.util.getMessageProperty(msg,rule.from));
                         } else if (rule.fromt === 'flow' || rule.fromt === 'global') {
-                            node.context()[rule.fromt].get(rule.from,(err,fromValue) => {
+                            var contextKey = RED.util.parseContextStore(rule.from);                            
+                            node.context()[rule.fromt].get(contextKey.key, contextKey.store, (err,fromValue) => {
                                 if (err) {
                                     reject(err);
                                 } else {
@@ -225,6 +233,7 @@ module.exports = function(RED) {
                             } catch(err) {}
                             return msg;
                         } else if (rule.pt === 'flow' || rule.pt === 'global') {
+                            var contextKey = RED.util.parseContextStore(property);
                             return new Promise((resolve,reject) => {
                                 var target = node.context()[rule.pt];
                                 var callback = err => {
@@ -235,11 +244,11 @@ module.exports = function(RED) {
                                     }
                                 }
                                 if (rule.t === 'delete') {
-                                    target.set(property,undefined,callback);
+                                    target.set(contextKey.key,undefined,contextKey.store,callback);
                                 } else if (rule.t === 'set') {
-                                    target.set(property,value,callback);
+                                    target.set(contextKey.key,value,contextKey.store,callback);
                                 } else if (rule.t === 'change') {
-                                    target.get(property,(err,current) => {
+                                    target.get(contextKey.key,contextKey.store,(err,current) => {
                                         if (err) {
                                             reject(err);
                                             return;
@@ -248,18 +257,18 @@ module.exports = function(RED) {
                                             if ((fromType === 'num' || fromType === 'bool' || fromType === 'str') && current === fromValue) {
                                                 // str representation of exact from number/boolean
                                                 // only replace if they match exactly
-                                                target.set(property,value,callback);
+                                                target.set(contextKey.key,value,contextKey.store,callback);
                                             } else {
                                                 current = current.replace(fromRE,value);
-                                                target.set(property,current,callback);
+                                                target.set(contextKey.key,current,contextKey.store,callback);
                                             }
                                         } else if ((typeof current === 'number' || current instanceof Number) && fromType === 'num') {
                                             if (current == Number(fromValue)) {
-                                                target.set(property,value,callback);
+                                                target.set(contextKey.key,value,contextKey.store,callback);
                                             }
                                         } else if (typeof current === 'boolean' && fromType === 'bool') {
                                             if (current.toString() === fromValue) {
-                                                target.set(property,value,callback);
+                                                target.set(contextKey.key,value,contextKey.store,callback);
                                             }
                                         }
                                     });
