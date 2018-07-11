@@ -125,7 +125,7 @@ describe('switch Node', function() {
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var sid = undefined;
+            var sid;
             var count = 0;
             if (modifier !== undefined) {
                 modifier(switchNode1);
@@ -332,6 +332,75 @@ describe('switch Node', function() {
     it('sends nothing when input is false and checking for true', function(done) {
         singularSwitchTest(false, true, false, true, done);
     });
+
+    it('should check if payload is empty (string)', function(done) {
+        singularSwitchTest("empty", true, true, "", done);
+    });
+    it('should check if payload is empty (array)', function(done) {
+        singularSwitchTest("empty", true, true, [], done);
+    });
+    it('should check if payload is empty (buffer)', function(done) {
+        singularSwitchTest("empty", true, true, Buffer.alloc(0), done);
+    });
+    it('should check if payload is empty (object)', function(done) {
+        singularSwitchTest("empty", true, true, {}, done);
+    });
+    it('should check if payload is empty (non-empty string)', function(done) {
+        singularSwitchTest("empty", true, false, "1", done);
+    });
+    it('should check if payload is empty (non-empty array)', function(done) {
+        singularSwitchTest("empty", true, false, [1], done);
+    });
+    it('should check if payload is empty (non-empty buffer)', function(done) {
+        singularSwitchTest("empty", true, false, Buffer.alloc(1), done);
+    });
+    it('should check if payload is empty (non-empty object)', function(done) {
+        singularSwitchTest("empty", true, false, {a:1}, done);
+    });
+    it('should check if payload is empty (null)', function(done) {
+        singularSwitchTest("empty", true, false, null, done);
+    });
+    it('should check if payload is empty (undefined)', function(done) {
+        singularSwitchTest("empty", true, false, undefined, done);
+    });
+    it('should check if payload is empty (0)', function(done) {
+        singularSwitchTest("empty", true, false, null, done);
+    });
+
+    it('should check if payload is not empty (string)', function(done) {
+        singularSwitchTest("nempty", true, !true, "", done);
+    });
+    it('should check if payload is not empty (array)', function(done) {
+        singularSwitchTest("nempty", true, !true, [], done);
+    });
+    it('should check if payload is not empty (buffer)', function(done) {
+        singularSwitchTest("nempty", true, !true, Buffer.alloc(0), done);
+    });
+    it('should check if payload is not empty (object)', function(done) {
+        singularSwitchTest("nempty", true, !true, {}, done);
+    });
+    it('should check if payload is not empty (non-empty string)', function(done) {
+        singularSwitchTest("nempty", true, !false, "1", done);
+    });
+    it('should check if payload is not empty (non-empty array)', function(done) {
+        singularSwitchTest("nempty", true, !false, [1], done);
+    });
+    it('should check if payload is not empty (non-empty buffer)', function(done) {
+        singularSwitchTest("nempty", true, !false, Buffer.alloc(1), done);
+    });
+    it('should check if payload is not empty (non-empty object)', function(done) {
+        singularSwitchTest("nempty", true, !false, {a:1}, done);
+    });
+    it('should check if payload is not empty (null)', function(done) {
+        singularSwitchTest("nempty", true, false, null, done);
+    });
+    it('should check if payload is not empty (undefined)', function(done) {
+        singularSwitchTest("nempty", true, false, undefined, done);
+    });
+    it('should check if payload is not empty (0)', function(done) {
+        singularSwitchTest("nempty", true, false, null, done);
+    });
+
 
     it('should check input against a previous value', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{ "t": "gt", "v": "", "vt": "prev" }],checkall:true,outputs:1,wires:[["helperNode1"]]},
@@ -666,9 +735,11 @@ describe('switch Node', function() {
             var vals = new Array(port_count);
             var recv_count = 0;
             for (var id in outs) {
-                var out = outs[id];
-                vals[out.port] = out.vals;
-                recv_count += out.vals.length;
+                if (outs.hasOwnProperty(id)) {
+                    var out = outs[id];
+                    vals[out.port] = out.vals;
+                    recv_count += out.vals.length;
+                }
             }
             var count = 0;
             function check_msg(msg, ix, vf) {
@@ -703,8 +774,8 @@ describe('switch Node', function() {
                     }
                     var index = parts.index;
                     var eindex = counts[ix];
-                    var eval = evals[eindex];
-                    payload.should.equal(eval);
+                    var value = evals[eindex];
+                    payload.should.equal(value);
                     counts[ix]++;
                     count++;
                     if (count === recv_count) {
@@ -716,18 +787,22 @@ describe('switch Node', function() {
                 }
             }
             for (var id in outs) {
-                (function() {
-                    var node = helper.getNode(id);
-                    var port = outs[id].port;
-                    var vf = outs[id].vf;
-                    node.on("input", function(msg) {
-                        check_msg(msg, port, vf);
-                    });
-                })();
+                if (outs.hasOwnProperty(id)) {
+                    (function() {
+                        var node = helper.getNode(id);
+                        var port = outs[id].port;
+                        var vf = outs[id].vf;
+                        node.on("input", function(msg) {
+                            check_msg(msg, port, vf);
+                        });
+                    })();
+                }
             }
             for(var i in seq_in) {
-                n1.receive({payload:seq_in[i], xindex:i,
-                            parts:{index:i, count:seq_in.length, id:222}});
+                if (seq_in.hasOwnProperty(i)) {
+                    n1.receive({payload:seq_in[i], xindex:i,
+                                parts:{index:i, count:seq_in.length, id:222}});
+                }
             }
         });
     }

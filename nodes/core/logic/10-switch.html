@@ -60,6 +60,12 @@
         <li>An <b>Otherwise</b> rule can be used to match if none of the preceeding
             rules have matched.</li>
     </ol>
+    <h4>Notes</h4>
+    <p>The <code>is true/false</code> and <code>is null</code> rules perform strict
+       comparisons against those types. They do not convert between types.</p>
+    <p>The <code>is empty</code> rule passes for Strings, Arrays and Buffers that have
+       a length of 0, or Objects that have no properties. It does not pass for <code>null</code>
+       or <code>undefined</code> values.</p>
     <h4>Handling message sequences</h4>
     <p>By default, the node does not modify the <code>msg.parts</code> property of messages
        that are part of a sequence.</p>
@@ -86,6 +92,8 @@
         {v:"null",t:"switch.rules.null",kind:'V'},
         {v:"nnull",t:"switch.rules.nnull",kind:'V'},
         {v:"istype",t:"switch.rules.istype",kind:'V'},
+        {v:"empty",t:"switch.rules.empty",kind:'V'},
+        {v:"nempty",t:"switch.rules.nempty",kind:'V'},
         {v:"head",t:"switch.rules.head",kind:'S'},
         {v:"index",t:"switch.rules.index",kind:'S'},
         {v:"tail",t:"switch.rules.tail",kind:'S'},

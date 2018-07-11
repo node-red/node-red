@@ -31,6 +31,23 @@ module.exports = function(RED) {
         'false': function(a) { return a === false; },
         'null': function(a) { return (typeof a == "undefined" || a === null); },
         'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
+        'empty': function(a) {
+            if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                return a.length === 0;
+            } else if (typeof a === 'object') {
+                return Object.keys(a).length === 0;
+            }
+            return false;
+        },
+        'nempty': function(a) {
+            if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                return a.length !== 0;
+            } else if (typeof a === 'object') {
+                return Object.keys(a).length !== 0;
+            }
+            return false;
+        },
+
         'istype': function(a, b) {
             if (b === "array") { return Array.isArray(a); }
             else if (b === "buffer") { return Buffer.isBuffer(a); }
