@@ -591,5 +591,6 @@ module.exports = {
     normalisePropertyExpression: normalisePropertyExpression,
     normaliseNodeTypeName: normaliseNodeTypeName,
     prepareJSONataExpression: prepareJSONataExpression,
-    evaluateJSONataExpression: evaluateJSONataExpression
+    evaluateJSONataExpression: evaluateJSONataExpression,
+    parseContextStore: parseContextStore
 };
