@@ -48,7 +48,9 @@ function runGitCommand(args,cwd,env) {
                 var err = new Error(stderr);
                 err.stdout = stdout;
                 err.stderr = stderr;
-                if(/Connection refused/i.test(stderr)) {
+                if (/Connection refused/i.test(stderr)) {
+                    err.code = "git_connection_failed";
+                } else if (/Connection timed out/i.test(stderr)) {
                     err.code = "git_connection_failed";
                 } else if (/fatal: could not read/i.test(stderr)) {
                     // Username/Password
