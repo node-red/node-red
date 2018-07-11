@@ -220,7 +220,7 @@ RED.palette.editor = (function() {
                         var setElements = nodeEntry.sets[setName];
                         if (set.err) {
                             errorCount++;
-                            $("<li>").text(set.err).appendTo(nodeEntry.errorList);
+                            $("<li>").text(set.err.msg).appendTo(nodeEntry.errorList);
                         }
                         if (set.enabled) {
                             activeTypeCount += set.types.length;
