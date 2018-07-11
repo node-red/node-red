@@ -747,7 +747,7 @@ describe('switch Node', function() {
                     msg.should.have.property("payload");
                     var payload = msg.payload;
                     msg.should.have.property("parts");
-                    vf(payload).should.be.ok;
+                    vf(payload).should.be.ok();
                     var parts = msg.parts;
                     var evals = vals[ix];
                     parts.should.have.property("id");
@@ -861,9 +861,9 @@ describe('switch Node', function() {
         var data = [ 1, -2, 2, 0, -1 ];
         var outs = {
             "n2" : { port:0, vals:[1, 2, 0],
-                     vf:function(x) { return(x > 0); } },
+                     vf:function(x) { return(x >= 0); } },
             "n3" : { port:1, vals:[-2, 0, -1],
-                     vf:function(x) { return(x < 0); } },
+                     vf:function(x) { return(x <= 0); } },
             "n4" : { port:2, vals:[],
                      vf:function(x) { return(false); } },
         };
