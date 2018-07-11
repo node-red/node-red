@@ -691,7 +691,7 @@
             "ssh-key-add": "SSHキーの追加",
             "credential-key": "認証情報の暗号化キー",
             "cant-get-ssh-key": "エラー! 選択したSSHキーのパスを取得できません。",
-            "already-exists": "既に存在します",
+            "already-exists2": "既に存在します",
             "git-error": "Gitエラー",
             "connection-failed": "接続に失敗しました",
             "not-git-repo": "Gitリポジトリではありません",
