@@ -32,6 +32,8 @@ var sessions = {};
 
 var loadedSessions = null;
 
+var apiAccessTokens;
+
 function expireSessions() {
     var now = Date.now();
     var modified = false;
@@ -61,22 +63,39 @@ function loadSessions() {
 }
 
 module.exports = {
-    init: function(adminAuthSettings, _storage) {
+    init: function(adminAuthSettings, _storage, apiAccessTokensSettings) {
         storage = _storage;
         sessionExpiryTime = adminAuthSettings.sessionExpiryTime || 604800; // 1 week in seconds
         // At this point, storage will not have been initialised, so defer loading
         // the sessions until there's a request for them.
         loadedSessions = null;
+
+        apiAccessTokens = {};
+        if ( Array.isArray(apiAccessTokensSettings) ) {
+            apiAccessTokens = apiAccessTokensSettings.reduce(function(prev, current) {
+                prev[current.token] = {
+                    user: current.username,
+                    scope: current.permissions
+                };
+                return prev;
+            }, {});
+        }
         return Promise.resolve();
     },
     get: function(token) {
         return loadSessions().then(function() {
-            if (sessions[token]) {
-                if (sessions[token].expires < Date.now()) {
-                    return expireSessions().then(function() { return null });
+            var info = apiAccessTokens[token] || null;
+
+            if (info) {
+                return Promise.resolve(info);
+            } else {
+                if (sessions[token]) {
+                    if (sessions[token].expires < Date.now()) {
+                        return expireSessions().then(function() { return null });
+                    }
                 }
+                return Promise.resolve(sessions[token]);
             }
-            return Promise.resolve(sessions[token]);
         });
     },
     create: function(user,client,scope) {

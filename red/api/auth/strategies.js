@@ -22,7 +22,6 @@ var crypto = require("crypto");
 var util = require("util");
 
 var Tokens = require("./tokens");
-var apiAccessTokens = require("./api-access-tokens");
 var Users = require("./users");
 var Clients = require("./clients");
 var permissions = require("./permissions");
@@ -31,27 +30,21 @@ var log;
 
 var bearerStrategy = function (accessToken, done) {
     // is this a valid token?
-    apiAccessTokens.get(accessToken).then(function(tokenInfo) {
-        if (tokenInfo && tokenInfo.username && tokenInfo.scope) {
-            done(null, tokenInfo.username,{scope:tokenInfo.scope});
-        } else {
-            Tokens.get(accessToken).then(function(token) {
-                if (token) {
-                    Users.get(token.user).then(function(user) {
-                        if (user) {
-                            done(null,user,{scope:token.scope});
-                        } else {
-                            log.audit({event: "auth.invalid-token"});
-                            done(null,false);
-                        }
-                    });
+    Tokens.get(accessToken).then(function(token) {
+        if (token) {
+            Users.get(token.user).then(function(user) {
+                if (user) {
+                    done(null,user,{scope:token.scope});
                 } else {
                     log.audit({event: "auth.invalid-token"});
                     done(null,false);
                 }
             });
+        } else {
+            log.audit({event: "auth.invalid-token"});
+            done(null,false);
         }
-    })
+    });
 }
 bearerStrategy.BearerStrategy = new BearerStrategy(bearerStrategy);
 
