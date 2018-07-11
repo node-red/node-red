@@ -78,7 +78,8 @@
             "type": "类型",
             "selectAll": "全选",
             "sortByLabel": "按名称排序",
-            "sortByType": "按类型排序"
+            "sortByType": "按类型排序",
+            "cancelAdjacentPropagation": "取消相邻的传播"
         },
         "scope": {
             "all": "所有节点",

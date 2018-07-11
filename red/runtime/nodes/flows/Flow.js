@@ -121,6 +121,14 @@ function Flow(global,flow) {
                 }
             }
         }
+        var z;
+        for (z in catchNodeMap) {
+            if (catchNodeMap.hasOwnProperty(z)) {
+                catchNodeMap[z].sort(function(a, b) {
+                return a.catchPrecedence - b.catchPrecedence;
+                });
+            }
+        }        
     }
 
     this.stop = function(stopList, removedList) {
@@ -252,9 +260,13 @@ function Flow(global,flow) {
         var handled = false;
         while (throwingNode && !handled) {
             targetCatchNodes = catchNodeMap[throwingNode.z];
+            var cancelAdjacentPropagation = false;
             if (targetCatchNodes) {
                 targetCatchNodes.forEach(function(targetCatchNode) {
                     if (targetCatchNode.scope && targetCatchNode.scope.indexOf(throwingNode.id) === -1) {
+                        return;
+                    }
+                    if (handled && cancelAdjacentPropagation) {
                         return;
                     }
                     var errorMessage;
@@ -280,6 +292,7 @@ function Flow(global,flow) {
                     }
                     targetCatchNode.receive(errorMessage);
                     handled = true;
+                    cancelAdjacentPropagation = targetCatchNode.cancelAdjacentPropagation;
                 });
             }
             if (!handled) {

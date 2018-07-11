@@ -21,6 +21,14 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.scope = n.scope;
+
+        if (this.scope == null)  // null = catch all
+            this.catchPrecedence = 10;
+        else 
+            this.catchPrecedence = 5;
+
+        this.cancelAdjacentPropagation = n.cancelAdjacentPropagation;
+
         this.on("input",function(msg) {
             this.send(msg);
         });
