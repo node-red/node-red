@@ -32,77 +32,141 @@ describe('memory',function() {
     });
 
     describe('#get/set',function() {
-        it('should store property',function() {
-            should.not.exist(context.get("nodeX","foo"));
-            context.set("nodeX","foo","test");
-            context.get("nodeX","foo").should.equal("test");
+        describe('sync',function() {
+            it('should store property',function() {
+                should.not.exist(context.get("nodeX","foo"));
+                context.set("nodeX","foo","test");
+                context.get("nodeX","foo").should.equal("test");
+            });
+
+            it('should store property - creates parent properties',function() {
+                context.set("nodeX","foo.bar","test");
+                context.get("nodeX","foo").should.eql({bar:"test"});
+            });
+
+            it('should delete property',function() {
+                context.set("nodeX","foo.abc.bar1","test1");
+                context.set("nodeX","foo.abc.bar2","test2");
+                context.get("nodeX","foo.abc").should.eql({bar1:"test1",bar2:"test2"});
+                context.set("nodeX","foo.abc.bar1",undefined);
+                context.get("nodeX","foo.abc").should.eql({bar2:"test2"});
+                context.set("nodeX","foo.abc",undefined);
+                should.not.exist(context.get("nodeX","foo.abc"));
+                context.set("nodeX","foo",undefined);
+                should.not.exist(context.get("nodeX","foo"));
+            });
+
+            it('should not shared context with other scope', function() {
+                should.not.exist(context.get("nodeX","foo"));
+                should.not.exist(context.get("nodeY","foo"));
+                context.set("nodeX","foo","testX");
+                context.set("nodeY","foo","testY");
+
+                context.get("nodeX","foo").should.equal("testX");
+                context.get("nodeY","foo").should.equal("testY");
+            });
+
+            it('should thorw the error if the error occurs', function() {
+                try{
+                    context.set("nodeX",".foo","test");
+                    should.fail("Error was not thrown");
+                }catch(err){
+                    should.exist(err);
+                    try{
+                        context.get("nodeX",".foo");
+                        should.fail("Error was not thrown");
+                    }catch(err){
+                        should.exist(err);
+                    }
+                }
+            });
         });
 
-        it('should store property - creates parent properties',function() {
-            context.set("nodeX","foo.bar","test");
-            context.get("nodeX","foo").should.eql({bar:"test"});
-        });
+        describe('async',function() {
+            it('should store property',function(done) {
+                context.get("nodeX","foo",function(err, value){
+                    should.not.exist(value);
+                    context.set("nodeX","foo","test",function(err){
+                        context.get("nodeX","foo",function(err, value){
+                            value.should.equal("test");
+                            done();
+                        });
+                    });
+                });
+            });
 
-        it('should delete property',function() {
-            context.set("nodeX","foo.abc.bar1","test1");
-            context.set("nodeX","foo.abc.bar2","test2");
-            context.get("nodeX","foo.abc").should.eql({bar1:"test1",bar2:"test2"});
-            context.set("nodeX","foo.abc.bar1",undefined);
-            context.get("nodeX","foo.abc").should.eql({bar2:"test2"});
-            context.set("nodeX","foo.abc",undefined);
-            should.not.exist(context.get("nodeX","foo.abc"));
-            context.set("nodeX","foo",undefined);
-            should.not.exist(context.get("nodeX","foo"));
-        });
-
-        it('should not shared context with other scope', function() {
-            should.not.exist(context.get("nodeX","foo"));
-            should.not.exist(context.get("nodeY","foo"));
-            context.set("nodeX","foo","testX");
-            context.set("nodeY","foo","testY");
-
-            context.get("nodeX","foo").should.equal("testX");
-            context.get("nodeY","foo").should.equal("testY");
+            it('should pass the error to callback if the error occurs',function(done) {
+                context.set("nodeX",".foo","test",function(err, value){
+                    should.exist(err);
+                    context.get("nodeX",".foo",function(err){
+                        should.exist(err);
+                        done();
+                    });
+                });
+            });
         });
     });
 
     describe('#keys',function() {
-        it('should enumerate context keys', function() {
-            var keys = context.keys("nodeX");
-            keys.should.be.an.Array();
-            keys.should.be.empty();
+        describe('sync',function() {
+            it('should enumerate context keys', function() {
+                var keys = context.keys("nodeX");
+                keys.should.be.an.Array();
+                keys.should.be.empty();
 
-            context.set("nodeX","foo","bar");
-            keys = context.keys("nodeX");
-            keys.should.have.length(1);
-            keys[0].should.equal("foo");
+                context.set("nodeX","foo","bar");
+                keys = context.keys("nodeX");
+                keys.should.have.length(1);
+                keys[0].should.equal("foo");
 
-            context.set("nodeX","abc.def","bar");
-            keys = context.keys("nodeX");
-            keys.should.have.length(2);
-            keys[1].should.equal("abc");
+                context.set("nodeX","abc.def","bar");
+                keys = context.keys("nodeX");
+                keys.should.have.length(2);
+                keys[1].should.equal("abc");
+            });
+
+            it('should enumerate context keys in each scopes', function() {
+                var keysX = context.keys("nodeX");
+                keysX.should.be.an.Array();
+                keysX.should.be.empty();
+
+                var keysY = context.keys("nodeY");
+                keysY.should.be.an.Array();
+                keysY.should.be.empty();
+
+                context.set("nodeX","foo","bar");
+                context.set("nodeY","hoge","piyo");
+                keysX = context.keys("nodeX");
+                keysX.should.have.length(1);
+                keysX[0].should.equal("foo");
+
+                keysY = context.keys("nodeY");
+                keysY.should.have.length(1);
+                keysY[0].should.equal("hoge");
+            });
         });
 
-        it('should enumerate context keys in each scopes', function() {
-            var keysX = context.keys("nodeX");
-            keysX.should.be.an.Array();
-            keysX.should.be.empty();
-
-            var keysY = context.keys("nodeY");
-            keysY.should.be.an.Array();
-            keysY.should.be.empty();
-
-            context.set("nodeX","foo","bar");
-            context.set("nodeY","hoge","piyo");
-            keysX = context.keys("nodeX");
-            keysX.should.have.length(1);
-            keysX[0].should.equal("foo");
-
-            keysY = context.keys("nodeY");
-            keysY.should.have.length(1);
-            keysY[0].should.equal("hoge");
+        describe('async',function() {
+            it('should enumerate context keys', function(done) {
+                context.keys("nodeX", function(err, keys) {
+                    keys.should.be.an.Array();
+                    keys.should.be.empty();
+                    context.set("nodeX", "foo", "bar", function(err) {
+                        context.keys("nodeX", function(err, keys) {
+                            keys.should.have.length(1);
+                            keys[0].should.equal("foo");
+                            context.set("nodeX","abc.def","bar",function(err){
+                                context.keys("nodeX",function(err, keys){
+                                    keys.should.have.length(2);
+                                    keys[1].should.equal("abc");
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         });
-
     });
 
     describe('#delete',function() {

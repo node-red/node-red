@@ -30,19 +30,24 @@ Memory.prototype.close = function(){
 
 Memory.prototype.get = function(scope, key, callback) {
     var value;
+    var error;
     try{
         if(this.data[scope]){
             value = util.getMessageProperty(this.data[scope], key);
         }
     }catch(err){
         if(callback){
-            callback(err);
+            error = err;
         }else{
             throw err;
         }
     }
     if(callback){
-        callback(null, value);
+        if(error){
+            callback(error);
+        } else {
+            callback(null, value);
+        }
     } else {
         return value;
     }
@@ -52,22 +57,24 @@ Memory.prototype.set =function(scope, key, value, callback) {
     if(!this.data[scope]){
         this.data[scope] = {};
     }
+    var error;
     try{
         util.setMessageProperty(this.data[scope],key,value);
     }catch(err){
         if(callback){
-            callback(err);
+            error = err;
         }else{
             throw err;
         }
     }
     if(callback){
-        callback(null);
+        callback(error || null);
     }
 };
 
 Memory.prototype.keys = function(scope, callback){
     var values = [];
+    var error;
     try{
         if(this.data[scope]){
             if (scope !== "global") {
@@ -80,13 +87,17 @@ Memory.prototype.keys = function(scope, callback){
         }
     }catch(err){
         if(callback){
-            callback(err);
+            error = err;
         }else{
             throw err;
         }
     }
     if(callback){
-        callback(null, values);
+        if(error){
+            callback(error);
+        } else {
+            callback(null, values);
+        }
     } else {
         return values;
     }
