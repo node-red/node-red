@@ -178,7 +178,7 @@
 }
 .form-row label {
     display: inline-block;
-    width: 100px;
+    min-width: 100px;
 }
 .form-row input, .form-row div[contenteditable="true"] {
     width:70%;
@@ -323,6 +323,7 @@
         margin-right: 20px;
         text-align: right;
         width: 30px;
+        min-width: 30px;
     }
     button {
         margin-left: 10px;
