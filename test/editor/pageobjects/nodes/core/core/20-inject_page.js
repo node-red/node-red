@@ -36,6 +36,13 @@ var payloadType = {
     "env": 9,
 };
 
+var timeType = {
+    "none": 1,
+    "interval": 2,
+    "intervalBetweenTimes": 3,
+    "atASpecificTime": 4,
+};
+
 injectNode.prototype.setPayload = function(type, value) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
@@ -48,6 +55,19 @@ injectNode.prototype.setPayload = function(type, value) {
 
 injectNode.prototype.setTopic = function(value) {
     browser.setValue('#node-input-topic', value);
+}
+
+injectNode.prototype.setOnce = function(value) {
+    browser.clickWithWait('#node-input-once');
+}
+
+injectNode.prototype.setTimeType = function(type) {
+    var timeTypeXPath = '//*[@id="inject-time-type-select"]/option[' + timeType[type] + ']';
+    browser.clickWithWait(timeTypeXPath);
+}
+
+injectNode.prototype.setRepeat = function(sec) {
+    browser.setValue('#inject-time-interval-count', sec);
 }
 
 module.exports = injectNode;

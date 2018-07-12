@@ -21,6 +21,7 @@ var fs = require('fs-extra');
 var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/workspace/debugTab_page');
 var workspace = require('../../pageobjects/workspace/workspace_page');
+var specUtil = require('../../pageobjects/util/spec_util_page');
 
 var nodeWidth = 200;
 
@@ -141,5 +142,47 @@ describe('cookbook', function() {
             injectNode3.clickLeftButton();
             debugTab.getMessage(3).should.be.equal('5');
         });
+    });
+
+    describe('flow control', function() {
+        it('trigger a flow whenever Node-RED starts', function() {
+            var injectNode = workspace.addNode("inject");
+            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+
+            injectNode.edit();
+            injectNode.setPayload("string", "Started!")
+            injectNode.setOnce(true);
+            injectNode.clickOk();
+            injectNode.connect(debugNode);
+
+            debugTab.open();
+            debugTab.clearMessage();
+            workspace.deploy();
+            debugTab.getMessage().should.be.equal('"Started!"');
+        });
+
+        it('trigger a flow at regular intervals', function() {
+            var injectNode = workspace.addNode("inject");
+            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+
+            injectNode.edit();
+            injectNode.setTimeType("interval");
+            injectNode.setRepeat(1);
+            injectNode.clickOk();
+            injectNode.connect(debugNode);
+
+            workspace.deploy();
+
+            debugTab.open();
+            debugTab.clearMessage();
+            specUtil.pause(1000);
+            var t1 = Number(debugTab.getMessage(1));
+            t1.should.within(1500000000000, 3000000000000);
+            specUtil.pause(1000);
+            debugTab.getMessage(2).should.within(t1 + 1000, 3000000000000);
+        });
+
+        // skip this case since it needs up to one minite.
+        it.skip('trigger a flow at a specific time');
     });
 });
