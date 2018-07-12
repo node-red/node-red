@@ -615,6 +615,46 @@ describe('context', function() {
                     });
                 }).catch(function(err){ done(err); });
             });
+
+            it('should store multiple properties if key and value are arrays', function(done) {
+                Context.init({contextStorage:memoryStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
+                        if (err) {
+                            done(err);
+                        } else {
+                            context.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    foo1.should.be.equal("bar1");
+                                    foo2.should.be.equal("bar2");
+                                    foo3.should.be.equal("bar3");
+                                    done();
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            it('should return an error if an error occurs in storing multiple values', function(done) {
+                Context.init({contextStorage:contextStorage});
+                stubSet.onFirstCall().callsArgWith(3, null);
+                stubSet.onSecondCall().callsArgWith(3, "error2");
+                stubSet.onThirdCall().callsArgWith(3, null);
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
+                        if (err === "error2") {
+                            done();
+                        } else {
+                            done("An error occurred");
+                        }
+                    });
+                }).catch(function(err){ done(err); });
+            });
         });
 
         describe('delete context',function(){

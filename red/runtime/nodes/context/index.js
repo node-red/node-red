@@ -268,7 +268,29 @@ function createContext(id,seed) {
             }
             context = getContextStorage(storage);
         }
-        context.set(scope, key, value, callback);
+        if (!Array.isArray(key) || !Array.isArray(value) || key.length !== value.length) {
+            context.set(scope, key, value, callback);
+        } else {
+            // If key and value are Array and each length is same, set each key-value pair.
+            var index = 0;
+            var cb = function(err, v) {
+                if (err) {
+                    if (callback) {
+                        callback(err);
+                    }
+                } else {
+                    index++;
+                    if (index === key.length) {
+                        if (callback) {
+                            callback(null);
+                        }
+                    } else {
+                        context.set(scope, key[index], value[index], cb);
+                    }
+                }
+            };
+            context.set(scope, key[index], value[index], cb);
+        }
     };
     obj.keys = function(storage, callback) {
         var context;
