@@ -18,29 +18,27 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function debugNode(id) {
+function fileinNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(debugNode, nodePage);
+util.inherits(fileinNode, nodePage);
 
-var target = {
-    "msg": 1,
-    "full": 2
+var formatType = {
+    "utf8": 1,
+    "lines": 2,
+    "": 3,  // a single Buffer object
+    "stream": 4
 };
 
-debugNode.prototype.setTarget = function(type, value) {
-    // Open a payload type list.
-    browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
-    // Select a payload type.
-    var xPath = '/html/body/div[11]/a[' + target[type] + ']';
-    browser.clickWithWait(xPath);
-    if (value) {
-        browser.clickWithWait('#node-input-typed-complete');
-        browser.keys(['Control', 'a', 'Control']);
-        browser.keys(['Delete']);
-        browser.setValue('#node-input-typed-complete', value);
-    }
+fileinNode.prototype.setFilename = function(value) {
+    browser.setValue('#node-input-filename', value);
 }
 
-module.exports = debugNode;
+fileinNode.prototype.setFormat = function(type) {
+    browser.clickWithWait('#node-input-format');
+    var formatTypeXPath = '//*[@id="node-input-format"]/option[' + formatType[type] + ']';
+    browser.clickWithWait(formatTypeXPath);
+}
+
+module.exports = fileinNode;

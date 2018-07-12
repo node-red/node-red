@@ -16,17 +16,33 @@
 
 var injectNode = require('./core/core/20-inject_page');
 var debugNode = require('./core/core/58-debug_page');
+var templateNode = require('./core/core/80-template_page');
+var functionNode = require('./core/core/80-function_page');
+var httpinNode = require('./core/io/21-httpin_page');
+var httpResponseNode = require('./core/io/21-httpresponse_page');
 var changeNode = require('./core/logic/15-change_page');
 var rangeNode = require('./core/logic/16-range_page');
+var httpRequestNode = require('./core/io/21-httprequest_page');
+var htmlNode = require('./core/parsers/70-HTML_page');
+var fileinNode = require('./core/storage/50-filein_page');
+
 
 var nodeCatalog = {
     // input
     "inject": injectNode,
+    "httpin": httpinNode,
     // output
     "debug": debugNode,
+    "httpResponse": httpResponseNode,
     // function
+    "function": functionNode,
+    "template": templateNode,
     "change": changeNode,
     "range": rangeNode,
+    "httpRequest": httpRequestNode,
+    "html": htmlNode,
+    // storage
+    "filein": fileinNode,
 }
 
 function create(type, id) {

@@ -14,28 +14,18 @@
  * limitations under the License.
  **/
 
-var idMap = {
-    // input
-    "inject": "#palette_node_inject",
-    "httpin": "#palette_node_http_in",
-    // output
-    "debug": "#palette_node_debug",
-    "httpResponse": "#palette_node_http_response",
-    // function
-    "function": "#palette_node_function",
-    "template": "#palette_node_template",
-    "change": "#palette_node_change",
-    "range": "#palette_node_range",
-    "httpRequest": "#palette_node_http_request",
-    "html": "#palette_node_html",
-    // storage
-    "filein": "#palette_node_file_in",
-};
+var util = require("util");
 
-function getId(type) {
-    return idMap[type];
+var nodePage = require("../../node_page");
+
+function htmlNode(id) {
+    nodePage.call(this, id);
 }
 
-module.exports = {
-    getId: getId,
-};
+util.inherits(htmlNode, nodePage);
+
+htmlNode.prototype.setTag = function(value) {
+    browser.setValue('#node-input-tag', value);
+}
+
+module.exports = htmlNode;
