@@ -98,10 +98,13 @@
             "nodeActionDisabled": "ノードのアクションは、サブフロー内で無効になっています",
             "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください。",
             "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります",
-            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報は暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報ファイルは暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "credentials_load_failed_reset": "<p>認証情報を復号できません</p><p>フローの認証情報ファイルは暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です。</p><p>次回のデプロイでフローの認証情報ファイルがリセットされます。既存フローの認証情報は削除されます。</p>",
             "missing_flow_file": "<p>プロジェクトのフローファイルが存在しません</p><p>本プロジェクトにフローファイルが登録されていません</p>",
+            "missing_package_file": "<p>プロジェクトのパッケージファイルが存在しません</p><p>本プロジェクトにはpackage.jsonファイルがありません</p>",
             "project_empty": "<p>空のプロジェクトです</p><p>デフォルトのプロジェクトファイルを作成しますか？<br/>作成しない場合、エディタの外でファイルをプロジェクトへ手動で追加する必要があります</p>",
-            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>"
+            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>",
+            "git_merge_conflict": "<p>変更の自動マージが失敗しました</p><p>マージされていない競合を解決し、コミットしてください</p>"
         },
         "error": "<strong>エラー</strong>: __message__",
         "errors": {
@@ -236,6 +239,7 @@
         "output": "出力:",
         "deleteSubflow": "サブフローを削除",
         "info": "詳細",
+        "category": "カテゴリ",
         "format": "マークダウン形式",
         "errors": {
             "noNodesSelected": "<strong>サブフローを作成できません</strong>: ノードが選択されていません",
@@ -312,6 +316,7 @@
         "noInfo": "情報がありません",
         "filter": "ノードを検索",
         "search": "ノードを検索",
+        "addCategory": "新規追加...",
         "label": {
             "subflows": "サブフロー",
             "input": "入力",
@@ -449,6 +454,10 @@
             "filterAll": "全て",
             "filtered": "__count__ 個が無効"
         },
+        "context": {
+            "name": "コンテキスト",
+            "label": "コンテキスト"
+        },
         "palette": {
             "name": "パレットの管理",
             "label": "パレット"
@@ -568,7 +577,6 @@
                 "pullUnrelatedHistory": "<p>リモートに関連のないコミット履歴があります。</p><p>本当に変更をプルしてローカルリポジトリに反映しますか？</p>",
                 "pullChanges": "プル変更",
                 "history": "履歴",
-                "plural": "",
                 "daysAgo": "__count__ 日前",
                 "daysAgo_plural": "__count__ 日前",
                 "hoursAgo": "__count__ 時間前",
@@ -799,7 +807,7 @@
             "no-empty": "デフォルトのファイル群を空でないプロジェクトに作成することはできません。",
             "git-error": "Gitエラー"
         },
-        "errors" : {
+        "errors": {
             "no-username-email": "Gitクライアントのユーザ名/emailが設定されていません。",
             "unexpected": "予期しないエラーが発生しました",
             "code": "コード"
