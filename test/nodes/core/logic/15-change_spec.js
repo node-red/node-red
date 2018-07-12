@@ -1062,7 +1062,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and type of the flow context if a complete match', function(done) {
+        it('changes the value and type of the persistable flow context if a complete match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {

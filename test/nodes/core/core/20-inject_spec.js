@@ -16,12 +16,21 @@
 
 var should = require("should");
 var injectNode = require("../../../../nodes/core/core/20-inject.js");
+var Context = require("../../../../red/runtime/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('inject node', function() {
 
     before(function(done) {
         helper.startServer(done);
+        Context.init({
+            contextStorage: {
+                memory: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load();
     });
 
     after(function(done) {
@@ -30,6 +39,90 @@ describe('inject node', function() {
 
     afterEach(function() {
         helper.unload();
+        Context.clean({allNodes: {}});
+        Context.close();
+    });
+
+    it('sets the value of flow context property', function (done) {
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "changeMe");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.context().flow.set("flowValue", "changeMe");
+            n1.receive({});
+        });
+    });
+
+    it('sets the value of persistable flow context property', function (done) {
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "#:(memory)::flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "changeMe");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.context().flow.set("flowValue", "changeMe", "memory", function (err) {
+                n1.receive({});
+            });
+        });
+    });
+
+    it('sets the value of global context property', function (done) {
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "globalValue", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "changeMe");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.context().global.set("globalValue", "changeMe");
+            n1.receive({});
+        });
+    });
+
+    it('sets the value of persistable global context property', function (done) {
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "#:(memory)::globalValue", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "changeMe");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.context().global.set("globalValue", "changeMe", "memory", function (err) {
+                n1.receive({});
+            });
+        });
     });
 
     it('should inject once with default delay property', function(done) {
