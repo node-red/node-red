@@ -545,6 +545,76 @@ describe('context', function() {
                 }).catch(done);
             })
 
+            it('should return multiple values if key is an array', function(done) {
+                Context.init({contextStorage:memoryStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.set("foo1","bar1","memory");
+                    context.set("foo2","bar2","memory");
+                    context.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                        if (err) {
+                            done(err);
+                        } else {
+                            foo1.should.be.equal("bar1");
+                            foo2.should.be.equal("bar2");
+                            should.not.exist(foo3);
+                            done();
+                        }
+                    });
+                }).catch(function(err){ done(err); });
+            });
+
+            it('should return multiple functionGlobalContext values if key is an array', function(done) {
+                var fGC = { "foo1": 456, "foo2": 789 };
+                Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                        if (err) {
+                            done(err);
+                        } else {
+                            foo1.should.be.equal(456);
+                            foo2.should.be.equal(789);
+                            should.not.exist(foo3);
+                            done();
+                        }
+                    });
+                }).catch(function(err){ done(err); });
+            });
+
+            it('should return an error if an error occurs in getting multiple store values', function(done) {
+                Context.init({contextStorage:contextStorage});
+                stubGet.onFirstCall().callsArgWith(2, null, "bar1");
+                stubGet.onSecondCall().callsArgWith(2, "error2");
+                stubGet.onThirdCall().callsArgWith(2, null, "bar3");
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                        if (err === "error2") {
+                            done();
+                        } else {
+                            done("An error occurred");
+                        }
+                    });
+                }).catch(function(err){ done(err); });
+            });
+
+            it('should return a first error if some errors occur in getting multiple store values', function(done) {
+                Context.init({contextStorage:contextStorage});
+                stubGet.onFirstCall().callsArgWith(2, "error1");
+                stubGet.onSecondCall().callsArgWith(2, null, "bar2");
+                stubGet.onThirdCall().callsArgWith(2, "error3");
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    context.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                        if (err === "error1") {
+                            done();
+                        } else {
+                            done("An error occurred");
+                        }
+                    });
+                }).catch(function(err){ done(err); });
+            });
         });
 
         describe('delete context',function(){

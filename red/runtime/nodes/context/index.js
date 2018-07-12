@@ -191,13 +191,38 @@ function createContext(id,seed) {
             // Get the value from the underlying store. If it is undefined,
             // check the seed for a default value.
             if (callback) {
-                context.get(scope,key,function(err, v) {
-                    if (v === undefined) {
-                        callback(err, seed[key]);
-                    } else {
-                        callback(err, v);
-                    }
-                })
+                if (!Array.isArray(key)) {
+                    context.get(scope,key,function(err, v) {
+                        if (v === undefined) {
+                            callback(err, seed[key]);
+                        } else {
+                            callback(err, v);
+                        }
+                    });
+                } else {
+                    // If key is an array, get the value of each key.
+                    var storeValues = [];
+                    var keys = key.slice();
+                    var _key = keys.shift();
+                    var cb = function(err, v) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            if (v === undefined) {
+                                storeValues.push(seed[_key]);
+                            } else {
+                                storeValues.push(v);
+                            }
+                            if (keys.length === 0) {
+                                callback.apply(null, [null].concat(storeValues));
+                            } else {
+                                _key = keys.shift();
+                                context.get(scope, _key, cb);
+                            }
+                        }
+                    };
+                    context.get(scope, _key, cb);
+                }
             } else {
                 // No callback, attempt to do this synchronously
                 var storeValue = context.get(scope,key);
@@ -208,7 +233,25 @@ function createContext(id,seed) {
                 }
             }
         } else {
-            return context.get(scope, key, callback);
+            if (!Array.isArray(key)) {
+                return context.get(scope, key, callback);
+            } else {
+                var storeValues = [];
+                var keys = key.slice();
+                var cb = function(err, v) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        storeValues.push(v);
+                        if (keys.length === 0) {
+                            callback.apply(null, [null].concat(storeValues));
+                        } else {
+                            context.get(scope, keys.shift(), cb);
+                        }
+                    }
+                };
+                context.get(scope, keys.shift(), cb);
+            }
         }
     };
     obj.set = function(key, value, storage, callback) {
