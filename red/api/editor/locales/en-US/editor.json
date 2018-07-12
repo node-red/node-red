@@ -306,13 +306,11 @@
         "savedNodes": "Saved nodes",
         "savedType": "Saved __type__",
         "saveFailed": "Save failed: __message__",
-
         "filename": "Filename",
         "folder": "Folder",
         "filenamePlaceholder": "file",
         "fullFilenamePlaceholder": "a/b/file",
         "folderPlaceholder": "a/b",
-
         "breadcrumb": "Library"
     },
     "palette": {
@@ -358,7 +356,6 @@
                 "monthsV_plural": "__count__ months ago",
                 "yearsV": "__count__ year ago",
                 "yearsV_plural": "__count__ years ago",
-
                 "yearMonthsV": "__y__ year, __count__ month ago",
                 "yearMonthsV_plural": "__y__ year, __count__ months ago",
                 "yearsMonthsV": "__y__ years, __count__ month ago",
@@ -489,8 +486,8 @@
                 "invalidEncryptionKey": "Invalid encryption key",
                 "encryptionEnabled": "Encryption enabled",
                 "encryptionDisabled": "Encryption disabled",
-                "resetTheEncryptionKey": "Reset the encryption key:",
                 "setTheEncryptionKey": "Set the encryption key:",
+                "resetTheEncryptionKey": "Reset the encryption key:",
                 "changeTheEncryptionKey": "Change the encryption key:",
                 "currentKey": "Current key",
                 "newKey": "New key",
