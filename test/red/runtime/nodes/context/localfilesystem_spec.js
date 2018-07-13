@@ -375,4 +375,125 @@ describe('localfilesystem',function() {
             });
         });
     });
+
+    describe('if cache is enabled',function() {
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close().then(function(){
+                    return fs.remove(resourcesDir);
+                });
+            });
+        });
+
+        it('should load contexts into the cache',function() {
+            var globalData = {key:"global"};
+            var flowData = {key:"flow"};
+            var nodeData = {key:"node"};
+            return Promise.all([
+                fs.outputFile(path.join(resourcesDir,"contexts","global","global.json"), JSON.stringify(globalData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,"contexts","flow","flow.json"), JSON.stringify(flowData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,"contexts","flow","node.json"), JSON.stringify(nodeData,null,4), "utf8")
+            ]).then(function(){
+                context = LocalFileSystem({dir: resourcesDir, cache: true});
+                return context.open();
+            }).then(function(){
+                return Promise.all([
+                    fs.remove(path.join(resourcesDir,"contexts","global","global.json")),
+                    fs.remove(path.join(resourcesDir,"contexts","flow","flow.json")),
+                    fs.remove(path.join(resourcesDir,"contexts","flow","node.json"))
+                ]);
+            }).then(function(){
+                context.get("global","key").should.be.equal("global");
+                context.get("flow","key").should.be.equal("flow");
+                context.get("node:flow","key").should.be.equal("node");
+            });
+        });
+
+        it('should store property to the cache',function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: true});
+            return context.open().then(function(){
+                return new Promise(function(resolve, reject){
+                    context.set("global","foo","bar",function(err){
+                        if(err){
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            }).then(function(){
+                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+            }).then(function(){
+                context.get("global","foo").should.be.equal("bar");
+            })
+        });
+
+        it('should enumerate context keys in the cache',function() {
+            var globalData = {foo:"bar"};
+            fs.outputFile(path.join(resourcesDir,"contexts","global","global.json"), JSON.stringify(globalData,null,4), "utf8").then(function(){
+                context = LocalFileSystem({dir: resourcesDir, cache: true});
+                return context.open()
+            }).then(function(){
+                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+            }).then(function(){
+                var keys = context.keys("global");
+                keys.should.have.length(1);
+                keys[0].should.equal("foo");
+                return new Promise(function(resolve, reject){
+                    context.set("global","foo2","bar2",function(err){
+                        if(err){
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            }).then(function(){
+                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+            }).then(function(){
+                var keys = context.keys("global");
+                keys.should.have.length(2);
+                keys[1].should.equal("foo2");
+            })
+        });
+
+        it('should delete context in the cache',function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: true});
+            return context.open().then(function(){
+                return new Promise(function(resolve, reject){
+                    context.set("global","foo","bar",function(err){
+                        if(err){
+                            reject(err);
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+            }).then(function(){
+                context.get("global","foo").should.be.equal("bar");
+                return context.delete("global");
+            }).then(function(){
+                should.not.exist(context.get("global","foo"))
+            })
+        });
+
+        it('should clean unnecessary context in the cache',function() {
+            var flowAData = {key:"flowA"};
+            var flowBData = {key:"flowB"};
+            return Promise.all([
+                fs.outputFile(path.join(resourcesDir,"contexts","flowA","flow.json"), JSON.stringify(flowAData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,"contexts","flowB","flow.json"), JSON.stringify(flowBData,null,4), "utf8")
+            ]).then(function(){
+                context = LocalFileSystem({dir: resourcesDir, cache: true});
+                return context.open();
+            }).then(function(){
+                context.get("flowA","key").should.be.equal("flowA");
+                context.get("flowB","key").should.be.equal("flowB");
+                return context.clean(["flowA"]);
+            }).then(function(){
+                context.get("flowA","key").should.be.equal("flowA");
+                should.not.exist(context.get("flowB","key"));
+            });
+        });
+    });
 });
