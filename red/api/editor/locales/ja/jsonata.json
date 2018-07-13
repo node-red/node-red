@@ -214,5 +214,9 @@
     "$toMillis": {
         "args": "timestamp",
         "desc": "ISO 8601形式の文字列 `timestamp` を、Unixエポック(1 January, 1970 UTC)からの経過ミリ秒を表す数値へ変換します。 文字列が正しい形式でない場合、エラーとなります。"
+    },
+    "$env": {
+        "args": "arg",
+        "desc": "環境変数の値を返します。\n\n本関数はNode-REDの定義関数です。"
     }
 }
