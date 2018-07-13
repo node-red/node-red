@@ -24,7 +24,6 @@ var helper = require("node-red-node-test-helper");
 describe('change Node', function() {
 
     beforeEach(function(done) {
-        helper.startServer(done);
         Context.init({
             contextStorage: {
                 memory: {
@@ -32,14 +31,19 @@ describe('change Node', function() {
                 }
             }
         });
-        Context.load();
+        Context.load().then(function () {
+            helper.startServer(done);
+        });
     });
 
     afterEach(function(done) {
-        helper.unload();
-        helper.stopServer(done);
-        Context.clean({allNodes:{}});
-        Context.close();        
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
+            helper.stopServer(done);
+        });
     });
 
     it('should load node with defaults', function(done) {
