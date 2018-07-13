@@ -408,9 +408,9 @@ function evaluateJSONataExpression(expr,msg,callback) {
     if (callback) {
         // If callback provided, need to override the pre-assigned sync
         // context functions to be their async variants
-        bindings.flowContext = function(val) {
+        bindings.flowContext = function(val, store) {
             return new Promise((resolve,reject) => {
-                expr._node.context().flow.get(val, function(err,value) {
+                expr._node.context().flow.get(val, store, function(err,value) {
                     if (err) {
                         reject(err);
                     } else {
@@ -419,9 +419,9 @@ function evaluateJSONataExpression(expr,msg,callback) {
                 })
             });
         }
-        bindings.globalContext = function(val) {
+        bindings.globalContext = function(val, store) {
             return new Promise((resolve,reject) => {
-                expr._node.context().global.get(val, function(err,value) {
+                expr._node.context().global.get(val, store, function(err,value) {
                     if (err) {
                         reject(err);
                     } else {
