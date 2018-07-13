@@ -22,7 +22,6 @@ var helper = require("node-red-node-test-helper");
 describe('inject node', function() {
 
     before(function(done) {
-        helper.startServer(done);
         Context.init({
             contextStorage: {
                 memory: {
@@ -31,6 +30,7 @@ describe('inject node', function() {
             }
         });
         Context.load();
+        helper.startServer(done);
     });
 
     after(function(done) {

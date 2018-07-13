@@ -24,7 +24,6 @@ var helper = require("node-red-node-test-helper");
 describe('change Node', function() {
 
     beforeEach(function(done) {
-        helper.startServer(done);
         Context.init({
             contextStorage: {
                 memory: {
@@ -33,6 +32,7 @@ describe('change Node', function() {
             }
         });
         Context.load();
+        helper.startServer(done);
     });
 
     afterEach(function(done) {

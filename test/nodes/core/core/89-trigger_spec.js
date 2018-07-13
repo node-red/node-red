@@ -18,16 +18,27 @@ var should = require("should");
 var sinon = require("sinon");
 var helper = require("node-red-node-test-helper");
 var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
+var Context = require("../../../../red/runtime/nodes/context");
 var RED = require("../../../../red/red.js");
 
 describe('trigger node', function() {
 
     beforeEach(function(done) {
+        Context.init({
+            contextStorage: {
+                memory: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load();
         helper.startServer(done);
     });
 
     afterEach(function(done) {
         helper.unload().then(function() {
+            Context.clean({allNodes: {}});
+            Context.close();
             helper.stopServer(done);
         });
     });
@@ -312,7 +323,33 @@ describe('trigger node', function() {
             });
             n1.emit("input", {payload:null});
         });
+    });
 
+    it('should be able to return things from persistable flow and global context variables', function (done) {
+        var flow = [{"id": "n1", "type": "trigger", "name": "triggerNode", "op1": "#:(memory)::foo", "op1type": "flow",
+                     "op2": "#:(memory)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function (msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "foo");
+                        c += 1;
+                    } else {
+                        msg.should.have.a.property("payload", "bar");
+                        done();
+                    }
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.context().flow.set("foo", "foo");
+            n1.context().global.set("bar", "bar");
+            n1.emit("input", { payload: null });
+        });
     });
 
     it('should be able to not output anything on first trigger', function(done) {
