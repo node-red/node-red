@@ -31,14 +31,17 @@ describe('trigger node', function() {
                 }
             }
         });
-        Context.load();
-        helper.startServer(done);
+        Context.load().then(function () {
+            helper.startServer(done);
+        });
     });
 
     afterEach(function(done) {
-        helper.unload().then(function() {
-            Context.clean({allNodes: {}});
-            Context.close();
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
             helper.stopServer(done);
         });
     });

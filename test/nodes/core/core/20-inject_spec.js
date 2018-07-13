@@ -21,7 +21,7 @@ var helper = require("node-red-node-test-helper");
 
 describe('inject node', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
         Context.init({
             contextStorage: {
                 memory: {
@@ -29,18 +29,19 @@ describe('inject node', function() {
                 }
             }
         });
-        Context.load();
-        helper.startServer(done);
+        Context.load().then(function () {
+            helper.startServer(done);
+        });
     });
 
-    after(function(done) {
-        helper.stopServer(done);
-    });
-
-    afterEach(function() {
-        helper.unload();
-        Context.clean({allNodes: {}});
-        Context.close();
+    afterEach(function(done) {
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
+            helper.stopServer(done);
+        });
     });
 
     it('sets the value of flow context property', function (done) {
