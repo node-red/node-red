@@ -268,7 +268,36 @@ function createContext(id,seed) {
             }
             context = getContextStorage(storage);
         }
-        context.set(scope, key, value, callback);
+        if (!Array.isArray(key)) {
+            context.set(scope, key, value, callback);
+        } else {
+            // If key is an array, set each key-value pair.
+            // If the value array is longer than the key array, then the extra values are ignored.
+            var index = 0;
+            var values = [].concat(value); // Convert the value to an array
+            var cb = function(err) {
+                if (err) {
+                    if (callback) {
+                        callback(err);
+                    }
+                } else {
+                    index++;
+                    if (index === key.length) {
+                        if (callback) {
+                            callback(null);
+                        }
+                    } else {
+                        if(index < values.length) {
+                            context.set(scope, key[index], values[index], cb);
+                        } else {
+                            // If the value array is shorter than the key array, use null for missing values.
+                            context.set(scope, key[index], null, cb);
+                        }
+                    }
+                }
+            };
+            context.set(scope, key[index], values[index], cb);
+        }
     };
     obj.keys = function(storage, callback) {
         var context;
