@@ -24,17 +24,24 @@ var RED = require("../../../../red/red.js");
 describe('trigger node', function() {
 
     beforeEach(function(done) {
+        helper.startServer(done);
+    });
+
+    function initContext(done) {
         Context.init({
             contextStorage: {
-                memory: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
                     module: "memory"
                 }
             }
         });
         Context.load().then(function () {
-            helper.startServer(done);
+            done();
         });
-    });
+    }
 
     afterEach(function(done) {
         helper.unload().then(function () {
@@ -329,29 +336,155 @@ describe('trigger node', function() {
     });
 
     it('should be able to return things from persistable flow and global context variables', function (done) {
-        var flow = [{"id": "n1", "type": "trigger", "name": "triggerNode", "op1": "#:(memory)::foo", "op1type": "flow",
-                     "op2": "#:(memory)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
+        var flow = [{"id": "n1", "type": "trigger", "name": "triggerNode", "op1": "#:(memory0)::foo", "op1type": "flow",
+                     "op2": "#:(memory0)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
                     {"id": "n2", "type": "helper"}];
         helper.load(triggerNode, flow, function () {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            var c = 0;
-            n2.on("input", function (msg) {
-                try {
-                    if (c === 0) {
-                        msg.should.have.a.property("payload", "foo");
-                        c += 1;
-                    } else {
-                        msg.should.have.a.property("payload", "bar");
-                        done();
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (c === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                            c += 1;
+                        } else {
+                            msg.should.have.a.property("payload", "bar");
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
                     }
-                } catch (err) {
-                    done(err);
-                }
+                });
+                var context = n1.context();
+                var flow = context.flow;
+                var global = context.global;
+                flow.set("foo", "foo", "memory0", function (err) {
+                    global.set("bar", "bar", "memory0", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
             });
-            n1.context().flow.set("foo", "foo");
-            n1.context().global.set("bar", "bar");
-            n1.emit("input", { payload: null });
+        });
+    });
+
+    it('should be able to return things from multiple persistable global context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory0)::val", "op1type": "global",
+                     "op2": "#:(memory1)::val", "op2type": "global"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n1.context().global;
+                global.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
+    });
+
+    it('should be able to return things from multiple persistable flow context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory0)::val", "op1type": "flow",
+                     "op2": "#:(memory1)::val", "op2type": "flow"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var flow = n1.context().flow;
+                flow.set("val", "foo", "memory0", function (err) {
+                    flow.set("val", "bar", "memory1", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
+    });
+
+    it('should be able to return things from multiple persistable flow & global context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory0)::val", "op1type": "flow",
+                     "op2": "#:(memory1)::val", "op2type": "global"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var context = n1.context();
+                var flow = context.flow;
+                var global = context.flow;
+                flow.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
         });
     });
 
