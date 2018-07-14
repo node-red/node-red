@@ -24,17 +24,24 @@ var helper = require("node-red-node-test-helper");
 describe('change Node', function() {
 
     beforeEach(function(done) {
+        helper.startServer(done);
+    });
+
+    function initContext(done) {
         Context.init({
             contextStorage: {
-                memory: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
                     module: "memory"
                 }
             }
         });
         Context.load().then(function () {
-            helper.startServer(done);
+            done();
         });
-    });
+    }
 
     afterEach(function(done) {
         helper.unload().then(function () {
@@ -112,7 +119,7 @@ describe('change Node', function() {
         });
 
         it('sets the value of persistable global context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t":"set","p":"#:(memory)::globalValue","pt":"global","to":"changed","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t":"set","p":"#:(memory0)::globalValue","pt":"global","to":"changed","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -337,7 +344,7 @@ describe('change Node', function() {
         });
 
         it('changes the value to persistable flow context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"#:(memory)::flowValue","tot":"flow"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"#:(memory0)::flowValue","tot":"flow"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -376,7 +383,7 @@ describe('change Node', function() {
         });
 
         it('changes the value to persistable global context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"#:(memory)::globalValue","tot":"global"}],"name":"changeNode","wires":[["helperNode1"]]},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"#:(memory0)::globalValue","tot":"global"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -793,7 +800,7 @@ describe('change Node', function() {
         });
 
         it('changes the value using persistable flow context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory)::topic","to":"123","fromt":"flow","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory0)::topic","to":"123","fromt":"flow","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -832,7 +839,7 @@ describe('change Node', function() {
         });
 
         it('changes the value using persistable global context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory)::topic","to":"123","fromt":"global","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory0)::topic","to":"123","fromt":"global","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -871,7 +878,7 @@ describe('change Node', function() {
         });
 
         it('changes the number using persistable global context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory)::topic","to":"ABC","fromt":"global","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"#:(memory0)::topic","to":"ABC","fromt":"global","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -982,7 +989,7 @@ describe('change Node', function() {
         });
 
         it('changes the value of the persistable global context', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "global", "from": "Hello", "fromt": "str", "to": "Goodbye", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory0)::payload", "pt": "global", "from": "Hello", "fromt": "str", "to": "Goodbye", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1024,7 +1031,7 @@ describe('change Node', function() {
         });
 
         it('changes the value and doesnt change type of the persistable flow context for partial match', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory0)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1067,7 +1074,7 @@ describe('change Node', function() {
         });
 
         it('changes the value and type of the persistable flow context if a complete match', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory0)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1107,7 +1114,7 @@ describe('change Node', function() {
         });
 
         it('changes the value using number - number persistable flow context', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "flow", "from": "123", "fromt": "num", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory0)::payload", "pt": "flow", "from": "123", "fromt": "num", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1148,7 +1155,7 @@ describe('change Node', function() {
         });
 
         it('changes the value using boolean - boolean persistable flow context', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory)::payload", "pt": "flow", "from": "true", "fromt": "bool", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory0)::payload", "pt": "flow", "from": "true", "fromt": "bool", "to": "abc", "tot": "str" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1236,7 +1243,7 @@ describe('change Node', function() {
         });
 
         it('deletes the value of persistable global context property', function(done) {
-            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "delete", "p": "#:(memory)::globalValue", "pt": "global"}],"name":"changeNode","wires":[["helperNode1"]]},
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "delete", "p": "#:(memory0)::globalValue", "pt": "global"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
@@ -1424,6 +1431,7 @@ describe('change Node', function() {
                 });
             });
         });
+        
         it('applies multiple rules in order', function(done) {
             var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
                         rules:[
@@ -1448,5 +1456,101 @@ describe('change Node', function() {
                 });
             });
         });
+
+        it('can access two persistable flow context property', function(done) {
+            var flow = [{"id":"changeNode1", "z":"t1", "type":"change",
+                         "wires":[["helperNode1"]],
+                         rules:[
+                             {"t":"set", "p":"val0", "to":"#:(memory0)::val", "tot":"flow"},
+                             {"t":"set", "p":"val1", "to":"#:(memory1)::val", "tot":"flow"}
+                        ]},
+                        {id:"helperNode1", "z":"t1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.should.have.property("val0", "foo");
+                            msg.should.have.property("val1", "bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    var flow = changeNode1.context().flow;
+                    flow.set("val", "foo", "memory0", function (err) {
+                        flow.set("val", "bar", "memory1", function (err) {
+                            changeNode1.receive({payload:""});
+                        });
+                    });
+                });
+            });
+        });
+        
+        it('can access two persistable global context property', function(done) {
+            var flow = [{"id":"changeNode1", "z":"t1", "type":"change",
+                         "wires":[["helperNode1"]],
+                         rules:[
+                             {"t":"set", "p":"val0", "to":"#:(memory0)::val", "tot":"global"},
+                             {"t":"set", "p":"val1", "to":"#:(memory1)::val", "tot":"global"}
+                         ]},
+                        {id:"helperNode1", "z":"t1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.should.have.property("val0", "foo");
+                            msg.should.have.property("val1", "bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    var global = changeNode1.context().global;
+                    global.set("val", "foo", "memory0", function (err) {
+                        global.set("val", "bar", "memory1", function (err) {
+                            changeNode1.receive({payload:""});
+                        });
+                    });
+                });
+            });
+        });
+        
+        it('can access persistable global & flow context property', function(done) {
+            var flow = [{"id":"changeNode1", "z":"t1", "type":"change",
+                         "wires":[["helperNode1"]],
+                         rules:[
+                             {"t":"set", "p":"val0", "to":"#:(memory0)::val", "tot":"flow"},
+                             {"t":"set", "p":"val1", "to":"#:(memory1)::val", "tot":"global"}
+                         ]},
+                        {id:"helperNode1", "z":"t1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.should.have.property("val0", "foo");
+                            msg.should.have.property("val1", "bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    var context = changeNode1.context();
+                    var flow = context.flow;
+                    var global = context.global;
+                    flow.set("val", "foo", "memory0", function (err) {
+                        global.set("val", "bar", "memory1", function (err) {
+                            changeNode1.receive({payload:""});
+                        });
+                    });
+                });
+            });
+        });
+        
     });
 });
