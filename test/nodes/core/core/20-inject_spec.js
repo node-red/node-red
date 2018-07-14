@@ -22,17 +22,24 @@ var helper = require("node-red-node-test-helper");
 describe('inject node', function() {
 
     beforeEach(function(done) {
+        helper.startServer(done);
+    });
+
+    function initContext(done) {
         Context.init({
             contextStorage: {
-                memory: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
                     module: "memory"
                 }
             }
         });
         Context.load().then(function () {
-            helper.startServer(done);
+            done();
         });
-    });
+    }
 
     afterEach(function(done) {
         helper.unload().then(function () {
@@ -65,22 +72,65 @@ describe('inject node', function() {
     });
 
     it('sets the value of persistable flow context property', function (done) {
-        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "#:(memory)::flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "#:(memory0)::flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n2.on("input", function (msg) {
-                try {
-                    msg.should.have.property("topic", "t1");
-                    msg.should.have.property("payload", "changeMe");
-                    done();
-                } catch (err) {
-                    done(err);
-                }
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic", "t1");
+                        msg.should.have.property("payload", "changeMe");
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                n1.context().flow.set("flowValue", "changeMe", "memory0", function (err) {
+                    n1.receive({});
+                });
             });
-            n1.context().flow.set("flowValue", "changeMe", "memory", function (err) {
-                n1.receive({});
+        });
+    });
+
+    it('sets the value of two persistable flow context property', function (done) {
+        var flow = [{id: "n0", z: "flow", type: "inject", topic: "t0", payload: "#:(memory0)::val", payloadType: "flow", wires: [["n2"]]},
+                    {id: "n1", z: "flow", type: "inject", topic: "t1", payload: "#:(memory1)::val", payloadType: "flow", wires: [["n2"]]},
+                    {id: "n2", z: "flow", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            initContext(function () {
+                var n0 = helper.getNode("n0");
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic");
+                        if (msg.topic === "t0") {
+                            msg.should.have.property("payload", "foo");
+                        }
+                        else if (msg.topic === "t1") {
+                            msg.should.have.property("payload", "bar");
+                        }
+                        else {
+                            done(new Error("unexpected message"));
+                        }
+                        count++;
+                        if (count === 2) {
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n0.context().flow;
+                global.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n0.receive({});
+                        n1.receive({});
+                    });
+                });
             });
         });
     });
@@ -106,26 +156,153 @@ describe('inject node', function() {
     });
 
     it('sets the value of persistable global context property', function (done) {
-        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "#:(memory)::globalValue", payloadType: "global", wires: [["n2"]]},
-                    {id: "n2", type: "helper"}];
+        var flow = [{id: "n1", z: "flow", type: "inject", topic: "t1", payload: "#:(memory1)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", z: "flow", type: "helper"}];
         helper.load(injectNode, flow, function () {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n2.on("input", function (msg) {
-                try {
-                    msg.should.have.property("topic", "t1");
-                    msg.should.have.property("payload", "changeMe");
-                    done();
-                } catch (err) {
-                    done(err);
-                }
-            });
-            n1.context().global.set("globalValue", "changeMe", "memory", function (err) {
-                n1.receive({});
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic", "t1");
+                        msg.should.have.property("payload", "foo");
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n1.context().global;
+                global.set("val", "foo", "memory1", function (err) {
+                    n1.receive({});
+                });
             });
         });
     });
 
+    it('sets the value of two persistable global context property', function (done) {
+        var flow = [{id: "n0", z: "flow", type: "inject", topic: "t0", payload: "#:(memory0)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n1", z: "flow", type: "inject", topic: "t1", payload: "#:(memory1)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", z: "flow", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            initContext(function () {
+                var n0 = helper.getNode("n0");
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic");
+                        if (msg.topic === "t0") {
+                            msg.should.have.property("payload", "foo");
+                        }
+                        else if (msg.topic === "t1") {
+                            msg.should.have.property("payload", "bar");
+                        }
+                        else {
+                            done(new Error("unexpected message"));
+                        }
+                        count++;
+                        if (count === 2) {
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n0.context().global;
+                global.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n0.receive({});
+                        n1.receive({});
+                    });
+                });
+            });
+        });
+    });
+
+    it('sets the value of persistable flow & global context property', function (done) {
+        var flow = [{id: "n0", z: "flow", type: "inject", topic: "t0", payload: "#:(memory0)::val", payloadType: "flow", wires: [["n2"]]},
+                    {id: "n1", z: "flow", type: "inject", topic: "t1", payload: "#:(memory1)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", z: "flow", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            initContext(function () {
+                var n0 = helper.getNode("n0");
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic");
+                        if (msg.topic === "t0") {
+                            msg.should.have.property("payload", "foo");
+                        }
+                        else if (msg.topic === "t1") {
+                            msg.should.have.property("payload", "bar");
+                        }
+                        else {
+                            done(new Error("unexpected message"));
+                        }
+                        count++;
+                        if (count === 2) {
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var context = n0.context();
+                var flow = context.flow;
+                var global = context.global;
+                flow.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n0.receive({});
+                        n1.receive({});
+                    });
+                });
+            });
+        });
+    });
+
+    it('sets the value of two persistable global context property', function (done) {
+        var flow = [{id: "n0", z: "flow", type: "inject", topic: "t0", payload: "#:(memory0)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n1", z: "flow", type: "inject", topic: "t1", payload: "#:(memory1)::val", payloadType: "global", wires: [["n2"]]},
+                    {id: "n2", z: "flow", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            initContext(function () {
+                var n0 = helper.getNode("n0");
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("topic");
+                        if (msg.topic === "t0") {
+                            msg.should.have.property("payload", "foo");
+                        }
+                        else if (msg.topic === "t1") {
+                            msg.should.have.property("payload", "bar");
+                        }
+                        else {
+                            done(new Error("unexpected message"));
+                        }
+                        count++;
+                        if (count === 2) {
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n0.context().global;
+                global.set("val", "foo", "memory0", function (err) {
+                    global.set("val", "bar", "memory1", function (err) {
+                        n0.receive({});
+                        n1.receive({});
+                    });
+                });
+            });
+        });
+    });
     it('should inject once with default delay property', function(done) {
         helper.load(injectNode, [{id:"n1", type:"inject", topic: "t1",
                     payload:"",payloadType:"date",
