@@ -494,7 +494,7 @@ function encodeObject(msg,opts) {
                 if (msg.msg.length > debuglength) {
                     // msg.msg = msg.msg.slice(0,debuglength);
                     msg.msg = {
-                        __encoded__: true,
+                        __enc__: true,
                         type: "array",
                         data: msg.msg.slice(0,debuglength),
                         length: msg.msg.length
@@ -505,14 +505,14 @@ function encodeObject(msg,opts) {
                 msg.msg = safeJSONStringify(msg.msg, function(key, value) {
                     if (key === '_req' || key === '_res') {
                         value = {
-                            __encoded__: true,
+                            __enc__: true,
                             type: "internal"
                         }
                     } else if (value instanceof Error) {
                         value = value.toString()
                     } else if (util.isArray(value) && value.length > debuglength) {
                         value = {
-                            __encoded__: true,
+                            __enc__: true,
                             type: "array",
                             data: value.slice(0,debuglength),
                             length: value.length
@@ -523,20 +523,20 @@ function encodeObject(msg,opts) {
                         }
                     } else if (typeof value === 'function') {
                         value = {
-                            __encoded__: true,
+                            __enc__: true,
                             type: "function"
                         }
                     } else if (typeof value === 'number') {
                         if (isNaN(value) || value === Infinity || value === -Infinity) {
                             value = {
-                                __encoded__: true,
+                                __enc__: true,
                                 type: "number",
                                 data: value.toString()
                             }
                         }
                     } else if (value && value.constructor) {
                         if (value.type === "Buffer") {
-                            value.__encoded__ = true;
+                            value.__enc__ = true;
                             value.length = value.data.length;
                             if (value.length > debuglength) {
                                 value.data = value.data.slice(0,debuglength);

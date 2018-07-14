@@ -276,7 +276,7 @@ RED.clipboard = (function() {
         if (typeof value !== "string" ) {
             value = JSON.stringify(value, function(key,value) {
                 if (value !== null && typeof value === 'object') {
-                    if (value.__encoded__) {
+                    if (value.__enc__) {
                         if (value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
                             truncated = value.data.length !== value.length;
                             return value.data;

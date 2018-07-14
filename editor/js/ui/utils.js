@@ -298,17 +298,17 @@ RED.utils = (function() {
 
         var isArray = Array.isArray(obj);
         var isArrayObject = false;
-        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__encoded__ && obj.type === 'array') || obj.type === 'Buffer')) {
+        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__enc__ && obj.type === 'array') || obj.type === 'Buffer')) {
             isArray = true;
             isArrayObject = true;
         }
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
-        } else if (obj.__encoded__ && obj.type === 'number') {
+        } else if (obj.__enc__ && obj.type === 'number') {
             e = $('<span class="debug-message-type-number debug-message-object-header"></span>').text(obj.data).appendTo(entryObj);
-        } else if (typeHint === "function" || (obj.__encoded__ && obj.type === 'function')) {
+        } else if (typeHint === "function" || (obj.__enc__ && obj.type === 'function')) {
             e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("function").appendTo(entryObj);
-        } else if (typeHint === "internal" || (obj.__encoded__ && obj.type === 'internal')) {
+        } else if (typeHint === "internal" || (obj.__enc__ && obj.type === 'internal')) {
             e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("[internal]").appendTo(entryObj);
         } else if (typeof obj === 'string') {
             if (/[\t\n\r]/.test(obj)) {
@@ -354,7 +354,7 @@ RED.utils = (function() {
                 if (originalLength === undefined) {
                     originalLength = data.length;
                 }
-                if (data.__encoded__) {
+                if (data.__enc__) {
                     data = data.data;
                 }
                 type = obj.type.toLowerCase();
