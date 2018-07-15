@@ -639,6 +639,9 @@
             "eval": "Error evaluating expression:\n  __message__"
         }
     },
+    "jsEditor": {
+        "title": "JavaScript editor"
+    },
     "jsonEditor": {
         "title": "JSON editor",
         "format": "format JSON"
