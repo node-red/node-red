@@ -606,7 +606,7 @@ describe('trigger node', function() {
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
-                        (Date.now() - ss).should.be.greaterThan(150);
+                        (Date.now() - ss).should.be.greaterThan(149);
                         done();
                     }
                 }
