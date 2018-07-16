@@ -16,7 +16,7 @@
 
 .sidebar-context-stack {
     position: absolute;
-    top: 0; // with toolbar: 43px;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
@@ -32,7 +32,8 @@
 .sidebar-context-property {
     position: relative;
     .debug-message-tools {
-        right: 3px;
+        right: 0px;
+        margin-right: 5px;
         display: none;
     }
     &:hover .debug-message-tools {
@@ -44,4 +45,10 @@
     font-size: 11px;
     color: #bbb;
     padding: 1px 3px;
+}
+.sidebar-context-property-storename {
+    display: block;
+    font-size: 0.8em;
+    font-style: italic;
+    color: #aaa;
 }

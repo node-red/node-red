@@ -30,10 +30,10 @@ RED.sidebar.context = (function() {
     var currentFlow;
 
     function init() {
+
         content = $("<div>").css({"position":"relative","height":"100%"});
         content.className = "sidebar-context"
         // var toolbar = $('<div class="sidebar-header">'+
-        //     '<span class="button-group"><a id="sidebar-context-toggle-live" class="sidebar-header-button-toggle single" href="#"><i class="fa fa-play"></i> <span></span></a></span>'+
         //     '</div>').appendTo(content);
 
         var footerToolbar = $('<div>'+
@@ -167,6 +167,7 @@ RED.sidebar.context = (function() {
         })
 
         updateEntry(globalSection,"context/global","global");
+
     }
 
     function updateNode(node,force) {
@@ -205,44 +206,64 @@ RED.sidebar.context = (function() {
     }
 
     function refreshEntry(section,baseUrl,id) {
+
+        var contextStores = RED.settings.context.stores;
         var container = section.table;
 
         $.getJSON(baseUrl, function(data) {
             $(container).empty();
-            var propRow;
-
-            var keys = Object.keys(data);
+            var sortedData = {};
+            for (var store in data) {
+                if (data.hasOwnProperty(store)) {
+                    for (var key in data[store]) {
+                        if (data[store].hasOwnProperty(key)) {
+                            if (!sortedData.hasOwnProperty(key)) {
+                                sortedData[key] = [];
+                            }
+                            data[store][key].store = store;
+                            sortedData[key].push(data[store][key])
+                        }
+                    }
+                }
+            }
+            var keys = Object.keys(sortedData);
             keys.sort();
             var l = keys.length;
             for (var i = 0; i < l; i++) {
-                var k = keys[i];
-                propRow = $('<tr class="node-info-node-row"><td class="sidebar-context-property"></td><td></td></tr>').appendTo(container);
-                var obj = $(propRow.children()[0]);
-                obj.text(k);
-                var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(obj);
-                var refreshItem = $('<button class="editor-button editor-button-small"><i class="fa fa-refresh"></i></button>').appendTo(tools).click(function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    $.getJSON(baseUrl+"/"+k, function(data) {
-                        $(propRow.children()[1]).empty();
-                        var payload = data.msg;
-                        var format = data.format;
-                        payload = RED.utils.decodeObject(payload,format);
-                        RED.utils.createObjectElement(payload, {
-                            typeHint: data.format,
-                            sourceId: id+"."+k
-                        }).appendTo(propRow.children()[1]);
-                    })
+                sortedData[keys[i]].forEach(function(v) {
+                    var k = keys[i];
+                    var l2 = sortedData[k].length;
+                    var propRow = $('<tr class="node-info-node-row"><td class="sidebar-context-property"></td><td></td></tr>').appendTo(container);
+                    var obj = $(propRow.children()[0]);
+                    obj.text(k);
+                    var tools = $('<span class="debug-message-tools button-group"></span>').appendTo(obj);
+                    var refreshItem = $('<button class="editor-button editor-button-small"><i class="fa fa-refresh"></i></button>').appendTo(tools).click(function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        $.getJSON(baseUrl+"/"+k+"?store="+v.store, function(data) {
+                            $(propRow.children()[1]).empty();
+                            var payload = data.msg;
+                            var format = data.format;
+                            payload = RED.utils.decodeObject(payload,format);
+                            RED.utils.createObjectElement(payload, {
+                                typeHint: data.format,
+                                sourceId: id+"."+k
+                            }).appendTo(propRow.children()[1]);
+                        })
+                    });
+
+
+                    var payload = v.msg;
+                    var format = v.format;
+                    payload = RED.utils.decodeObject(payload,format);
+                    RED.utils.createObjectElement(payload, {
+                        typeHint: v.format,
+                        sourceId: id+"."+k
+                    }).appendTo(propRow.children()[1]);
+                    if (contextStores.length > 1) {
+                        $("<span>",{class:"sidebar-context-property-storename"}).text(v.store).appendTo($(propRow.children()[0]))
+                    }
                 });
-
-
-                var payload = data[k].msg;
-                var format = data[k].format;
-                payload = RED.utils.decodeObject(payload,format);
-                RED.utils.createObjectElement(payload, {
-                    typeHint: data[k].format,
-                    sourceId: id+"."+k
-                }).appendTo(propRow.children()[1]);
             }
             if (l === 0) {
                 $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td data-i18n="sidebar.context.empty"></td></tr>').appendTo(container).i18n();
