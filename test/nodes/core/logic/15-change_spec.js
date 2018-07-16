@@ -560,6 +560,102 @@ describe('change Node', function() {
             });
         });
 
+        it('changes the value using flow context with jsonata', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$flowContext(\"foo\")","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"},{"id":"flow","type":"tab"}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    changeNode1.context().flow.set("foo","bar");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.eql("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"Hello World!"});
+                });
+            });
+        });
+
+        it('changes the value using global context with jsonata', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$globalContext(\"foo\")","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"},{"id":"flow","type":"tab"}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    changeNode1.context().global.set("foo","bar");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.eql("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"Hello World!"});
+                });
+            });
+        });
+
+        it('changes the value using persistable flow context with jsonata', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$flowContext(\"foo\",\"memory1\")","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"},{"id":"flow","type":"tab"}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.eql("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.context().flow.set("foo","bar","memory1",function(err){
+                        if(err){
+                            done(err);
+                        }else{
+                            changeNode1.context().flow.set("foo","error!");
+                            changeNode1.receive({payload:"Hello World!"});
+                        }
+                    });
+                });
+            });
+        });
+
+        it('changes the value using persistable global context with jsonata', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$globalContext(\"foo\",\"memory1\")","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[],"z":"flow"},{"id":"flow","type":"tab"}];
+            helper.load(changeNode, flow, function() {
+                initContext(function () {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.eql("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.context().global.set("foo","bar","memory1",function(err){
+                        if(err){
+                            done(err);
+                        }else{
+                            changeNode1.context().global.set("foo","error!");
+                            changeNode1.receive({payload:"Hello World!"});
+                        }
+                    });
+                });
+            });
+        });
+
     });
     describe('#change', function() {
         it('changes the value of the message property', function(done) {
@@ -1431,7 +1527,7 @@ describe('change Node', function() {
                 });
             });
         });
-        
+
         it('applies multiple rules in order', function(done) {
             var flow = [{"id":"changeNode1","type":"change","wires":[["helperNode1"]],
                         rules:[
@@ -1487,7 +1583,7 @@ describe('change Node', function() {
                 });
             });
         });
-        
+
         it('can access two persistable global context property', function(done) {
             var flow = [{"id":"changeNode1", "z":"t1", "type":"change",
                          "wires":[["helperNode1"]],
@@ -1518,7 +1614,7 @@ describe('change Node', function() {
                 });
             });
         });
-        
+
         it('can access persistable global & flow context property', function(done) {
             var flow = [{"id":"changeNode1", "z":"t1", "type":"change",
                          "wires":[["helperNode1"]],
@@ -1551,6 +1647,6 @@ describe('change Node', function() {
                 });
             });
         });
-        
+
     });
 });
