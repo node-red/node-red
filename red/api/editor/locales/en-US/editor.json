@@ -457,8 +457,14 @@
             "filtered": "__count__ hidden"
         },
         "context": {
-            "name":"Context",
-            "label":"context"
+            "name":"Context Data",
+            "label":"context",
+            "none": "none selected",
+            "refresh": "refresh to load",
+            "empty": "empty",
+            "node": "Node",
+            "flow": "Flow",
+            "global": "Global"
         },
         "palette": {
             "name": "Palette management",

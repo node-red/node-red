@@ -48,7 +48,7 @@ RED.sidebar.context = (function() {
         });
 
         nodeSection = sections.add({
-            title: "Node",
+            title: RED._("sidebar.context.node"),
             collapsible: true,
             // onexpand: function() {
             //     updateNode(currentNode,true);
@@ -85,7 +85,7 @@ RED.sidebar.context = (function() {
         // subflowSection.container.hide();
 
         flowSection = sections.add({
-            title: "Flow",
+            title: RED._("sidebar.context.flow"),
             collapsible: true
         });
         flowSection.expand();
@@ -103,7 +103,7 @@ RED.sidebar.context = (function() {
             })
 
         globalSection = sections.add({
-            title: "Global",
+            title: RED._("sidebar.context.global"),
             collapsible: true
         });
         globalSection.expand();
@@ -187,9 +187,9 @@ RED.sidebar.context = (function() {
         } else {
             $(nodeSection.table).empty();
             if (node) {
-                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>refresh to load</td></tr>').appendTo(nodeSection.table);
+                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td data-i18n="sidebar.context.refresh"></td></tr>').appendTo(nodeSection.table).i18n();
             } else {
-                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>none selected</td></tr>').appendTo(nodeSection.table);
+                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td data-i18n="sidebar.context.none"></td></tr>').appendTo(nodeSection.table).i18n();
             }
             nodeSection.timestamp.html("&nbsp;");
 
@@ -245,7 +245,7 @@ RED.sidebar.context = (function() {
                 }).appendTo(propRow.children()[1]);
             }
             if (l === 0) {
-                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>empty</td></tr>').appendTo(container);
+                $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td data-i18n="sidebar.context.empty"></td></tr>').appendTo(container).i18n();
             }
             $(section.timestamp).text(new Date().toLocaleString());
         });
@@ -256,7 +256,7 @@ RED.sidebar.context = (function() {
             refreshEntry(section,baseUrl,id);
         } else {
             $(container).empty();
-            $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td>none selected</td></tr>').appendTo(container);
+            $('<tr class="node-info-node-row red-ui-search-empty blank" colspan="2"><td data-i18n="sidebar.context.none"></td></tr>').appendTo(container).i18n();
         }
     }
 
