@@ -305,7 +305,7 @@ function setMessageProperty(msg,prop,value,createMissing) {
     }
 }
 
-function evaluteEnvProperty(value) {
+function evaluateEnvProperty(value) {
     if (/^\${[^}]+}$/.test(value)) {
         // ${ENV_VAR}
         value = value.substring(2,value.length-1);
@@ -372,7 +372,7 @@ function evaluateNodeProperty(value, type, node, msg, callback) {
         var expr = prepareJSONataExpression(value,node);
         result = evaluateJSONataExpression(expr,msg);
     } else if (type === 'env') {
-        result = evaluteEnvProperty(value);
+        result = evaluateEnvProperty(value);
     }
     if (callback) {
         callback(null,result);
