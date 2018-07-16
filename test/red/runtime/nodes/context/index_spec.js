@@ -292,26 +292,6 @@ describe('context', function() {
                 Context.init({contextStorage:{file:{module:"localfilesystem",config:{dir:resourcesDir}}}});
                 Context.load();
             });
-            it('should accept special storage name', function(done) {
-                Context.init({
-                    contextStorage:{
-                        "#%&":{module:testPlugin},
-                        \u3042:{module:testPlugin},
-                        1:{module:testPlugin},
-                    }
-                });
-                Context.load().then(function(){
-                    var context = Context.get("1","flow");
-                    var cb = function(){done("An error occurred")}
-                    context.set("sign","sign1","#%&",cb);
-                    context.set("file","file2","\u3042",cb);
-                    context.set("num","num3","1",cb);
-                    stubSet.calledWithExactly("1:flow","sign","sign1",cb).should.be.true();
-                    stubSet.calledWithExactly("1:flow","file","file2",cb).should.be.true();
-                    stubSet.calledWithExactly("1:flow","num","num3",cb).should.be.true();
-                    done();
-                }).catch(done);
-            });
             it('should ignore reserved storage name `_`', function(done) {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
                 Context.load().then(function(){
@@ -325,6 +305,15 @@ describe('context', function() {
                     stubKeys.called.should.be.false();
                     done();
                 }).catch(done);
+            });
+
+            it('should fail when using invalid store name', function(done) {
+                Context.init({contextStorage:{'Invalid name':"noexist"}});
+                Context.load().then(function(){
+                    done("An error was not thrown");
+                }).catch(function(){
+                    done();
+                });
             });
             it('should fail when using invalid default context', function(done) {
                 Context.init({contextStorage:{default:"noexist"}});

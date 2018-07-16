@@ -56,6 +56,9 @@ function load() {
                     if (pluginName === "_") {
                         continue;
                     }
+                    if (!/^[a-zA-Z0-9_]+$/.test(pluginName)) {
+                        return reject(new Error(log._("context.error-invalid-module-name", {name:pluginName})));
+                    }
 
                     // Check if this is setting the 'default' context to be a named plugin
                     if (pluginName === "default" && typeof plugins[pluginName] === "string") {
