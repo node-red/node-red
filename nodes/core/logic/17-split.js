@@ -359,47 +359,16 @@ module.exports = function(RED) {
     }
 
     function getInitialReduceValue(node, exp, exp_type) {
-        return new Promise((resolve,reject) => {
-            if(exp_type === "flow" || exp_type === "global") {
-                node.context()[exp_type].get(exp,(err,value) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(value);
-                    }
-                });
-                return;
-            } else if(exp_type === "jsonata") {
-                var jexp = RED.util.prepareJSONataExpression(exp, node);
-                RED.util.evaluateJSONataExpression(jexp, {},(err,value) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(value);
-                    }
-                });
-                return;
-            }
-            var result;
-            if(exp_type === "str") {
-                result = exp;
-            } else if(exp_type === "num") {
-                result = Number(exp);
-            } else if(exp_type === "bool") {
-                if (exp === 'true') {
-                    result = true;
-                } else if (exp === 'false') {
-                    result = false;
-                }
-            } else if ((exp_type === "bin") || (exp_type === "json")) {
-                result = JSON.parse(exp);
-            } else if(exp_type === "date") {
-                result = Date.now();
-            } else {
-                reject(new Error("unexpected initial value type"));
-                return;
-            }
-            resolve(result);
+        return new Promise((resolve, reject) => {
+            RED.util.evaluateNodeProperty(exp, exp_type, node, {},
+                                          (err, result) => {
+                                              if(err) {
+                                                  return reject(err);
+                                              }
+                                              else {
+                                                  return resolve(result);
+                                              }
+                                          });
         });
     }
 

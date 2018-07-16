@@ -940,6 +940,108 @@ describe('JOIN node', function() {
         });
     });
 
+    function checkInitTypes(itype, ival, rval, initializer, checker, done) {
+        var flow = [{id:"n1", z:"f0", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A",
+                     reduceInit:ival,
+                     reduceInitType:itype,
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        if (!initializer) {
+            initializer = (node, cb) => {
+                cb();
+            };
+        }
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            initializer(n1, function () {
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        checker(msg.payload, rval);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+                n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+                n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+                n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+            });
+        });
+    }
+
+    function checkInitTypesSimple(itype, val, done) {
+        checkInitTypes(itype, val, val, undefined, should.equal, done);
+    }
+    
+    function checkInitTypesComplex(itype, ival, rval, done) {
+        checkInitTypes(itype, ival, rval, undefined, should.deepEqual, done);
+    }
+    
+    it('should reduce messages with init types (str)', function(done) {
+        checkInitTypesSimple('str', "xyz", done);
+    });
+
+    it('should reduce messages with init types (num)', function(done) {
+        checkInitTypesSimple('num', 10, done);
+    });
+
+    it('should reduce messages with init types (bool)', function(done) {
+        checkInitTypesSimple('bool', true, done);
+    });
+
+    it('should reduce messages with init types (json)', function(done) {
+        var ival = '{"x":"vx", "y":"vy", "z":"vz"}';
+        var rval = JSON.parse(ival);
+        checkInitTypesComplex('json', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (bin)', function(done) {
+        var ival = "[1,2,3]";
+        var rval = Buffer.from(JSON.parse(ival));
+        checkInitTypesComplex('bin', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (JSONata)', function(done) {
+        var ival = "1+2+3";
+        var rval = 6;
+        checkInitTypesComplex('jsonata', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (env)', function(done) {
+        function init(node, cb) {
+            process.env.NR_XYZ = "nr_xyz";
+            cb();
+        }
+        function fin(err) {
+            delete process.env.NR_XYZ;
+            done(err);
+        }
+        checkInitTypes('env', "NR_XYZ", "nr_xyz", init, should.equal, fin);
+    });
+
+    it('should reduce messages with init types (flow.name)', function(done) {
+        function init(node, cb) {
+            var context = node.context();
+            context.flow.set("foo", "bar");
+            cb();
+        }
+        checkInitTypes('flow', "foo", "bar", init, should.equal, done);
+    });
+
+    it('should reduce messages with init types (global.name)', function(done) {
+        function init(node, cb) {
+            var context = node.context();
+            context.global.set("foo", "bar");
+            cb();
+        }
+        checkInitTypes('global', "foo", "bar", init, should.equal, done);
+    });
+
     it('should reduce messages using $I', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
