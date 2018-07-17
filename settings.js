@@ -41,6 +41,10 @@ module.exports = {
     //  defaults to no timeout
     //socketTimeout: 120000,
 
+    // Maximum number of messages to wait in queue while attempting to connect to TCP socket
+    //  defaults to 1000
+    //tcpMsgQueueSize: 2000,
+
     // Timeout in milliseconds for HTTP request connections
     //  defaults to 120 seconds
     //httpRequestTimeout: 120000,
