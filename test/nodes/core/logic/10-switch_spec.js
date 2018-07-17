@@ -30,7 +30,10 @@ describe('switch Node', function() {
     function initContext(done) {
         Context.init({
             contextStorage: {
-                memory: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
                     module: "memory"
                 }
             }
@@ -41,7 +44,11 @@ describe('switch Node', function() {
     }
 
     afterEach(function(done) {
-        helper.unload().then(function(){
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
             RED.settings.nodeMessageBufferMaxLength = 0;
             helper.stopServer(done);
         });
@@ -306,6 +313,98 @@ describe('switch Node', function() {
     });
     it('should check if payload if of type undefined', function(done) {
         genericSwitchTest("istype", "undefined", true, true, undefined, done);
+    });
+
+    it('should handle flow context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "foo", "propertyType": "flow",
+                     "rules": [{"t": "eq", "v": "bar", "vt": "flow"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]], "z": "flow"},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("value");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().flow.set("foo", "flowValue");
+            switchNode1.context().flow.set("bar", "flowValue");
+            switchNode1.receive({payload: "value"});
+        });
+    });
+
+    it('should handle persistable flow context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "#:(memory1)::foo", "propertyType": "flow",
+                     "rules": [{"t": "eq", "v": "#:(memory1)::bar", "vt": "flow"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]], "z": "flow"},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("value");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().flow.set("foo", "flowValue", "memory1", function (err) {
+                switchNode1.context().flow.set("bar", "flowValue", "memory1", function (err) {
+                    switchNode1.receive({payload: "value"});
+                });
+            });
+        });
+    });
+
+    it('should handle global context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "foo", "propertyType": "global",
+                     "rules": [{"t": "eq", "v": "bar", "vt": "global"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]]},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("value");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().global.set("foo", "globalValue");
+            switchNode1.context().global.set("bar", "globalValue");
+            switchNode1.receive({payload: "value"});
+        });
+    });
+
+    it('should handle persistable global context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "#:(memory1)::foo", "propertyType": "global",
+                     "rules": [{"t": "eq", "v": "#:(memory1)::bar", "vt": "global"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]]},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("foo");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().global.set("foo", "globalValue", "memory1", function (err) {
+                switchNode1.context().global.set("bar", "globalValue", "memory1", function (err) {
+                    switchNode1.receive({payload: "foo"});
+                });
+            });
+        });
     });
 
     it('should match regex with ignore-case flag set true', function(done) {
