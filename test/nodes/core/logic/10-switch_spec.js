@@ -19,6 +19,7 @@ var should = require("should");
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
 var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
+var Context = require("../../../../red/runtime/nodes/context");
 
 describe('switch Node', function() {
 
@@ -26,10 +27,24 @@ describe('switch Node', function() {
         helper.startServer(done);
     });
 
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+                memory: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
+
     afterEach(function(done) {
-        helper.unload();
-        RED.settings.nodeMessageBufferMaxLength = 0;
-        helper.stopServer(done);
+        helper.unload().then(function(){
+            RED.settings.nodeMessageBufferMaxLength = 0;
+            helper.stopServer(done);
+        });
     });
 
     it('should be loaded with some defaults', function(done) {
@@ -651,6 +666,53 @@ describe('switch Node', function() {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs(payload)",propertyType:"jsonata",rules:[{"t":"btwn","v":"$sqrt(16)","vt":"jsonata","v2":"$sqrt(36)","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, true, -5, done);
+    });
+
+    it('should handle flow and global contexts with JSONata expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs($flowContext(\"payload\"))",propertyType:"jsonata",rules:[{"t":"btwn","v":"$flowContext(\"vt\")","vt":"jsonata","v2":"$globalContext(\"v2t\")","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]],z:"flow"},
+                    {id:"helperNode1", type:"helper", wires:[],z:"flow"},
+                    {id:"flow",type:"tab"}];
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            switchNode1.context().flow.set("payload",-5);
+            switchNode1.context().flow.set("vt",4);
+            switchNode1.context().global.set("v2t",6);
+            helperNode1.on("input", function(msg) {
+                try {
+                    should.equal(msg.payload,"pass");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            switchNode1.receive({payload:"pass"});
+        });
+    });
+
+    it('should handle persistable flow and global contexts with JSONata expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs($flowContext(\"payload\",\"memory\"))",propertyType:"jsonata",rules:[{"t":"btwn","v":"$flowContext(\"vt\",\"memory\")","vt":"jsonata","v2":"$globalContext(\"v2t\",\"memory\")","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]],z:"flow"},
+                    {id:"helperNode1", type:"helper", wires:[],z:"flow"},
+                    {id:"flow",type:"tab"}];
+        helper.load(switchNode, flow, function() {
+            initContext(function () {
+                var switchNode1 = helper.getNode("switchNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                switchNode1.context().flow.set(["payload","vt"],[-7,6],"memory",function(){
+                    switchNode1.context().global.set("v2t",8,"memory",function(){
+                        helperNode1.on("input", function(msg) {
+                            try {
+                                should.equal(msg.payload,"pass");
+                                done();
+                            } catch(err) {
+                                done(err);
+                            }
+                        });
+                        switchNode1.receive({payload:"pass"});
+                    });
+                });
+            });
+        });
     });
 
     it('should take head of message sequence (no repair)', function(done) {
