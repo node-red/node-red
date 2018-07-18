@@ -214,4 +214,11 @@ describe('memory',function() {
         });
     });
 
+    describe('#info',function() {
+        it('should return info', function() {
+            var info = context.info();
+            info.should.be.equal("module=memory");
+        });
+    });
+
 });

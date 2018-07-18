@@ -163,6 +163,7 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
+                redNodes.logContextStores();
                 redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
                 started = true;
             }).catch(function(err) {

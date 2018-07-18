@@ -267,6 +267,24 @@ LocalFileSystem.prototype.clean = function(activeNodes){
     });
 }
 
+LocalFileSystem.prototype.info = function() {
+    var self = this;
+    var conf = self.config;
+    var info = "module=localfilesystem";
+    if (conf) {
+        if (conf.hasOwnProperty("base")) {
+            info += ",base='"+conf.base+"'";
+        }
+        if (conf.hasOwnProperty("dir")) {
+            info += ",dir='"+conf.dir+"'";
+        }
+        if (conf.hasOwnProperty("cache")) {
+            info += ",cache";
+        }
+    }
+    return info;
+}
+
 module.exports = function(config){
     return new LocalFileSystem(config);
 };

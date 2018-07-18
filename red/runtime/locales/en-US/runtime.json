@@ -163,7 +163,9 @@
         "error-module-not-defined": "'module' is not defined in '__storage__' of settings.contextStorage",
         "error-invalid-module-name": "Invalid context store name: '__name__'",
         "error-invalid-default-module": "Invalid storage '__storage__' is specified as a default storage",
-        "error-use-undefined-storage": "Undefined storage '__storage__' is specified"
+        "error-use-undefined-storage": "Undefined storage '__storage__' is specified",
+        "unknown-store": "Unknown store '__name__' specified. Use default store instead.",
+        "log-store-init": "Context store : '__name__' [__info__]"
     }
 
 }

@@ -31,6 +31,27 @@ var defaultStore;
 // Whether there context storage has been configured or left as default
 var hasConfiguredStore = false;
 
+// Unknown Stores
+var unknownStores = {};
+
+function logUnknownStore(name) {
+    var count = unknownStores[name] || 0;
+    if (count == 0) {
+        log.warn(log._("context.unknown-store", {name: name}));
+        count++;
+        unknownStores[name] = count;
+    }
+}
+
+function logStores() {
+    for(var name in stores) {
+        if (name !== '_') { // ignore default store
+            var plugin = stores[name];
+            log.info(log._("context.log-store-init",
+                           {name:name, info:plugin.info() }));
+        }
+    }
+}
 
 function init(_settings) {
     settings = _settings;
@@ -158,6 +179,7 @@ function getContextStorage(storage) {
         return stores[storage];
     } else if (stores.hasOwnProperty("_")) {
         // Not known, but we have a default to fall back to
+        logUnknownStore(storage);
         return stores["_"];
     } else {
         // Not known and no default configured
@@ -402,5 +424,6 @@ module.exports = {
     get: getContext,
     delete: deleteContext,
     clean: clean,
-    close: close
+    close: close,
+    logStores: logStores
 };

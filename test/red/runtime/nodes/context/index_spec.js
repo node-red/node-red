@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require('sinon');
 var path = require("path");
 var Context = require("../../../../../red/runtime/nodes/context/index");
+var Log = require("../../../../../red/runtime/log");
 
 describe('context', function() {
     describe('local memory',function() {
@@ -789,6 +790,39 @@ describe('context', function() {
                         done();
                     });
                 }).catch(done);
+            });
+        });
+    });
+
+    describe('log', function() {
+        it('should log context store info', function(done) {
+            Context.init({
+                contextStorage: {
+                    memory: {
+                        module: "memory",
+                        congig: {
+                        }
+                    }
+                }
+            });
+            Context.load().then(function() {
+                var loginfo = undefined;
+                var logmsg = undefined;
+                sinon.stub(Log, 'log', function(msg) {
+                    loginfo = msg;
+                });
+                sinon.stub(Log, '_', function(msg, info) {
+                    logmsg = JSON.stringify(info);
+                    return logmsg;
+                });
+                Context.logStores();
+                should.deepEqual(loginfo, {
+                    level: Log.INFO,
+                    msg: logmsg
+                });
+                Log.log.restore();
+                Log._.restore();
+                done();
             });
         });
     });

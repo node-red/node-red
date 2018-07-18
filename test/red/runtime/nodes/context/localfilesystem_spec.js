@@ -376,7 +376,7 @@ describe('localfilesystem',function() {
         });
     });
 
-    describe('if cache is enabled',function() {
+    describe('#if cache is enabled',function() {
         afterEach(function() {
             return context.clean([]).then(function(){
                 return context.close().then(function(){
@@ -494,6 +494,14 @@ describe('localfilesystem',function() {
                 context.get("flowA","key").should.be.equal("flowA");
                 should.not.exist(context.get("flowB","key"));
             });
+        });
+    });
+
+    describe('#info', function() {
+        it('should return info', function() {
+            var context = LocalFileSystem({dir: "/tmp", base: "xyz", cache: true});
+            var info = context.info();
+            info.should.be.equal("module=localfilesystem,base='xyz',dir='/tmp',cache");
         });
     });
 });
