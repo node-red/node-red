@@ -16,6 +16,7 @@
 
 var should = require("should");
 var functionNode = require("../../../../nodes/core/core/80-function.js");
+var Context = require("../../../../red/runtime/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('function node', function() {
@@ -28,9 +29,30 @@ describe('function node', function() {
         helper.stopServer(done);
     });
 
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+                memory1: {
+                    module: "memory"
+                },
+                memory2: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
+
     afterEach(function() {
-        helper.unload();
+        helper.unload().then(function () {
+            return Context.clean({allNodes:{}});
+        }).then(function () {
+            return Context.close();
+        });
     });
+
 
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"function", name: "function" }];
@@ -304,6 +326,137 @@ describe('function node', function() {
         });
     });
 
+    it('should set persistable node context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0','memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n1.context().get("count", "memory1", function (err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set two persistable node context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0','memory1');context.set('count','1','memory2');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n1.context().get("count", "memory1", function (err, val1) {
+			    val1.should.equal("0");
+			    n1.context().get("count", "memory2", function (err, val2) {
+				val2.should.equal("1");
+				done();
+			    });
+			});
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set persistable node context (w callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0','memory1', function (err) { node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n1.context().get("count", "memory1", function (err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set two persistable node context (w callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0','memory1', function (err) { context.set('count', '1', 'memory2', function (err) { node.send(msg); }); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n1.context().get("count", "memory1", function (err, val1) {
+			    val1.should.equal("0");
+			    n1.context().get("count", "memory1", function (err, val2) {
+				val2.should.equal("0");
+				done();
+			    });
+			});
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set default persistable node context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.set('count','0');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n1.context().get("count", "memory1", function (err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
     it('should get node context', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.get('count');return msg;"},
                     {id:"n2", type:"helper"}];
@@ -311,6 +464,53 @@ describe('function node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n1.context().set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    function checkCallbackError(name, done) {
+	try {
+            helper.log().called.should.be.true();
+            var logEvents = helper.log().args.filter(function (evt) {
+                return evt[0].type == "function";
+            });
+            logEvents.should.have.length(1);
+            var msg = logEvents[0][0];
+            msg.should.have.property('level', helper.log().ERROR);
+            msg.should.have.property('id', name);
+            msg.should.have.property('type', 'function');
+	    msg.should.have.property('msg', 'Error: Callback must be a function');
+            done();
+	}
+	catch (e) {
+	    done(e);
+	}
+    }
+    
+    it('should handle error on get persistable node context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.get('count','memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().set("count","0","memory1");
+            n1.receive({payload:"foo",topic: "bar"});
+	    checkCallbackError('n1', done);
+        });
+    });
+
+    it('should get persistable node context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.get('count','memory1',function (err, val) { msg.payload=val; node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().set("count","0","memory1");
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', '0');
@@ -336,6 +536,67 @@ describe('function node', function() {
         });
     });
 
+    it('should handle error on get keys in persistable node context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.keys('memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().set("count","0","memory1");
+		n1.receive({payload:"foo",topic: "bar"});
+		checkCallbackError('n1', done);
+	    });
+        });
+    });
+
+    it('should get keys in persistable node context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.keys('memory1', function(err, keys) { msg.payload=keys; node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().set("count","0","memory1");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', ['count']);
+			done();
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should get keys in default persistable node context', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.keys();return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().set("count","0","memory1");
+		n1.context().set("number","1","memory2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', ['count']);
+			done();
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
     it('should set flow context', function(done) {
         var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0');return msg;"},
                     {id:"n2", type:"helper",z:"flowA"}];
@@ -352,6 +613,112 @@ describe('function node', function() {
         });
     });
 
+    it('should set persistable flow context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0','memory1');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try { 
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().flow.get("count", "memory1", function (err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set two persistable flow context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0','memory1');flow.set('count','1','memory2');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try { 
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().flow.get("count", "memory1", function (err, val1) {
+			    val1.should.equal("0");
+			    n2.context().flow.get("count", "memory2", function (err, val2) {
+				val2.should.equal("1");
+				done();
+			    });
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set persistable flow context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0','memory1', function (err) { node.send(msg); });"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try { 
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().flow.get("count", "memory1", function (err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set two persistable flow context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.set('count','0','memory1', function (err) { flow.set('count','1','memory2', function (err) { node.send(msg); }); });"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try { 
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().flow.get("count", "memory1", function (err, val1) {
+			    val1.should.equal("0");
+			    n2.context().flow.get("count", "memory2", function (err, val2) {
+				val2.should.equal("1");
+				done();
+			    });
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
     it('should get flow context', function(done) {
         var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.get('count');return msg;"},
                     {id:"n2", type:"helper",z:"flowA"}];
@@ -359,6 +726,34 @@ describe('function node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n1.context().flow.set("count","0");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', '0');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle error on get persistable flow context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.get('count','memory1');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("count","0","memory1");
+            n1.receive({payload:"foo",topic: "bar"});
+	    checkCallbackError('n1', done);
+        });
+    });
+
+    it('should get persistable flow context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.get('count','memory1', function(err, val) { msg.payload=val; node.send(msg); });"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n1.context().flow.set("count","0","memory1");
             n2.on("input", function(msg) {
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', '0');
@@ -384,6 +779,20 @@ describe('function node', function() {
         });
     });
 
+    it('should handle error on get persistable flow context', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=context.flow.get('count','memory1');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().flow.set("count","0","memory1");
+		n1.receive({payload:"foo",topic: "bar"});
+		checkCallbackError('n1', done);
+	    });
+        });
+    });
+
     it('should get keys in flow context', function(done) {
         var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.keys();return msg;"},
                     {id:"n2", type:"helper",z:"flowA"}];
@@ -397,6 +806,43 @@ describe('function node', function() {
                 done();
             });
             n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle error on get keys in persistable flow context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"msg.payload=flow.keys('memory1');return msg;"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().flow.set("count","0","memory1");
+		n1.receive({payload:"foo",topic: "bar"});
+		checkCallbackError('n1', done);
+	    });
+        });
+    });
+
+    it('should get keys in persistable flow context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",z:"flowA",wires:[["n2"]],func:"flow.keys('memory1', function (err, val) { msg.payload=val; node.send(msg); });"},
+                    {id:"n2", type:"helper",z:"flowA"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().flow.set("count","0","memory1");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', ['count']);
+			done();
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
         });
     });
 
@@ -416,6 +862,56 @@ describe('function node', function() {
         });
     });
 
+    it('should set persistable global context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"global.set('count','0','memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () { 
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().global.get("count", "memory1", function(err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
+    it('should set persistable global context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"global.set('count','0','memory1', function (err) { node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () { 
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', 'foo');
+			n2.context().global.get("count", "memory1", function(err, val) {
+			    val.should.equal("0");
+			    done();
+			});
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
+        });
+    });
+
     it('should get global context', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.get('count');return msg;"},
                     {id:"n2", type:"helper"}];
@@ -432,6 +928,38 @@ describe('function node', function() {
         });
     });
 
+    it('should handle error on get persistable global context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=global.get('count', 'memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+	initContext(function () {
+            helper.load(functionNode, flow, function() {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().global.set("count","0", 'memory1');
+		n1.receive({payload:"foo",topic: "bar"});
+		checkCallbackError('n1', done);
+            });
+	});
+    });
+
+    it('should get persistable global context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"global.get('count', 'memory1', function (err, val) { msg.payload=val; node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+	initContext(function () {
+            helper.load(functionNode, flow, function() {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().global.set("count","0", 'memory1');
+		n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', '0');
+                    done();
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+            });
+	});
+    });
+
     it('should get global context', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.global.get('count');return msg;"},
                     {id:"n2", type:"helper"}];
@@ -445,6 +973,43 @@ describe('function node', function() {
                 done();
             });
             n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should handle error on get persistable global context (w/o callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload=context.global.get('count','memory1');return msg;"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().global.set("count","0", "memory1");
+		n1.receive({payload:"foo",topic: "bar"});
+		checkCallbackError('n1', done);
+	    });
+        });
+    });
+
+    it('should get persistable global context (w/ callback)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"context.global.get('count','memory1', function (err, val) { msg.payload = val; node.send(msg); });"},
+                    {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+	    initContext(function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n1.context().global.set("count","0", "memory1");
+		n2.on("input", function(msg) {
+		    try {
+			msg.should.have.property('topic', 'bar');
+			msg.should.have.property('payload', '0');
+			done();
+		    }
+		    catch(e) {
+			done(e);
+		    }
+		});
+		n1.receive({payload:"foo",topic: "bar"});
+	    });
         });
     });
 
