@@ -51,6 +51,61 @@ describe('inject node', function() {
         });
     });
 
+    function basicTest(type, val, rval) {
+	it('inject value ('+type+')', function (done) {
+            var flow = [{id: "n1", type: "inject", topic: "t1", payload: val, payloadType: type, wires: [["n2"]], z: "flow"},
+			{id: "n2", type: "helper"}];
+            helper.load(injectNode, flow, function () {
+		var n1 = helper.getNode("n1");
+		var n2 = helper.getNode("n2");
+		n2.on("input", function (msg) {
+                    try {
+			msg.should.have.property("topic", "t1");
+			if (rval) {
+			    msg.should.have.property("payload");
+			    should.deepEqual(msg.payload, rval);
+			}
+			else {
+			    msg.should.have.property("payload", val);
+			}
+			done();
+                    } catch (err) {
+			done(err);
+                    }
+		});
+		n1.receive({});
+            });
+	});
+    }
+
+    basicTest("num", 10);
+    basicTest("str", "10");
+    basicTest("bool", true);
+    var val_json = '{ "x":"vx", "y":"vy", "z":"vz" }';
+    basicTest("json", val_json, JSON.parse(val_json));
+    var val_buf = "[1,2,3,4,5]";
+    basicTest("bin", val_buf, Buffer.from(JSON.parse(val_buf)));
+
+    it('inject value of environment variable ', function (done) {
+        var flow = [{id: "n1", type: "inject", topic: "t1", payload: "NR_TEST", payloadType: "env", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "foo");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+	    process.env.NR_TEST = 'foo';
+            n1.receive({});
+        });
+    });
+
     it('sets the value of flow context property', function (done) {
         var flow = [{id: "n1", type: "inject", topic: "t1", payload: "flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
