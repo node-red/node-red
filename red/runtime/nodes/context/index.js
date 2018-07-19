@@ -35,11 +35,13 @@ var hasConfiguredStore = false;
 var unknownStores = {};
 
 function logUnknownStore(name) {
-    var count = unknownStores[name] || 0;
-    if (count == 0) {
-        log.warn(log._("context.unknown-store", {name: name}));
-        count++;
-        unknownStores[name] = count;
+    if (name) {
+	var count = unknownStores[name] || 0;
+	if (count == 0) {
+            log.warn(log._("context.unknown-store", {name: name}));
+            count++;
+            unknownStores[name] = count;
+	}
     }
 }
 
