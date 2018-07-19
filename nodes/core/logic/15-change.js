@@ -143,7 +143,7 @@ module.exports = function(RED) {
                         if (rule.fromt === "msg") {
                             resolve(RED.util.getMessageProperty(msg,rule.from));
                         } else if (rule.fromt === 'flow' || rule.fromt === 'global') {
-                            var contextKey = RED.util.parseContextStore(rule.from);                            
+                            var contextKey = RED.util.parseContextStore(rule.from);
                             node.context()[rule.fromt].get(contextKey.key, contextKey.store, (err,fromValue) => {
                                 if (err) {
                                     reject(err);
@@ -166,12 +166,10 @@ module.exports = function(RED) {
                             try {
                                 fromRE = new RegExp(fromRE, "g");
                             } catch (e) {
-                                reject(new Error(RED._("change.errors.invalid-from",{error:e.message})));
-                                return;
+                                return Promise.reject(new Error(RED._("change.errors.invalid-from",{error:e.message})));
                             }
                         } else {
-                            reject(new Error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)})));
-                            return;
+                            return Promise.reject(new Error(RED._("change.errors.invalid-from",{error:"unsupported type: "+(typeof fromValue)})));
                         }
                         return {
                             fromType,
