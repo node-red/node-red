@@ -36,6 +36,9 @@ describe('template node', function() {
     function initContext(done) {
         Context.init({
             contextStorage: {
+		memory0: { // do not use (for excluding effect fallback)
+		    module: "memory"
+		},
                 memory1: {
                     module: "memory"
                 },
@@ -337,7 +340,7 @@ describe('template node', function() {
                     msg.should.have.property('topic', 'bar');
                     msg.should.have.property('payload', 'foo');
                     // result is in flow context
-                    n2.context().flow.get("payload", "memory", function (err, val) {
+                    n2.context().flow.get("payload", "memory1", function (err, val) {
                         val.should.equal("payload=foo");
                         done();
                     });
@@ -375,7 +378,7 @@ describe('template node', function() {
                     msg.should.have.property('topic', 'bar');
                     msg.should.have.property('payload', 'foo');
                     // result is in global context
-                    n2.context().global.get("payload", "memory", function (err, val) {
+                    n2.context().global.get("payload", "memory1", function (err, val) {
                         val.should.equal("payload=foo");
                         done();
                     });
