@@ -165,7 +165,7 @@
         "error-invalid-default-module": "Invalid storage '__storage__' is specified as a default storage",
         "error-use-undefined-storage": "Undefined storage '__storage__' is specified",
         "unknown-store": "Unknown store '__name__' specified. Use default store instead.",
-        "log-store-init": "Context store : '__name__' [__info__]"
+        "log-store-init": "Context store  : '__name__' [__info__]"
     }
 
 }
