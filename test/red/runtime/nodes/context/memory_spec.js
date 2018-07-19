@@ -144,6 +144,32 @@ describe('memory',function() {
                 keysY.should.have.length(1);
                 keysY[0].should.equal("hoge");
             });
+
+            it('should enumerate global context keys', function () {
+                var keys = context.keys("global");
+                keys.should.be.an.Array();
+                keys.should.be.empty();
+
+                context.set("global", "foo", "bar");
+                keys = context.keys("global");
+                keys.should.have.length(1);
+                keys[0].should.equal("foo");
+
+                context.set("global", "abc.def", "bar");
+                keys = context.keys("global");
+                keys.should.have.length(2);
+                keys[1].should.equal("abc");
+            });
+
+            it('should not return specific keys as global context keys', function () {
+                var keys = context.keys("global");
+
+                context.set("global", "set", "bar");
+                context.set("global", "get", "bar");
+                context.set("global", "keys", "bar");
+                keys = context.keys("global");
+                keys.should.have.length(0);
+            });
         });
 
         describe('async',function() {
@@ -210,6 +236,14 @@ describe('memory',function() {
             return context.clean(["nodeX"]).then(function(){
                 should.exist(context.get("nodeX","foo"));
                 should.not.exist(context.get("nodeY","foo"));
+            });
+        });
+        it('should not clean global context', function () {
+            context.set("global", "foo", "abc");
+            context.get("global", "foo").should.equal("abc");
+
+            return context.clean(["global"]).then(function () {
+                should.exist(context.get("global", "foo"));
             });
         });
     });
