@@ -1272,6 +1272,25 @@ describe('change Node', function() {
             });
         });
 
+        it('reports invalid fromValue', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"change","p":"payload","from":"null","fromt":"msg","to":"abc","tot":"str"}],"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "change";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'changeNode1');
+                    done();
+                },25);
+                changeNode1.receive({payload:"",null:null});
+            });
+        });
+
         describe('env var', function() {
             before(function() {
                 process.env.NR_TEST_A = 'foo';
