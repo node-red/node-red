@@ -203,6 +203,8 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
         var storagePath = getStoragePath(this.storageBaseDir ,scope);
         fs.outputFile(storagePath + ".json", JSON.stringify(newContext, undefined, 4), "utf8").catch(function(err) {
         });
+    } else if (callback && typeof callback !== 'function') {
+        throw new Error("Callback must be a function");
     } else {
         this._set(scope,key,value,callback);
     }
