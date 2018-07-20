@@ -308,10 +308,18 @@ describe('context', function() {
             });
 
             it('should fail when using invalid store name', function(done) {
-                Context.init({contextStorage:{'Invalid name':"noexist"}});
+                Context.init({contextStorage:{'Invalid name':{module:testPlugin}}});
                 Context.load().then(function(){
                     done("An error was not thrown");
                 }).catch(function(){
+                    done();
+                });
+            });
+            it('should fail when using invalid sign character', function (done) {
+                Context.init({ contextStorage:{'abc-123':{module:testPlugin}}});
+                Context.load().then(function () {
+                    done("An error was not thrown");
+                }).catch(function () {
                     done();
                 });
             });
@@ -336,6 +344,20 @@ describe('context', function() {
                 Context.load().then(function(){
                     done("An error was not thrown");
                 }).catch(function(){
+                    done();
+                });
+            });
+            it('should fail to load invalid module', function (done) {
+                Context.init({contextStorage: {
+                    test: {
+                        module: function (config) {
+                            throw new Error("invalid plugin was loaded.");
+                        }
+                    }
+                }});
+                Context.load().then(function () {
+                    done("An error was not thrown");
+                }).catch(function () {
                     done();
                 });
             });
@@ -419,7 +441,7 @@ describe('context', function() {
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
-                    context.set("foo","bar","defaultt",cb);
+                    context.set("foo","bar","default",cb);
                     context.get("foo","default",cb);
                     context.keys("default",cb);
                     stubGet.called.should.be.false();
@@ -762,6 +784,93 @@ describe('context', function() {
                         }
                     });
                 }).catch(function(err){ done(err); });
+            });
+
+            it('should throw an error if callback of context.get is not a function', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get("foo", "memory", "callback");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+            it('should throw an error if callback of context.get is not specified', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get("foo", "memory");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+            it('should throw an error if callback of context.set is not a function', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set("foo", "bar", "memory", "callback");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+            it('should not throw an error if callback of context.set is not specified', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set("foo", "bar", "memory");
+                    done();
+                }).catch(done);
+            });
+
+            it('should throw an error if callback of context.keys is not a function', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.keys("memory", "callback");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+            it('should throw an error if callback of context.keys is not specified', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.keys("memory");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+        });
+
+        describe('listStores', function () {
+            it('should list context storages', function (done) {
+                Context.init({ contextStorage: contextDefaultStorage });
+                Context.load().then(function () {
+                    var list = Context.listStores();
+                    list.default.should.equal("default");
+                    list.stores.should.eql(["default", "test"]);
+                    done();
+                }).catch(done);
+            });
+
+            it('should list context storages without default storage', function (done) {
+                Context.init({ contextStorage: contextStorage });
+                Context.load().then(function () {
+                    var list = Context.listStores();
+                    list.default.should.equal("test");
+                    list.stores.should.eql(["test"]);
+                    done();
+                }).catch(done);
             });
         });
 
