@@ -264,6 +264,8 @@
         "settingIcon": "アイコン",
         "noDefaultLabel": "なし",
         "defaultLabel": "既定の名前を使用",
+        "searchIcons": "アイコンを検索",
+        "useDefault":  "デフォルトを使用",
         "errors": {
             "scopeChange": "スコープの変更は、他のフローで使われているノードを無効にします"
         }
