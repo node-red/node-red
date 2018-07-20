@@ -455,14 +455,14 @@
             "filtered": "__count__ 個が無効"
         },
         "context": {
-            "name": "コンテキスト",
-            "label": "コンテキスト",
+            "name": "コンテキストデータ",
+            "label": "コンテキストデータ",
             "none": "選択されていません",
             "refresh": "読み込みのため更新してください",
-            "empty": "空",
-            "node": "なし",
-            "flow": "フロー",
-            "global": "グローバル"
+            "empty": "データが存在しません",
+            "node": "Node",
+            "flow": "Flow",
+            "global": "Global"
         },
         "palette": {
             "name": "パレットの管理",
