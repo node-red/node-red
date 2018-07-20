@@ -379,7 +379,7 @@ describe('switch Node', function() {
         singularSwitchTest("empty", true, false, undefined, done);
     });
     it('should check if payload is empty (0)', function(done) {
-        singularSwitchTest("empty", true, false, null, done);
+        singularSwitchTest("empty", true, false, 0, done);
     });
 
     it('should check if payload is not empty (string)', function(done) {
@@ -413,7 +413,7 @@ describe('switch Node', function() {
         singularSwitchTest("nempty", true, false, undefined, done);
     });
     it('should check if payload is not empty (0)', function(done) {
-        singularSwitchTest("nempty", true, false, null, done);
+        singularSwitchTest("nempty", true, false, 0, done);
     });
 
 
