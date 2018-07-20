@@ -618,7 +618,8 @@
             "bool": "boolean",
             "json": "JSON",
             "bin": "buffer",
-            "date": "timestamp"
+            "date": "timestamp",
+            "env": "env variable"
         }
     },
     "editableList": {

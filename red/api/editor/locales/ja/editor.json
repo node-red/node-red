@@ -616,7 +616,8 @@
             "bool": "真偽",
             "json": "JSON",
             "bin": "バッファ",
-            "date": "日時"
+            "date": "日時",
+            "env": "環境変数"
         }
     },
     "editableList": {
