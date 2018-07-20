@@ -619,6 +619,7 @@
             "json": "JSON",
             "bin": "buffer",
             "date": "timestamp",
+            "jsonata": "expression",
             "env": "env variable"
         }
     },

@@ -617,6 +617,7 @@
             "json": "JSON",
             "bin": "バッファ",
             "date": "日時",
+            "jsonata": "JSONata式",
             "env": "環境変数"
         }
     },
