@@ -34,7 +34,7 @@ module.exports = function(RED) {
         'empty': function(a) {
             if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
                 return a.length === 0;
-            } else if (typeof a === 'object') {
+            } else if (typeof a === 'object' && a !== null) {
                 return Object.keys(a).length === 0;
             }
             return false;
@@ -42,7 +42,7 @@ module.exports = function(RED) {
         'nempty': function(a) {
             if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
                 return a.length !== 0;
-            } else if (typeof a === 'object') {
+            } else if (typeof a === 'object' && a !== null) {
                 return Object.keys(a).length !== 0;
             }
             return false;
