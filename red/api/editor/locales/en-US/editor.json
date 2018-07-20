@@ -265,6 +265,8 @@
         "settingIcon": "Icon",
         "noDefaultLabel": "none",
         "defaultLabel": "use default label",
+        "searchIcons": "Search icons",
+        "useDefault": "use default",
         "errors": {
             "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
         }
