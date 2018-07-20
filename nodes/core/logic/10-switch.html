@@ -147,7 +147,7 @@
                 }
                 if ((rule.t === 'btwn') || (rule.t === 'index')) {
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
-                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
+                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'empty' && rule.t !== 'nempty' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);
                 }
                 return label;
@@ -199,7 +199,7 @@
                 } else if (type === "istype") {
                     typeField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
-                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
                         // valueField.hide();
                     } else {
                         valueField.typedInput("width",(newWidth-selectWidth-70));
@@ -295,7 +295,7 @@
                             numValueField.typedInput('hide');
                             typeValueField.typedInput('hide');
                             valueField.typedInput('hide');
-                            if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                            if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
                                 valueField.typedInput('hide');
                                 typeValueField.typedInput('hide');
                             }
@@ -396,7 +396,7 @@
                 var rule = $(this);
                 var type = rule.find("select").val();
                 var r = {t:type};
-                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
+                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else")) {
                     if ((type === "btwn") || (type === "index")) {
                         r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');
