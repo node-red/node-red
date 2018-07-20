@@ -63,6 +63,15 @@ describe('localfilesystem',function() {
             });
         });
 
+        it('should store local scope property', function (done) {
+            context.set("abc:def", "foo.bar", "test", function (err) {
+                context.get("abc:def", "foo", function (err, value) {
+                    value.should.be.eql({ bar: "test" });
+                    done();
+                });
+            });
+        });
+
         it('should delete property',function(done) {
             context.set("nodeX","foo.abc.bar1","test1",function(err){
                 context.set("nodeX","foo.abc.bar2","test2",function(err){
@@ -240,6 +249,81 @@ describe('localfilesystem',function() {
                 });
             });
         });
+
+        it('should throw an error when getting a value with invalid key', function (done) {
+            context.set("nodeX","foo","bar",function(err) {
+                context.get("nodeX"," ",function(err,value) {
+                    should.exist(err);
+                    done();
+                });
+            });
+        });
+
+        it('should throw an error when setting a value with invalid key',function (done) {
+            context.set("nodeX"," ","bar",function (err) {
+                should.exist(err);
+                done();
+            });
+        });
+
+        it('should throw an error when callback of get() is not a function',function (done) {
+            try {
+                context.get("nodeX","foo","callback");
+                done("should throw an error.");
+            } catch (err) {
+                done();
+            };
+        });
+
+        it('should throw an error when callback of get() is not specified',function (done) {
+            try {
+                context.get("nodeX","foo");
+                done("should throw an error.");
+            } catch (err) {
+                done();
+            };
+        });
+
+        it('should throw an error when callback of set() is not a function',function (done) {
+            try {
+                context.set("nodeX","foo","bar","callback");
+                done("should throw an error.");
+            } catch (err) {
+                done();
+            };
+        });
+
+        it('should not throw an error when callback of set() is not specified', function (done) {
+            try {
+                context.set("nodeX"," ","bar");
+                done();
+            } catch (err) {
+                done("should not throw an error.");
+            };
+        });
+
+        it('should handle empty context file', function (done) {
+            fs.outputFile(path.join(resourcesDir,"contexts","nodeX","flow.json"),"",function(){
+                context.get("nodeX", "foo", function (err, value) {
+                    should.not.exist(value);
+                    context.set("nodeX", "foo", "test", function (err) {
+                        context.get("nodeX", "foo", function (err, value) {
+                            value.should.be.equal("test");
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should throw an error when reading corrupt context file', function (done) {
+            fs.outputFile(path.join(resourcesDir, "contexts", "nodeX", "flow.json"),"{abc",function(){
+                context.get("nodeX", "foo", function (err, value) {
+                    should.exist(err);
+                    done();
+                });
+            });
+        });
     });
 
     describe('#keys',function() {
@@ -285,6 +369,24 @@ describe('localfilesystem',function() {
                     });
                 });
             });
+        });
+
+        it('should throw an error when callback of keys() is not a function', function (done) {
+            try {
+                context.keys("nodeX", "callback");
+                done("should throw an error.");
+            } catch (err) {
+                done();
+            };
+        });
+
+        it('should throw an error when callback of keys() is not specified', function (done) {
+            try {
+                context.keys("nodeX");
+                done("should throw an error.");
+            } catch (err) {
+                done();
+            };
         });
     });
 
@@ -497,4 +599,131 @@ describe('localfilesystem',function() {
         });
     });
 
+    describe('Configuration', function () {
+        it('should change a base directory', function (done) {
+            var differentBaseContext = LocalFileSystem({
+                base: "contexts2",
+                dir: resourcesDir,
+                cache: false
+            });
+            differentBaseContext.open().then(function () {
+                differentBaseContext.set("node2", "foo2", "bar2", function (err) {
+                    differentBaseContext.get("node2", "foo2", function (err, value) {
+                        value.should.be.equal("bar2");
+                        context.get("node2", "foo2", function(err, value) {
+                            should.not.exist(value);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should use userDir', function (done) {
+            var userDirContext = LocalFileSystem({
+                base: "contexts2",
+                cache: false,
+                settings: {
+                    userDir: resourcesDir
+                }
+            });
+            userDirContext.open().then(function () {
+                userDirContext.set("node2", "foo2", "bar2", function (err) {
+                    userDirContext.get("node2", "foo2", function (err, value) {
+                        value.should.be.equal("bar2");
+                        context.get("node2", "foo2", function (err, value) {
+                            should.not.exist(value);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('should use NODE_RED_HOME', function (done) {
+            var oldNRH = process.env.NODE_RED_HOME;
+            process.env.NODE_RED_HOME = resourcesDir;
+            fs.mkdirSync(resourcesDir);
+            fs.writeFileSync(path.join(resourcesDir,".config.json"),"");
+            var nrHomeContext = LocalFileSystem({
+                base: "contexts2",
+                cache: false
+            });
+            try {
+                nrHomeContext.open().then(function () {
+                    nrHomeContext.set("node2", "foo2", "bar2", function (err) {
+                        nrHomeContext.get("node2", "foo2", function (err, value) {
+                            value.should.be.equal("bar2");
+                            context.get("node2", "foo2", function (err, value) {
+                                should.not.exist(value);
+                                done();
+                            });
+                        });
+                    });
+                });
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+            }
+        });
+
+        it('should use HOME_PATH', function (done) {
+            var oldNRH = process.env.NODE_RED_HOME;
+            var oldHOMEPATH = process.env.HOMEPATH;
+            process.env.NODE_RED_HOME = resourcesDir;
+            process.env.HOMEPATH = resourcesDir;
+            var homePath = path.join(resourcesDir, ".node-red");
+            fs.outputFile(path.join(homePath, ".config.json"),"",function(){
+                var homeContext = LocalFileSystem({
+                    base: "contexts2",
+                    cache: false
+                });
+                try {
+                    homeContext.open().then(function () {
+                        homeContext.set("node2", "foo2", "bar2", function (err) {
+                            homeContext.get("node2", "foo2", function (err, value) {
+                                value.should.be.equal("bar2");
+                                context.get("node2", "foo2", function (err, value) {
+                                    should.not.exist(value);
+                                    done();
+                                });
+                            });
+                        });
+                    });
+                } finally {
+                    process.env.NODE_RED_HOME = oldNRH;
+                    process.env.HOMEPATH = oldHOMEPATH;
+                }
+            });
+        });
+
+        it('should use HOME_PATH', function (done) {
+            var oldNRH = process.env.NODE_RED_HOME;
+            var oldHOMEPATH = process.env.HOMEPATH;
+            var oldHOME = process.env.HOME;
+            process.env.NODE_RED_HOME = resourcesDir;
+            process.env.HOMEPATH = resourcesDir;
+            process.env.HOME = resourcesDir;
+            var homeContext = LocalFileSystem({
+                base: "contexts2",
+                cache: false
+            });
+            try {
+                homeContext.open().then(function () {
+                    homeContext.set("node2", "foo2", "bar2", function (err) {
+                        homeContext.get("node2", "foo2", function (err, value) {
+                            value.should.be.equal("bar2");
+                            context.get("node2", "foo2", function (err, value) {
+                                should.not.exist(value);
+                                done();
+                            });
+                        });
+                    });
+                });
+            } finally {
+                process.env.NODE_RED_HOME = oldNRH;
+                process.env.HOMEPATH = oldHOMEPATH;
+                process.env.HOME = oldHOME;
+            }
+        });
+    });
 });

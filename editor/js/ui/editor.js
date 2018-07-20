@@ -706,7 +706,7 @@ RED.editor = (function() {
         pickerBackground.on("mousedown", hide);
 
         var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(picker);
-        searchInput = $('<input type="text">').attr("placeholder","Search icons").appendTo(searchDiv).searchBox({
+        searchInput = $('<input type="text">').attr("placeholder",RED._("editor.searchIcons")).appendTo(searchDiv).searchBox({
             delay: 50,
             change: function() {
                 var searchTerm = $(this).val().trim();
@@ -730,7 +730,7 @@ RED.editor = (function() {
         var iconList = $('<div class="red-ui-icon-list">').appendTo(picker);
         var metaRow = $('<div class="red-ui-icon-meta"></div>').appendTo(picker);
         var summary = $('<span>').appendTo(metaRow);
-        var resetButton = $('<button class="editor-button editor-button-small">use default</button>').appendTo(metaRow).click(function(e) {
+        var resetButton = $('<button class="editor-button editor-button-small">'+RED._("editor.useDefault")+'</button>').appendTo(metaRow).click(function(e) {
             e.preventDefault();
             hide();
             done(null);

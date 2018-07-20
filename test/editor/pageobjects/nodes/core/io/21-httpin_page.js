@@ -18,29 +18,34 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function debugNode(id) {
+function httpinNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(debugNode, nodePage);
-
-var target = {
-    "msg": 1,
-    "full": 2
-};
-
-debugNode.prototype.setTarget = function(type, value) {
-    // Open a payload type list.
-    browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
-    // Select a payload type.
-    var xPath = '/html/body/div[11]/a[' + target[type] + ']';
-    browser.clickWithWait(xPath);
-    if (value) {
-        browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
-        browser.keys(['Control', 'a', 'Control']);
-        browser.keys(['Delete']);
-        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', value);
-    }
+function setMethod(type) {
+    browser.selectByValue('#node-input-method', type);
 }
 
-module.exports = debugNode;
+util.inherits(httpinNode, nodePage);
+
+var methodType = {
+    "get": 1,
+    "post": 2,
+    "put": 3,
+    "delete": 4,
+    "patch": 5,
+};
+
+httpinNode.prototype.setMethod = function(type) {
+  // Open a method type list.
+  browser.clickWithWait('#node-input-method');
+  // Select a method type.
+  var methodTypeXPath = '//*[@id="node-input-method"]/option[' + methodType[type] + ']';
+  browser.clickWithWait(methodTypeXPath);
+}
+
+httpinNode.prototype.setUrl = function(value) {
+    browser.setValue('#node-input-url', value);
+}
+
+module.exports = httpinNode;

@@ -27,13 +27,20 @@ util.inherits(injectNode, nodePage);
 var payloadType = {
     "flow": 1,
     "global": 2,
-    "string": 3,
+    "str": 3,
     "num": 4,
     "bool": 5,
     "json": 6,
     "bin": 7,
     "date": 8,
     "env": 9,
+};
+
+var timeType = {
+    "none": 1,
+    "interval": 2,
+    "intervalBetweenTimes": 3,
+    "atASpecificTime": 4,
 };
 
 var timeType = {
