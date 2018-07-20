@@ -31,6 +31,26 @@ var defaultStore;
 // Whether there context storage has been configured or left as default
 var hasConfiguredStore = false;
 
+// Unknown Stores
+var unknownStores = {};
+
+function logUnknownStore(name) {
+    if (name) {
+	var count = unknownStores[name] || 0;
+	if (count == 0) {
+            log.warn(log._("context.unknown-store", {name: name}));
+            count++;
+            unknownStores[name] = count;
+	}
+    }
+}
+
+function logStore(name, module) {
+    if (name !== '_') { // ignore default store
+        log.info(log._("context.log-store-init",
+                       {name:name, info:"module="+module}));
+    }
+}
 
 function init(_settings) {
     settings = _settings;
@@ -93,6 +113,7 @@ function load() {
                         try {
                             // Create a new instance of the plugin by calling its module function
                             stores[pluginName] = plugin(config);
+                            logStore(pluginName, plugins[pluginName].module);
                         } catch(err) {
                             return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
                         }
@@ -158,6 +179,7 @@ function getContextStorage(storage) {
         return stores[storage];
     } else if (stores.hasOwnProperty("_")) {
         // Not known, but we have a default to fall back to
+        logUnknownStore(storage);
         return stores["_"];
     } else {
         // Not known and no default configured

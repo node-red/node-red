@@ -124,7 +124,6 @@ Memory.prototype._export = function() {
     return this.data;
 }
 
-
 module.exports = function(config){
     return new Memory(config);
 };

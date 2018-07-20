@@ -478,7 +478,7 @@ describe('localfilesystem',function() {
         });
     });
 
-    describe('if cache is enabled',function() {
+    describe('#if cache is enabled',function() {
         afterEach(function() {
             return context.clean([]).then(function(){
                 return context.close().then(function(){
