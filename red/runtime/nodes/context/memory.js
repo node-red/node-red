@@ -124,13 +124,6 @@ Memory.prototype._export = function() {
     return this.data;
 }
 
-Memory.prototype.info = function() {
-    var self = this;
-    var conf = self.config;
-    var info = "module=memory";
-    return info;
-}
-
 module.exports = function(config){
     return new Memory(config);
 };

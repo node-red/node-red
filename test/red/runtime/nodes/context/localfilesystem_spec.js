@@ -497,11 +497,4 @@ describe('localfilesystem',function() {
         });
     });
 
-    describe('#info', function() {
-        it('should return info', function() {
-            var context = LocalFileSystem({dir: "/tmp", base: "xyz", cache: true});
-            var info = context.info();
-            info.should.be.equal("module=localfilesystem,base='xyz',dir='/tmp',cache");
-        });
-    });
 });

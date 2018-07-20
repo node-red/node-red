@@ -45,13 +45,10 @@ function logUnknownStore(name) {
     }
 }
 
-function logStores() {
-    for(var name in stores) {
-        if (name !== '_') { // ignore default store
-            var plugin = stores[name];
-            log.info(log._("context.log-store-init",
-                           {name:name, info:plugin.info() }));
-        }
+function logStore(name, module) {
+    if (name !== '_') { // ignore default store
+        log.info(log._("context.log-store-init",
+                       {name:name, info:"module="+module}));
     }
 }
 
@@ -116,6 +113,7 @@ function load() {
                         try {
                             // Create a new instance of the plugin by calling its module function
                             stores[pluginName] = plugin(config);
+                            logStore(pluginName, plugins[pluginName].module);
                         } catch(err) {
                             return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
                         }
@@ -426,6 +424,5 @@ module.exports = {
     get: getContext,
     delete: deleteContext,
     clean: clean,
-    close: close,
-    logStores: logStores
+    close: close
 };

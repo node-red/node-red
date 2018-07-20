@@ -90,7 +90,6 @@ function start() {
         })
         .then(function() { return storage.init(runtime)})
         .then(function() { return settings.load(storage)})
-        .then(function() { return redNodes.loadContextsPlugin()})
         .then(function() {
 
             if (log.metric()) {
@@ -163,9 +162,10 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
-                redNodes.logContextStores();
-                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
-                started = true;
+                redNodes.loadContextsPlugin().then(function () {
+                    redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
+                    started = true;
+                });
             }).catch(function(err) {
                 console.log(err);
             });
