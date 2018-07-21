@@ -58,7 +58,7 @@ function init(_settings) {
     var seed = settings.functionGlobalContext || {};
     contexts['global'] = createContext("global",seed);
     stores["_"] = new memory();
-    defaultStore = "memory";
+    defaultStore = "_";
 }
 
 function load() {
@@ -150,16 +150,16 @@ function load() {
             } else {
                 // else there were no stores list the config object - fall through
                 // to below where we default to a memory store
-                storeList = ["memory"];
-                defaultStore = "memory";
+                storeList = ["_"];
+                defaultStore = "_";
             }
             hasConfiguredStore = true;
             storeList = Object.keys(stores).filter(n=>!(defaultIsAlias && n==="default") && n!== "_");
         } else {
             // No configured plugins
             promises.push(stores["_"].open())
-            storeList = ["memory"];
-            defaultStore = "memory";
+            storeList = ["_"];
+            defaultStore = "_";
         }
         return resolve(Promise.all(promises));
     });
