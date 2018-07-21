@@ -54,7 +54,10 @@ function logStore(name, module) {
 
 function init(_settings) {
     settings = _settings;
+    contexts = {};
     stores = {};
+    storeList = [];
+    hasConfiguredStore = false;
     var seed = settings.functionGlobalContext || {};
     contexts['global'] = createContext("global",seed);
     stores["_"] = new memory();
