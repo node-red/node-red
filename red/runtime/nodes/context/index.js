@@ -57,7 +57,7 @@ function init(_settings) {
     // `load()` initialisation sequence.
     // If the user has any stores configured, this will be disgarded
     stores["_"] = new memory();
-    defaultStore = "memory";
+    defaultStore = "_";
 }
 
 function load() {
@@ -149,8 +149,8 @@ function load() {
             } else {
                 // else there were no stores list the config object - fall through
                 // to below where we default to a memory store
-                storeList = ["memory"];
-                defaultStore = "memory";
+                storeList = ["_"];
+                defaultStore = "_";
             }
             hasConfiguredStore = true;
             storeList = Object.keys(stores).filter(n=>!(defaultIsAlias && n==="default") && n!== "_");
@@ -158,8 +158,8 @@ function load() {
             // No configured plugins
             log.info(log._("context.log-store-init", {name:"default", info:"module=memory"}));
             promises.push(stores["_"].open())
-            storeList = ["memory"];
-            defaultStore = "memory";
+            storeList = ["_"];
+            defaultStore = "_";
         }
         return resolve(Promise.all(promises));
     });

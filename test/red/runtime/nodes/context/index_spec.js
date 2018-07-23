@@ -849,6 +849,16 @@ describe('context', function() {
         });
 
         describe('listStores', function () {
+            it('should list default context storages', function (done) {
+                Context.init({});
+                Context.load().then(function () {
+                    var list = Context.listStores();
+                    list.default.should.equal("_");
+                    list.stores.should.eql(["_"]);
+                    done();
+                }).catch(done);
+            });
+
             it('should list context storages', function (done) {
                 Context.init({ contextStorage: contextDefaultStorage });
                 Context.load().then(function () {
