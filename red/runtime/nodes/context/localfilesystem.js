@@ -169,7 +169,16 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     loadFile(storagePath + ".json").then(function(data){
         if(data){
-            callback(null, util.getMessageProperty(JSON.parse(data),key));
+            data = JSON.parse(data);
+            if (!Array.isArray(key)) {
+                callback(null, util.getMessageProperty(data,key));
+            } else {
+                var results = [undefined];
+                for (var i=0;i<key.length;i++) {
+                    results.push(util.getMessageProperty(data,key[i]))
+                }
+                callback.apply(null,results);
+            }
         }else{
             callback(null, undefined);
         }
@@ -178,35 +187,43 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
     });
 };
 
-LocalFileSystem.prototype._set = function(scope, key, value, callback) {
-    var storagePath = getStoragePath(this.storageBaseDir ,scope);
-    loadFile(storagePath + ".json").then(function(data){
-        var obj = data ? JSON.parse(data) : {}
-        util.setMessageProperty(obj,key,value);
-        return fs.outputFile(storagePath + ".json", JSON.stringify(obj, undefined, 4), "utf8");
-    }).then(function(){
-        if(typeof callback === "function"){
-            callback(null);
-        }
-    }).catch(function(err){
-        if(typeof callback === "function"){
-            callback(err);
-        }
-    });
-}
-
 LocalFileSystem.prototype.set = function(scope, key, value, callback) {
+    var storagePath = getStoragePath(this.storageBaseDir ,scope);
     if (this.cache) {
         this.cache.set(scope,key,value,callback);
         // With cache enabled, no need to re-read the file prior to writing.
         var newContext = this.cache._export()[scope];
-        var storagePath = getStoragePath(this.storageBaseDir ,scope);
         fs.outputFile(storagePath + ".json", JSON.stringify(newContext, undefined, 4), "utf8").catch(function(err) {
         });
     } else if (callback && typeof callback !== 'function') {
         throw new Error("Callback must be a function");
     } else {
-        this._set(scope,key,value,callback);
+        loadFile(storagePath + ".json").then(function(data){
+            var obj = data ? JSON.parse(data) : {}
+            if (!Array.isArray(key)) {
+                key = [key];
+                value = [value];
+            } else if (!Array.isArray(value)) {
+                // key is an array, but value is not - wrap it as an array
+                value = [value];
+            }
+            for (var i=0;i<key.length;i++) {
+                var v = null;
+                if (i<value.length) {
+                    v = value[i];
+                }
+                util.setMessageProperty(obj,key[i],v);
+            }
+            return fs.outputFile(storagePath + ".json", JSON.stringify(obj, undefined, 4), "utf8");
+        }).then(function(){
+            if(typeof callback === "function"){
+                callback(null);
+            }
+        }).catch(function(err){
+            if(typeof callback === "function"){
+                callback(err);
+            }
+        });
     }
 };
 

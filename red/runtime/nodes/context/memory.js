@@ -28,47 +28,84 @@ Memory.prototype.close = function(){
     return Promise.resolve();
 };
 
+Memory.prototype._getOne = function(scope, key) {
+    var value;
+    var error;
+    if(this.data[scope]){
+        value = util.getMessageProperty(this.data[scope], key);
+    }
+    return value;
+}
+
 Memory.prototype.get = function(scope, key, callback) {
     var value;
     var error;
-    try{
-        if(this.data[scope]){
-            value = util.getMessageProperty(this.data[scope], key);
-        }
-    }catch(err){
-        if(callback){
+    if (!Array.isArray(key)) {
+        try {
+            value = this._getOne(scope,key);
+        } catch(err) {
+            if (!callback) {
+                throw err;
+            }
             error = err;
-        }else{
-            throw err;
+        }
+        if (callback) {
+            callback(error,value);
+            return;
+        } else {
+            return value;
         }
     }
-    if(callback){
-        if(error){
-            callback(error);
-        } else {
-            callback(null, value);
+
+    value = [];
+    for (var i=0; i<key.length; i++) {
+        try {
+            value.push(this._getOne(scope,key[i]));
+        } catch(err) {
+            if (!callback) {
+                throw err;
+            } else {
+                callback(err);
+                return;
+            }
         }
+    }
+    if (callback) {
+        callback.apply(null, [undefined].concat(value));
     } else {
         return value;
     }
 };
 
-Memory.prototype.set =function(scope, key, value, callback) {
+Memory.prototype.set = function(scope, key, value, callback) {
     if(!this.data[scope]){
         this.data[scope] = {};
     }
     var error;
-    try{
-        util.setMessageProperty(this.data[scope],key,value);
-    }catch(err){
-        if(callback){
+    if (!Array.isArray(key)) {
+        key = [key];
+        value = [value];
+    } else if (!Array.isArray(value)) {
+        // key is an array, but value is not - wrap it as an array
+        value = [value];
+    }
+    try {
+        for (var i=0; i<key.length; i++) {
+            var v = null;
+            if (i < value.length) {
+                v = value[i];
+            }
+            util.setMessageProperty(this.data[scope],key[i],v);
+        }
+    } catch(err) {
+        if (callback) {
             error = err;
-        }else{
+        } else {
             throw err;
         }
     }
     if(callback){
-        callback(error || null);
+        callback(error);
     }
 };
 

@@ -106,7 +106,7 @@ describe('localfilesystem',function() {
                     context.set("nodeX","foo","testX",function(err){
                         context.set("nodeY","foo","testY",function(err){
                             context.get("nodeX","foo",function(err, value){
-                                value.should.be.equal("testX"),
+                                value.should.be.equal("testX");
                                 context.get("nodeY","foo",function(err, value){
                                     value.should.be.equal("testY");
                                     done();
@@ -250,6 +250,51 @@ describe('localfilesystem',function() {
             });
         });
 
+        it('should set/get multiple values', function(done) {
+            context.set("nodeX",["one","two","three"],["test1","test2","test3"], function(err) {
+                context.get("nodeX",["one","two"], function() {
+                    Array.prototype.slice.apply(arguments).should.eql([undefined,"test1","test2"])
+                    done();
+                });
+            });
+        })
+        it('should set/get multiple values - get unknown', function(done) {
+            context.set("nodeX",["one","two","three"],["test1","test2","test3"], function(err) {
+                context.get("nodeX",["one","two","unknown"], function() {
+                    Array.prototype.slice.apply(arguments).should.eql([undefined,"test1","test2",undefined])
+                    done();
+                });
+            });
+        })
+        it('should set/get multiple values - single value providd', function(done) {
+            context.set("nodeX",["one","two","three"],"test1", function(err) {
+                context.get("nodeX",["one","two"], function() {
+                    Array.prototype.slice.apply(arguments).should.eql([undefined,"test1",null])
+                    done();
+                });
+            });
+        })
+
+        it('should throw error if bad key included in multiple keys - get', function(done) {
+            context.set("nodeX",["one","two","three"],["test1","test2","test3"], function(err) {
+                context.get("nodeX",["one",".foo","three"], function(err) {
+                    should.exist(err);
+                    done();
+                });
+            });
+        })
+
+        it('should throw error if bad key included in multiple keys - set', function(done) {
+            context.set("nodeX",["one",".foo","three"],["test1","test2","test3"], function(err) {
+                should.exist(err);
+                // Check 'one' didn't get set as a result
+                context.get("nodeX","one",function(err,one) {
+                    should.not.exist(one);
+                    done();
+                })
+            });
+        })
+
         it('should throw an error when getting a value with invalid key', function (done) {
             context.set("nodeX","foo","bar",function(err) {
                 context.get("nodeX"," ",function(err,value) {
@@ -272,7 +317,7 @@ describe('localfilesystem',function() {
                 done("should throw an error.");
             } catch (err) {
                 done();
-            };
+            }
         });
 
         it('should throw an error when callback of get() is not specified',function (done) {
@@ -281,7 +326,7 @@ describe('localfilesystem',function() {
                 done("should throw an error.");
             } catch (err) {
                 done();
-            };
+            }
         });
 
         it('should throw an error when callback of set() is not a function',function (done) {
@@ -290,7 +335,7 @@ describe('localfilesystem',function() {
                 done("should throw an error.");
             } catch (err) {
                 done();
-            };
+            }
         });
 
         it('should not throw an error when callback of set() is not specified', function (done) {
@@ -299,7 +344,7 @@ describe('localfilesystem',function() {
                 done();
             } catch (err) {
                 done("should not throw an error.");
-            };
+            }
         });
 
         it('should handle empty context file', function (done) {
@@ -377,7 +422,7 @@ describe('localfilesystem',function() {
                 done("should throw an error.");
             } catch (err) {
                 done();
-            };
+            }
         });
 
         it('should throw an error when callback of keys() is not specified', function (done) {
@@ -386,7 +431,7 @@ describe('localfilesystem',function() {
                 done("should throw an error.");
             } catch (err) {
                 done();
-            };
+            }
         });
     });
 

@@ -66,7 +66,7 @@ describe('memory',function() {
                 context.get("nodeY","foo").should.equal("testY");
             });
 
-            it('should thorw the error if the error occurs', function() {
+            it('should throw the error if the error occurs', function() {
                 try{
                     context.set("nodeX",".foo","test");
                     should.fail("Error was not thrown");
@@ -80,6 +80,40 @@ describe('memory',function() {
                     }
                 }
             });
+
+            it('should get multiple values - all known', function() {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                var values = context.get("nodeX",["one","two","four"]);
+                values.should.eql(["test1","test2","test4"])
+            })
+            it('should get multiple values - include unknown', function() {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                var values = context.get("nodeX",["one","unknown"]);
+                values.should.eql(["test1",undefined])
+            })
+            it('should throw error if bad key included in multiple keys', function() {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                try{
+                    var values = context.get("nodeX",["one",".foo","three"]);
+                    should.fail("Error was not thrown");
+                }catch(err){
+                    should.exist(err);
+                }
+            })
+
+
         });
 
         describe('async',function() {
@@ -104,6 +138,40 @@ describe('memory',function() {
                     });
                 });
             });
+
+            it('should get multiple values - all known', function(done) {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                context.get("nodeX",["one","two","four"],function() {
+                    Array.prototype.slice.apply(arguments).should.eql([undefined,"test1","test2","test4"])
+                    done();
+                });
+            })
+            it('should get multiple values - include unknown', function(done) {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                context.get("nodeX",["one","unknown"],function() {
+                    Array.prototype.slice.apply(arguments).should.eql([undefined,"test1",undefined])
+                    done();
+                });
+            })
+            it('should throw error if bad key included in multiple keys', function(done) {
+                context.set("nodeX","one","test1");
+                context.set("nodeX","two","test2");
+                context.set("nodeX","three","test3");
+                context.set("nodeX","four","test4");
+
+                context.get("nodeX",["one",".foo","three"], function(err) {
+                    should.exist(err);
+                    done();
+                });
+            })
         });
     });
 

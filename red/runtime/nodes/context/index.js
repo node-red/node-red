@@ -195,9 +195,24 @@ function createContext(id,seed) {
     var scope = id;
     var obj = seed || {};
     var seedKeys;
+    var insertSeedValues;
     if (seed) {
         seedKeys = Object.keys(seed);
+        insertSeedValues = function(keys,values) {
+            if (!Array.isArray(keys)) {
+                if (values[0] === undefined) {
+                    values[0] = seed[keys];
+                }
+            } else {
+                for (var i=0;i<keys.length;i++) {
+                    if (values[i] === undefined) {
+                        values[i] = seed[keys[i]];
+                    }
+                }
+            }
+        }
     }
+
     obj.get = function(key, storage, callback) {
         var context;
         if (!storage && !callback) {
@@ -212,71 +227,33 @@ function createContext(id,seed) {
             }
             context = getContextStorage(storage);
         }
-        if (seed) {
-            // Get the value from the underlying store. If it is undefined,
-            // check the seed for a default value.
-            if (callback) {
-                if (!Array.isArray(key)) {
-                    context.get(scope,key,function(err, v) {
-                        if (v === undefined) {
-                            callback(err, seed[key]);
-                        } else {
-                            callback(err, v);
-                        }
-                    });
-                } else {
-                    // If key is an array, get the value of each key.
-                    var storeValues = [];
-                    var keys = key.slice();
-                    var _key = keys.shift();
-                    var cb = function(err, v) {
-                        if (err) {
-                            callback(err);
-                        } else {
-                            if (v === undefined) {
-                                storeValues.push(seed[_key]);
-                            } else {
-                                storeValues.push(v);
-                            }
-                            if (keys.length === 0) {
-                                callback.apply(null, [null].concat(storeValues));
-                            } else {
-                                _key = keys.shift();
-                                context.get(scope, _key, cb);
-                            }
-                        }
-                    };
-                    context.get(scope, _key, cb);
-                }
+        if (callback) {
+            if (!seed) {
+                context.get(scope,key,callback);
             } else {
-                // No callback, attempt to do this synchronously
-                var storeValue = context.get(scope,key);
-                if (storeValue === undefined) {
-                    return seed[key];
-                } else {
-                    return storeValue;
-                }
+                context.get(scope,key,function() {
+                    if (arguments[0]) {
+                        callback(arguments[0]);
+                        return;
+                    }
+                    var results = Array.prototype.slice.call(arguments,[1]);
+                    insertSeedValues(key,results);
+                    // Put the err arg back
+                    results.unshift(undefined);
+                    callback.apply(null,results);
+                });
             }
         } else {
-            if (!Array.isArray(key)) {
-                return context.get(scope, key, callback);
-            } else {
-                var storeValues = [];
-                var keys = key.slice();
-                var cb = function(err, v) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        storeValues.push(v);
-                        if (keys.length === 0) {
-                            callback.apply(null, [null].concat(storeValues));
-                        } else {
-                            context.get(scope, keys.shift(), cb);
-                        }
-                    }
-                };
-                context.get(scope, keys.shift(), cb);
+            // No callback, attempt to do this synchronously
+            var results = context.get(scope,key);
+            if (seed) {
+                if (Array.isArray(key)) {
+                    insertSeedValues(key,results);
+                } else if (results === undefined){
+                    results = seed[key];
+                }
             }
+            return results;
         }
     };
     obj.set = function(key, value, storage, callback) {
@@ -293,36 +270,7 @@ function createContext(id,seed) {
             }
             context = getContextStorage(storage);
         }
-        if (!Array.isArray(key)) {
-            context.set(scope, key, value, callback);
-        } else {
-            // If key is an array, set each key-value pair.
-            // If the value array is longer than the key array, then the extra values are ignored.
-            var index = 0;
-            var values = [].concat(value); // Convert the value to an array
-            var cb = function(err) {
-                if (err) {
-                    if (callback) {
-                        callback(err);
-                    }
-                } else {
-                    index++;
-                    if (index === key.length) {
-                        if (callback) {
-                            callback(null);
-                        }
-                    } else {
-                        if(index < values.length) {
-                            context.set(scope, key[index], values[index], cb);
-                        } else {
-                            // If the value array is shorter than the key array, use null for missing values.
-                            context.set(scope, key[index], null, cb);
-                        }
-                    }
-                }
-            };
-            context.set(scope, key[index], values[index], cb);
-        }
+        context.set(scope, key, value, callback);
     };
     obj.keys = function(storage, callback) {
         var context;

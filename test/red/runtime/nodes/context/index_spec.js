@@ -386,7 +386,7 @@ describe('context', function() {
                     context.get("foo","test",cb);
                     context.keys("test",cb);
                     stubSet.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
-                    stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubGet.calledWith("1:flow","foo").should.be.true();
                     stubKeys.calledWithExactly("1:flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -400,7 +400,7 @@ describe('context', function() {
                     context.flow.get("foo","test",cb);
                     context.flow.keys("test",cb);
                     stubSet.calledWithExactly("flow","foo","bar",cb).should.be.true();
-                    stubGet.calledWithExactly("flow","foo",cb).should.be.true();
+                    stubGet.calledWith("flow","foo").should.be.true();
                     stubKeys.calledWithExactly("flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -431,7 +431,7 @@ describe('context', function() {
                     stubSet.called.should.be.false();
                     stubKeys.called.should.be.false();
                     stubSet2.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubGet2.calledWith("1:flow","foo").should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -448,7 +448,7 @@ describe('context', function() {
                     stubSet.called.should.be.false();
                     stubKeys.called.should.be.false();
                     stubSet2.calledWithExactly("1:flow","foo","bar",cb).should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubGet2.calledWith("1:flow","foo").should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -465,7 +465,7 @@ describe('context', function() {
                     stubSet.called.should.be.false();
                     stubKeys.called.should.be.false();
                     stubSet2.calledWithExactly("1:flow","foo","alias",cb).should.be.true();
-                    stubGet2.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubGet2.calledWith("1:flow","foo").should.be.true();
                     stubKeys2.calledWithExactly("1:flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -479,7 +479,7 @@ describe('context', function() {
                     context.get("foo",cb);
                     context.keys(cb);
                     stubSet.calledWithExactly("1:flow","foo","alias",cb).should.be.true();
-                    stubGet.calledWithExactly("1:flow","foo",cb).should.be.true();
+                    stubGet.calledWith("1:flow","foo").should.be.true();
                     stubKeys.calledWithExactly("1:flow",cb).should.be.true();
                     done();
                 }).catch(done);
@@ -595,9 +595,7 @@ describe('context', function() {
 
             it('should return an error if an error occurs in getting multiple store values', function(done) {
                 Context.init({contextStorage:contextStorage});
-                stubGet.onFirstCall().callsArgWith(2, null, "bar1");
-                stubGet.onSecondCall().callsArgWith(2, "error2");
-                stubGet.onThirdCall().callsArgWith(2, null, "bar3");
+                stubGet.onFirstCall().callsArgWith(2, "error2", "bar1");
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
@@ -771,9 +769,7 @@ describe('context', function() {
 
             it('should return an error if an error occurs in storing multiple values', function(done) {
                 Context.init({contextStorage:contextStorage});
-                stubSet.onFirstCall().callsArgWith(3, null);
-                stubSet.onSecondCall().callsArgWith(3, "error2");
-                stubSet.onThirdCall().callsArgWith(3, null);
+                stubSet.onFirstCall().callsArgWith(3, "error2");
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
