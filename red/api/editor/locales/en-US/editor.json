@@ -618,7 +618,9 @@
             "bool": "boolean",
             "json": "JSON",
             "bin": "buffer",
-            "date": "timestamp"
+            "date": "timestamp",
+            "jsonata": "expression",
+            "env": "env variable"
         }
     },
     "editableList": {
