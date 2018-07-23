@@ -33,16 +33,16 @@ describe("api/editor/locales", function() {
             locales.init({
                 i18n: {
                     i: {
-                        lng: function() { return 'en-US'},
-                        setLng: function(lang,callback) {
+                        language: function() { return 'en-US'},
+                        changeLanguage: function(lang,callback) {
                             if (callback) {
                                 callback();
                             }
+                        },
+                        getResourceBundle: function(lang, namespace) {
+                            return {namespace:namespace, lang:lang};
                         }
                     },
-                    catalog: function(namespace, lang) {
-                        return {namespace:namespace, lang:lang};
-                    }
                 }
             });
             app = express();
@@ -81,13 +81,15 @@ describe("api/editor/locales", function() {
             // bit of a mess of internal workings
             locales.init({
                 i18n: {
-                    catalog: function(namespace, lang) {
-                        return {
-                            "node-red": "should not return",
-                            "test-module-a-id": "test-module-a-catalog",
-                            "test-module-b-id": "test-module-b-catalog",
-                            "test-module-c-id": "test-module-c-catalog"
-                        }[namespace]
+                    i:{
+                        getResourceBundle: function(lang, namespace) {
+                            return {
+                                "node-red": "should not return",
+                                "test-module-a-id": "test-module-a-catalog",
+                                "test-module-b-id": "test-module-b-catalog",
+                                "test-module-c-id": "test-module-c-catalog"
+                            }[namespace]
+                        }
                     }
                 },
                 nodes: {
