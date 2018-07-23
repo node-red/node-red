@@ -36,19 +36,12 @@ var unknownStores = {};
 
 function logUnknownStore(name) {
     if (name) {
-	var count = unknownStores[name] || 0;
-	if (count == 0) {
+        var count = unknownStores[name] || 0;
+        if (count == 0) {
             log.warn(log._("context.unknown-store", {name: name}));
             count++;
             unknownStores[name] = count;
-	}
-    }
-}
-
-function logStore(name, module) {
-    if (name !== '_') { // ignore default store
-        log.info(log._("context.log-store-init",
-                       {name:name, info:"module="+module}));
+        }
     }
 }
 
@@ -60,6 +53,9 @@ function init(_settings) {
     hasConfiguredStore = false;
     var seed = settings.functionGlobalContext || {};
     contexts['global'] = createContext("global",seed);
+    // create a default memory store - used by the unit tests that skip the full
+    // `load()` initialisation sequence.
+    // If the user has any stores configured, this will be disgarded
     stores["_"] = new memory();
     defaultStore = "memory";
 }
@@ -107,7 +103,7 @@ function load() {
                             try {
                                 plugin = require("./"+plugins[pluginName].module);
                             } catch(err) {
-                                return reject(new Error(log._("context.error-module-not-loaded", {module:plugins[pluginName].module})));
+                                return reject(new Error(log._("context.error-loading-module", {module:plugins[pluginName].module,message:err.toString()})));
                             }
                         } else {
                             // Assume `module` is an already-required module we can use
@@ -116,7 +112,7 @@ function load() {
                         try {
                             // Create a new instance of the plugin by calling its module function
                             stores[pluginName] = plugin(config);
-                            logStore(pluginName, plugins[pluginName].module);
+                            log.info(log._("context.log-store-init", {name:pluginName, info:"module="+plugins[pluginName].module}));
                         } catch(err) {
                             return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
                         }
@@ -160,6 +156,7 @@ function load() {
             storeList = Object.keys(stores).filter(n=>!(defaultIsAlias && n==="default") && n!== "_");
         } else {
             // No configured plugins
+            log.info(log._("context.log-store-init", {name:"default", info:"module=memory"}));
             promises.push(stores["_"].open())
             storeList = ["memory"];
             defaultStore = "memory";
@@ -182,13 +179,11 @@ function getContextStorage(storage) {
         return stores[storage];
     } else if (stores.hasOwnProperty("_")) {
         // Not known, but we have a default to fall back to
-        logUnknownStore(storage);
+        if (storage !== defaultStore) {
+            // It isn't the default store either, so log it
+            logUnknownStore(storage);
+        }
         return stores["_"];
-    } else {
-        // Not known and no default configured
-        var contextError = new Error(log._("context.error-use-undefined-storage", {storage:storage}));
-        contextError.name = "ContextError";
-        throw contextError;
     }
 }
 
