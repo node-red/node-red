@@ -286,7 +286,7 @@ function setMessageProperty(msg,prop,value,createMissing) {
                     }
                     obj = obj[key];
                 } else {
-                    return null
+                    return null;
                 }
             } else {
                 obj = obj[key];
@@ -563,9 +563,6 @@ function encodeObject(msg,opts) {
     } else if (msgType === "number") {
         msg.format = "number";
         msg.msg = msg.msg.toString();
-    } else if (msg.msg === 0) {
-        msg.format = "number";
-        msg.msg = "0";
     } else if (msg.msg === null || msgType === "undefined") {
         msg.format = (msg.msg === null)?"null":"undefined";
         msg.msg = "(undefined)";
