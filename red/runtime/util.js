@@ -235,10 +235,13 @@ function normalisePropertyExpression(str) {
 }
 
 function getMessageProperty(msg,expr) {
-    var result = null;
     if (expr.indexOf('msg.')===0) {
         expr = expr.substring(4);
     }
+    return getObjectProperty(msg,expr);
+}
+function getObjectProperty(msg,expr) {
+    var result = null;
     var msgPropParts = normalisePropertyExpression(expr);
     var m;
     msgPropParts.reduce(function(obj, key) {
@@ -249,11 +252,14 @@ function getMessageProperty(msg,expr) {
 }
 
 function setMessageProperty(msg,prop,value,createMissing) {
-    if (typeof createMissing === 'undefined') {
-        createMissing = (typeof value !== 'undefined');
-    }
     if (prop.indexOf('msg.')===0) {
         prop = prop.substring(4);
+    }
+    return setObjectProperty(msg,prop,value,createMissing);
+}
+function setObjectProperty(msg,prop,value,createMissing) {
+    if (typeof createMissing === 'undefined') {
+        createMissing = (typeof value !== 'undefined');
     }
     var msgPropParts = normalisePropertyExpression(prop);
     var depth = 0;
@@ -584,6 +590,8 @@ module.exports = {
     generateId: generateId,
     getMessageProperty: getMessageProperty,
     setMessageProperty: setMessageProperty,
+    getObjectProperty: getObjectProperty,
+    setObjectProperty: setObjectProperty,
     evaluateNodeProperty: evaluateNodeProperty,
     normalisePropertyExpression: normalisePropertyExpression,
     normaliseNodeTypeName: normaliseNodeTypeName,

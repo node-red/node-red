@@ -141,7 +141,15 @@ describe("red/util", function() {
             cloned.res.should.equal(msg.res);
         });
     });
-
+    describe('getObjectProperty', function() {
+        it('gets a property beginning with "msg."', function() {
+            // getMessageProperty strips off `msg.` prefixes.
+            // getObjectProperty does not
+            var obj = { msg: { a: "foo"}, a: "bar"};
+            var v = util.getObjectProperty(obj,"msg.a");
+            v.should.eql("foo");
+        })
+    });
     describe('getMessageProperty', function() {
         it('retrieves a simple property', function() {
             var v = util.getMessageProperty({a:"foo"},"msg.a");
@@ -169,7 +177,16 @@ describe("red/util", function() {
         });
 
     });
-
+    describe('setObjectProperty', function() {
+        it('set a property beginning with "msg."', function() {
+            // setMessageProperty strips off `msg.` prefixes.
+            // setObjectProperty does not
+            var obj = {};
+            util.setObjectProperty(obj,"msg.a","bar");
+            obj.should.have.property("msg");
+            obj.msg.should.have.property("a","bar");
+        })
+    });
     describe('setMessageProperty', function() {
         it('sets a property', function() {
             var msg = {a:"foo"};
