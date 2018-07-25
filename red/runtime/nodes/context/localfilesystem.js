@@ -171,11 +171,11 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
         if(data){
             data = JSON.parse(data);
             if (!Array.isArray(key)) {
-                callback(null, util.getMessageProperty(data,key));
+                callback(null, util.getObjectProperty(data,key));
             } else {
                 var results = [undefined];
                 for (var i=0;i<key.length;i++) {
-                    results.push(util.getMessageProperty(data,key[i]))
+                    results.push(util.getObjectProperty(data,key[i]))
                 }
                 callback.apply(null,results);
             }
@@ -212,7 +212,7 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
                 if (i<value.length) {
                     v = value[i];
                 }
-                util.setMessageProperty(obj,key[i],v);
+                util.setObjectProperty(obj,key[i],v);
             }
             return fs.outputFile(storagePath + ".json", JSON.stringify(obj, undefined, 4), "utf8");
         }).then(function(){

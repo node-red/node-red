@@ -32,7 +32,7 @@ Memory.prototype._getOne = function(scope, key) {
     var value;
     var error;
     if(this.data[scope]){
-        value = util.getMessageProperty(this.data[scope], key);
+        value = util.getObjectProperty(this.data[scope], key);
     }
     return value;
 }
@@ -95,7 +95,7 @@ Memory.prototype.set = function(scope, key, value, callback) {
             if (i < value.length) {
                 v = value[i];
             }
-            util.setMessageProperty(this.data[scope],key[i],v);
+            util.setObjectProperty(this.data[scope],key[i],v);
         }
     } catch(err) {
         if (callback) {
