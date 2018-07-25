@@ -266,7 +266,15 @@ module.exports = function(RED) {
     function apply_f(exp, accum, count) {
         exp.assign("N", count);
         exp.assign("A", accum);
-        return RED.util.evaluateJSONataExpression(exp, {});
+        return new Promise((resolve,reject) => {
+            return RED.util.evaluateJSONataExpression(exp, {}, (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
     }
 
     function exp_or_undefined(exp) {
@@ -296,9 +304,12 @@ module.exports = function(RED) {
             return msgs.reduce((promise, msg) => promise.then(accum => apply_r(reduce_exp, accum, msg, msg.parts.index, count)), Promise.resolve(accum))
                 .then(accum => {
                     if(reduce_fixup !== undefined) {
-                        accum = apply_f(reduce_fixup, accum, count);
+                        return apply_f(reduce_fixup, accum, count).then(accum => {
+                            node.send({payload: accum});
+                        });
+                    } else {
+                        node.send({payload: accum});
                     }
-                    node.send({payload: accum});
                 });
         }).catch(err => {
             throw new Error(RED._("join.errors.invalid-expr",{error:e.message}));

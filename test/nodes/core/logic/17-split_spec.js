@@ -1319,24 +1319,28 @@ describe('JOIN node', function() {
             initContext(function () {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property("payload");
-                        msg.payload.should.equal(((((1+1*2)+2*2)+3*2)+4*2)*3);
-                        done();
-                    }
-                    catch(e) { done(e); }
-                });
-                n1.context().flow.set(["one","two","three"],[1,2,3],"memory",function(err){
-                    if(err){
-                        done(err);
-                    } else{
-                        n1.receive({payload:3, parts:{index:2, count:4, id:222}});
-                        n1.receive({payload:2, parts:{index:1, count:4, id:222}});
-                        n1.receive({payload:4, parts:{index:3, count:4, id:222}});
-                        n1.receive({payload:1, parts:{index:0, count:4, id:222}});
-                    }
-                });
+                    n2.on("input", function(msg) {
+                        try {
+                            msg.should.have.property("payload");
+                            msg.payload.should.equal(((((1+1*2)+2*2)+3*2)+4*2)*3);
+                            done();
+                        }
+                        catch(e) { done(e); }
+                    });
+                    n1.context().flow.set(["one","two","three"],[1,2,3],"memory",function(err){
+                        if(err){
+                            done(err);
+                        } else{
+                            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+                            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+                            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+                            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+                        }
+                    });
+                }catch(err) {
+                done(err);
+            }
             });
         });
     });
