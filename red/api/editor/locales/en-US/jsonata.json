@@ -189,11 +189,11 @@
         "desc":"Returns an aggregated value derived from applying the `function` parameter successively to each value in `array` in combination with the result of the previous application of the function.\n\nThe function must accept two arguments, and behaves like an infix operator between each value within the `array`.\n\nThe optional `init` parameter is used as the initial value in the aggregation."
     },
     "$flowContext": {
-        "args": "string",
+        "args": "string[, string]",
         "desc": "Retrieves a flow context property.\n\nThis is a Node-RED defined function."
     },
     "$globalContext": {
-        "args": "string",
+        "args": "string[, string]",
         "desc": "Retrieves a global context property.\n\nThis is a Node-RED defined function."
     },
     "$pad": {
