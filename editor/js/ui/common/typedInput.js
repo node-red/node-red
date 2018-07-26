@@ -440,6 +440,9 @@
             }
         },
         _destroy: function() {
+            if (this.optionMenu) {
+                this.optionMenu.remove();
+            }
             this.menu.remove();
         },
         types: function(types) {
