@@ -956,6 +956,34 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should reduce messages - count only in last part', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(10);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, id:222}});
+            n1.receive({payload:2, parts:{index:1, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4,id:222}});
+            n1.receive({payload:1, parts:{index:0, id:222}});
+        });
+    });
+
     function checkInitTypes(itype, ival, rval, initializer, checker, done) {
         var flow = [{id:"n1", z:"f0", type:"join", mode:"reduce",
                      reduceRight:false,

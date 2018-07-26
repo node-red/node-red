@@ -335,9 +335,8 @@ module.exports = function(RED) {
             }
             var group = pending[gid];
             var msgs = group.msgs;
-            if(parts.hasOwnProperty('count') &&
-            (group.count === undefined)) {
-                group.count = count;
+            if(parts.hasOwnProperty('count') && (group.count === undefined)) {
+                group.count = parts.count;
             }
             msgs.push(msg);
             pending_count++;
