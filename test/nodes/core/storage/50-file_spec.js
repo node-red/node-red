@@ -46,9 +46,14 @@ describe('file Nodes', function() {
         it('should be loaded', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":true}];
             helper.load(fileNode, flow, function() {
-                var fileNode1 = helper.getNode("fileNode1");
-                fileNode1.should.have.property('name', 'fileNode');
-                done();
+		try {
+                    var fileNode1 = helper.getNode("fileNode1");
+                    fileNode1.should.have.property('name', 'fileNode');
+                    done();
+		}
+		catch (e) {
+		    done(e);
+		}
             });
         });
 
@@ -59,11 +64,16 @@ describe('file Nodes', function() {
                 var n1 = helper.getNode("fileNode1");
                 var n2 = helper.getNode("helperNode1");
                 n2.on("input", function(msg) {
-                    var f = fs.readFileSync(fileToTest);
-                    f.should.have.length(4);
-                    fs.unlinkSync(fileToTest);
-                    msg.should.have.property("payload", "test");
-                    done();
+		    try {
+			var f = fs.readFileSync(fileToTest);
+			f.should.have.length(4);
+			fs.unlinkSync(fileToTest);
+			msg.should.have.property("payload", "test");
+			done();
+		    }
+		    catch (e) {
+			done(e);
+		    }
                 });
                 n1.receive({payload:"test"});
             });
@@ -83,20 +93,26 @@ describe('file Nodes', function() {
                 var data = ["test2", true, 999, [2]];
 
                 n2.on("input", function (msg) {
-                    msg.should.have.property("payload", data[count]);
-                    if (count === 3) {
-                        var f = fs.readFileSync(fileToTest).toString();
-                        if (os.type() !== "Windows_NT") {
-                            f.should.have.length(19);
-                            f.should.equal("test2\ntrue\n999\n[2]\n");
-                        }
-                        else {
-                            f.should.have.length(23);
-                            f.should.equal("test2\r\ntrue\r\n999\r\n[2]\r\n");
-                        }
-                        done();
-                    }
-                    count++;
+		    try {
+			msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
+			if (count === 3) {
+                            var f = fs.readFileSync(fileToTest).toString();
+                            if (os.type() !== "Windows_NT") {
+				f.should.have.length(19);
+				f.should.equal("test2\ntrue\n999\n[2]\n");
+                            }
+                            else {
+				f.should.have.length(23);
+				f.should.equal("test2\r\ntrue\r\n999\r\n[2]\r\n");
+                            }
+                            done();
+			}
+			count++;
+		    }
+		    catch (e) {
+			done(e);
+		    }
                 });
 
                 n1.receive({payload:"test2"});    // string
@@ -126,31 +142,37 @@ describe('file Nodes', function() {
                 var count = 0;
                 
                 n2.on("input", function (msg) {
-                    msg.should.have.property("payload", data[count]);
-                    try {
-                        if (count === 1) {
-                            // Check they got appended as expected
-                            var f = fs.readFileSync(fileToTest).toString();
-                            f.should.equal("onetwo");
+		    try {
+			msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
+			try {
+                            if (count === 1) {
+				// Check they got appended as expected
+				var f = fs.readFileSync(fileToTest).toString();
+				f.should.equal("onetwo");
 
-                            // Delete the file
-                            fs.unlinkSync(fileToTest);
-                            setTimeout(function() {
-                                // Send two more messages to the file
-                                n1.receive({payload:"three"});
-                                n1.receive({payload:"four"});
-                            }, wait);
-                        }
-                        if (count === 3) {
-                            var f = fs.readFileSync(fileToTest).toString();
-                            f.should.equal("threefour");
-                            fs.unlinkSync(fileToTest);
-                            done();
-                        }
-                    } catch(err) {
-                        done(err);
-                    }
-                    count++;
+				// Delete the file
+				fs.unlinkSync(fileToTest);
+				setTimeout(function() {
+                                    // Send two more messages to the file
+                                    n1.receive({payload:"three"});
+                                    n1.receive({payload:"four"});
+				}, wait);
+                            }
+                            if (count === 3) {
+				var f = fs.readFileSync(fileToTest).toString();
+				f.should.equal("threefour");
+				fs.unlinkSync(fileToTest);
+				done();
+                            }
+			} catch(err) {
+                            done(err);
+			}
+			count++;
+		    }
+		    catch (e) {
+			done(e);
+		    }
                 });
                 
                 // Send two messages to the file
@@ -174,7 +196,8 @@ describe('file Nodes', function() {
                 
                 n2.on("input", function (msg) {
                     try {
-                        msg.should.have.property("payload", data[count]);
+                        msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
                         if (count == 1) {
                             // Check they got appended as expected
                             var f = fs.readFileSync(fileToTest).toString();
@@ -233,20 +256,25 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("helperNode1");
                 
                 n2.on("input", function (msg) {
-                    msg.should.have.property("payload", "fine");
-                    msg.should.have.property("filename", fileToTest);
+		    try {
+			msg.should.have.property("payload", "fine");
+			msg.should.have.property("filename", fileToTest);
 
-                    var f = fs.readFileSync(fileToTest).toString();
-                    if (os.type() !== "Windows_NT") {
-                        f.should.have.length(5);
-                        f.should.equal("fine\n");
-                    }
-                    else {
-                        f.should.have.length(6);
-                        f.should.equal("fine\r\n");
-                    }
-                    done();
-                });
+			var f = fs.readFileSync(fileToTest).toString();
+			if (os.type() !== "Windows_NT") {
+                            f.should.have.length(5);
+                            f.should.equal("fine\n");
+			}
+			else {
+                            f.should.have.length(6);
+                            f.should.equal("fine\r\n");
+			}
+			done();
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
 
                 n1.receive({payload:"fine", filename:fileToTest});
             });
