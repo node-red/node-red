@@ -793,15 +793,13 @@ describe('context', function() {
                 });
             });
 
-            it('should throw an error if callback of context.get is not specified', function (done) {
+            it('should not throw an error if callback of context.get is not specified', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
                     var context = Context.get("1", "flow");
                     context.get("foo", "memory");
-                    done("should throw an error.");
-                }).catch(function () {
                     done();
-                });
+                }).catch(done);
             });
 
             it('should throw an error if callback of context.set is not a function', function (done) {
@@ -835,15 +833,13 @@ describe('context', function() {
                 });
             });
 
-            it('should throw an error if callback of context.keys is not specified', function (done) {
+            it('should not throw an error if callback of context.keys is not specified', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
                     var context = Context.get("1", "flow");
                     context.keys("memory");
-                    done("should throw an error.");
-                }).catch(function () {
                     done();
-                });
+                }).catch(done);
             });
 
         });
