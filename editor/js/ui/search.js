@@ -193,7 +193,7 @@ RED.search = (function() {
                     var div = $('<a>',{href:'#',class:"red-ui-search-result"}).appendTo(container);
 
                     var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
-                    var colour = def.color;
+                    var colour = RED.utils.getNodeColor(node.type,def);
                     var icon_url = RED.utils.getNodeIcon(def,node);
                     if (node.type === 'tab') {
                         colour = "#C0DEED";

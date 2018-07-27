@@ -172,7 +172,7 @@ RED.palette = (function() {
                 $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
             }
 
-            d.style.backgroundColor = def.color;
+            d.style.backgroundColor = RED.utils.getNodeColor(nt,def);
 
             if (def.outputs > 0) {
                 var portOut = document.createElement("div");

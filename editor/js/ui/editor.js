@@ -745,7 +745,7 @@ RED.editor = (function() {
                 icons.forEach(function(icon) {
                     var iconDiv = $('<div>',{class:"red-ui-icon-list-icon"}).appendTo(iconList);
                     var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(iconDiv);
-                    var colour = node._def.color;
+                    var colour = RED.utils.getNodeColor(node.type, node._def);
                     var icon_url = "icons/"+moduleName+"/"+icon;
                     iconDiv.data('icon',icon_url)
                     nodeDiv.css('backgroundColor',colour);
@@ -816,7 +816,7 @@ RED.editor = (function() {
             var iconButton = $('<button class="editor-button">').appendTo(iconRow);
 
             var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(iconButton);
-            var colour = node._def.color;
+            var colour = RED.utils.getNodeColor(node.type, node._def);
             var icon_url = RED.utils.getNodeIcon(node._def,node);
             nodeDiv.css('backgroundColor',colour);
             var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);

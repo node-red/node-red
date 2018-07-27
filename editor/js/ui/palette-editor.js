@@ -233,7 +233,7 @@ RED.palette.editor = (function() {
                             if (set.enabled) {
                                 var def = RED.nodes.getType(t);
                                 if (def && def.color) {
-                                    swatch.css({background:def.color});
+                                    swatch.css({background:RED.utils.getNodeColor(t,def)});
                                     swatch.css({border: "1px solid "+getContrastingBorder(swatch.css('backgroundColor'))})
 
                                 } else {

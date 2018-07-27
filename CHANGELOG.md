@@ -2,7 +2,7 @@
 
 Editor
 
- - Add Context data sidebar
+ - Add editorTheme.palette.theme to allow overriding colours
  - Index all node properties when searching Fixes #1446
  - Handle NaN and Infinity properly in debug sidebar Fixes #1778 #1779
  - Prevent horizontal scroll when palette name cannot wrap
@@ -44,6 +44,7 @@ Nodes
 
 Persistent Context
 
+ - Add Context data sidebar
  - Add persistable context option
  - Add default memory store
  - Add file-based context store

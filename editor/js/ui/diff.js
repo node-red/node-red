@@ -490,7 +490,7 @@ RED.diff = (function() {
     }
     function createNodeIcon(node,def) {
         var nodeDiv = $("<div>",{class:"node-diff-node-entry-node"});
-        var colour = def.color;
+        var colour = RED.utils.getNodeColor(node.type,def);
         var icon_url = RED.utils.getNodeIcon(def,node);
         if (node.type === 'tab') {
             colour = "#C0DEED";

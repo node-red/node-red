@@ -221,7 +221,7 @@ RED.sidebar.info = (function() {
 
                                         var div = $('<span>',{class:""}).appendTo(container);
                                         var nodeDiv = $('<div>',{class:"palette_node palette_node_small"}).appendTo(div);
-                                        var colour = configNode._def.color;
+                                        var colour = RED.utils.getNodeColor(configNode.type,configNode._def);
                                         var icon_url = RED.utils.getNodeIcon(configNode._def);
                                         nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
                                         var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);

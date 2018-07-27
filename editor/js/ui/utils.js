@@ -794,6 +794,40 @@ RED.utils = (function() {
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
 
+    var nodeColorCache = {};
+    function getNodeColor(type, def) {
+        var result = def.color;
+        var paletteTheme = RED.settings.theme('palette.theme') || [];
+        if (paletteTheme.length > 0) {
+            if (!nodeColorCache.hasOwnProperty(type)) {
+                var l = paletteTheme.length;
+                for (var i=0;i<l;i++ ){
+                    var themeRule = paletteTheme[i];
+                    if (themeRule.hasOwnProperty('category')) {
+                        if (!themeRule.hasOwnProperty('_category')) {
+                            themeRule._category = new RegExp(themeRule.category);
+                        }
+                        if (!themeRule._category.test(def.category)) {
+                            continue;
+                        }
+                    }
+                    if (themeRule.hasOwnProperty('type')) {
+                        if (!themeRule.hasOwnProperty('_type')) {
+                            themeRule._type = new RegExp(themeRule.type);
+                        }
+                        if (!themeRule._type.test(type)) {
+                            continue;
+                        }
+                    }
+                    nodeColorCache[type] = themeRule.color || def.color;
+                    break;
+                }
+            }
+            result = nodeColorCache[type];
+        }
+        return result;
+    }
+
     function addSpinnerOverlay(container,contain) {
         var spinner = $('<div class="projects-dialog-spinner "><img src="red/images/spin.svg"/></div>').appendTo(container);
         if (contain) {
@@ -852,6 +886,7 @@ RED.utils = (function() {
         getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
+        getNodeColor: getNodeColor,
         addSpinnerOverlay: addSpinnerOverlay,
         decodeObject: decodeObject,
         parseContextKey: parseContextKey

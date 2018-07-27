@@ -46,7 +46,7 @@
              .attr("y",function(d) { return (d.y-d.h/2)/nav_scale })
              .attr("width",function(d) { return Math.max(9,d.w/nav_scale) })
              .attr("height",function(d) { return Math.max(3,d.h/nav_scale) })
-             .attr("fill",function(d) { return d._def.color;})
+             .attr("fill",function(d) { return RED.utils.getNodeColor(d.type,d._def);})
          });
      }
      function onScroll() {
