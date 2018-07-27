@@ -50,14 +50,23 @@ var timeType = {
     "atASpecificTime": 4,
 };
 
+var timeType = {
+    "none": 1,
+    "interval": 2,
+    "intervalBetweenTimes": 3,
+    "atASpecificTime": 4,
+};
+
 injectNode.prototype.setPayload = function(type, value) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
     // Select a payload type.
     var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadType[type] + ']';
     browser.clickWithWait(payloadTypeXPath);
-    // Input a value.
-    browser.setValue('//*[@class="red-ui-typedInput-input"]/input', value);
+    if (value) {
+        // Input a value.
+        browser.setValue('//*[@class="red-ui-typedInput-input"]/input', value);
+    }
 }
 
 injectNode.prototype.setTopic = function(value) {
