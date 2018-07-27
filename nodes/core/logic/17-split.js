@@ -312,7 +312,7 @@ module.exports = function(RED) {
                     }
                 });
         }).catch(err => {
-            throw new Error(RED._("join.errors.invalid-expr",{error:e.message}));
+            throw new Error(RED._("join.errors.invalid-expr",{error:err.message}));
         });
     }
 
@@ -371,15 +371,15 @@ module.exports = function(RED) {
     function getInitialReduceValue(node, exp, exp_type) {
         return new Promise((resolve, reject) => {
             RED.util.evaluateNodeProperty(exp, exp_type, node, {},
-                                          (err, result) => {
-                                              if(err) {
-                                                  return reject(err);
-                                              }
-                                              else {
-                                                  return resolve(result);
-                                              }
-                                          });
-        });
+                (err, result) => {
+                    if(err) {
+                        return reject(err);
+                    }
+                    else {
+                        return resolve(result);
+                    }
+                });
+            });
     }
 
     function JoinNode(n) {
@@ -408,6 +408,7 @@ module.exports = function(RED) {
                 this.reduce_fixup = (exp_fixup !== undefined) ? RED.util.prepareJSONataExpression(exp_fixup, this) : undefined;
             } catch(e) {
                 this.error(RED._("join.errors.invalid-expr",{error:e.message}));
+                return;
             }
         }
 

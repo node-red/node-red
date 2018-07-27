@@ -1409,7 +1409,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should handle invalid JSON expression"', function (done) {
+    it('should handle invalid JSONata reduce expression - syntax error"', function (done) {
         var flow = [{
             id: "n1", type: "join", mode: "reduce",
             reduceRight: false,
@@ -1417,6 +1417,77 @@ describe('JOIN node', function() {
             reduceInit: "0",
             reduceInitType: "num",
             reduceFixup: undefined,
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should handle invalid JSONata reduce expression - runtime error"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$uknown()",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: undefined,
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should handle invalid JSONata fixup expression - syntax err"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$A",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: "invalid expr",
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+    it('should handle invalid JSONata fixup expression - runtime err"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$A",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: "$unknown()",
             wires: [["n2"]]
         },
         { id: "n2", type: "helper" }];
