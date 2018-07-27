@@ -435,6 +435,11 @@ describe('file Nodes', function() {
         });
 
         it('should try to create a new directory if asked to do so (append)', function(done) {
+            // fs.writeFileSync of afterEach failed on Windows.
+            if (os.type() === "Windows_NT") {
+                done();
+                return;
+            }
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
