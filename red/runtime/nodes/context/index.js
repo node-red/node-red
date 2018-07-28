@@ -220,7 +220,7 @@ function createContext(id,seed) {
                 callback = storage;
                 storage = "_";
             }
-            if (typeof callback !== 'function'){
+            if (callback && typeof callback !== 'function'){
                 throw new Error("Callback must be a function");
             }
             context = getContextStorage(storage);
@@ -279,7 +279,7 @@ function createContext(id,seed) {
                 callback = storage;
                 storage = "_";
             }
-            if (typeof callback !== 'function') {
+            if (callback && typeof callback !== 'function') {
                 throw new Error("Callback must be a function");
             }
             context = getContextStorage(storage);
