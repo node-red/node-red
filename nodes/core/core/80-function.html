@@ -9,7 +9,8 @@
         <input type="hidden" id="node-input-func" autofocus="autofocus">
         <input type="hidden" id="node-input-noerr">
     </div>
-    <div class="form-row node-text-editor-row">
+    <div class="form-row node-text-editor-row" style="position:relative">
+        <div style="position: absolute; right:0; bottom:calc(100% + 3px);"><button id="node-function-expand-js" class="editor-button editor-button-small"><i class="fa fa-expand"></i></button></div>
         <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
@@ -119,6 +120,22 @@
                 fields:['name','outputs']
             });
             this.editor.focus();
+
+            $("#node-function-expand-js").click(function(e) {
+                e.preventDefault();
+                var value = that.editor.getValue();
+                RED.editor.editJavaScript({
+                    value: value,
+                    cursor: that.editor.getCursorPosition(),
+                    complete: function(v,cursor) {
+                        that.editor.setValue(v, -1);
+                        that.editor.gotoLine(cursor.row+1,cursor.column,false);
+                        setTimeout(function() {
+                            that.editor.focus();
+                        },300);
+                    }
+                })
+            })
         },
         oneditsave: function() {
             var annot = this.editor.getSession().getAnnotations();

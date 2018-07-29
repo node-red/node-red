@@ -214,12 +214,11 @@
     border-bottom: 1px solid $primary-border-color;
     z-index: 2;
     a {
-        @include workspace-button;
+        @include workspace-button-toggle;
         line-height: 26px;
         height: 28px;
         width: 28px;
         margin: 4px 3px 3px;
-        border: 1px solid $primary-border-color;
         z-index: 2;
         &.red-ui-tab-link-button {
             &:not(.active) {

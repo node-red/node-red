@@ -361,19 +361,19 @@ var api = module.exports = {
         return new Promise(function(resolve,reject) {
             var namespace = opts.module;
             var lang = opts.lang;
-            var prevLang = runtime.i18n.i.lng();
+            var prevLang = runtime.i18n.i.language;
             // Trigger a load from disk of the language if it is not the default
-            runtime.i18n.i.setLng(lang, function(){
+            runtime.i18n.i.changeLanguage(lang, function(){
                 var nodeList = runtime.nodes.getNodeList();
                 var result = {};
                 nodeList.forEach(function(n) {
                     if (n.module !== "node-red") {
-                        result[n.id] = runtime.i18n.catalog(n.id,lang)||{};
+                        result[n.id] = runtime.i18n.i.getResourceBundle(lang, n.id)||{};
                     }
                 });
                 resolve(result);
             });
-            runtime.i18n.i.setLng(prevLang);
+            runtime.i18n.i.changeLanguage(prevLang);
         });
     },
 
@@ -392,11 +392,11 @@ var api = module.exports = {
             var lang = opts.lang;
             var prevLang = runtime.i18n.i.lng();
             // Trigger a load from disk of the language if it is not the default
-            runtime.i18n.i.setLng(lang, function(){
-                var catalog = runtime.i18n.catalog(namespace,lang);
+            runtime.i18n.i.changeLanguage(lang, function(){
+                var catalog = runtime.i18n.getResourceBundle(lang, namespace);
                 resolve(catalog||{});
             });
-            runtime.i18n.i.setLng(prevLang);
+            runtime.i18n.i.changeLanguage(prevLang);
         });
     },
 

@@ -20,6 +20,8 @@
     <dl class="message-properties">
         <dt>payload<span class="property-type">オブジェクト | 文字列</span></dt>
         <dd>JavaScriptオブジェクトもしくはJSON文字列</dd>
+        <dt>schema<span class="property-type">オブジェクト</span></dt>
+        <dd>JSONの検証に利用するJSONスキーマ。設定されていない場合は検証を行いません。</dd>
     </dl>
     <h3>出力</h3>
     <dl class="message-properties">
@@ -30,9 +32,12 @@
                 <li>入力がJavaScriptオブジェクトの場合、JSON文字列に変換します。JSON文字列は整形することも可能です。</li>
             </ul>
         </dd>
+        <dt>schemaError<span class="property-type">配列</span></dt>
+        <dd>JSONの検証でエラーが発生した場合、Catchノードを利用し、エラーを配列として<code>schemaError</code>プロパティから取得することができます。</dd>
     </dl>
     <h3>詳細</h3>
     <p>デフォルトの変換対象は<code>msg.payload</code>ですが、他のメッセージプロパティを変換対象とすることも可能です。</p>
     <p>双方向の変換を自動選択するのではなく、特定の変換のみ行うように設定できます。この機能は、例えば、<code>HTTP In</code>ノードに対するリクエストがcontent-typeを正しく設定していない場合であっても、JSONノードによる変換結果がJavaScriptオブジェクトであることを保証するために利用します。</p>
     <p>JSON文字列への変換が指定されている場合、受信した文字列に対してさらなるチェックは行いません。すなわち、文字列がJSONとして正しいかどうかの検査や、整形オプションを指定していたとしても整形処理を実施しません。</p>
+    <p>JSONスキーマの詳細については、<a href="http://json-schema.org/latest/json-schema-validation.html">こちら</a>を参照してください。</p>
 </script>

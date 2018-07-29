@@ -622,7 +622,7 @@ RED.projects = (function() {
                                             },
                                             400: {
                                                 'project_exists': function(error) {
-                                                    console.log(RED._("projects.clone-project.already-exists"));
+                                                    console.log(RED._("projects.clone-project.already-exists2"));
                                                 },
                                                 'git_error': function(error) {
                                                     console.log(RED._("projects.clone-project.git-error"),error);
@@ -1983,7 +1983,7 @@ RED.projects = (function() {
                                     notification.close();
                                 }
                             },{
-                                text: $('<span><i class="fa fa-refresh"></i> Retry</span>'),
+                                text: '<span><i class="fa fa-refresh"></i> ' +RED._("projects.send-req.retry") +'</span>',
                                 click: function() {
                                     body = body || {};
                                     var authBody = {};

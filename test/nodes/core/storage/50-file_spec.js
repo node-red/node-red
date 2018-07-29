@@ -46,82 +46,173 @@ describe('file Nodes', function() {
         it('should be loaded', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":true}];
             helper.load(fileNode, flow, function() {
-                var fileNode1 = helper.getNode("fileNode1");
-                fileNode1.should.have.property('name', 'fileNode');
-                done();
+		try {
+                    var fileNode1 = helper.getNode("fileNode1");
+                    fileNode1.should.have.property('name', 'fileNode');
+                    done();
+		}
+		catch (e) {
+		    done(e);
+		}
             });
         });
 
         it('should write to a file', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true}];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
-                n1.emit("input", {payload:"test"});
-                setTimeout(function() {
-                    var f = fs.readFileSync(fileToTest);
-                    f.should.have.length(4);
-                    fs.unlinkSync(fileToTest);
-                    done();
-                },wait);
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function(msg) {
+		    try {
+			var f = fs.readFileSync(fileToTest);
+			f.should.have.length(4);
+			fs.unlinkSync(fileToTest);
+			msg.should.have.property("payload", "test");
+			done();
+		    }
+		    catch (e) {
+			done(e);
+		    }
+                });
+                n1.receive({payload:"test"});
             });
         });
 
         it('should append to a file and add newline', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false}];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
             try {
                 fs.unlinkSync(fileToTest);
-            }catch(err) {}
+            } catch(err) {
+            }
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
-                n1.emit("input", {payload:"test2"});    // string
+                var n2 = helper.getNode("helperNode1");
+                var count = 0;
+                var data = ["test2", true, 999, [2]];
+
+                n2.on("input", function (msg) {
+		    try {
+			msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
+			if (count === 3) {
+                            var f = fs.readFileSync(fileToTest).toString();
+                            if (os.type() !== "Windows_NT") {
+				f.should.have.length(19);
+				f.should.equal("test2\ntrue\n999\n[2]\n");
+                            }
+                            else {
+				f.should.have.length(23);
+				f.should.equal("test2\r\ntrue\r\n999\r\n[2]\r\n");
+                            }
+                            done();
+			}
+			count++;
+		    }
+		    catch (e) {
+			done(e);
+		    }
+                });
+
+                n1.receive({payload:"test2"});    // string
                 setTimeout(function() {
-                    n1.emit("input", {payload:true});       // boolean
+                    n1.receive({payload:true});       // boolean
                 },30);
                 setTimeout(function() {
-                    n1.emit("input", {payload:999});        // number
+                    n1.receive({payload:999});        // number
                 },60);
                 setTimeout(function() {
-                    n1.emit("input", {payload:[2]});        // object (array)
+                    n1.receive({payload:[2]});        // object (array)
                 },90);
-                setTimeout(function() {
-                    var f = fs.readFileSync(fileToTest).toString();
-                    if (os.type() !== "Windows_NT") {
-                        f.should.have.length(19);
-                        f.should.equal("test2\ntrue\n999\n[2]\n");
-                    }
-                    else {
-                        f.should.have.length(23);
-                        f.should.equal("test2\r\ntrue\r\n999\r\n[2]\r\n");
-                    }
-                    done();
-                },wait);
             });
         });
 
         it('should append to a file after it has been deleted ', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false}];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
             try {
                 fs.unlinkSync(fileToTest);
-            } catch(err) {}
+            } catch(err) {
+            }
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                var data = ["one", "two", "three", "four"];
+                var count = 0;
+                
+                n2.on("input", function (msg) {
+		    try {
+			msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
+			try {
+                            if (count === 1) {
+				// Check they got appended as expected
+				var f = fs.readFileSync(fileToTest).toString();
+				f.should.equal("onetwo");
+
+				// Delete the file
+				fs.unlinkSync(fileToTest);
+				setTimeout(function() {
+                                    // Send two more messages to the file
+                                    n1.receive({payload:"three"});
+                                    n1.receive({payload:"four"});
+				}, wait);
+                            }
+                            if (count === 3) {
+				var f = fs.readFileSync(fileToTest).toString();
+				f.should.equal("threefour");
+				fs.unlinkSync(fileToTest);
+				done();
+                            }
+			} catch(err) {
+                            done(err);
+			}
+			count++;
+		    }
+		    catch (e) {
+			done(e);
+		    }
+                });
+                
                 // Send two messages to the file
-                n1.emit("input", {payload:"one"});
-                n1.emit("input", {payload:"two"});
-                setTimeout(function() {
+                n1.receive({payload:"one"});
+                n1.receive({payload:"two"});
+            });
+        });
+
+        it('should append to a file after it has been recreated ', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            try {
+                fs.unlinkSync(fileToTest);
+            } catch(err) {
+            }
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                var data = ["one", "two", "three", "four"];
+                var count = 0;
+                
+                n2.on("input", function (msg) {
                     try {
-                        // Check they got appended as expected
-                        var f = fs.readFileSync(fileToTest).toString();
-                        f.should.equal("onetwo");
+                        msg.should.have.property("payload");
+			data.should.containDeep([msg.payload]);
+                        if (count == 1) {
+                            // Check they got appended as expected
+                            var f = fs.readFileSync(fileToTest).toString();
+                            f.should.equal("onetwo");
 
-                        // Delete the file
-                        fs.unlinkSync(fileToTest);
-
-                        // Send two more messages to the file
-                        n1.emit("input", {payload:"three"});
-                        n1.emit("input", {payload:"four"});
-
-                        setTimeout(function() {
+                            if (os.type() === "Windows_NT") {
+                                var dummyFile = path.join(resourcesDir,"50-file-test-dummy.txt");
+                                fs.rename(fileToTest, dummyFile, function() {
+                                    recreateTest(n1, dummyFile);
+                                });
+                            } else {
+                                recreateTest(n1, fileToTest);
+                            }
+                        }
+                        if (count == 3) {
                             // Check the file was updated
                             try {
                                 var f = fs.readFileSync(fileToTest).toString();
@@ -131,42 +222,16 @@ describe('file Nodes', function() {
                             } catch(err) {
                                 done(err);
                             }
-                        },wait);
-                    } catch(err) {
-                        done(err);
-                    }
-                },wait);
-            });
-        });
-
-        it('should append to a file after it has been recreated ', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false}];
-            try {
-                fs.unlinkSync(fileToTest);
-            } catch(err) {}
-            helper.load(fileNode, flow, function() {
-                var n1 = helper.getNode("fileNode1");
-                // Send two messages to the file
-                n1.emit("input", {payload:"one"});
-                n1.emit("input", {payload:"two"});
-                setTimeout(function() {
-                    try {
-                        // Check they got appended as expected
-                        var f = fs.readFileSync(fileToTest).toString();
-                        f.should.equal("onetwo");
-
-                        if (os.type() === "Windows_NT") {
-                            var dummyFile = path.join(resourcesDir,"50-file-test-dummy.txt");
-                            fs.rename(fileToTest, dummyFile, function() {
-                                recreateTest(n1, dummyFile);
-                            });
-                        } else {
-                            recreateTest(n1, fileToTest);
                         }
                     } catch(err) {
                         done(err);
                     }
-                },wait);
+                    count++;
+                });
+
+                // Send two messages to the file
+                n1.receive({payload:"one"});
+                n1.receive({payload:"two"});
             });
 
             function recreateTest(n1, fileToDelete) {
@@ -177,50 +242,52 @@ describe('file Nodes', function() {
                 fs.writeFileSync(fileToTest,"");
 
                 // Send two more messages to the file
-                n1.emit("input", {payload:"three"});
-                n1.emit("input", {payload:"four"});
-
-                setTimeout(function() {
-                    // Check the file was updated
-                    try {
-                        var f = fs.readFileSync(fileToTest).toString();
-                        f.should.equal("threefour");
-                        fs.unlinkSync(fileToTest);
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                },wait);
+                n1.receive({payload:"three"});
+                n1.receive({payload:"four"});
             }
         });
 
 
         it('should use msg.filename if filename not set in node', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":true}];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
-                n1.emit("input", {payload:"fine", filename:fileToTest});
-                setTimeout(function() {
-                    var f = fs.readFileSync(fileToTest).toString();
-                    if (os.type() !== "Windows_NT") {
-                        f.should.have.length(5);
-                        f.should.equal("fine\n");
-                    }
-                    else {
-                        f.should.have.length(6);
-                        f.should.equal("fine\r\n");
-                    }
-                    done();
-                },wait);
+                var n2 = helper.getNode("helperNode1");
+                
+                n2.on("input", function (msg) {
+		    try {
+			msg.should.have.property("payload", "fine");
+			msg.should.have.property("filename", fileToTest);
+
+			var f = fs.readFileSync(fileToTest).toString();
+			if (os.type() !== "Windows_NT") {
+                            f.should.have.length(5);
+                            f.should.equal("fine\n");
+			}
+			else {
+                            f.should.have.length(6);
+                            f.should.equal("fine\r\n");
+			}
+			done();
+		    }
+		    catch (e) {
+			done(e);
+		    }
+		});
+
+                n1.receive({payload:"fine", filename:fileToTest});
             });
         });
 
         it('should be able to delete the file', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":"delete"}];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":"delete", wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
-                n1.emit("input", {payload:"fine"});
-                setTimeout(function() {
+                var n2 = helper.getNode("helperNode1");
+                
+                n2.on("input", function (msg) {
                     try {
                         var f = fs.readFileSync(fileToTest).toString();
                         f.should.not.equal("fine");
@@ -230,7 +297,9 @@ describe('file Nodes', function() {
                         e.code.should.equal("ENOENT");
                         done();
                     }
-                },wait);
+                });
+
+                n1.receive({payload:"fine"});
             });
         });
 
@@ -394,6 +463,11 @@ describe('file Nodes', function() {
         });
 
         it('should try to create a new directory if asked to do so (append)', function(done) {
+            // fs.writeFileSync of afterEach failed on Windows.
+            if (os.type() === "Windows_NT") {
+                done();
+                return;
+            }
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
             var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });

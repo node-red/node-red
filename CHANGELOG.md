@@ -1,3 +1,65 @@
+#### 0.19: Milestone Release
+
+Editor
+
+ - Add editorTheme.palette.theme to allow overriding colours
+ - Index all node properties when searching Fixes #1446
+ - Handle NaN and Infinity properly in debug sidebar Fixes #1778 #1779
+ - Prevent horizontal scroll when palette name cannot wrap
+ - Ignore middle-click on node/ports to enable panning
+ - Better wire layout when looping back
+ - fix appearence of retry button of remote branch management dialog
+ - Handle releasing ctrl when using quick-add node dialog
+ - Add $env function to JSONata expressions
+ - Widen support for env var to use ${} or $() syntax
+ - Add env-var support to TypedInput
+ - Show unknown node properties in info tab
+ - Add node icon picker widget
+ - Only edit nodes on dbl click on primary button with no modifiers
+ - Allow subflows to be put in any palette category
+ - Add flow navigator widget
+ - Cache flow library result to improve response time Fixes #1753
+ - Add middle-button-drag to pan the workspace
+ - allow multi-line category name in editor
+ - Redesign sidebar tabs
+ - Do not disable the export-clipboard menu option with empty selection
+
+Nodes
+
+ - Change: Ensure runtime errors in Change node can be caught Fixes #1769
+ - File: Add output to File Out node
+ - Function: add expandable JavaScript editor pane
+ - Function: allow id and name reference in function node code (#1731)
+ - HTTP Request: Move to request module
+ - HTTP: Ensure apiMaxLength applies to HTTP Nodes Fixes #1278
+ - Join: accumulate top level properties
+ - Join: allow environment variable as reduce init value
+ - JSON: add JSON schema validation via msg.schema
+ - Pi: Let nrgpio code work with python 3
+ - Pi: let Pi nodes be visible/editable on all platforms
+ - Switch: add isEmpty rule
+ - TCP: queue messages while connecting; closes #1414
+ - TLS: Add servername option to TLS config node for SNI Fixes #1805
+ - UDP: Don't accidentally re-use udp port when set to not do so
+
+Persistent Context
+
+ - Add Context data sidebar
+ - Add persistable context option
+ - Add default memory store
+ - Add file-based context store
+ - Add async mode to evaluateJSONataExpression
+ - Update RED.util.evaluateNodeProperty to support context stores
+
+Runtime
+
+ - Support flow.disabled and .info in /flow API
+ - Node errors should be Strings not Errors Fixes #1781
+ - Add detection of connection timeout in git communication Fixes #1770
+ - Handle loading empty nodesDir
+ - Add 'private' property to userDir generated package.json
+ - Add RED.require to allow nodes to access other modules
+
 #### 0.18.7: Maintenance Release
 
 Editor Fixes

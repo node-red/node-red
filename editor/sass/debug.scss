@@ -64,22 +64,22 @@
             display: inline-block;
         }
     }
-    .debug-message-row {
-        .debug-message-tools-pin {
-            display: none;
-        }
-        &.debug-message-row-pinned .debug-message-tools-pin {
-            display: inline-block;
-        }
-        &:hover {
-            background: #f3f3f3;
-            &>.debug-message-tools {
-                .debug-message-tools-copy {
-                    display: inline-block;
-                }
-                .debug-message-tools-pin {
-                    display: inline-block;
-                }
+}
+.debug-message-row {
+    .debug-message-tools-pin {
+        display: none;
+    }
+    &.debug-message-row-pinned .debug-message-tools-pin {
+        display: inline-block;
+    }
+    &:hover {
+        background: #f3f3f3;
+        &>.debug-message-tools {
+            .debug-message-tools-copy {
+                display: inline-block;
+            }
+            .debug-message-tools-pin {
+                display: inline-block;
             }
         }
     }

@@ -30,13 +30,12 @@ module.exports = {
         var lngs = req.query.lng;
         namespace = namespace.replace(/\.json$/,"");
         var lang = req.query.lng; //apiUtil.determineLangFromHeaders(req.acceptsLanguages() || []);
-        var prevLang = i18n.i.lng();
+        var prevLang = i18n.i.language;
         // Trigger a load from disk of the language if it is not the default
-        i18n.i.setLng(lang, function(){
-            var catalog = i18n.catalog(namespace,lang);
+        i18n.i.changeLanguage(lang, function(){
+            var catalog = i18n.i.getResourceBundle(lang, namespace);
             res.json(catalog||{});
         });
-        i18n.i.setLng(prevLang);
-
+        i18n.i.changeLanguage(prevLang);
     }
 }

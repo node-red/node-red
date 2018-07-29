@@ -411,7 +411,7 @@ describe('debug node', function() {
                     data:{
                         id:"n1",
                         msg:JSON.stringify({
-                            __encoded__: true,
+                            __enc__: true,
                             type: "array",
                             data: Array(1000).fill("X"),
                             length: 1001
@@ -438,7 +438,7 @@ describe('debug node', function() {
                         id:"n1",
                         msg:JSON.stringify({
                             foo:{
-                                __encoded__: true,
+                                __enc__: true,
                                 type: "array",
                                 data: Array(1000).fill("X"),
                                 length: 1001
@@ -489,7 +489,7 @@ describe('debug node', function() {
                             foo:{
                                 type: "Buffer",
                                 data: Array(1000).fill(88),
-                                __encoded__: true,
+                                __enc__: true,
                                 length: 1001
                             }
                         },null," "),

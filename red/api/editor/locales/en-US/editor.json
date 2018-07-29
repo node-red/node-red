@@ -240,6 +240,7 @@
         "output": "outputs:",
         "deleteSubflow": "delete subflow",
         "info": "Description",
+        "category": "Category",
         "format":"markdown format",
         "errors": {
             "noNodesSelected": "<strong>Cannot create subflow</strong>: no nodes selected",
@@ -264,6 +265,8 @@
         "settingIcon": "Icon",
         "noDefaultLabel": "none",
         "defaultLabel": "use default label",
+        "searchIcons": "Search icons",
+        "useDefault": "use default",
         "errors": {
             "scopeChange": "Changing the scope will make it unavailable to nodes in other flows that use it"
         }
@@ -305,19 +308,18 @@
         "savedNodes": "Saved nodes",
         "savedType": "Saved __type__",
         "saveFailed": "Save failed: __message__",
-
         "filename": "Filename",
         "folder": "Folder",
         "filenamePlaceholder": "file",
         "fullFilenamePlaceholder": "a/b/file",
         "folderPlaceholder": "a/b",
-
         "breadcrumb": "Library"
     },
     "palette": {
         "noInfo": "no information available",
         "filter": "filter nodes",
         "search": "search modules",
+        "addCategory": "Add new...",
         "label": {
             "subflows": "subflows",
             "input": "input",
@@ -356,7 +358,6 @@
                 "monthsV_plural": "__count__ months ago",
                 "yearsV": "__count__ year ago",
                 "yearsV_plural": "__count__ years ago",
-
                 "yearMonthsV": "__y__ year, __count__ month ago",
                 "yearMonthsV_plural": "__y__ year, __count__ months ago",
                 "yearsMonthsV": "__y__ years, __count__ month ago",
@@ -457,6 +458,16 @@
             "filterAll":"all",
             "filtered": "__count__ hidden"
         },
+        "context": {
+            "name":"Context Data",
+            "label":"context",
+            "none": "none selected",
+            "refresh": "refresh to load",
+            "empty": "empty",
+            "node": "Node",
+            "flow": "Flow",
+            "global": "Global"
+        },
         "palette": {
             "name": "Palette management",
             "label": "palette"
@@ -477,15 +488,14 @@
                 "install": "install",
                 "removeFromProject": "remove from project",
                 "addToProject": "add to project",
-                "none": "None",
                 "files": "Files",
                 "flow": "Flow",
                 "credentials": "Credentials",
                 "invalidEncryptionKey": "Invalid encryption key",
                 "encryptionEnabled": "Encryption enabled",
                 "encryptionDisabled": "Encryption disabled",
-                "resetTheEncryptionKey": "Reset the encryption key:",
                 "setTheEncryptionKey": "Set the encryption key:",
+                "resetTheEncryptionKey": "Reset the encryption key:",
                 "changeTheEncryptionKey": "Change the encryption key:",
                 "currentKey": "Current key",
                 "newKey": "New key",
@@ -608,7 +618,9 @@
             "bool": "boolean",
             "json": "JSON",
             "bin": "buffer",
-            "date": "timestamp"
+            "date": "timestamp",
+            "jsonata": "expression",
+            "env": "env variable"
         }
     },
     "editableList": {
@@ -636,6 +648,9 @@
             "context-unsupported": "Cannot test context functions\n $flowContext or $globalContext",
             "eval": "Error evaluating expression:\n  __message__"
         }
+    },
+    "jsEditor": {
+        "title": "JavaScript editor"
     },
     "jsonEditor": {
         "title": "JSON editor",
@@ -699,7 +714,7 @@
             "ssh-key-add": "Add an ssh key",
             "credential-key": "Credentials encryption key",
             "cant-get-ssh-key": "Error! Can't get selected SSH key path.",
-            "already-exists": "already exists",
+            "already-exists2": "already exists",
             "git-error": "git error",
             "connection-failed": "Connection failed",
             "not-git-repo": "Not a git repository",
@@ -793,6 +808,7 @@
             "username": "Username",
             "password": "Password",
             "passphrase": "Passphrase",
+            "retry": "Retry",
             "update-failed": "Failed to update auth",
             "unhandled": "Unhandled error response"
         },

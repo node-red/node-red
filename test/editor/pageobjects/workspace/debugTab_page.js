@@ -15,7 +15,7 @@
  **/
 
 function open() {
-    browser.clickWithWait('#red-ui-tab-debug');
+    browser.clickWithWait('#red-ui-tab-debug-link-button');
 }
 
 function getMessage(index) {

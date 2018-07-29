@@ -276,9 +276,20 @@ RED.clipboard = (function() {
         if (typeof value !== "string" ) {
             value = JSON.stringify(value, function(key,value) {
                 if (value !== null && typeof value === 'object') {
-                    if (value.__encoded__ && value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
-                        truncated = value.data.length !== value.length;
-                        return value.data;
+                    if (value.__enc__) {
+                        if (value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
+                            truncated = value.data.length !== value.length;
+                            return value.data;
+                        }
+                        if (value.type === 'function' || value.type === 'internal') {
+                            return undefined
+                        }
+                        if (value.type === 'number') {
+                            // Handle NaN and Infinity - they are not permitted
+                            // in JSON. We can either substitute with a String
+                            // representation or null
+                            return null;
+                        }
                     }
                 }
                 return value;

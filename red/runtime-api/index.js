@@ -33,6 +33,7 @@ var api = module.exports = {
         api.settings.init(runtime);
         api.library.init(runtime);
         api.projects.init(runtime);
+        api.context.init(runtime);
     },
 
     comms: require("./comms"),
@@ -41,6 +42,7 @@ var api = module.exports = {
     nodes: require("./nodes"),
     settings: require("./settings"),
     projects: require("./projects"),
+    context: require("./context"),
 
     /**
     * Returns whether the runtime is started

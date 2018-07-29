@@ -61,7 +61,7 @@ RED.sidebar = (function() {
         }
 
         delete options.closeable;
-        
+
         options.wrapper = $('<div>',{style:"height:100%"}).appendTo("#sidebar-content")
         options.wrapper.append(options.content);
         options.wrapper.hide();
@@ -218,6 +218,7 @@ RED.sidebar = (function() {
         showSidebar();
         RED.sidebar.info.init();
         RED.sidebar.config.init();
+        RED.sidebar.context.init();
         // hide info bar at start if screen rather narrow...
         if ($(window).width() < 600) { RED.menu.setSelected("menu-item-sidebar",false); }
     }

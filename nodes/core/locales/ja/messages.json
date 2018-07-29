@@ -153,19 +153,23 @@
             "key": "秘密鍵",
             "passphrase": "パスフレーズ",
             "ca": "CA証明書",
-            "verify-server-cert": "サーバ証明書を確認"
+            "verify-server-cert": "サーバ証明書を確認",
+            "servername": "サーバ名"
         },
         "placeholder": {
             "cert": "証明書(PEM形式)のパス",
             "key": "秘密鍵(PEM形式)のパス",
             "ca": "CA証明書(PEM形式)のパス",
-            "passphrase":"秘密鍵のパスフレーズ (任意)"
+            "passphrase": "秘密鍵のパスフレーズ (任意)",
+            "servername": "SNIで使用"
         },
         "error": {
             "missing-file": "証明書と秘密鍵のファイルが設定されていません"
         }
     },
     "exec": {
+        "exec": "exec",
+        "spawn": "spawn",
         "label": {
             "command": "コマンド",
             "append": "引数",
@@ -184,6 +188,7 @@
         "oldrc": "旧型式の出力を使用(互換モード)"
     },
     "function": {
+        "function": "",
         "label": {
             "function": "コード",
             "outputs": "出力数"
@@ -195,6 +200,7 @@
         "tip": "コードの記述方法はノードの「情報」を参照してください。"
     },
     "template": {
+        "template": "template",
         "label": {
             "template": "テンプレート",
             "property": "設定先",
@@ -301,6 +307,7 @@
         }
     },
     "comment": {
+        "comment": "comment",
         "label": {
             "title": "タイトル",
             "body": "本文"
@@ -318,6 +325,7 @@
             "broker": "サーバ",
             "example": "例) localhost",
             "qos": "QoS",
+            "retain": "保持",
             "clientid": "クライアント",
             "port": "ポート",
             "keepalive": "キープアライブ時間",
@@ -327,10 +335,10 @@
             "verify-server-cert": "サーバの証明書を確認",
             "compatmode": "旧MQTT 3.1のサポート"
         },
-        "sections-label":{
+        "sections-label": {
             "birth-message": "接続時の送信メッセージ(Birthメッセージ)",
-            "will-message":"予期しない切断時の送信メッセージ(Willメッセージ)",
-            "close-message":"切断前の送信メッセージ(Closeメッセージ)"
+            "will-message": "予期しない切断時の送信メッセージ(Willメッセージ)",
+            "close-message": "切断前の送信メッセージ(Closeメッセージ)"
         },
         "tabs-label": {
             "connection": "接続",
@@ -414,6 +422,10 @@
             "url1": "URLには ws:&#47;&#47; または wss:&#47;&#47; スキーマを使用して、存在するwebsocketリスナを設定してください。",
             "url2": "標準では <code>payload</code> がwebsocketから送信、受信されるデータを持ちます。クライアントはJSON形式の文字列としてメッセージ全体を送信、受信するよう設定できます。"
         },
+        "status": {
+            "connected": "接続数 __count__",
+            "connected_plural": "接続数 __count__"
+        },
         "errors": {
             "connect-error": "ws接続でエラーが発生しました: ",
             "send-error": "送信中にエラーが発生しました: ",
@@ -421,6 +433,7 @@
         }
     },
     "watch": {
+        "watch": "watch",
         "label": {
             "files": "ファイル",
             "recursive": "サブディレクトリを再帰的に監視"
@@ -543,15 +556,15 @@
             "port-notset": "udp: ポートが設定されていません",
             "port-invalid": "udp: ポート番号が不正です",
             "alreadyused": "udp: 既に__port__番ポートが使用されています",
-            "ifnotfound": "udp: インターフェイス __iface__ がありません",
-            "alreadyused": "udp: 既にポートが使用されています"
+            "ifnotfound": "udp: インターフェイス __iface__ がありません"
         }
     },
     "switch": {
+        "switch": "switch",
         "label": {
             "property": "プロパティ",
             "rule": "条件",
-            "repair" :  "メッセージ列の補正"
+            "repair": "メッセージ列の補正"
         },
         "and": "～",
         "checkall": "全ての条件を適用",
@@ -565,15 +578,18 @@
             "false": "is false",
             "null": "is null",
             "nnull": "is not null",
-            "head":"head",
-            "tail":"tail",
-            "index":"index between",
-            "exp":"JSONata式",
+            "istype": "is of type",
+            "empty": "is empty",
+            "nempty": "is not empty",
+            "head": "head",
+            "tail": "tail",
+            "index": "index between",
+            "exp": "JSONata式",
             "else": "その他"
         },
         "errors": {
             "invalid-expr": "不正な表現: __error__",
-            "too-many" : "switchノード内で保持しているメッセージが多すぎます"
+            "too-many": "switchノード内で保持しているメッセージが多すぎます"
         }
     },
     "change": {
@@ -603,6 +619,7 @@
         }
     },
     "range": {
+        "range": "range",
         "label": {
             "action": "動作",
             "inputrange": "入力値の範囲",
@@ -670,7 +687,7 @@
         "label": {
             "select": "抽出する要素",
             "output": "出力",
-	    "in": "対象:"
+            "in": "対象:"
         },
         "output": {
             "html": "要素内のHTML",
@@ -686,7 +703,9 @@
         "errors": {
             "dropped-object": "オブジェクト形式でないペイロードを無視しました",
             "dropped": "対応していない形式のペイロードを無視しました",
-            "dropped-error": "ペイロードの変換処理が失敗しました"
+            "dropped-error": "ペイロードの変換処理が失敗しました",
+            "schema-error": "JSONスキーマエラー",
+            "schema-error-compile": "JSONスキーマエラー: スキーマのコンパイルが失敗しました"
         },
         "label": {
             "o2j": "オブジェクトからJSONへ変換",
@@ -695,8 +714,8 @@
             "property": "プロパティ",
             "actions": {
                 "toggle": "JSON文字列とオブジェクト間の相互変換",
-                "str":"常にJSON文字列に変換",
-                "obj":"常にJavaScriptオブジェクトに変換"
+                "str": "常にJSON文字列に変換",
+                "obj": "常にJavaScriptオブジェクトに変換"
             }
         }
     },
@@ -791,6 +810,7 @@
         }
     },
     "tail": {
+        "tail": "tail",
         "label": {
             "filename": "ファイル名",
             "type": "ファイル形式",
@@ -844,6 +864,7 @@
         "tip": "注釈: 「ファイル名」はフルパスを設定する必要があります。"
     },
     "split": {
+        "split": "split",
         "intro": "型に基づいて <code>msg.payload</code> を分割:",
         "object": "<b>オブジェクト</b>",
         "objectSend": "各key/valueペアのメッセージを送信",
@@ -855,11 +876,12 @@
         "addname": " keyのコピー先"
     },
     "join": {
+        "join": "join",
         "mode": {
             "mode": "動作",
             "auto": "自動",
-            "merge":"列のマージ",
-            "reduce":"列の集約",
+            "merge": "列のマージ",
+            "reduce": "列の集約",
             "custom": "手動"
         },
         "combine": "結合",
@@ -882,12 +904,12 @@
         "seconds": "秒",
         "complete": "<code>msg.complete</code> プロパティが設定されたメッセージ受信後",
         "tip": "このモードでは、本ノードが <i>split</i> ノードと組となるか、 <code>msg.parts</code> プロパティが設定されたメッセージを受け取ることが前提となります。",
-        "too-many" : "joinノード内部で保持しているメッセージが多すぎます",
+        "too-many": "joinノード内部で保持しているメッセージが多すぎます",
         "merge": {
-            "topics-label":"対象トピック",
-            "topics":"トピック",
-            "topic" : "トピック",
-            "on-change":"新規トピックを受け取るとメッセージを送信する"
+            "topics-label": "対象トピック",
+            "topics": "トピック",
+            "topic": "トピック",
+            "on-change": "新規トピックを受け取るとメッセージを送信する"
         },
         "reduce": {
             "exp": "集約式",
@@ -900,43 +922,45 @@
             "invalid-expr": "JSONata式が不正: __error__"
         }
     },
-    "sort" : {
-        "target" : "対象",
-        "seq" : "メッセージ列",
-        "key" : "キー",
-        "elem" : "要素の値",
-        "order" : "順序",
-        "ascending" : "昇順",
-        "descending" : "降順",
-        "as-number" : "数値として比較",
-        "invalid-exp" : "sortノードで不正なJSONata式が指定されました",
-        "too-many" : "sortノードの未処理メッセージの数が許容数を超えました",
-        "clear" : "sortノードの未処理メッセージを破棄しました"
+    "sort": {
+        "sort": "sort",
+        "target": "対象",
+        "seq": "メッセージ列",
+        "key": "キー",
+        "elem": "要素の値",
+        "order": "順序",
+        "ascending": "昇順",
+        "descending": "降順",
+        "as-number": "数値として比較",
+        "invalid-exp": "sortノードで不正なJSONata式が指定されました",
+        "too-many": "sortノードの未処理メッセージの数が許容数を超えました",
+        "clear": "sortノードの未処理メッセージを破棄しました"
     },
-    "batch" : {
+    "batch": {
+        "batch": "batch",
         "mode": {
-            "label" : "モード",
-            "num-msgs" : "メッセージ数でグループ化",
-            "interval" : "時間間隔でグループ化",
-            "concat" : "列の結合"
+            "label": "モード",
+            "num-msgs": "メッセージ数でグループ化",
+            "interval": "時間間隔でグループ化",
+            "concat": "列の結合"
         },
         "count": {
-            "label" : "メッセージ数",
-            "overlap" : "オーバラップ",
-            "count" : "数",
-            "invalid" : "メッセージ数とオーバラップ数が不正"
+            "label": "メッセージ数",
+            "overlap": "オーバラップ",
+            "count": "数",
+            "invalid": "メッセージ数とオーバラップ数が不正"
         },
         "interval": {
-            "label" : "時間間隔",
-            "seconds" : "秒",
-            "empty" : "メッセージを受信しない場合、空のメッセージを送信"
+            "label": "時間間隔",
+            "seconds": "秒",
+            "empty": "メッセージを受信しない場合、空のメッセージを送信"
         },
         "concat": {
             "topics-label": "トピック",
-            "topic" : "トピック"
+            "topic": "トピック"
         },
-        "too-many" : "batchノード内で保持しているメッセージが多すぎます",
-        "unexpected" : "想定外のモード",
-        "no-parts" : "メッセージにpartsプロパティがありません"
+        "too-many": "batchノード内で保持しているメッセージが多すぎます",
+        "unexpected": "想定外のモード",
+        "no-parts": "メッセージにpartsプロパティがありません"
     }
 }

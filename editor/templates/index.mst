@@ -51,6 +51,7 @@
             <a class="workspace-footer-button" id="btn-zoom-out" href="#"><i class="fa fa-minus"></i></a>
             <a class="workspace-footer-button" id="btn-zoom-zero" href="#"><i class="fa fa-circle-o"></i></a>
             <a class="workspace-footer-button" id="btn-zoom-in" href="#"><i class="fa fa-plus"></i></a>
+            <a class="workspace-footer-button-toggle single" id="btn-navigate" href="#"><i class="fa fa-map-o"></i></a>
         </div>
         <div id="editor-shade" class="hide"></div>
     </div>

@@ -88,6 +88,7 @@ function getVersion() {
 }
 
 function start() {
+
     return i18n.registerMessageCatalog("runtime",path.resolve(path.join(__dirname,"locales")),"runtime.json")
         .then(function() { return storage.init(runtime)})
         .then(function() { return settings.load(storage)})
@@ -163,8 +164,10 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
-                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
-                started = true;
+                redNodes.loadContextsPlugin().then(function () {
+                    redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
+                    started = true;
+                });
             }).catch(function(err) {
                 console.log(err);
             });
@@ -230,7 +233,9 @@ function stop() {
         clearTimeout(reinstallTimeout);
     }
     started = false;
-    return redNodes.stopFlows();
+    return redNodes.stopFlows().then(function(){
+        return redNodes.closeContextsPlugin();
+    });
 }
 
 var runtime = module.exports = {

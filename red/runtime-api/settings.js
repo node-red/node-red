@@ -79,6 +79,9 @@ var api = module.exports = {
                         }
                     })
                 }
+
+                safeSettings.context = runtime.nodes.listContextStores();
+
                 if (util.isArray(runtime.settings.paletteCategories)) {
                     safeSettings.paletteCategories = runtime.settings.paletteCategories;
                 }

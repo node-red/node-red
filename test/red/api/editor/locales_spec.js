@@ -20,8 +20,7 @@ var express = require('express');
 var sinon = require('sinon');
 
 var locales = require("../../../../red/api/editor/locales");
-var i18n = require("../../../../red/util/i18n");
-
+var i18n = require("../../../../red/util").i18n;
 
 describe("api/editor/locales", function() {
     beforeEach(function() {
@@ -31,18 +30,39 @@ describe("api/editor/locales", function() {
     describe('get named resource catalog',function() {
         var app;
         before(function() {
-            // bit of a mess of internal workings
+            // locales.init({
+            //     i18n: {
+            //         i: {
+            //             language: function() { return 'en-US'},
+            //             changeLanguage: function(lang,callback) {
+            //                 if (callback) {
+            //                     callback();
+            //                 }
+            //             },
+            //             getResourceBundle: function(lang, namespace) {
+            //                 return {namespace:namespace, lang:lang};
+            //             }
+            //         },
+            //     }
+            // });
             locales.init({});
-            sinon.stub(i18n.i,'lng',function() { return 'en-US'});
-            sinon.stub(i18n.i,'setLng',function(lang,callback) { if (callback) {callback();}});
-            sinon.stub(i18n,'catalog',function(namespace, lang) {return {namespace:namespace, lang:lang};});
+
+            // bit of a mess of internal workings
+            sinon.stub(i18n.i,'changeLanguage',function(lang,callback) { if (callback) {callback();}});
+            if (i18n.i.getResourceBundle) {
+                sinon.stub(i18n.i,'getResourceBundle',function(lang, namespace) {return {namespace:namespace, lang:lang};});
+            } else {
+                // If i18n.init has not been called, then getResourceBundle isn't
+                // defined - so hardcode a stub
+                i18n.i.getResourceBundle = function(lang, namespace) {return {namespace:namespace, lang:lang};};
+                i18n.i.getResourceBundle.restore = function() { delete i18n.i.getResourceBundle };
+            }
             app = express();
             app.get(/locales\/(.+)\/?$/,locales.get);
         });
         after(function() {
-            i18n.i.lng.restore();
-            i18n.i.setLng.restore();
-            i18n.catalog.restore();
+            i18n.i.changeLanguage.restore();
+            i18n.i.getResourceBundle.restore();
         })
         it('returns with default language', function(done) {
             request(app)

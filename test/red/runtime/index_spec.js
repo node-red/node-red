@@ -89,6 +89,8 @@ describe("runtime", function() {
         var redNodesGetNodeList;
         var redNodesLoadFlows;
         var redNodesStartFlows;
+        var redNodesLoadContextsPlugin;
+
         beforeEach(function() {
             storageInit = sinon.stub(storage,"init",function(settings) {return Promise.resolve();});
             redNodesInit = sinon.stub(redNodes,"init", function() {});
@@ -96,6 +98,7 @@ describe("runtime", function() {
             redNodesCleanModuleList = sinon.stub(redNodes,"cleanModuleList",function(){});
             redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return Promise.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
+            redNodesLoadContextsPlugin = sinon.stub(redNodes,"loadContextsPlugin",function() {return Promise.resolve()});
         });
         afterEach(function() {
             storageInit.restore();
@@ -105,6 +108,7 @@ describe("runtime", function() {
             redNodesCleanModuleList.restore();
             redNodesLoadFlows.restore();
             redNodesStartFlows.restore();
+            redNodesLoadContextsPlugin.restore();
         });
         it("reports errored/missing modules",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
@@ -187,7 +191,7 @@ describe("runtime", function() {
         });
 
         it("reports runtime metrics",function(done) {
-            var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
+            var stopFlows = sinon.stub(redNodes,"stopFlows",function() { return Promise.resolve();} );
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             var util = mockUtil(true);
             runtime.init({testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
@@ -214,10 +218,19 @@ describe("runtime", function() {
 
     });
 
-    it("stops components", function() {
-        var stopFlows = sinon.stub(redNodes,"stopFlows",function() {} );
-        runtime.stop();
-        stopFlows.called.should.be.true();
-        stopFlows.restore();
+    it("stops components", function(done) {
+        var stopFlows = sinon.stub(redNodes,"stopFlows",function() { return Promise.resolve();} );
+        var closeContextsPlugin = sinon.stub(redNodes,"closeContextsPlugin",function() { return Promise.resolve();} );
+        runtime.stop().then(function(){
+            stopFlows.called.should.be.true();
+            closeContextsPlugin.called.should.be.true();
+            stopFlows.restore();
+            closeContextsPlugin.restore();
+            done();
+        }).catch(function(err){
+            stopFlows.restore();
+            closeContextsPlugin.restore();
+            return done(err)
+        });
     });
 });

@@ -144,6 +144,7 @@ module.exports = {
         runtimeAPI.nodes.getModuleCatalog(opts).then(function(result) {
             res.json(result);
         }).catch(function(err) {
+            console.log(err.stack);
             apiUtils.rejectHandler(req,res,err);
         })
     },
@@ -156,6 +157,7 @@ module.exports = {
         runtimeAPI.nodes.getModuleCatalogs(opts).then(function(result) {
             res.json(result);
         }).catch(function(err) {
+            console.log(err.stack);
             apiUtils.rejectHandler(req,res,err);
         })
     },

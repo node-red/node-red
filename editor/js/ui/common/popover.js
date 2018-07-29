@@ -48,23 +48,31 @@ RED.popover = (function() {
 
         var openPopup = function(instant) {
             if (active) {
-                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>').appendTo("body");
+                div = $('<div class="red-ui-popover red-ui-popover-'+direction+'"></div>');
                 if (size !== "default") {
                     div.addClass("red-ui-popover-size-"+size);
                 }
                 if (typeof content === 'function') {
-                    content.call(res).appendTo(div);
+                    var result = content.call(res);
+                    if (result === null) {
+                        return;
+                    }
+                    if (typeof result === 'string') {
+                        div.text(result);
+                    } else {
+                        div.append(result);
+                    }
                 } else {
                     div.html(content);
                 }
                 if (width !== "auto") {
                     div.width(width);
                 }
-
+                div.appendTo("body");
 
                 var targetPos = target.offset();
-                var targetWidth = target.width();
-                var targetHeight = target.height();
+                var targetWidth = target.outerWidth();
+                var targetHeight = target.outerHeight();
                 var divHeight = div.height();
                 var divWidth = div.width();
                 if (direction === 'right') {
@@ -147,7 +155,17 @@ RED.popover = (function() {
     }
 
     return {
-        create: createPopover
+        create: createPopover,
+        tooltip: function(target,content) {
+            RED.popover.create({
+                target:target,
+                trigger: "hover",
+                size: "small",
+                direction: "bottom",
+                content: content,
+                delay: { show: 550, hide: 10 }
+            });
+        }
     }
 
 })();

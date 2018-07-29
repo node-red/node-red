@@ -17,11 +17,19 @@
 var idMap = {
     // input
     "inject": "#palette_node_inject",
+    "httpin": "#palette_node_http_in",
     // output
     "debug": "#palette_node_debug",
+    "httpResponse": "#palette_node_http_response",
     // function
+    "function": "#palette_node_function",
+    "template": "#palette_node_template",
     "change": "#palette_node_change",
     "range": "#palette_node_range",
+    "httpRequest": "#palette_node_http_request",
+    "html": "#palette_node_html",
+    // storage
+    "filein": "#palette_node_file_in",
 };
 
 function getId(type) {

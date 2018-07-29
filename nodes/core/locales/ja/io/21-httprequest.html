@@ -30,7 +30,9 @@
         <dt class="optional">payload</dt>
         <dd>リクエストボディとして送るデータ</dd>
         <dt class="optional">rejectUnauthorized</dt>
-        <dd><code>true</code>をセットすると、自己署名証明書を使用するhttpsサイトへのリクエストを許可します。</dd>
+        <dd><code>false</code>をセットすると、自己署名証明書を使用するhttpsサイトへのリクエストを許可します。</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd><code>false</code>をセットすると、リダイレクトを行いません。デフォルトは<code>true</code>です。</dd>
     </dl>
     <h3>出力</h3>
     <dl class="message-properties">

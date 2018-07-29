@@ -24,6 +24,10 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var nonHeadless = grunt.option('non-headless');
+    if (nonHeadless) {
+        process.env.NODE_RED_NON_HEADLESS = 'true';
+    }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         paths: {
@@ -144,10 +148,12 @@ module.exports = function(grunt) {
                     "editor/js/ui/keyboard.js",
                     "editor/js/ui/workspaces.js",
                     "editor/js/ui/view.js",
+                    "editor/js/ui/view-navigator.js",
                     "editor/js/ui/sidebar.js",
                     "editor/js/ui/palette.js",
                     "editor/js/ui/tab-info.js",
                     "editor/js/ui/tab-config.js",
+                    "editor/js/ui/tab-context.js",
                     "editor/js/ui/palette-editor.js",
                     "editor/js/ui/editor.js",
                     "editor/js/ui/editors/*.js",

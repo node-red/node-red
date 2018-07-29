@@ -17,6 +17,9 @@
 
 
 RED.tabs = (function() {
+
+    var defaultTabIcon = "fa fa-lemon-o";
+
     function createTabs(options) {
         var tabs = {};
         var pinnedTabsCount = 0;
@@ -71,6 +74,7 @@ RED.tabs = (function() {
                         var id = $(el).data('tabId');
                         var opt = {
                             id:"red-ui-tabs-menu-option-"+id,
+                            icon: tabs[id].iconClass || defaultTabIcon,
                             label: tabs[id].name,
                             onselect: function() {
                                 activateTab(id);
@@ -90,12 +94,12 @@ RED.tabs = (function() {
                     collapsibleMenu.on('mouseleave', function(){ $(this).hide() });
                     collapsibleMenu.on('mouseup', function() { $(this).hide() });
                     collapsibleMenu.appendTo("body");
-                    var elementPos = selectButton.offset();
-                    collapsibleMenu.css({
-                        top: (elementPos.top+selectButton.height()-20)+"px",
-                        left: (elementPos.left - collapsibleMenu.width() + selectButton.width())+"px"
-                    })
                 }
+                var elementPos = selectButton.offset();
+                collapsibleMenu.css({
+                    top: (elementPos.top+selectButton.height()-20)+"px",
+                    left: (elementPos.left - collapsibleMenu.width() + selectButton.width())+"px"
+                })
                 collapsibleMenu.toggle();
             })
 
@@ -170,8 +174,8 @@ RED.tabs = (function() {
                 ul.children().css({"transition": "width 100ms"});
                 link.parent().addClass("active");
                 var parentId = link.parent().attr('id');
-                wrapper.find(".red-ui-tab-link-button").removeClass("active");
-                $("#"+parentId+"-link-button").addClass("active");
+                wrapper.find(".red-ui-tab-link-button").removeClass("active selected");
+                $("#"+parentId+"-link-button").addClass("active selected");
                 if (options.scrollable) {
                     var pos = link.parent().position().left;
                     if (pos-21 < 0) {
@@ -339,7 +343,7 @@ RED.tabs = (function() {
                     if (tab.iconClass) {
                         $('<i>',{class:tab.iconClass}).appendTo(pinnedLink);
                     } else {
-                        $('<i>',{class:"fa fa-lemon-o"}).appendTo(pinnedLink);
+                        $('<i>',{class:defaultTabIcon}).appendTo(pinnedLink);
                     }
                     pinnedLink.click(function(evt) {
                         evt.preventDefault();
@@ -349,14 +353,7 @@ RED.tabs = (function() {
                         pinnedLink.addClass("red-ui-tab-link-button-pinned");
                         pinnedTabsCount++;
                     }
-                    RED.popover.create({
-                        target:$(pinnedLink),
-                        trigger: "hover",
-                        size: "small",
-                        direction: "bottom",
-                        content: tab.name,
-                        delay: { show: 550, hide: 10 }
-                    });
+                    RED.popover.tooltip($(pinnedLink), tab.name);
 
                 }
                 link.on("click",onTabClick);
@@ -370,7 +367,6 @@ RED.tabs = (function() {
                         removeTab(tab.id);
                     });
                 }
-                updateTabWidths();
                 if (options.onadd) {
                     options.onadd(tab);
                 }
@@ -455,6 +451,9 @@ RED.tabs = (function() {
                         }
                     })
                 }
+                setTimeout(function() {
+                    updateTabWidths();
+                },10);
                 collapsibleMenu = null;
             },
             removeTab: removeTab,

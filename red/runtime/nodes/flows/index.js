@@ -163,11 +163,12 @@ function setFlows(_config,type,muteLog,forceStart) {
             activeFlowConfig = newFlowConfig;
             if (forceStart || started) {
                 return stop(type,diff,muteLog).then(function() {
-                    context.clean(activeFlowConfig);
-                    start(type,diff,muteLog).then(function() {
-                        events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
+                    return context.clean(activeFlowConfig).then(function() {
+                        start(type,diff,muteLog).then(function() {
+                            events.emit("runtime-event",{id:"runtime-deploy",payload:{revision:flowRevision},retain: true});
+                        });
+                        return flowRevision;
                     });
-                    return flowRevision;
                 }).catch(function(err) {
                 })
             } else {

@@ -187,6 +187,8 @@ module.exports = {
     createNode: createNode,
     getNode: flows.get,
     eachNode: flows.eachNode,
+    getContext: context.get,
+
 
     paletteEditorEnabled: registry.paletteEditorEnabled,
     installModule: installModule,
@@ -236,5 +238,10 @@ module.exports = {
     setCredentialSecret: credentials.setKey,
     clearCredentials: credentials.clear,
     exportCredentials: credentials.export,
-    getCredentialKeyType: credentials.getKeyType
+    getCredentialKeyType: credentials.getKeyType,
+
+    // Contexts
+    loadContextsPlugin: context.load,
+    closeContextsPlugin: context.close,
+    listContextStores: context.listStores
 };

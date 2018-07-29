@@ -153,13 +153,15 @@
             "key": "Private Key",
             "passphrase": "Passphrase",
             "ca": "CA Certificate",
-            "verify-server-cert":"Verify server certificate"
+            "verify-server-cert":"Verify server certificate",
+            "servername": "Server Name"
         },
         "placeholder": {
             "cert":"path to certificate (PEM format)",
             "key":"path to private key (PEM format)",
             "ca":"path to CA certificate (PEM format)",
-            "passphrase":"private key passphrase (optional)"
+            "passphrase":"private key passphrase (optional)",
+            "servername":"for use with SNI"
         },
         "error": {
             "missing-file": "No certificate/key file provided"
@@ -420,6 +422,10 @@
             "url1": "URL should use ws:&#47;&#47; or wss:&#47;&#47; scheme and point to an existing websocket listener.",
             "url2": "By default, <code>payload</code> will contain the data to be sent over, or received from a websocket. The client can be configured to send or receive the entire message object as a JSON formatted string."
         },
+        "status": {
+            "connected": "connected __count__",
+            "connected_plural": "connected __count__"
+        },
         "errors": {
             "connect-error": "An error occured on the ws connection: ",
             "send-error": "An error occurred while sending: ",
@@ -575,6 +581,8 @@
             "null":"is null",
             "nnull":"is not null",
             "istype":"is of type",
+            "empty":"is empty",
+            "nempty":"is not empty",
             "head":"head",
             "tail":"tail",
             "index":"index between",
@@ -697,7 +705,9 @@
         "errors": {
             "dropped-object": "Ignored non-object payload",
             "dropped": "Ignored unsupported payload type",
-            "dropped-error": "Failed to convert payload"
+            "dropped-error": "Failed to convert payload",
+            "schema-error": "JSON Schema error",
+            "schema-error-compile": "JSON Schema error: failed to compile schema"
         },
         "label": {
             "o2j": "Object to JSON options",
@@ -786,8 +796,8 @@
             "na": "N/A : __value__"
         },
         "errors": {
-            "ignorenode": "Ignoring Raspberry Pi specific node",
-            "version": "Version command failed",
+            "ignorenode": "Raspberry Pi specific node set inactive",
+            "version": "Failed to get version from Pi",
             "sawpitype": "Saw Pi Type",
             "libnotfound": "Cannot find Pi RPi.GPIO python library",
             "alreadyset": "GPIO pin __pin__ already set as type: __type__",
@@ -924,8 +934,8 @@
         "ascending" : "ascending",
         "descending" : "descending",
         "as-number" : "as number",
-        "invalid-exp" : "invalid JSONata expression in sort node",
-        "too-many" : "too many pending messages in sort node",
+        "invalid-exp" : "Invalid JSONata expression in sort node: __message__",
+        "too-many" : "Too many pending messages in sort node",
         "clear" : "clear pending message in sort node"
     },
     "batch" : {

@@ -133,7 +133,7 @@ RED.nodes = (function() {
             registerNodeType: function(nt,def) {
                 nodeDefinitions[nt] = def;
                 def.type = nt;
-                if (def.category != "subflows") {
+                if (nt.substring(0,8) != "subflow:") {
                     def.set = nodeSets[typeToId[nt]];
                     nodeSets[typeToId[nt]].added = true;
                     nodeSets[typeToId[nt]].enabled = true;
@@ -356,7 +356,7 @@ RED.nodes = (function() {
             defaults:{name:{value:""}},
             info: sf.info,
             icon: function() { return sf.icon||"subflow.png" },
-            category: "subflows",
+            category: sf.category || "subflows",
             inputs: sf.in.length,
             outputs: sf.out.length,
             color: "#da9",
@@ -519,6 +519,7 @@ RED.nodes = (function() {
         node.type = n.type;
         node.name = n.name;
         node.info = n.info;
+        node.category = n.category;
         node.in = [];
         node.out = [];
 

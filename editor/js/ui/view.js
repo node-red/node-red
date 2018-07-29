@@ -59,7 +59,9 @@ RED.view = (function() {
         dblClickPrimed = null,
         clickTime = 0,
         clickElapsed = 0,
-        scroll_position;
+        scroll_position = [],
+        quickAddActive = false,
+        quickAddLink = null;
 
     var clipboard = "";
 
@@ -332,6 +334,8 @@ RED.view = (function() {
             redraw();
         });
 
+        RED.view.navigator.init();
+
         $("#btn-zoom-out").click(function() {zoomOut();});
         $("#btn-zoom-zero").click(function() {zoomZero();});
         $("#btn-zoom-in").click(function() {zoomIn();});
@@ -460,6 +464,82 @@ RED.view = (function() {
         RED.actions.add("core:step-selection-left", function() { moveSelection(-20,0);});
     }
 
+    function generateLinkPath(origX,origY, destX, destY, sc) {
+        var dy = destY-origY;
+        var dx = destX-origX;
+        var delta = Math.sqrt(dy*dy+dx*dx);
+        var scale = lineCurveScale;
+        var scaleY = 0;
+        if (dx*sc > 0) {
+            if (delta < node_width) {
+                scale = 0.75-0.75*((node_width-delta)/node_width);
+                // scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
+                // if (Math.abs(dy) < 3*node_height) {
+                //     scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
+                // }
+            }
+        } else {
+            scale = 0.4-0.2*(Math.max(0,(node_width-Math.min(Math.abs(dx),Math.abs(dy)))/node_width));
+        }
+        if (dx*sc > 0) {
+            return "M "+origX+" "+origY+
+                " C "+(origX+sc*(node_width*scale))+" "+(origY+scaleY*node_height)+" "+
+                (destX-sc*(scale)*node_width)+" "+(destY-scaleY*node_height)+" "+
+                destX+" "+destY
+        } else {
+
+            var midX = Math.floor(destX-dx/2);
+            var midY = Math.floor(destY-dy/2);
+            //
+            if (dy === 0) {
+                midY = destY + node_height;
+            }
+            var cp_height = node_height/2;
+            var y1 = (destY + midY)/2
+            var topX =origX + sc*node_width*scale;
+            var topY = dy>0?Math.min(y1 - dy/2 , origY+cp_height):Math.max(y1 - dy/2 , origY-cp_height);
+            var bottomX = destX - sc*node_width*scale;
+            var bottomY = dy>0?Math.max(y1, destY-cp_height):Math.min(y1, destY+cp_height);
+            var x1 = (origX+topX)/2;
+            var scy = dy>0?1:-1;
+            var cp = [
+                // Orig -> Top
+                [x1,origY],
+                [topX,dy>0?Math.max(origY, topY-cp_height):Math.min(origY, topY+cp_height)],
+                // Top -> Mid
+                // [Mirror previous cp]
+                [x1,dy>0?Math.min(midY, topY+cp_height):Math.max(midY, topY-cp_height)],
+                // Mid -> Bottom
+                // [Mirror previous cp]
+                [bottomX,dy>0?Math.max(midY, bottomY-cp_height):Math.min(midY, bottomY+cp_height)],
+                // Bottom -> Dest
+                // [Mirror previous cp]
+                [(destX+bottomX)/2,destY]
+            ];
+            if (cp[2][1] === topY+scy*cp_height) {
+                if (Math.abs(dy) < cp_height*10) {
+                    cp[1][1] = topY-scy*cp_height/2;
+                    cp[3][1] = bottomY-scy*cp_height/2;
+                }
+                cp[2][0] = topX;
+            }
+            return "M "+origX+" "+origY+
+                " C "+
+                   cp[0][0]+" "+cp[0][1]+" "+
+                   cp[1][0]+" "+cp[1][1]+" "+
+                   topX+" "+topY+
+                " S "+
+                   cp[2][0]+" "+cp[2][1]+" "+
+                   midX+" "+midY+
+               " S "+
+                  cp[3][0]+" "+cp[3][1]+" "+
+                  bottomX+" "+bottomY+
+                " S "+
+                    cp[4][0]+" "+cp[4][1]+" "+
+                    destX+" "+destY
+        }
+    }
+
 
     function addNode(type,x,y) {
         var m = /^subflow:(.+)$/.exec(type);
@@ -567,14 +647,16 @@ RED.view = (function() {
                     mouse_mode = RED.state.QUICK_JOINING;
                     $(window).on('keyup',disableQuickJoinEventHandler);
                 }
-
+                quickAddActive = true;
                 RED.typeSearch.show({
                     x:d3.event.clientX-mainPos.left-node_width/2,
                     y:d3.event.clientY-mainPos.top-node_height/2,
                     cancel: function() {
+                        quickAddActive = false;
                         resetMouseVars();
                     },
                     add: function(type) {
+                        quickAddActive = false;
                         var result = addNode(type);
                         if (!result) {
                             return;
@@ -583,11 +665,10 @@ RED.view = (function() {
                         var historyEvent = result.historyEvent;
                         nn.x = point[0];
                         nn.y = point[1];
-                        if (mouse_mode === RED.state.QUICK_JOINING) {
-                            if (drag_lines.length > 0) {
-                                var drag_line = drag_lines[0];
+                        if (mouse_mode === RED.state.QUICK_JOINING || quickAddLink) {
+                            if (quickAddLink || drag_lines.length > 0) {
+                                var drag_line = quickAddLink||drag_lines[0];
                                 var src = null,dst,src_port;
-
                                 if (drag_line.portType === PORT_TYPE_OUTPUT && nn.inputs > 0) {
                                     src = drag_line.node;
                                     src_port = drag_line.port;
@@ -602,9 +683,9 @@ RED.view = (function() {
                                     RED.nodes.addLink(link);
                                     historyEvent.links = [link];
                                     hideDragLines();
-                                    if (drag_line.portType === PORT_TYPE_OUTPUT && nn.outputs > 0) {
+                                    if (!quickAddLink && drag_line.portType === PORT_TYPE_OUTPUT && nn.outputs > 0) {
                                         showDragLines([{node:nn,port:0,portType:PORT_TYPE_OUTPUT}]);
-                                    } else if (drag_line.portType === PORT_TYPE_INPUT && nn.inputs > 0) {
+                                    } else if (!quickAddLink && drag_line.portType === PORT_TYPE_INPUT && nn.inputs > 0) {
                                         showDragLines([{node:nn,port:0,portType:PORT_TYPE_INPUT}]);
                                     } else {
                                         resetMouseVars();
@@ -622,8 +703,8 @@ RED.view = (function() {
                                     resetMouseVars();
                                 }
                             }
+                            quickAddLink = null;
                         }
-
 
                         RED.history.push(historyEvent);
                         RED.nodes.add(nn);
@@ -789,28 +870,7 @@ RED.view = (function() {
 
                 var sc = (drag_line.portType === PORT_TYPE_OUTPUT)?1:-1;
 
-                var dy = mousePos[1]-(drag_line.node.y+portY);
-                var dx = mousePos[0]-(drag_line.node.x+sc*drag_line.node.w/2);
-                var delta = Math.sqrt(dy*dy+dx*dx);
-                var scale = lineCurveScale;
-                var scaleY = 0;
-
-                if (delta < node_width) {
-                    scale = 0.75-0.75*((node_width-delta)/node_width);
-                }
-                if (dx*sc < 0) {
-                    scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
-                    if (Math.abs(dy) < 3*node_height) {
-                        scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
-                    }
-                }
-
-                drag_line.el.attr("d",
-                    "M "+(drag_line.node.x+sc*drag_line.node.w/2)+" "+(drag_line.node.y+portY)+
-                    " C "+(drag_line.node.x+sc*(drag_line.node.w/2+node_width*scale))+" "+(drag_line.node.y+portY+scaleY*node_height)+" "+
-                    (mousePos[0]-sc*(scale)*node_width)+" "+(mousePos[1]-scaleY*node_height)+" "+
-                    mousePos[0]+" "+mousePos[1]
-                    );
+                drag_line.el.attr("d",generateLinkPath(drag_line.node.x+sc*drag_line.node.w/2,drag_line.node.y+portY,mousePos[0],mousePos[1],sc));
             }
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
@@ -1060,17 +1120,20 @@ RED.view = (function() {
     function zoomIn() {
         if (scaleFactor < 2) {
             scaleFactor += 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomOut() {
         if (scaleFactor > 0.3) {
             scaleFactor -= 0.1;
+            RED.view.navigator.resize();
             redraw();
         }
     }
     function zoomZero() {
         scaleFactor = 1;
+        RED.view.navigator.resize();
         redraw();
     }
 
@@ -1407,6 +1470,9 @@ RED.view = (function() {
     function disableQuickJoinEventHandler(evt) {
         // Check for ctrl (all browsers), "Meta" (Chrome/FF), keyCode 91 (Safari)
         if (evt.keyCode === 17 || evt.key === "Meta" || evt.keyCode === 91) {
+            if (quickAddActive && drag_lines.length > 0) {
+                quickAddLink = drag_lines[0];
+            }
             resetMouseVars();
             hideDragLines();
             redraw();
@@ -1418,6 +1484,10 @@ RED.view = (function() {
         //console.log(d,portType,portIndex);
         // disable zoom
         //vis.call(d3.behavior.zoom().on("zoom"), null);
+        if (d3.event.button === 1) {
+            return;
+        }
+
         mousedown_node = d;
         mousedown_port_type = portType;
         mousedown_port_index = portIndex || 0;
@@ -1649,6 +1719,9 @@ RED.view = (function() {
 
     function nodeMouseDown(d) {
         focusView();
+        if (d3.event.button === 1) {
+            return;
+        }
         //var touch0 = d3.event;
         //var pos = [touch0.pageX,touch0.pageY];
         //RED.touch.radialMenu.show(d3.select(this),pos);
@@ -1692,7 +1765,9 @@ RED.view = (function() {
         clickElapsed = now-clickTime;
         clickTime = now;
 
-        dblClickPrimed = (lastClickNode == mousedown_node);
+        dblClickPrimed = (lastClickNode == mousedown_node &&
+            d3.event.buttons === 1 &&
+            !d3.event.shiftKey && !d3.event.metaKey && !d3.event.altKey && !d3.event.ctrlKey);
         lastClickNode = mousedown_node;
 
         var i;
@@ -1963,7 +2038,7 @@ RED.view = (function() {
                             .attr("ry",4)
                             .attr("width",16)
                             .attr("height",node_height-12)
-                            .attr("fill",function(d) { return d._def.color;})
+                            .attr("fill",function(d) { return RED.utils.getNodeColor(d.type,d._def); /*d._def.color;*/})
                             .attr("cursor","pointer")
                             .on("mousedown",function(d) {if (!lasso && isButtonEnabled(d)) {focusView();d3.select(this).attr("fill-opacity",0.2);d3.event.preventDefault(); d3.event.stopPropagation();}})
                             .on("mouseup",function(d) {if (!lasso && isButtonEnabled(d)) { d3.select(this).attr("fill-opacity",0.4);d3.event.preventDefault();d3.event.stopPropagation();}})
@@ -1984,7 +2059,7 @@ RED.view = (function() {
                         .classed("node_unknown",function(d) { return d.type == "unknown"; })
                         .attr("rx", 5)
                         .attr("ry", 5)
-                        .attr("fill",function(d) { return d._def.color;})
+                        .attr("fill",function(d) { return RED.utils.getNodeColor(d.type,d._def); /*d._def.color;*/})
                         .on("mouseup",nodeMouseUp)
                         .on("mousedown",nodeMouseDown)
                         .on("touchstart",function(d) {
@@ -2381,32 +2456,17 @@ RED.view = (function() {
                         var numOutputs = d.source.outputs || 1;
                         var sourcePort = d.sourcePort || 0;
                         var y = -((numOutputs-1)/2)*13 +13*sourcePort;
-
-                        var dy = d.target.y-(d.source.y+y);
-                        var dx = (d.target.x-d.target.w/2)-(d.source.x+d.source.w/2);
-                        var delta = Math.sqrt(dy*dy+dx*dx);
-                        var scale = lineCurveScale;
-                        var scaleY = 0;
-                        if (delta < node_width) {
-                            scale = 0.75-0.75*((node_width-delta)/node_width);
-                        }
-
-                        if (dx < 0) {
-                            scale += 2*(Math.min(5*node_width,Math.abs(dx))/(5*node_width));
-                            if (Math.abs(dy) < 3*node_height) {
-                                scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_width,Math.abs(dx))/(node_width)) ;
-                            }
-                        }
-
                         d.x1 = d.source.x+d.source.w/2;
                         d.y1 = d.source.y+y;
                         d.x2 = d.target.x-d.target.w/2;
                         d.y2 = d.target.y;
 
-                        return "M "+d.x1+" "+d.y1+
-                            " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
-                            (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
-                            d.x2+" "+d.y2;
+                        // return "M "+d.x1+" "+d.y1+
+                        //     " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
+                        //     (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
+                        //     d.x2+" "+d.y2;
+
+                        return generateLinkPath(d.x1,d.y1,d.x2,d.y2,1);
                     });
                 }
             })
@@ -2542,7 +2602,7 @@ RED.view = (function() {
                 }
             ).classed("link_selected", false);
         }
-
+        RED.view.navigator.refresh();
         if (d3.event) {
             d3.event.preventDefault();
         }
@@ -2816,7 +2876,9 @@ RED.view = (function() {
                 gridSize = Math.max(5,v);
                 updateGrid();
             }
+        },
+        getActiveNodes: function() {
+            return activeNodes;
         }
-
     };
 })();

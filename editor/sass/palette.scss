@@ -90,13 +90,14 @@
     text-align: left;
     padding: 9px;
     font-weight: bold;
+    padding-left: 30px;
     overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-
+    user-select: none;
 }
 .palette-header > i {
-    margin: 3px 10px 3px 3px;
+    position: absolute;
+    left: 11px;
+    top: 12px;
     -webkit-transition: all 0.2s ease-in-out;
     -moz-transition: all 0.2s ease-in-out;
     -o-transition: all 0.2s ease-in-out;
