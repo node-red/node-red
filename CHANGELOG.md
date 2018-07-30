@@ -59,6 +59,7 @@ Runtime
  - Handle loading empty nodesDir
  - Add 'private' property to userDir generated package.json
  - Add RED.require to allow nodes to access other modules
+ - Ensure add/remove modules are run sequentially
 
 #### 0.18.7: Maintenance Release
 

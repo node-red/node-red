@@ -73,7 +73,7 @@
     "request": "2.87.0",
     "semver": "5.5.0",
     "sentiment": "2.1.0",
-    "uglify-js": "3.4.5",
+    "uglify-js": "3.4.6",
     "when": "3.7.8",
     "ws": "1.1.5",
     "xml2js": "0.4.19"
@@ -92,7 +92,7 @@
     "grunt-contrib-concat": "~1.0.1",
     "grunt-contrib-copy": "~1.0.0",
     "grunt-contrib-jshint": "~1.1.0",
-    "grunt-contrib-uglify": "~3.3.0",
+    "grunt-contrib-uglify": "~3.4.0",
     "grunt-contrib-watch": "~1.1.0",
     "grunt-jsonlint": "~1.1.0",
     "grunt-mocha-istanbul": "5.0.2",
