@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="480" width="480" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="0 0 480.00002 479.99999">
+ <title>Node-RED Icon</title>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title>Node-RED Icon</dc:title>
+    <cc:license rdf:resource="http://creativecommons.org/licenses/by/3.0/"/>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Nick O&apos;Leary</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+   <cc:License rdf:about="http://creativecommons.org/licenses/by/3.0/">
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Notice"/>
+    <cc:requires rdf:resource="http://creativecommons.org/ns#Attribution"/>
+    <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+   </cc:License>
+  </rdf:RDF>
+ </metadata>
+ <g transform="translate(0 -572.36)">
+  <rect style="color-rendering:auto;color:#000000;isolation:auto;mix-blend-mode:normal;shape-rendering:auto;solid-color:#000000;image-rendering:auto" ry="56" height="448" width="448" y="588.36" x="16" fill="#8f0000"/>
+  <g transform="matrix(8.545 0 0 8.545 -786.19 -1949.8)">
+   <path style="color-rendering:auto;text-decoration-color:#000000;color:#000000;isolation:auto;mix-blend-mode:normal;shape-rendering:auto;solid-color:#000000;block-progression:tb;text-decoration-line:none;text-decoration-style:solid;image-rendering:auto;white-space:normal;text-indent:0;text-transform:none" d="m104.41 321.21c0.0138-2.3846-1.905-4.2806-4.2896-4.2806h-6.243v2.9257h6.243c0.80513 0 1.4808 0.58383 1.4808 1.389v4.2422c0 0.80513-0.67566 1.5075-1.4808 1.5075h-6.243v2.8086h6.243c2.3846 0 4.2895-1.9315 4.2895-4.3162l-0.00005-1.9812c9.8659 0.14125 12.737 2.7065 15.877 5.4519 3.0241 2.6446 6.4153 5.4869 15.252 5.557l0.00046 0.97238c0.001 2.3846 1.9543 4.3803 4.3389 4.3803h6.4273v-3.0427h-6.4273c-0.80514 0-1.4135-0.53255-1.4135-1.3377v-4.2422c0-0.80513 0.60835-1.4418 1.4135-1.4418h6.4273v-2.8086h-6.4273c-2.3846 0-4.3379 1.8658-4.3389 4.2504l-0.00045 1.005c-8.351-0.0276-10.723-2.3434-13.76-4.9992-2.5914-2.2662-5.6368-4.7578-12.346-5.6642 0.0583-0.0501 0.11211-0.0987 0.16838-0.15027 1.2918-1.1846 1.9884-2.6158 2.6699-3.8516 0.68148-1.2357 1.3227-2.267 2.373-2.9879 0.85207-0.58483 2.0639-1.0208 3.926-1.1017l0.00018 0.99192c0.00043 2.3846 1.9236 4.4325 4.3083 4.4325h17.242c2.3846 0 4.3127-2.0479 4.3127-4.4325v-4.2422c0-2.3846-1.9281-4.3153-4.3127-4.3153h-17.242c-2.3846 0-4.3095 1.9306-4.3083 4.3153l0.00051 0.98395c-2.2474 0.0903-3.9508 0.6357-5.2079 1.4985-1.5245 1.0464-2.3662 2.4764-3.0762 3.7637-0.70992 1.2873-1.3108 2.4408-2.2188 3.2734-0.79034 0.72475-1.8834 1.2844-3.658 1.493zm18.468-12.356h17.242c0.80514 0 1.387 0.58455 1.387 1.3897v4.2422c0 0.80514-0.5819 1.3898-1.387 1.3898h-17.242c-0.80514 0-1.4994-0.58462-1.4994-1.3898v-4.2422c0-0.80513 0.69431-1.3897 1.4994-1.3897z" fill="#fff"/>
+  </g>
+ </g>
+</svg>
