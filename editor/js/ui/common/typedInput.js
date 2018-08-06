@@ -522,10 +522,18 @@
                     this.selectLabel.empty();
                     var image;
                     if (opt.icon) {
-                        image = new Image();
-                        image.name = opt.icon;
-                        image.src = opt.icon;
-                        $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        if (opt.icon.indexOf("<") === 0) {
+                            $(opt.icon).prependTo(this.selectLabel);
+                        }
+                        else if (opt.icon.indexOf("/") !== -1) {
+                            image = new Image();
+                            image.name = opt.icon;
+                            image.src = opt.icon;
+                            $('<img>',{src:opt.icon,style:"margin-right: 4px;height: 18px;"}).prependTo(this.selectLabel);
+                        }
+                        else {
+                            $('<i>',{class:"red-ui-typedInput-icon "+opt.icon}).prependTo(this.selectLabel);
+                        }
                     } else {
                         this.selectLabel.text(opt.label);
                     }
