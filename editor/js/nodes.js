@@ -509,6 +509,9 @@ RED.nodes = (function() {
                     node.icon = n.icon;
                 }
             }
+            if (n.info) {
+                node.info = n.info;
+            }
         }
         return node;
     }
@@ -947,6 +950,7 @@ RED.nodes = (function() {
                         inputLabels: n.inputLabels,
                         outputLabels: n.outputLabels,
                         icon: n.icon,
+                        info: n.info,
                         changed:false,
                         _config:{}
                     };
