@@ -19,12 +19,16 @@
  *
  * Configuration options:
  * {
- *    base: "contexts",        // the base directory to use
- *                             // default: "contexts"
+ *    base: "context",         // the base directory to use
+ *                             // default: "context"
  *    dir: "/path/to/storage", // the directory to create the base directory in
  *                             // default: settings.userDir
- *    cache: true              // whether to cache contents in memory
+ *    cache: true,             // whether to cache contents in memory
  *                             // default: true
+ *    flushInterval: 30        // if cache is enabled, the minimum interval
+ *                             // between writes to storage, in seconds. This
+ *                                can be used to reduce wear on underlying storage.
+ *                                default: 30 seconds
  *  }
  *
  *
@@ -61,7 +65,7 @@ function getStoragePath(storageBaseDir, scope) {
 }
 
 function getBasePath(config) {
-    var base = config.base || "contexts";
+    var base = config.base || "context";
     var storageBaseDir;
     if (!config.dir) {
         if(config.settings && config.settings.userDir){
@@ -102,11 +106,29 @@ function loadFile(storagePath){
     });
 }
 
+function listFiles(storagePath) {
+    var promises = [];
+    return fs.readdir(storagePath).then(function(files) {
+        files.forEach(function(file) {
+            promises.push(fs.readdir(path.join(storagePath,file)).then(function(subdirFiles) {
+                return subdirFiles.map(subfile => path.join(file,subfile));
+            }))
+        });
+        return Promise.all(promises);
+    }).then(dirs => dirs.reduce((acc, val) => acc.concat(val), []));
+}
+
 function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getBasePath(this.config);
     if (config.hasOwnProperty('cache')?config.cache:true) {
         this.cache = MemoryStore({});
+    }
+    this.pendingWrites = {};
+    if (config.hasOwnProperty('flushInterval')) {
+        this.flushInterval = Math.max(0,config.flushInterval) * 1000;
+    } else {
+        this.flushInterval = 30000;
     }
 }
 
@@ -115,25 +137,17 @@ LocalFileSystem.prototype.open = function(){
     if (this.cache) {
         var scopes = [];
         var promises = [];
-        var subdirs = [];
-        var subdirPromises = [];
-        return fs.readdir(self.storageBaseDir).then(function(dirs){
-            dirs.forEach(function(fn) {
-                var p = getStoragePath(self.storageBaseDir ,fn)+".json";
-                scopes.push(fn);
-                promises.push(loadFile(p));
-                subdirs.push(path.join(self.storageBaseDir,fn));
-                subdirPromises.push(fs.readdir(path.join(self.storageBaseDir,fn)));
-            })
-            return Promise.all(subdirPromises);
-        }).then(function(dirs) {
-            dirs.forEach(function(files,i) {
-                files.forEach(function(fn) {
-                    if (fn !== 'flow.json' && fn !== 'global.json') {
-                        scopes.push(fn.substring(0,fn.length-5)+":"+scopes[i]);
-                        promises.push(loadFile(path.join(subdirs[i],fn)))
-                    }
-                });
+        return listFiles(self.storageBaseDir).then(function(files) {
+            files.forEach(function(file) {
+                var parts = file.split("/");
+                if (parts[0] === 'global') {
+                    scopes.push("global");
+                } else if (parts[1] === 'flow.json') {
+                    scopes.push(parts[0])
+                } else {
+                    scopes.push(parts[1].substring(0,parts[1].length-5)+":"+parts[0]);
+                }
+                promises.push(loadFile(path.join(self.storageBaseDir,file)));
             })
             return Promise.all(promises);
         }).then(function(res) {
@@ -149,13 +163,32 @@ LocalFileSystem.prototype.open = function(){
             }else{
                 return Promise.reject(err);
             }
+        }).then(function() {
+            self._flushPendingWrites = function() {
+                var scopes = Object.keys(self.pendingWrites);
+                self.pendingWrites = {};
+                var promises = [];
+                var newContext = self.cache._export();
+                scopes.forEach(function(scope) {
+                    var storagePath = getStoragePath(self.storageBaseDir,scope);
+                    var context = newContext[scope];
+                    promises.push(fs.outputFile(storagePath + ".json", JSON.stringify(context, undefined, 4), "utf8"));
+                });
+                delete self._pendingWriteTimeout;
+                return Promise.all(promises);
+            }
         });
     } else {
-        return Promise.resolve();
+        return fs.ensureDir(self.storageBaseDir);
     }
 }
 
 LocalFileSystem.prototype.close = function(){
+    if (this.cache && this._flushPendingWrites) {
+        clearTimeout(this._pendingWriteTimeout);
+        delete this._pendingWriteTimeout;
+        return this._flushPendingWrites();
+    }
     return Promise.resolve();
 }
 
@@ -191,10 +224,14 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     if (this.cache) {
         this.cache.set(scope,key,value,callback);
-        // With cache enabled, no need to re-read the file prior to writing.
-        var newContext = this.cache._export()[scope];
-        fs.outputFile(storagePath + ".json", JSON.stringify(newContext, undefined, 4), "utf8").catch(function(err) {
-        });
+        this.pendingWrites[scope] = true;
+        if (this._pendingWriteTimeout) {
+            // there's a pending write which will handle this
+            return;
+        } else {
+            var self = this;
+            this._pendingWriteTimeout = setTimeout(function() { self._flushPendingWrites.call(self)}, this.flushInterval);
+        }
     } else if (callback && typeof callback !== 'function') {
         throw new Error("Callback must be a function");
     } else {
@@ -254,36 +291,44 @@ LocalFileSystem.prototype.delete = function(scope){
         cachePromise = Promise.resolve();
     }
     var that = this;
+    delete this.pendingWrites[scope];
     return cachePromise.then(function() {
         var storagePath = getStoragePath(that.storageBaseDir,scope);
         return fs.remove(storagePath + ".json");
     });
 }
 
-LocalFileSystem.prototype.clean = function(activeNodes){
+LocalFileSystem.prototype.clean = function(_activeNodes) {
+    var activeNodes = {};
+    _activeNodes.forEach(function(node) { activeNodes[node] = true });
     var self = this;
     var cachePromise;
     if (this.cache) {
-        cachePromise = this.cache.clean(activeNodes);
+        cachePromise = this.cache.clean(_activeNodes);
     } else {
         cachePromise = Promise.resolve();
     }
-    return cachePromise.then(function() {
-        return fs.readdir(self.storageBaseDir).then(function(dirs){
-            return Promise.all(dirs.reduce(function(result, item){
-                if(item !== "global" && activeNodes.indexOf(item) === -1){
-                    result.push(fs.remove(path.join(self.storageBaseDir,item)));
-                }
-                return result;
-            },[]));
-        }).catch(function(err){
-            if(err.code == 'ENOENT') {
-                return Promise.resolve();
-            }else{
-                return Promise.reject(err);
+    return cachePromise.then(() => listFiles(self.storageBaseDir)).then(function(files) {
+        var promises = [];
+        files.forEach(function(file) {
+            var parts = file.split("/");
+            var removePromise;
+            if (parts[0] === 'global') {
+                // never clean global
+                return;
+            } else if (!activeNodes[parts[0]]) {
+                // Flow removed - remove the whole dir
+                removePromise = fs.remove(path.join(self.storageBaseDir,parts[0]));
+            } else if (parts[1] !== 'flow.json' && !activeNodes[parts[1].substring(0,parts[1].length-5)]) {
+                // Node removed - remove the context file
+                removePromise = fs.remove(path.join(self.storageBaseDir,file));
+            }
+            if (removePromise) {
+                promises.push(removePromise);
             }
         });
-    });
+        return Promise.all(promises)
+    })
 }
 
 module.exports = function(config){
