@@ -65,13 +65,28 @@
                       .attr('height',chartSize[1]/nav_scale/scaleFactor)
          }
      }
+     function toggle() {
+         if (!isShowing) {
+             isShowing = true;
+             $("#btn-navigate").addClass("selected");
+             resizeNavBorder();
+             refreshNodes();
+             $("#chart").on("scroll",onScroll);
+             navContainer.fadeIn(200);
+         } else {
+             isShowing = false;
+             navContainer.fadeOut(100);
+             $("#chart").off("scroll",onScroll);
+             $("#btn-navigate").removeClass("selected");
+         }
+     }
 
      return {
          init: function() {
 
              $(window).resize(resizeNavBorder);
              RED.events.on("sidebar:resize",resizeNavBorder);
-
+             RED.actions.add("core:toggle-navigator",toggle);
              var hideTimeout;
 
              navContainer = $('<div>').css({
@@ -141,23 +156,12 @@
 
             $("#btn-navigate").click(function(evt) {
                 evt.preventDefault();
-                if (!isShowing) {
-                    isShowing = true;
-                    $("#btn-navigate").addClass("selected");
-                    resizeNavBorder();
-                    refreshNodes();
-                    $("#chart").on("scroll",onScroll);
-                    navContainer.fadeIn(200);
-                } else {
-                    isShowing = false;
-                    navContainer.fadeOut(100);
-                    $("#chart").off("scroll",onScroll);
-                    $("#btn-navigate").removeClass("selected");
-                }
+                toggle();
             })
         },
         refresh: refreshNodes,
-        resize: resizeNavBorder
+        resize: resizeNavBorder,
+        toggle: toggle
     }
 
 
