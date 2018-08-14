@@ -19,6 +19,19 @@ module.exports = function(RED) {
     var mustache = require("mustache");
     var yaml = require("js-yaml");
 
+    function extractTokens(tokens,set) {
+        set = set || new Set();
+        tokens.forEach(function(token) {
+            if (token[0] !== 'text') {
+                set.add(token[1]);
+                if (token.length > 4) {
+                    extractTokens(token[4],set);
+                }
+            }
+        });
+        return set;
+    }
+
     function parseContext(key) {
         var match = /^(flow|global)(\[(\w+)\])?\.(.+)/.exec(key);
         if (match) {
@@ -36,22 +49,16 @@ module.exports = function(RED) {
      * flow and global context
      */
 
-    function NodeContext(msg, nodeContext, parent, escapeStrings, promises, results) {
+    function NodeContext(msg, nodeContext, parent, escapeStrings, cachedContextTokens) {
         this.msgContext = new mustache.Context(msg,parent);
         this.nodeContext = nodeContext;
         this.escapeStrings = escapeStrings;
-        this.promises = promises;
-        this.results = results;
+        this.cachedContextTokens = cachedContextTokens;
     }
 
     NodeContext.prototype = new mustache.Context();
 
     NodeContext.prototype.lookup = function (name) {
-        var results = this.results;
-        if (results) {
-            var val = results.shift();
-            return val;
-        }
         // try message first:
         try {
             var value = this.msgContext.lookup(name);
@@ -64,7 +71,6 @@ module.exports = function(RED) {
                     value = value.replace(/\f/g, "\\f");
                     value = value.replace(/[\b]/g, "\\b");
                 }
-                this.promises.push(Promise.resolve(value));
                 return value;
             }
 
@@ -76,28 +82,10 @@ module.exports = function(RED) {
                 var field = context.field;
                 var target = this.nodeContext[type];
                 if (target) {
-                    var promise = new Promise((resolve, reject) => {
-                        var callback = (err, val) => {
-                            if (err) {
-                                reject(err);
-                            } else {
-                                resolve(val);
-                            }
-                        };
-                        target.get(field, store, callback);
-                    });
-                    this.promises.push(promise);
-                    return '';
-                }
-                else {
-                    this.promises.push(Promise.resolve(''));
-                    return '';
+                    return this.cachedContextTokens[name];
                 }
             }
-            else {
-                this.promises.push(Promise.resolve(''));
-                return '';
-            }
+            return '';
         }
         catch(err) {
             throw err;
@@ -105,7 +93,7 @@ module.exports = function(RED) {
     }
 
     NodeContext.prototype.push = function push (view) {
-        return new NodeContext(view, this.nodeContext, this.msgContext, undefined, this.promises, this.results);
+        return new NodeContext(view, this.nodeContext, this.msgContext, undefined, this.cachedContextTokens);
     };
 
     function TemplateNode(n) {
@@ -118,33 +106,36 @@ module.exports = function(RED) {
         this.outputFormat = n.output || "str";
 
         var node = this;
-        node.on("input", function(msg) {
-            function output(value) {
-                /* istanbul ignore else  */
-                if (node.outputFormat === "json") {
-                    value = JSON.parse(value);
-                }
-                /* istanbul ignore else  */
-                if (node.outputFormat === "yaml") {
-                    value = yaml.load(value);
-                }
 
-                if (node.fieldType === 'msg') {
-                    RED.util.setMessageProperty(msg, node.field, value);
-                    node.send(msg);
-                } else if ((node.fieldType === 'flow') ||
-                           (node.fieldType === 'global')) {
-                    var context = RED.util.parseContextStore(node.field);
-                    var target = node.context()[node.fieldType];
-                    target.set(context.key, value, context.store, function (err) {
-                        if (err) {
-                            node.error(err, msg);
-                        } else {
-                            node.send(msg);
-                        }
-                    });
-                }
+        function output(msg,value) {
+            /* istanbul ignore else  */
+            if (node.outputFormat === "json") {
+                value = JSON.parse(value);
             }
+            /* istanbul ignore else  */
+            if (node.outputFormat === "yaml") {
+                value = yaml.load(value);
+            }
+
+            if (node.fieldType === 'msg') {
+                RED.util.setMessageProperty(msg, node.field, value);
+                node.send(msg);
+            } else if ((node.fieldType === 'flow') ||
+                       (node.fieldType === 'global')) {
+                var context = RED.util.parseContextStore(node.field);
+                var target = node.context()[node.fieldType];
+                target.set(context.key, value, context.store, function (err) {
+                    if (err) {
+                        node.error(err, msg);
+                    } else {
+                        node.send(msg);
+                    }
+                });
+            }
+        }
+
+        node.on("input", function(msg) {
+
             try {
                 /***
                 * Allow template contents to be defined externally
@@ -160,19 +151,44 @@ module.exports = function(RED) {
                 if (node.syntax === "mustache") {
                     var is_json = (node.outputFormat === "json");
                     var promises = [];
-                    mustache.render(template, new NodeContext(msg, node.context(), null, is_json, promises, null));
-                    Promise.all(promises).then(function (values) {
-                        var value = mustache.render(template, new NodeContext(msg, node.context(), null, is_json, null, values));
-                        output(value);
+                    var tokens = extractTokens(mustache.parse(template));
+                    var resolvedTokens = {};
+                    tokens.forEach(function(name) {
+                        var context = parseContext(name);
+                        if (context) {
+                            var type = context.type;
+                            var store = context.store;
+                            var field = context.field;
+                            var target = node.context()[type];
+                            if (target) {
+                                var promise = new Promise((resolve, reject) => {
+                                    target.get(field, store, (err, val) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolvedTokens[name] = val;
+                                            resolve();
+                                        }
+                                    });
+                                });
+                                promises.push(promise);
+                                return;
+                            }
+                        }
+                    });
+
+                    Promise.all(promises).then(function() {
+                        var value = mustache.render(template, new NodeContext(msg, node.context(), null, is_json, resolvedTokens));
+                        output(msg, value);
                     }).catch(function (err) {
-                        node.error(err.message);
+                        node.error(err.message,msg);
                     });
                 } else {
-                    output(template);
+                    output(msg, template);
                 }
             }
             catch(err) {
-                node.error(err.message);
+                node.error(err.message, msg);
             }
         });
     }

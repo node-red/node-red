@@ -177,6 +177,53 @@ describe('template node', function() {
         });
     });
 
+    it('should handle nested context tags - property not set', function(done) {
+        // This comes from the Coursera Node-RED course and is a good example of
+        // multiple conditional tags
+        var template = `{{#flow.time}}time={{flow.time}}{{/flow.time}}{{^flow.time}}!time{{/flow.time}}{{#flow.random}}random={{flow.random}}randomtime={{flow.randomtime}}{{/flow.random}}{{^flow.random}}!random{{/flow.random}}`;
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:template,wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', '!time!random');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            });
+        });
+    })
+    it('should handle nested context tags - property set', function(done) {
+        // This comes from the Coursera Node-RED course and is a good example of
+        // multiple conditional tags
+        var template = `{{#flow.time}}time={{flow.time}}{{/flow.time}}{{^flow.time}}!time{{/flow.time}}{{#flow.random}}random={{flow.random}}randomtime={{flow.randomtime}}{{/flow.random}}{{^flow.random}}!random{{/flow.random}}`;
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:template,wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', 'time=123random=456randomtime=789');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.context().flow.set(["time","random","randomtime"],["123","456","789"],function (err) {
+                    n1.receive({payload:"foo",topic: "bar"});
+                });
+            });
+        });
+    })
+
     it('should modify payload from two persistable flow context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow[memory1].value}}/{{flow[memory2].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
@@ -429,7 +476,7 @@ describe('template node', function() {
             n1.receive({payload:{A:"abc"}});
         });
     });
-    
+
     it('should raise error if passed bad template', function(done) {
         var flow = [{id:"n1", type:"template", field: "payload", template: "payload={{payload",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {
