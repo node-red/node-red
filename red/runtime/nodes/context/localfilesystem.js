@@ -150,7 +150,7 @@ LocalFileSystem.prototype.open = function(){
         var promises = [];
         return listFiles(self.storageBaseDir).then(function(files) {
             files.forEach(function(file) {
-                var parts = file.split("/");
+                var parts = file.split(path.sep);
                 if (parts[0] === 'global') {
                     scopes.push("global");
                 } else if (parts[1] === 'flow.json') {
@@ -338,7 +338,7 @@ LocalFileSystem.prototype.clean = function(_activeNodes) {
     return cachePromise.then(() => listFiles(self.storageBaseDir)).then(function(files) {
         var promises = [];
         files.forEach(function(file) {
-            var parts = file.split("/");
+            var parts = file.split(path.sep);
             var removePromise;
             if (parts[0] === 'global') {
                 // never clean global
