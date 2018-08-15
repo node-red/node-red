@@ -46,9 +46,12 @@ describe('localfilesystem',function() {
 
         it('should store property',function(done) {
             context.get("nodeX","foo",function(err, value){
+                if (err) { return done(err); }
                 should.not.exist(value);
                 context.set("nodeX","foo","test",function(err){
+                    if (err) { return done(err); }
                     context.get("nodeX","foo",function(err, value){
+                        if (err) { return done(err); }
                         value.should.be.equal("test");
                         done();
                     });

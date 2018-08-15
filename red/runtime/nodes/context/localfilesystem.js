@@ -48,8 +48,11 @@
 var fs = require('fs-extra');
 var path = require("path");
 var util = require("../../util");
+var log = require("../../log");
 
+var safeJSONStringify = require("json-stringify-safe");
 var MemoryStore = require("./memory");
+
 
 function getStoragePath(storageBaseDir, scope) {
     if(scope.indexOf(":") === -1){
@@ -118,6 +121,12 @@ function listFiles(storagePath) {
     }).then(dirs => dirs.reduce((acc, val) => acc.concat(val), []));
 }
 
+function stringify(value) {
+    var hasCircular;
+    var result = safeJSONStringify(value,null,4,function(k,v){hasCircular = true})
+    return { json: result, circular: hasCircular };
+}
+
 function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getBasePath(this.config);
@@ -125,6 +134,8 @@ function LocalFileSystem(config){
         this.cache = MemoryStore({});
     }
     this.pendingWrites = {};
+    this.knownCircularRefs = {};
+
     if (config.hasOwnProperty('flushInterval')) {
         this.flushInterval = Math.max(0,config.flushInterval) * 1000;
     } else {
@@ -172,7 +183,15 @@ LocalFileSystem.prototype.open = function(){
                 scopes.forEach(function(scope) {
                     var storagePath = getStoragePath(self.storageBaseDir,scope);
                     var context = newContext[scope];
-                    promises.push(fs.outputFile(storagePath + ".json", JSON.stringify(context, undefined, 4), "utf8"));
+                    var stringifiedContext = stringify(context);
+                    if (stringifiedContext.circular && !self.knownCircularRefs[scope]) {
+                        log.warn("Context "+scope+" contains a circular reference that cannot be persisted");
+                        self.knownCircularRefs[scope] = true;
+                    } else {
+                        delete self.knownCircularRefs[scope];
+                    }
+                    log.debug("Flushing localfilesystem context scope "+scope);
+                    promises.push(fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8"));
                 });
                 delete self._pendingWriteTimeout;
                 return Promise.all(promises);
@@ -221,6 +240,7 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
 };
 
 LocalFileSystem.prototype.set = function(scope, key, value, callback) {
+    var self = this;
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     if (this.cache) {
         this.cache.set(scope,key,value,callback);
@@ -229,7 +249,6 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             // there's a pending write which will handle this
             return;
         } else {
-            var self = this;
             this._pendingWriteTimeout = setTimeout(function() { self._flushPendingWrites.call(self)}, this.flushInterval);
         }
     } else if (callback && typeof callback !== 'function') {
@@ -251,7 +270,14 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
                 }
                 util.setObjectProperty(obj,key[i],v);
             }
-            return fs.outputFile(storagePath + ".json", JSON.stringify(obj, undefined, 4), "utf8");
+            var stringifiedContext = stringify(obj);
+            if (stringifiedContext.circular && !self.knownCircularRefs[scope]) {
+                log.warn("Context "+scope+" contains a circular reference that cannot be persisted");
+                self.knownCircularRefs[scope] = true;
+            } else {
+                delete self.knownCircularRefs[scope];
+            }
+            return fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8");
         }).then(function(){
             if(typeof callback === "function"){
                 callback(null);
@@ -308,6 +334,7 @@ LocalFileSystem.prototype.clean = function(_activeNodes) {
     } else {
         cachePromise = Promise.resolve();
     }
+    this.knownCircularRefs = {};
     return cachePromise.then(() => listFiles(self.storageBaseDir)).then(function(files) {
         var promises = [];
         files.forEach(function(file) {
