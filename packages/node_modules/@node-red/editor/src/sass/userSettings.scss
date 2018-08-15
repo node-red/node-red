@@ -61,7 +61,13 @@
 }
 
 #user-settings-tab-view {
+    position: absolute;
+    top:0;
+    right: 0;
+    left: 0;
+    bottom: 0;
     padding: 8px 20px 20px;
+    overflow-y: scroll;
 }
 .user-settings-row {
     padding: 5px 10px 2px;

@@ -1,3 +1,12 @@
+#### 0.19.1: Maintenance Release
+
+ - Pull in latest twitter node
+ - Handle windows paths for context storage
+ - Handle persisting objects with circular refs in context
+ - Ensure js editor can expand to fill available space
+ - Add example localfilesystem contextStorage to settings
+ - Fix template node handling of nested context tags
+
 #### 0.19: Milestone Release
 
 Editor
@@ -59,6 +68,7 @@ Runtime
  - Handle loading empty nodesDir
  - Add 'private' property to userDir generated package.json
  - Add RED.require to allow nodes to access other modules
+ - Ensure add/remove modules are run sequentially
 
 #### 0.18.7: Maintenance Release
 

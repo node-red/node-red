@@ -16,7 +16,7 @@
 RED.editor.types._js = (function() {
 
 
-    var template = '<script type="text/x-red" data-template-name="_js"><div class="form-row node-text-editor-row" style="width: 700px"><div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-js"></div></div></script>';
+    var template = '<script type="text/x-red" data-template-name="_js"><div class="form-row node-text-editor-row"><div style="height: 200px;min-height: 150px;" class="node-text-editor" id="node-input-js"></div></div></script>';
 
     return {
         init: function() {
@@ -58,7 +58,6 @@ RED.editor.types._js = (function() {
                     for (var i=0;i<rows.size();i++) {
                         height -= $(rows[i]).outerHeight(true);
                     }
-                    height -= (parseInt($("#dialog-form").css("marginTop"))+parseInt($("#dialog-form").css("marginBottom")));
                     $(".node-text-editor").css("height",height+"px");
                     expressionEditor.resize();
                 },

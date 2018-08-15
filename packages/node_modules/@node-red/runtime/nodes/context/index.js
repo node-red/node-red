@@ -112,7 +112,15 @@ function load() {
                         try {
                             // Create a new instance of the plugin by calling its module function
                             stores[pluginName] = plugin(config);
-                            log.info(log._("context.log-store-init", {name:pluginName, info:"module="+plugins[pluginName].module}));
+                            var moduleInfo = plugins[pluginName].module;
+                            if (typeof moduleInfo !== 'string') {
+                                if (moduleInfo.hasOwnProperty("toString")) {
+                                    moduleInfo = moduleInfo.toString();
+                                } else {
+                                    moduleInfo = "custom";
+                                }
+                            }
+                            log.info(log._("context.log-store-init", {name:pluginName, info:"module="+moduleInfo}));
                         } catch(err) {
                             return reject(new Error(log._("context.error-loading-module",{module:pluginName,message:err.toString()})));
                         }

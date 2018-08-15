@@ -280,8 +280,7 @@ RED.sidebar.info = (function() {
             if (infoText) {
                 setInfoText(infoText);
             }
-
-
+            $(".sidebar-node-info-stack").scrollTop(0);
             $(".node-info-property-header").click(function(e) {
                 e.preventDefault();
                 expandedSections["property"] = !expandedSections["property"];
@@ -395,10 +394,9 @@ RED.sidebar.info = (function() {
     function set(html,title) {
         // tips.stop();
         // sections.show();
-        // nodeSection.container.hide();
-        infoSection.title.text(title||"");
         refresh(null);
-        $(infoSection.content).empty();
+        nodeSection.container.hide();
+        infoSection.title.text(title||RED._("sidebar.info.info"));
         setInfoText(html);
         $(".sidebar-node-info-stack").scrollTop(0);
     }

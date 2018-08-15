@@ -21,32 +21,37 @@ var LocalFileSystem = require('../../../../../red/runtime/nodes/context/localfil
 
 var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
 
+var defaultContextBase = "context";
+
 describe('localfilesystem',function() {
-    var context;
 
     before(function() {
         return fs.remove(resourcesDir);
     });
 
-    beforeEach(function() {
-        context = LocalFileSystem({dir: resourcesDir, cache: false});
-        return context.open();
-    });
+    describe('#get/set',function() {
+        var context;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            return context.open();
+        });
 
-    afterEach(function() {
-        return context.clean([]).then(function(){
-            return context.close().then(function(){
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close();
+            }).then(function(){
                 return fs.remove(resourcesDir);
             });
         });
-    });
 
-    describe('#get/set',function() {
         it('should store property',function(done) {
             context.get("nodeX","foo",function(err, value){
+                if (err) { return done(err); }
                 should.not.exist(value);
                 context.set("nodeX","foo","test",function(err){
+                    if (err) { return done(err); }
                     context.get("nodeX","foo",function(err, value){
+                        if (err) { return done(err); }
                         value.should.be.equal("test");
                         done();
                     });
@@ -348,7 +353,7 @@ describe('localfilesystem',function() {
         });
 
         it('should handle empty context file', function (done) {
-            fs.outputFile(path.join(resourcesDir,"contexts","nodeX","flow.json"),"",function(){
+            fs.outputFile(path.join(resourcesDir,defaultContextBase,"nodeX","flow.json"),"",function(){
                 context.get("nodeX", "foo", function (err, value) {
                     should.not.exist(value);
                     context.set("nodeX", "foo", "test", function (err) {
@@ -362,7 +367,7 @@ describe('localfilesystem',function() {
         });
 
         it('should throw an error when reading corrupt context file', function (done) {
-            fs.outputFile(path.join(resourcesDir, "contexts", "nodeX", "flow.json"),"{abc",function(){
+            fs.outputFile(path.join(resourcesDir, defaultContextBase, "nodeX", "flow.json"),"{abc",function(){
                 context.get("nodeX", "foo", function (err, value) {
                     should.exist(err);
                     done();
@@ -372,6 +377,20 @@ describe('localfilesystem',function() {
     });
 
     describe('#keys',function() {
+        var context;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            return context.open();
+        });
+
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close();
+            }).then(function(){
+                return fs.remove(resourcesDir);
+            });
+        });
+
         it('should enumerate context keys', function(done) {
             context.keys("nodeX",function(err, value){
                 value.should.be.an.Array();
@@ -436,6 +455,20 @@ describe('localfilesystem',function() {
     });
 
     describe('#delete',function() {
+        var context;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            return context.open();
+        });
+
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close();
+            }).then(function(){
+                return fs.remove(resourcesDir);
+            });
+        });
+
         it('should delete context',function(done) {
             context.get("nodeX","foo",function(err, value){
                 should.not.exist(value);
@@ -466,64 +499,36 @@ describe('localfilesystem',function() {
     });
 
     describe('#clean',function() {
-        it('should clean unnecessary context',function(done) {
-            context.get("nodeX","foo",function(err, value){
-                should.not.exist(value);
-                context.get("nodeY","foo",function(err, value){
-                    should.not.exist(value);
-                    context.set("nodeX","foo","testX",function(err){
-                        context.set("nodeY","foo","testY",function(err){
-                            context.get("nodeX","foo",function(err, value){
-                                value.should.be.equal("testX");
-                                context.get("nodeY","foo",function(err, value){
-                                    value.should.be.equal("testY");
-                                    context.clean([]).then(function(){
-                                        context.get("nodeX","foo",function(err, value){
-                                            should.not.exist(value);
-                                            context.get("nodeY","foo",function(err, value){
-                                                should.not.exist(value);
-                                                done();
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
+        var context;
+        var contextGet;
+        var contextSet;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            contextGet = function(scope,key) {
+                return new Promise((res,rej) => {
+                    context.get(scope,key, function(err,value) {
+                        if (err) {
+                            rej(err);
+                        } else {
+                            res(value);
+                        }
+                    })
                 });
-            });
+            }
+            contextSet = function(scope,key,value) {
+                return new Promise((res,rej) => {
+                    context.set(scope,key,value, function(err) {
+                        if (err) {
+                            rej(err);
+                        } else {
+                            res();
+                        }
+                    })
+                });
+            }
+            return context.open();
         });
 
-        it('should not clean active context',function(done) {
-            context.get("nodeX","foo",function(err, value){
-                should.not.exist(value);
-                context.get("nodeY","foo",function(err, value){
-                    should.not.exist(value);
-                    context.set("nodeX","foo","testX",function(err){
-                        context.set("nodeY","foo","testY",function(err){
-                            context.get("nodeX","foo",function(err, value){
-                                value.should.be.equal("testX");
-                                context.get("nodeY","foo",function(err, value){
-                                    value.should.be.equal("testY");
-                                    context.clean(["nodeX"]).then(function(){
-                                        context.get("nodeX","foo",function(err, value){
-                                            value.should.be.equal("testX");
-                                            context.get("nodeY","foo",function(err, value){
-                                                should.not.exist(value);
-                                                done();
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    });
-
-    describe('#if cache is enabled',function() {
         afterEach(function() {
             return context.clean([]).then(function(){
                 return context.close().then(function(){
@@ -531,23 +536,101 @@ describe('localfilesystem',function() {
                 });
             });
         });
+        it('should clean unnecessary context',function(done) {
+            contextSet("global","foo","testGlobal").then(function() {
+                return contextSet("nodeX:flow1","foo","testX");
+            }).then(function() {
+                return contextSet("nodeY:flow2","foo","testY");
+            }).then(function() {
+                return contextGet("nodeX:flow1","foo");
+            }).then(function(value) {
+                value.should.be.equal("testX");
+            }).then(function() {
+                return contextGet("nodeY:flow2","foo");
+            }).then(function(value) {
+                value.should.be.equal("testY");
+            }).then(function() {
+                return context.clean([])
+            }).then(function() {
+                return contextGet("nodeX:flow1","foo");
+            }).then(function(value) {
+                should.not.exist(value);
+            }).then(function() {
+                return contextGet("nodeY:flow2","foo");
+            }).then(function(value) {
+                should.not.exist(value);
+            }).then(function() {
+                return contextGet("global","foo");
+            }).then(function(value) {
+                value.should.eql("testGlobal");
+            }).then(done).catch(done);
+        });
+
+        it('should not clean active context',function(done) {
+            contextSet("global","foo","testGlobal").then(function() {
+                return contextSet("nodeX:flow1","foo","testX");
+            }).then(function() {
+                return contextSet("nodeY:flow2","foo","testY");
+            }).then(function() {
+                return contextGet("nodeX:flow1","foo");
+            }).then(function(value) {
+                value.should.be.equal("testX");
+            }).then(function() {
+                return contextGet("nodeY:flow2","foo");
+            }).then(function(value) {
+                value.should.be.equal("testY");
+            }).then(function() {
+                return context.clean(["flow1","nodeX"])
+            }).then(function() {
+                return contextGet("nodeX:flow1","foo");
+            }).then(function(value) {
+                value.should.be.equal("testX");
+            }).then(function() {
+                return contextGet("nodeY:flow2","foo");
+            }).then(function(value) {
+                should.not.exist(value);
+            }).then(function() {
+                return contextGet("global","foo");
+            }).then(function(value) {
+                value.should.eql("testGlobal");
+            }).then(done).catch(done);
+        });
+    });
+
+    describe('#if cache is enabled',function() {
+
+        var context;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            return context.open();
+        });
+
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close();
+            }).then(function(){
+                return fs.remove(resourcesDir);
+            });
+        });
+
+
 
         it('should load contexts into the cache',function() {
             var globalData = {key:"global"};
             var flowData = {key:"flow"};
             var nodeData = {key:"node"};
             return Promise.all([
-                fs.outputFile(path.join(resourcesDir,"contexts","global","global.json"), JSON.stringify(globalData,null,4), "utf8"),
-                fs.outputFile(path.join(resourcesDir,"contexts","flow","flow.json"), JSON.stringify(flowData,null,4), "utf8"),
-                fs.outputFile(path.join(resourcesDir,"contexts","flow","node.json"), JSON.stringify(nodeData,null,4), "utf8")
+                fs.outputFile(path.join(resourcesDir,defaultContextBase,"global","global.json"), JSON.stringify(globalData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,defaultContextBase,"flow","flow.json"), JSON.stringify(flowData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,defaultContextBase,"flow","node.json"), JSON.stringify(nodeData,null,4), "utf8")
             ]).then(function(){
                 context = LocalFileSystem({dir: resourcesDir, cache: true});
                 return context.open();
             }).then(function(){
                 return Promise.all([
-                    fs.remove(path.join(resourcesDir,"contexts","global","global.json")),
-                    fs.remove(path.join(resourcesDir,"contexts","flow","flow.json")),
-                    fs.remove(path.join(resourcesDir,"contexts","flow","node.json"))
+                    fs.remove(path.join(resourcesDir,defaultContextBase,"global","global.json")),
+                    fs.remove(path.join(resourcesDir,defaultContextBase,"flow","flow.json")),
+                    fs.remove(path.join(resourcesDir,defaultContextBase,"flow","node.json"))
                 ]);
             }).then(function(){
                 context.get("global","key").should.be.equal("global");
@@ -557,19 +640,31 @@ describe('localfilesystem',function() {
         });
 
         it('should store property to the cache',function() {
-            context = LocalFileSystem({dir: resourcesDir, cache: true});
+            context = LocalFileSystem({dir: resourcesDir, cache: true, flushInterval: 1});
             return context.open().then(function(){
                 return new Promise(function(resolve, reject){
                     context.set("global","foo","bar",function(err){
                         if(err){
                             reject(err);
                         } else {
-                            resolve();
+                            fs.readJson(path.join(resourcesDir,defaultContextBase,"global","global.json")).then(function(data) {
+                                // File should not exist as flush hasn't happened
+                                reject("File global/global.json should not exist");
+                            }).catch(function(err) {
+                                setTimeout(function() {
+                                    fs.readJson(path.join(resourcesDir,defaultContextBase,"global","global.json")).then(function(data) {
+                                        data.should.eql({foo:'bar'});
+                                        resolve();
+                                    }).catch(function(err) {
+                                        reject(err);
+                                    });
+                                },1100)
+                            })
                         }
                     });
                 });
             }).then(function(){
-                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+                return fs.remove(path.join(resourcesDir,defaultContextBase,"global","global.json"));
             }).then(function(){
                 context.get("global","foo").should.be.equal("bar");
             })
@@ -577,11 +672,11 @@ describe('localfilesystem',function() {
 
         it('should enumerate context keys in the cache',function() {
             var globalData = {foo:"bar"};
-            fs.outputFile(path.join(resourcesDir,"contexts","global","global.json"), JSON.stringify(globalData,null,4), "utf8").then(function(){
-                context = LocalFileSystem({dir: resourcesDir, cache: true});
+            fs.outputFile(path.join(resourcesDir,defaultContextBase,"global","global.json"), JSON.stringify(globalData,null,4), "utf8").then(function(){
+                context = LocalFileSystem({dir: resourcesDir, cache: true, flushInterval: 2});
                 return context.open()
             }).then(function(){
-                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+                return fs.remove(path.join(resourcesDir,defaultContextBase,"global","global.json"));
             }).then(function(){
                 var keys = context.keys("global");
                 keys.should.have.length(1);
@@ -596,7 +691,7 @@ describe('localfilesystem',function() {
                     });
                 });
             }).then(function(){
-                return fs.remove(path.join(resourcesDir,"contexts","global","global.json"));
+                return fs.remove(path.join(resourcesDir,defaultContextBase,"global","global.json"));
             }).then(function(){
                 var keys = context.keys("global");
                 keys.should.have.length(2);
@@ -605,7 +700,7 @@ describe('localfilesystem',function() {
         });
 
         it('should delete context in the cache',function() {
-            context = LocalFileSystem({dir: resourcesDir, cache: true});
+            context = LocalFileSystem({dir: resourcesDir, cache: true, flushInterval: 2});
             return context.open().then(function(){
                 return new Promise(function(resolve, reject){
                     context.set("global","foo","bar",function(err){
@@ -628,10 +723,10 @@ describe('localfilesystem',function() {
             var flowAData = {key:"flowA"};
             var flowBData = {key:"flowB"};
             return Promise.all([
-                fs.outputFile(path.join(resourcesDir,"contexts","flowA","flow.json"), JSON.stringify(flowAData,null,4), "utf8"),
-                fs.outputFile(path.join(resourcesDir,"contexts","flowB","flow.json"), JSON.stringify(flowBData,null,4), "utf8")
+                fs.outputFile(path.join(resourcesDir,defaultContextBase,"flowA","flow.json"), JSON.stringify(flowAData,null,4), "utf8"),
+                fs.outputFile(path.join(resourcesDir,defaultContextBase,"flowB","flow.json"), JSON.stringify(flowBData,null,4), "utf8")
             ]).then(function(){
-                context = LocalFileSystem({dir: resourcesDir, cache: true});
+                context = LocalFileSystem({dir: resourcesDir, cache: true, flushInterval: 2});
                 return context.open();
             }).then(function(){
                 context.get("flowA","key").should.be.equal("flowA");
@@ -645,6 +740,19 @@ describe('localfilesystem',function() {
     });
 
     describe('Configuration', function () {
+        var context;
+        beforeEach(function() {
+            context = LocalFileSystem({dir: resourcesDir, cache: false});
+            return context.open();
+        });
+
+        afterEach(function() {
+            return context.clean([]).then(function(){
+                return context.close();
+            }).then(function(){
+                return fs.remove(resourcesDir);
+            });
+        });
         it('should change a base directory', function (done) {
             var differentBaseContext = LocalFileSystem({
                 base: "contexts2",
@@ -688,7 +796,7 @@ describe('localfilesystem',function() {
         it('should use NODE_RED_HOME', function (done) {
             var oldNRH = process.env.NODE_RED_HOME;
             process.env.NODE_RED_HOME = resourcesDir;
-            fs.mkdirSync(resourcesDir);
+            fs.ensureDirSync(resourcesDir);
             fs.writeFileSync(path.join(resourcesDir,".config.json"),"");
             var nrHomeContext = LocalFileSystem({
                 base: "contexts2",

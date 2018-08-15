@@ -17,6 +17,7 @@
 var should = require("should");
 var sinon = require('sinon');
 var path = require("path");
+var fs = require('fs-extra');
 var Context = require("../../../../../red/runtime/nodes/context/index");
 
 describe('context', function() {
@@ -273,6 +274,8 @@ describe('context', function() {
             sandbox.reset();
             return Context.clean({allNodes:{}}).then(function(){
                 return Context.close();
+            }).then(function(){
+                return fs.remove(resourcesDir);
             });
         });
 
@@ -286,11 +289,11 @@ describe('context', function() {
             });
             it('should load memory module', function() {
                 Context.init({contextStorage:{memory:{module:"memory"}}});
-                Context.load();
+                return Context.load();
             });
             it('should load localfilesystem module', function() {
                 Context.init({contextStorage:{file:{module:"localfilesystem",config:{dir:resourcesDir}}}});
-                Context.load();
+                return Context.load();
             });
             it('should ignore reserved storage name `_`', function(done) {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
