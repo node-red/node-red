@@ -170,6 +170,8 @@ function load() {
             defaultStore = "memory";
         }
         return resolve(Promise.all(promises));
+    }).catch(function(err) {
+        throw new Error(log._("context.error-loading-module",{message:err.toString()}));
     });
 }
 

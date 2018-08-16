@@ -104,8 +104,6 @@ function loadFile(storagePath){
         }else{
             return Promise.resolve(undefined);
         }
-    }).catch(function(err){
-        throw Promise.reject(err);
     });
 }
 
@@ -113,9 +111,21 @@ function listFiles(storagePath) {
     var promises = [];
     return fs.readdir(storagePath).then(function(files) {
         files.forEach(function(file) {
-            promises.push(fs.readdir(path.join(storagePath,file)).then(function(subdirFiles) {
-                return subdirFiles.map(subfile => path.join(file,subfile));
-            }))
+            if (!/^\./.test(file)) {
+                var fullPath = path.join(storagePath,file);
+                var stats = fs.statSync(fullPath);
+                if (stats.isDirectory()) {
+                    promises.push(fs.readdir(fullPath).then(function(subdirFiles) {
+                        var result = [];
+                        subdirFiles.forEach(subfile => {
+                            if (/\.json$/.test(subfile)) {
+                                result.push(path.join(file,subfile))
+                            }
+                        });
+                        return result;
+                    }))
+                }
+            }
         });
         return Promise.all(promises);
     }).then(dirs => dirs.reduce((acc, val) => acc.concat(val), []));
@@ -172,7 +182,7 @@ LocalFileSystem.prototype.open = function(){
             if(err.code == 'ENOENT') {
                 return fs.ensureDir(self.storageBaseDir);
             }else{
-                return Promise.reject(err);
+                throw err;
             }
         }).then(function() {
             self._flushPendingWrites = function() {
@@ -185,7 +195,7 @@ LocalFileSystem.prototype.open = function(){
                     var context = newContext[scope];
                     var stringifiedContext = stringify(context);
                     if (stringifiedContext.circular && !self.knownCircularRefs[scope]) {
-                        log.warn("Context "+scope+" contains a circular reference that cannot be persisted");
+                        log.warn(log._("error-circular",{scope:scope}));
                         self.knownCircularRefs[scope] = true;
                     } else {
                         delete self.knownCircularRefs[scope];
@@ -249,7 +259,11 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             // there's a pending write which will handle this
             return;
         } else {
-            this._pendingWriteTimeout = setTimeout(function() { self._flushPendingWrites.call(self)}, this.flushInterval);
+            this._pendingWriteTimeout = setTimeout(function() {
+                self._flushPendingWrites.call(self).catch(function(err) {
+                    log.error(log._("context.localfilesystem.error-write",{message:err.toString()}))
+                });
+            }, this.flushInterval);
         }
     } else if (callback && typeof callback !== 'function') {
         throw new Error("Callback must be a function");
@@ -272,7 +286,7 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             }
             var stringifiedContext = stringify(obj);
             if (stringifiedContext.circular && !self.knownCircularRefs[scope]) {
-                log.warn("Context "+scope+" contains a circular reference that cannot be persisted");
+                log.warn(log._("error-circular",{scope:scope}));
                 self.knownCircularRefs[scope] = true;
             } else {
                 delete self.knownCircularRefs[scope];
