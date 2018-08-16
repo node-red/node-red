@@ -283,6 +283,9 @@ module.exports = function(RED) {
             }
         }
         function applyRules(msg, currentRule) {
+            if (currentRule >= node.rules.length) {
+                return Promise.resolve(msg);
+            }
             var r = node.rules[currentRule];
             var rulePromise;
             if (r.t === "move") {

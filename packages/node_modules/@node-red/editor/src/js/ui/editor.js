@@ -1110,7 +1110,7 @@ RED.editor = (function() {
                                     changed = true;
                                 }
                             } else {
-                                if (icon !== defaultIcon) {
+                                if (icon !== "" && icon !== defaultIcon) {
                                     changes.icon = editing_node.icon;
                                     editing_node.icon = icon;
                                     changed = true;

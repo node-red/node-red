@@ -163,7 +163,12 @@
         "error-module-not-defined": "Context store '__storage__' missing 'module' option",
         "error-invalid-module-name": "Invalid context store name: '__name__'",
         "error-invalid-default-module": "Default context store unknown: '__storage__'",
-        "unknown-store": "Unknown context store '__name__' specified. Using default store."
+        "unknown-store": "Unknown context store '__name__' specified. Using default store.",
+        "error-loading-module": "Error loading context store: __message__",
+        "localfilesystem": {
+            "error-circular": "Context __scope__ contains a circular reference that cannot be persisted",
+            "error-write": "Error writing context: __message__"
+        }
     }
 
 }

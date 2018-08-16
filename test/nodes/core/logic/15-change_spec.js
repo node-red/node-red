@@ -78,6 +78,24 @@ describe('change Node', function() {
             done();
         });
     });
+    it('should no-op if there are no rules', function(done) {
+        var flow = [{"id":"changeNode1","type":"change","rules":[],"action":"","property":"","from":"","to":"","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(changeNode, flow, function() {
+            var changeNode1 = helper.getNode("changeNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                try {
+                    msg.should.eql(sentMsg);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var sentMsg = {payload:"leaveMeAlong"};
+            changeNode1.receive(sentMsg);
+        });
+    });
 
     describe('#set' , function() {
 
