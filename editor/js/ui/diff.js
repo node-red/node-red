@@ -881,7 +881,6 @@ RED.diff = (function() {
                 }
             }
         }
-
         var properties = Object.keys(node).filter(function(p) { return p!='inputLabels'&&p!='outputLabels'&&p!='z'&&p!='wires'&&p!=='x'&&p!=='y'&&p!=='id'&&p!=='type'&&(!def.defaults||!def.defaults.hasOwnProperty(p))});
         if (def.defaults) {
             properties = properties.concat(Object.keys(def.defaults));
@@ -889,6 +888,13 @@ RED.diff = (function() {
         if (node.type !== 'tab') {
             properties = properties.concat(['inputLabels','outputLabels']);
         }
+        if ( ((localNode && localNode.hasOwnProperty('icon')) || (remoteNode && remoteNode.hasOwnProperty('icon'))) &&
+            properties.indexOf('icon') === -1
+        ) {
+            properties.unshift('icon');
+        }
+
+
         properties.forEach(function(d) {
             localChanged = false;
             remoteChanged = false;
