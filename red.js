@@ -77,6 +77,8 @@ if (parsedArgs.argv.remain.length > 0) {
     flowFile = parsedArgs.argv.remain[0];
 }
 
+process.env.NODE_RED_HOME = process.env.NODE_RED_HOME || __dirname;
+
 if (parsedArgs.settings) {
     // User-specified settings file
     settingsFile = parsedArgs.settings;

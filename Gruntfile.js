@@ -118,81 +118,81 @@ module.exports = function(grunt) {
                 src: [
                     // Ensure editor source files are concatenated in
                     // the right order
-                    "packages/node_modules/@node-red/editor/src/js/red.js",
-                    "packages/node_modules/@node-red/editor/src/js/events.js",
-                    "packages/node_modules/@node-red/editor/src/js/i18n.js",
-                    "packages/node_modules/@node-red/editor/src/js/settings.js",
-                    "packages/node_modules/@node-red/editor/src/js/user.js",
-                    "packages/node_modules/@node-red/editor/src/js/comms.js",
-                    "packages/node_modules/@node-red/editor/src/js/text/bidi.js",
-                    "packages/node_modules/@node-red/editor/src/js/text/format.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/state.js",
-                    "packages/node_modules/@node-red/editor/src/js/nodes.js",
-                    "packages/node_modules/@node-red/editor/src/js/history.js",
-                    "packages/node_modules/@node-red/editor/src/js/validators.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/utils.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/editableList.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/checkboxSet.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/menu.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/panels.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/popover.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/searchBox.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/tabs.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/stack.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/common/typedInput.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/actions.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/deploy.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/diff.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/keyboard.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/workspaces.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/view.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/view-navigator.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/sidebar.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/palette.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/tab-info.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/tab-config.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/tab-context.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/palette-editor.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/editor.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/editors/*.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/tray.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/clipboard.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/library.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/notifications.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/search.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/typeSearch.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/subflow.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/userSettings.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/projects/projects.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/projects/projectSettings.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/projects/projectUserSettings.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/projects/tab-versionControl.js",
-                    "packages/node_modules/@node-red/editor/src/js/ui/touch/radialMenu.js"
+                    "packages/node_modules/@node-red/editor-client/src/js/red.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/events.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/i18n.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/settings.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/user.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/comms.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/text/bidi.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/text/format.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/state.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/nodes.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/history.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/validators.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/utils.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/editableList.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/checkboxSet.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/menu.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/panels.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/popover.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/searchBox.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/tabs.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/stack.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/actions.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/deploy.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/keyboard.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/workspaces.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/view-navigator.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/sidebar.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/palette.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-info.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-config.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-context.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/palette-editor.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/editor.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/editors/*.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tray.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/clipboard.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/library.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/notifications.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/search.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/typeSearch.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/subflow.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/userSettings.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projects.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectSettings.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectUserSettings.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/projects/tab-versionControl.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js"
                 ],
-                dest: "packages/node_modules/@node-red/editor/public/red/red.js"
+                dest: "packages/node_modules/@node-red/editor-client/public/red/red.js"
             },
             vendor: {
                 files: {
-                    "packages/node_modules/@node-red/editor/public/vendor/vendor.js": [
-                        "packages/node_modules/@node-red/editor/src/vendor/jquery/js/jquery-1.11.3.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/bootstrap/js/bootstrap.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/jquery/js/jquery-ui-1.10.3.custom.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/marked/marked.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/d3/d3.v3.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/i18next/i18next.min.js"
+                    "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js": [
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-1.11.3.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/bootstrap/js/bootstrap.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui-1.10.3.custom.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js"
                     ],
-                    "packages/node_modules/@node-red/editor/public/vendor/vendor.css": [
+                    "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
                         // TODO: resolve relative resource paths in
                         //       bootstrap/FA/jquery
                     ],
-                    "packages/node_modules/@node-red/editor/public/vendor/jsonata/jsonata.min.js": [
+                    "packages/node_modules/@node-red/editor-client/public/vendor/jsonata/jsonata.min.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/jsonata/formatter.js"
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js"
                     ],
-                    "packages/node_modules/@node-red/editor/public/vendor/ace/worker-jsonata.js": [
+                    "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
-                        "packages/node_modules/@node-red/editor/src/vendor/jsonata/worker-jsonata.js"
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
                     ]
                 }
             }
@@ -200,10 +200,10 @@ module.exports = function(grunt) {
         uglify: {
             build: {
                 files: {
-                    'packages/node_modules/@node-red/editor/public/red/red.min.js': 'packages/node_modules/@node-red/editor/public/red/red.js',
-                    'packages/node_modules/@node-red/editor/public/red/main.min.js': 'packages/node_modules/@node-red/editor/public/red/main.js',
-                    'packages/node_modules/@node-red/editor/public/vendor/ace/mode-jsonata.js': 'packages/node_modules/@node-red/editor/src/vendor/jsonata/mode-jsonata.js',
-                    'packages/node_modules/@node-red/editor/public/vendor/ace/snippets/jsonata.js': 'packages/node_modules/@node-red/editor/src/vendor/jsonata/snippets-jsonata.js'
+                    'packages/node_modules/@node-red/editor-client/public/red/red.min.js': 'packages/node_modules/@node-red/editor-client/public/red/red.js',
+                    'packages/node_modules/@node-red/editor-client/public/red/main.min.js': 'packages/node_modules/@node-red/editor-client/public/red/main.js',
+                    'packages/node_modules/@node-red/editor-client/public/vendor/ace/mode-jsonata.js': 'packages/node_modules/@node-red/editor-client/src/vendor/jsonata/mode-jsonata.js',
+                    'packages/node_modules/@node-red/editor-client/public/vendor/ace/snippets/jsonata.js': 'packages/node_modules/@node-red/editor-client/src/vendor/jsonata/snippets-jsonata.js'
                 }
             }
         },
@@ -213,12 +213,12 @@ module.exports = function(grunt) {
                     outputStyle: 'compressed'
                 },
                 files: [{
-                    dest: 'packages/node_modules/@node-red/editor/public/red/style.min.css',
-                    src: 'packages/node_modules/@node-red/editor/src/sass/style.scss'
+                    dest: 'packages/node_modules/@node-red/editor-client/public/red/style.min.css',
+                    src: 'packages/node_modules/@node-red/editor-client/src/sass/style.scss'
                 },
                 {
-                    dest: 'packages/node_modules/@node-red/editor/public/vendor/bootstrap/css/bootstrap.min.css',
-                    src: 'packages/node_modules/@node-red/editor/src/vendor/bootstrap/css/bootstrap.css'
+                    dest: 'packages/node_modules/@node-red/editor-client/public/vendor/bootstrap/css/bootstrap.min.css',
+                    src: 'packages/node_modules/@node-red/editor-client/src/vendor/bootstrap/css/bootstrap.css'
                 }]
             }
         },
@@ -232,31 +232,31 @@ module.exports = function(grunt) {
             },
             keymaps: {
                 src: [
-                    'packages/node_modules/@node-red/editor/src/js/keymap.json'
+                    'packages/node_modules/@node-red/editor-client/src/js/keymap.json'
                 ]
             }
         },
         attachCopyright: {
             js: {
                 src: [
-                    'packages/node_modules/@node-red/editor/public/red/red.min.js',
-                    'packages/node_modules/@node-red/editor/public/red/main.min.js'
+                    'packages/node_modules/@node-red/editor-client/public/red/red.min.js',
+                    'packages/node_modules/@node-red/editor-client/public/red/main.min.js'
                 ]
             },
             css: {
                 src: [
-                    'packages/node_modules/@node-red/editor/public/red/style.min.css'
+                    'packages/node_modules/@node-red/editor-client/public/red/style.min.css'
                 ]
             }
         },
         clean: {
             build: {
                 src: [
-                    "packages/node_modules/@node-red/editor/public/red",
-                    "packages/node_modules/@node-red/editor/public/index.html",
-                    "packages/node_modules/@node-red/editor/public/favicon.ico",
-                    "packages/node_modules/@node-red/editor/public/icons",
-                    "packages/node_modules/@node-red/editor/public/vendor"
+                    "packages/node_modules/@node-red/editor-client/public/red",
+                    "packages/node_modules/@node-red/editor-client/public/index.html",
+                    "packages/node_modules/@node-red/editor-client/public/favicon.ico",
+                    "packages/node_modules/@node-red/editor-client/public/icons",
+                    "packages/node_modules/@node-red/editor-client/public/vendor"
                 ]
             },
             release: {
@@ -268,13 +268,13 @@ module.exports = function(grunt) {
         watch: {
             js: {
                 files: [
-                    'packages/node_modules/@node-red/editor/src/js/**/*.js'
+                    'packages/node_modules/@node-red/editor-client/src/js/**/*.js'
                 ],
                 tasks: ['copy:build','concat','uglify','attachCopyright:js']
             },
             sass: {
                 files: [
-                    'packages/node_modules/@node-red/editor/src/sass/**/*.scss'
+                    'packages/node_modules/@node-red/editor-client/src/sass/**/*.scss'
                 ],
                 tasks: ['sass','attachCopyright:css']
             },
@@ -288,7 +288,7 @@ module.exports = function(grunt) {
             },
             keymaps: {
                 files: [
-                    'packages/node_modules/@node-red/editor/src/js/keymap.json'
+                    'packages/node_modules/@node-red/editor-client/src/js/keymap.json'
                 ],
                 tasks: ['jsonlint:keymaps','copy:build']
             },
@@ -327,21 +327,21 @@ module.exports = function(grunt) {
             build: {
                 files:[
                     {
-                        src: 'packages/node_modules/@node-red/editor/src/js/main.js',
-                        dest: 'packages/node_modules/@node-red/editor/public/red/main.js'
+                        src: 'packages/node_modules/@node-red/editor-client/src/js/main.js',
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/main.js'
                     },
                     {
-                        src: 'packages/node_modules/@node-red/editor/src/js/keymap.json',
-                        dest: 'packages/node_modules/@node-red/editor/public/red/keymap.json'
+                        src: 'packages/node_modules/@node-red/editor-client/src/js/keymap.json',
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/keymap.json'
                     },
                     {
-                        cwd: 'packages/node_modules/@node-red/editor/src/images',
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/images',
                         src: '**',
                         expand: true,
-                        dest: 'packages/node_modules/@node-red/editor/public/red/images/'
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/images/'
                     },
                     {
-                        cwd: 'packages/node_modules/@node-red/editor/src/vendor',
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/vendor',
                         src: [
                             'ace/**',
                             //'bootstrap/css/**',
@@ -350,23 +350,23 @@ module.exports = function(grunt) {
                             'font-awesome/**'
                         ],
                         expand: true,
-                        dest: 'packages/node_modules/@node-red/editor/public/vendor/'
+                        dest: 'packages/node_modules/@node-red/editor-client/public/vendor/'
                     },
                     {
-                        cwd: 'packages/node_modules/@node-red/editor/src/icons',
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/icons',
                         src: '**',
                         expand: true,
-                        dest: 'packages/node_modules/@node-red/editor/public/icons/'
+                        dest: 'packages/node_modules/@node-red/editor-client/public/icons/'
                     },
                     {
                         expand: true,
-                        src: ['packages/node_modules/@node-red/editor/src/index.html','packages/node_modules/@node-red/editor/src/favicon.ico'],
-                        dest: 'packages/node_modules/@node-red/editor/public/',
+                        src: ['packages/node_modules/@node-red/editor-client/src/index.html','packages/node_modules/@node-red/editor-client/src/favicon.ico'],
+                        dest: 'packages/node_modules/@node-red/editor-client/public/',
                         flatten: true
                     },
                     {
                         src: 'CHANGELOG.md',
-                        dest: 'packages/node_modules/@node-red/editor/public/red/about'
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/about'
                     }
                 ]
             },
