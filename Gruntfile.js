@@ -303,12 +303,12 @@ module.exports = function(grunt) {
         nodemon: {
             /* uses .nodemonignore */
             dev: {
-                script: 'red.js',
+                script: 'packages/node_modules/node-red/red.js',
                 options: {
                     args: nodemonArgs,
                     ext: 'js,html,json',
                     watch: [
-                        'red','nodes'
+                        'packages/node_modules'
                     ]
                 }
             }
@@ -491,6 +491,15 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.registerTask('verifyPackageDependencies', function() {
+        var verifyDependencies = require("./scripts/verify-package-dependencies.js");
+        var failures = verifyDependencies();
+        if (failures.length > 0) {
+            failures.forEach(f => grunt.log.error(f));
+            grunt.fail.fatal("Failed to verify package dependencies");
+        }
+    });
+
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -499,7 +508,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
-        ['build','jshint:editor','mocha_istanbul:all']);
+        ['build','verifyPackageDependencies','jshint:editor','mocha_istanbul:all']);
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
@@ -527,7 +536,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','clean:release','copy:release','chmod:release','compress:release']);
+        ['build','verifyPackageDependencies','clean:release','copy:release','chmod:release','compress:release']);
 
     grunt.registerTask('coverage',
         'Run Istanbul code test coverage task',
