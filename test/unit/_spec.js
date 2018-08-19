@@ -29,9 +29,9 @@ var should = require("should");
 var path = require('path');
 
 // Directories to check with .js files and _spec.js files respectively
-var rootdir = path.resolve(__dirname, "..");
-var jsdir = path.resolve(__dirname, "../red");
-var testdir = path.resolve(__dirname, "red");
+var rootdir = path.resolve(__dirname, "../..");
+var jsdir = path.resolve(__dirname, "../../packages/node_modules/");
+var testdir = path.resolve(__dirname);
 
 var walkDirectory = function(dir) {
     var p = fs.readdir(dir);
@@ -40,28 +40,31 @@ var walkDirectory = function(dir) {
         var promises = [];
         list.forEach(function(file) {
             var filePath = path.join(dir,file);
-            promises.push(fs.stat(filePath).then(function(stat){
-                if (stat.isDirectory()) {
-                    return walkDirectory(filePath).then(function(results) {
-                        if (results) {
-                            errors = errors.concat(results);
-                        }
-                    });
-                } else if (/\.js$/.test(filePath)) {
-                    var testFile = filePath.replace(jsdir, testdir).replace(".js", "_spec.js");
-                    return fs.exists(testFile).then(function(exists) {
-                        if (!exists) {
-                            errors.push(testFile.substring(rootdir.length+1));
-                        } else {
-                            return fs.stat(testFile).then(function(stat) {
-                                if (stat.size === 0) {
-                                    errors.push("[empty] "+testFile.substring(rootdir.length+1));
-                                }
-                            })
-                        }
-                    });
-                }
-            }));
+
+            if (!/@node-red\/(editor-client|nodes)/.test(filePath)) {
+                promises.push(fs.stat(filePath).then(function(stat){
+                    if (stat.isDirectory()) {
+                        return walkDirectory(filePath).then(function(results) {
+                            if (results) {
+                                errors = errors.concat(results);
+                            }
+                        });
+                    } else if (/\.js$/.test(filePath)) {
+                        var testFile = filePath.replace(jsdir, testdir).replace(".js", "_spec.js");
+                        return fs.exists(testFile).then(function(exists) {
+                            if (!exists) {
+                                errors.push(testFile.substring(rootdir.length+1));
+                            } else {
+                                return fs.stat(testFile).then(function(stat) {
+                                    if (stat.size === 0) {
+                                        errors.push("[empty] "+testFile.substring(rootdir.length+1));
+                                    }
+                                })
+                            }
+                        });
+                    }
+                }));
+            }
         });
         return Promise.all(promises).then(function() {
             return errors;
