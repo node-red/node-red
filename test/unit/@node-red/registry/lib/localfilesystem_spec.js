@@ -64,7 +64,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             checkNodes(nm.nodes,['TestNode1','MultipleNodes1','NestedNode','TestNode2','TestNode3','TestNode4'],['TestNodeModule']);
             i18n.registerMessageCatalog.called.should.be.true();
             i18n.registerMessageCatalog.lastCall.args[0].should.eql('node-red');
-            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(resourcesDir,"core","locales")));
+            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(resourcesDir,"locales")));
             i18n.registerMessageCatalog.lastCall.args[2].should.eql('messages.json');
             done();
         });
@@ -161,7 +161,7 @@ describe("red/nodes/registry/localfilesystem",function() {
 
             i18n.registerMessageCatalog.called.should.be.true();
             i18n.registerMessageCatalog.lastCall.args[0].should.eql('node-red');
-            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(moduleDir,"core","locales")));
+            i18n.registerMessageCatalog.lastCall.args[1].should.eql(path.resolve(path.join(moduleDir,"locales")));
             i18n.registerMessageCatalog.lastCall.args[2].should.eql('messages.json');
 
 
