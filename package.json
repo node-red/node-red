@@ -8,30 +8,16 @@
         "type": "git",
         "url": "https://github.com/node-red/node-red.git"
     },
-    "main": "red/red.js",
+    "private": "true",
     "scripts": {
-        "start": "node red.js",
+        "start": "node packages/node_modules/node-red/red.js",
         "test": "grunt",
         "build": "grunt build",
         "docs": "grunt docs"
     },
-    "bin": {
-        "node-red": "./red.js",
-        "node-red-pi": "bin/node-red-pi"
-    },
     "contributors": [
-        {
-            "name": "Nick O'Leary"
-        },
-        {
-            "name": "Dave Conway-Jones"
-        }
-    ],
-    "keywords": [
-        "editor",
-        "messaging",
-        "iot",
-        "flow"
+        { "name": "Nick O'Leary" },
+        { "name": "Dave Conway-Jones"}
     ],
     "dependencies": {
         "ajv": "6.5.2",
