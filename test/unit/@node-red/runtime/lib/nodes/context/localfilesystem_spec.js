@@ -673,7 +673,7 @@ describe('localfilesystem',function() {
 
         it('should enumerate context keys in the cache',function() {
             var globalData = {foo:"bar"};
-            fs.outputFile(path.join(resourcesDir,defaultContextBase,"global","global.json"), JSON.stringify(globalData,null,4), "utf8").then(function(){
+            return fs.outputFile(path.join(resourcesDir,defaultContextBase,"global","global.json"), JSON.stringify(globalData,null,4), "utf8").then(function(){
                 context = LocalFileSystem({dir: resourcesDir, cache: true, flushInterval: 2});
                 return context.open()
             }).then(function(){
