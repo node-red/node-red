@@ -415,7 +415,7 @@ module.exports = function(grunt) {
         },
         jsdoc : {
             runtimeAPI: {
-                src: 'red/runtime-api/*.js',
+                src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
                 options: {
                     destination: 'docs',
                     configure: './jsdoc.json'
@@ -427,7 +427,7 @@ module.exports = function(grunt) {
                 options: {
                     separators: true
                 },
-                src: 'red/runtime-api/*.js',
+                src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
                 dest: 'docs/runtime-api.md'
             }
         }
