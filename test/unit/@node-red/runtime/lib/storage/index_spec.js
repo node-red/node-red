@@ -16,7 +16,10 @@
 var when = require("when");
 var should = require("should");
 var paff = require('path');
-var storage = require("../../../../red/runtime/storage/index");
+
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var storage = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/index");
 
 describe("red/storage/index", function() {
 

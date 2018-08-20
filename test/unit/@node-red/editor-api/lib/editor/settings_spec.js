@@ -21,8 +21,11 @@ var bodyParser = require("body-parser");
 var sinon = require('sinon');
 
 var app;
-var info = require("../../../../red/api/editor/settings");
-var theme = require("../../../../red/api/editor/theme");
+
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var info = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/settings");
+var theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
 
 describe("api/editor/settings", function() {
     before(function() {

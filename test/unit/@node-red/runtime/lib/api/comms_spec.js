@@ -17,7 +17,8 @@
 var should = require("should");
 var sinon = require("sinon");
 
-var comms = require("../../../red/runtime-api/comms");
+var NR_TEST_UTILS = require("nr-test-utils");
+var comms = NR_TEST_UTILS.require("@node-red/runtime/lib/api/comms");
 
 describe("runtime-api/comms", function() {
     describe("listens for events", function() {

@@ -20,7 +20,9 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 
-var ui = require("../../../../red/api/editor/ui");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var ui = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/ui");
 
 
 describe("api/editor/ui", function() {
@@ -31,7 +33,7 @@ describe("api/editor/ui", function() {
             nodes: {
                 getIcon: function(opts) {
                     return new Promise(function(resolve,reject) {
-                        fs.readFile(path.resolve(__dirname+'/../../../../public/icons/arrow-in.png'), function(err,data) {
+                        fs.readFile(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.png"), function(err,data) {
                             resolve(data);
                         })
                     });
@@ -92,7 +94,7 @@ describe("api/editor/ui", function() {
             }
         }
         it('returns the requested icon', function(done) {
-            var defaultIcon = fs.readFileSync(path.resolve(__dirname+'/../../../../public/icons/arrow-in.png'));
+            var defaultIcon = fs.readFileSync(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.png"));
             request(app)
                 .get("/icons/module/icon.png")
                 .expect("Content-Type", /image\/png/)

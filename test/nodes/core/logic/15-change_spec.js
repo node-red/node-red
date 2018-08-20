@@ -17,8 +17,8 @@
 var should = require("should");
 var sinon = require("sinon");
 
-var changeNode = require("../../../../nodes/core/logic/15-change.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var changeNode = require("nr-test-utils").require("@node-red/nodes/core/logic/15-change.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('change Node', function() {
@@ -569,19 +569,14 @@ describe('change Node', function() {
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
-                sinon.spy(changeNode1,"error");
                 helperNode1.on("input", function(msg) {
                     done("Invalid jsonata expression passed message through");
                 });
+                changeNode1.on("call:error", function(err) {
+                    // Expect error to be called
+                    done();
+                });
                 changeNode1.receive({payload:"Hello World!"});
-                setTimeout(function() {
-                    try {
-                        changeNode1.error.called.should.be.true();
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                },50);
             });
         });
 

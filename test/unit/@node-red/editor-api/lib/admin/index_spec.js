@@ -18,12 +18,14 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
-var adminApi = require("../../../../red/api/admin");
-var auth = require("../../../../red/api/auth");
 
-var nodes = require("../../../../red/api/admin/nodes");
-var flows = require("../../../../red/api/admin/flows");
-var flow = require("../../../../red/api/admin/flow");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var adminApi = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin");
+var auth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
+var nodes = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/nodes");
+var flows = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/flows");
+var flow = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/flow");
 
 /**
 * Ensure all API routes are correctly mounted, with the expected permissions checks

@@ -18,9 +18,10 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 var clone = require("clone");
-var flowUtil = require("../../../../../red/runtime/nodes/flows/util");
-var typeRegistry = require("../../../../../red/runtime-registry");
-var redUtil = require("../../../../../red/runtime/util");
+var NR_TEST_UTILS = require("nr-test-utils");
+var flowUtil = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/util");
+var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
+var redUtil = NR_TEST_UTILS.require("@node-red/util").util;
 
 describe('flows/util', function() {
     var getType;

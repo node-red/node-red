@@ -19,7 +19,8 @@ var sinon = require("sinon");
 var child_process = require('child_process');
 var EventEmitter = require("events");
 
-var keygen = require("../../../../../../../red/runtime/storage/localfilesystem/projects/ssh/keygen")
+var NR_TEST_UTILS = require("nr-test-utils");
+var keygen = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/ssh/keygen")
 
 describe("localfilesystem/projects/ssh/keygen", function() {
 

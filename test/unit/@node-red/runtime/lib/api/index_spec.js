@@ -17,18 +17,19 @@
 var should = require("should");
 var sinon = require("sinon");
 
-var index = require("../../../red/runtime-api/index");
+var NR_TEST_UTILS = require("nr-test-utils");
+var index = NR_TEST_UTILS.require("@node-red/runtime/lib/api/index");
 
 
 describe("runtime-api/index", function() {
     before(function() {
         ["comms","flows","nodes","settings","library","projects"].forEach(n => {
-            sinon.stub(require(`../../../red/runtime-api/${n}`),"init",()=>{});
+            sinon.stub(NR_TEST_UTILS.require(`@node-red/runtime/lib/api/${n}`),"init",()=>{});
         })
     });
     after(function() {
         ["comms","flows","nodes","settings","library","projects"].forEach(n => {
-            require(`../../../red/runtime-api/${n}`).init.restore()
+            NR_TEST_UTILS.require(`@node-red/runtime/lib/api/${n}`).init.restore()
         })
     })
     it('isStarted', function(done) {

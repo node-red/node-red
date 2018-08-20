@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+var NR_TEST_UTILS = require("nr-test-utils");
+
 describe("storage/localfilesystem/projects/index", function() {
     it.skip("NEEDS TESTS WRITING",function() {});
 })

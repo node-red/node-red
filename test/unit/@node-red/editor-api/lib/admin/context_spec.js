@@ -21,9 +21,11 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var context = require("../../../../red/api/admin/context");
-var Context = require("../../../../red/runtime/nodes/context");
-var Util = require("../../../../red/runtime/util");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var context = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/context");
+// var Context = require("../../../../red/runtime/nodes/context");
+// var Util = require("../../../../red/runtime/util");
 
 describe("api/admin/context", function() {
     it.skip("NEEDS TESTS WRITING",function() {});

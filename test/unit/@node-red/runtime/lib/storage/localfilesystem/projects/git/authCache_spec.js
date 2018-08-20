@@ -17,7 +17,8 @@
 var should = require("should");
 var sinon = require("sinon");
 
-var authCache = require("../../../../../../../red/runtime/storage/localfilesystem/projects/git/authCache")
+var NR_TEST_UTILS = require("nr-test-utils");
+var authCache = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/git/authCache")
 
 describe("localfilesystem/projects/git/authCache", function() {
 

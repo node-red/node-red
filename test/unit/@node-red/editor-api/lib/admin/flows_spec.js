@@ -20,7 +20,9 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var sinon = require('sinon');
 
-var flows = require("../../../../red/api/admin/flows");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var flows = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/flows");
 
 describe("api/admin/flows", function() {
 

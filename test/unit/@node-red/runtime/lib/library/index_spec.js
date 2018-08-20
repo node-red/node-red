@@ -18,7 +18,8 @@ var should = require("should");
 var sinon = require("sinon");
 var fs = require("fs");
 
-var library = require("../../../../red/runtime/library/index")
+var NR_TEST_UTILS = require("nr-test-utils");
+var library = NR_TEST_UTILS.require("@node-red/runtime/lib/library/index")
 
 var mockLog = {
     log: sinon.stub(),

@@ -20,10 +20,12 @@ var sinon = require("sinon");
 
 var passport = require("passport");
 
-var auth = require("../../../../red/api/auth");
-var Users = require("../../../../red/api/auth/users");
-var Tokens = require("../../../../red/api/auth/tokens");
-var Permissions = require("../../../../red/api/auth/permissions");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var auth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
+var Users = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/users");
+var Tokens = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/tokens");
+var Permissions = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/permissions");
 
 describe("api/auth/index",function() {
 

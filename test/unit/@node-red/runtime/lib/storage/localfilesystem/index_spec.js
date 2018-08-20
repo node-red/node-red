@@ -18,9 +18,10 @@ var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
 var sinon = require('sinon');
+var NR_TEST_UTILS = require("nr-test-utils");
 
-var localfilesystem = require("../../../../../red/runtime/storage/localfilesystem");
-var log = require("../../../../../red/util/log");
+var localfilesystem = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem");
+var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 describe('storage/localfilesystem', function() {
     var mockRuntime = {

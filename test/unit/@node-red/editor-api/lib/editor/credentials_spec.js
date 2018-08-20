@@ -20,7 +20,9 @@ var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
 
-var credentials = require("../../../../red/api/editor/credentials");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var credentials = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/credentials");
 
 describe('api/editor/credentials', function() {
     var app;

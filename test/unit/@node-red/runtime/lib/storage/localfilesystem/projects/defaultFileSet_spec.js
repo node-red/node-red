@@ -16,7 +16,8 @@
 
 
 var should = require("should");
-var defaultFileSet = require("../../../../../../red/runtime/storage/localfilesystem/projects/defaultFileSet");
+var NR_TEST_UTILS = require("nr-test-utils");
+var defaultFileSet = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/defaultFileSet");
 
 describe('storage/localfilesystem/projects/defaultFileSet', function() {
     var runtime = {

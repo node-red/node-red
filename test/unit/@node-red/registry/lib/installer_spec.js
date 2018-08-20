@@ -22,9 +22,13 @@ var fs = require('fs');
 var EventEmitter = require('events');
 
 var child_process = require('child_process');
-var installer = require("../../../red/runtime-registry/installer");
-var registry = require("../../../red/runtime-registry/index");
-var typeRegistry = require("../../../red/runtime-registry/registry");
+
+
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
+var registry = NR_TEST_UTILS.require("@node-red/registry/lib/index");
+var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
 
 describe('nodes/registry/installer', function() {
 

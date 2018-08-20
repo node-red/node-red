@@ -14,9 +14,13 @@
  * limitations under the License.
  **/
 
-describe("util/i18n", function() {
-    it('can be required without errors', function() {
-        require("../../../red/util/i18n");
-    });
+
+
+ var NR_TEST_UTILS = require("nr-test-utils");
+
+ var i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
+
+
+describe("@node-red/util/i18n", function() {
     it.skip('more tests needed', function(){})
 });

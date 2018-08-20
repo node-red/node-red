@@ -18,7 +18,9 @@ var should = require("should");
 var when = require("when");
 var sinon = require("sinon");
 
-var Tokens = require("../../../../red/api/auth/tokens");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var Tokens = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/tokens");
 
 
 describe("api/auth/tokens", function() {

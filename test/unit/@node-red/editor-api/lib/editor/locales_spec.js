@@ -19,8 +19,10 @@ var request = require('supertest');
 var express = require('express');
 var sinon = require('sinon');
 
-var locales = require("../../../../red/api/editor/locales");
-var i18n = require("../../../../red/util").i18n;
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var locales = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/locales");
+var i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
 
 describe("api/editor/locales", function() {
     beforeEach(function() {

@@ -22,7 +22,9 @@ var sinon = require("sinon");
 var child_process = require("child_process");
 var fs = require("fs-extra");
 
-var authServer = require("../../../../../../../red/runtime/storage/localfilesystem/projects/git/authServer");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var authServer = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/git/authServer");
 
 
 var sendPrompt = function(localPath, prompt) {

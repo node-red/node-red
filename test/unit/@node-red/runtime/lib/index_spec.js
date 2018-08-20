@@ -17,13 +17,15 @@ var should = require("should");
 var sinon = require("sinon");
 var path = require("path");
 
-var api = require("../../../red/api");
-var runtime = require("../../../red/runtime");
+var NR_TEST_UTILS = require("nr-test-utils");
 
-var redNodes = require("../../../red/runtime/nodes");
-var storage = require("../../../red/runtime/storage");
-var settings = require("../../../red/runtime/settings");
-var log = require("../../../red/util/log");
+var api = NR_TEST_UTILS.require("@node-red/runtime/lib/api");
+var runtime = NR_TEST_UTILS.require("@node-red/runtime");
+
+var redNodes = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes");
+var storage = NR_TEST_UTILS.require("@node-red/runtime/lib/storage");
+var settings = NR_TEST_UTILS.require("@node-red/runtime/lib/settings");
+var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 describe("runtime", function() {
     afterEach(function() {
@@ -33,7 +35,7 @@ describe("runtime", function() {
     })
 
     before(function() {
-        process.env.NODE_RED_HOME = path.resolve(path.join(__dirname,"..","..",".."))
+        process.env.NODE_RED_HOME = NR_TEST_UTILS.resolve("node-red");
     });
     after(function() {
         delete process.env.NODE_RED_HOME;
@@ -75,7 +77,10 @@ describe("runtime", function() {
 
         it("returns version", function() {
             runtime.init({testSettings: true, httpAdminRoot:"/"},mockUtil());
-            /^\d+\.\d+\.\d+(-git)?$/.test(runtime.version()).should.be.true();
+            return runtime.version().then(version => {
+                /^\d+\.\d+\.\d+(-git)?$/.test(version).should.be.true();
+            });
+
 
         })
     });

@@ -18,7 +18,8 @@ var should = require("should");
 var sinon = require('sinon');
 var path = require("path");
 var fs = require('fs-extra');
-var Context = require("../../../../../red/runtime/nodes/context/index");
+var NR_TEST_UTILS = require("nr-test-utils");
+var Context = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/context/index");
 
 describe('context', function() {
     describe('local memory',function() {

@@ -16,9 +16,13 @@
 var should = require("should");
 var sinon = require("sinon");
 var util = require("util");
-var log = require("../../../red/util/log");
 
-describe("util/log", function() {
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var log = NR_TEST_UTILS.require("@node-red/util").log;
+
+
+describe("@node-red/util/log", function() {
     beforeEach(function () {
         var spy = sinon.stub(util, 'log', function(arg){});
         var settings = {logging: { console: { level: 'metric', metrics: true } } };

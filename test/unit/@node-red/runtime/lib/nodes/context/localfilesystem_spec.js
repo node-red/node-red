@@ -17,7 +17,8 @@
 var should = require('should');
 var fs = require('fs-extra');
 var path = require("path");
-var LocalFileSystem = require('../../../../../red/runtime/nodes/context/localfilesystem');
+var NR_TEST_UTILS = require("nr-test-utils");
+var LocalFileSystem =  NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/context/localfilesystem");
 
 var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
 

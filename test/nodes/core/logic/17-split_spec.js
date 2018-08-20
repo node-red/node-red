@@ -15,11 +15,11 @@
  **/
 
 var should = require("should");
-var splitNode = require("../../../../nodes/core/logic/17-split.js");
-var joinNode = require("../../../../nodes/core/logic/17-split.js");
+var splitNode = require("nr-test-utils").require("@node-red/nodes/core/logic/17-split.js");
+var joinNode = require("nr-test-utils").require("@node-red/nodes/core/logic/17-split.js");
 var helper = require("node-red-node-test-helper");
-var RED = require("../../../../red/red.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var RED = require("nr-test-utils").require("node-red/lib/red.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 
 var TimeoutForErrorCase = 20;
 

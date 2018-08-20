@@ -17,7 +17,8 @@ var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
 
-var sshkeys = require("../../../../../../../red/runtime/storage/localfilesystem/projects/ssh");
+var NR_TEST_UTILS = require("nr-test-utils");
+var sshkeys = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/projects/ssh");
 
 describe("storage/localfilesystem/projects/ssh", function() {
     var userDir = path.join(__dirname,".testSSHKeyUserHome");

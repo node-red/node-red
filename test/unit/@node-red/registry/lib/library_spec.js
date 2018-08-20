@@ -19,7 +19,9 @@ var should = require("should");
 var fs = require("fs");
 var path = require("path");
 
-var library = require("../../../red/runtime-registry/library");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var library = NR_TEST_UTILS.require("@node-red/registry/lib/library");
 
 describe("library api", function() {
     it('returns null list when no modules have been registered', function() {

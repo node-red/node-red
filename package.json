@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "0.19.1",
+    "version": "0.20.0",
     "description": "A visual tool for wiring the Internet of Things",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -116,9 +116,9 @@
         "wdio-mocha-framework": "^0.6.2",
         "wdio-spec-reporter": "^0.1.5",
         "webdriverio": "^4.13.1",
-        "node-red-node-test-helper": "^0.1.7"
+        "node-red-node-test-helper": "node-red/node-red-node-test-helper"
     },
     "engines": {
-        "node": ">=4"
+        "node": ">=8"
     }
 }

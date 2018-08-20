@@ -17,7 +17,7 @@
 var dgram = require("dgram");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
-var udpNode = require("../../../../nodes/core/io/32-udp.js");
+var udpNode = require("nr-test-utils").require("@node-red/nodes/core/io/32-udp.js");
 
 
 describe('UDP in Node', function() {

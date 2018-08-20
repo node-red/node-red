@@ -21,11 +21,14 @@ var express = require("express");
 var when = require("when");
 var fs = require("fs");
 var path = require("path");
-var api = require("../../../red/api");
 
-var apiAuth = require("../../../red/api/auth");
-var apiEditor = require("../../../red/api/editor");
-var apiAdmin = require("../../../red/api/admin");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var api = NR_TEST_UTILS.require("@node-red/editor-api");
+
+var apiAuth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
+var apiEditor = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor");
+var apiAdmin = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin");
 
 
 describe("api/index", function() {

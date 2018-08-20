@@ -19,12 +19,12 @@ var sinon = require("sinon");
 var request = require('supertest');
 var express = require('express');
 
-var apiUtil = require("../../../red/api/util");
+var NR_TEST_UTILS = require("nr-test-utils");
 
-var log = require("../../../red/util").log; // TODO: separate module
-var i18n = require("../../../red/util").i18n; // TODO: separate module
+var apiUtil = NR_TEST_UTILS.require("@node-red/editor-api/lib/util");
 
-
+var log = NR_TEST_UTILS.require("@node-red/util").log;
+var i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
 
 describe("api/util", function() {
     describe("errorHandler", function() {

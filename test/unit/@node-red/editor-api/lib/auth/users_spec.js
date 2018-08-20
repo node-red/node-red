@@ -18,7 +18,9 @@ var should = require("should");
 var when = require('when');
 var sinon = require('sinon');
 
-var Users = require("../../../../red/api/auth/users");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var Users = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/users");
 
 describe("api/auth/users", function() {
     after(function() {

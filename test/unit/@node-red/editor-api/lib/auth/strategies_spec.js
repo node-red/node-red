@@ -18,10 +18,12 @@ var should = require("should");
 var when = require('when');
 var sinon = require('sinon');
 
-var strategies = require("../../../../red/api/auth/strategies");
-var Users = require("../../../../red/api/auth/users");
-var Tokens = require("../../../../red/api/auth/tokens");
-var Clients = require("../../../../red/api/auth/clients");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var strategies = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/strategies");
+var Users = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/users");
+var Tokens = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/tokens");
+var Clients = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/clients");
 
 describe("api/auth/strategies", function() {
     describe("Password Token Exchange", function() {

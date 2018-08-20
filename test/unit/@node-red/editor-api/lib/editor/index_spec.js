@@ -18,12 +18,15 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
-var editorApi = require("../../../../red/api/editor");
-var comms = require("../../../../red/api/editor/comms");
-var info = require("../../../../red/api/editor/settings");
-var auth = require("../../../../red/api/auth");
 
-var log = require("../../../../red/util/log");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var editorApi = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor");
+var comms = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/comms");
+var info = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/settings");
+var auth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
+
+var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 
 var when = require("when");
@@ -59,15 +62,15 @@ describe("api/editor/index", function() {
                 return function(req,res,next) { next(); }
             });
             mockList.forEach(function(m) {
-                sinon.stub(require("../../../../red/api/editor/"+m),"init",function(){});
+                sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m),"init",function(){});
             });
-            sinon.stub(require("../../../../red/api/editor/theme"),"app",function(){ return express()});
+            sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme"),"app",function(){ return express()});
         });
         after(function() {
             mockList.forEach(function(m) {
-                require("../../../../red/api/editor/"+m).init.restore();
+                NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m).init.restore();
             })
-            require("../../../../red/api/editor/theme").app.restore();
+            NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme").app.restore();
             auth.needsPermission.restore();
             log.error.restore();
         });
@@ -93,9 +96,12 @@ describe("api/editor/index", function() {
         });
         it('serves icons', function(done) {
             request(app)
-            .get("/icons/inject.png")
+            .get("/red/images/icons/node-changed.png")
+            .expect(200)
             .expect("Content-Type", /image\/png/)
-            .expect(200,done)
+            .end(function(err,res) {
+                done(err);
+            });
         });
         it('handles page not there', function(done) {
             request(app)

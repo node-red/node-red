@@ -18,7 +18,9 @@ var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
 
-var localfilesystemSettings = require("../../../../../red/runtime/storage/localfilesystem/settings");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var localfilesystemSettings = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/settings");
 
 describe('storage/localfilesystem/settings', function() {
     var userDir = path.join(__dirname,".testUserHome");

@@ -14,23 +14,8 @@
  * limitations under the License.
  **/
 
-var should = require("should");
-var unknown = require("nr-test-utils").require("@node-red/nodes/core/core/98-unknown.js");
-var helper = require("node-red-node-test-helper");
+var NR_TEST_UTILS = require("nr-test-utils");
 
-describe('unknown Node', function() {
-
-    afterEach(function() {
-        helper.unload();
-    });
-
-    it('should be loaded', function(done) {
-        var flow = [{id:"n1", type:"unknown", name: "unknown" }];
-        helper.load(unknown, flow, function() {
-            var n1 = helper.getNode("n1");
-            n1.should.have.property('name', 'unknown');
-            done();
-        });
-    });
-
+describe("node-red/red", function() {
+    it.skip("NEEDS TESTS WRITING",function() {});
 });

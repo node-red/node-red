@@ -14,6 +14,6 @@
  * limitations under the License.
  **/
 
-describe("util", function() {
+describe("@node-red/util", function() {
     it.skip('more tests needed', function(){})
 });

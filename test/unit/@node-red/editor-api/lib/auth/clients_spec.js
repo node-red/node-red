@@ -15,7 +15,8 @@
  **/
 
 var should = require("should");
-var Clients = require("../../../../red/api/auth/clients");
+var NR_TEST_UTILS = require("nr-test-utils");
+var Clients = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/clients");
 
 describe("api/auth/clients", function() {
     it('finds the known editor client',function(done) {

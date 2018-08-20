@@ -19,13 +19,15 @@ var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
-var localfilesystem = require("../../../red/runtime-registry/localfilesystem");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var localfilesystem = NR_TEST_UTILS.require("@node-red/registry/lib/localfilesystem");
 
 var resourcesDir = path.resolve(path.join(__dirname,"resources","local"));
 var userDir = path.resolve(path.join(__dirname,"resources","userDir"));
 var moduleDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule"));
 
-var i18n = require("../../../red/util").i18n; // TODO: separate module
+var i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
 
 describe("red/nodes/registry/localfilesystem",function() {
     beforeEach(function() {
@@ -108,7 +110,8 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
-            var relativeUserDir = path.join("test","red","runtime-registry","resources","userDir");
+            var relativeUserDir = path.join("test","unit","@node-red","registry","lib","resources","userDir");
+            console.log(relativeUserDir)
             localfilesystem.init({settings:{nodesDir:relativeUserDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
@@ -186,11 +189,11 @@ describe("red/nodes/registry/localfilesystem",function() {
             var list = localfilesystem.getNodeFiles(true);
             list.should.have.property("node-red");
             list["node-red"].should.have.property("icons");
-            list["node-red"].icons.should.have.length(2);
-            list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/local/NestedDirectoryNode/NestedNode/icons"))
-            list["node-red"].icons[1].should.have.property("icons");
-            list["node-red"].icons[1].icons.should.have.length(1);
-            list["node-red"].icons[1].icons[0].should.eql("arrow-in.png");
+            list["node-red"].icons.should.have.length(1);
+            list["node-red"].icons[0].should.have.property("path",path.join(__dirname,"resources/local/NestedDirectoryNode/NestedNode/icons"))
+            list["node-red"].icons[0].should.have.property("icons");
+            list["node-red"].icons[0].icons.should.have.length(1);
+            list["node-red"].icons[0].icons[0].should.eql("arrow-in.png");
             done();
         });
         it("scans icons dir in library",function(done) {
@@ -216,11 +219,11 @@ describe("red/nodes/registry/localfilesystem",function() {
             var list = localfilesystem.getNodeFiles(true);
             list.should.have.property("node-red");
             list["node-red"].should.have.property("icons");
-            list["node-red"].icons.should.have.length(2);
-            list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/userDir/lib/icons"))
-            list["node-red"].icons[1].should.have.property("icons");
-            list["node-red"].icons[1].icons.should.have.length(1);
-            list["node-red"].icons[1].icons[0].should.eql("test_icon.png");
+            list["node-red"].icons.should.have.length(1);
+            list["node-red"].icons[0].should.have.property("path",path.join(__dirname,"resources/userDir/lib/icons"))
+            list["node-red"].icons[0].should.have.property("icons");
+            list["node-red"].icons[0].icons.should.have.length(1);
+            list["node-red"].icons[0].icons[0].should.eql("test_icon.png");
             done();
         });
     });

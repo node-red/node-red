@@ -18,13 +18,15 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 var clone = require("clone");
-var flows = require("../../../../../red/runtime/nodes/flows");
-var RedNode = require("../../../../../red/runtime/nodes/Node");
-var RED = require("../../../../../red/runtime/nodes");
-var events = require("../../../../../red/runtime/events");
-var credentials = require("../../../../../red/runtime/nodes/credentials");
-var typeRegistry = require("../../../../../red/runtime-registry");
-var Flow = require("../../../../../red/runtime/nodes/flows/Flow");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var RedNode = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
+var RED = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes");
+var events = NR_TEST_UTILS.require("@node-red/runtime/lib/events");
+var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
+var typeRegistry = NR_TEST_UTILS.require("@node-red/registry")
+var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/Flow");
 
 describe('flows/index', function() {
 

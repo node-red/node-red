@@ -22,12 +22,12 @@ var express = require("express");
 var bodyParser = require('body-parser');
 var stoppable = require('stoppable');
 var helper = require("node-red-node-test-helper");
-var httpRequestNode = require("../../../../nodes/core/io/21-httprequest.js");
-var tlsNode = require("../../../../nodes/core/io/05-tls.js");
+var httpRequestNode = require("nr-test-utils").require("@node-red/nodes/core/io/21-httprequest.js");
+var tlsNode = require("nr-test-utils").require("@node-red/nodes/core/io/05-tls.js");
 var hashSum = require("hash-sum");
 var httpProxy = require('http-proxy');
 var cookieParser = require('cookie-parser');
-var RED = require("../../../../red/red.js");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 var fs = require('fs-extra');
 var auth = require('basic-auth');
 

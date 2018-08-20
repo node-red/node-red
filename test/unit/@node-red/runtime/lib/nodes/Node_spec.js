@@ -16,9 +16,10 @@
 
 var should = require("should");
 var sinon = require('sinon');
-var RedNode = require("../../../../red/runtime/nodes/Node");
-var Log = require("../../../../red/util/log");
-var flows = require("../../../../red/runtime/nodes/flows");
+var NR_TEST_UTILS = require("nr-test-utils");
+var RedNode = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
+var Log = NR_TEST_UTILS.require("@node-red/util").log;
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
 
 describe('Node', function() {
     describe('#constructor',function() {

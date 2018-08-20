@@ -17,7 +17,8 @@
 var should = require("should");
 var sinon = require("sinon");
 
-var projects = require("../../../red/runtime-api/projects")
+var NR_TEST_UTILS = require("nr-test-utils");
+var projects = NR_TEST_UTILS.require("@node-red/runtime/lib/api/projects")
 
 var mockLog = () => ({
     log: sinon.stub(),

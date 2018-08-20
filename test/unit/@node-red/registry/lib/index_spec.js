@@ -20,11 +20,13 @@ var path = require("path");
 var when = require("when");
 var fs = require("fs");
 
-var registry = require("../../../red/runtime-registry");
+var NR_TEST_UTILS = require("nr-test-utils");
 
-var installer = require("../../../red/runtime-registry/installer");
-var loader = require("../../../red/runtime-registry/loader");
-var typeRegistry = require("../../../red/runtime-registry/registry");
+var registry = NR_TEST_UTILS.require("@node-red/registry");
+
+var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
+var loader = NR_TEST_UTILS.require("@node-red/registry/lib/loader");
+var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
 
 describe('red/registry/index', function() {
     var stubs = [];

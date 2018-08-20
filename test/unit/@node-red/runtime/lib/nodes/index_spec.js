@@ -21,15 +21,16 @@ var when = require("when");
 var sinon = require('sinon');
 var inherits = require("util").inherits;
 
-var index = require("../../../../red/runtime/nodes/index");
-var flows = require("../../../../red/runtime/nodes/flows");
-var registry = require("../../../../red/runtime-registry");
-var Node = require("../../../../red/runtime/nodes/Node");
+var NR_TEST_UTILS = require("nr-test-utils");
+var index = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/index");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var registry = NR_TEST_UTILS.require("@node-red/registry")
+var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 
 describe("red/nodes/index", function() {
     before(function() {
         sinon.stub(index,"startFlows");
-        process.env.NODE_RED_HOME = path.resolve(path.join(__dirname,"..","..","..",".."))
+        process.env.NODE_RED_HOME = NR_TEST_UTILS.resolve("node-red");
     });
     after(function() {
         index.startFlows.restore();
@@ -168,11 +169,11 @@ describe("red/nodes/index", function() {
             var http = require('http');
             var express = require('express');
             var app = express();
-            var runtime = require("../../../../red/runtime");
-            var credentials = require("../../../../red/runtime/nodes/credentials");
-            var localfilesystem = require("../../../../red/runtime/storage/localfilesystem");
-            var log = require("../../../../red/util/log");
-            var RED = require("../../../../red/red.js");
+            var runtime = NR_TEST_UTILS.require("@node-red/runtime");
+            var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
+            var localfilesystem = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem");
+            var log = NR_TEST_UTILS.require("@node-red/util").log;
+            var RED = NR_TEST_UTILS.require("node-red/lib/red.js");
 
             var userDir = path.join(__dirname,".testUserHome");
             before(function(done) {

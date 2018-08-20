@@ -15,7 +15,8 @@
  **/
 
 var should = require("should");
-var util = require("../../../../../red/runtime/storage/localfilesystem/util");
+var NR_TEST_UTILS = require("nr-test-utils");
+var util = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/util");
 
 describe('storage/localfilesystem/util', function() {
     describe('parseJSON', function() {

@@ -15,9 +15,9 @@
  **/
 
 var should = require("should");
-var batchNode = require("../../../../nodes/core/logic/19-batch.js");
+var batchNode = require("nr-test-utils").require("@node-red/nodes/core/logic/19-batch.js");
 var helper = require("node-red-node-test-helper");
-var RED = require("../../../../red/red.js");
+var RED = require("nr-test-utils").require("node-red/lib/red.js");
 
 describe('BATCH node', function() {
     this.timeout(8000);

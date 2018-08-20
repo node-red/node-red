@@ -15,7 +15,10 @@
  **/
 
 var should = require("should");
-var permissions = require("../../../../red/api/auth/permissions");
+
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var permissions = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/permissions");
 
 describe("api/auth/permissions", function() {
     describe("hasPermission", function() {

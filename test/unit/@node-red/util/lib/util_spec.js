@@ -14,9 +14,12 @@
  * limitations under the License.
  **/
 var should = require("should");
-var util = require("../../../red/runtime/util");
 
-describe("red/util", function() {
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var util = NR_TEST_UTILS.require("@node-red/util").util;
+
+describe("@node-red/util/util", function() {
     describe('generateId', function() {
         it('generates an id', function() {
             var id = util.generateId();

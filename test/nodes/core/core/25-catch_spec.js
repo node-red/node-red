@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var catchNode = require("../../../../nodes/core/core/25-catch.js");
+var catchNode = require("nr-test-utils").require("@node-red/nodes/core/core/25-catch.js");
 var helper = require("node-red-node-test-helper");
 
 describe('catch Node', function() {

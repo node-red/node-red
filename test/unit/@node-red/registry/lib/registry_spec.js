@@ -19,7 +19,9 @@ var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
-var typeRegistry = require("../../../red/runtime-registry/registry");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
 var EventEmitter = require('events');
 
 var events = new EventEmitter();
@@ -518,10 +520,9 @@ describe("red/nodes/registry/registry",function() {
     });
 
     describe('#getNodeIconPath', function() {
-        it('returns the default icon when getting an unknown icon', function() {
-            var defaultIcon = path.resolve(__dirname+'/../../../public/icons/arrow-in.png');
+        it('returns the null when getting an unknown icon', function() {
             var iconPath = typeRegistry.getNodeIconPath('random-module','youwonthaveme.png');
-            iconPath.should.eql(defaultIcon);
+            should.not.exist(iconPath);
         });
 
         it('returns a registered icon' , function() {
@@ -543,10 +544,10 @@ describe("red/nodes/registry/registry",function() {
             iconPath.should.eql(path.resolve(testIcon+"/test_icon.png"));
         });
 
-        it('returns the debug icon when getting an unknown module', function() {
+        it('returns null when getting an unknown module', function() {
             var debugIcon = path.resolve(__dirname+'/../../../public/icons/debug.png');
             var iconPath = typeRegistry.getNodeIconPath('unknown-module', 'debug.png');
-            iconPath.should.eql(debugIcon);
+            should.not.exist(iconPath);
         });
     });
 

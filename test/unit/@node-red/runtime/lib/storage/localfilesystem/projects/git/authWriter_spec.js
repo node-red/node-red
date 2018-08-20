@@ -22,7 +22,9 @@ var sinon = require("sinon");
 var child_process = require("child_process");
 var fs = require("fs-extra");
 
-var authWriter = "../../../../../../../red/runtime/storage/localfilesystem/projects/git/authWriter";
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var authWriter = NR_TEST_UTILS.resolve("@node-red/runtime/lib/storage/localfilesystem/projects/git/authWriter");
 
 function getListenPath() {
     var seed = (0x100000+Math.random()*0x999999).toString(16);

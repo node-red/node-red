@@ -15,7 +15,8 @@
  **/
 var should = require("should");
 
-var settings = require("../../../red/runtime/settings");
+var NR_TEST_UTILS = require("nr-test-utils");
+var settings = NR_TEST_UTILS.require("@node-red/runtime/lib/settings");
 
 
 describe("red/settings", function() {

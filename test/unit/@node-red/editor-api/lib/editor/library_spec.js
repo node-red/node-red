@@ -20,9 +20,11 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 
-var app;
+var NR_TEST_UTILS = require("nr-test-utils");
 
-var library = require("../../../../red/api/editor/library");
+var library = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/library");
+
+var app;
 
 describe("api/editor/library", function() {
 

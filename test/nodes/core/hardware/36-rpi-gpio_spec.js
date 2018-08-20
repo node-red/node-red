@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var rpi = require("../../../../nodes/core/hardware/36-rpi-gpio.js");
+var rpi = require("nr-test-utils").require("@node-red/nodes/core/hardware/36-rpi-gpio.js");
 var helper = require("node-red-node-test-helper");
 var fs = require("fs");
 

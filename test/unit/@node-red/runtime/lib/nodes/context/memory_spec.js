@@ -15,7 +15,9 @@
  **/
 
 var should = require('should');
-var Memory = require('../../../../../red/runtime/nodes/context/memory');
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var Memory =  NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/context/memory");
 
 describe('memory',function() {
     var context;

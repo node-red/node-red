@@ -15,8 +15,8 @@
  **/
 
 var should = require("should");
-var injectNode = require("../../../../nodes/core/core/20-inject.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var injectNode = require("nr-test-utils").require("@node-red/nodes/core/core/20-inject.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('inject node', function() {

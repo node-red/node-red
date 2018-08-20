@@ -21,8 +21,10 @@ var bodyParser = require('body-parser');
 var sinon = require('sinon');
 var when = require('when');
 
-var nodes = require("../../../../red/api/admin/nodes");
-var apiUtil = require("../../../../red/api/util");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var nodes = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/nodes");
+var apiUtil = NR_TEST_UTILS.require("@node-red/editor-api/lib/util");
 
 describe("api/admin/nodes", function() {
 

@@ -18,7 +18,8 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
-var sshkeys = require("../../../../red/api/editor/sshkeys");
+var NR_TEST_UTILS = require("nr-test-utils");
+var sshkeys = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/sshkeys");
 var bodyParser = require("body-parser");
 
 

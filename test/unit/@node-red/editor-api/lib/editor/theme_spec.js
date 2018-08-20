@@ -22,7 +22,9 @@ var fs = require("fs");
 
 var app = express();
 
-var theme = require("../../../../red/api/editor/theme");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
 
 describe("api/editor/theme", function() {
     beforeEach(function() {

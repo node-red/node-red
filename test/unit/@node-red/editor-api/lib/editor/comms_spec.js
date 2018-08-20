@@ -24,9 +24,11 @@ var express = require('express');
 var app = express();
 var WebSocket = require('ws');
 
-var comms = require("../../../../red/api/editor/comms");
-var Users = require("../../../../red/api/auth/users");
-var Tokens = require("../../../../red/api/auth/tokens");
+var NR_TEST_UTILS = require("nr-test-utils");
+
+var comms = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/comms");
+var Users = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/users");
+var Tokens = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth/tokens");
 
 var address = '127.0.0.1';
 var listenPort = 0; // use ephemeral port

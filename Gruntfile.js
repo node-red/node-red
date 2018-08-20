@@ -42,7 +42,7 @@ module.exports = function(grunt) {
                 reporter: 'spec'
             },
             all: { src: ['test/**/*_spec.js'] },
-            core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
+            core: { src: ["test/_spec.js","test/unit/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
         webdriver: {
@@ -59,8 +59,8 @@ module.exports = function(grunt) {
                 reportFormats: ['lcov','html'],
                 print: 'both'
             },
-            all: { src: ["test/_spec.js","test/red/**/*_spec.js","test/nodes/**/*_spec.js"] },
-            core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
+            all: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js","test/nodes/**/*_spec.js"] },
+            core: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
         jshint: {

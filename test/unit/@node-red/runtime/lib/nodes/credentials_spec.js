@@ -19,9 +19,10 @@ var sinon = require("sinon");
 var when = require("when");
 var util = require("util");
 
-var index = require("../../../../red/runtime/nodes/index");
-var credentials = require("../../../../red/runtime/nodes/credentials");
-var log = require("../../../../red/util/log");
+var NR_TEST_UTILS = require("nr-test-utils");
+var index = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/index");
+var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
+var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 
 describe('red/runtime/nodes/credentials', function() {
