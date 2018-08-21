@@ -16,8 +16,12 @@
         "docs": "grunt docs"
     },
     "contributors": [
-        { "name": "Nick O'Leary" },
-        { "name": "Dave Conway-Jones"}
+        {
+            "name": "Nick O'Leary"
+        },
+        {
+            "name": "Dave Conway-Jones"
+        }
     ],
     "dependencies": {
         "ajv": "6.5.2",
