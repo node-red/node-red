@@ -24,29 +24,20 @@ function templateNode(id) {
 
 util.inherits(templateNode, nodePage);
 
-var syntaxType = {
-    "mustache": 1,
-    "plain": 2
-};
-
-templateNode.prototype.setSyntax = function(type) {
-    // Open a method type list.
-    browser.clickWithWait('#node-input-syntax');
-    // Select a method type.
-    var syntaxTypeXPath = '//*[@id="node-input-syntax"]/option[' + syntaxType[type] + ']';
-    browser.clickWithWait(syntaxTypeXPath);
+templateNode.prototype.setSyntax = function(syntax) {
+    browser.selectByValue('#node-input-syntax', syntax);
 }
 
-templateNode.prototype.setFormat = function(type) {
-    browser.selectByValue('#node-input-format', type);
+templateNode.prototype.setFormat = function(format) {
+    browser.selectByValue('#node-input-format', format);
 }
 
-templateNode.prototype.setTemplate = function(value) {
+templateNode.prototype.setTemplate = function(template) {
     browser.click('#node-input-template-editor');
     browser.keys(['Control', 'a', 'Control']); // call twice to release the keys.
     // Need to add a character one by one since some words such as 'Control' are treated as a special word.
-    for (var i=0; i<value.length; i++) {
-        browser.keys([value.charAt(i)]);
+    for (var i = 0; i < template.length; i++) {
+        browser.keys([template.charAt(i)]);
     }
     browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
     browser.keys(['Delete']);

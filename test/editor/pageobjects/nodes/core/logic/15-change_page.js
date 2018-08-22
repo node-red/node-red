@@ -24,13 +24,6 @@ function changeNode(id) {
 
 util.inherits(changeNode, nodePage);
 
-var tType = {
-    "set": 1,
-    "change": 2,
-    "delete": 3,
-    "move": 4,
-};
-
 var totType = {
     "msg": 1,
     "flow": 2,
@@ -42,6 +35,7 @@ var totType = {
     "bin": 8,
     "date": 9,
     "jsonata": 10,
+    "env": 11,
 };
 
 var ptType = {
@@ -50,8 +44,8 @@ var ptType = {
     "global": 3,
 };
 
-function setT(rule, index) {
-    browser.selectByValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', rule);
+function setT(t, index) {
+    browser.selectByValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', t);
 }
 
 // It is better to create a function whose input value is the object type in the future,

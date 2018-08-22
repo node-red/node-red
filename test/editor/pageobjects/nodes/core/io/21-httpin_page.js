@@ -22,30 +22,14 @@ function httpinNode(id) {
     nodePage.call(this, id);
 }
 
-function setMethod(type) {
-    browser.selectByValue('#node-input-method', type);
-}
-
 util.inherits(httpinNode, nodePage);
 
-var methodType = {
-    "get": 1,
-    "post": 2,
-    "put": 3,
-    "delete": 4,
-    "patch": 5,
-};
-
-httpinNode.prototype.setMethod = function(type) {
-  // Open a method type list.
-  browser.clickWithWait('#node-input-method');
-  // Select a method type.
-  var methodTypeXPath = '//*[@id="node-input-method"]/option[' + methodType[type] + ']';
-  browser.clickWithWait(methodTypeXPath);
+httpinNode.prototype.setMethod = function(method) {
+    browser.selectByValue('#node-input-method', method);
 }
 
-httpinNode.prototype.setUrl = function(value) {
-    browser.setValue('#node-input-url', value);
+httpinNode.prototype.setUrl = function(url) {
+    browser.setValue('#node-input-url', url);
 }
 
 module.exports = httpinNode;

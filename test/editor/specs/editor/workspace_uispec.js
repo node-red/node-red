@@ -19,8 +19,8 @@ var should = require("should");
 var fs = require('fs-extra');
 
 var helper = require("../../editor_helper");
-var debugTab = require('../../pageobjects/workspace/debugTab_page');
-var workspace = require('../../pageobjects/workspace/workspace_page');
+var debugTab = require('../../pageobjects/editor/debugTab_page');
+var workspace = require('../../pageobjects/editor/workspace_page');
 
 var nodeWidth = 200;
 

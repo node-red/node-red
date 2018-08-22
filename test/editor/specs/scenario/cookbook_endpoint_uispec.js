@@ -17,8 +17,8 @@
 var should = require("should");
 
 var helper = require("../../editor_helper");
-var debugTab = require('../../pageobjects/workspace/debugTab_page');
-var workspace = require('../../pageobjects/workspace/workspace_page');
+var debugTab = require('../../pageobjects/editor/debugTab_page');
+var workspace = require('../../pageobjects/editor/workspace_page');
 
 var nodeWidth = 200;
 var nodeHeight = 100;
@@ -65,7 +65,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello');
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -105,7 +105,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-query?name=Nick');
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -145,7 +145,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-param/Dave');
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -190,7 +190,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-headers');
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.clickOk();
 
             injectNode.connect(changeNode);
@@ -249,7 +249,7 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight * 2);
 
             httpRequestNode.edit();
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-data');
             httpRequestNode.clickOk();
 
@@ -299,12 +299,12 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
 
             httpRequestNode.edit();
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-json');
             httpRequestNode.clickOk();
 
             debugNode.edit();
-            debugNode.setTarget("msg", "headers");
+            debugNode.setOutput("headers");
             debugNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -332,7 +332,7 @@ describe('cookbook', function() {
 
             fileinNode.edit();
             fileinNode.setFilename("test/resources/file-in-node/test.txt");
-            fileinNode.setFormat("");
+            fileinNode.setOutput("");
             fileinNode.clickOk();
 
             changeNode.edit();
@@ -352,7 +352,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-file');
-            httpRequestNode.setMethod("get");
+            httpRequestNode.setMethod("GET");
             httpRequestNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -396,7 +396,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-raw');
-            httpRequestNode.setMethod("post");
+            httpRequestNode.setMethod("POST");
             httpRequestNode.clickOk();
 
             injectNode.connect(httpRequestNode);
@@ -445,7 +445,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-form');
-            httpRequestNode.setMethod("post");
+            httpRequestNode.setMethod("POST");
             httpRequestNode.clickOk();
 
             injectNode.connect(changeNode);
@@ -495,7 +495,7 @@ describe('cookbook', function() {
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-json');
-            httpRequestNode.setMethod("post");
+            httpRequestNode.setMethod("POST");
             httpRequestNode.clickOk();
 
             injectNode.connect(changeNode);
@@ -531,7 +531,7 @@ describe('cookbook', function() {
             httpinNodeFormat.clickOk();
 
             functionNodeFormat.edit();
-            functionNodeFormat.setCode("msg.payload = JSON.stringify(msg.req.cookies,null,4);");
+            functionNodeFormat.setFunction("msg.payload = JSON.stringify(msg.req.cookies,null,4);");
             functionNodeFormat.clickOk();
 
             templateNode.edit();
@@ -550,7 +550,7 @@ describe('cookbook', function() {
             httpinNodeAdd.clickOk();
 
             functionNodeAdd.edit();
-            functionNodeAdd.setCode("msg.cookies = { };\n msg.cookies[\"demo-\"+(Math.floor(Math.random()*1000))] = Date.now();");
+            functionNodeAdd.setFunction("msg.cookies = { };\n msg.cookies[\"demo-\"+(Math.floor(Math.random()*1000))] = Date.now();");
             functionNodeAdd.clickOk();
 
             changeNode.edit();
@@ -571,7 +571,7 @@ describe('cookbook', function() {
             httpinNodeClear.clickOk();
 
             functionNodeClear.edit();
-            functionNodeClear.setCode("var cookieNames = Object.keys(msg.req.cookies).filter(function(cookieName) { return /^demo-/.test(cookieName);});\nmsg.cookies = {};\n\ncookieNames.forEach(function(cookieName) {\n    msg.cookies[cookieName] = null;\n});\n\n");
+            functionNodeClear.setFunction("var cookieNames = Object.keys(msg.req.cookies).filter(function(cookieName) { return /^demo-/.test(cookieName);});\nmsg.cookies = {};\n\ncookieNames.forEach(function(cookieName) {\n    msg.cookies[cookieName] = null;\n});\n\n");
             functionNodeClear.clickOk();
 
             httpinNodeClear.connect(functionNodeClear);
