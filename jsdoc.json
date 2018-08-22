@@ -1,6 +1,6 @@
 {
     "opts": {
-        "template": "./node_modules/ink-docstrap/template",
+        "template": "./node_modules/minami",
         "destination": "./docs",
         "recurse": true
     },
@@ -9,7 +9,7 @@
         "dictionaries": ["jsdoc"]
     },
     "source": {
-        "include": [
+        "_include": [
             "./packages/node_modules/@node-red/runtime/lib/api"
         ]
     },
@@ -18,5 +18,6 @@
         "theme":"yeti",
         "footer": "",
         "copyright": "Released under the Apache License v2.0"
-    }
+    },
+    "plugins": ["plugins/markdown"]
 }

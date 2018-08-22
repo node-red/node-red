@@ -420,6 +420,13 @@ module.exports = function(grunt) {
                     destination: 'docs',
                     configure: './jsdoc.json'
                 }
+            },
+            nodeREDUtil: {
+                src: 'packages/node_modules/@node-red/util/**/*.js',
+                options: {
+                    destination: 'packages/node_modules/@node-red/util/docs',
+                    configure: './jsdoc.json'
+                }
             }
         },
         jsdoc2md: {
@@ -429,6 +436,13 @@ module.exports = function(grunt) {
                 },
                 src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
                 dest: 'docs/runtime-api.md'
+            },
+            nodeREDUtil: {
+                options: {
+                    separators: true
+                },
+                src: 'packages/node_modules/@node-red/util/**/*.js',
+                dest: 'packages/node_modules/@node-red/util/docs/api.md'
             }
         }
     });
