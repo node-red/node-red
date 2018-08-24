@@ -1,6 +1,6 @@
 {
     "opts": {
-        "template": "./node_modules/minami",
+        "template": "./node_modules/jsdoc-nr-template",
         "destination": "./docs",
         "recurse": true
     },
@@ -17,7 +17,10 @@
         "systemName": "Node-RED Runtime API",
         "theme":"yeti",
         "footer": "",
-        "copyright": "Released under the Apache License v2.0"
+        "copyright": "Released under the Apache License v2.0",
+        "default": {
+            "outputSourceFiles": false
+        }
     },
     "plugins": ["plugins/markdown"]
 }

@@ -106,7 +106,8 @@
         "wdio-mocha-framework": "^0.6.2",
         "wdio-spec-reporter": "^0.1.5",
         "webdriverio": "^4.13.1",
-        "node-red-node-test-helper": "node-red/node-red-node-test-helper"
+        "node-red-node-test-helper": "node-red/node-red-node-test-helper",
+        "jsdoc-nr-template": "node-red/jsdoc-nr-template"
     },
     "engines": {
         "node": ">=8"
