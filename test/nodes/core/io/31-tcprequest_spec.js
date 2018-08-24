@@ -59,7 +59,11 @@ describe('TCP Request Node', function() {
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 try {
-                    msg.should.have.property('payload', Buffer(val1));
+                    if (typeof val1 === 'object') {
+                        msg.should.have.properties(Object.assign({}, val1, {payload: Buffer(val1.payload)}));
+                    } else {
+                        msg.should.have.property('payload', Buffer(val1));
+                    }
                     done();
                 } catch(err) {
                     done(err);
@@ -79,7 +83,11 @@ describe('TCP Request Node', function() {
             const n2 = helper.getNode("n2");
             n2.on("input", msg => {
                 try {
-                    msg.should.have.property('payload', Buffer(result));
+                    if (typeof result === 'object') {
+                        msg.should.have.properties(Object.assign({}, result, {payload: Buffer(result.payload)}));
+                    } else {
+                        msg.should.have.property('payload', Buffer(result));
+                    }
                     done();
                 } catch(err) {
                     done(err);
@@ -95,31 +103,75 @@ describe('TCP Request Node', function() {
         it('should send & recv data', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
             {id:"n2", type:"helper"}];
-            testTCP(flow, "foo", "ACK:foo", done)
+            testTCP(flow, {
+                payload: 'foo',
+                topic: 'bar'
+            }, {
+                payload: 'ACK:foo',
+                topic: 'bar'
+            }, done);
+        });
+
+        it('should retain complete message', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
+            {id:"n2", type:"helper"}];
+            testTCP(flow, {
+                payload: 'foo',
+                topic: 'bar'
+            }, {
+                payload: 'ACK:foo',
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data when specified character received', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"char", splitc: "0", wires:[["n2"]] },
             {id:"n2", type:"helper"}];
-            testTCP(flow, "foo0bar0", "ACK:foo0", done);
+            testTCP(flow, {
+                payload: 'foo0bar0',
+                topic: 'bar'
+            }, {
+                payload: 'ACK:foo0',
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data after fixed number of chars received', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"count", splitc: "7", wires:[["n2"]] },
             {id:"n2", type:"helper"}];
-            testTCP(flow, "foo bar", "ACK:foo", done);
+            testTCP(flow, {
+                payload: 'foo bar',
+                topic: 'bar'
+            }, {
+                payload: 'ACK:foo',
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & receive, then keep connection', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", splitc: "5", wires:[["n2"]] },
             {id:"n2", type:"helper"}];
-            testTCP(flow, "foo", "ACK:foo", done);
+            testTCP(flow, {
+                payload: 'foo',
+                topic: 'bar'
+            }, {
+                payload: 'ACK:foo',
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data to/from server:port from msg', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"", port:"", out:"time", splitc: "0", wires:[["n2"]] },
             {id:"n2", type:"helper"}];
-            testTCP(flow, {payload:"foo", host:"localhost", port:port}, "ACK:foo", done)
+            testTCP(flow, {
+                payload: "foo",
+                host: "localhost",
+                port: port
+            }, {
+                payload: "ACK:foo",
+                host: 'localhost',
+                port: port
+            }, done);
         });
     });
 
@@ -127,36 +179,95 @@ describe('TCP Request Node', function() {
         it('should send & recv data', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-
-            testTCPMany(flow, ['f', 'o', 'o'], 'ACK:foo', done);
+            testTCPMany(flow, [{
+                payload: 'f',
+                topic: 'bar'
+            }, {
+                payload: 'o',
+                topic: 'bar'
+            }, {
+                payload: 'o',
+                topic: 'bar'
+            }], {
+                payload: 'ACK:foo',
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data when specified character received', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"char", splitc: "0", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-            testTCPMany(flow, ["foo0","bar0"], "ACK:foo0", done);
+            testTCPMany(flow, [{
+                payload: "foo0",
+                topic: 'bar'
+            }, {
+                payload: "bar0",
+                topic: 'bar'
+            }], {
+                payload: "ACK:foo0",
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data after fixed number of chars received', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"count", splitc: "7", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-            testTCPMany(flow, ["fo", "ob", "ar"], "ACK:foo", done);
+            testTCPMany(flow, [{
+                payload: "fo",
+                topic: 'bar'
+            }, {
+                payload: "ob",
+                topic: 'bar'
+            }, {
+                payload: "ar",
+                topic: 'bar'
+            }], {
+                payload: "ACK:foo",
+                topic: 'bar'
+            }, done);
         });
-
 
         it('should send & receive, then keep connection', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", splitc: "5", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-            testTCPMany(flow, ["foo", "bar", "baz"], "ACK:foobarbaz", done);
+            testTCPMany(flow, [{
+                payload: "foo",
+                topic: 'bar'
+            }, {
+                payload: "bar",
+                topic: 'bar'
+            }, {
+                payload: "baz",
+                topic: 'bar'
+            }], {
+                payload: "ACK:foobarbaz",
+                topic: 'bar'
+            }, done);
         });
 
         it('should send & recv data to/from server:port from msg', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"", port:"", out:"time", splitc: "0", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-            testTCPMany(flow, [
-                {payload:"f", host:"localhost", port:port},
-                {payload:"o", host:"localhost", port:port},
-                {payload:"o", host:"localhost", port:port}], "ACK:foo", done);
+            testTCPMany(flow, [{
+                    payload: "f",
+                    host: "localhost",
+                    port: port
+                },
+                {
+                    payload: "o",
+                    host: "localhost",
+                    port: port
+                },
+                {
+                    payload: "o",
+                    host: "localhost",
+                    port: port
+                }
+            ], {
+                payload: "ACK:foo",
+                host: 'localhost',
+                port: port
+            }, done);
         });
 
         it('should limit the queue size', function (done) {
@@ -167,6 +278,24 @@ describe('TCP Request Node', function() {
             const msgs = new Array(RED.settings.tcpMsgQueueSize + 1).fill('x');
             const expected = msgs.slice(0, -1);
             testTCPMany(flow, msgs, "ACK:" + expected.join(''), done);
+        });
+
+        it('should only retain the latest message', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"time", splitc: "0", wires:[["n2"]] },
+                        {id:"n2", type:"helper"}];
+            testTCPMany(flow, [{
+                payload: 'f',
+                topic: 'bar'
+            }, {
+                payload: 'o',
+                topic: 'baz'
+            }, {
+                payload: 'o',
+                topic: 'quux'
+            }], {
+                payload: 'ACK:foo',
+                topic: 'quux'
+            }, done);
         });
     });
 });

@@ -1,3 +1,12 @@
+#### 0.19.2: Maintenance Release
+
+ - Ensure node default colour is used if palette.theme has no match
+ - fix lost messages / properties in TCPRequest Node; closes #1863 (#1864)
+ - Fix typo in template.html
+ - Improve error reporting from context plugin loading
+ - Prevent no-op edit of node marking as changed due to icon
+ - Change node must handle empty rule set
+
 #### 0.19.1: Maintenance Release
 
  - Pull in latest twitter node

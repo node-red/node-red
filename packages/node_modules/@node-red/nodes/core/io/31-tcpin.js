@@ -467,6 +467,7 @@ module.exports = function(RED) {
                 connecting: false
             };
             enqueue(clients[connection_id].msgQueue, msg);
+            clients[connection_id].lastMsg = msg;
 
             if (!clients[connection_id].connecting && !clients[connection_id].connected) {
                 var buf;
@@ -507,8 +508,7 @@ module.exports = function(RED) {
                 clients[connection_id].client.on('data', function(data) {
                     if (node.out === "sit") { // if we are staying connected just send the buffer
                         if (clients[connection_id]) {
-                            let msg = dequeue(clients[connection_id].msgQueue) || {};
-                            clients[connection_id].msgQueue.unshift(msg);
+                            const msg = clients[connection_id].lastMsg || {};
                             msg.payload = data;
                             node.send(RED.util.cloneMessage(msg));
                         }
@@ -530,8 +530,7 @@ module.exports = function(RED) {
                                         clients[connection_id].timeout = setTimeout(function () {
                                             if (clients[connection_id]) {
                                                 clients[connection_id].timeout = null;
-                                                let msg = dequeue(clients[connection_id].msgQueue) || {};
-                                                clients[connection_id].msgQueue.unshift(msg);
+                                                const msg = clients[connection_id].lastMsg || {};
                                                 msg.payload = Buffer.alloc(i+1);
                                                 buf.copy(msg.payload,0,0,i+1);
                                                 node.send(msg);
@@ -553,8 +552,7 @@ module.exports = function(RED) {
                                 i += 1;
                                 if ( i >= node.splitc) {
                                     if (clients[connection_id]) {
-                                        let msg = dequeue(clients[connection_id].msgQueue) || {};
-                                        clients[connection_id].msgQueue.unshift(msg);
+                                        const msg = clients[connection_id].lastMsg || {};
                                         msg.payload = Buffer.alloc(i);
                                         buf.copy(msg.payload,0,0,i);
                                         node.send(msg);
@@ -573,8 +571,7 @@ module.exports = function(RED) {
                                 i += 1;
                                 if (data[j] == node.splitc) {
                                     if (clients[connection_id]) {
-                                        let msg = dequeue(clients[connection_id].msgQueue) || {};
-                                        clients[connection_id].msgQueue.unshift(msg);
+                                        const msg = clients[connection_id].lastMsg || {};
                                         msg.payload = Buffer.alloc(i);
                                         buf.copy(msg.payload,0,0,i);
                                         node.send(msg);
