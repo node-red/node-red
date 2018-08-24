@@ -1,6 +1,6 @@
 {
   "name": "node-red",
-  "version": "0.19.1",
+  "version": "0.19.2",
   "description": "A visual tool for wiring the Internet of Things",
   "homepage": "http://nodered.org",
   "license": "Apache-2.0",
@@ -33,7 +33,7 @@
     "flow"
   ],
   "dependencies": {
-    "ajv": "6.5.2",
+    "ajv": "6.5.3",
     "basic-auth": "2.0.0",
     "bcryptjs": "2.4.3",
     "body-parser": "1.18.3",
@@ -56,7 +56,7 @@
     "jsonata": "1.5.4",
     "media-typer": "0.3.0",
     "memorystore": "1.6.0",
-    "mqtt": "2.18.3",
+    "mqtt": "2.18.5",
     "multer": "1.3.1",
     "mustache": "2.3.1",
     "node-red-node-email": "0.1.*",
@@ -71,9 +71,9 @@
     "passport-oauth2-client-password": "0.1.2",
     "raw-body": "2.3.3",
     "request": "2.88.0",
-    "semver": "5.5.0",
+    "semver": "5.5.1",
     "sentiment": "2.1.0",
-    "uglify-js": "3.4.7",
+    "uglify-js": "3.4.8",
     "when": "3.7.8",
     "ws": "1.1.5",
     "xml2js": "0.4.19"
@@ -103,6 +103,7 @@
     "http-proxy": "^1.16.2",
     "istanbul": "0.4.5",
     "mocha": "^5.2.0",
+    "node-red-node-test-helper": "0.1.7",
     "should": "^8.4.0",
     "sinon": "1.17.7",
     "stoppable": "^1.0.6",
@@ -110,8 +111,7 @@
     "wdio-chromedriver-service": "^0.1.3",
     "wdio-mocha-framework": "^0.6.2",
     "wdio-spec-reporter": "^0.1.5",
-    "webdriverio": "^4.13.1",
-    "node-red-node-test-helper": "^0.1.7"
+    "webdriverio": "^4.13.1"
   },
   "engines": {
     "node": ">=4"
