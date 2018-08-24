@@ -800,8 +800,9 @@ RED.utils = (function() {
         var paletteTheme = RED.settings.theme('palette.theme') || [];
         if (paletteTheme.length > 0) {
             if (!nodeColorCache.hasOwnProperty(type)) {
+                nodeColorCache[type] = def.color;
                 var l = paletteTheme.length;
-                for (var i=0;i<l;i++ ){
+                for (var i = 0; i < l; i++ ){
                     var themeRule = paletteTheme[i];
                     if (themeRule.hasOwnProperty('category')) {
                         if (!themeRule.hasOwnProperty('_category')) {
