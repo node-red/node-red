@@ -81,7 +81,11 @@ module.exports = {
      writeFile: function(path,content,backupPath) {
          if (backupPath) {
             if (fs.existsSync(path)) {
-                fs.renameSync(path,backupPath);
+                try {
+                    fs.renameSync(path,backupPath);
+                } catch(e) {
+                    log.warn(log._("storage.localfilesystem.fwrite-fail",{path:path}));
+                }
             }
         }
         return when.promise(function(resolve,reject) {
