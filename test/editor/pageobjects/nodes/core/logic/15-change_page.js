@@ -45,7 +45,7 @@ var ptType = {
 };
 
 function setT(t, index) {
-    browser.selectByValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', t);
+    browser.selectWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', t);
 }
 
 // It is better to create a function whose input value is the object type in the future,

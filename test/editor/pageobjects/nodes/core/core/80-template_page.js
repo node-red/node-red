@@ -25,11 +25,11 @@ function templateNode(id) {
 util.inherits(templateNode, nodePage);
 
 templateNode.prototype.setSyntax = function(syntax) {
-    browser.selectByValue('#node-input-syntax', syntax);
+    browser.selectWithWait('#node-input-syntax', syntax);
 }
 
 templateNode.prototype.setFormat = function(format) {
-    browser.selectByValue('#node-input-format', format);
+    browser.selectWithWait('#node-input-format', format);
 }
 
 templateNode.prototype.setTemplate = function(template) {

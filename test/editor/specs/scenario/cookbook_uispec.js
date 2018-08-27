@@ -364,11 +364,11 @@ describe('cookbook', function() {
             templateNode.edit();
             templateNode.setSyntax("mustache");
             templateNode.setFormat("handlebars");
-            templateNode.setTemplate("{\"title\": \"Hello\"}");
+            templateNode.setTemplate('{"title": "Hello"}');
             templateNode.clickOk();
 
             changeNodeSetHeader.edit();
-            changeNodeSetHeader.ruleSet("headers", "msg", "{\"content-type\":\"application/json\"}", "json");
+            changeNodeSetHeader.ruleSet("headers", "msg", '{"content-type":"application/json"}', "json");
             changeNodeSetHeader.clickOk();
 
             httpinNode.connect(templateNode);
@@ -413,7 +413,7 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 3);
 
             functionNode.edit();
-            functionNode.setFunction("msg.payload = \"data to post\";");
+            functionNode.setFunction('msg.payload = "data to post";\nreturn msg;');
             functionNode.clickOk();
 
             httpRequetNode.edit();

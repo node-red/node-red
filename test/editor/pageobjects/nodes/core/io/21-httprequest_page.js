@@ -29,11 +29,11 @@ httpRequestNode.prototype.setUrl = function(url) {
 }
 
 httpRequestNode.prototype.setMethod = function(method) {
-    browser.selectByValue('#node-input-method', method);
+    browser.selectWithWait('#node-input-method', method);
 }
 
 httpRequestNode.prototype.setReturn = function(ret) {
-    browser.selectByValue('#node-input-ret', ret);
+    browser.selectWithWait('#node-input-ret', ret);
 }
 
 module.exports = httpRequestNode;

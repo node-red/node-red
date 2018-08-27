@@ -25,7 +25,7 @@ function httpinNode(id) {
 util.inherits(httpinNode, nodePage);
 
 httpinNode.prototype.setMethod = function(method) {
-    browser.selectByValue('#node-input-method', method);
+    browser.selectWithWait('#node-input-method', method);
 }
 
 httpinNode.prototype.setUrl = function(url) {
