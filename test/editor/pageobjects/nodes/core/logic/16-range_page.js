@@ -24,8 +24,8 @@ function rangeNode(id) {
 
 util.inherits(rangeNode, nodePage);
 
-rangeNode.prototype.setAction = function(value) {
-    browser.selectByValue('#node-input-action', value);
+rangeNode.prototype.setAction = function(action) {
+    browser.selectWithWait('#node-input-action', action);
 }
 
 rangeNode.prototype.setRange = function(minin, maxin, minout, maxout) {
