@@ -19,6 +19,7 @@ module.exports = function(RED) {
     const Ajv = require('ajv');
     const ajv = new Ajv({allErrors: true, schemaId: 'auto'});
     ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+    ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
