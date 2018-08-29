@@ -24,12 +24,17 @@ function functionNode(id) {
 
 util.inherits(functionNode, nodePage);
 
-functionNode.prototype.setCode = function(value) {
+functionNode.prototype.setFunction = function(func) {
     browser.click('#node-input-func-editor');
     browser.keys(['Control', 'Home', 'Control']);
-    for (var i=0; i<value.length; i++) {
-        browser.keys([value.substr(i, 1)]);
+    for (var i = 0; i < func.length; i++) {
+        browser.keys([func.charAt(i)]);
     }
+    // Delete the unnecessary code that ace editor does the autocompletion.
+    browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
+    browser.keys(['Delete']);
+    // Need to wait until ace editor correctly checks the syntax.
+    browser.pause(50);
 }
 
 module.exports = functionNode;

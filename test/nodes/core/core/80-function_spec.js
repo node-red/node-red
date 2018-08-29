@@ -1216,7 +1216,7 @@ describe('function node', function() {
                 msg.should.have.property('payload', n1.id);
                 done();
             });
-            n1.receive({payload:"foo",topicb: "bar"});
+            n1.receive({payload:"foo",topic: "bar"});
         });
     });
 
@@ -1230,7 +1230,7 @@ describe('function node', function() {
                 msg.should.have.property('payload', n1.name);
                 done();
             });
-            n1.receive({payload:"foo",topicb: "bar"});
+            n1.receive({payload:"foo",topic: "bar"});
         });
     });
 

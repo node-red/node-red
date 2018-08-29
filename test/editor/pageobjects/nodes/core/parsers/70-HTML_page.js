@@ -24,8 +24,8 @@ function htmlNode(id) {
 
 util.inherits(htmlNode, nodePage);
 
-htmlNode.prototype.setTag = function(value) {
-    browser.setValue('#node-input-tag', value);
+htmlNode.prototype.setSelector = function(tag) {
+    browser.setValue('#node-input-tag', tag);
 }
 
 module.exports = htmlNode;

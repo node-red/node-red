@@ -31,13 +31,13 @@ var formatType = {
     "stream": 4
 };
 
-fileinNode.prototype.setFilename = function(value) {
-    browser.setValue('#node-input-filename', value);
+fileinNode.prototype.setFilename = function(filename) {
+    browser.setValue('#node-input-filename', filename);
 }
 
-fileinNode.prototype.setFormat = function(type) {
+fileinNode.prototype.setOutput = function(format) {
     browser.clickWithWait('#node-input-format');
-    var formatTypeXPath = '//*[@id="node-input-format"]/option[' + formatType[type] + ']';
+    var formatTypeXPath = '//*[@id="node-input-format"]/option[' + formatType[format] + ']';
     browser.clickWithWait(formatTypeXPath);
 }
 

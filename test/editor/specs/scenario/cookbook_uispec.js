@@ -19,8 +19,8 @@ var should = require("should");
 var fs = require('fs-extra');
 
 var helper = require("../../editor_helper");
-var debugTab = require('../../pageobjects/workspace/debugTab_page');
-var workspace = require('../../pageobjects/workspace/workspace_page');
+var debugTab = require('../../pageobjects/editor/debugTab_page');
+var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
 
 var nodeWidth = 200;
@@ -168,8 +168,8 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2);
 
             injectNode.edit();
-            injectNode.setTimeType("interval");
-            injectNode.setRepeat(1);
+            injectNode.setRepeat("interval");
+            injectNode.setRepeatInterval(1);
             injectNode.clickOk();
             injectNode.connect(debugNode);
 
@@ -196,12 +196,12 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 3);
 
             httpRequetNode.edit();
-            httpRequetNode.setMethod("get");
+            httpRequetNode.setMethod("GET");
             httpRequetNode.setUrl(helper.url());
             httpRequetNode.clickOk();
 
             htmlNode.edit();
-            htmlNode.setTag("title");
+            htmlNode.setSelector("title");
             htmlNode.clickOk();
 
             injectNode.connect(httpRequetNode);
@@ -336,14 +336,14 @@ describe('cookbook', function() {
             changeNodeSetPost.clickOk();
 
             httpRequetNode.edit();
-            httpRequetNode.setMethod("get");
+            httpRequetNode.setMethod("GET");
             var url = helper.url() + httpNodeRoot + "/{{post}}";
             httpRequetNode.setUrl(url);
-            httpRequetNode.setRet("obj");
+            httpRequetNode.setReturn("obj");
             httpRequetNode.clickOk();
 
             debugNode.edit();
-            debugNode.setTarget("msg", "payload.title");
+            debugNode.setOutput("payload.title");
             debugNode.clickOk();
 
             injectNode.connect(changeNodeSetPost);
@@ -364,11 +364,11 @@ describe('cookbook', function() {
             templateNode.edit();
             templateNode.setSyntax("mustache");
             templateNode.setFormat("handlebars");
-            templateNode.setTemplate("{\"title\": \"Hello\"}");
+            templateNode.setTemplate('{"title": "Hello"}');
             templateNode.clickOk();
 
             changeNodeSetHeader.edit();
-            changeNodeSetHeader.ruleSet("headers", "msg", "{\"content-type\":\"application/json\"}", "json");
+            changeNodeSetHeader.ruleSet("headers", "msg", '{"content-type":"application/json"}', "json");
             changeNodeSetHeader.clickOk();
 
             httpinNode.connect(templateNode);
@@ -389,9 +389,9 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 2);
 
             httpRequetNode.edit();
-            httpRequetNode.setMethod("get");
+            httpRequetNode.setMethod("GET");
             httpRequetNode.setUrl(helper.url() + "/settings");
-            httpRequetNode.setRet("bin");
+            httpRequetNode.setReturn("bin");
             httpRequetNode.clickOk();
 
             injectNode.connect(httpRequetNode);
@@ -413,11 +413,11 @@ describe('cookbook', function() {
             var debugNode = workspace.addNode("debug", nodeWidth * 3);
 
             functionNode.edit();
-            functionNode.setCode("msg.payload = \"data to post\";");
+            functionNode.setFunction('msg.payload = "data to post";\nreturn msg;');
             functionNode.clickOk();
 
             httpRequetNode.edit();
-            httpRequetNode.setMethod("post");
+            httpRequetNode.setMethod("POST");
             var url = helper.url() + httpNodeRoot + "/set-header";
             httpRequetNode.setUrl(url);
             httpRequetNode.clickOk();

@@ -24,7 +24,7 @@ function injectNode(id) {
 
 util.inherits(injectNode, nodePage);
 
-var payloadType = {
+var payloadTypeList = {
     "flow": 1,
     "global": 2,
     "str": 3,
@@ -36,54 +36,43 @@ var payloadType = {
     "env": 9,
 };
 
-var timeType = {
+var repeatTypeList = {
     "none": 1,
     "interval": 2,
     "intervalBetweenTimes": 3,
     "atASpecificTime": 4,
 };
 
-var timeType = {
-    "none": 1,
-    "interval": 2,
-    "intervalBetweenTimes": 3,
-    "atASpecificTime": 4,
-};
-
-var timeType = {
-    "none": 1,
-    "interval": 2,
-    "intervalBetweenTimes": 3,
-    "atASpecificTime": 4,
-};
-
-injectNode.prototype.setPayload = function(type, value) {
+injectNode.prototype.setPayload = function(payloadType, payload) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
     // Select a payload type.
-    var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadType[type] + ']';
+    var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadTypeList[payloadType] + ']';
     browser.clickWithWait(payloadTypeXPath);
-    if (value) {
+    if (payload) {
         // Input a value.
-        browser.setValue('//*[@class="red-ui-typedInput-input"]/input', value);
+        browser.setValue('//*[@class="red-ui-typedInput-input"]/input', payload);
     }
 }
 
-injectNode.prototype.setTopic = function(value) {
-    browser.setValue('#node-input-topic', value);
+injectNode.prototype.setTopic = function(topic) {
+    browser.setValue('#node-input-topic', topic);
 }
 
-injectNode.prototype.setOnce = function(value) {
-    browser.clickWithWait('#node-input-once');
+injectNode.prototype.setOnce = function(once) {
+    var isChecked = browser.isSelected('#node-input-once');
+    if (isChecked !== once) {
+        browser.clickWithWait('#node-input-once');
+    }
 }
 
-injectNode.prototype.setTimeType = function(type) {
-    var timeTypeXPath = '//*[@id="inject-time-type-select"]/option[' + timeType[type] + ']';
-    browser.clickWithWait(timeTypeXPath);
+injectNode.prototype.setRepeat = function(repeatType) {
+    var repeatTypeXPath = '//*[@id="inject-time-type-select"]/option[' + repeatTypeList[repeatType] + ']';
+    browser.clickWithWait(repeatTypeXPath);
 }
 
-injectNode.prototype.setRepeat = function(sec) {
-    browser.setValue('#inject-time-interval-count', sec);
+injectNode.prototype.setRepeatInterval = function(repeat) {
+    browser.setValue('#inject-time-interval-count', repeat);
 }
 
 module.exports = injectNode;

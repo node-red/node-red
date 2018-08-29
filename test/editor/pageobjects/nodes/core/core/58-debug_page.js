@@ -24,22 +24,20 @@ function debugNode(id) {
 
 util.inherits(debugNode, nodePage);
 
-var target = {
-    "msg": 1,
-    "full": 2
-};
-
-debugNode.prototype.setTarget = function(type, value) {
+debugNode.prototype.setOutput = function(complete) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
-    // Select a payload type.
-    var xPath = '/html/body/div[11]/a[' + target[type] + ']';
-    browser.clickWithWait(xPath);
-    if (value) {
+    if (complete !== 'true') {
+        // Select the "msg" type.
+        browser.clickWithWait('/html/body/div[11]/a[1]');
+        // Input the path in msg.
         browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
         browser.keys(['Control', 'a', 'Control']);
         browser.keys(['Delete']);
-        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', value);
+        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', complete);
+    } else {
+        // Select the "complete msg object" type.
+        browser.clickWithWait('/html/body/div[11]/a[2]');
     }
 }
 

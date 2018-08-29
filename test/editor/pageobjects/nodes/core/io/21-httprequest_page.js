@@ -24,36 +24,16 @@ function httpRequestNode(id) {
 
 util.inherits(httpRequestNode, nodePage);
 
-var methodType = {
-    "get": 1,
-    "post": 2,
-    "put": 3,
-    "delete": 4,
-    "setByMsgMethod": 5,
-};
-
-var retType = {
-    "txt": 1,
-    "bin": 2,
-    "obj": 3,
-};
-
-httpRequestNode.prototype.setUrl = function(value) {
-    browser.setValue('#node-input-url', value);
+httpRequestNode.prototype.setUrl = function(url) {
+    browser.setValue('#node-input-url', url);
 }
 
-httpRequestNode.prototype.setMethod = function(type) {
-    // Open a method type list.
-    browser.clickWithWait('#node-input-method');
-    // Select a method type.
-    var methodTypeXPath = '//*[@id="node-input-method"]/option[' + methodType[type] + ']';
-    browser.clickWithWait(methodTypeXPath);
+httpRequestNode.prototype.setMethod = function(method) {
+    browser.selectWithWait('#node-input-method', method);
 }
 
-httpRequestNode.prototype.setRet = function(type) {
-    browser.clickWithWait('#node-input-ret');
-    var retTypeXPath = '//*[@id="node-input-ret"]/option[' + retType[type] + ']';
-    browser.clickWithWait(retTypeXPath);
+httpRequestNode.prototype.setReturn = function(ret) {
+    browser.selectWithWait('#node-input-ret', ret);
 }
 
 module.exports = httpRequestNode;
