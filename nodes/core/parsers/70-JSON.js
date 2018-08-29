@@ -31,15 +31,6 @@ module.exports = function(RED) {
 
         var node = this;
 
-        this.validateMessage = function(msg) {
-            if (this.compiledSchema(msg[node.property])) {
-                node.send(msg);
-            } else {
-                msg.schemaError = this.compiledSchema.errors;
-                node.error(`${RED._("json.errors.schema-error")}: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
-            }
-        }
-
         this.on("input", function(msg) {
             var validate = false;
             if (msg.schema) {
