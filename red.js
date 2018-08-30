@@ -106,8 +106,11 @@ if (parsedArgs.settings) {
                     settingsFile = userSettingsFile;
                 }
                 catch (err) {
-                    console.log("Can't copy settings file. Is file system Read Only ?");
-                    console.log("You may want to set readOnly: true, in settings.js");
+                    console.log("Failed to copy settings file to "+userSettingsFile);
+                    console.log("Error: "+err.toString());
+                    if (err.code == "EACCES") {
+                        console.log("You may need to set readOnly: true, in settings.js");
+                    }
                     process.exit(1);
                 }
             } else {

@@ -84,7 +84,7 @@ module.exports = {
                 try {
                     fs.renameSync(path,backupPath);
                 } catch(e) {
-                    log.warn(log._("storage.localfilesystem.fwrite-fail",{path:path}));
+                    log.warn(log._("storage.localfilesystem.fwrite-fail",{path:path, message:e.toString()}));
                 }
             }
         }

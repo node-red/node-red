@@ -142,7 +142,7 @@
             "restore": "Restoring __type__ file backup : __path__",
             "restore-fail": "Restoring __type__ file backup failed : __message__",
             "fsync-fail": "Flushing file __path__ to disk failed : __message__",
-            "fwrite-fail": "Writing backup file __path__ to disk failed.",
+            "fwrite-fail": "Writing backup file __path__ to disk failed : __message__",
             "projects": {
                 "changing-project": "Setting active project : __project__",
                 "active-project": "Active project : __project__",
