@@ -369,27 +369,6 @@ module.exports = function(grunt) {
                         dest: 'packages/node_modules/@node-red/editor-client/public/red/about'
                     }
                 ]
-            },
-            release: {
-                files: [{
-                    mode: true,
-                    expand: true,
-                    src: [
-                        '*.md',
-                        'LICENSE',
-                        'package.json',
-                        'settings.js',
-                        'red.js',
-                        'lib/.gitignore',
-                        'nodes/*.demo',
-                        'nodes/core/**',
-                        'red/**',
-                        'public/**',
-                        'editor/templates/**',
-                        'bin/**'
-                    ],
-                    dest: path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>')
-                }]
             }
         },
         chmod: {
@@ -398,8 +377,8 @@ module.exports = function(grunt) {
             },
             release: {
                 src: [
-                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/nodes/core/hardware/nrgpio*'),
-                    path.resolve('<%= paths.dist %>/node-red-<%= pkg.version %>/red/runtime/storage/localfilesystem/projects/git/node-red-*sh')
+                    "packages/node_modules/@node-red/nodes/core/hardware/nrgpio",
+                    "packages/node_modules/@node-red/runtime/lib/storage/localfilesystem/projects/git/node-red-*sh"
                 ]
             }
         },
@@ -409,8 +388,11 @@ module.exports = function(grunt) {
                     archive: '<%= paths.dist %>/node-red-<%= pkg.version %>.zip'
                 },
                 expand: true,
-                cwd: '<%= paths.dist %>/',
-                src: ['node-red-<%= pkg.version %>/**']
+                cwd: 'packages/node_modules/',
+                src: [
+                    '**',
+                    '!@node-red/editor-client/src/**'
+                ]
             }
         },
         jsdoc : {
@@ -550,7 +532,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','verifyPackageDependencies','clean:release','copy:release','chmod:release','compress:release']);
+        ['build','verifyPackageDependencies','clean:release','chmod:release','compress:release']);
 
     grunt.registerTask('coverage',
         'Run Istanbul code test coverage task',
