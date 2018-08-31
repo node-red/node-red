@@ -1249,6 +1249,36 @@ describe('function node', function() {
         });
     });
 
+    it('should allow accessing env vars', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = env.get('_TEST_FOO_'); return msg;"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            delete process.env._TEST_FOO_;
+
+            n2.on("input", function(msg) {
+                try {
+                    if (count === 0) {
+                        msg.should.have.property('payload', undefined);
+                        process.env._TEST_FOO_ = "hello";
+                        count++;
+                        n1.receive({payload:"foo",topic: "bar"});
+                    } else {
+                        msg.should.have.property('payload', "hello");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                } finally {
+                    delete process.env._TEST_FOO_;
+                }
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
     describe('Logger', function () {
         it('should log an Info Message', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.log('test');"}];

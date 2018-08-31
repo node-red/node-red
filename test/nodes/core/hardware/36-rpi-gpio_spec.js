@@ -15,7 +15,8 @@
  **/
 
 var should = require("should");
-var rpi = require("nr-test-utils").require("@node-red/nodes/core/hardware/36-rpi-gpio.js");
+var rpiNode = require("nr-test-utils").require("@node-red/nodes/core/hardware/36-rpi-gpio.js");
+var statusNode = require("nr-test-utils").require("@node-red/nodes/core/core/25-status.js");
 var helper = require("node-red-node-test-helper");
 var fs = require("fs");
 
@@ -50,7 +51,7 @@ describe('RPI GPIO Node', function() {
 
     it('should load Input node', function(done) {
         var flow = [{id:"n1", type:"rpi-gpio in", name:"rpi-gpio in" }];
-        helper.load(rpi, flow, function() {
+        helper.load(rpiNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'rpi-gpio in');
             try {
@@ -69,7 +70,7 @@ describe('RPI GPIO Node', function() {
 
     it('should load Output node', function(done) {
         var flow = [{id:"n1", type:"rpi-gpio out", name:"rpi-gpio out" }];
-        helper.load(rpi, flow, function() {
+        helper.load(rpiNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.should.have.property('name', 'rpi-gpio out');
             try {
@@ -83,6 +84,70 @@ describe('RPI GPIO Node', function() {
             catch(e) {
                 checkIgnore(done);
             }
+        });
+    });
+
+
+    it('should read a dummy value high (not on Pi)', function(done) {
+        var flow = [{id:"n1", type:"rpi-gpio in", pin:"7", intype:"up", debounce:"25", read:true, wires:[["n2"]] },
+        {id:"n2", type:"helper"}];
+        helper.load(rpiNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', 'pi/7');
+                    msg.should.have.property('payload', 1);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+    });
+
+    it('should read a dummy value low (not on Pi)', function(done) {
+        var flow = [{id:"n1", type:"rpi-gpio in", pin:"11", intype:"down", debounce:"25", read:true, wires:[["n2"]] },
+        {id:"n2", type:"helper"}];
+        helper.load(rpiNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', 'pi/11');
+                    msg.should.have.property('payload', 0);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
+    });
+
+    it('should be able preset out to a dummy value (not on Pi)', function(done) {
+        var flow = [{id:"n1", type:"rpi-gpio out", pin:"7", out:"out", level:"0", set:true, freq:"", wires:[], z:"1"},
+        {id:"n2", type:"status", scope:null, wires:[["n3"]], z:"1"},
+        {id:"n3", type:"helper", z:"1"}];
+        helper.load([rpiNode,statusNode], flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            var count = 0;
+            n3.on("input", function(msg) {
+                // Only check the first status message received as it may get a
+                // 'closed' status as the test is tidied up.
+                if (count === 0) {
+                    count++;
+                    try {
+                        msg.should.have.property('status');
+                        msg.status.should.have.property('text', "rpi-gpio.status.na");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            });
+            n1.receive({payload:"1"});
         });
     });
 
