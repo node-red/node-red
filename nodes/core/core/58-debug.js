@@ -19,7 +19,11 @@ module.exports = function(RED) {
         if (this.tosidebar === undefined) { this.tosidebar = true; }
         this.severity = n.severity || 40;
         this.active = (n.active === null || typeof n.active === "undefined") || n.active;
-        this.status({});
+        if (this.tostatus) {
+            this.oldStatus = {fill:"grey", shape:this.active?"dot":"ring"};
+            this.status(this.oldStatus);
+        }
+        else { this.status({}); }
 
         var node = this;
         var levels = {
@@ -122,7 +126,7 @@ module.exports = function(RED) {
             if (state === "enable") {
                 node.active = true;
                 res.sendStatus(200);
-                if (node.tostatus) { node.status({}); }
+                if (node.tostatus) { node.status({fill:"grey", shape:"dot"}); }
             } else if (state === "disable") {
                 node.active = false;
                 res.sendStatus(201);
