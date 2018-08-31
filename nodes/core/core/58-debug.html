@@ -56,6 +56,11 @@
         },
         label: function() {
             var suffix = "";
+            if (this.tostatus === true || this.tostatus === "true") {
+                if (this.tosidebar === false || this.tosidebar === "false") {
+                    suffix = " ↲";
+                }
+            }
             if (this.console === true || this.console === "true") { suffix = " ⇲"; }
             if (this.complete === true || this.complete === "true") {
                 return (this.name||"msg") + suffix;
