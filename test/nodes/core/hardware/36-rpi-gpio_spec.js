@@ -132,13 +132,19 @@ describe('RPI GPIO Node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var n3 = helper.getNode("n3");
+            var count = 0;
             n3.on("input", function(msg) {
-                try {
-                    msg.should.have.property('status');
-                    msg.status.should.have.property('text', "rpi-gpio.status.na");
-                    done();
-                } catch(err) {
-                    done(err);
+                // Only check the first status message received as it may get a
+                // 'closed' status as the test is tidied up.
+                if (count === 0) {
+                    count++;
+                    try {
+                        msg.should.have.property('status');
+                        msg.status.should.have.property('text', "rpi-gpio.status.na");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
                 }
             });
             n1.receive({payload:"1"});
