@@ -23,7 +23,7 @@ var i18n;
 
 var settings;
 var disableNodePathScan = false;
-var iconFileExtensions = [".png", ".gif"];
+var iconFileExtensions = [".png", ".gif", ".svg"];
 
 function init(runtime) {
     settings = runtime.settings;
