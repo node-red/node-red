@@ -19,6 +19,7 @@ module.exports = function(RED) {
     const Ajv = require('ajv');
     const ajv = new Ajv({allErrors: true, schemaId: 'auto'});
     ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-04.json'));
+    ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'));
 
     function JSONNode(n) {
         RED.nodes.createNode(this,n);
@@ -29,6 +30,7 @@ module.exports = function(RED) {
         this.compiledSchema = null;
 
         var node = this;
+
         this.on("input", function(msg) {
             var validate = false;
             if (msg.schema) {
@@ -65,7 +67,17 @@ module.exports = function(RED) {
                         }
                         catch(e) { node.error(e.message,msg); }
                     } else {
-                        node.send(msg);
+                        // If node.action is str and value is str
+                        if (validate) {
+                            if (this.compiledSchema(JSON.parse(msg[node.property]))) {
+                                node.send(msg);
+                            } else {
+                                msg.schemaError = this.compiledSchema.errors;
+                                node.error(`${RED._("json.errors.schema-error")}: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                            }
+                        } else {
+                            node.send(msg);
+                        }
                     }
                 }
                 else if (typeof value === "object") {
@@ -84,13 +96,22 @@ module.exports = function(RED) {
                                     RED.util.setMessageProperty(msg,node.property,JSON.stringify(value,null,node.indent));
                                     node.send(msg);
                                 }
-
                             }
                             catch(e) { node.error(RED._("json.errors.dropped-error")); }
                         }
                         else { node.warn(RED._("json.errors.dropped-object")); }
                     } else {
-                        node.send(msg);
+                        // If node.action is obj and value is object
+                        if (validate) {
+                            if (this.compiledSchema(value)) {
+                                node.send(msg);
+                            } else {
+                                msg.schemaError = this.compiledSchema.errors;
+                                node.error(`${RED._("json.errors.schema-error")}: ${ajv.errorsText(this.compiledSchema.errors)}`, msg);
+                            }
+                        } else {
+                            node.send(msg);
+                        }
                     }
                 }
                 else { node.warn(RED._("json.errors.dropped")); }

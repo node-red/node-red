@@ -33,9 +33,7 @@ module.exports = function(RED) {
      */
     const enqueue = (queue, item) => {
         // drop msgs from front of queue if size is going to be exceeded
-        if (queue.size() === msgQueueSize) {
-            queue.shift();
-        }
+        if (queue.size() === msgQueueSize) { queue.shift(); }
         queue.push(item);
         return queue;
     };
@@ -646,7 +644,7 @@ module.exports = function(RED) {
             }
             else if (!clients[connection_id].connecting && clients[connection_id].connected) {
                 if (clients[connection_id] && clients[connection_id].client) {
-                    clients[connection_id].client.write(dequeue(clients[connection_id].msgQueue));
+                    clients[connection_id].client.write(dequeue(clients[connection_id].msgQueue).payload);
                 }
             }
         });
