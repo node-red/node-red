@@ -1004,7 +1004,7 @@ RED.sidebar.versionControl = (function() {
         RED.sidebar.addTab({
             id: "version-control",
             label: RED._("sidebar.project.versionControl.history"),
-            name: "Project History",
+            name: RED._("sidebar.project.versionControl.projectHistory"),
             content: sidebarContent,
             enableOnEdit: false,
             pinned: true,
