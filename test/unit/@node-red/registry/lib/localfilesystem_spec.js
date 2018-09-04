@@ -111,7 +111,6 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
         it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
             var relativeUserDir = path.join("test","unit","@node-red","registry","lib","resources","userDir");
-            console.log(relativeUserDir)
             localfilesystem.init({settings:{nodesDir:relativeUserDir}});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
