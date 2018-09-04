@@ -128,7 +128,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({log:{debug:function(){}},i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
             var nodeList = localfilesystem.getNodeFiles();
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
