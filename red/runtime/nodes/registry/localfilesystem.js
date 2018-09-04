@@ -290,6 +290,33 @@ function getNodeFiles(disableNodePathScan) {
 
     if (!disableNodePathScan) {
         var moduleFiles = scanTreeForNodesModules();
+
+        // Filter the module list to ignore global modules
+        // that have also been installed locally - allowing the user to
+        // update a module they may not otherwise be able to touch
+
+        moduleFiles.sort(function(A,B) {
+            if (A.local && !B.local) {
+                return -1
+            } else if (!A.local && B.local) {
+                return 1
+            }
+            return 0;
+        })
+        var knownModules = {};
+        moduleFiles = moduleFiles.filter(function(mod) {
+            var result;
+            if (!knownModules[mod.package.name]) {
+                knownModules[mod.package.name] = true;
+                result = true;
+            } else {
+                result = false;
+            }
+            log.debug("Module: "+mod.package.name+" "+mod.package.version+(result?"":" *ignored due to local copy*"));
+            log.debug("        "+mod.dir);
+            return result;
+        });
+
         moduleFiles.forEach(function(moduleFile) {
             var nodeModuleFiles = getModuleNodeFiles(moduleFile);
             nodeList[moduleFile.package.name] = {
