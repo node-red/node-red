@@ -126,6 +126,7 @@
                 var value = that.editor.getValue();
                 RED.editor.editJavaScript({
                     value: value,
+                    width: "Infinity",
                     cursor: that.editor.getCursorPosition(),
                     complete: function(v,cursor) {
                         that.editor.setValue(v, -1);
