@@ -586,7 +586,10 @@ module.exports = function(RED) {
                     }
                     else {
                         if (msg.hasOwnProperty('complete')) {
-                            completeSend(partId);
+                            if (inflight[partId]) {
+                                inflight[partId].msg.complete = msg.complete;
+                                completeSend(partId);
+                            }
                         }
                         else {
                             node.warn("Message missing key property 'msg."+node.key+"' - cannot add to object")
@@ -594,6 +597,7 @@ module.exports = function(RED) {
                     }
                     return;
                 }
+
                 if (!inflight.hasOwnProperty(partId)) {
                     if (payloadType === 'object' || payloadType === 'merged') {
                         inflight[partId] = {
@@ -603,19 +607,6 @@ module.exports = function(RED) {
                             type:"object",
                             msg:RED.util.cloneMessage(msg)
                         };
-                    }
-                    else if (node.accumulate === true) {
-                        if (msg.hasOwnProperty("reset")) { delete inflight[partId]; }
-                        inflight[partId] = inflight[partId] || {
-                            currentCount:0,
-                            payload:{},
-                            targetCount:targetCount,
-                            type:payloadType,
-                            msg:RED.util.cloneMessage(msg)
-                        }
-                        if (payloadType === 'string' || payloadType === 'array' || payloadType === 'buffer') {
-                            inflight[partId].payload = [];
-                        }
                     }
                     else {
                         inflight[partId] = {
