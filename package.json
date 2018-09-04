@@ -104,6 +104,7 @@
     "http-proxy": "^1.16.2",
     "istanbul": "0.4.5",
     "mocha": "^5.2.0",
+    "mosca": "^2.8.3",
     "node-red-node-test-helper": "0.1.7",
     "should": "^8.4.0",
     "sinon": "1.17.7",
