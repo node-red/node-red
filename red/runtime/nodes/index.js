@@ -159,6 +159,7 @@ function uninstallModule(module) {
     }
 }
 
+// get & set global Node timeout value in ms
 function getNodeTimeout() {
     return Node.getTimeout();
 }
@@ -219,6 +220,7 @@ module.exports = {
     // disableFlow: flows.disableFlow,
     // enableFlow:  flows.enableFlow,
 
+    // get & set global Node timeout value in ms
     getNodeTimeout: getNodeTimeout,
     setNodeTimeout: setNodeTimeout,
     

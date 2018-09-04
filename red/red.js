@@ -111,6 +111,7 @@ module.exports = {
     library: api.library,
     auth: api.auth,
 
+    // get & set timeout value of node's message processing in ms
     getNodeTimeout: runtime.getNodeTimeout,
     setNodeTimeout: runtime.setNodeTimeout,
 

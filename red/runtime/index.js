@@ -262,6 +262,7 @@ var runtime = module.exports = {
     isStarted: function() {
         return started;
     },
+    // get & set timeout value of node's message processing in ms
     getNodeTimeout: getNodeTimeout,
     setNodeTimeout: setNodeTimeout
 }

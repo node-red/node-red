@@ -31,7 +31,7 @@ function Flow(global,flow) {
     var subflowInstanceNodes = {};
     var catchNodeMap = {};
     var statusNodeMap = {};
-    var succNodeMap = {};
+    var doneNodeMap = {}; // records `Done` nodes in flow
 
     this.start = function(diff) {
         var node;
@@ -39,7 +39,7 @@ function Flow(global,flow) {
         var id;
         catchNodeMap = {};
         statusNodeMap = {};
-        succNodeMap = {};
+        doneNodeMap = {};
 
         var configNodes = Object.keys(flow.configs);
         var configNodeAttempts = {};
@@ -120,23 +120,26 @@ function Flow(global,flow) {
                 } else if (node.type === "status") {
                     statusNodeMap[node.z] = statusNodeMap[node.z] || [];
                     statusNodeMap[node.z].push(node);
-                } else if (node.type === "success") {
-                    succNodeMap[node.z] = succNodeMap[node.z] || [];
-                    succNodeMap[node.z].push(node);
+                } else if (node.type === "done") {
+                    doneNodeMap[node.z] = doneNodeMap[node.z] || [];
+                    doneNodeMap[node.z].push(node);
                 }
             }
         }
+        // clear `node._canSendDone`
         for (id in activeNodes) {
-            node.setCanSendSuccess(false);
+            node.setCanSendDone(false);
         }
+        // if a node is target of `Done` node make
+        // `node._canSendDone` `true`.
         for (id in activeNodes) {
             var node = activeNodes[id];
-            if ((node.type === "success") && node.hasOwnProperty("scope")) {
+            if ((node.type === "done") && node.hasOwnProperty("scope")) {
                 var scope = node.scope;
                 if (scope) {
                     for (var src_id of scope) {
                         var src = activeNodes[src_id];
-                        src.setCanSendSuccess(true);
+                        src.setCanSendDone(true);
                     }
                 }
             }
@@ -309,36 +312,37 @@ function Flow(global,flow) {
         return handled;
     };
 
-    this.handleSuccess = function(node, msg) {
+    // notify successful completion of `node` with output message
+    // `msg` to `Done` node.
+    this.handleDone = function(node, msg) {
         var sourceNode = node;
-        var targetSuccNodes = succNodeMap[sourceNode.z];
-        var has_target = false;
-        if (targetSuccNodes) {
-            targetSuccNodes.forEach(function(targetSuccNode) {
-                if (targetSuccNode.scope && targetSuccNode.scope.indexOf(sourceNode.id) === -1) {
+        var targetDoneNodes = doneNodeMap[sourceNode.z];
+        if (targetDoneNodes) {
+            targetDoneNodes.forEach(function(targetDoneNode) {
+                if (targetDoneNode.scope && targetDoneNode.scope.indexOf(sourceNode.id) === -1) {
                     return;
                 }
-                var succMessage;
+                var doneMessage;
                 if (msg) {
-                    succMessage = redUtil.cloneMessage(msg);
+                    doneMessage = redUtil.cloneMessage(msg);
                 } else {
-                    succMessage = {};
+                    doneMessage = {};
                 }
-                if (succMessage.hasOwnProperty("success")) {
-                    succMessage._success = succMessage.success;
+                // save `done` property if already exist
+                if (doneMessage.hasOwnProperty("done")) {
+                    doneMessage._done = succMessage.done;
                 }
-                succMessage.success = {
+                // send message to `Done` node
+                doneMessage.done = {
                     source: {
                         id: node.id,
                         type: node.type,
                         name: node.name
                     }
                 };
-                targetSuccNode.receive(succMessage);
-                has_target = true;
+                targetDoneNode.receive(doneMessage);
             });
         }
-        node.setCanSendSuccess(has_target);
     };
 }
 

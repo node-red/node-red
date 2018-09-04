@@ -48,7 +48,9 @@ var verbose;
 
 var metricsEnabled = false;
 
-var _correlate_in_out = false;
+// A flag to output corrlating input message to metric log
+// This flag is set by logging.correlate_msg_in_out property of settings.js.
+var _correlateInOut = false;
 
 var LogHandler = function(settings) {
     this.logLevel  = settings ? levels[settings.level]||levels.info : levels.info;
@@ -121,11 +123,12 @@ var log = module.exports = {
             log.addHandler(new LogHandler());
         }
         if (logging && logging.hasOwnProperty("correlate_msg_in_out")) {
-            _correlate_in_out = logging.correlate_msg_in_out;
+            _correlateInOut = logging.correlate_msg_in_out;
         }
     },
-    correlate_msg_in_out: function() {
-        return _correlate_in_out;
+    // output corrlating input message to metric log if true
+    correlateMsgInOut: function() {
+        return _correlateInOut;
     },
     addHandler: function(func) {
         logHandlers.push(func);

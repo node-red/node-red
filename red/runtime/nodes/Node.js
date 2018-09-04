@@ -23,6 +23,8 @@ var Log = require("../log");
 var context = require("./context");
 var flows = require("./flows");
 
+// Global timeout value in ms.
+// This valie can be specified by `node_timeout` property in `settings.js`.
 var _timeout = undefined;
 
 function Node(n) {
@@ -30,7 +32,9 @@ function Node(n) {
     this.type = n.type;
     this.z = n.z;
     this._closeCallbacks = [];
-    this._msg_in = undefined;
+    // record last received message for logging correlation for
+    // old-style `send` function
+    this._msgIn = undefined;
 
     if (n.name) {
         this.name = n.name;
@@ -81,15 +85,18 @@ Node.prototype.on = function(event, callback) {
         this._closeCallbacks.push(callback);
     } else {
         if (callback.length === 3) {
-            this._on(event, function(msg_in) {
+            // handle new style callback: `function(msg, send, done) {...}`
+            this._on(event, function(msgIn) {
                 var done = undefined;
                 var timer = undefined;
+                // setup timeout if specified
                 function setupNodeTimeout() {
                     var timeout = node.getTimeout();
                     if (timeout) {
                         timer = setTimeout(function() {
+                            // report error if timeout period exceeded
                             node.error(new Error("node execution timeout"),
-                                       msg_in);
+                                       msgIn);
                         }, timeout);
                     }
                 }
@@ -98,36 +105,49 @@ Node.prototype.on = function(event, callback) {
                         clearTimeout(timer);
                     }
                 }
-                if (node.maySendSuccess()) {
+                // define `done` callback with optimization
+                if (node.maySendDone()) {
+                    // if this node is specified as target of Done node,
+                    // process `error` & `done`.
                     done = function (err, msg) {
                         clearNodeTimeout();
                         if (err) {
-                            node.error(err, msg ? msg : msg_in);
+                            node.error(err, msg ? msg : msgIn);
                         }
                         else {
-                            node.success(msg ? msg : msg_in);
+                            node.done(msg ? msg : msgIn);
                         }
                     };
                 }
                 else {
+                    // otherwise do not need to process `done`.
                     done = function (err, msg) {
                         clearNodeTimeout();
+                        if (err) {
+                            node.error(err, msg ? msg : msgIn);
+                        }
                     }
                 }
+                // define `send` callback
                 var send = function(msg_out) {
-                    node.send(msg_out, msg_in);
+                    node.send(msg_out, msgIn);
                 }
                 setupNodeTimeout();
-                node._msg_in = msg_in;
-                callback.call(node, msg_in, send, done);
+                // save input message for old-style `send` function
+                node._msgIn = msgIn;
+                callback.call(node, msgIn, send, done);
             });
         }
         else {
+            // handle old style callback: `function(msg) { ... }`
             this._on(event, function(msg) {
-                node._msg_in = msg;
+                // save input message for old-style `send` function
+                node._msgIn = msg;
                 callback.call(node, msg);
-                if (node.maySendSuccess()) {
-                    node.success(msg);
+                // implicitly notify successful completion if this
+                // node is target of `Done` node.
+                if (node.maySendDone()) {
+                    node.done(msg);
                 }
             });
         }
@@ -169,7 +189,11 @@ Node.prototype.close = function(removed) {
     }
 };
 
-Node.prototype.send = function(msg, in_msg) {
+/**
+ * msg: output message
+ * inMsg: correlating input message
+ */
+Node.prototype.send = function(msg, inMsg) {
     var msgSent = false;
     var node;
 
@@ -183,7 +207,9 @@ Node.prototype.send = function(msg, in_msg) {
             if (!msg._msgid) {
                 msg._msgid = redUtil.generateId();
             }
-            this.metric("send",msg, undefined, in_msg);
+            // log "send" metric.
+            // (with correlating input message if specified)
+            this.metric("send",msg, undefined, inMsg);
             node = flows.get(this._wire);
             /* istanbul ignore else */
             if (node) {
@@ -244,8 +270,10 @@ Node.prototype.send = function(msg, in_msg) {
     if (!sentMessageId) {
         sentMessageId = redUtil.generateId();
     }
-    var msg_in = in_msg || this._msg_in;
-    this.metric("send",{_msgid:sentMessageId}, undefined, msg_in);
+    // log "send" metric.
+    // (with correlating input message if specified)
+    var msgIn = inMsg || this._msgIn; // use _msgIn for old-style send call
+    this.metric("send",{_msgid:sentMessageId}, undefined, msgIn);
 
     for (i=0;i<sendEvents.length;i++) {
         var ev = sendEvents[i];
@@ -316,21 +344,20 @@ Node.prototype.error = function(logMessage,msg) {
     }
 };
 
-Node.prototype.setCanSendSuccess = function(val) {
-    this._can_send_success = val;
+// true if node is candidate for handling by `Done` node.
+// (see `Flow` function in `red/runtime/nodes/flows/Flow.js` for details)
+Node.prototype.setCanSendDone = function(val) {
+    this._canSendDone = val;
 }
 
-Node.prototype.canSendSuccess = function() {
-    return (this._can_send_success === true);
+Node.prototype.maySendDone = function() {
+    return (this._canSendDone !== false);
 }
 
-Node.prototype.maySendSuccess = function() {
-    return (this._can_send_success !== false);
-}
-
-Node.prototype.success = function(msg) {
+// notify successful completion of the node to `Done` node.
+Node.prototype.done = function(msg) {
     try {
-        flows.handleSuccess(this, msg);
+        flows.handleDone(this, msg);
     }
     catch(e) {
         console.log(e.stack);
@@ -349,7 +376,7 @@ Node.prototype.trace = function(msg) {
 /**
  * If called with no args, returns whether metric collection is enabled
  */
-Node.prototype.metric = function(eventname, msg, metricValue, msg_in) {
+Node.prototype.metric = function(eventname, msg, metricValue, msgIn) {
     if (typeof eventname === "undefined") {
         return Log.metric();
     }
@@ -358,8 +385,10 @@ Node.prototype.metric = function(eventname, msg, metricValue, msg_in) {
     metrics.nodeid = this.id;
     metrics.event = "node."+this.type+"."+eventname;
     metrics.msgid = msg._msgid;
-    if (msg_in && Log.correlate_msg_in_out()) {
-        metrics.in_msgid = msg_in._msgid;
+    // log correlating input message if `correlate_msg_in_out` is
+    // specified in settings.js
+    if (msgIn && Log.correlateMsgInOut()) {
+        metrics.inMsgid = msgIn._msgid;
     }
     metrics.value = metricValue;
     Log.log(metrics);
@@ -394,6 +423,8 @@ Node.setTimeout = function(val) {
 }
 
 Node.init = function(settings) {
+    // record global timeout value specified by `node_timeout`
+    // property in settings.js.
     if (settings && settings.hasOwnProperty("node_timeout")) {
         _timeout = settings.node_timeout;
     }

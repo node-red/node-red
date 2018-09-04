@@ -101,8 +101,8 @@
             "selected": "selected nodes"
         }
     },
-    "success": {
-        "successNodes": "success: __number__",
+    "done": {
+        "doneNodes": "done: __number__",
         "label": {
             "source": "Report completion of",
             "node": "node",

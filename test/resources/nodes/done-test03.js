@@ -17,14 +17,16 @@
 module.exports = function(RED) {
     "use strict";
 
-    function SuccTest00Node(n) {
+    function DoneTest03Node(n) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.on("input", function(msg, send, done) {
-            send(msg);
-            done();
+            setTimeout(function() {
+                send(msg);
+                done(null, msg);
+            }, 100);
         });
     }
 
-    RED.nodes.registerType("succ-test00", SuccTest00Node);
+    RED.nodes.registerType("done-test03", DoneTest03Node);
 }
