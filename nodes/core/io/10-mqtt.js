@@ -136,10 +136,11 @@ module.exports = function(RED) {
                     }
             } else {
                 // construct the std mqtt:// url
-                if (this.usetls) {
-                    this.brokerurl="mqtts://";
+                let tlsPrefix = (this.usetls) ? "s" : "";
+                if (this.usetws) {
+                    this.brokerurl="ws" + tlsPrefix + "://";
                 } else {
-                    this.brokerurl="mqtt://";
+                    this.brokerurl="mqtt" + tlsPrefix + "://";
                 }
                 if (this.broker !== "") {
                     this.brokerurl = this.brokerurl+this.broker+":";
