@@ -24,7 +24,7 @@ var context = require("./context");
 var flows = require("./flows");
 
 // Global timeout value in ms.
-// This valie can be specified by `node_timeout` property in `settings.js`.
+// This valie can be specified by `nodeTimeout` property in `settings.js`.
 var _timeout = undefined;
 
 function Node(n) {
@@ -385,9 +385,8 @@ Node.prototype.metric = function(eventname, msg, metricValue, msgIn) {
     metrics.nodeid = this.id;
     metrics.event = "node."+this.type+"."+eventname;
     metrics.msgid = msg._msgid;
-    // log correlating input message if `correlate_msg_in_out` is
-    // specified in settings.js
-    if (msgIn && Log.correlateMsgInOut()) {
+    // log correlating input message
+    if (msgIn) {
         metrics.inMsgid = msgIn._msgid;
     }
     metrics.value = metricValue;
@@ -423,10 +422,10 @@ Node.setTimeout = function(val) {
 }
 
 Node.init = function(settings) {
-    // record global timeout value specified by `node_timeout`
+    // record global timeout value specified by `nodeTimeout`
     // property in settings.js.
-    if (settings && settings.hasOwnProperty("node_timeout")) {
-        _timeout = settings.node_timeout;
+    if (settings && settings.hasOwnProperty("nodeTimeout")) {
+        _timeout = settings.nodeTimeout;
     }
 }
 

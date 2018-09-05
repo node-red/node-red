@@ -84,7 +84,7 @@ module.exports = {
     //nodesDir: '/home/nol/.node-red/nodes',
 
     // timeout of node execution in milliseconds
-    // node_timeout: 600000,
+    // nodeTimeout: 600000,
     
     // By default, the Node-RED UI is available at http://localhost:1880/
     // The following property can be used to specify a different root path.
@@ -235,9 +235,7 @@ module.exports = {
             metrics: false,
             // Whether or not to include audit events in the log output
             audit: false
-        },
-        // output corresponding input message in send metrics
-        correlate_msg_in_out: false
+        }
     },
 
     // Customising the editor

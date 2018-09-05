@@ -593,7 +593,6 @@ describe('Node', function() {
         });
 
         it('produces metrics for send/recv (single, new handler, corr.)', function(done) {
-            Log.init({logging:{correlate_msg_in_out: true}});
             var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2']]});
             var n2 = new RedNode({id:'n2', type:'abc'});
             var flowGet = sinon.stub(flows,"get",function(id) {
@@ -610,7 +609,7 @@ describe('Node', function() {
                         ; // OK
                     }
                     else if (msg.event === 'node.abc.send') {
-                        msg.should.have.property('in_msgid');
+                        msg.should.have.property('inMsgid');
                     }
                     else {
                         should.fail();
@@ -638,7 +637,6 @@ describe('Node', function() {
         });
 
         it('produces metrics for send/recv (multi, new handler, corr.)', function(done) {
-            Log.init({logging:{correlate_msg_in_out: true}});
             var n1 = new RedNode({id:'n1', type:'abc', wires:[['n2', 'n3']]});
             var n2 = new RedNode({id:'n2', type:'abc'});
             var n3 = new RedNode({id:'n3', type:'abc'});
@@ -656,7 +654,7 @@ describe('Node', function() {
                         ; // OK
                     }
                     else if (msg.event === 'node.abc.send') {
-                        msg.should.have.property('in_msgid');
+                        msg.should.have.property('inMsgid');
                     }
                     else {
                         should.fail();

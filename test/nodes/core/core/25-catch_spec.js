@@ -23,13 +23,14 @@ var catchTest02Node = require("../../../resources/nodes/catch-test02.js");
 var catchTest03Node = require("../../../resources/nodes/catch-test03.js");
 var catchTest04Node = require("../../../resources/nodes/catch-test04.js");
 var RED = require("../../../../red/red.js");
+var runtime = require("../../../../red/runtime");
 var helper = require("node-red-node-test-helper");
 
 describe('catch Node', function() {
 
     afterEach(function() {
         helper.unload();
-        RED.setNodeTimeout(undefined);
+        runtime.setNodeTimeout(undefined);
     });
 
     it('should output a message when called', function(done) {
@@ -198,7 +199,7 @@ describe('catch Node', function() {
             var n1 = helper.getNode("n1");
             var n3 = helper.getNode("n3");
             var count = 0;
-            RED.setNodeTimeout(500);
+            runtime.setNodeTimeout(500);
             n3.on("input", function(msg) {
                 msg.should.have.property("_msgid", "xyz");
                 msg.should.have.property("payload", "foo");
