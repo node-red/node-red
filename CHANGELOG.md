@@ -1,3 +1,19 @@
+#### 0.19.3: Maintenance Release
+
+ - Split node - fix complete to send msg for k/v object
+ - Remove unused Join node merged object key typed input
+ - Set the JavaScript editor to full-screen
+ - Filter global modules installed locally
+ - Add svg to permitted icon extension list
+ - Debug node - indicate status all the time if selected to do so
+ - pi nodes - increase test coverage slightly
+ - TCP-request node - only write payload
+ - JSON schema: perform validation when obj -> obj or str -> str
+ - JSON schema: add draft-06 support (via $schema keyword)
+ - Mqtt proxy configuration for websocket connection, #1651.
+ - Allows MQTT Shared Subscriptions for MQTT-In core node
+ - Fix use of HTML tag or CSS class specification as icon of typedInput
+
 #### 0.19.2: Maintenance Release
 
  - Ensure node default colour is used if palette.theme has no match

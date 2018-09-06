@@ -66,13 +66,25 @@ describe('SORT node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
-                msg.should.have.property(target);
-                var data = msg[target];
-                data.length.should.equal(data_out.length);
-                for(var i = 0; i < data_out.length; i++) {
-                    data[i].should.equal(data_out[i]);
+                try {
+                    msg.should.have.property(target);
+                    var data = msg[target];
+                    data.length.should.equal(data_out.length);
+                    for(var i = 0; i < data_out.length; i++) {
+                        var data0 = data[i];
+                        var data1 = data_out[i];
+                        if (typeof data0 === "object") {
+                            data0.should.deepEqual(data1);
+                        }
+                        else {
+                            data0.should.equal(data1);
+                        }
+                    }
+                    done();
                 }
-                done();
+                catch(e) {
+                    console.log(e);
+                }
             });
             var msg = {};
             msg[target] = data_in;
@@ -93,6 +105,34 @@ describe('SORT node', function() {
     }
 
     function check_sort1(flow, key, key_type, data_in, data_out, done) {
+        function equals(v0, v1) {
+            var k0 = Object.keys(v0);
+            var k1 = Object.keys(v1);
+
+            if (k0.length === k1.length) {
+                for (var i = 0; i < k0.length; i++) {
+                    var k = k0[i];
+                    if (!v1.hasOwnProperty(k) ||
+                        (v0[k] !== v1[k])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        function indexOf(a, v) {
+            for(var i = 0; i < a.length; i++) {
+                var av = a[i];
+                if ((typeof v === 'object') && equals(v, av)) {
+                    return i;
+                }
+                else if (v === av) {
+                    return i;
+                }
+            }
+            return -1;
+        }
         var sort = flow[0];
         var prop = (key_type === "msg") ? key : "payload";
         sort.targetType = "seq";
@@ -107,7 +147,7 @@ describe('SORT node', function() {
                 msg.should.have.property("parts");
                 msg.parts.should.have.property("count", data_out.length);
                 var data = msg[prop];
-                var index = data_out.indexOf(data);
+                var index = indexOf(data_out, data);
                 msg.parts.should.have.property("index", index);
                 count++;
                 if (count === data_out.length) {
@@ -135,7 +175,6 @@ describe('SORT node', function() {
     function check_sort1C(flow, exp, data_in, data_out, done) {
         check_sort1(flow, exp, "jsonata", data_in, data_out, done);
     }
-
 
     (function() {
         var flow = [{id:"n1", type:"sort", order:"ascending", as_num:false, wires:[["n2"]]},
@@ -239,6 +278,19 @@ describe('SORT node', function() {
         });
     })();
 
+    (function() {
+        var flow = [{id:"n1", type:"sort", order:"ascending", as_num:true, wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        var conv = function(x) {
+            return x.map(function(v) { return { val:v }; });
+        };
+        var data_in  = conv([ "200", "4", "30", "1000" ]);
+        var data_out = conv([ "4", "30", "200", "1000" ]);
+        it('should sort payload of objects', function(done) {
+            check_sort0C(flow, "val", data_in, data_out, done);
+        });
+    })();
+
     it('should sort payload by context (exp, not number, ascending)', function(done) {
         var flow = [{id:"n1", type:"sort", target:"data", targetType:"msg", msgKey:"$flowContext($)", msgKeyType:"jsonata", order:"ascending", as_num:false, wires:[["n2"]],z:"flow"},
                     {id:"n2", type:"helper",z:"flow"},
@@ -268,7 +320,7 @@ describe('SORT node', function() {
     });
 
     it('should sort message group by context (exp, not number, ascending)', function(done) {
-        var flow = [{id:"n1", type:"sort", target:"data", targetType:"msg", msgKey:"$globalContext(payload)", msgKeyType:"jsonata", order:"ascending", as_num:false, wires:[["n2"]],z:"flow"},
+        var flow = [{id:"n1", type:"sort", target:"data", targetType:"seq", seqKey:"$globalContext(payload)", seqKeyType:"jsonata", order:"ascending", as_num:false, wires:[["n2"]],z:"flow"},
                     {id:"n2", type:"helper",z:"flow"},
                     {id:"flow", type:"tab"}];
         var data_in  = [ "first", "second", "third", "fourth" ];
@@ -282,15 +334,20 @@ describe('SORT node', function() {
             n1.context()["global"].set("third","3");
             n1.context()["global"].set("fourth","2");
             n2.on("input", function(msg) {
-                msg.should.have.property("payload");
-                msg.should.have.property("parts");
-                msg.parts.should.have.property("count", data_out.length);
-                var data = msg["payload"];
-                var index = data_out.indexOf(data);
-                msg.parts.should.have.property("index", index);
-                count++;
-                if (count === data_out.length) {
-                    done();
+                try {
+                    msg.should.have.property("payload");
+                    msg.should.have.property("parts");
+                    msg.parts.should.have.property("count", data_out.length);
+                    var data = msg["payload"];
+                    var index = data_out.indexOf(data);
+                    msg.parts.should.have.property("index", index);
+                    count++;
+                    if (count === data_out.length) {
+                        done();
+                    }
+                }
+                catch(e) {
+                    done(e);
                 }
             });
             var len = data_in.length;
@@ -332,7 +389,7 @@ describe('SORT node', function() {
     });
 
     it('should sort message group by persistable context (exp, not number, descending)', function(done) {
-        var flow = [{id:"n1", type:"sort", target:"data", targetType:"msg", msgKey:"$flowContext(payload,\"memory\")", msgKeyType:"jsonata", order:"descending", as_num:false, wires:[["n2"]],z:"flow"},
+        var flow = [{id:"n1", type:"sort", target:"data", targetType:"seq", seqKey:"$flowContext(payload,\"memory\")", seqKeyType:"jsonata", order:"descending", as_num:false, wires:[["n2"]],z:"flow"},
                     {id:"n2", type:"helper",z:"flow"},
                     {id:"flow", type:"tab"}];
         var data_in  = [ "first", "second", "third", "fourth" ];

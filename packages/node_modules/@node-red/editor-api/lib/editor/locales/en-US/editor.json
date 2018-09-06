@@ -587,6 +587,7 @@
                 "pullUnrelatedHistory": "<p>The remote has an unrelated history of commits.</p><p>Are you sure you want to pull the changes into your local repository?</p>",
                 "pullChanges": "Pull changes",
                 "history": "history",
+                "projectHistory": "Project History",
                 "daysAgo": "__count__ day ago",
                 "daysAgo_plural": "__count__ days ago",
                 "hoursAgo": "__count__ hour ago",

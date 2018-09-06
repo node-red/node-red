@@ -32,7 +32,7 @@ RED.editor.types._js = (function() {
 
             var trayOptions = {
                 title: options.title,
-                width: "inherit",
+                width: options.width||"inherit",
                 buttons: [
                     {
                         id: "node-dialog-cancel",

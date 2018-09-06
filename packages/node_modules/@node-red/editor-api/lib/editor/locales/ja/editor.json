@@ -585,6 +585,7 @@
                 "pullUnrelatedHistory": "<p>リモートに関連のないコミット履歴があります。</p><p>本当に変更をプルしてローカルリポジトリに反映しますか？</p>",
                 "pullChanges": "プル変更",
                 "history": "履歴",
+                "projectHistory": "プロジェクト履歴",
                 "daysAgo": "__count__ 日前",
                 "daysAgo_plural": "__count__ 日前",
                 "hoursAgo": "__count__ 時間前",

@@ -603,14 +603,14 @@ describe('JOIN node', function() {
     });
 
     it('should accumulate a merged object', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true, count:1},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true, count:3},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 5) {
+                if (c === 3) {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("a",3);
@@ -632,14 +632,14 @@ describe('JOIN node', function() {
     });
 
     it('should be able to reset an accumulation', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom", count:1},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom", count:3},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 3) {
+                if (c === 1) {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("a",1);
@@ -649,11 +649,20 @@ describe('JOIN node', function() {
                     }
                     catch(e) { done(e) }
                 }
-                if (c === 5) {
+                if (c === 2) {
                     try {
                         msg.should.have.property("payload");
-                        msg.payload.should.have.property("b",2);
-                        msg.payload.should.have.property("c",1);
+                        msg.payload.should.have.property("e",2);
+                        msg.payload.should.have.property("f",1);
+                    }
+                    catch(e) { done(e) }
+                }
+                if (c === 3) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("g",2);
+                        msg.payload.should.have.property("h",1);
+                        msg.payload.should.have.property("i",3);
                         done();
                     }
                     catch(e) { done(e) }
@@ -664,8 +673,11 @@ describe('JOIN node', function() {
             n1.receive({payload:{b:2}, topic:"b"});
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d", complete:true});
-            n1.receive({payload:{b:2}, topic:"e"});
-            n1.receive({payload:{c:1}, topic:"f"});
+            n1.receive({payload:{e:2}, topic:"e"});
+            n1.receive({payload:{f:1}, topic:"f", complete:true});
+            n1.receive({payload:{g:2}, topic:"g"});
+            n1.receive({payload:{h:1}, topic:"h"});
+            n1.receive({payload:{i:3}, topic:"i"});
         });
     });
 
