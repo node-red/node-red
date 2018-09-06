@@ -225,9 +225,9 @@ module.exports = function(grunt) {
         jsonlint: {
             messages: {
                 src: [
-                    'nodes/core/locales/en-US/messages.json',
-                    'red/api/locales/en-US/editor.json',
-                    'red/runtime/locales/en-US/runtime.json'
+                    'packages/node_modules/@node-red/nodes/locales/**/*.json',
+                    'packages/node_modules/@node-red/editor-api/lib/editor/locales/**/*.json',
+                    'packages/node_modules/@node-red/runtime/locales/**/*.json'
                 ]
             },
             keymaps: {
@@ -280,9 +280,9 @@ module.exports = function(grunt) {
             },
             json: {
                 files: [
-                    'nodes/core/locales/en-US/messages.json',
-                    'red/api/locales/en-US/editor.json',
-                    'red/runtime/locales/en-US/runtime.json'
+                    'packages/node_modules/@node-red/nodes/locales/**/*.json',
+                    'packages/node_modules/@node-red/editor-api/lib/editor/locales/**/*.json',
+                    'packages/node_modules/@node-red/runtime/locales/**/*.json'
                 ],
                 tasks: ['jsonlint:messages']
             },
@@ -308,7 +308,8 @@ module.exports = function(grunt) {
                     args: nodemonArgs,
                     ext: 'js,html,json',
                     watch: [
-                        'packages/node_modules'
+                        'packages/node_modules',
+                        '!packages/node_modules/@node-red/editor-client'
                     ]
                 }
             }
