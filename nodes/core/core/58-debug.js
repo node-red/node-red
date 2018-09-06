@@ -20,7 +20,7 @@ module.exports = function(RED) {
         this.severity = n.severity || 40;
         this.active = (n.active === null || typeof n.active === "undefined") || n.active;
         if (this.tostatus) {
-            this.oldStatus = {fill:"grey", shape:this.active?"dot":"ring"};
+            this.oldStatus = {fill:"grey", shape:"ring"};
             this.status(this.oldStatus);
         }
         else { this.status({}); }
@@ -131,7 +131,7 @@ module.exports = function(RED) {
                 node.active = false;
                 res.sendStatus(201);
                 if (node.tostatus && node.hasOwnProperty("oldStatus")) {
-                    node.oldStatus.shape = "ring";
+                    node.oldStatus.shape = "dot";
                     node.status(node.oldStatus);
                 }
             } else {

@@ -196,9 +196,10 @@ module.exports = function(RED) {
                 }).catch(err => {
                     node.error(err,msg);
                 });
+                return;
             }
             var parts = msg.parts;
-            if (!parts.hasOwnProperty("id") || !parts.hasOwnProperty("index")) {
+            if (!parts || !parts.hasOwnProperty("id") || !parts.hasOwnProperty("index")) {
                 return;
             }
             var gid = parts.id;
@@ -242,7 +243,8 @@ module.exports = function(RED) {
                     delete pending[key];
                 }
             }
-            pending_count = 0;        })
+            pending_count = 0;
+        });
     }
 
     RED.nodes.registerType("sort", SortNode);
