@@ -21,7 +21,12 @@ import os
 import subprocess
 from time import sleep
 
-bounce = 25;
+try:
+    raw_input          # Python 2
+except NameError:
+    raw_input = input  # Python 3
+
+bounce = 25
 
 if len(sys.argv) > 2:
     cmd = sys.argv[1].lower()
@@ -198,7 +203,7 @@ if len(sys.argv) > 2:
     elif cmd == "kbd":  # catch keyboard button events
         try:
             while not os.path.isdir("/dev/input/by-path"):
-                time.sleep(10)
+                sleep(10)
             infile = subprocess.check_output("ls /dev/input/by-path/ | grep -m 1 'kbd'", shell=True).strip()
             infile_path = "/dev/input/by-path/" + infile
             EVENT_SIZE = struct.calcsize('llHHI')
