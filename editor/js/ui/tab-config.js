@@ -140,7 +140,8 @@ RED.sidebar.config = (function() {
                 var entry = $('<li class="palette_node config_node palette_node_id_'+node.id.replace(/\./g,"-")+'"></li>').appendTo(list);
                 $('<div class="palette_label"></div>').text(label).appendTo(entry);
                 if (node._def.hasUsers !== false) {
-                    var iconContainer = $('<div/>',{class:"palette_icon_container  palette_icon_container_right"}).text(node.users.length).appendTo(entry);
+                    var f = 'RED.search.show(\''+node.id+'\')'
+                    var iconContainer = $('<div/>',{class:"palette_icon_container palette_icon_container_right", onclick:f }).text(node.users.length).appendTo(entry);
                     if (node.users.length === 0) {
                         entry.addClass("config_node_unused");
                     }

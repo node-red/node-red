@@ -118,6 +118,7 @@ RED.search = (function() {
             }
         }
     }
+
     function ensureSelectedIsVisible() {
         var selectedEntry = searchResults.find("li.selected");
         if (selectedEntry.length === 1) {
@@ -143,6 +144,7 @@ RED.search = (function() {
                 search($(this).val());
             }
         });
+
         searchInput.on('keydown',function(evt) {
             var children;
             if (results.length > 0) {
@@ -229,12 +231,13 @@ RED.search = (function() {
         });
 
     }
+
     function reveal(node) {
         hide();
         RED.view.reveal(node.id);
     }
 
-    function show() {
+    function show(v) {
         if (disabled) {
             return;
         }
@@ -250,11 +253,13 @@ RED.search = (function() {
                 createDialog();
             }
             dialog.slideDown(300);
+            searchInput.searchBox('value',v)
             RED.events.emit("search:open");
             visible = true;
         }
         searchInput.focus();
     }
+
     function hide() {
         if (visible) {
             RED.keyboard.remove("escape");
