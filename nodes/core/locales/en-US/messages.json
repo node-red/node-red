@@ -332,6 +332,7 @@
             "cleansession": "Use clean session",
             "use-tls": "Enable secure (SSL/TLS) connection",
             "tls-config":"TLS Configuration",
+            "use-ws": "Enable MQTT over web sockets",
             "verify-server-cert":"Verify server certificate",
             "compatmode": "Use legacy MQTT 3.1 support"
         },
