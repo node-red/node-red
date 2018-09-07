@@ -20,6 +20,7 @@ RED.editor = (function() {
     var editing_node = null;
     var editing_config_node = null;
     var subflowEditor;
+    var nodeInfoEditor;
 
     var editTrayWidthCache = {};
 
@@ -839,6 +840,20 @@ RED.editor = (function() {
             })
             $('<div class="uneditable-input" id="node-settings-icon">').text(node.icon).appendTo(iconRow);
         }
+
+        if (node.type.indexOf("subflow") != 0 && node.type !== "comment") {
+            $('<hr>').appendTo(dialogForm);
+            $('<div class="form-row"><span data-i18n="editor.description"></span><div id="node-label-form-info"></div></div>').appendTo(dialogForm);
+            $('<div style="height: 150px;" class="node-text-editor" id="node-info-input-info-editor" ></div>').appendTo(dialogForm);
+            nodeInfoEditor = RED.editor.createEditor({
+                id: 'node-info-input-info-editor',
+                mode: 'ace/mode/markdown',
+                value: ""
+            });
+            if (node.info) {
+                nodeInfoEditor.getSession().setValue(node.info, -1);
+            }
+        }
     }
 
     function updateLabels(editing_node, changes, outputMap) {
@@ -1126,6 +1141,10 @@ RED.editor = (function() {
                             }
                         }
 
+                        if (node.type.indexOf("subflow") != 0 && node.type !== "comment") {
+                            node.info = nodeInfoEditor.getValue();
+                        }
+
                         if (changed) {
                             var wasChanged = editing_node.changed;
                             editing_node.changed = true;
@@ -1240,6 +1259,9 @@ RED.editor = (function() {
                     RED.sidebar.info.refresh(editing_node);
                 }
                 RED.workspaces.refresh();
+                if (node.type.indexOf("subflow") != 0 && node.type !== "comment") {
+                    nodeInfoEditor.destroy();
+                }
                 RED.view.redraw(true);
                 editStack.pop();
             },

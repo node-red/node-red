@@ -277,6 +277,10 @@ RED.sidebar.info = (function() {
                 // TODO: help
                 infoText = infoText + marked(textInfo);
             }
+            if (node.info) {
+                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
+                infoText = marked(node.info || "") || ('<span class="node-info-none">' + RED._("sidebar.info.none") + '</span>');
+            }
             if (infoText) {
                 setInfoText(infoText);
             }
