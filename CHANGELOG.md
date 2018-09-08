@@ -1,3 +1,180 @@
+#### 0.19.3: Maintenance Release
+
+ - Split node - fix complete to send msg for k/v object
+ - Remove unused Join node merged object key typed input
+ - Set the JavaScript editor to full-screen
+ - Filter global modules installed locally
+ - Add svg to permitted icon extension list
+ - Debug node - indicate status all the time if selected to do so
+ - pi nodes - increase test coverage slightly
+ - TCP-request node - only write payload
+ - JSON schema: perform validation when obj -> obj or str -> str
+ - JSON schema: add draft-06 support (via $schema keyword)
+ - Mqtt proxy configuration for websocket connection, #1651.
+ - Allows MQTT Shared Subscriptions for MQTT-In core node
+ - Fix use of HTML tag or CSS class specification as icon of typedInput
+
+#### 0.19.2: Maintenance Release
+
+ - Ensure node default colour is used if palette.theme has no match
+ - fix lost messages / properties in TCPRequest Node; closes #1863 (#1864)
+ - Fix typo in template.html
+ - Improve error reporting from context plugin loading
+ - Prevent no-op edit of node marking as changed due to icon
+ - Change node must handle empty rule set
+
+#### 0.19.1: Maintenance Release
+
+ - Pull in latest twitter node
+ - Handle windows paths for context storage
+ - Handle persisting objects with circular refs in context
+ - Ensure js editor can expand to fill available space
+ - Add example localfilesystem contextStorage to settings
+ - Fix template node handling of nested context tags
+
+#### 0.19: Milestone Release
+
+Editor
+
+ - Add editorTheme.palette.theme to allow overriding colours
+ - Index all node properties when searching Fixes #1446
+ - Handle NaN and Infinity properly in debug sidebar Fixes #1778 #1779
+ - Prevent horizontal scroll when palette name cannot wrap
+ - Ignore middle-click on node/ports to enable panning
+ - Better wire layout when looping back
+ - fix appearence of retry button of remote branch management dialog
+ - Handle releasing ctrl when using quick-add node dialog
+ - Add $env function to JSONata expressions
+ - Widen support for env var to use ${} or $() syntax
+ - Add env-var support to TypedInput
+ - Show unknown node properties in info tab
+ - Add node icon picker widget
+ - Only edit nodes on dbl click on primary button with no modifiers
+ - Allow subflows to be put in any palette category
+ - Add flow navigator widget
+ - Cache flow library result to improve response time Fixes #1753
+ - Add middle-button-drag to pan the workspace
+ - allow multi-line category name in editor
+ - Redesign sidebar tabs
+ - Do not disable the export-clipboard menu option with empty selection
+
+Nodes
+
+ - Change: Ensure runtime errors in Change node can be caught Fixes #1769
+ - File: Add output to File Out node
+ - Function: add expandable JavaScript editor pane
+ - Function: allow id and name reference in function node code (#1731)
+ - HTTP Request: Move to request module
+ - HTTP: Ensure apiMaxLength applies to HTTP Nodes Fixes #1278
+ - Join: accumulate top level properties
+ - Join: allow environment variable as reduce init value
+ - JSON: add JSON schema validation via msg.schema
+ - Pi: Let nrgpio code work with python 3
+ - Pi: let Pi nodes be visible/editable on all platforms
+ - Switch: add isEmpty rule
+ - TCP: queue messages while connecting; closes #1414
+ - TLS: Add servername option to TLS config node for SNI Fixes #1805
+ - UDP: Don't accidentally re-use udp port when set to not do so
+
+Persistent Context
+
+ - Add Context data sidebar
+ - Add persistable context option
+ - Add default memory store
+ - Add file-based context store
+ - Add async mode to evaluateJSONataExpression
+ - Update RED.util.evaluateNodeProperty to support context stores
+
+Runtime
+
+ - Support flow.disabled and .info in /flow API
+ - Node errors should be Strings not Errors Fixes #1781
+ - Add detection of connection timeout in git communication Fixes #1770
+ - Handle loading empty nodesDir
+ - Add 'private' property to userDir generated package.json
+ - Add RED.require to allow nodes to access other modules
+ - Ensure add/remove modules are run sequentially
+
+#### 0.18.7: Maintenance Release
+
+Editor Fixes
+
+ - Do not trim wires if node declares outputs in defaults but misses value Fixes #1737
+
+Node Fixes
+
+ - Relax twitter node version ready for major version bump
+ - Pass Date into the Function node sandbox to fix instanceof tests
+ - let TCP in node report remote ip and port when in single packet mode
+ - typo fix in node help (#1735)
+
+Other Fixes
+ - Tidy up default grunt task and fixup test break due to reorder Fixes #1738
+ - Bump jsonata version
+
+#### 0.18.6: Maintenance Release
+
+Editor Fixes
+
+ - Handle a node having wires in the editor on ports it no longer has Fixes #1724
+ - Add missing ACE snippet files
+ - Fix wireClippedNodes is not defined Fixes #1726
+ - Split node html to isolate bad nodes when loading
+ - Avoid unnecessary use of .html() where .text() will do
+
+ - Add editorTheme.projects.enabled to default settings.js"
+
+#### 0.18.5: Maintenance Release
+
+Projects
+
+ - Add clone project to welcome screen
+ - Handle cloning a project without package.json
+ - Keep remote branch state in sync between editor and runtime
+
+New Features
+
+ - Add type checks to switch node options (#1714)
+ - add output property select to HTML parse node (#1701)
+ - Add Prevent Following Redirect to HTTP Request node (#615) (#1684)
+ - Add debug and trace functions to function node (#1654)
+ - Enable user defined icon for subflow
+ - Add MQTT disconnect message and rework broker node UI (#1719)
+ - Japanese message catalogue updates (#1723)
+ - Show node load errors in the Palette Manager view
+
+Editor Fixes
+
+ - Highlight subflow node when log msg comes from inside Fixes #1698
+ - Ensure node wires array is not longer than outputs value Fixes #1678
+ - Allow importing an unknown config node to be undone Fixes #1681
+ - Ensure keyboard shortcuts get saved in runtime settings Fixes #1696
+ - Don't mark a subflow changed when actually modified nothing (#1665)
+
+Node Fixes
+
+ - bind to correct port when doing udp broadcast/multicast (#1686)
+ - Provide full error stack in Function node log message (#1700)
+ - Fix http request doc type Fixes #1690
+ - Make debug slightly larger to pass WCAG AA rating
+ - Make core nodes labels more consistent, to close #1673
+ - Allow template node to be updated more than once Fixes #1671
+ - Fix the problem that output labels of switch node sometimes disappear (#1664)
+ - Chinese translations for core nodes (#1607)
+
+Runtime Fixes
+
+ - Handle and display for invalid flow credentials when project is disabled #1689 (#1694)
+ - node-red-pi: fix behavior with old bash version (#1713)
+ - Fix ENOENT error on first start when no user dir (#1711)
+ - Handle null error object in Flow.handleError Fixes #1721
+ - update settings comments to describe how to setup for ipv6 (#1675)
+ - Remove credential props after diffing flow to prevent future false positives Fixes #1359
+ - Log error if settings unavailable when saving user settings Fixes #1645
+ - Keep backup of .config.json
+ - Add warning if using \_credentialSecret from .config.json
+ - Filter req.user in /settings to prevent potentially leaking info
+
 #### 0.18.4: Maintenance Release
 
 Projects

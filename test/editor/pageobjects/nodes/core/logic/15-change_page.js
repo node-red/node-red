@@ -24,14 +24,52 @@ function changeNode(id) {
 
 util.inherits(changeNode, nodePage);
 
-function setT(rule, index) {
-    browser.selectByValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', rule);
+var totType = {
+    "msg": 1,
+    "flow": 2,
+    "global": 3,
+    "str": 4,
+    "num": 5,
+    "bool": 6,
+    "json": 7,
+    "bin": 8,
+    "date": 9,
+    "jsonata": 10,
+    "env": 11,
+};
+
+var ptType = {
+    "msg": 1,
+    "flow": 2,
+    "global": 3,
+};
+
+function setT(t, index) {
+    browser.selectWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/select', t);
 }
 
-changeNode.prototype.ruleSet = function(to, index) {
+// It is better to create a function whose input value is the object type in the future,
+changeNode.prototype.ruleSet = function(p, pt, to, tot, index) {
     index = index ? index : 1;
     setT("set", index);
-    browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/div/input', to);
+    if (pt) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
+        var num = 5 * index + 6;
+        var ptXPath = '/html/body/div[' + num + ']/a[' + ptType[pt] + ']';
+        browser.clickWithWait(ptXPath);
+    }
+    if (p) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
+    }
+    if (tot) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/button[1]');
+        var num = 5 * index + 7;
+        var totXPath = '/html/body/div[' + num + ']/a[' + totType[tot] + ']';
+        browser.clickWithWait(totXPath);
+    }
+    if (to) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/div/input' , to);
+    }
 }
 
 changeNode.prototype.ruleDelete = function(index) {

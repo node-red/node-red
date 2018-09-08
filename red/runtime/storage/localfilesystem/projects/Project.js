@@ -162,7 +162,7 @@ Project.prototype.initialise = function(user,data) {
         if (defaultFileSet.hasOwnProperty(file)) {
             var path = fspath.join(project.path,file);
             if (!fs.existsSync(path)) {
-                promises.push(util.writeFile(path,defaultFileSet[file](project)));
+                promises.push(util.writeFile(path,defaultFileSet[file](project, runtime)));
             }
 
         }
@@ -850,7 +850,7 @@ function createDefaultProject(user, project) {
         }
         for (var file in defaultFileSet) {
             if (defaultFileSet.hasOwnProperty(file)) {
-                promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project)));
+                promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project, runtime)));
             }
         }
 

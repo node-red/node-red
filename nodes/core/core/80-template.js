@@ -19,15 +19,41 @@ module.exports = function(RED) {
     var mustache = require("mustache");
     var yaml = require("js-yaml");
 
+    function extractTokens(tokens,set) {
+        set = set || new Set();
+        tokens.forEach(function(token) {
+            if (token[0] !== 'text') {
+                set.add(token[1]);
+                if (token.length > 4) {
+                    extractTokens(token[4],set);
+                }
+            }
+        });
+        return set;
+    }
+
+    function parseContext(key) {
+        var match = /^(flow|global)(\[(\w+)\])?\.(.+)/.exec(key);
+        if (match) {
+            var parts = {};
+            parts.type = match[1];
+            parts.store = (match[3] === '') ? "default" : match[3];
+            parts.field = match[4];
+            return parts;
+        }
+        return undefined;
+    }
 
     /**
-     * Custom Mustache Context capable to resolve message property and node
+     * Custom Mustache Context capable to collect message property and node
      * flow and global context
      */
-    function NodeContext(msg, nodeContext, parent, escapeStrings) {
+
+    function NodeContext(msg, nodeContext, parent, escapeStrings, cachedContextTokens) {
         this.msgContext = new mustache.Context(msg,parent);
         this.nodeContext = nodeContext;
         this.escapeStrings = escapeStrings;
+        this.cachedContextTokens = cachedContextTokens;
     }
 
     NodeContext.prototype = new mustache.Context();
@@ -48,20 +74,18 @@ module.exports = function(RED) {
                 return value;
             }
 
-            // try node context:
-            var dot = name.indexOf(".");
-            /* istanbul ignore else  */
-            if (dot > 0) {
-                var contextName = name.substr(0, dot);
-                var variableName = name.substr(dot + 1);
-
-                if (contextName === "flow" && this.nodeContext.flow) {
-                    return this.nodeContext.flow.get(variableName);
-                }
-                else if (contextName === "global" && this.nodeContext.global) {
-                    return this.nodeContext.global.get(variableName);
+            // try flow/global context:
+            var context = parseContext(name);
+            if (context) {
+                var type = context.type;
+                var store = context.store;
+                var field = context.field;
+                var target = this.nodeContext[type];
+                if (target) {
+                    return this.cachedContextTokens[name];
                 }
             }
+            return '';
         }
         catch(err) {
             throw err;
@@ -69,7 +93,7 @@ module.exports = function(RED) {
     }
 
     NodeContext.prototype.push = function push (view) {
-        return new NodeContext(view, this.nodeContext,this.msgContext);
+        return new NodeContext(view, this.nodeContext, this.msgContext, undefined, this.cachedContextTokens);
     };
 
     function TemplateNode(n) {
@@ -82,9 +106,37 @@ module.exports = function(RED) {
         this.outputFormat = n.output || "str";
 
         var node = this;
+
+        function output(msg,value) {
+            /* istanbul ignore else  */
+            if (node.outputFormat === "json") {
+                value = JSON.parse(value);
+            }
+            /* istanbul ignore else  */
+            if (node.outputFormat === "yaml") {
+                value = yaml.load(value);
+            }
+
+            if (node.fieldType === 'msg') {
+                RED.util.setMessageProperty(msg, node.field, value);
+                node.send(msg);
+            } else if ((node.fieldType === 'flow') ||
+                       (node.fieldType === 'global')) {
+                var context = RED.util.parseContextStore(node.field);
+                var target = node.context()[node.fieldType];
+                target.set(context.key, value, context.store, function (err) {
+                    if (err) {
+                        node.error(err, msg);
+                    } else {
+                        node.send(msg);
+                    }
+                });
+            }
+        }
+
         node.on("input", function(msg) {
+
             try {
-                var value;
                 /***
                 * Allow template contents to be defined externally
                 * through inbound msg.template IFF node.template empty
@@ -97,34 +149,46 @@ module.exports = function(RED) {
                 }
 
                 if (node.syntax === "mustache") {
-                    if (node.outputFormat === "json") {
-                        value = mustache.render(template,new NodeContext(msg, node.context(), null, true));
-                    } else {
-                        value = mustache.render(template,new NodeContext(msg, node.context(), null, false));
-                    }
-                } else {
-                    value = template;
-                }
-                /* istanbul ignore else  */
-                if (node.outputFormat === "json") {
-                    value = JSON.parse(value);
-                }
-                /* istanbul ignore else  */
-                if (node.outputFormat === "yaml") {
-                    value = yaml.load(value);
-                }
+                    var is_json = (node.outputFormat === "json");
+                    var promises = [];
+                    var tokens = extractTokens(mustache.parse(template));
+                    var resolvedTokens = {};
+                    tokens.forEach(function(name) {
+                        var context = parseContext(name);
+                        if (context) {
+                            var type = context.type;
+                            var store = context.store;
+                            var field = context.field;
+                            var target = node.context()[type];
+                            if (target) {
+                                var promise = new Promise((resolve, reject) => {
+                                    target.get(field, store, (err, val) => {
+                                        if (err) {
+                                            reject(err);
+                                        } else {
+                                            resolvedTokens[name] = val;
+                                            resolve();
+                                        }
+                                    });
+                                });
+                                promises.push(promise);
+                                return;
+                            }
+                        }
+                    });
 
-                if (node.fieldType === 'msg') {
-                    RED.util.setMessageProperty(msg,node.field,value);
-                } else if (node.fieldType === 'flow') {
-                    node.context().flow.set(node.field,value);
-                } else if (node.fieldType === 'global') {
-                    node.context().global.set(node.field,value);
+                    Promise.all(promises).then(function() {
+                        var value = mustache.render(template, new NodeContext(msg, node.context(), null, is_json, resolvedTokens));
+                        output(msg, value);
+                    }).catch(function (err) {
+                        node.error(err.message,msg);
+                    });
+                } else {
+                    output(msg, template);
                 }
-                node.send(msg);
             }
             catch(err) {
-                node.error(err.message);
+                node.error(err.message, msg);
             }
         });
     }

@@ -36,6 +36,7 @@ function addNode(type, x, y) {
 }
 
 function deleteAllNodes() {
+    browser.click('.innerCanvas');
     browser.keys(['Control', 'a', 'a', 'Control']); // call twice to release the keys.
     browser.keys(['Delete']);
 }

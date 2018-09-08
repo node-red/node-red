@@ -141,7 +141,15 @@ describe("red/util", function() {
             cloned.res.should.equal(msg.res);
         });
     });
-
+    describe('getObjectProperty', function() {
+        it('gets a property beginning with "msg."', function() {
+            // getMessageProperty strips off `msg.` prefixes.
+            // getObjectProperty does not
+            var obj = { msg: { a: "foo"}, a: "bar"};
+            var v = util.getObjectProperty(obj,"msg.a");
+            v.should.eql("foo");
+        })
+    });
     describe('getMessageProperty', function() {
         it('retrieves a simple property', function() {
             var v = util.getMessageProperty({a:"foo"},"msg.a");
@@ -169,7 +177,16 @@ describe("red/util", function() {
         });
 
     });
-
+    describe('setObjectProperty', function() {
+        it('set a property beginning with "msg."', function() {
+            // setMessageProperty strips off `msg.` prefixes.
+            // setObjectProperty does not
+            var obj = {};
+            util.setObjectProperty(obj,"msg.a","bar");
+            obj.should.have.property("msg");
+            obj.msg.should.have.property("a","bar");
+        })
+    });
     describe('setMessageProperty', function() {
         it('sets a property', function() {
             var msg = {a:"foo"};
@@ -189,6 +206,11 @@ describe("red/util", function() {
         it('does not create missing parent properties', function() {
             var msg = {a:{}};
             util.setMessageProperty(msg,"msg.a.b.c","bar",false);
+            should.not.exist(msg.a.b);
+        })
+        it('does not create missing parent properties with array', function () {
+            var msg = {a:{}};
+            util.setMessageProperty(msg, "msg.a.b[1].c", "bar", false);
             should.not.exist(msg.a.b);
         })
         it('deletes property if value is undefined', function() {
@@ -226,6 +248,11 @@ describe("red/util", function() {
             msg.a[2].should.have.length(3);
             msg.a[2].should.be.instanceOf(Array);
             msg.a[2][2].should.eql("bar");
+        });
+        it('does not create missing array elements - mid property', function () {
+            var msg = {a:[]};
+            util.setMessageProperty(msg, "msg.a[1][1]", "bar", false);
+            msg.a.should.empty();
         });
         it('does not create missing array elements - final property', function() {
             var msg = {a:{}};
@@ -275,9 +302,22 @@ describe("red/util", function() {
             var result = util.evaluateNodeProperty('','date');
             (Date.now() - result).should.be.approximately(0,50);
         });
+        it('returns bin', function () {
+            var result = util.evaluateNodeProperty('[1, 2]','bin');
+            result[0].should.eql(1);
+            result[1].should.eql(2);
+        });
         it('returns msg property',function() {
             var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
             result.should.eql("123");
+        });
+        it('throws an error if callback is not defined', function (done) {
+            try {
+                util.evaluateNodeProperty(' ','msg',{},{foo:{bar:"123"}});
+                done("should throw an error");
+            } catch (err) {
+                done();
+            }
         });
         it('returns flow property',function() {
             var result = util.evaluateNodeProperty('foo.bar','flow',{
@@ -306,6 +346,46 @@ describe("red/util", function() {
                 }}
             },{});
             result.should.eql("123");
+        });
+        it('returns jsonata result', function () {
+            var result = util.evaluateNodeProperty('$abs(-1)','jsonata',{},{});
+            result.should.eql(1);
+        });
+        it('returns null', function() {
+            var result = util.evaluateNodeProperty(null,'null');
+            (result === null).should.be.true();
+        })
+        describe('environment variable', function() {
+            before(function() {
+                process.env.NR_TEST_A = "foo";
+                process.env.NR_TEST_B = "${NR_TEST_A}";
+            })
+            after(function() {
+                delete process.env.NR_TEST_A;
+                delete process.env.NR_TEST_B;
+            })
+
+            it('returns an environment variable - NR_TEST_A', function() {
+                var result = util.evaluateNodeProperty('NR_TEST_A','env');
+                result.should.eql('foo');
+            });
+            it('returns an environment variable - ${NR_TEST_A}', function() {
+                var result = util.evaluateNodeProperty('${NR_TEST_A}','env');
+                result.should.eql('foo');
+            });
+            it('returns an environment variable - ${NR_TEST_A', function() {
+                var result = util.evaluateNodeProperty('${NR_TEST_A','env');
+                result.should.eql('');
+            });
+            it('returns an environment variable - foo${NR_TEST_A}bar', function() {
+                var result = util.evaluateNodeProperty('123${NR_TEST_A}456','env');
+                result.should.eql('123foo456');
+            });
+            it('returns an environment variable - foo${NR_TEST_B}bar', function() {
+                var result = util.evaluateNodeProperty('123${NR_TEST_B}456','env');
+                result.should.eql('123${NR_TEST_A}456');
+            });
+
         });
     });
 
@@ -412,6 +492,12 @@ describe("red/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("bar");
           });
+          it('accesses environment variable from an expression', function() {
+              process.env.UTIL_ENV = 'foo';
+              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('foo');
+          });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
@@ -422,7 +508,267 @@ describe("red/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);
           });
-
+          it('handles async flow context access', function(done) {
+              var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
+          it('handles async global context access', function(done) {
+              var expr = util.prepareJSONataExpression('$globalContext("foo")',{context:function() { return {global:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
+          it('handles persistable store in flow context access', function(done) {
+              var storeName;
+              var expr = util.prepareJSONataExpression('$flowContext("foo", "flowStoreName")',{context:function() { return {flow:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      storeName.should.equal("flowStoreName");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
+          it('handles persistable store in global context access', function(done) {
+              var storeName;
+              var expr = util.prepareJSONataExpression('$globalContext("foo", "globalStoreName")',{context:function() { return {global:{get: function(key,store,callback) { storeName = store;setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
+              util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value) {
+                  try {
+                      should.not.exist(err);
+                      value.should.eql("bar");
+                      storeName.should.equal("globalStoreName");
+                      done();
+                  } catch(err2) {
+                      done(err2);
+                  }
+              });
+          })
+          it('callbacks with error when invalid expression was specified', function (done) {
+              var expr = util.prepareJSONataExpression('$abc(1)',{});
+              var result = util.evaluateJSONataExpression(expr,{payload:"hello"},function(err,value){
+                  should.exist(err);
+                  done();
+              });
+          });
       });
 
+    describe('encodeObject', function () {
+        it('encodes Error with message', function() {
+            var err = new Error("encode error");
+            err.name = 'encodeError';
+            var msg = {msg:err};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("error");
+            var resultJson = JSON.parse(result.msg);
+            resultJson.name.should.eql('encodeError');
+            resultJson.message.should.eql('encode error');
+        });
+        it('encodes Error without message', function() {
+            var err = new Error();
+            err.name = 'encodeError';
+            err.toString = function(){return 'error message';}
+            var msg = {msg:err};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("error");
+            var resultJson = JSON.parse(result.msg);
+            resultJson.name.should.eql('encodeError');
+            resultJson.message.should.eql('error message');
+        });
+        it('encodes Buffer', function() {
+            var msg = {msg:Buffer.from("abc")};
+            var result = util.encodeObject(msg,{maxLength:4});
+            result.format.should.eql("buffer[3]");
+            result.msg[0].should.eql('6');
+            result.msg[1].should.eql('1');
+            result.msg[2].should.eql('6');
+            result.msg[3].should.eql('2');
+        });
+        it('encodes function', function() {
+            var msg = {msg:function(){}};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("function");
+            result.msg.should.eql('[function]');
+        });
+        it('encodes boolean', function() {
+            var msg = {msg:true};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("boolean");
+            result.msg.should.eql('true');
+        });
+        it('encodes number', function() {
+            var msg = {msg:123};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("number");
+            result.msg.should.eql('123');
+        });
+        it('encodes 0', function() {
+            var msg = {msg:0};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("number");
+            result.msg.should.eql('0');
+        });
+        it('encodes null', function() {
+            var msg = {msg:null};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("null");
+            result.msg.should.eql('(undefined)');
+        });
+        it('encodes undefined', function() {
+            var msg = {msg:undefined};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("undefined");
+            result.msg.should.eql('(undefined)');
+        });
+        it('encodes string', function() {
+            var msg = {msg:'1234567890'};
+            var result = util.encodeObject(msg,{maxLength:6});
+            result.format.should.eql("string[10]");
+            result.msg.should.eql('123456...');
+        });
+        describe('encode object', function() {
+            it('object', function() {
+                var msg = { msg:{"foo":"bar"} };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.foo.should.eql('bar');
+            });
+            it('object whose name includes error', function() {
+                function MyErrorObj(){
+                    this.name = 'my error obj';
+                    this.message = 'my error message';
+                };
+                var msg = { msg:new MyErrorObj() };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("MyErrorObj");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.name.should.eql('my error obj');
+                resultJson.message.should.eql('my error message');
+            });
+            it('constructor of IncomingMessage', function() {
+                function IncomingMessage(){};
+                var msg = { msg:new IncomingMessage() };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.empty();
+            });
+            it('_req key in msg', function() {
+                function Socket(){};
+                var msg = { msg:{"_req":123} };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson._req.__enc__.should.eql(true);
+                resultJson._req.type.should.eql('internal');
+            });
+            it('_res key in msg', function() {
+                function Socket(){};
+                var msg = { msg:{"_res":123} };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson._res.__enc__.should.eql(true);
+                resultJson._res.type.should.eql('internal');
+            });
+            it('array of error', function() {
+                var msg = { msg:[new Error("encode error")] };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("array[1]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson[0].should.eql('Error: encode error');
+            });
+            it('long array in msg', function() {
+                var msg = {msg:{array:[1,2,3,4]}};
+                var result = util.encodeObject(msg,{maxLength:2});
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.array.__enc__.should.eql(true);
+                resultJson.array.data[0].should.eql(1);
+                resultJson.array.data[1].should.eql(2);
+                resultJson.array.length.should.eql(4);
+            });
+            it('array of string', function() {
+                var msg = { msg:["abcde","12345"] };
+                var result = util.encodeObject(msg,{maxLength:3});
+                result.format.should.eql("array[2]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson[0].should.eql('abc...');
+                resultJson[1].should.eql('123...');
+            });
+            it('array of function', function() {
+                var msg = { msg:[function(){}] };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("array[1]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson[0].__enc__.should.eql(true);
+                resultJson[0].type.should.eql('function');
+            });
+            it('array of number', function() {
+                var msg = { msg:[1,2,3] };
+                var result = util.encodeObject(msg,{maxLength:2});
+                result.format.should.eql("array[3]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.__enc__.should.eql(true);
+                resultJson.data[0].should.eql(1);
+                resultJson.data[1].should.eql(2);
+                resultJson.data.length.should.eql(2);
+                resultJson.length.should.eql(3);
+            });
+            it('array of special number', function() {
+                var msg = { msg:[NaN,Infinity,-Infinity] };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("array[3]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson[0].__enc__.should.eql(true);
+                resultJson[0].type.should.eql('number');
+                resultJson[0].data.should.eql('NaN');
+                resultJson[1].data.should.eql('Infinity');
+                resultJson[2].data.should.eql('-Infinity');
+            });
+            it('constructor of Buffer in msg', function() {
+                var msg = { msg:{buffer:new Buffer([1,2,3,4])} };
+                var result = util.encodeObject(msg,{maxLength:2});
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.buffer.__enc__.should.eql(true);
+                resultJson.buffer.length.should.eql(4);
+                resultJson.buffer.data[0].should.eql(1);
+                resultJson.buffer.data[1].should.eql(2);
+            });
+            it('constructor of ServerResponse', function() {
+                function ServerResponse(){};
+                var msg = { msg: new ServerResponse() };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.eql('[internal]');
+            });
+            it('constructor of Socket in msg', function() {
+                function Socket(){};
+                var msg = { msg: { socket: new Socket() } };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.socket.should.eql('[internal]');
+            });
+        });
+    });
 });

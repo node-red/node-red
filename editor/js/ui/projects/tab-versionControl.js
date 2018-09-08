@@ -52,11 +52,11 @@ RED.sidebar.versionControl = (function() {
                 200: function(data) {
                     var title;
                     if (state === 'unstaged') {
-                        title = 'Unstaged changes : '+entry.file
+                        title = RED._("sidebar.project.versionControl.unstagedChanges")+' : '+entry.file
                     } else if (state === 'staged') {
-                        title = 'Staged changes : '+entry.file
+                        title = RED._("sidebar.project.versionControl.stagedChanges")+' : '+entry.file
                     } else {
-                        title = 'Resolve conflicts : '+entry.file
+                        title = RED._("sidebar.project.versionControl.resolveConflicts")+' : '+entry.file
                     }
                     var options = {
                         diff: data.diff,
@@ -65,18 +65,18 @@ RED.sidebar.versionControl = (function() {
                         project: activeProject
                     }
                     if (state == 'unstaged') {
-                        options.oldRevTitle = entry.indexStatus === " "?"HEAD":"Staged";
-                        options.newRevTitle = "Unstaged";
+                        options.oldRevTitle = entry.indexStatus === " "?RED._("sidebar.project.versionControl.head"):RED._("sidebar.project.versionControl.staged");
+                        options.newRevTitle = RED._("sidebar.project.versionControl.unstaged");
                         options.oldRev = entry.indexStatus === " "?"@":":0";
                         options.newRev = "_";
                     } else if (state === 'staged') {
-                        options.oldRevTitle = "HEAD";
-                        options.newRevTitle = "Staged";
+                        options.oldRevTitle = RED._("sidebar.project.versionControl.head");
+                        options.newRevTitle = RED._("sidebar.project.versionControl.staged");
                         options.oldRev = "@";
                         options.newRev = ":0";
                     } else {
-                        options.oldRevTitle = "Local";
-                        options.newRevTitle = "Remote";
+                        options.oldRevTitle = RED._("sidebar.project.versionControl.local");
+                        options.newRevTitle = RED._("sidebar.project.versionControl.remote");
                         options.commonRev = ":1";
                         options.oldRev = ":2";
                         options.newRev = ":3";
@@ -156,7 +156,7 @@ RED.sidebar.versionControl = (function() {
                     evt.preventDefault();
 
                     var spinner = utils.addSpinnerOverlay(container).addClass('projects-dialog-spinner-contain');
-                    var notification = RED.notify("Are you sure you want to revert the changes to '"+entry.file+"'? This cannot be undone.", {
+                    var notification = RED.notify(RED._("sidebar.project.versionControl.revert",{file:entry.file}), {
                         type: "warning",
                         modal: true,
                         fixed: true,
@@ -168,7 +168,7 @@ RED.sidebar.versionControl = (function() {
                                     notification.close();
                                 }
                             },{
-                                text: 'Revert changes',
+                                text: RED._("sidebar.project.versionControl.revertChanges"),
                                 click: function() {
                                     notification.close();
                                     var activeProject = RED.projects.getActiveProject();
@@ -281,6 +281,8 @@ RED.sidebar.versionControl = (function() {
         entry["update"+((state==='unstaged')?"Unstaged":"Staged")](entry, status);
     }
     var utils;
+    var emptyStagedItem;
+    var emptyMergedItem;
     function init(_utils) {
         utils = _utils;
 
@@ -312,7 +314,7 @@ RED.sidebar.versionControl = (function() {
         });
 
         localChanges = sections.add({
-            title: "Local Changes",
+            title: RED._("sidebar.project.versionControl.localChanges"),
             collapsible: true
         });
         localChanges.expand();
@@ -326,10 +328,12 @@ RED.sidebar.versionControl = (function() {
                 refresh(true);
             })
 
+        emptyStagedItem = { label: RED._("sidebar.project.versionControl.none") };
+        emptyMergedItem = { label: RED._("sidebar.project.versionControl.conflictResolve") };
 
         var unstagedContent = $('<div class="sidebar-version-control-change-container"></div>').appendTo(localChanges.content);
-        var header = $('<div class="sidebar-version-control-change-header">Local files</div>').appendTo(unstagedContent);
-        stageAllButton = $('<button class="editor-button editor-button-small" style="float: right"><i class="fa fa-plus"></i> all</button>')
+        var header = $('<div class="sidebar-version-control-change-header">'+RED._("sidebar.project.versionControl.localFiles")+'</div>').appendTo(unstagedContent);
+        stageAllButton = $('<button class="editor-button editor-button-small" style="float: right"><i class="fa fa-plus"></i> '+RED._("sidebar.project.versionControl.all")+'</button>')
             .appendTo(header)
             .click(function(evt) {
                 evt.preventDefault();
@@ -359,9 +363,9 @@ RED.sidebar.versionControl = (function() {
 
         unmergedContent = $('<div class="sidebar-version-control-change-container"></div>').appendTo(localChanges.content);
 
-        header = $('<div class="sidebar-version-control-change-header">Unmerged changes</div>').appendTo(unmergedContent);
+        header = $('<div class="sidebar-version-control-change-header">'+RED._("sidebar.project.versionControl.unmergedChanges")+'</div>').appendTo(unmergedContent);
         bg = $('<div style="float: right"></div>').appendTo(header);
-        var abortMergeButton = $('<button class="editor-button editor-button-small" style="margin-right: 5px;">abort merge</button>')
+        var abortMergeButton = $('<button class="editor-button editor-button-small" style="margin-right: 5px;">'+RED._("sidebar.project.versionControl.abortMerge")+'</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -399,7 +403,7 @@ RED.sidebar.versionControl = (function() {
             addItem: function(row,index,entry) {
                 if (entry === emptyMergedItem) {
                     entry.button = {
-                        label: 'commit',
+                        label: RED._("sidebar.project.versionControl.commit"),
                         click: function(evt) {
                             evt.preventDefault();
                             evt.stopPropagation();
@@ -423,7 +427,7 @@ RED.sidebar.versionControl = (function() {
 
         var stagedContent = $('<div class="sidebar-version-control-change-container"></div>').appendTo(localChanges.content);
 
-        header = $('<div class="sidebar-version-control-change-header">Changes to commit</div>').appendTo(stagedContent);
+        header = $('<div class="sidebar-version-control-change-header">'+RED._("sidebar.project.versionControl.changeToCommit")+'</div>').appendTo(stagedContent);
 
         bg = $('<div style="float: right"></div>').appendTo(header);
         var showCommitBox = function() {
@@ -446,14 +450,14 @@ RED.sidebar.versionControl = (function() {
             abortMergeButton.attr("disabled",true);
             commitMessage.focus();
         }
-        commitButton = $('<button class="editor-button editor-button-small" style="margin-right: 5px;">commit</button>')
+        commitButton = $('<button class="editor-button editor-button-small" style="margin-right: 5px;">'+RED._("sidebar.project.versionControl.commit")+'</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
                 evt.stopPropagation();
                 showCommitBox();
             });
-        unstageAllButton = $('<button class="editor-button editor-button-small"><i class="fa fa-minus"></i> all</button>')
+        unstageAllButton = $('<button class="editor-button editor-button-small"><i class="fa fa-minus"></i> '+RED._("sidebar.project.versionControl.all")+'</button>')
             .appendTo(bg)
             .click(function(evt) {
                 evt.preventDefault();
@@ -480,14 +484,14 @@ RED.sidebar.versionControl = (function() {
 
         commitBox = $('<div class="sidebar-version-control-slide-box sidebar-version-control-slide-box-bottom"></div>').hide().appendTo(localChanges.content);
 
-        var commitMessage = $('<textarea placeholder="Enter your commit message"></textarea>')
+        var commitMessage = $('<textarea placeholder='+RED._("sidebar.project.versionControl.commitPlaceholder")+'></textarea>')
             .appendTo(commitBox)
             .on("change keyup paste",function() {
                 submitCommitButton.attr('disabled',$(this).val().trim()==="");
             });
         var commitToolbar = $('<div class="sidebar-version-control-slide-box-toolbar button-group">').appendTo(commitBox);
 
-        var cancelCommitButton = $('<button class="editor-button">Cancel</button>')
+        var cancelCommitButton = $('<button class="editor-button">'+RED._("sidebar.project.versionControl.cancelCapital")+'</button>')
             .appendTo(commitToolbar)
             .click(function(evt) {
                 evt.preventDefault();
@@ -505,7 +509,7 @@ RED.sidebar.versionControl = (function() {
                 abortMergeButton.attr("disabled",false);
 
             })
-        var submitCommitButton = $('<button class="editor-button">Commit</button>')
+        var submitCommitButton = $('<button class="editor-button">'+RED._("sidebar.project.versionControl.commitCapital")+'</button>')
             .appendTo(commitToolbar)
             .click(function(evt) {
                 evt.preventDefault();
@@ -541,7 +545,7 @@ RED.sidebar.versionControl = (function() {
 
 
         var localHistory = sections.add({
-            title: "Commit History",
+            title: RED._("sidebar.project.versionControl.commitHistory"),
             collapsible: true
         });
 
@@ -555,7 +559,7 @@ RED.sidebar.versionControl = (function() {
 
         var localBranchToolbar = $('<div class="sidebar-version-control-change-header" style="text-align: right;"></div>').appendTo(localHistory.content);
 
-        var localBranchButton = $('<button class="editor-button editor-button-small"><i class="fa fa-code-fork"></i> Branch: <span id="sidebar-version-control-local-branch"></span></button>')
+        var localBranchButton = $('<button class="editor-button editor-button-small"><i class="fa fa-code-fork"></i> '+RED._("sidebar.project.versionControl.branch")+' <span id="sidebar-version-control-local-branch"></span></button>')
             .appendTo(localBranchToolbar)
             .click(function(evt) {
                 evt.preventDefault();
@@ -612,7 +616,7 @@ RED.sidebar.versionControl = (function() {
                 row.addClass('sidebar-version-control-commit-entry');
                 if (entry.url) {
                     row.addClass('sidebar-version-control-commit-more');
-                    row.text("+ "+(entry.total-entry.totalKnown)+" more commit(s)");
+                    row.text("+ "+(entry.total-entry.totalKnown)+RED._("sidebar.project.versionControl.moreCommits"));
                     row.click(function(e) {
                         e.preventDefault();
                         getCommits(entry.url,localCommitList,row,entry.limit,entry.before);
@@ -626,8 +630,8 @@ RED.sidebar.versionControl = (function() {
                                 result.parents = entry.parents;
                                 result.oldRev = entry.sha+"~1";
                                 result.newRev = entry.sha;
-                                result.oldRevTitle = "Commit "+entry.sha.substring(0,7)+"~1";
-                                result.newRevTitle = "Commit "+entry.sha.substring(0,7);
+                                result.oldRevTitle = RED._("sidebar.project.versionControl.commitCapital")+" "+entry.sha.substring(0,7)+"~1";
+                                result.newRevTitle = RED._("sidebar.project.versionControl.commitCapital")+" "+entry.sha.substring(0,7);
                                 result.date = humanizeSinceDate(parseInt(entry.date));
                                 RED.diff.showCommitDiff(result);
                             });
@@ -666,10 +670,10 @@ RED.sidebar.versionControl = (function() {
         }
         var localBranchBox = $('<div class="sidebar-version-control-slide-box sidebar-version-control-slide-box-top" style="top:30px;"></div>').hide().appendTo(localHistory.content);
 
-        $('<div class="sidebar-version-control-slide-box-header"></div>').text("Change local branch").appendTo(localBranchBox);
+        $('<div class="sidebar-version-control-slide-box-header"></div>').text(RED._("sidebar.project.versionControl.changeLocalBranch")).appendTo(localBranchBox);
 
         var localBranchList = utils.createBranchList({
-            placeholder: "Find or create a branch",
+            placeholder: RED._("sidebar.project.versionControl.createBranchPlaceholder"),
             container: localBranchBox,
             onselect: function(body) {
                 if (body.current) {
@@ -701,7 +705,7 @@ RED.sidebar.versionControl = (function() {
                         400: {
                             'git_local_overwrite': function(error) {
                                 spinner.remove();
-                                RED.notify("You have local changes that would be overwritten by changing the branch. You must either commit or undo those changes first.",{
+                                RED.notify(RED._("sidebar.project.versionControl.localOverwrite"),{
                                     type:'error',
                                     timeout: 8000
                                 });
@@ -744,10 +748,10 @@ RED.sidebar.versionControl = (function() {
                 },200);
             }
         }
-        $('<div class="sidebar-version-control-slide-box-header"></div>').text("Manage remote branch").appendTo(remoteBox);
+        $('<div class="sidebar-version-control-slide-box-header"></div>').text(RED._("sidebar.project.versionControl.manageRemoteBranch")).appendTo(remoteBox);
 
         var remoteBranchRow = $('<div style="margin-bottom: 5px;"></div>').appendTo(remoteBox);
-        var remoteBranchButton = $('<button id="sidebar-version-control-repo-branch" class="sidebar-version-control-repo-action editor-button"><i class="fa fa-code-fork"></i> Remote: <span id="sidebar-version-control-remote-branch"></span></button>')
+        var remoteBranchButton = $('<button id="sidebar-version-control-repo-branch" class="sidebar-version-control-repo-action editor-button"><i class="fa fa-code-fork"></i> '+RED._("sidebar.project.versionControl.remote")+': <span id="sidebar-version-control-remote-branch"></span></button>')
             .appendTo(remoteBranchRow)
             .click(function(evt) {
                 evt.preventDefault();
@@ -770,9 +774,9 @@ RED.sidebar.versionControl = (function() {
 
 
         var errorMessage = $('<div id="sidebar-version-control-repo-toolbar-error-message" class="sidebar-version-control-slide-box-header" style="min-height: 100px;"></div>').hide().appendTo(remoteBox);
-        $('<div style="margin-top: 10px;"><i class="fa fa-warning"></i> Unable to access remote repository</div>').appendTo(errorMessage)
+        $('<div style="margin-top: 10px;"><i class="fa fa-warning"></i> '+RED._("sidebar.project.versionControl.unableToAccess")+'</div>').appendTo(errorMessage)
         var buttonRow = $('<div style="margin: 10px 30px; text-align: center"></div>').appendTo(errorMessage);
-        $('<button class="editor-button" style="width: 80%;"><i class="fa fa-refresh"></i> Retry</button>')
+        $('<button class="editor-button" style="width: 80%;"><i class="fa fa-refresh"></i> '+RED._("sidebar.project.versionControl.retry")+'</button>')
             .appendTo(buttonRow)
             .click(function(e) {
                 e.preventDefault();
@@ -810,12 +814,12 @@ RED.sidebar.versionControl = (function() {
                 });
             })
 
-        $('<div class="sidebar-version-control-slide-box-header" style="height: 20px;"><label id="sidebar-version-control-repo-toolbar-set-upstream-row" for="sidebar-version-control-repo-toolbar-set-upstream" class="hide"><input type="checkbox" id="sidebar-version-control-repo-toolbar-set-upstream"> Set as upstream branch</label></div>').appendTo(remoteBox);
+        $('<div class="sidebar-version-control-slide-box-header" style="height: 20px;"><label id="sidebar-version-control-repo-toolbar-set-upstream-row" for="sidebar-version-control-repo-toolbar-set-upstream" class="hide"><input type="checkbox" id="sidebar-version-control-repo-toolbar-set-upstream"> '+RED._("sidebar.project.versionControl.setUpstreamBranch")+'</label></div>').appendTo(remoteBox);
 
         var remoteBranchSubRow = $('<div style="height: 0;overflow:hidden; transition: height 0.2s ease-in-out;"></div>').hide().appendTo(remoteBranchRow);
         var remoteBranchList = utils.createBranchList({
-            placeholder: "Find or create a remote branch",
-            currentLabel: "upstream",
+            placeholder: RED._("sidebar.project.versionControl.createRemoteBranchPlaceholder"),
+            currentLabel: RED._("sidebar.project.versionControl.upstream"),
             remote: function() {
                 var project = RED.projects.getActiveProject();
                 var remotes = Object.keys(project.git.remotes);
@@ -845,11 +849,11 @@ RED.sidebar.versionControl = (function() {
                         })
                     } else {
                         if (!activeProject.git.branches.remote) {
-                            $('#sidebar-version-control-repo-toolbar-message').text("The created branch will be set as the tracked upstream branch.");
+                            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.trackedUpstreamBranch"));
                             $("#sidebar-version-control-repo-toolbar-set-upstream").prop('checked',true);
                             $("#sidebar-version-control-repo-toolbar-set-upstream").prop('disabled',true);
                         } else {
-                            $('#sidebar-version-control-repo-toolbar-message').text("The branch will be created. Select below to set it as the tracked upstream branch.");
+                            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.selectUpstreamBranch"));
                         }
                         $("#sidebar-version-control-repo-pull").attr('disabled',true);
                         $("#sidebar-version-control-repo-push").attr('disabled',false);
@@ -861,7 +865,7 @@ RED.sidebar.versionControl = (function() {
 
         var row = $('<div style="margin-bottom: 5px;"></div>').appendTo(remoteBox);
 
-        $('<button id="sidebar-version-control-repo-push" class="sidebar-version-control-repo-sub-action editor-button"><i class="fa fa-long-arrow-up"></i> <span>push</span></button>')
+        $('<button id="sidebar-version-control-repo-push" class="sidebar-version-control-repo-sub-action editor-button"><i class="fa fa-long-arrow-up"></i> <span data-i18n="sidebar.project.versionControl.push"></span></button>')
             .appendTo(row)
             .click(function(e) {
                 e.preventDefault();
@@ -893,8 +897,8 @@ RED.sidebar.versionControl = (function() {
                         },
                         400: {
                             'git_push_failed': function(err) {
-                                // TODO: better message + NLS
-                                RED.notify("NLS: Push failed as the remote has more recent commits. Pull first and write a better error message!","error");
+                                // TODO: better message
+                                RED.notify(RED._("sidebar.project.versionControl.pushFailed"),"error");
                             },
                             'unexpected_error': function(error) {
                                 console.log(error);
@@ -945,18 +949,18 @@ RED.sidebar.versionControl = (function() {
                     },
                     400: {
                         'git_local_overwrite': function(err) {
-                            RED.notify("<p>Unable to pull remote changes; your unstaged local changes would be overwritten.</p><p>Commit your changes and try again.</p>"+
-                                '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+'Show unstaged changes'+'</a></p>',"error",false,10000000);
+                            RED.notify(RED._("sidebar.project.versionControl.unablePull")+
+                                '<p><a href="#" onclick="RED.sidebar.versionControl.showLocalChanges(); return false;">'+RED._("sidebar.project.versionControl.showUnstagedChanges")+'</a></p>',"error",false,10000000);
                         },
                         'git_pull_merge_conflict': function(err) {
                             refresh(true);
                             closeRemoteBox();
                         },
                         'git_connection_failed': function(err) {
-                            RED.notify("Could not connect to remote repository: "+err.toString(),"warning")
+                            RED.notify(RED._("sidebar.project.versionControl.connectionFailed")+err.toString(),"warning")
                         },
                         'git_pull_unrelated_history': function(error) {
-                            var notification = RED.notify("<p>The remote has an unrelated history of commits.</p><p>Are you sure you want to pull the changes into your local repository?</p>",{
+                            var notification = RED.notify(RED._("sidebar.project.versionControl.pullUnrelatedHistory"),{
                                 type: 'error',
                                 modal: true,
                                 fixed: true,
@@ -967,7 +971,7 @@ RED.sidebar.versionControl = (function() {
                                             notification.close();
                                         }
                                     },{
-                                        text: 'Pull changes',
+                                        text: RED._("sidebar.project.versionControl.pullChanges"),
                                         click: function() {
                                             notification.close();
                                             options.allowUnrelatedHistories = true;
@@ -986,7 +990,7 @@ RED.sidebar.versionControl = (function() {
                 spinner.remove();
             });
         }
-        $('<button id="sidebar-version-control-repo-pull" class="sidebar-version-control-repo-sub-action editor-button"><i class="fa fa-long-arrow-down"></i> <span>pull</span></button>')
+        $('<button id="sidebar-version-control-repo-pull" class="sidebar-version-control-repo-sub-action editor-button"><i class="fa fa-long-arrow-down"></i> <span data-i18n="sidebar.project.versionControl.pull"></span></button>')
             .appendTo(row)
             .click(function(e) {
                 e.preventDefault();
@@ -999,10 +1003,12 @@ RED.sidebar.versionControl = (function() {
 
         RED.sidebar.addTab({
             id: "version-control",
-            label: "history",
+            label: RED._("sidebar.project.versionControl.history"),
             name: "Project History",
             content: sidebarContent,
             enableOnEdit: false,
+            pinned: true,
+            iconClass: "fa fa-code-fork",
             onchange: function() {
                 setTimeout(function() {
                     sections.resize();
@@ -1019,17 +1025,17 @@ RED.sidebar.versionControl = (function() {
         if (daysDelta > 30) {
             return (new Date(date*1000)).toLocaleDateString();
         } else if (daysDelta > 0) {
-            return daysDelta+" day"+(daysDelta>1?"s":"")+" ago";
+            return RED._("sidebar.project.versionControl.daysAgo", {count:daysDelta})
         }
         var hoursDelta = Math.floor(delta / (60*60));
         if (hoursDelta > 0) {
-            return hoursDelta+" hour"+(hoursDelta>1?"s":"")+" ago";
+            return RED._("sidebar.project.versionControl.hoursAgo", {count:hoursDelta})
         }
         var minutesDelta = Math.floor(delta / 60);
         if (minutesDelta > 0) {
-            return minutesDelta+" minute"+(minutesDelta>1?"s":"")+" ago";
+            return RED._("sidebar.project.versionControl.minsAgo", {count:minutesDelta})
         }
-        return "Seconds ago";
+        return RED._("sidebar.project.versionControl.secondsAgo");
     }
 
     function updateBulk(files,unstaged) {
@@ -1063,9 +1069,6 @@ RED.sidebar.versionControl = (function() {
     }
 
     var refreshInProgress = false;
-
-    var emptyStagedItem = { label:"None" };
-    var emptyMergedItem = { label:"All conflicts resolved. Commit the changes to complete the merge." };
 
     function getCommits(url,targetList,spinnerTarget,limit,before) {
         var spinner = utils.addSpinnerOverlay(spinnerTarget);
@@ -1274,7 +1277,7 @@ RED.sidebar.versionControl = (function() {
                 refreshFiles(result);
 
                 $('#sidebar-version-control-local-branch').text(result.branches.local);
-                $('#sidebar-version-control-remote-branch').text(result.branches.remote||"none");
+                $('#sidebar-version-control-remote-branch').text(result.branches.remote||RED._("sidebar.project.versionControl.none"));
 
                 var commitsAhead = result.commits.ahead || 0;
                 var commitsBehind = result.commits.behind || 0;
@@ -1304,7 +1307,7 @@ RED.sidebar.versionControl = (function() {
                             $('#sidebar-version-control-commits-ahead').text("");
                             $('#sidebar-version-control-commits-behind').text("");
 
-                            $('#sidebar-version-control-repo-toolbar-message').text("Your local branch is not currently tracking a remote branch.");
+                            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.notTracking"));
                             $("#sidebar-version-control-repo-pull").attr('disabled',true);
                             $("#sidebar-version-control-repo-push").attr('disabled',true);
                         }
@@ -1330,23 +1333,26 @@ RED.sidebar.versionControl = (function() {
         $('#sidebar-version-control-commits-ahead').text(commitsAhead);
         $('#sidebar-version-control-commits-behind').text(commitsBehind);
         if (isMerging) {
-            $('#sidebar-version-control-repo-toolbar-message').text("Your repository has unmerged changes. You need to fix the conflicts and commit the result.");
+            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.statusUnmergedChanged"));
             $("#sidebar-version-control-repo-pull").attr('disabled',true);
             $("#sidebar-version-control-repo-push").attr('disabled',true);
         } else if (commitsAhead > 0 && commitsBehind === 0) {
-            $('#sidebar-version-control-repo-toolbar-message').text("Your repository is "+commitsAhead+" commit"+(commitsAhead===1?'':'s')+" ahead of the remote. You can push "+(commitsAhead===1?'this commit':'these commits')+" now.");
+            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.commitsAhead", {count:commitsAhead}));
             $("#sidebar-version-control-repo-pull").attr('disabled',true);
             $("#sidebar-version-control-repo-push").attr('disabled',false);
         } else if (commitsAhead === 0 && commitsBehind > 0) {
-            $('#sidebar-version-control-repo-toolbar-message').text("Your repository is "+commitsBehind+" commit"+(commitsBehind===1?'':'s')+" behind of the remote. You can pull "+(commitsBehind===1?'this commit':'these commits')+" now.");
+            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.commitsBehind",{ count: commitsBehind }));
             $("#sidebar-version-control-repo-pull").attr('disabled',false);
             $("#sidebar-version-control-repo-push").attr('disabled',true);
         } else if (commitsAhead > 0 && commitsBehind > 0) {
-            $('#sidebar-version-control-repo-toolbar-message').text("Your repository is "+commitsBehind+" commit"+(commitsBehind===1?'':'s')+" behind and "+commitsAhead+" commit"+(commitsAhead===1?'':'s')+" ahead of the remote. You must pull the remote commit"+(commitsBehind===1?'':'s')+" down before pushing.");
+            $('#sidebar-version-control-repo-toolbar-message').text(
+                RED._("sidebar.project.versionControl.commitsAheadAndBehind1",{ count:commitsBehind })+
+                RED._("sidebar.project.versionControl.commitsAheadAndBehind2",{ count:commitsAhead })+
+                RED._("sidebar.project.versionControl.commitsAheadAndBehind3",{ count:commitsBehind }));
             $("#sidebar-version-control-repo-pull").attr('disabled',false);
             $("#sidebar-version-control-repo-push").attr('disabled',true);
         } else if (commitsAhead === 0 && commitsBehind === 0) {
-            $('#sidebar-version-control-repo-toolbar-message').text("Your repository is up to date.");
+            $('#sidebar-version-control-repo-toolbar-message').text(RED._("sidebar.project.versionControl.repositoryUpToDate"));
             $("#sidebar-version-control-repo-pull").attr('disabled',true);
             $("#sidebar-version-control-repo-push").attr('disabled',true);
         }

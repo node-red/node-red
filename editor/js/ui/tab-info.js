@@ -83,7 +83,9 @@ RED.sidebar.info = (function() {
             id: "info",
             label: RED._("sidebar.info.label"),
             name: RED._("sidebar.info.name"),
+            iconClass: "fa fa-info",
             content: content,
+            pinned: true,
             enableOnEdit: true
         });
         if (tips.enabled()) {
@@ -167,24 +169,42 @@ RED.sidebar.info = (function() {
                 $(propRow.children()[1]).text(node.label||node.name||"");
                 if (node.type === "tab") {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
-                    $(propRow.children()[1]).html((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+                    $(propRow.children()[1]).text((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
+                } else if (node.type === "subflow") {
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("subflow.category")+'</td><td></td></tr>').appendTo(tableBody);
+                    var category = node.category||"subflows";
+                    $(propRow.children()[1]).text(RED._("palette.label."+category,{defaultValue:category}))
                 }
             } else {
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.node")+"</td><td></td></tr>").appendTo(tableBody);
                 RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
 
 
-                if (node.type !== "subflow" && node.name) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td><span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'">'+node.name+'</span></td></tr>').appendTo(tableBody);
+                if (node.type !== "subflow" && node.type !== "unknown" && node.name) {
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td></td></tr>').appendTo(tableBody);
+                    $('<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'"></span>').text(node.name).appendTo(propRow.children()[1]);
                 }
                 if (!m) {
-                    $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td>"+node.type+"</td></tr>").appendTo(tableBody);
+                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.type")+"</td><td></td></tr>").appendTo(tableBody);
+                    $(propRow.children()[1]).text((node.type === "unknown")?node._orig.type:node.type);
+                    if (node.type === "unknown") {
+                        $('<span style="float: right; font-size: 0.8em"><i class="fa fa-warning"></i></span>').prependTo($(propRow.children()[1]))
+                    }
                 }
-
                 if (!m && node.type != "subflow" && node.type != "comment") {
-                    if (node._def) {
+                    var defaults;
+                    if (node.type === 'unknown') {
+                        defaults = {};
+                        Object.keys(node._orig).forEach(function(k) {
+                            if (k !== 'type') {
+                                defaults[k] = {};
+                            }
+                        })
+                    } else if (node._def) {
+                        defaults = node._def.defaults;
+                    }
+                    if (defaults) {
                         var count = 0;
-                        var defaults = node._def.defaults;
                         for (var n in defaults) {
                             if (n != "name" && defaults.hasOwnProperty(n)) {
                                 var val = node[n];
@@ -201,12 +221,12 @@ RED.sidebar.info = (function() {
 
                                         var div = $('<span>',{class:""}).appendTo(container);
                                         var nodeDiv = $('<div>',{class:"palette_node palette_node_small"}).appendTo(div);
-                                        var colour = configNode._def.color;
+                                        var colour = RED.utils.getNodeColor(configNode.type,configNode._def);
                                         var icon_url = RED.utils.getNodeIcon(configNode._def);
                                         nodeDiv.css({'backgroundColor':colour, "cursor":"pointer"});
                                         var iconContainer = $('<div/>',{class:"palette_icon_container"}).appendTo(nodeDiv);
                                         $('<div/>',{class:"palette_icon",style:"background-image: url("+icon_url+")"}).appendTo(iconContainer);
-                                        var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).html(configLabel).appendTo(container);
+                                        var nodeContainer = $('<span></span>').css({"verticalAlign":"top","marginLeft":"6px"}).text(configLabel).appendTo(container);
 
                                         nodeDiv.on('dblclick',function() {
                                             RED.editor.editConfig("", configNode.type, configNode.id);
@@ -231,24 +251,27 @@ RED.sidebar.info = (function() {
                 }
             }
             if (m) {
+                propRow = $('<tr class="node-info-node-row"><td>'+RED._("subflow.category")+'</td><td></td></tr>').appendTo(tableBody);
+                var category = subflowNode.category||"subflows";
+                $(propRow.children()[1]).text(RED._("palette.label."+category,{defaultValue:category}))
                 $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+subflowUserCount+'</td></tr>').appendTo(tableBody);
             }
 
             var infoText = "";
             if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
-                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
                 var helpText = $("script[data-help-name='"+node.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
                 infoText = helpText;
             } else if (node.type === "tab") {
-                infoSection.title.html(RED._("sidebar.info.flowDesc"));
+                infoSection.title.text(RED._("sidebar.info.flowDesc"));
                 infoText = marked(node.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
             }
 
             if (subflowNode) {
                 infoText = infoText + (marked(subflowNode.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>'));
-                infoSection.title.html(RED._("sidebar.info.subflowDesc"));
+                infoSection.title.text(RED._("sidebar.info.subflowDesc"));
             } else if (node._def && node._def.info) {
-                infoSection.title.html(RED._("sidebar.info.nodeHelp"));
+                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
                 var info = node._def.info;
                 var textInfo = (typeof info === "function" ? info.call(node) : info);
                 // TODO: help
@@ -257,8 +280,7 @@ RED.sidebar.info = (function() {
             if (infoText) {
                 setInfoText(infoText);
             }
-
-
+            $(".sidebar-node-info-stack").scrollTop(0);
             $(".node-info-property-header").click(function(e) {
                 e.preventDefault();
                 expandedSections["property"] = !expandedSections["property"];
@@ -372,10 +394,9 @@ RED.sidebar.info = (function() {
     function set(html,title) {
         // tips.stop();
         // sections.show();
-        // nodeSection.container.hide();
-        infoSection.title.text(title||"");
         refresh(null);
-        $(infoSection.content).empty();
+        nodeSection.container.hide();
+        infoSection.title.text(title||RED._("sidebar.info.info"));
         setInfoText(html);
         $(".sidebar-node-info-stack").scrollTop(0);
     }

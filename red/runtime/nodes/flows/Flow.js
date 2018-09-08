@@ -236,8 +236,8 @@ function Flow(global,flow) {
 
     this.handleError = function(node,logMessage,msg) {
         var count = 1;
-        if (msg && msg.hasOwnProperty("error")) {
-            if (msg.error.hasOwnProperty("source")) {
+        if (msg && msg.hasOwnProperty("error") && msg.error !== null) {
+            if (msg.error.hasOwnProperty("source") && msg.error.source !== null) {
                 if (msg.error.source.id === node.id) {
                     count = msg.error.source.count+1;
                     if (count === 10) {

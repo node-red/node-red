@@ -24,29 +24,55 @@ function injectNode(id) {
 
 util.inherits(injectNode, nodePage);
 
-var payloadType = {
+var payloadTypeList = {
     "flow": 1,
     "global": 2,
-    "string": 3,
+    "str": 3,
     "num": 4,
     "bool": 5,
     "json": 6,
     "bin": 7,
     "date": 8,
+    "env": 9,
 };
 
-injectNode.prototype.setPayload = function(type, value) {
+var repeatTypeList = {
+    "none": 1,
+    "interval": 2,
+    "intervalBetweenTimes": 3,
+    "atASpecificTime": 4,
+};
+
+injectNode.prototype.setPayload = function(payloadType, payload) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
     // Select a payload type.
-    var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadType[type] + ']';
+    var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadTypeList[payloadType] + ']';
     browser.clickWithWait(payloadTypeXPath);
-    // Input a value.
-    browser.setValue('#node-input-payload', value);
+    if (payload) {
+        // Input a value.
+        browser.setValue('//*[@class="red-ui-typedInput-input"]/input', payload);
+    }
 }
 
-injectNode.prototype.setTopic = function(value) {
-    browser.setValue('#node-input-topic', value);
+injectNode.prototype.setTopic = function(topic) {
+    browser.setValue('#node-input-topic', topic);
+}
+
+injectNode.prototype.setOnce = function(once) {
+    var isChecked = browser.isSelected('#node-input-once');
+    if (isChecked !== once) {
+        browser.clickWithWait('#node-input-once');
+    }
+}
+
+injectNode.prototype.setRepeat = function(repeatType) {
+    var repeatTypeXPath = '//*[@id="inject-time-type-select"]/option[' + repeatTypeList[repeatType] + ']';
+    browser.clickWithWait(repeatTypeXPath);
+}
+
+injectNode.prototype.setRepeatInterval = function(repeat) {
+    browser.setValue('#inject-time-interval-count', repeat);
 }
 
 module.exports = injectNode;

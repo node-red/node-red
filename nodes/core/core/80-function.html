@@ -9,7 +9,8 @@
         <input type="hidden" id="node-input-func" autofocus="autofocus">
         <input type="hidden" id="node-input-noerr">
     </div>
-    <div class="form-row node-text-editor-row">
+    <div class="form-row node-text-editor-row" style="position:relative">
+        <div style="position: absolute; right:0; bottom:calc(100% + 3px);"><button id="node-function-expand-js" class="editor-button editor-button-small"><i class="fa fa-expand"></i></button></div>
         <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-func-editor" ></div>
     </div>
     <div class="form-row">
@@ -52,6 +53,12 @@
     <p>The Catch node can also be used to handle errors. To invoke a Catch node,
     pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
     <pre>node.error("Error",msg);</pre>
+    <h4>Referring Node Information</h4>
+    <p>In the function block, id and name of the node can be referenced using the following properties:</p>
+    <ul>
+        <li><code>node.id</code> - id of the node</li>
+        <li><code>node.name</code> - name of the node</li>
+    </ul>
 </script>
 
 <script type="text/javascript">
@@ -113,6 +120,23 @@
                 fields:['name','outputs']
             });
             this.editor.focus();
+
+            $("#node-function-expand-js").click(function(e) {
+                e.preventDefault();
+                var value = that.editor.getValue();
+                RED.editor.editJavaScript({
+                    value: value,
+                    width: "Infinity",
+                    cursor: that.editor.getCursorPosition(),
+                    complete: function(v,cursor) {
+                        that.editor.setValue(v, -1);
+                        that.editor.gotoLine(cursor.row+1,cursor.column,false);
+                        setTimeout(function() {
+                            that.editor.focus();
+                        },300);
+                    }
+                })
+            })
         },
         oneditsave: function() {
             var annot = this.editor.getSession().getAnnotations();

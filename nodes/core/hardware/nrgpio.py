@@ -21,11 +21,12 @@ import os
 import subprocess
 from time import sleep
 
-bounce = 25;
+try:
+    raw_input          # Python 2
+except NameError:
+    raw_input = input  # Python 3
 
-if sys.version_info >= (3,0):
-    print("Sorry - currently only configured to work with python 2.x")
-    sys.exit(1)
+bounce = 25
 
 if len(sys.argv) > 2:
     cmd = sys.argv[1].lower()
@@ -34,7 +35,7 @@ if len(sys.argv) > 2:
     GPIO.setwarnings(False)
 
     if cmd == "pwm":
-        #print "Initialised pin "+str(pin)+" to PWM"
+        #print("Initialised pin "+str(pin)+" to PWM")
         try:
             freq = int(sys.argv[3])
         except:
@@ -54,10 +55,10 @@ if len(sys.argv) > 2:
                 GPIO.cleanup(pin)
                 sys.exit(0)
             except Exception as ex:
-                print "bad data: "+data
+                print("bad data: "+data)
 
     elif cmd == "buzz":
-        #print "Initialised pin "+str(pin)+" to Buzz"
+        #print("Initialised pin "+str(pin)+" to Buzz")
         GPIO.setup(pin,GPIO.OUT)
         p = GPIO.PWM(pin, 100)
         p.stop()
@@ -76,10 +77,10 @@ if len(sys.argv) > 2:
                 GPIO.cleanup(pin)
                 sys.exit(0)
             except Exception as ex:
-                print "bad data: "+data
+                print("bad data: "+data)
 
     elif cmd == "out":
-        #print "Initialised pin "+str(pin)+" to OUT"
+        #print("Initialised pin "+str(pin)+" to OUT")
         GPIO.setup(pin,GPIO.OUT)
         if len(sys.argv) == 4:
             GPIO.output(pin,int(sys.argv[3]))
@@ -103,11 +104,11 @@ if len(sys.argv) > 2:
             GPIO.output(pin,data)
 
     elif cmd == "in":
-        #print "Initialised pin "+str(pin)+" to IN"
+        #print("Initialised pin "+str(pin)+" to IN")
         bounce = float(sys.argv[4])
         def handle_callback(chan):
             sleep(bounce/1000.0)
-            print GPIO.input(chan)
+            print(GPIO.input(chan))
 
         if sys.argv[3].lower() == "up":
             GPIO.setup(pin,GPIO.IN,GPIO.PUD_UP)
@@ -116,7 +117,7 @@ if len(sys.argv) > 2:
         else:
             GPIO.setup(pin,GPIO.IN)
 
-        print GPIO.input(pin)
+        print(GPIO.input(pin))
         GPIO.add_event_detect(pin, GPIO.BOTH, callback=handle_callback, bouncetime=int(bounce))
 
         while True:
@@ -129,7 +130,7 @@ if len(sys.argv) > 2:
                 sys.exit(0)
 
     elif cmd == "byte":
-        #print "Initialised BYTE mode - "+str(pin)+
+        #print("Initialised BYTE mode - "+str(pin)+)
         list = [7,11,13,12,15,16,18,22]
         GPIO.setup(list,GPIO.OUT)
 
@@ -152,7 +153,7 @@ if len(sys.argv) > 2:
                 GPIO.output(list[bit], data & mask)
 
     elif cmd == "borg":
-        #print "Initialised BORG mode - "+str(pin)+
+        #print("Initialised BORG mode - "+str(pin)+)
         GPIO.setup(11,GPIO.OUT)
         GPIO.setup(13,GPIO.OUT)
         GPIO.setup(15,GPIO.OUT)
@@ -190,7 +191,7 @@ if len(sys.argv) > 2:
           button = ord( buf[0] ) & pin # mask out just the required button(s)
           if button != oldbutt:  # only send if changed
               oldbutt = button
-              print button
+              print(button)
 
         while True:
             try:
@@ -202,7 +203,7 @@ if len(sys.argv) > 2:
     elif cmd == "kbd":  # catch keyboard button events
         try:
             while not os.path.isdir("/dev/input/by-path"):
-                time.sleep(10)
+                sleep(10)
             infile = subprocess.check_output("ls /dev/input/by-path/ | grep -m 1 'kbd'", shell=True).strip()
             infile_path = "/dev/input/by-path/" + infile
             EVENT_SIZE = struct.calcsize('llHHI')
@@ -215,7 +216,7 @@ if len(sys.argv) > 2:
                     # type,code,value
                     print("%u,%u" % (code, value))
                 event = file.read(EVENT_SIZE)
-            print "0,0"
+            print("0,0")
             file.close()
             sys.exit(0)
         except:
@@ -225,14 +226,14 @@ if len(sys.argv) > 2:
 elif len(sys.argv) > 1:
     cmd = sys.argv[1].lower()
     if cmd == "rev":
-        print GPIO.RPI_REVISION
+        print(GPIO.RPI_REVISION)
     elif cmd == "ver":
-        print GPIO.VERSION
+        print(GPIO.VERSION)
     elif cmd == "info":
-        print GPIO.RPI_INFO
+        print(GPIO.RPI_INFO)
     else:
-        print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"
-        print "  only ver (gpio version) and info (board information) accept no pin parameter."
+        print("Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}")
+        print("  only ver (gpio version) and info (board information) accept no pin parameter.")
 
 else:
-    print "Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}"
+    print("Bad parameters - in|out|pwm|buzz|byte|borg|mouse|kbd|ver|info {pin} {value|up|down}")

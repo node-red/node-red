@@ -24,6 +24,10 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var nonHeadless = grunt.option('non-headless');
+    if (nonHeadless) {
+        process.env.NODE_RED_NON_HEADLESS = 'true';
+    }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         paths: {
@@ -55,7 +59,7 @@ module.exports = function(grunt) {
                 reportFormats: ['lcov','html'],
                 print: 'both'
             },
-            all: { src: ['test/**/*_spec.js'] },
+            all: { src: ["test/_spec.js","test/red/**/*_spec.js","test/nodes/**/*_spec.js"] },
             core: { src: ["test/_spec.js","test/red/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]}
         },
@@ -144,12 +148,15 @@ module.exports = function(grunt) {
                     "editor/js/ui/keyboard.js",
                     "editor/js/ui/workspaces.js",
                     "editor/js/ui/view.js",
+                    "editor/js/ui/view-navigator.js",
                     "editor/js/ui/sidebar.js",
                     "editor/js/ui/palette.js",
                     "editor/js/ui/tab-info.js",
                     "editor/js/ui/tab-config.js",
+                    "editor/js/ui/tab-context.js",
                     "editor/js/ui/palette-editor.js",
                     "editor/js/ui/editor.js",
+                    "editor/js/ui/editors/*.js",
                     "editor/js/ui/tray.js",
                     "editor/js/ui/clipboard.js",
                     "editor/js/ui/library.js",
@@ -474,7 +481,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
-        ['build','test-core','test-editor','test-nodes']);
+        ['build','jshint:editor','mocha_istanbul:all']);
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',

@@ -276,9 +276,20 @@ RED.clipboard = (function() {
         if (typeof value !== "string" ) {
             value = JSON.stringify(value, function(key,value) {
                 if (value !== null && typeof value === 'object') {
-                    if (value.__encoded__ && value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
-                        truncated = value.data.length !== value.length;
-                        return value.data;
+                    if (value.__enc__) {
+                        if (value.hasOwnProperty('data') && value.hasOwnProperty('length')) {
+                            truncated = value.data.length !== value.length;
+                            return value.data;
+                        }
+                        if (value.type === 'function' || value.type === 'internal') {
+                            return undefined
+                        }
+                        if (value.type === 'number') {
+                            // Handle NaN and Infinity - they are not permitted
+                            // in JSON. We can either substitute with a String
+                            // representation or null
+                            return null;
+                        }
                     }
                 }
                 return value;
@@ -308,18 +319,6 @@ RED.clipboard = (function() {
             setupDialogs();
 
             $('<input type="text" id="clipboard-hidden">').appendTo("body");
-
-            RED.events.on("view:selection-changed",function(selection) {
-                if (!selection.nodes) {
-                    RED.menu.setDisabled("menu-item-export",true);
-                    RED.menu.setDisabled("menu-item-export-clipboard",true);
-                    RED.menu.setDisabled("menu-item-export-library",true);
-                } else {
-                    RED.menu.setDisabled("menu-item-export",false);
-                    RED.menu.setDisabled("menu-item-export-clipboard",false);
-                    RED.menu.setDisabled("menu-item-export-library",false);
-                }
-            });
 
             RED.actions.add("core:show-export-dialog",exportNodes);
             RED.actions.add("core:show-import-dialog",importNodes);

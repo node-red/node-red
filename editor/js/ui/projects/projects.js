@@ -22,18 +22,18 @@ RED.projects = (function() {
     function reportUnexpectedError(error) {
         var notification;
         if (error.error === 'git_missing_user') {
-            notification = RED.notify("<p>You Git client is not configured with a username/email.</p>",{
+            notification = RED.notify("<p>"+RED._("projects.errors.no-username-email")+"</p>",{
                 fixed: true,
                 type:'error',
                 buttons: [
                     {
-                        text: "Cancel",
+                        text: RED._("common.label.cancel"),
                         click: function() {
                             notification.close();
                         }
                     },
                     {
-                        text: "Configure Git client",
+                        text: RED._("projects.config-git"),
                         click: function() {
                             RED.userSettings.show('gitconfig');
                             notification.close();
@@ -43,13 +43,13 @@ RED.projects = (function() {
             })
         } else {
             console.log(error);
-            notification = RED.notify("<p>An unexpected error occurred:</p><p>"+error.message+"</p><small>code: "+error.error+"</small>",{
+            notification = RED.notify("<p>"+RED._("projects.errors.unexpected")+":</p><p>"+error.message+"</p><small>"+RED._("projects.errors.code")+": "+error.error+"</small>",{
                 fixed: true,
                 modal: true,
                 type: 'error',
                 buttons: [
                     {
-                        text: "Close",
+                        text: RED._("common.label.close"),
                         click: function() {
                             notification.close();
                         }
@@ -75,14 +75,14 @@ RED.projects = (function() {
                     migrateProjectHeader.appendTo(container);
 
                     var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
-                    $('<p>').text("Hello! We have introduced 'projects' to Node-RED.").appendTo(body);
-                    $('<p>').text("This is a new way for you to manage your flow files and includes version control of your flows.").appendTo(body);
-                    $('<p>').text("To get started you can create your first project or clone an existing project from a git repository.").appendTo(body);
-                    $('<p>').text("If you are not sure, you can skip this for now. You will still be able to create your first project from the 'Projects' menu at any time.").appendTo(body);
+                    $('<p>').text(RED._("projects.welcome.hello")).appendTo(body);
+                    $('<p>').text(RED._("projects.welcome.desc0")).appendTo(body);
+                    $('<p>').text(RED._("projects.welcome.desc1")).appendTo(body);
+                    $('<p>').text(RED._("projects.welcome.desc2")).appendTo(body);
 
                     var row = $('<div style="text-align: center"></div>').appendTo(body);
-                    var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>Create Project</button>').appendTo(row);
-                    var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-git"></i><br/>Clone Repository</button>').appendTo(row);
+                    var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>'+RED._("projects.welcome.create")+'</button>').appendTo(row);
+                    var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-git"></i><br/>'+RED._("projects.welcome.clone")+'</button>').appendTo(row);
 
                     createAsEmpty.click(function(e) {
                         e.preventDefault();
@@ -105,7 +105,7 @@ RED.projects = (function() {
                 buttons: [
                     {
                         // id: "clipboard-dialog-cancel",
-                        text: "Not right now",
+                        text: RED._("projects.welcome.not-right-now"),
                         click: function() {
                             createProjectOptions = {};
                             $( this ).dialog( "close" );
@@ -139,23 +139,23 @@ RED.projects = (function() {
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
-                        $('<p>').text("Setup your version control client").appendTo(body);
-                        $('<p>').text("Node-RED uses the open source tool Git for version control. It tracks changes to your project files and lets you push them to remote repositories.").appendTo(body);
-                        $('<p>').text("When you commit a set of changes, Git records who made the changes with a username and email address. The Username can be anything you want - it does not need to be your real name.").appendTo(body);
+                        $('<p>').text(RED._("projects.git-config.setup")).appendTo(body);
+                        $('<p>').text(RED._("projects.git-config.desc0")).appendTo(body);
+                        $('<p>').text(RED._("projects.git-config.desc1")).appendTo(body);
 
                         if (isGlobalConfig) {
-                            $('<p>').text("Your Git client is already configured with the details below.").appendTo(body);
+                            $('<p>').text(RED._("projects.git-config.desc2")).appendTo(body);
                         }
-                        $('<p>').text("You can change these settings later under the 'Git config' tab of the settings dialog.").appendTo(body);
+                        $('<p>').text(RED._("projects.git-config.desc3")).appendTo(body);
 
                         var row = $('<div class="form-row"></div>').appendTo(body);
-                        $('<label for="">Username</label>').appendTo(row);
+                        $('<label for="">'+RED._("projects.git-config.username")+'</label>').appendTo(row);
                         gitUsernameInput = $('<input type="text">').val((existingGitSettings&&existingGitSettings.name)||"").appendTo(row);
                         // $('<div style="position:relative;"></div>').text("This does not need to be your real name").appendTo(row);
                         gitUsernameInput.on("change keyup paste",validateForm);
 
                         row = $('<div class="form-row"></div>').appendTo(body);
-                        $('<label for="">Email</label>').appendTo(row);
+                        $('<label for="">'+RED._("projects.git-config.email")+'</label>').appendTo(row);
                         gitEmailInput = $('<input type="text">').val((existingGitSettings&&existingGitSettings.email)||"").appendTo(row);
                         gitEmailInput.on("change keyup paste",validateForm);
                         // $('<div style="position:relative;"></div>').text("Something something email").appendTo(row);
@@ -168,14 +168,14 @@ RED.projects = (function() {
                     buttons: [
                         {
                             // id: "clipboard-dialog-cancel",
-                            text: "Back",
+                            text: RED._("common.label.back"),
                             click: function() {
                                 show('welcome');
                             }
                         },
                         {
                             id: "projects-dialog-git-config",
-                            text: "Next", // TODO: nls
+                            text: RED._("common.label.next"),
                             class: "primary",
                             click: function() {
                                 var currentGitSettings = RED.settings.get('git') || {};
@@ -216,10 +216,10 @@ RED.projects = (function() {
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
-                        $('<p>').text("Create your project").appendTo(body);
-                        $('<p>').text("A project is maintained as a Git repository. It makes it much easier to share your flows with others and to collaborate on them.").appendTo(body);
-                        $('<p>').text("You can create multiple projects and quickly switch between them from the editor.").appendTo(body);
-                        $('<p>').text("To begin, your project needs a name and an optional description.").appendTo(body);
+                        $('<p>').text(RED._("projects.project-details.create")).appendTo(body);
+                        $('<p>').text(RED._("projects.project-details.desc0")).appendTo(body);
+                        $('<p>').text(RED._("projects.project-details.desc1")).appendTo(body);
+                        $('<p>').text(RED._("projects.project-details.desc2")).appendTo(body);
 
                         var validateForm = function() {
                             var projectName = projectNameInput.val();
@@ -236,14 +236,14 @@ RED.projects = (function() {
                                     projectNameValid = false;
                                     valid = false;
                                     if (projectList[projectName]) {
-                                        projectNameSublabel.text("Project already exists");
+                                        projectNameSublabel.text(RED._("projects.project-details.already-exists"));
                                     } else {
-                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                        projectNameSublabel.text(RED._("projects.project-details.must-contain"));
                                     }
                                 } else {
                                     projectNameInput.removeClass("input-error");
                                     $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
-                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameSublabel.text(RED._("projects.project-details.must-contain"));
                                     projectNameValid = true;
                                 }
                                 projectNameLastChecked = projectName;
@@ -253,7 +253,7 @@ RED.projects = (function() {
                         }
 
                         var row = $('<div class="form-row"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-name">'+RED._("projects.project-details.project-name")+'</label>').appendTo(row);
 
                         var subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').val(createProjectOptions.name||"").appendTo(subrow);
@@ -283,13 +283,13 @@ RED.projects = (function() {
                                 checkProjectName = null;
                             },300)
                         });
-                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.project-details.must-contain")+'</small></label>').appendTo(row).find("small");
 
                         // Empty Project
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-desc">Description</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-desc">'+RED._("projects.project-details.desc")+'</label>').appendTo(row);
                         projectSummaryInput = $('<input id="projects-dialog-screen-create-project-desc" type="text">').val(createProjectOptions.summary||"").appendTo(row);
-                        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.project-details.opt")+'</small></label>').appendTo(row);
 
                         setTimeout(function() {
                             projectNameInput.focus();
@@ -300,7 +300,7 @@ RED.projects = (function() {
                     buttons: function(options) {
                         return [
                             {
-                                text: "Back",
+                                text: RED._("common.label.back"),
                                 click: function() {
                                     show('git-config');
                                 }
@@ -308,7 +308,7 @@ RED.projects = (function() {
                             {
                                 id: "projects-dialog-create-name",
                                 disabled: true,
-                                text: "Next", // TODO: nls
+                                text: RED._("common.label.next"),
                                 class: "primary disabled",
                                 click: function() {
                                     createProjectOptions.name = projectNameInput.val();
@@ -344,8 +344,8 @@ RED.projects = (function() {
                         var container = $('<div class="projects-dialog-screen-start"></div>');
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
-                        $('<p>').text("Clone a project").appendTo(body);
-                        $('<p>').text("If you already have a git repository containing a project, you can clone it to get started.").appendTo(body);
+                        $('<p>').text(RED._("projects.clone-project.clone")).appendTo(body);
+                        $('<p>').text(RED._("projects.clone-project.desc0")).appendTo(body);
 
                         var projectList = null;
                         var pendingFormValidation = false;
@@ -376,14 +376,14 @@ RED.projects = (function() {
                                     projectNameValid = false;
                                     valid = false;
                                     if (projectList[projectName]) {
-                                        projectNameSublabel.text("Project already exists");
+                                        projectNameSublabel.text(RED._("projects.clone-project.already-exists"));
                                     } else {
-                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                        projectNameSublabel.text(RED._("projects.clone-project.must-contain"));
                                     }
                                 } else {
                                     projectNameInput.removeClass("input-error");
                                     $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
-                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameSublabel.text(RED._("projects.clone-project.must-contain"));
                                     projectNameValid = true;
                                 }
                                 projectNameLastChecked = projectName;
@@ -395,7 +395,7 @@ RED.projects = (function() {
                             // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
                             var validRepo = repo.length > 0 && !/\s/.test(repo);
                             if (/^https?:\/\/[^/]+@/i.test(repo)) {
-                                $("#projects-dialog-screen-create-project-repo-label small").text("Do not include the username/password in the url");
+                                $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.no-info-in-url"));
                                 validRepo = false;
                             }
                             if (!validRepo) {
@@ -426,7 +426,7 @@ RED.projects = (function() {
                         var row;
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty projects-dialog-screen-create-row-clone"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-name">'+RED._("projects.clone-project.project-name")+'</label>').appendTo(row);
 
                         var subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').appendTo(subrow);
@@ -456,19 +456,19 @@ RED.projects = (function() {
                                 checkProjectName = null;
                             },300)
                         });
-                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.clone-project.must-contain")+'</small></label>').appendTo(row).find("small");
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo">'+RED._("projects.clone-project.git-url")+'</label>').appendTo(row);
                         projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
-                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
+                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>'+RED._("projects.clone-project.protocols")+'</small></label>').appendTo(row);
                         var projectRepoChanged = false;
                         var lastProjectRepo = "";
                         projectRepoInput.on("change keyup paste",function() {
                             projectRepoChanged = true;
                             var repo = $(this).val();
                             if (lastProjectRepo !== repo) {
-                                $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                                $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.protocols"));
                             }
                             lastProjectRepo = repo;
 
@@ -486,24 +486,24 @@ RED.projects = (function() {
 
                         var cloneAuthRows = $('<div class="projects-dialog-screen-create-row"></div>').appendTo(body);
                         row = $('<div class="form-row projects-dialog-screen-create-row-auth-error"></div>').hide().appendTo(cloneAuthRows);
-                        $('<div><i class="fa fa-warning"></i> Authentication failed</div>').appendTo(row);
+                        $('<div><i class="fa fa-warning"></i> '+RED._("projects.clone-project.auth-failed")+'</div>').appendTo(row);
 
                         // Repo credentials - username/password ----------------
                         row = $('<div class="hide form-row projects-dialog-screen-create-row-creds"></div>').hide().appendTo(cloneAuthRows);
 
                         var subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-user">Username</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-user">'+RED._("projects.clone-project.username")+'</label>').appendTo(subrow);
                         projectRepoUserInput = $('<input id="projects-dialog-screen-create-project-repo-user" type="text"></input>').appendTo(subrow);
 
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-pass">Password</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-pass">'+RED._("projects.clone-project.passwd")+'</label>').appendTo(subrow);
                         projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
                         // -----------------------------------------------------
 
                         // Repo credentials - key/passphrase -------------------
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(cloneAuthRows);
                         subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Key</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">'+RED._("projects.clone-project.ssh-key")+'</label>').appendTo(subrow);
                         projectRepoSSHKeySelect = $("<select>",{style:"width: 100%"}).appendTo(subrow);
 
                         $.getJSON("settings/user/keys", function(data) {
@@ -523,14 +523,14 @@ RED.projects = (function() {
                             }
                         });
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">Passphrase</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">'+RED._("projects.clone-project.passphrase")+'</label>').appendTo(subrow);
                         projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password"></input>').appendTo(subrow);
 
                         subrow = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').appendTo(cloneAuthRows);
                         var sshwarningRow = $('<div class="projects-dialog-screen-create-row-auth-error-no-keys"></div>').hide().appendTo(subrow);
-                        $('<div class="form-row"><i class="fa fa-warning"></i> Before you can clone a repository over ssh you must add an SSH key to access it.</div>').appendTo(sshwarningRow);
+                        $('<div class="form-row"><i class="fa fa-warning"></i> '+RED._("projects.clone-project.ssh-key-desc")+'</div>').appendTo(sshwarningRow);
                         subrow = $('<div style="text-align: center">').appendTo(sshwarningRow);
-                        $('<button class="editor-button">Add an ssh key</button>').appendTo(subrow).click(function(e) {
+                        $('<button class="editor-button">'+RED._("projects.clone-project.ssh-key-add")+'</button>').appendTo(subrow).click(function(e) {
                             e.preventDefault();
                             $('#projects-dialog-cancel').click();
                             RED.userSettings.show('gitconfig');
@@ -543,7 +543,7 @@ RED.projects = (function() {
 
                         // Secret - clone
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(body);
-                        $('<label>Credentials encryption key</label>').appendTo(row);
+                        $('<label>'+RED._("projects.clone-project.credential-key")+'</label>').appendTo(row);
                         projectSecretInput = $('<input type="password"></input>').appendTo(row);
 
 
@@ -553,7 +553,7 @@ RED.projects = (function() {
                     buttons: function(options) {
                         return [
                             {
-                                text: "Back",
+                                text: RED._("common.label.back"),
                                 click: function() {
                                     show('git-config');
                                 }
@@ -561,7 +561,7 @@ RED.projects = (function() {
                             {
                                 id: "projects-dialog-clone-project",
                                 disabled: true,
-                                text: "Clone project", // TODO: nls
+                                text: RED._("common.label.clone"),
                                 class: "primary disabled",
                                 click: function() {
                                     var projectType = $(".projects-dialog-screen-create-type.selected").data('type');
@@ -585,7 +585,7 @@ RED.projects = (function() {
                                             };
                                         }
                                         else {
-                                            console.log("Error! Can't get selected SSH key path.");
+                                            console.log(RED._("projects.clone-project.cant-get-ssh-key"));
                                             return;
                                         }
                                     }
@@ -602,7 +602,7 @@ RED.projects = (function() {
                                     }
 
                                     $(".projects-dialog-screen-create-row-auth-error").hide();
-                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.protocols"));
 
                                     projectRepoUserInput.removeClass("input-error");
                                     projectRepoPasswordInput.removeClass("input-error");
@@ -622,22 +622,22 @@ RED.projects = (function() {
                                             },
                                             400: {
                                                 'project_exists': function(error) {
-                                                    console.log("already exists");
+                                                    console.log(RED._("projects.clone-project.already-exists2"));
                                                 },
                                                 'git_error': function(error) {
-                                                    console.log("git error",error);
+                                                    console.log(RED._("projects.clone-project.git-error"),error);
                                                 },
                                                 'git_connection_failed': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Connection failed");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.connection-failed"));
                                                 },
                                                 'git_not_a_repository': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Not a git repository");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.not-git-repo"));
                                                 },
                                                 'git_repository_not_found': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Repository not found");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.clone-project.repo-not-found"));
                                                 },
                                                 'git_auth_failed': function(error) {
                                                     $(".projects-dialog-screen-create-row-auth-error").show();
@@ -689,11 +689,11 @@ RED.projects = (function() {
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
-                        $('<p>').text("Create your project files").appendTo(body);
-                        $('<p>').text("A project contains your flow files, a README file and a package.json file.").appendTo(body);
-                        $('<p>').text("It can contain any other files you want to maintain in the Git repository.").appendTo(body);
+                        $('<p>').text(RED._("projects.default-files.create")).appendTo(body);
+                        $('<p>').text(RED._("projects.default-files.desc0")).appendTo(body);
+                        $('<p>').text(RED._("projects.default-files.desc1")).appendTo(body);
                         if (!options.existingProject && RED.settings.files) {
-                            $('<p>').text("Your existing flow and credential files will be copied into the project.").appendTo(body);
+                            $('<p>').text(RED._("projects.default-files.desc2")).appendTo(body);
                         }
 
                         var validateForm = function() {
@@ -724,7 +724,7 @@ RED.projects = (function() {
                             $("#projects-dialog-create-default-files").prop('disabled',!valid).toggleClass('disabled ui-button-disabled ui-state-disabled',!valid);
                         }
                         var row = $('<div class="form-row"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-file">Flow file</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-file">'+RED._("projects.default-files.flow-file")+'</label>').appendTo(row);
                         var subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         var defaultFlowFile = (createProjectOptions.files &&createProjectOptions.files.flow) || (RED.settings.files && RED.settings.files.flow)||"flow.json";
                         projectFlowFileInput = $('<input id="projects-dialog-screen-create-project-file" type="text">').val(defaultFlowFile)
@@ -735,7 +735,7 @@ RED.projects = (function() {
 
                         var defaultCredentialsFile = (createProjectOptions.files &&createProjectOptions.files.credentials) || (RED.settings.files && RED.settings.files.credentials)||"flow_cred.json";
                         row = $('<div class="form-row"></div>').appendTo(body);
-                        $('<label for="projects-dialog-screen-create-project-credfile">Credentials file</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-credfile">'+RED._("projects.default-files.credentials-file")+'</label>').appendTo(row);
                         subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         projectCredentialFileInput = $('<div style="width: 100%" class="uneditable-input" id="projects-dialog-screen-create-project-credentials">').text(defaultCredentialsFile)
                             .appendTo(subrow);
@@ -752,7 +752,7 @@ RED.projects = (function() {
                         return [
                             {
                                 // id: "clipboard-dialog-cancel",
-                                text: options.existingProject?"Cancel":"Back",
+                                text: RED._(options.existingProject ? "common.label.cancel": "common.label.back"),
                                 click: function() {
                                     if (options.existingProject) {
                                         $(this).dialog('close');
@@ -763,7 +763,7 @@ RED.projects = (function() {
                             },
                             {
                                 id: "projects-dialog-create-default-files",
-                                text: "Next", // TODO: nls
+                                text: RED._("common.label.next"),
                                 class: "primary",
                                 click: function() {
                                     createProjectOptions.files = {
@@ -789,22 +789,22 @@ RED.projects = (function() {
                         migrateProjectHeader.appendTo(container);
                         var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
-                        $('<p>').text("Setup encryption of your credentials file").appendTo(body);
+                        $('<p>').text(RED._("projects.encryption-config.setup")).appendTo(body);
                         if (options.existingProject) {
-                            $('<p>').text("Your flow credentials file can be encrypted to keep its contents secure.").appendTo(body);
-                            $('<p>').text("If you want to store these credentials in a public Git repository, you must encrypt them by providing a secret key phrase.").appendTo(body);
+                            $('<p>').text(RED._("projects.encryption-config.desc0")).appendTo(body);
+                            $('<p>').text(RED._("projects.encryption-config.desc1")).appendTo(body);
                         } else {
                             if (RED.settings.flowEncryptionType === 'disabled') {
-                                $('<p>').text("Your flow credentials file is not currently encrypted.").appendTo(body);
-                                $('<p>').text("That means its contents, such as passwords and access tokens, can be read by anyone with access to the file.").appendTo(body);
-                                $('<p>').text("If you want to store these credentials in a public Git repository, you must encrypt them by providing a secret key phrase.").appendTo(body);
+                                $('<p>').text(RED._("projects.encryption-config.desc2")).appendTo(body);
+                                $('<p>').text(RED._("projects.encryption-config.desc3")).appendTo(body);
+                                $('<p>').text(RED._("projects.encryption-config.desc4")).appendTo(body);
                             } else {
                                 if (RED.settings.flowEncryptionType === 'user') {
-                                    $('<p>').text("Your flow credentials file is currently encrypted using the credentialSecret property from your settings file as the key.").appendTo(body);
+                                    $('<p>').text(RED._("projects.encryption-config.desc5")).appendTo(body);
                                 } else if (RED.settings.flowEncryptionType === 'system') {
-                                    $('<p>').text("Your flow credentials file is currently encrypted using a system-generated key. You should provide a new secret key for this project.").appendTo(body);
+                                    $('<p>').text(RED._("projects.encryption-config.desc6")).appendTo(body);
                                 }
-                                $('<p>').text("The key will be stored separately from your project files. You will need to provide the key to use this project in another instance of Node-RED.").appendTo(body);
+                                $('<p>').text(RED._("projects.encryption-config.desc7")).appendTo(body);
                             }
                         }
 
@@ -832,16 +832,16 @@ RED.projects = (function() {
 
 
                         var row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(body);
-                        $('<label>Credentials</label>').appendTo(row);
+                        $('<label>'+RED._("projects.encryption-config.credentials")+'</label>').appendTo(row);
 
                         var credentialsBox = $('<div style="width: 550px">').appendTo(row);
                         var credentialsRightBox = $('<div style="min-height:150px; box-sizing: border-box; float: right; vertical-align: top; width: 331px; margin-left: -1px; padding: 15px; margin-top: -15px; border: 1px solid #ccc; border-radius: 3px;  display: inline-block">').appendTo(credentialsBox);
                         var credentialsLeftBox = $('<div style="vertical-align: top; width: 220px;  display: inline-block">').appendTo(credentialsBox);
 
                         var credentialsEnabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid #ccc;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: white;"></div>').appendTo(credentialsLeftBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">Enable encryption</span></label>').appendTo(credentialsEnabledBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">'+RED._("projects.encryption-config.enable")+'</span></label>').appendTo(credentialsEnabledBox);
                         var credentialsDisabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid white;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: #ccc; "></div>').appendTo(credentialsLeftBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">Disable encryption</span></label>').appendTo(credentialsDisabledBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">'+RED._("projects.encryption-config.disable")+'</span></label>').appendTo(credentialsDisabledBox);
 
                         credentialsLeftBox.find("input[name=projects-encryption-type]").click(function(e) {
                             var val = $(this).val();
@@ -876,15 +876,15 @@ RED.projects = (function() {
                         })
 
                         row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        $('<label class="projects-edit-form-inline-label '+((RED.settings.flowEncryptionType !== 'user')?'disabled':'')+'" style="margin-left: 5px"><input '+((RED.settings.flowEncryptionType !== 'user')?'disabled':'')+' type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="default" name="projects-encryption-key"> <span style="vertical-align: middle;">Copy over existing key</span></label>').appendTo(row);
+                        $('<label class="projects-edit-form-inline-label '+((RED.settings.flowEncryptionType !== 'user')?'disabled':'')+'" style="margin-left: 5px"><input '+((RED.settings.flowEncryptionType !== 'user')?RED._("projects.encryption-config.disabled"):'')+' type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="default" name="projects-encryption-key"> <span style="vertical-align: middle;">'+RED._("projects.encryption-config.copy")+'</span></label>').appendTo(row);
                         row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="custom" name="projects-encryption-key"> <span style="vertical-align: middle;">Use custom key</span></label>').appendTo(row);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" value="custom" name="projects-encryption-key"> <span style="vertical-align: middle;">'+RED._("projects.encryption-config.use-custom")+'</span></label>').appendTo(row);
                         row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
                         emptyProjectCredentialInput = $('<input disabled type="password" style="margin-left: 25px; width: calc(100% - 30px);"></input>').appendTo(row);
                         emptyProjectCredentialInput.on("change keyup paste", validateForm);
 
                         row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
-                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
+                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> '+RED._("projects.encryption-config.desc8")+'</div>').appendTo(row);
 
                         credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
                             var val = $(this).val();
@@ -911,14 +911,14 @@ RED.projects = (function() {
                             return [
                             {
                                 // id: "clipboard-dialog-cancel",
-                                text: "Back",
+                                text: RED._("common.label.back"),
                                 click: function() {
                                     show('default-files',options);
                                 }
                             },
                             {
                                 id: "projects-dialog-create-encryption",
-                                text: options.existingProject?"Create project files":"Create project", // TODO: nls
+                                text: RED._(options.existingProject?"projects.encryption-config.create-project-files":"projects.encryption-config.create-project"),
                                 class: "primary disabled",
                                 disabled: true,
                                 click: function() {
@@ -966,10 +966,10 @@ RED.projects = (function() {
                                             },
                                             400: {
                                                 'project_exists': function(error) {
-                                                    console.log("already exists");
+                                                    console.log(RED._("projects.encryption-config.already-exists"));
                                                 },
                                                 'git_error': function(error) {
-                                                    console.log("git error",error);
+                                                    console.log(RED._("projects.encryption-config.git-error"),error);
                                                 },
                                                 'git_connection_failed': function(error) {
                                                     projectRepoInput.addClass("input-error");
@@ -978,7 +978,7 @@ RED.projects = (function() {
                                                     projectRepoUserInput.addClass("input-error");
                                                     projectRepoPasswordInput.addClass("input-error");
                                                     // getRepoAuthDetails(req);
-                                                    console.log("git auth error",error);
+                                                    console.log(RED._("projects.encryption-config.git-auth-error"),error);
                                                 },
                                                 '*': function(error) {
                                                     reportUnexpectedError(error);
@@ -1004,19 +1004,16 @@ RED.projects = (function() {
                     migrateProjectHeader.appendTo(container);
                     var body = $('<div class="projects-dialog-screen-start-body"></div>').appendTo(container);
 
-                    $('<p>').text("You have successfully created your first project!").appendTo(body);
-                    $('<p>').text("You can now continue to use Node-RED just as you always have.").appendTo(body);
-                    $('<p>').text("The 'info' tab in the sidebar shows you what your current active project is. "+
-                    "The button next to the name can be used to access the project settings view.").appendTo(body);
-                    $('<p>').text("The 'history' tab in the sidebar can be used to view files that have changed "+
-                    "in your project and to commit them. It shows you a complete history of your commits and "+
-                    "allows you to push your changes to a remote repository.").appendTo(body);
+                    $('<p>').text(RED._("projects.create-success.success")).appendTo(body);
+                    $('<p>').text(RED._("projects.create-success.desc0")).appendTo(body);
+                    $('<p>').text(RED._("projects.create-success.desc1")).appendTo(body);
+                    $('<p>').text(RED._("projects.create-success.desc2")).appendTo(body);
 
                     return container;
                 },
                 buttons: [
                     {
-                        text: "Done",
+                        text: RED._("common.label.done"),
                         click: function() {
                             $( this ).dialog( "close" );
                         }
@@ -1043,7 +1040,7 @@ RED.projects = (function() {
                 var selectedProject;
 
                 return {
-                    title: "Projects", // TODO: NLS
+                    title: RED._("projects.create.projects"),
                     content: function(options) {
                         var projectList = null;
                         selectedProject = null;
@@ -1077,14 +1074,14 @@ RED.projects = (function() {
                                     projectNameValid = false;
                                     valid = false;
                                     if (projectList[projectName]) {
-                                        projectNameSublabel.text("Project already exists");
+                                        projectNameSublabel.text(RED._("projects.create.already-exists"));
                                     } else {
-                                        projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                        projectNameSublabel.text(RED._("projects.create.must-contain"));
                                     }
                                 } else {
                                     projectNameInput.removeClass("input-error");
                                     $('<i style="margin-top: 8px;" class="fa fa-check"></i>').appendTo(projectNameStatus);
-                                    projectNameSublabel.text("Must contain only A-Z 0-9 _ -");
+                                    projectNameSublabel.text(RED._("projects.create.must-contain"));
                                     projectNameValid = true;
                                 }
                                 projectNameLastChecked = projectName;
@@ -1102,7 +1099,7 @@ RED.projects = (function() {
                                 // var validRepo = /^(?:file|git|ssh|https?|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?[\w\.@:\/~_-]+(?:\/?|\#[\d\w\.\-_]+?)$/.test(repo);
                                 var validRepo = repo.length > 0 && !/\s/.test(repo);
                                 if (/^https?:\/\/[^/]+@/i.test(repo)) {
-                                    $("#projects-dialog-screen-create-project-repo-label small").text("Do not include the username/password in the url");
+                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.no-info-in-url"));
                                     validRepo = false;
                                 }
                                 if (!validRepo) {
@@ -1159,10 +1156,10 @@ RED.projects = (function() {
 
                         row = $('<div class="form-row button-group"></div>').appendTo(container);
 
-                        var openProject = $('<button data-type="open" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-folder-open"></i><br/>Open Project</button>').appendTo(row);
-                        var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>Create Project</button>').appendTo(row);
+                        var openProject = $('<button data-type="open" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-folder-open"></i><br/>'+RED._("projects.create.open")+'</button>').appendTo(row);
+                        var createAsEmpty = $('<button data-type="empty" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-asterisk"></i><br/>'+RED._("projects.create.create")+'</button>').appendTo(row);
                         // var createAsCopy = $('<button data-type="copy" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i class="fa fa-long-arrow-right fa-2x"></i><i class="fa fa-archive fa-2x"></i><br/>Copy existing</button>').appendTo(row);
-                        var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-git"></i><br/>Clone Repository</button>').appendTo(row);
+                        var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-archive fa-2x"></i><i style="position: absolute;" class="fa fa-git"></i><br/>'+RED._("projects.create.clone")+'</button>').appendTo(row);
                         // var createAsClone = $('<button data-type="clone" class="editor-button projects-dialog-screen-create-type toggle"><i class="fa fa-git fa-2x"></i><i class="fa fa-arrows-h fa-2x"></i><i class="fa fa-archive fa-2x"></i><br/>Clone Repository</button>').appendTo(row);
                         row.find(".projects-dialog-screen-create-type").click(function(evt) {
                             evt.preventDefault();
@@ -1173,9 +1170,9 @@ RED.projects = (function() {
                             validateForm();
                             projectNameInput.focus();
                             switch ($(this).data('type')) {
-                                case "open": $("#projects-dialog-create").text("Open project"); break;
-                                case "empty": $("#projects-dialog-create").text("Create project"); break;
-                                case "clone": $("#projects-dialog-create").text("Clone project"); break;
+                                case "open": $("#projects-dialog-create").text(RED._("projects.create.open")); break;
+                                case "empty": $("#projects-dialog-create").text(RED._("projects.create.create")); break;
+                                case "clone": $("#projects-dialog-create").text(RED._("projects.create.clone")); break;
                             }
                         })
 
@@ -1201,7 +1198,7 @@ RED.projects = (function() {
                         }).appendTo(row);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label for="projects-dialog-screen-create-project-name">Project name</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-name">'+RED._("projects.create.project-name")+'</label>').appendTo(row);
 
                         var subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         projectNameInput = $('<input id="projects-dialog-screen-create-project-name" type="text"></input>').appendTo(subrow);
@@ -1231,16 +1228,16 @@ RED.projects = (function() {
                                 checkProjectName = null;
                             },300)
                         });
-                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>Must contain only A-Z 0-9 _ -</small></label>').appendTo(row).find("small");
+                        projectNameSublabel = $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.create.must-contain")+'</small></label>').appendTo(row).find("small");
 
                         // Empty Project
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label for="projects-dialog-screen-create-project-desc">Description</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-desc">'+RED._("projects.create.desc")+'</label>').appendTo(row);
                         projectSummaryInput = $('<input id="projects-dialog-screen-create-project-desc" type="text">').appendTo(row);
-                        $('<label class="projects-edit-form-sublabel"><small>Optional</small></label>').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.create.opt")+'</small></label>').appendTo(row);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label for="projects-dialog-screen-create-project-file">Flow file</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-file">'+RED._("projects.create.flow-file")+'</label>').appendTo(row);
                         subrow = $('<div style="position:relative;"></div>').appendTo(row);
                         projectFlowFileInput = $('<input id="projects-dialog-screen-create-project-file" type="text">').val("flow.json")
                             .on("change keyup paste",validateForm)
@@ -1249,16 +1246,16 @@ RED.projects = (function() {
                         $('<label class="projects-edit-form-sublabel"><small>*.json</small></label>').appendTo(row);
 
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-empty"></div>').appendTo(container);
-                        $('<label>Credentials</label>').appendTo(row);
+                        $('<label>'+RED._("projects.create.credentials")+'</label>').appendTo(row);
 
                         var credentialsBox = $('<div style="width: 550px">').appendTo(row);
                         var credentialsRightBox = $('<div style="min-height:150px; box-sizing: border-box; float: right; vertical-align: top; width: 331px; margin-left: -1px; padding: 15px; margin-top: -15px; border: 1px solid #ccc; border-radius: 3px;  display: inline-block">').appendTo(credentialsBox);
                         var credentialsLeftBox = $('<div style="vertical-align: top; width: 220px;  display: inline-block">').appendTo(credentialsBox);
 
                         var credentialsEnabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid #ccc;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: white;"></div>').appendTo(credentialsLeftBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" checked style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">Enable encryption</span></label>').appendTo(credentialsEnabledBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" checked style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="enabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-lock"></i> <span style="vertical-align: middle;">'+RED._("projects.create.enable-encryption")+'</span></label>').appendTo(credentialsEnabledBox);
                         var credentialsDisabledBox = $('<div class="form-row" style="padding:  7px 8px 3px 8px;border: 1px solid white;border-radius: 4px;border-top-right-radius: 0;border-bottom-right-radius: 0;border-right-color: #ccc; "></div>').appendTo(credentialsLeftBox);
-                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">Disable encryption</span></label>').appendTo(credentialsDisabledBox);
+                        $('<label class="projects-edit-form-inline-label" style="margin-left: 5px"><input type="radio" style="vertical-align: middle; margin-top:0; margin-right: 10px;" name="projects-encryption-type" value="disabled"> <i style="font-size: 1.4em; margin-right: 8px; vertical-align: middle; color: #888;" class="fa fa-unlock"></i> <span style="vertical-align: middle;">'+RED._("projects.create.disable-encryption")+'</span></label>').appendTo(credentialsDisabledBox);
 
                         credentialsLeftBox.find("input[name=projects-encryption-type]").click(function(e) {
                             var val = $(this).val();
@@ -1292,15 +1289,15 @@ RED.projects = (function() {
                         })
 
                         row = $('<div class="form-row projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
-                        $('<label class="projects-edit-form-inline-label">Encryption key</label>').appendTo(row);
+                        $('<label class="projects-edit-form-inline-label">'+RED._("projects.create.encryption-key")+'</label>').appendTo(row);
                         // row = $('<div class="projects-encryption-enabled-row"></div>').appendTo(credentialsRightBox);
                         emptyProjectCredentialInput = $('<input type="password"></input>').appendTo(row);
                         emptyProjectCredentialInput.on("change keyup paste", validateForm);
-                        $('<label class="projects-edit-form-sublabel"><small>A phrase to secure your credentials with</small></label>').appendTo(row);
+                        $('<label class="projects-edit-form-sublabel"><small>'+RED._("projects.create.desc0")+'</small></label>').appendTo(row);
 
 
                         row = $('<div class="form-row projects-encryption-disabled-row"></div>').hide().appendTo(credentialsRightBox);
-                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> The credentials file will not be encrypted and its contents easily read</div>').appendTo(row);
+                        $('<div class="" style="padding: 5px 20px;"><i class="fa fa-warning"></i> '+RED._("projects.create.desc1")+'</div>').appendTo(row);
 
                         credentialsRightBox.find("input[name=projects-encryption-key]").click(function() {
                             var val = $(this).val();
@@ -1313,9 +1310,9 @@ RED.projects = (function() {
 
                         // Clone Project
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label for="projects-dialog-screen-create-project-repo">Git repository URL</label>').appendTo(row);
+                        $('<label for="projects-dialog-screen-create-project-repo">'+RED._("projects.create.git-url")+'</label>').appendTo(row);
                         projectRepoInput = $('<input id="projects-dialog-screen-create-project-repo" type="text" placeholder="https://git.example.com/path/my-project.git"></input>').appendTo(row);
-                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>https://, ssh:// or file://</small></label>').appendTo(row);
+                        $('<label id="projects-dialog-screen-create-project-repo-label" class="projects-edit-form-sublabel"><small>'+RED._("projects.create.protocols")+'</small></label>').appendTo(row);
 
                         var projectRepoChanged = false;
                         var lastProjectRepo = "";
@@ -1323,7 +1320,7 @@ RED.projects = (function() {
                             projectRepoChanged = true;
                             var repo = $(this).val();
                             if (lastProjectRepo !== repo) {
-                                $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                                $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.protocols"));
                             }
                             lastProjectRepo = repo;
 
@@ -1342,24 +1339,24 @@ RED.projects = (function() {
 
                         var cloneAuthRows = $('<div class="hide projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').hide().appendTo(container);
                         row = $('<div class="form-row projects-dialog-screen-create-row-auth-error"></div>').hide().appendTo(cloneAuthRows);
-                        $('<div><i class="fa fa-warning"></i> Authentication failed</div>').appendTo(row);
+                        $('<div><i class="fa fa-warning"></i> '+RED._("projects.create.auth-failed")+'</div>').appendTo(row);
 
                         // Repo credentials - username/password ----------------
                         row = $('<div class="hide form-row projects-dialog-screen-create-row-creds"></div>').hide().appendTo(cloneAuthRows);
 
                         var subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-user">Username</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-user">'+RED._("projects.create.username")+'</label>').appendTo(subrow);
                         projectRepoUserInput = $('<input id="projects-dialog-screen-create-project-repo-user" type="text"></input>').appendTo(subrow);
 
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-pass">Password</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-pass">'+RED._("projects.create.password")+'</label>').appendTo(subrow);
                         projectRepoPasswordInput = $('<input id="projects-dialog-screen-create-project-repo-pass" type="password"></input>').appendTo(subrow);
                         // -----------------------------------------------------
 
                         // Repo credentials - key/passphrase -------------------
                         row = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').hide().appendTo(cloneAuthRows);
                         subrow = $('<div style="width: calc(50% - 10px); display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">SSH Key</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">'+RED._("projects.create.ssh-key")+'</label>').appendTo(subrow);
                         projectRepoSSHKeySelect = $("<select>",{style:"width: 100%"}).appendTo(subrow);
 
                         $.getJSON("settings/user/keys", function(data) {
@@ -1379,14 +1376,14 @@ RED.projects = (function() {
                             }
                         });
                         subrow = $('<div style="width: calc(50% - 10px); margin-left: 20px; display:inline-block;"></div>').appendTo(row);
-                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">Passphrase</label>').appendTo(subrow);
+                        $('<label for="projects-dialog-screen-create-project-repo-passphrase">'+RED._("projects.create.passphrase")+'</label>').appendTo(subrow);
                         projectRepoPassphrase = $('<input id="projects-dialog-screen-create-project-repo-passphrase" type="password"></input>').appendTo(subrow);
 
                         subrow = $('<div class="form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-sshkey"></div>').appendTo(cloneAuthRows);
                         var sshwarningRow = $('<div class="projects-dialog-screen-create-row-auth-error-no-keys"></div>').hide().appendTo(subrow);
-                        $('<div class="form-row"><i class="fa fa-warning"></i> Before you can clone a repository over ssh you must add an SSH key to access it.</div>').appendTo(sshwarningRow);
+                        $('<div class="form-row"><i class="fa fa-warning"></i> '+RED._("projects.create.desc2")+'</div>').appendTo(sshwarningRow);
                         subrow = $('<div style="text-align: center">').appendTo(sshwarningRow);
-                        $('<button class="editor-button">Add an ssh key</button>').appendTo(subrow).click(function(e) {
+                        $('<button class="editor-button">'+RED._("projects.create.add-ssh-key")+'</button>').appendTo(subrow).click(function(e) {
                             e.preventDefault();
                             $('#projects-dialog-cancel').click();
                             RED.userSettings.show('gitconfig');
@@ -1399,7 +1396,7 @@ RED.projects = (function() {
 
                         // Secret - clone
                         row = $('<div class="hide form-row projects-dialog-screen-create-row projects-dialog-screen-create-row-clone"></div>').appendTo(container);
-                        $('<label>Credentials encryption key</label>').appendTo(row);
+                        $('<label>'+RED._("projects.create.credentials-encryption-key")+'</label>').appendTo(row);
                         projectSecretInput = $('<input type="password"></input>').appendTo(row);
 
 
@@ -1421,9 +1418,9 @@ RED.projects = (function() {
                     buttons: function(options) {
                         var initialLabel;
                         switch (options.screen||"empty") {
-                            case "open": initialLabel = "Open project"; break;
-                            case "empty": initialLabel = "Create project"; break;
-                            case "clone": initialLabel = "Clone project"; break;
+                            case "open": initialLabel = RED._("projects.create.open"); break;
+                            case "empty": initialLabel = RED._("projects.create.create"); break;
+                            case "clone": initialLabel = RED._("projects.create.clone"); break;
                         }
                         return [
                             {
@@ -1477,7 +1474,7 @@ RED.projects = (function() {
                                                 };
                                             }
                                             else {
-                                                console.log("Error! Can't get selected SSH key path.");
+                                                console.log(RED._("projects.create.cant-get-ssh-key-path"));
                                                 return;
                                             }
                                         }
@@ -1497,14 +1494,14 @@ RED.projects = (function() {
                                             dialog.dialog( "close" );
                                             if (err) {
                                                 if (err.error !== 'credentials_load_failed') {
-                                                    console.log("unexpected_error",err)
+                                                    console.log(RED._("projects.create.unexpected_error"),err)
                                                 }
                                             }
                                         })
                                     }
 
                                     $(".projects-dialog-screen-create-row-auth-error").hide();
-                                    $("#projects-dialog-screen-create-project-repo-label small").text("https://, ssh:// or file://");
+                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.protocols"));
 
                                     projectRepoUserInput.removeClass("input-error");
                                     projectRepoPasswordInput.removeClass("input-error");
@@ -1524,22 +1521,22 @@ RED.projects = (function() {
                                             },
                                             400: {
                                                 'project_exists': function(error) {
-                                                    console.log("already exists");
+                                                    console.log(RED._("projects.create.already-exists-2"));
                                                 },
                                                 'git_error': function(error) {
-                                                    console.log("git error",error);
+                                                    console.log(RED._("projects.create.git-error"),error);
                                                 },
                                                 'git_connection_failed': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Connection failed");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.con-failed"));
                                                 },
                                                 'git_not_a_repository': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Not a git repository");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.not-git"));
                                                 },
                                                 'git_repository_not_found': function(error) {
                                                     projectRepoInput.addClass("input-error");
-                                                    $("#projects-dialog-screen-create-project-repo-label small").text("Repository not found");
+                                                    $("#projects-dialog-screen-create-project-repo-label small").text(RED._("projects.create.no-resource"));
                                                 },
                                                 'git_auth_failed': function(error) {
                                                     $(".projects-dialog-screen-create-row-auth-error").show();
@@ -1619,15 +1616,15 @@ RED.projects = (function() {
             whitespace: "nowrap",
             width:"1000px"
         }).click(function(evt) { evt.stopPropagation(); }).appendTo(row);
-        $('<span>').css({"lineHeight":"40px"}).text("Are you sure you want to delete this project?").appendTo(cover);
-        $('<button style="margin-left:20px" class="editor-button">Cancel</button>')
+        $('<span>').css({"lineHeight":"40px"}).text(RED._("projects.delete.confirm")).appendTo(cover);
+        $('<button style="margin-left:20px" class="editor-button">'+RED._("common.label.cancel")+'</button>')
             .appendTo(cover)
             .click(function(e) {
                 e.stopPropagation();
                 cover.remove();
                 done(true);
             });
-        $('<button style="margin-left:20px" class="editor-button primary">Delete</button>')
+        $('<button style="margin-left:20px" class="editor-button primary">'+RED._("common.label.delete")+'</button>')
             .appendTo(cover)
             .click(function(e) {
                 e.stopPropagation();
@@ -1681,7 +1678,7 @@ RED.projects = (function() {
         var filterTerm = "";
 
         var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(container);
-        var searchInput = $('<input id="projects-dialog-project-list-search" type="text" placeholder="search your projects">').appendTo(searchDiv).searchBox({
+        var searchInput = $('<input id="projects-dialog-project-list-search" type="text" placeholder="'+RED._("projects.create-project-list.search")+'">').appendTo(searchDiv).searchBox({
             //data-i18n="[placeholder]menu.label.searchInput"
             delay: 200,
             change: function() {
@@ -1790,7 +1787,7 @@ RED.projects = (function() {
                 $('<span class="projects-dialog-project-list-entry-name" style=""></span>').text(entry.name).appendTo(header);
                 if (activeProject && activeProject.name === entry.name) {
                     header.addClass("projects-list-entry-current");
-                    $('<span class="projects-dialog-project-list-entry-current">current</span>').appendTo(header);
+                    $('<span class="projects-dialog-project-list-entry-current">'+RED._("projects.create-project-list.current")+'</span>').appendTo(header);
                     if (options.canSelectActive === false) {
                         // active project cannot be selected; so skip the rest
                         return
@@ -1852,7 +1849,7 @@ RED.projects = (function() {
 
     function requireCleanWorkspace(done) {
         if (RED.nodes.dirty()) {
-            var message = '<p>You have undeployed changes that will be lost.</p><p>Do you want to continue?</p>';
+            var message = RED._("projects.require-clean.confirm");
             var cleanNotification = RED.notify(message,{
                 type:"info",
                 fixed: true,
@@ -1867,7 +1864,7 @@ RED.projects = (function() {
                             done(true);
                         }
                     },{
-                        text: 'Continue',
+                        text: RED._("common.label.cont"),
                         click: function() {
                             cleanNotification.close();
                             done(false);
@@ -1945,14 +1942,14 @@ RED.projects = (function() {
                     var url = activeProject.git.remotes[xhr.responseJSON.remote||options.remote||'origin'].fetch;
 
                     var message = $('<div>'+
-                        '<div class="form-row">Authentication required for repository:</div>'+
+                        '<div class="form-row">'+RED._("projects.send-req.auth-req")+':</div>'+
                         '<div class="form-row"><div style="margin-left: 20px;">'+url+'</div></div>'+
                         '</div>');
 
                     var isSSH = false;
                     if (/^https?:\/\//.test(url)) {
-                        $('<div class="form-row"><label for="projects-user-auth-username">Username</label><input id="projects-user-auth-username" type="text"></input></div>'+
-                        '<div class="form-row"><label for=projects-user-auth-password">Password</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
+                        $('<div class="form-row"><label for="projects-user-auth-username">'+RED._("projects.send-req.username")+'</label><input id="projects-user-auth-username" type="text"></input></div>'+
+                          '<div class="form-row"><label for=projects-user-auth-password">'+RED._("projects.send-req.password")+'</label><input id="projects-user-auth-password" type="password"></input></div>').appendTo(message);
                     } else if (/^(?:ssh|[\d\w\.\-_]+@[\w\.]+):(?:\/\/)?/.test(url)) {
                         isSSH = true;
                         var row = $('<div class="form-row"></div>').appendTo(message);
@@ -1969,7 +1966,7 @@ RED.projects = (function() {
                             }
                         });
                         row = $('<div class="form-row"></div>').appendTo(message);
-                        $('<label for="projects-user-auth-passphrase">Passphrase</label>').appendTo(row);
+                        $('<label for="projects-user-auth-passphrase">'+RED._("projects.send-req.passphrase")+'</label>').appendTo(row);
                         $('<input id="projects-user-auth-passphrase" type="password"></input>').appendTo(row);
                     }
 
@@ -1986,7 +1983,7 @@ RED.projects = (function() {
                                     notification.close();
                                 }
                             },{
-                                text: $('<span><i class="fa fa-refresh"></i> Retry</span>'),
+                                text: '<span><i class="fa fa-refresh"></i> ' +RED._("projects.send-req.retry") +'</span>',
                                 click: function() {
                                     body = body || {};
                                     var authBody = {};
@@ -1999,7 +1996,7 @@ RED.projects = (function() {
                                     }
                                     var done = function(err) {
                                         if (err) {
-                                            console.log("Failed to update auth");
+                                            console.log(RED._("projects.send-req.update-failed"));
                                             console.log(err);
                                         } else {
                                             sendRequest(options,body);
@@ -2039,7 +2036,7 @@ RED.projects = (function() {
                     return;
                 }
             }
-            console.log("Unhandled error response:");
+            console.log(RED._("projects.send-req.unhandled")+":");
             console.log(xhr);
             console.log(textStatus);
             console.log(err);
@@ -2073,7 +2070,7 @@ RED.projects = (function() {
                         branchFilterCreateItem.addClass("input-error");
                         branchFilterCreateItem.find("i").addClass("fa-warning").removeClass("fa-code-fork");
                     }
-                    branchFilterCreateItem.find("span").text("Invalid branch: "+branchPrefix+branchFilterTerm);
+                    branchFilterCreateItem.find("span").text(RED._("projects.create-branch-list.invalid")+": "+branchPrefix+branchFilterTerm);
                 } else {
                     if (branchFilterCreateItem.hasClass("input-error")) {
                         branchFilterCreateItem.removeClass("input-error");
@@ -2093,14 +2090,14 @@ RED.projects = (function() {
                 if (!entry.hasOwnProperty('commit')) {
                     branchFilterCreateItem = container;
                     $('<i class="fa fa-code-fork"></i>').appendTo(container);
-                    $('<span>').text("Create branch:").appendTo(container);
+                    $('<span>').text(RED._("projects.create-branch-list.create")+":").appendTo(container);
                     $('<div class="sidebar-version-control-branch-list-entry-create-name" style="margin-left: 10px;">').text(entry.name).appendTo(container);
                 } else {
                     $('<i class="fa fa-code-fork"></i>').appendTo(container);
                     $('<span>').text(entry.name).appendTo(container);
                     if (entry.current) {
                         container.addClass("selected");
-                        $('<span class="current"></span>').text(options.currentLabel||"current").appendTo(container);
+                        $('<span class="current"></span>').text(options.currentLabel||RED._("projects.create-branch-list.current")).appendTo(container);
                     }
                 }
                 container.click(function(evt) {
@@ -2240,9 +2237,9 @@ RED.projects = (function() {
 
     function createDefaultFileSet() {
         if (!activeProject) {
-            throw new Error("Cannot create default file set without an active project");
+            throw new Error(RED._("projects.create-default-file-set.no-active"));
         } else if (!activeProject.empty) {
-            throw new Error("Cannot create default file set on a non-empty project");
+            throw new Error(RED._("projects.create-default-file-set.no-empty"));
         }
         if (!RED.user.hasPermission("projects.write")) {
             RED.notify(RED._("user.errors.notAuthorized"),"error");
@@ -2269,7 +2266,7 @@ RED.projects = (function() {
                 200: function(data) { },
                 400: {
                     'git_error': function(error) {
-                        console.log("git error",error);
+                        console.log(RED._("projects.create-default-file-set.git-error"),error);
                     },
                     'missing_flow_file': function(error) {
                         // This is a natural next error - but let the runtime event

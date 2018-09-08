@@ -17,10 +17,15 @@
 
 
 RED.tabs = (function() {
+
+    var defaultTabIcon = "fa fa-lemon-o";
+
     function createTabs(options) {
         var tabs = {};
+        var pinnedTabsCount = 0;
         var currentTabWidth;
         var currentActiveTabWidth = 0;
+        var collapsibleMenu;
 
         var ul = options.element || $("#"+options.id);
         var wrapper = ul.wrap( "<div>" ).parent();
@@ -50,6 +55,56 @@ RED.tabs = (function() {
             scrollRight = $('<div class="red-ui-tab-button red-ui-tab-scroll red-ui-tab-scroll-right"><a href="#" style="display:none;"><i class="fa fa-caret-right"></i></a></div>').appendTo(wrapper).find("a");
             scrollRight.on('mousedown',function(evt) { scrollEventHandler(evt,'+=150') }).on('click',function(evt){ evt.preventDefault();});
         }
+
+        if (options.collapsible) {
+            // var dropDown = $('<div>',{class:"red-ui-tabs-select"}).appendTo(wrapper);
+            // ul.hide();
+            wrapper.addClass("red-ui-tabs-collapsible");
+
+            var collapsedButtonsRow = $('<div class="red-ui-tab-link-buttons"></div>').appendTo(wrapper);
+
+            var selectButton = $('<a href="#"><i class="fa fa-caret-down"></i></a>').appendTo(collapsedButtonsRow);
+            selectButton.addClass("red-ui-tab-link-button-menu")
+            selectButton.click(function(evt) {
+                evt.preventDefault();
+                if (!collapsibleMenu) {
+                    var pinnedOptions = [];
+                    var options = [];
+                    ul.children().each(function(i,el) {
+                        var id = $(el).data('tabId');
+                        var opt = {
+                            id:"red-ui-tabs-menu-option-"+id,
+                            icon: tabs[id].iconClass || defaultTabIcon,
+                            label: tabs[id].name,
+                            onselect: function() {
+                                activateTab(id);
+                            }
+                        };
+                        if (tabs[id].pinned) {
+                            pinnedOptions.push(opt);
+                        } else {
+                            options.push(opt);
+                        }
+                    });
+                    options = pinnedOptions.concat(options);
+                    collapsibleMenu = RED.menu.init({id:"debug-message-option-menu",options: options});
+                    collapsibleMenu.css({
+                        position: "absolute"
+                    })
+                    collapsibleMenu.on('mouseleave', function(){ $(this).hide() });
+                    collapsibleMenu.on('mouseup', function() { $(this).hide() });
+                    collapsibleMenu.appendTo("body");
+                }
+                var elementPos = selectButton.offset();
+                collapsibleMenu.css({
+                    top: (elementPos.top+selectButton.height()-20)+"px",
+                    left: (elementPos.left - collapsibleMenu.width() + selectButton.width())+"px"
+                })
+                collapsibleMenu.toggle();
+            })
+
+        }
+
         function scrollEventHandler(evt,dir) {
             evt.preventDefault();
             if ($(this).hasClass('disabled')) {
@@ -118,6 +173,9 @@ RED.tabs = (function() {
                 ul.children().removeClass("active");
                 ul.children().css({"transition": "width 100ms"});
                 link.parent().addClass("active");
+                var parentId = link.parent().attr('id');
+                wrapper.find(".red-ui-tab-link-button").removeClass("active selected");
+                $("#"+parentId+"-link-button").addClass("active selected");
                 if (options.scrollable) {
                     var pos = link.parent().position().left;
                     if (pos-21 < 0) {
@@ -155,41 +213,70 @@ RED.tabs = (function() {
             var tabs = ul.find("li.red-ui-tab");
             var width = wrapper.width();
             var tabCount = tabs.size();
-            var tabWidth = (width-12-(tabCount*6))/tabCount;
-            currentTabWidth = (100*tabWidth/width)+"%";
-            currentActiveTabWidth = currentTabWidth+"%";
-            if (options.scrollable) {
-                tabWidth = Math.max(tabWidth,140);
-                currentTabWidth = tabWidth+"px";
-                currentActiveTabWidth = 0;
-                var listWidth = Math.max(wrapper.width(),12+(tabWidth+6)*tabCount);
-                ul.width(listWidth);
-                updateScroll();
-            } else if (options.hasOwnProperty("minimumActiveTabWidth")) {
-                if (tabWidth < options.minimumActiveTabWidth) {
-                    tabCount -= 1;
-                    tabWidth = (width-12-options.minimumActiveTabWidth-(tabCount*6))/tabCount;
-                    currentTabWidth = (100*tabWidth/width)+"%";
-                    currentActiveTabWidth = options.minimumActiveTabWidth+"px";
+            var tabWidth;
+
+            if (options.collapsible) {
+                tabWidth = width - collapsedButtonsRow.width()-10;
+                if (tabWidth < 198) {
+                    var delta = 198 - tabWidth;
+                    var b = collapsedButtonsRow.find("a:last").prev();
+                    while (b.is(":not(:visible)")) {
+                        b = b.prev();
+                    }
+                    if (!b.hasClass("red-ui-tab-link-button-pinned")) {
+                        b.hide();
+                    }
+                    tabWidth = width - collapsedButtonsRow.width()-10;
                 } else {
-                    currentActiveTabWidth = 0;
+                    var space = width - 198 - collapsedButtonsRow.width();
+                    if (space > 40) {
+                        collapsedButtonsRow.find("a:not(:visible):first").show();
+                        tabWidth = width - collapsedButtonsRow.width()-10;
+                    }
                 }
-            }
-            tabs.css({width:currentTabWidth});
-            if (tabWidth < 50) {
-                ul.find(".red-ui-tab-close").hide();
-                ul.find(".red-ui-tab-icon").hide();
-                ul.find(".red-ui-tab-label").css({paddingLeft:Math.min(12,Math.max(0,tabWidth-38))+"px"})
+                tabs.css({width:tabWidth});
+
             } else {
-                ul.find(".red-ui-tab-close").show();
-                ul.find(".red-ui-tab-icon").show();
-                ul.find(".red-ui-tab-label").css({paddingLeft:""})
-            }
-            if (currentActiveTabWidth !== 0) {
-                ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
-                ul.find("li.red-ui-tab.active .red-ui-tab-close").show();
-                ul.find("li.red-ui-tab.active .red-ui-tab-icon").show();
-                ul.find("li.red-ui-tab.active .red-ui-tab-label").css({paddingLeft:""})
+                var tabWidth = (width-12-(tabCount*6))/tabCount;
+                currentTabWidth = (100*tabWidth/width)+"%";
+                currentActiveTabWidth = currentTabWidth+"%";
+                if (options.scrollable) {
+                    tabWidth = Math.max(tabWidth,140);
+                    currentTabWidth = tabWidth+"px";
+                    currentActiveTabWidth = 0;
+                    var listWidth = Math.max(wrapper.width(),12+(tabWidth+6)*tabCount);
+                    ul.width(listWidth);
+                    updateScroll();
+                } else if (options.hasOwnProperty("minimumActiveTabWidth")) {
+                    if (tabWidth < options.minimumActiveTabWidth) {
+                        tabCount -= 1;
+                        tabWidth = (width-12-options.minimumActiveTabWidth-(tabCount*6))/tabCount;
+                        currentTabWidth = (100*tabWidth/width)+"%";
+                        currentActiveTabWidth = options.minimumActiveTabWidth+"px";
+                    } else {
+                        currentActiveTabWidth = 0;
+                    }
+                }
+                if (options.collapsible) {
+                    console.log(currentTabWidth);
+                }
+
+                tabs.css({width:currentTabWidth});
+                if (tabWidth < 50) {
+                    ul.find(".red-ui-tab-close").hide();
+                    ul.find(".red-ui-tab-icon").hide();
+                    ul.find(".red-ui-tab-label").css({paddingLeft:Math.min(12,Math.max(0,tabWidth-38))+"px"})
+                } else {
+                    ul.find(".red-ui-tab-close").show();
+                    ul.find(".red-ui-tab-icon").show();
+                    ul.find(".red-ui-tab-label").css({paddingLeft:""})
+                }
+                if (currentActiveTabWidth !== 0) {
+                    ul.find("li.red-ui-tab.active").css({"width":options.minimumActiveTabWidth});
+                    ul.find("li.red-ui-tab.active .red-ui-tab-close").show();
+                    ul.find("li.red-ui-tab.active .red-ui-tab-icon").show();
+                    ul.find("li.red-ui-tab.active .red-ui-tab-label").css({paddingLeft:""})
+                }
             }
 
         }
@@ -210,11 +297,15 @@ RED.tabs = (function() {
                 activateTab(tab.find("a"));
             }
             li.remove();
+            if (tabs[id].pinned) {
+                pinnedTabsCount--;
+            }
             if (options.onremove) {
                 options.onremove(tabs[id]);
             }
             delete tabs[id];
             updateTabWidths();
+            collapsibleMenu = null;
         }
 
         return {
@@ -223,13 +314,48 @@ RED.tabs = (function() {
                 var li = $("<li/>",{class:"red-ui-tab"}).appendTo(ul);
                 li.attr('id',"red-ui-tab-"+(tab.id.replace(".","-")));
                 li.data("tabId",tab.id);
+
+                if (options.maximumTabWidth) {
+                    li.css("maxWidth",options.maximumTabWidth+"px");
+                }
                 var link = $("<a/>",{href:"#"+tab.id, class:"red-ui-tab-label"}).appendTo(li);
                 if (tab.icon) {
                     $('<img src="'+tab.icon+'" class="red-ui-tab-icon"/>').appendTo(link);
+                } else if (tab.iconClass) {
+                    $('<i>',{class:"red-ui-tab-icon "+tab.iconClass}).appendTo(link);
                 }
                 var span = $('<span/>',{class:"bidiAware"}).text(tab.label).appendTo(link);
                 span.attr('dir', RED.text.bidi.resolveBaseTextDir(tab.label));
+                if (options.collapsible) {
+                    li.addClass("red-ui-tab-pinned");
+                    var pinnedLink = $('<a href="#'+tab.id+'" class="red-ui-tab-link-button"></a>');
+                    if (tab.pinned) {
+                        if (pinnedTabsCount === 0) {
+                            pinnedLink.prependTo(collapsedButtonsRow)
+                        } else {
+                            pinnedLink.insertAfter(collapsedButtonsRow.find("a.red-ui-tab-link-button-pinned:last"));
+                        }
+                    } else {
+                        pinnedLink.insertBefore(collapsedButtonsRow.find("a:last"));
+                    }
 
+                    pinnedLink.attr('id',li.attr('id')+"-link-button");
+                    if (tab.iconClass) {
+                        $('<i>',{class:tab.iconClass}).appendTo(pinnedLink);
+                    } else {
+                        $('<i>',{class:defaultTabIcon}).appendTo(pinnedLink);
+                    }
+                    pinnedLink.click(function(evt) {
+                        evt.preventDefault();
+                        activateTab(tab.id);
+                    });
+                    if (tab.pinned) {
+                        pinnedLink.addClass("red-ui-tab-link-button-pinned");
+                        pinnedTabsCount++;
+                    }
+                    RED.popover.tooltip($(pinnedLink), tab.name);
+
+                }
                 link.on("click",onTabClick);
                 link.on("dblclick",onTabDblClick);
                 if (tab.closeable) {
@@ -241,7 +367,6 @@ RED.tabs = (function() {
                         removeTab(tab.id);
                     });
                 }
-                updateTabWidths();
                 if (options.onadd) {
                     options.onadd(tab);
                 }
@@ -326,6 +451,10 @@ RED.tabs = (function() {
                         }
                     })
                 }
+                setTimeout(function() {
+                    updateTabWidths();
+                },10);
+                collapsibleMenu = null;
             },
             removeTab: removeTab,
             activateTab: activateTab,

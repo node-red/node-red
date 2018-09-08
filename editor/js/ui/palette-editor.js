@@ -208,6 +208,8 @@ RED.palette.editor = (function() {
             if (nodeEntry) {
                 var activeTypeCount = 0;
                 var typeCount = 0;
+                var errorCount = 0;
+                nodeEntry.errorList.empty();
                 nodeEntries[module].totalUseCount = 0;
                 nodeEntries[module].setUseCount = {};
 
@@ -216,7 +218,10 @@ RED.palette.editor = (function() {
                         var inUseCount = 0;
                         var set = moduleInfo.sets[setName];
                         var setElements = nodeEntry.sets[setName];
-
+                        if (set.err) {
+                            errorCount++;
+                            $("<li>").text(set.err).appendTo(nodeEntry.errorList);
+                        }
                         if (set.enabled) {
                             activeTypeCount += set.types.length;
                         }
@@ -228,7 +233,7 @@ RED.palette.editor = (function() {
                             if (set.enabled) {
                                 var def = RED.nodes.getType(t);
                                 if (def && def.color) {
-                                    swatch.css({background:def.color});
+                                    swatch.css({background:RED.utils.getNodeColor(t,def)});
                                     swatch.css({border: "1px solid "+getContrastingBorder(swatch.css('backgroundColor'))})
 
                                 } else {
@@ -242,24 +247,31 @@ RED.palette.editor = (function() {
                         nodeEntries[module].totalUseCount += inUseCount;
 
                         if (inUseCount > 0) {
-                            setElements.enableButton.html(RED._('palette.editor.inuse'));
+                            setElements.enableButton.text(RED._('palette.editor.inuse'));
                             setElements.enableButton.addClass('disabled');
                         } else {
                             setElements.enableButton.removeClass('disabled');
                             if (set.enabled) {
-                                setElements.enableButton.html(RED._('palette.editor.disable'));
+                                setElements.enableButton.text(RED._('palette.editor.disable'));
                             } else {
-                                setElements.enableButton.html(RED._('palette.editor.enable'));
+                                setElements.enableButton.text(RED._('palette.editor.enable'));
                             }
                         }
                         setElements.setRow.toggleClass("palette-module-set-disabled",!set.enabled);
                     }
                 }
+
+                if (errorCount === 0) {
+                    nodeEntry.errorRow.hide()
+                } else {
+                    nodeEntry.errorRow.show();
+                }
+
                 var nodeCount = (activeTypeCount === typeCount)?typeCount:activeTypeCount+" / "+typeCount;
-                nodeEntry.setCount.html(RED._('palette.editor.nodeCount',{count:typeCount,label:nodeCount}));
+                nodeEntry.setCount.text(RED._('palette.editor.nodeCount',{count:typeCount,label:nodeCount}));
 
                 if (nodeEntries[module].totalUseCount > 0) {
-                    nodeEntry.enableButton.html(RED._('palette.editor.inuse'));
+                    nodeEntry.enableButton.text(RED._('palette.editor.inuse'));
                     nodeEntry.enableButton.addClass('disabled');
                     nodeEntry.removeButton.hide();
                 } else {
@@ -268,20 +280,20 @@ RED.palette.editor = (function() {
                         nodeEntry.removeButton.css('display', 'inline-block');
                     }
                     if (activeTypeCount === 0) {
-                        nodeEntry.enableButton.html(RED._('palette.editor.enableall'));
+                        nodeEntry.enableButton.text(RED._('palette.editor.enableall'));
                     } else {
-                        nodeEntry.enableButton.html(RED._('palette.editor.disableall'));
+                        nodeEntry.enableButton.text(RED._('palette.editor.disableall'));
                     }
                     nodeEntry.container.toggleClass("disabled",(activeTypeCount === 0));
                 }
             }
             if (moduleInfo.pending_version) {
                 nodeEntry.versionSpan.html(moduleInfo.version+' <i class="fa fa-long-arrow-right"></i> '+moduleInfo.pending_version).appendTo(nodeEntry.metaRow)
-                nodeEntry.updateButton.html(RED._('palette.editor.updated')).addClass('disabled').show();
+                nodeEntry.updateButton.text(RED._('palette.editor.updated')).addClass('disabled').show();
             } else if (loadedIndex.hasOwnProperty(module)) {
                 if (semVerCompare(loadedIndex[module].version,moduleInfo.version) === 1) {
                     nodeEntry.updateButton.show();
-                    nodeEntry.updateButton.html(RED._('palette.editor.update',{version:loadedIndex[module].version}));
+                    nodeEntry.updateButton.text(RED._('palette.editor.update',{version:loadedIndex[module].version}));
                 } else {
                     nodeEntry.updateButton.hide();
                 }
@@ -355,7 +367,7 @@ RED.palette.editor = (function() {
             loadedIndex = {};
             packageList.editableList('empty');
 
-            $(".palette-module-shade-status").html(RED._('palette.editor.loading'));
+            $(".palette-module-shade-status").text(RED._('palette.editor.loading'));
             var catalogues = RED.settings.theme('palette.catalogues')||['https://catalogue.nodered.org/catalogue.json'];
             catalogueLoadStatus = [];
             catalogueLoadErrors = false;
@@ -461,7 +473,7 @@ RED.palette.editor = (function() {
                 if (filteredList[i].info.id === ns.module) {
                     var installButton = filteredList[i].elements.installButton;
                     installButton.addClass('disabled');
-                    installButton.html(RED._('palette.editor.installed'));
+                    installButton.text(RED._('palette.editor.installed'));
                     break;
                 }
             }
@@ -477,7 +489,7 @@ RED.palette.editor = (function() {
                         if (filteredList[i].info.id === ns.module) {
                             var installButton = filteredList[i].elements.installButton;
                             installButton.removeClass('disabled');
-                            installButton.html(RED._('palette.editor.install'));
+                            installButton.text(RED._('palette.editor.install'));
                             break;
                         }
                     }
@@ -583,15 +595,18 @@ RED.palette.editor = (function() {
                 if (entry) {
                     var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
                     var titleRow = $('<div class="palette-module-meta palette-module-name"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-                    $('<span>').html(entry.name).appendTo(titleRow);
+                    $('<span>').text(entry.name).appendTo(titleRow);
                     var metaRow = $('<div class="palette-module-meta palette-module-version"><i class="fa fa-tag"></i></div>').appendTo(headerRow);
-                    var versionSpan = $('<span>').html(entry.version).appendTo(metaRow);
+                    var versionSpan = $('<span>').text(entry.version).appendTo(metaRow);
+
+                    var errorRow = $('<div class="palette-module-meta palette-module-errors"><i class="fa fa-warning"></i></div>').hide().appendTo(headerRow);
+                    var errorList = $('<ul class="palette-module-error-list"></ul>').appendTo(errorRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var setButton = $('<a href="#" class="editor-button editor-button-small palette-module-set-button"><i class="fa fa-angle-right palette-module-node-chevron"></i> </a>').appendTo(buttonRow);
                     var setCount = $('<span>').appendTo(setButton);
                     var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
 
-                    var updateButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.update')).appendTo(buttonGroup);
+                    var updateButton = $('<a href="#" class="editor-button editor-button-small"></a>').text(RED._('palette.editor.update')).appendTo(buttonGroup);
                     updateButton.attr('id','up_'+Math.floor(Math.random()*1000000000));
                     updateButton.click(function(evt) {
                         evt.preventDefault();
@@ -602,7 +617,7 @@ RED.palette.editor = (function() {
                     })
 
 
-                    var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.remove')).appendTo(buttonGroup);
+                    var removeButton = $('<a href="#" class="editor-button editor-button-small"></a>').text(RED._('palette.editor.remove')).appendTo(buttonGroup);
                     removeButton.attr('id','up_'+Math.floor(Math.random()*1000000000));
                     removeButton.click(function(evt) {
                         evt.preventDefault();
@@ -611,7 +626,7 @@ RED.palette.editor = (function() {
                     if (!entry.local) {
                         removeButton.hide();
                     }
-                    var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.disableall')).appendTo(buttonGroup);
+                    var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').text(RED._('palette.editor.disableall')).appendTo(buttonGroup);
 
                     var contentRow = $('<div>',{class:"palette-module-content"}).appendTo(container);
                     var shade = $('<div class="palette-module-shade hide"><img src="red/images/spin.svg" class="palette-spinner"/></div>').appendTo(container);
@@ -620,6 +635,8 @@ RED.palette.editor = (function() {
                         updateButton: updateButton,
                         removeButton: removeButton,
                         enableButton: enableButton,
+                        errorRow: errorRow,
+                        errorList: errorList,
                         setCount: setCount,
                         container: container,
                         shade: shade,
@@ -649,9 +666,8 @@ RED.palette.editor = (function() {
                         set.types.forEach(function(t) {
                             var typeDiv = $('<div>',{class:"palette-module-type"}).appendTo(setRow);
                             typeSwatches[t] = $('<span>',{class:"palette-module-type-swatch"}).appendTo(typeDiv);
-                            $('<span>',{class:"palette-module-type-node"}).html(t).appendTo(typeDiv);
+                            $('<span>',{class:"palette-module-type-node"}).text(t).appendTo(typeDiv);
                         })
-
                         var enableButton = $('<a href="#" class="editor-button editor-button-small"></a>').appendTo(buttonGroup);
                         enableButton.click(function(evt) {
                             evt.preventDefault();
@@ -689,7 +705,7 @@ RED.palette.editor = (function() {
                     })
                     refreshNodeModule(entry.name);
                 } else {
-                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
+                    $('<div>',{class:"red-ui-search-empty"}).text(RED._('search.empty')).appendTo(container);
                 }
             }
         });
@@ -729,7 +745,7 @@ RED.palette.editor = (function() {
             });
 
 
-        $('<span>').html(RED._("palette.editor.sort")+' ').appendTo(toolBar);
+        $('<span>').text(RED._("palette.editor.sort")+' ').appendTo(toolBar);
         var sortGroup = $('<span class="button-group"></span>').appendTo(toolBar);
         var sortAZ = $('<a href="#" class="sidebar-header-button-toggle selected" data-i18n="palette.editor.sortAZ"></a>').appendTo(sortGroup);
         var sortRecent = $('<a href="#" class="sidebar-header-button-toggle" data-i18n="palette.editor.sortRecent"></a>').appendTo(sortGroup);
@@ -771,13 +787,13 @@ RED.palette.editor = (function() {
             scrollOnAdd: false,
             addItem: function(container,i,object) {
                 if (object.count) {
-                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('palette.editor.moduleCount',{count:object.count})).appendTo(container);
+                    $('<div>',{class:"red-ui-search-empty"}).text(RED._('palette.editor.moduleCount',{count:object.count})).appendTo(container);
                     return
                 }
                 if (object.more) {
                     container.addClass('palette-module-more');
                     var moreRow = $('<div>',{class:"palette-module-header palette-module"}).appendTo(container);
-                    var moreLink = $('<a href="#"></a>').html(RED._('palette.editor.more',{count:object.more})).appendTo(moreRow);
+                    var moreLink = $('<a href="#"></a>').text(RED._('palette.editor.more',{count:object.more})).appendTo(moreRow);
                     moreLink.click(function(e) {
                         e.preventDefault();
                         packageList.editableList('removeItem',object);
@@ -794,17 +810,17 @@ RED.palette.editor = (function() {
                     var entry = object.info;
                     var headerRow = $('<div>',{class:"palette-module-header"}).appendTo(container);
                     var titleRow = $('<div class="palette-module-meta"><i class="fa fa-cube"></i></div>').appendTo(headerRow);
-                    $('<span>',{class:"palette-module-name"}).html(entry.name||entry.id).appendTo(titleRow);
+                    $('<span>',{class:"palette-module-name"}).text(entry.name||entry.id).appendTo(titleRow);
                     $('<a target="_blank" class="palette-module-link"><i class="fa fa-external-link"></i></a>').attr('href',entry.url).appendTo(titleRow);
                     var descRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
-                    $('<div>',{class:"palette-module-description"}).html(entry.description).appendTo(descRow);
+                    $('<div>',{class:"palette-module-description"}).text(entry.description).appendTo(descRow);
 
                     var metaRow = $('<div class="palette-module-meta"></div>').appendTo(headerRow);
                     $('<span class="palette-module-version"><i class="fa fa-tag"></i> '+entry.version+'</span>').appendTo(metaRow);
                     $('<span class="palette-module-updated"><i class="fa fa-calendar"></i> '+formatUpdatedAt(entry.updated_at)+'</span>').appendTo(metaRow);
                     var buttonRow = $('<div>',{class:"palette-module-meta"}).appendTo(headerRow);
                     var buttonGroup = $('<div>',{class:"palette-module-button-group"}).appendTo(buttonRow);
-                    var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').html(RED._('palette.editor.install')).appendTo(buttonGroup);
+                    var installButton = $('<a href="#" class="editor-button editor-button-small"></a>').text(RED._('palette.editor.install')).appendTo(buttonGroup);
                     installButton.click(function(e) {
                         e.preventDefault();
                         if (!$(this).hasClass('disabled')) {
@@ -813,14 +829,14 @@ RED.palette.editor = (function() {
                     })
                     if (nodeEntries.hasOwnProperty(entry.id)) {
                         installButton.addClass('disabled');
-                        installButton.html(RED._('palette.editor.installed'));
+                        installButton.text(RED._('palette.editor.installed'));
                     }
 
                     object.elements = {
                         installButton:installButton
                     }
                 } else {
-                    $('<div>',{class:"red-ui-search-empty"}).html(RED._('search.empty')).appendTo(container);
+                    $('<div>',{class:"red-ui-search-empty"}).text(RED._('search.empty')).appendTo(container);
                 }
             }
         });

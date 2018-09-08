@@ -455,24 +455,8 @@ RED.debug = (function() {
             $('<span class="debug-message-name">'+name+'</span>').appendTo(metaRow);
         }
 
-        if ((format === 'number') && (payload === "NaN")) {
-            payload = Number.NaN;
-        } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
-            payload = JSON.parse(payload);
-        } else if (/error/i.test(format)) {
-            payload = JSON.parse(payload);
-            payload = (payload.name?payload.name+": ":"")+payload.message;
-        } else if (format === 'null') {
-            payload = null;
-        } else if (format === 'undefined') {
-            payload = undefined;
-        } else if (/^buffer/.test(format)) {
-            var buffer = payload;
-            payload = [];
-            for (var c = 0; c < buffer.length; c += 2) {
-                payload.push(parseInt(buffer.substr(c, 2), 16));
-            }
-        }
+        payload = RED.utils.decodeObject(payload,format);
+
         var el = $('<span class="debug-message-payload"></span>').appendTo(msg);
         var path = o.property||'';
         var debugMessage = RED.utils.createObjectElement(payload, {

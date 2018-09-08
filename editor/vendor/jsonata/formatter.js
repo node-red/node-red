@@ -117,6 +117,7 @@
         '$contains':{ args:[ 'str', 'pattern' ]},
         '$count':{ args:[ 'array' ]},
         '$each':{ args:[ 'object', 'function' ]},
+        '$env': { args:[ 'arg' ]},
         '$exists':{ args:[ 'arg' ]},
         '$filter':{ args:[ 'array', 'function' ]},
         '$floor':{ args:[ 'number' ]},

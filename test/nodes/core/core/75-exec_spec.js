@@ -16,7 +16,7 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var execNode = require("../../../../nodes/core/core/75-exec.js");
 var osType = require("os").type();
 

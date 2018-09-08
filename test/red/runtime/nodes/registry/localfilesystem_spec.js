@@ -128,7 +128,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({log:{debug:function(){}},i18n:{registerMessageCatalog:function(){}},events:{emit:function(){}},settings:{coreNodesDir:moduleDir}});
             var nodeList = localfilesystem.getNodeFiles();
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -166,7 +166,15 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }},
                 settings:{coreNodesDir:resourcesDir}
             });
-            localfilesystem.getNodeFiles(true);
+            var list = localfilesystem.getNodeFiles(true);
+            list.should.have.property("node-red");
+            list["node-red"].should.have.property("icons");
+            list["node-red"].icons.should.have.length(2);
+            //list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/local/NestedDirectoryNode/NestedNode/icons"))
+            list["node-red"].icons[1].should.have.property("icons");
+            list["node-red"].icons[1].icons.should.have.length(1);
+            list["node-red"].icons[1].icons[0].should.eql("arrow-in.png");
+            done();
         });
         it("scans icons dir in library",function(done) {
             var count = 0;
@@ -188,7 +196,15 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }},
                 settings:{userDir:userDir}
             });
-            localfilesystem.getNodeFiles(true);
+            var list = localfilesystem.getNodeFiles(true);
+            list.should.have.property("node-red");
+            list["node-red"].should.have.property("icons");
+            list["node-red"].icons.should.have.length(2);
+            //list["node-red"].icons[1].should.have.property("path",path.join(__dirname,"resources/userDir/lib/icons"))
+            list["node-red"].icons[1].should.have.property("icons");
+            list["node-red"].icons[1].icons.should.have.length(1);
+            list["node-red"].icons[1].icons[0].should.eql("test_icon.png");
+            done();
         });
     });
     describe("#getModuleFiles",function() {
@@ -256,6 +272,14 @@ describe("red/nodes/registry/localfilesystem",function() {
                 settings:{coreNodesDir:moduleDir}
             });
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
+            nodeModule.should.have.property("TestNodeModule");
+            nodeModule.TestNodeModule.should.have.property('icons');
+
+            nodeModule.TestNodeModule.icons.should.have.length(1);
+            nodeModule.TestNodeModule.icons[0].should.have.property("path");
+            nodeModule.TestNodeModule.icons[0].should.have.property("icons");
+            nodeModule.TestNodeModule.icons[0].icons[0].should.eql("arrow-in.png");
+            done();
         });
     });
 });

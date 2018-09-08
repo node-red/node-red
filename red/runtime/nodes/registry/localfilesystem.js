@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var when = require("when");
 var fs = require("fs");
 var path = require("path");
 
@@ -24,7 +23,7 @@ var i18n;
 
 var settings;
 var disableNodePathScan = false;
-var iconFileExtensions = [".png", ".gif"];
+var iconFileExtensions = [".png", ".gif", ".svg"];
 
 function init(runtime) {
     settings = runtime.settings;
@@ -85,10 +84,11 @@ function getLocalNodeFiles(dir) {
 
     var result = [];
     var files = [];
+    var icons = [];
     try {
         files = fs.readdirSync(dir);
     } catch(err) {
-        return result;
+        return {files: [], icons: []};
     }
     files.sort();
     files.forEach(function(fn) {
@@ -103,14 +103,16 @@ function getLocalNodeFiles(dir) {
         } else if (stats.isDirectory()) {
             // Ignore /.dirs/, /lib/ /node_modules/
             if (!/^(\..*|lib|icons|node_modules|test|locales)$/.test(fn)) {
-                result = result.concat(getLocalNodeFiles(path.join(dir,fn)));
+                var subDirResults = getLocalNodeFiles(path.join(dir,fn));
+                result = result.concat(subDirResults.files);
+                icons = icons.concat(subDirResults.icons);
             } else if (fn === "icons") {
                 var iconList = scanIconDir(path.join(dir,fn));
-                events.emit("node-icon-dir",{name:'node-red',path:path.join(dir,fn),icons:iconList});
+                icons.push({path:path.join(dir,fn),icons:iconList});
             }
         }
     });
-    return result;
+    return {files: result, icons: icons}
 }
 
 function scanDirForNodesModules(dir,moduleName) {
@@ -198,7 +200,7 @@ function getModuleNodeFiles(module) {
     var nodes = pkg['node-red'].nodes||{};
     var results = [];
     var iconDirs = [];
-
+    var iconList = [];
     for (var n in nodes) {
         /* istanbul ignore else */
         if (nodes.hasOwnProperty(n)) {
@@ -213,47 +215,54 @@ function getModuleNodeFiles(module) {
             if (iconDirs.indexOf(iconDir) == -1) {
                 try {
                     fs.statSync(iconDir);
-                    var iconList = scanIconDir(iconDir);
-                    events.emit("node-icon-dir",{name:pkg.name,path:iconDir,icons:iconList});
+                    var icons = scanIconDir(iconDir);
+                    iconList.push({path:iconDir,icons:icons});
                     iconDirs.push(iconDir);
                 } catch(err) {
                 }
             }
         }
     }
+    var result = {files:results,icons:iconList};
+
     var examplesDir = path.join(moduleDir,"examples");
     try {
         fs.statSync(examplesDir)
         events.emit("node-examples-dir",{name:pkg.name,path:examplesDir});
     } catch(err) {
     }
-    return results;
+    return result;
 }
 
 function getNodeFiles(disableNodePathScan) {
     var dir;
     // Find all of the nodes to load
     var nodeFiles = [];
+    var results;
 
     var dir = path.resolve(__dirname + '/../../../../public/icons');
-    var iconList = scanIconDir(dir);
-    events.emit("node-icon-dir",{name:'node-red',path:dir,icons:iconList});
+    var iconList = [{path:dir,icons:scanIconDir(dir)}];
 
     if (settings.coreNodesDir) {
-        nodeFiles = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
+        results = getLocalNodeFiles(path.resolve(settings.coreNodesDir));
+        nodeFiles = nodeFiles.concat(results.files);
+        iconList = iconList.concat(results.icons);
+
         var defaultLocalesPath = path.join(settings.coreNodesDir,"core","locales");
         i18n.registerMessageCatalog("node-red",defaultLocalesPath,"messages.json");
     }
 
     if (settings.userDir) {
         dir = path.join(settings.userDir,"lib","icons");
-        iconList = scanIconDir(dir);
-        if (iconList.length > 0) {
-            events.emit("node-icon-dir",{name:'Library',path:dir,icons:iconList});
+        var icons = scanIconDir(dir);
+        if (icons.length > 0) {
+            iconList.push({path:dir,icons:icons});
         }
 
         dir = path.join(settings.userDir,"nodes");
-        nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir));
+        results = getLocalNodeFiles(path.resolve(dir));
+        nodeFiles = nodeFiles.concat(results.files);
+        iconList = iconList.concat(results.icons);
     }
     if (settings.nodesDir) {
         dir = settings.nodesDir;
@@ -261,7 +270,9 @@ function getNodeFiles(disableNodePathScan) {
             dir = [dir];
         }
         for (var i=0;i<dir.length;i++) {
-            nodeFiles = nodeFiles.concat(getLocalNodeFiles(dir[i]));
+            results = getLocalNodeFiles(dir[i]);
+            nodeFiles = nodeFiles.concat(results.files);
+            iconList = iconList.concat(results.icons);
         }
     }
 
@@ -269,7 +280,8 @@ function getNodeFiles(disableNodePathScan) {
         "node-red": {
             name: "node-red",
             version: settings.version,
-            nodes: {}
+            nodes: {},
+            icons: iconList
         }
     }
     nodeFiles.forEach(function(node) {
@@ -278,25 +290,54 @@ function getNodeFiles(disableNodePathScan) {
 
     if (!disableNodePathScan) {
         var moduleFiles = scanTreeForNodesModules();
+
+        // Filter the module list to ignore global modules
+        // that have also been installed locally - allowing the user to
+        // update a module they may not otherwise be able to touch
+
+        moduleFiles.sort(function(A,B) {
+            if (A.local && !B.local) {
+                return -1
+            } else if (!A.local && B.local) {
+                return 1
+            }
+            return 0;
+        })
+        var knownModules = {};
+        moduleFiles = moduleFiles.filter(function(mod) {
+            var result;
+            if (!knownModules[mod.package.name]) {
+                knownModules[mod.package.name] = true;
+                result = true;
+            } else {
+                result = false;
+            }
+            log.debug("Module: "+mod.package.name+" "+mod.package.version+(result?"":" *ignored due to local copy*"));
+            log.debug("        "+mod.dir);
+            return result;
+        });
+
         moduleFiles.forEach(function(moduleFile) {
             var nodeModuleFiles = getModuleNodeFiles(moduleFile);
             nodeList[moduleFile.package.name] = {
                 name: moduleFile.package.name,
                 version: moduleFile.package.version,
+                path: moduleFile.dir,
                 local: moduleFile.local||false,
-                nodes: {}
+                nodes: {},
+                icons: nodeModuleFiles.icons
             };
             if (moduleFile.package['node-red'].version) {
                 nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
             }
-            nodeModuleFiles.forEach(function(node) {
+            nodeModuleFiles.files.forEach(function(node) {
                 node.local = moduleFile.local||false;
                 nodeList[moduleFile.package.name].nodes[node.name] = node;
             });
-            nodeFiles = nodeFiles.concat(nodeModuleFiles);
+            nodeFiles = nodeFiles.concat(nodeModuleFiles.files);
         });
     } else {
-        console.log("node path scan disabled");
+        // console.log("node path scan disabled");
     }
     return nodeList;
 }
@@ -316,12 +357,13 @@ function getModuleFiles(module) {
         nodeList[moduleFile.package.name] = {
             name: moduleFile.package.name,
             version: moduleFile.package.version,
-            nodes: {}
+            nodes: {},
+            icons: nodeModuleFiles.icons
         };
         if (moduleFile.package['node-red'].version) {
             nodeList[moduleFile.package.name].redVersion = moduleFile.package['node-red'].version;
         }
-        nodeModuleFiles.forEach(function(node) {
+        nodeModuleFiles.files.forEach(function(node) {
             nodeList[moduleFile.package.name].nodes[node.name] = node;
             nodeList[moduleFile.package.name].nodes[node.name].local = moduleFile.local || false;
         });

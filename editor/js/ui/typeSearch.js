@@ -128,7 +128,7 @@ RED.typeSearch = (function() {
                 var div = $('<a>',{href:'#',class:"red-ui-search-result"}).appendTo(container);
 
                 var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
-                var colour = def.color;
+                var colour = RED.utils.getNodeColor(object.type,def);
                 var icon_url = RED.utils.getNodeIcon(def);
                 nodeDiv.css('backgroundColor',colour);
 
@@ -147,7 +147,7 @@ RED.typeSearch = (function() {
                 var label = object.label;
                 object.index += "|"+label.toLowerCase();
 
-                $('<div>',{class:"red-ui-search-result-node-label"}).html(label).appendTo(contentDiv);
+                $('<div>',{class:"red-ui-search-result-node-label"}).text(label).appendTo(contentDiv);
 
                 div.click(function(evt) {
                     evt.preventDefault();

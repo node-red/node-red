@@ -15,7 +15,6 @@
  **/
 
 
-var when = require("when");
 var path = require("path");
 var fs = require("fs");
 
@@ -35,6 +34,8 @@ var slashRe = process.platform === "win32" ? /\\|[/]/ : /[/]/;
 function init(_settings) {
     settings = _settings;
 }
+
+var activePromise = Promise.resolve();
 
 function checkModulePath(folder) {
     var moduleName;
@@ -71,79 +72,86 @@ function checkExistingModule(module,version) {
     return false;
 }
 function installModule(module,version) {
-    //TODO: ensure module is 'safe'
-    return when.promise(function(resolve,reject) {
-        var installName = module;
-        var isUpgrade = false;
-        try {
-            if (moduleRe.test(module)) {
-                // Simple module name - assume it can be npm installed
-                if (version) {
-                    installName += "@"+version;
+    activePromise = activePromise.then(() => {
+        //TODO: ensure module is 'safe'
+        return new Promise((resolve,reject) => {
+            var installName = module;
+            var isUpgrade = false;
+            try {
+                if (moduleRe.test(module)) {
+                    // Simple module name - assume it can be npm installed
+                    if (version) {
+                        installName += "@"+version;
+                    }
+                } else if (slashRe.test(module)) {
+                    // A path - check if there's a valid package.json
+                    installName = module;
+                    module = checkModulePath(module);
                 }
-            } else if (slashRe.test(module)) {
-                // A path - check if there's a valid package.json
-                installName = module;
-                module = checkModulePath(module);
+                isUpgrade = checkExistingModule(module,version);
+            } catch(err) {
+                return reject(err);
             }
-            isUpgrade = checkExistingModule(module,version);
-        } catch(err) {
-            return reject(err);
-        }
-        if (!isUpgrade) {
-            log.info(log._("server.install.installing",{name: module,version: version||"latest"}));
-        } else {
-            log.info(log._("server.install.upgrading",{name: module,version: version||"latest"}));
-        }
-
-        var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var args = ['install','--save','--save-prefix="~"','--production',installName];
-        log.trace(npmCommand + JSON.stringify(args));
-        var child = child_process.spawn(npmCommand,args,{
-            cwd: installDir,
-            shell: true
-        });
-        var output = "";
-        child.stdout.on('data', (data) => {
-            output += data;
-        });
-        child.stderr.on('data', (data) => {
-            output += data;
-        });
-        child.on('close', (code) => {
-            if (code !== 0) {
-                var e;
-                var lookFor404 = new RegExp(" 404 .*"+module,"m");
-                var lookForVersionNotFound = new RegExp("version not found: "+module+"@"+version,"m");
-                if (lookFor404.test(output)) {
-                    log.warn(log._("server.install.install-failed-not-found",{name:module}));
-                    e = new Error("Module not found");
-                    e.code = 404;
-                    reject(e);
-                } else if (isUpgrade && lookForVersionNotFound.test(output)) {
-                    log.warn(log._("server.install.upgrade-failed-not-found",{name:module}));
-                    e = new Error("Module not found");
-                    e.code = 404;
-                    reject(e);
-                } else {
-                    log.warn(log._("server.install.install-failed-long",{name:module}));
-                    log.warn("------------------------------------------");
-                    log.warn(output);
-                    log.warn("------------------------------------------");
-                    reject(new Error(log._("server.install.install-failed")));
-                }
+            if (!isUpgrade) {
+                log.info(log._("server.install.installing",{name: module,version: version||"latest"}));
             } else {
-                if (!isUpgrade) {
-                    log.info(log._("server.install.installed",{name:module}));
-                    resolve(require("./index").addModule(module).then(reportAddedModules));
-                } else {
-                    log.info(log._("server.install.upgraded",{name:module, version:version}));
-                    events.emit("runtime-event",{id:"restart-required",payload:{type:"warning",text:"notification.warnings.restartRequired"},retain:true});
-                    resolve(require("./registry").setModulePendingUpdated(module,version));
-                }
+                log.info(log._("server.install.upgrading",{name: module,version: version||"latest"}));
             }
+
+            var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+            var args = ['install','--save','--save-prefix="~"','--production',installName];
+            log.trace(npmCommand + JSON.stringify(args));
+            var child = child_process.spawn(npmCommand,args,{
+                cwd: installDir,
+                shell: true
+            });
+            var output = "";
+            child.stdout.on('data', (data) => {
+                output += data;
+            });
+            child.stderr.on('data', (data) => {
+                output += data;
+            });
+            child.on('close', (code) => {
+                if (code !== 0) {
+                    var e;
+                    var lookFor404 = new RegExp(" 404 .*"+module,"m");
+                    var lookForVersionNotFound = new RegExp("version not found: "+module+"@"+version,"m");
+                    if (lookFor404.test(output)) {
+                        log.warn(log._("server.install.install-failed-not-found",{name:module}));
+                        e = new Error("Module not found");
+                        e.code = 404;
+                        reject(e);
+                    } else if (isUpgrade && lookForVersionNotFound.test(output)) {
+                        log.warn(log._("server.install.upgrade-failed-not-found",{name:module}));
+                        e = new Error("Module not found");
+                        e.code = 404;
+                        reject(e);
+                    } else {
+                        log.warn(log._("server.install.install-failed-long",{name:module}));
+                        log.warn("------------------------------------------");
+                        log.warn(output);
+                        log.warn("------------------------------------------");
+                        reject(new Error(log._("server.install.install-failed")));
+                    }
+                } else {
+                    if (!isUpgrade) {
+                        log.info(log._("server.install.installed",{name:module}));
+                        resolve(require("./index").addModule(module).then(reportAddedModules));
+                    } else {
+                        log.info(log._("server.install.upgraded",{name:module, version:version}));
+                        events.emit("runtime-event",{id:"restart-required",payload:{type:"warning",text:"notification.warnings.restartRequired"},retain:true});
+                        resolve(require("./registry").setModulePendingUpdated(module,version));
+                    }
+                }
+            });
         });
+    }).catch(err => {
+        // In case of error, reset activePromise to be resolvable
+        activePromise = Promise.resolve();
+        throw err;
     });
+    return activePromise;
 }
 
 
@@ -176,47 +184,54 @@ function reportRemovedModules(removedNodes) {
 }
 
 function uninstallModule(module) {
-    return when.promise(function(resolve,reject) {
-        if (/[\s;]/.test(module)) {
-            reject(new Error(log._("server.install.invalid")));
-            return;
-        }
-        var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
-        var moduleDir = path.join(installDir,"node_modules",module);
-
-        try {
-            fs.statSync(moduleDir);
-        } catch(err) {
-            return reject(new Error(log._("server.install.uninstall-failed",{name:module})));
-        }
-
-        var list = registry.removeModule(module);
-        log.info(log._("server.install.uninstalling",{name:module}));
-
-        var args = ['remove','--save',module];
-        log.trace(npmCommand + JSON.stringify(args));
-
-        var child = child_process.execFile(npmCommand,args,
-            {
-                cwd: installDir
-            },
-            function(err, stdin, stdout) {
-                if (err) {
-                    log.warn(log._("server.install.uninstall-failed-long",{name:module}));
-                    log.warn("------------------------------------------");
-                    log.warn(err.toString());
-                    log.warn("------------------------------------------");
-                    reject(new Error(log._("server.install.uninstall-failed",{name:module})));
-                } else {
-                    log.info(log._("server.install.uninstalled",{name:module}));
-                    reportRemovedModules(list);
-                    // TODO: tidy up internal event names
-                    events.emit("node-module-uninstalled",module)
-                    resolve(list);
-                }
+    activePromise = activePromise.then(() => {
+        return new Promise((resolve,reject) => {
+            if (/[\s;]/.test(module)) {
+                reject(new Error(log._("server.install.invalid")));
+                return;
             }
-        );
+            var installDir = settings.userDir || process.env.NODE_RED_HOME || ".";
+            var moduleDir = path.join(installDir,"node_modules",module);
+
+            try {
+                fs.statSync(moduleDir);
+            } catch(err) {
+                return reject(new Error(log._("server.install.uninstall-failed",{name:module})));
+            }
+
+            var list = registry.removeModule(module);
+            log.info(log._("server.install.uninstalling",{name:module}));
+
+            var args = ['remove','--save',module];
+            log.trace(npmCommand + JSON.stringify(args));
+
+            var child = child_process.execFile(npmCommand,args,
+                {
+                    cwd: installDir
+                },
+                function(err, stdin, stdout) {
+                    if (err) {
+                        log.warn(log._("server.install.uninstall-failed-long",{name:module}));
+                        log.warn("------------------------------------------");
+                        log.warn(err.toString());
+                        log.warn("------------------------------------------");
+                        reject(new Error(log._("server.install.uninstall-failed",{name:module})));
+                    } else {
+                        log.info(log._("server.install.uninstalled",{name:module}));
+                        reportRemovedModules(list);
+                        // TODO: tidy up internal event names
+                        events.emit("node-module-uninstalled",module)
+                        resolve(list);
+                    }
+                }
+            );
+        });
+    }).catch(err => {
+        // In case of error, reset activePromise to be resolvable
+        activePromise = Promise.resolve();
+        throw err;
     });
+    return activePromise;
 }
 
 function checkPrereq() {
@@ -227,9 +242,9 @@ function checkPrereq() {
     ) {
         log.info(log._("server.palette-editor.disabled"));
         paletteEditorEnabled = false;
-        return when.resolve();
+        return Promise.resolve();
     } else {
-        return when.promise(function(resolve) {
+        return new Promise(resolve => {
             child_process.execFile(npmCommand,['-v'],function(err) {
                 if (err) {
                     log.info(log._("server.palette-editor.npm-not-found"));

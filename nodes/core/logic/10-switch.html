@@ -60,6 +60,12 @@
         <li>An <b>Otherwise</b> rule can be used to match if none of the preceeding
             rules have matched.</li>
     </ol>
+    <h4>Notes</h4>
+    <p>The <code>is true/false</code> and <code>is null</code> rules perform strict
+       comparisons against those types. They do not convert between types.</p>
+    <p>The <code>is empty</code> rule passes for Strings, Arrays and Buffers that have
+       a length of 0, or Objects that have no properties. It does not pass for <code>null</code>
+       or <code>undefined</code> values.</p>
     <h4>Handling message sequences</h4>
     <p>By default, the node does not modify the <code>msg.parts</code> property of messages
        that are part of a sequence.</p>
@@ -86,6 +92,8 @@
         {v:"null",t:"switch.rules.null",kind:'V'},
         {v:"nnull",t:"switch.rules.nnull",kind:'V'},
         {v:"istype",t:"switch.rules.istype",kind:'V'},
+        {v:"empty",t:"switch.rules.empty",kind:'V'},
+        {v:"nempty",t:"switch.rules.nempty",kind:'V'},
         {v:"head",t:"switch.rules.head",kind:'S'},
         {v:"index",t:"switch.rules.index",kind:'S'},
         {v:"tail",t:"switch.rules.tail",kind:'S'},
@@ -99,11 +107,17 @@
         }
         return v;
     }
+    function prop2name(key) {
+        var result = RED.utils.parseContextKey(key);
+        return result.key;
+    }
     function getValueLabel(t,v) {
         if (t === 'str') {
             return '"'+clipValueLength(v)+'"';
-        } else if (t === 'msg' || t==='flow' || t==='global') {
+        } else if (t === 'msg') {
             return t+"."+clipValueLength(v);
+        } else if (t === 'flow' || t === 'global') {
+            return t+"."+clipValueLength(prop2name(v));
         }
         return clipValueLength(v);
     }
@@ -133,7 +147,7 @@
                 }
                 if ((rule.t === 'btwn') || (rule.t === 'index')) {
                     label += " "+getValueLabel(rule.vt,rule.v)+" & "+getValueLabel(rule.v2t,rule.v2);
-                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'else' ) {
+                } else if (rule.t !== 'true' && rule.t !== 'false' && rule.t !== 'null' && rule.t !== 'nnull' && rule.t !== 'empty' && rule.t !== 'nempty' && rule.t !== 'else' ) {
                     label += " "+getValueLabel(rule.vt,rule.v);
                 }
                 return label;
@@ -185,7 +199,7 @@
                 } else if (type === "istype") {
                     typeField.typedInput("width",(newWidth-selectWidth-70));
                 } else {
-                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                    if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
                         // valueField.hide();
                     } else {
                         valueField.typedInput("width",(newWidth-selectWidth-70));
@@ -230,12 +244,12 @@
                             selectField.append($("<option></option>").val(operators[d].v).text(/^switch/.test(operators[d].t)?node._(operators[d].t):operators[d].t));
                         }
                     }
-                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata',previousValueType]});
-                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata']});
+                    var valueField = $('<input/>',{class:"node-input-rule-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'str',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
+                    var numValueField = $('<input/>',{class:"node-input-rule-num-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['flow','global','num','jsonata','env']});
                     var expValueField = $('<input/>',{class:"node-input-rule-exp-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'jsonata',types:['jsonata']});
-                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var btwnValueField = $('<input/>',{class:"node-input-rule-btwn-value",type:"text",style:"margin-left: 5px;"}).appendTo(row).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
                     var btwnAndLabel = $('<span/>',{class:"node-input-rule-btwn-label"}).text(" "+andLabel+" ").appendTo(row3);
-                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata',previousValueType]});
+                    var btwnValue2Field = $('<input/>',{class:"node-input-rule-btwn-value2",type:"text",style:"margin-left:2px;"}).appendTo(row3).typedInput({default:'num',types:['msg','flow','global','str','num','jsonata','env',previousValueType]});
                     var typeValueField = $('<input/>',{class:"node-input-rule-type-value",type:"text",style:"margin-left: 5px;"}).appendTo(row)
                         .typedInput({default:'string',types:[
                             {value:"string",label:"string",hasValue:false},
@@ -281,7 +295,7 @@
                             numValueField.typedInput('hide');
                             typeValueField.typedInput('hide');
                             valueField.typedInput('hide');
-                            if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else") {
+                            if (type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else") {
                                 valueField.typedInput('hide');
                                 typeValueField.typedInput('hide');
                             }
@@ -382,7 +396,7 @@
                 var rule = $(this);
                 var type = rule.find("select").val();
                 var r = {t:type};
-                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "else")) {
+                if (!(type === "true" || type === "false" || type === "null" || type === "nnull" || type === "empty" || type === "nempty" || type === "else")) {
                     if ((type === "btwn") || (type === "index")) {
                         r.v = rule.find(".node-input-rule-btwn-value").typedInput('value');
                         r.vt = rule.find(".node-input-rule-btwn-value").typedInput('type');

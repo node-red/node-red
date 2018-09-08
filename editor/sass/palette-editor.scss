@@ -49,7 +49,12 @@
                 .palette-module-version {
                     color: #aaa;
                 }
-
+                .palette-module-errors .fa-warning {
+                    opacity: 0.5;
+                }
+                ul.palette-module-error-list li {
+                    color: #aaa;
+                }
 
 
             }
@@ -222,6 +227,20 @@
         margin-left: 5px;
     }
 }
+.palette-module-meta .fa-warning {
+    color: #AD1625;
+}
+ul.palette-module-error-list {
+    display: inline-block;
+    list-style-type: none;
+    margin: 0;
+    font-size: 0.9em;
+    li {
+        border: none;
+        background: none;
+    }
+}
+
 .palette-module-shade {
     @include shade;
     text-align: center;

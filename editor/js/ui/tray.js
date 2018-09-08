@@ -52,7 +52,7 @@ RED.tray = (function() {
                     b.attr('id',button.id);
                 }
                 if (button.text) {
-                    b.html(button.text);
+                    b.text(button.text);
                 }
                 if (button.click) {
                     b.click((function(action) {

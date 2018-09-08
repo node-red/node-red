@@ -28,9 +28,19 @@ module.exports = {
     runtimeSettings: function(req,res) {
         var safeSettings = {
             httpNodeRoot: settings.httpNodeRoot||"/",
-            version: settings.version,
-            user: req.user
+            version: settings.version
         }
+        if (req.user) {
+            safeSettings.user = {}
+            var props = ["anonymous","username","image","permissions"];
+            props.forEach(prop => {
+                if (req.user.hasOwnProperty(prop)) {
+                    safeSettings.user[prop] = req.user[prop];
+                }
+            })
+        }
+
+        safeSettings.context = runtime.nodes.listContextStores();
 
         var themeSettings = theme.settings();
         if (themeSettings) {

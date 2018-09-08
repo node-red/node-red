@@ -15,6 +15,25 @@
  **/
 (function() {
 
+    function appendNodeConfig(nodeConfig) {
+        var m = /<!-- --- \[red-module:(\S+)\] --- -->/.exec(nodeConfig.trim());
+        var moduleId;
+        if (m) {
+            moduleId = m[1];
+        } else {
+            moduleId = "unknown";
+        }
+        try {
+            $("body").append(nodeConfig);
+        } catch(err) {
+            RED.notify(RED._("notification.errors.failedToAppendNode",{module:moduleId, error:err.toString()}),{
+                type: "error",
+                timeout: 10000
+            });
+            console.log("["+moduleId+"] "+err.toString());
+        }
+    }
+
     function loadNodeList() {
         $.ajax({
             headers: {
@@ -55,7 +74,11 @@
             cache: false,
             url: 'nodes',
             success: function(data) {
-                $("body").append(data);
+                var configs = data.trim().split(/(?=<!-- --- \[red-module:\S+\] --- -->)/);
+                configs.forEach(function(data) {
+                    appendNodeConfig(data);
+                });
+
                 $("body").i18n();
                 $("#palette > .palette-spinner").hide();
                 $(".palette-scroll").removeClass("hide");
@@ -130,13 +153,13 @@
                     loadFlows(function() {
                         var project = RED.projects.getActiveProject();
                         var message = {
-                            "change-branch":"Change to local branch '"+project.git.branches.local+"'",
-                            "merge-abort":"Git merge aborted",
-                            "loaded":"Project '"+msg.project+"' loaded",
-                            "updated":"Project '"+msg.project+"' updated",
-                            "pull":"Project '"+msg.project+"' reloaded",
-                            "revert": "Project '"+msg.project+"' reloaded",
-                            "merge-complete":"Git merge completed"
+                            "change-branch": RED._("notification.project.change-branch", {project: project.git.branches.local}),
+                            "merge-abort": RED._("notification.project.merge-abort"),
+                            "loaded": RED._("notification.project.loaded", {project: msg.project}),
+                            "updated": RED._("notification.project.updated", {project: msg.project}),
+                            "pull": RED._("notification.project.pull", {project: msg.project}),
+                            "revert": RED._("notification.project.revert", {project: msg.project}),
+                            "merge-complete": RED._("notification.project.merge-complete")
                         }[msg.action];
                         RED.notify("<p>"+message+"</p>");
                         RED.sidebar.info.refresh()
@@ -160,7 +183,7 @@
                         if (!!RED.projects.getActiveProject()) {
                             options.buttons = [
                                 {
-                                    text: "Manage project dependencies",
+                                    text: RED._("notification.label.manage-project-dep"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.settings.show('deps');
@@ -171,7 +194,7 @@
                         } else {
                             options.buttons = [
                                 {
-                                    text: "Close",
+                                    text: RED._("common.label.close"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                     }
@@ -184,7 +207,7 @@
                             if (RED.user.hasPermission("projects.write")) {
                                 options.buttons = [
                                     {
-                                        text: "Setup credentials",
+                                        text: RED._("notification.label.setup-cred"),
                                         click: function() {
                                             persistentNotifications[notificationId].hideNotification();
                                             RED.projects.showCredentialsPrompt();
@@ -195,7 +218,7 @@
                         } else {
                             options.buttons = [
                                 {
-                                    text: "Close",
+                                    text: RED._("common.label.close"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                     }
@@ -206,7 +229,7 @@
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
                                 {
-                                    text: "Setup project files",
+                                    text: RED._("notification.label.setup-project"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.showFilesPrompt();
@@ -218,7 +241,7 @@
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
                                 {
-                                    text: "Create default package file",
+                                    text: RED._("notification.label.create-default-package"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.createDefaultPackageFile();
@@ -230,13 +253,13 @@
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
                                 {
-                                    text: "No thanks",
+                                    text: RED._("notification.label.no-thanks"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                     }
                                 },
                                 {
-                                    text: "Create default project files",
+                                    text: RED._("notification.label.create-default-project"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.projects.createDefaultFileSet();
@@ -250,7 +273,7 @@
                         if (RED.user.hasPermission("projects.write")) {
                             options.buttons = [
                                 {
-                                    text: "Show merge conflicts",
+                                    text: RED._("notification.label.show-merge-conflicts"),
                                     click: function() {
                                         persistentNotifications[notificationId].hideNotification();
                                         RED.sidebar.versionControl.showLocalChanges();
@@ -296,7 +319,7 @@
                     addedTypes = addedTypes.concat(m.types);
                     RED.i18n.loadCatalog(id, function() {
                         $.get('nodes/'+id, function(data) {
-                            $("body").append(data);
+                            appendNodeConfig(data);
                         });
                     });
                 });
@@ -324,7 +347,7 @@
                         RED.notify(RED._("palette.event.nodeEnabled", {count:msg.types.length})+typeList,"success");
                     } else {
                         $.get('nodes/'+msg.id, function(data) {
-                            $("body").append(data);
+                            appendNodeConfig(data);
                             typeList = "<ul><li>"+msg.types.join("</li><li>")+"</li></ul>";
                             RED.notify(RED._("palette.event.nodeAdded", {count:msg.types.length})+typeList,"success");
                         });
@@ -359,10 +382,10 @@
     function loadEditor() {
         var menuOptions = [];
         if (RED.settings.theme("projects.enabled",false)) {
-            menuOptions.push({id:"menu-item-projects-menu",label:"Projects",options:[
-                {id:"menu-item-projects-new",label:"New",disabled:false,onselect:"core:new-project"},
-                {id:"menu-item-projects-open",label:"Open",disabled:false,onselect:"core:open-project"},
-                {id:"menu-item-projects-settings",label:"Project Settings",disabled:false,onselect:"core:show-project-settings"}
+            menuOptions.push({id:"menu-item-projects-menu",label:RED._("menu.label.projects"),options:[
+                {id:"menu-item-projects-new",label:RED._("menu.label.projects-new"),disabled:false,onselect:"core:new-project"},
+                {id:"menu-item-projects-open",label:RED._("menu.label.projects-open"),disabled:false,onselect:"core:open-project"},
+                {id:"menu-item-projects-settings",label:RED._("menu.label.projects-settings"),disabled:false,onselect:"core:show-project-settings"}
             ]});
         }
 
@@ -387,8 +410,8 @@
             {id:"menu-item-import-clipboard",label:RED._("menu.label.clipboard"),onselect:"core:show-import-dialog"},
             {id:"menu-item-import-library",label:RED._("menu.label.library"),options:[]}
         ]});
-        menuOptions.push({id:"menu-item-export",label:RED._("menu.label.export"),disabled:true,options:[
-            {id:"menu-item-export-clipboard",label:RED._("menu.label.clipboard"),disabled:true,onselect:"core:show-export-dialog"},
+        menuOptions.push({id:"menu-item-export",label:RED._("menu.label.export"),options:[
+            {id:"menu-item-export-clipboard",label:RED._("menu.label.clipboard"),onselect:"core:show-export-dialog"},
             {id:"menu-item-export-library",label:RED._("menu.label.library"),disabled:true,onselect:"core:library-export"}
         ]});
         menuOptions.push(null);

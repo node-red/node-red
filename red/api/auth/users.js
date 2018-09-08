@@ -86,6 +86,10 @@ function init(config) {
         } else {
             api.authenticate = authenticate;
         }
+    } else {
+        api.get = get;
+        api.authenticate = authenticate;
+        api.default = api.default;
     }
     if (config.default) {
         if (typeof config.default === "function") {

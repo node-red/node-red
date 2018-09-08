@@ -26,14 +26,18 @@ RED.utils = (function() {
     function buildMessageSummaryValue(value) {
         var result;
         if (Array.isArray(value)) {
-            result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('array['+value.length+']');
+            result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
         } else if (value === null) {
             result = $('<span class="debug-message-object-value debug-message-type-null">null</span>');
         } else if (typeof value === 'object') {
             if (value.hasOwnProperty('type') && value.type === 'Buffer' && value.hasOwnProperty('data')) {
-                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('buffer['+value.length+']');
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('buffer['+value.length+']');
             } else if (value.hasOwnProperty('type') && value.type === 'array' && value.hasOwnProperty('data')) {
-                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').html('array['+value.length+']');
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
+            } else if (value.hasOwnProperty('type') && value.type === 'function') {
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('function');
+            } else if (value.hasOwnProperty('type') && value.type === 'number') {
+                result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(value.data);
             } else {
                 result = $('<span class="debug-message-object-value debug-message-type-meta">object</span>');
             }
@@ -45,6 +49,8 @@ RED.utils = (function() {
                 subvalue = sanitize(value);
             }
             result = $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"');
+        } else if (typeof value === 'number') {
+            result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(""+value);
         } else {
             result = $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value);
         }
@@ -125,7 +131,7 @@ RED.utils = (function() {
             e.stopPropagation();
             RED.clipboard.copyText(msg,copyPayload,"clipboard.copyMessageValue");
         })
-        if (strippedKey !== '') {
+        if (strippedKey !== undefined && strippedKey !== '') {
             var isPinned = pinnedPaths[sourceId].hasOwnProperty(strippedKey);
 
             var pinPath = $('<button class="editor-button editor-button-small debug-message-tools-pin"><i class="fa fa-map-pin"></i></button>').appendTo(tools).click(function(e) {
@@ -292,19 +298,24 @@ RED.utils = (function() {
 
         var isArray = Array.isArray(obj);
         var isArrayObject = false;
-        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__encoded__ && obj.type === 'array') || obj.type === 'Buffer')) {
+        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__enc__ && obj.type === 'array') || obj.type === 'Buffer')) {
             isArray = true;
             isArrayObject = true;
         }
-
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
+        } else if (obj.__enc__ && obj.type === 'number') {
+            e = $('<span class="debug-message-type-number debug-message-object-header"></span>').text(obj.data).appendTo(entryObj);
+        } else if (typeHint === "function" || (obj.__enc__ && obj.type === 'function')) {
+            e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("function").appendTo(entryObj);
+        } else if (typeHint === "internal" || (obj.__enc__ && obj.type === 'internal')) {
+            e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("[internal]").appendTo(entryObj);
         } else if (typeof obj === 'string') {
             if (/[\t\n\r]/.test(obj)) {
                 element.addClass('collapsed');
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header, function() {
-                    $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||'string').appendTo(header);
+                    $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text(typeHint||'string').appendTo(header);
                     var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
                     $('<pre class="debug-message-type-string"></pre>').text(obj).appendTo(row);
                 },function(state) {if (ontoggle) { ontoggle(path,state);}}, checkExpanded(strippedKey,expandPaths));
@@ -343,7 +354,7 @@ RED.utils = (function() {
                 if (originalLength === undefined) {
                     originalLength = data.length;
                 }
-                if (data.__encoded__) {
+                if (data.__enc__) {
                     data = data.data;
                 }
                 type = obj.type.toLowerCase();
@@ -358,7 +369,7 @@ RED.utils = (function() {
                 element.addClass('debug-message-buffer-raw');
             }
             if (key) {
-                headerHead = $('<span class="debug-message-type-meta"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
+                headerHead = $('<span class="debug-message-type-meta"></span>').text(typeHint||(type+'['+originalLength+']')).appendTo(entryObj);
             } else {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
                 $('<span>[ </span>').appendTo(headerHead);
@@ -381,7 +392,7 @@ RED.utils = (function() {
 
                 makeExpandable(header,function() {
                     if (!key) {
-                        headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html(typeHint||(type+'['+originalLength+']')).appendTo(header);
+                        headerHead = $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text(typeHint||(type+'['+originalLength+']')).appendTo(header);
                     }
                     if (type === 'buffer') {
                         var stringRow = $('<div class="debug-message-string-rows"></div>').appendTo(element);
@@ -394,7 +405,7 @@ RED.utils = (function() {
                         }
                         $('<pre class="debug-message-type-string"></pre>').text(stringEncoding).appendTo(sr);
                         var bufferOpts = $('<span class="debug-message-buffer-opts"></span>').appendTo(headerHead);
-                        var switchFormat = $('<a href="#"></a>').addClass('selected').html('raw').appendTo(bufferOpts).click(function(e) {
+                        var switchFormat = $('<a href="#"></a>').addClass('selected').text('raw').appendTo(bufferOpts).click(function(e) {
                             e.preventDefault();
                             e.stopPropagation();
                             formatBuffer(element,$(this),sourceId,path,true);
@@ -471,7 +482,7 @@ RED.utils = (function() {
                 $('<i class="fa fa-caret-right debug-message-object-handle"></i> ').prependTo(header);
                 makeExpandable(header, function() {
                     if (!key) {
-                        $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').html('object').appendTo(header);
+                        $('<span class="debug-message-type-meta debug-message-object-type-header"></span>').text('object').appendTo(header);
                     }
                     for (i=0;i<keys.length;i++) {
                         var row = $('<div class="debug-message-object-entry collapsed"></div>').appendTo(element);
@@ -507,7 +518,7 @@ RED.utils = (function() {
                 checkExpanded(strippedKey,expandPaths));
             }
             if (key) {
-                $('<span class="debug-message-type-meta"></span>').html('object').appendTo(entryObj);
+                $('<span class="debug-message-type-meta"></span>').text('object').appendTo(entryObj);
             } else {
                 headerHead = $('<span class="debug-message-object-header"></span>').appendTo(entryObj);
                 $('<span>{ </span>').appendTo(headerHead);
@@ -783,12 +794,88 @@ RED.utils = (function() {
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
 
+    var nodeColorCache = {};
+    function getNodeColor(type, def) {
+        var result = def.color;
+        var paletteTheme = RED.settings.theme('palette.theme') || [];
+        if (paletteTheme.length > 0) {
+            if (!nodeColorCache.hasOwnProperty(type)) {
+                nodeColorCache[type] = def.color;
+                var l = paletteTheme.length;
+                for (var i = 0; i < l; i++ ){
+                    var themeRule = paletteTheme[i];
+                    if (themeRule.hasOwnProperty('category')) {
+                        if (!themeRule.hasOwnProperty('_category')) {
+                            themeRule._category = new RegExp(themeRule.category);
+                        }
+                        if (!themeRule._category.test(def.category)) {
+                            continue;
+                        }
+                    }
+                    if (themeRule.hasOwnProperty('type')) {
+                        if (!themeRule.hasOwnProperty('_type')) {
+                            themeRule._type = new RegExp(themeRule.type);
+                        }
+                        if (!themeRule._type.test(type)) {
+                            continue;
+                        }
+                    }
+                    nodeColorCache[type] = themeRule.color || def.color;
+                    break;
+                }
+            }
+            result = nodeColorCache[type];
+        }
+        return result;
+    }
+
     function addSpinnerOverlay(container,contain) {
         var spinner = $('<div class="projects-dialog-spinner "><img src="red/images/spin.svg"/></div>').appendTo(container);
         if (contain) {
             spinner.addClass('projects-dialog-spinner-contain');
         }
         return spinner;
+    }
+
+    function decodeObject(payload,format) {
+        if ((format === 'number') && (payload === "NaN")) {
+            payload = Number.NaN;
+        } else if ((format === 'number') && (payload === "Infinity")) {
+            payload = Infinity;
+        } else if ((format === 'number') && (payload === "-Infinity")) {
+            payload = -Infinity;
+        } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+            payload = JSON.parse(payload);
+        } else if (/error/i.test(format)) {
+            payload = JSON.parse(payload);
+            payload = (payload.name?payload.name+": ":"")+payload.message;
+        } else if (format === 'null') {
+            payload = null;
+        } else if (format === 'undefined') {
+            payload = undefined;
+        } else if (/^buffer/.test(format)) {
+            var buffer = payload;
+            payload = [];
+            for (var c = 0; c < buffer.length; c += 2) {
+                payload.push(parseInt(buffer.substr(c, 2), 16));
+            }
+        }
+        return payload;
+    }
+
+    function parseContextKey(key) {
+        var parts = {};
+        var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+        if (m) {
+            parts.store = m[1];
+            parts.key = m[2];
+        } else {
+            parts.key = key;
+            if (RED.settings.context) {
+                parts.store = RED.settings.context.default;
+            }
+        }
+        return parts;
     }
 
     return {
@@ -800,6 +887,9 @@ RED.utils = (function() {
         getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
-        addSpinnerOverlay: addSpinnerOverlay
+        getNodeColor: getNodeColor,
+        addSpinnerOverlay: addSpinnerOverlay,
+        decodeObject: decodeObject,
+        parseContextKey: parseContextKey
     }
 })();

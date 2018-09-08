@@ -17,7 +17,7 @@
 var ws = require("ws");
 var when = require("when");
 var should = require("should");
-var helper = require("../../helper.js");
+var helper = require("node-red-node-test-helper");
 var websocketNode = require("../../../../nodes/core/io/22-websocket.js");
 
 var sockets = [];

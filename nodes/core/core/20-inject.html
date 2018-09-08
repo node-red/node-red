@@ -237,10 +237,9 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
                 } else {
                     return this._("inject.timestamp")+suffix;
                 }
-            } else if (this.payloadType === 'flow' && this.payload.length < 19) {
-                return 'flow.'+this.payload+suffix;
-            } else if (this.payloadType === 'global' && this.payload.length < 17) {
-                return 'global.'+this.payload+suffix;
+            } else if (this.payloadType === 'flow' || this.payloadType === 'global') {
+                var key = RED.utils.parseContextKey(this.payload);
+                return this.payloadType+"."+key.key+suffix;
             } else {
                 return this._("inject.inject")+suffix;
             }
@@ -263,7 +262,7 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
             $("#node-input-payload").typedInput({
                 default: 'str',
                 typeField: $("#node-input-payloadType"),
-                types:['flow','global','str','num','bool','json','bin','date']
+                types:['flow','global','str','num','bool','json','bin','date','env']
             });
 
             $("#inject-time-type-select").change(function() {
@@ -502,7 +501,13 @@ If you want every 20 minutes from now - use the <i>"interval"</i> option.</p>
                 if (this.changed) {
                     return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
                 }
-                var label = (this.name||this.payload);
+                var payload = this.payload;
+                if ((this.payloadType === 'flow') ||
+                    (this.payloadType === 'global')) {
+                    var key = RED.utils.parseContextKey(payload);
+                    payload = this.payloadType+"."+key.key;
+                }
+                var label = (this.name||payload);
                 if (label.length > 30) {
                     label = label.substring(0,50)+"...";
                 }

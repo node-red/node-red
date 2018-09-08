@@ -73,7 +73,7 @@ describe('nodes/registry/installer', function() {
                 return ee;
             });
 
-            installer.installModule("this_wont_exist").otherwise(function(err) {
+            installer.installModule("this_wont_exist").catch(function(err) {
                 err.code.should.be.eql(404);
                 done();
             });
@@ -95,7 +95,7 @@ describe('nodes/registry/installer', function() {
                 }
             });
 
-            installer.installModule("this_wont_exist","0.1.2").otherwise(function(err) {
+            installer.installModule("this_wont_exist","0.1.2").catch(function(err) {
                 err.code.should.be.eql(404);
                 done();
             });
@@ -106,7 +106,7 @@ describe('nodes/registry/installer', function() {
                     version: "0.1.1"
                 }
             });
-            installer.installModule("this_wont_exist","0.1.1").otherwise(function(err) {
+            installer.installModule("this_wont_exist","0.1.1").catch(function(err) {
                 err.code.should.be.eql('module_already_loaded');
                 done();
             });
@@ -125,7 +125,7 @@ describe('nodes/registry/installer', function() {
 
             installer.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done();
             });
         });
@@ -150,16 +150,16 @@ describe('nodes/registry/installer', function() {
                 // commsMessages[0].topic.should.equal("node/added");
                 // commsMessages[0].msg.should.eql(nodeInfo.nodes);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
         it("rejects when non-existant path is provided", function(done) {
-            this.timeout(10000);
+            this.timeout(20000);
             var resourcesDir = path.resolve(path.join(__dirname,"..","resources","local","TestNodeModule","node_modules","NonExistant"));
             installer.installModule(resourcesDir).then(function() {
                 done(new Error("Unexpected success"));
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 if (err.hasOwnProperty("code")) {
                     err.code.should.eql(404);
                     done();
@@ -189,7 +189,7 @@ describe('nodes/registry/installer', function() {
             installer.installModule(resourcesDir).then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });
@@ -218,7 +218,7 @@ describe('nodes/registry/installer', function() {
 
             installer.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done();
             });
         });
@@ -242,7 +242,7 @@ describe('nodes/registry/installer', function() {
                 // commsMessages[0].topic.should.equal("node/removed");
                 // commsMessages[0].msg.should.eql(nodeInfo);
                 done();
-            }).otherwise(function(err) {
+            }).catch(function(err) {
                 done(err);
             });
         });

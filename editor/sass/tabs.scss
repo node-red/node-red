@@ -93,7 +93,7 @@
                         color: $workspace-button-color-hover;
                     }
                 }
-                .red-ui-tab-icon {
+                img.red-ui-tab-icon {
                     opacity: 0.2;
                 }
             }
@@ -112,6 +112,21 @@
     }
     &.red-ui-tabs-add.red-ui-tabs-scrollable {
         padding-right: 59px;
+    }
+    &.red-ui-tabs-collapsible {
+        li:not(.active) {
+            display: none;
+             &.red-ui-tab-pinned {
+                 a {
+                     padding-left: 0;
+                     text-align: center;
+                 }
+                 span {
+                     display: none;
+                 }
+                 width: 32px;
+             }
+        }
     }
 
     &.red-ui-tabs-vertical {
@@ -157,6 +172,15 @@
             }
         }
     }
+    .red-ui-tabs-select {
+        position: absolute;
+        top:0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        opacity: 0.4;
+        background: red;
+    }
 }
 .red-ui-tab-button {
     position: absolute;
@@ -180,7 +204,32 @@
         z-index: 2;
     }
 }
-
+.red-ui-tab-link-buttons {
+    position: absolute;
+    box-sizing: border-box;
+    top: 0;
+    right: 0;
+    height: 35px;
+    background: #fff;
+    border-bottom: 1px solid $primary-border-color;
+    z-index: 2;
+    a {
+        @include workspace-button-toggle;
+        line-height: 26px;
+        height: 28px;
+        width: 28px;
+        margin: 4px 3px 3px;
+        z-index: 2;
+        &.red-ui-tab-link-button {
+            &:not(.active) {
+                background: #eee;
+            }
+        }
+        &.red-ui-tab-link-button-menu {
+            border-color: white;
+        }
+    }
+}
 .red-ui-tab-scroll {
     width: 21px;
     top: 0;
@@ -216,7 +265,7 @@
     right: 38px;
 }
 
-.red-ui-tab-icon {
+img.red-ui-tab-icon {
     margin-left: -8px;
     margin-right: 3px;
     margin-top: -2px;
@@ -224,6 +273,11 @@
     width: 20px;
     height: 20px;
     vertical-align: middle;
+}
+i.red-ui-tab-icon {
+    opacity: 0.7;
+    width: 18px;
+    height: 20px;
 }
 
 .red-ui-tabs-badges {

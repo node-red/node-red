@@ -54,6 +54,10 @@
         outputs: 1,
         icon: "swap.png",
         label: function() {
+            function prop2name(type, key) {
+                var result = RED.utils.parseContextKey(key);
+                return type +"." +result.key;
+            }
             if (this.name) {
                 return this.name;
             }
@@ -70,13 +74,13 @@
             } else {
                 if (this.rules.length == 1) {
                     if (this.rules[0].t === "set") {
-                        return this._("change.label.set",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.set",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else if (this.rules[0].t === "change") {
-                        return this._("change.label.change",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.change",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else if (this.rules[0].t === "move") {
-                        return this._("change.label.move",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.move",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     } else {
-                        return this._("change.label.delete",{property:(this.rules[0].pt||"msg")+"."+this.rules[0].p});
+                        return this._("change.label.delete",{property:prop2name((this.rules[0].pt||"msg"), this.rules[0].p)});
                     }
                 } else {
                     return this._("change.label.changeCount",{count:this.rules.length});
@@ -146,7 +150,7 @@
                         .appendTo(row2);
                     var propertyValue = $('<input/>',{class:"node-input-rule-property-value",type:"text"})
                         .appendTo(row2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','date','jsonata','env']});
 
                     var row3_1 = $('<div/>').appendTo(row3);
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
@@ -154,7 +158,7 @@
                         .appendTo(row3_1);
                     var fromValue = $('<input/>',{class:"node-input-rule-property-search-value",type:"text"})
                         .appendTo(row3_1)
-                        .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','re','num','bool','env']});
 
                     var row3_2 = $('<div/>',{style:"margin-top:8px;"}).appendTo(row3);
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
@@ -162,7 +166,7 @@
                         .appendTo(row3_2);
                     var toValue = $('<input/>',{class:"node-input-rule-property-replace-value",type:"text"})
                         .appendTo(row3_2)
-                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin']});
+                        .typedInput({default:'str',types:['msg','flow','global','str','num','bool','json','bin','env']});
 
                     $('<div/>',{style:"display:inline-block;text-align:right; width:120px; padding-right:10px; box-sizing:border-box;"})
                         .text(to)

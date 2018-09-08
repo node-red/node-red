@@ -19,6 +19,13 @@ var should = require("should");
 var defaultFileSet = require("../../../../../../red/runtime/storage/localfilesystem/projects/defaultFileSet");
 
 describe('storage/localfilesystem/projects/defaultFileSet', function() {
+    var runtime = {
+        i18n: {
+            "_": function(name) {
+                return name;
+            }
+        }
+    };
     it('generates package.json for a project', function() {
         var generated = defaultFileSet["package.json"]({
             name: "A TEST NAME",
@@ -27,7 +34,7 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
                 flow: "MY FLOW FILE",
                 credentials: "MY CREDENTIALS FILE"
             }
-        });
+        }, runtime);
 
         var parsed = JSON.parse(generated);
         parsed.should.have.property('name',"A TEST NAME");
@@ -42,7 +49,7 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
         var generated = defaultFileSet["README.md"]({
             name: "A TEST NAME",
             summary: "A TEST SUMMARY"
-        });
+        }, runtime);
         generated.should.match(/A TEST NAME/);
         generated.should.match(/A TEST SUMMARY/);
     });
@@ -50,7 +57,7 @@ describe('storage/localfilesystem/projects/defaultFileSet', function() {
         var generated = defaultFileSet[".gitignore"]({
             name: "A TEST NAME",
             summary: "A TEST SUMMARY"
-        });
+        }, runtime);
         generated.length.should.be.greaterThan(0);
     });
 });
