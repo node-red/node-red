@@ -130,13 +130,19 @@ function compareObjects(obj1,obj2) {
     return true;
 }
 
+function createError(code, message) {
+    var e = new Error(message);
+    e.code = code;
+    return e;
+}
+
 function normalisePropertyExpression(str) {
     // This must be kept in sync with validatePropertyExpression
     // in editor/js/ui/utils.js
 
     var length = str.length;
     if (length === 0) {
-        throw new Error("Invalid property expression: zero-length");
+        throw createError("INVALID_EXPR","Invalid property expression: zero-length");
     }
     var parts = [];
     var start = 0;
@@ -149,14 +155,14 @@ function normalisePropertyExpression(str) {
         if (!inString) {
             if (c === "'" || c === '"') {
                 if (i != start) {
-                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+c+" at position "+i);
                 }
                 inString = true;
                 quoteChar = c;
                 start = i+1;
             } else if (c === '.') {
                 if (i===0) {
-                    throw new Error("Invalid property expression: unexpected . at position 0");
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected . at position 0");
                 }
                 if (start != i) {
                     v = str.substring(start,i);
@@ -167,57 +173,57 @@ function normalisePropertyExpression(str) {
                     }
                 }
                 if (i===length-1) {
-                    throw new Error("Invalid property expression: unterminated expression");
+                    throw createError("INVALID_EXPR","Invalid property expression: unterminated expression");
                 }
                 // Next char is first char of an identifier: a-z 0-9 $ _
                 if (!/[a-z0-9\$\_]/i.test(str[i+1])) {
-                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
                 }
                 start = i+1;
             } else if (c === '[') {
                 if (i === 0) {
-                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+c+" at position "+i);
                 }
                 if (start != i) {
                     parts.push(str.substring(start,i));
                 }
                 if (i===length-1) {
-                    throw new Error("Invalid property expression: unterminated expression");
+                    throw createError("INVALID_EXPR","Invalid property expression: unterminated expression");
                 }
                 // Next char is either a quote or a number
                 if (!/["'\d]/.test(str[i+1])) {
-                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+str[i+1]+" at position "+(i+1));
                 }
                 start = i+1;
                 inBox = true;
             } else if (c === ']') {
                 if (!inBox) {
-                    throw new Error("Invalid property expression: unexpected "+c+" at position "+i);
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+c+" at position "+i);
                 }
                 if (start != i) {
                     v = str.substring(start,i);
                     if (/^\d+$/.test(v)) {
                         parts.push(parseInt(v));
                     } else {
-                        throw new Error("Invalid property expression: unexpected array expression at position "+start);
+                        throw createError("INVALID_EXPR","Invalid property expression: unexpected array expression at position "+start);
                     }
                 }
                 start = i+1;
                 inBox = false;
             } else if (c === ' ') {
-                throw new Error("Invalid property expression: unexpected ' ' at position "+i);
+                throw createError("INVALID_EXPR","Invalid property expression: unexpected ' ' at position "+i);
             }
         } else {
             if (c === quoteChar) {
                 if (i-start === 0) {
-                    throw new Error("Invalid property expression: zero-length string at position "+start);
+                    throw createError("INVALID_EXPR","Invalid property expression: zero-length string at position "+start);
                 }
                 parts.push(str.substring(start,i));
                 // If inBox, next char must be a ]. Otherwise it may be [ or .
                 if (inBox && !/\]/.test(str[i+1])) {
-                    throw new Error("Invalid property expression: unexpected array expression at position "+start);
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected array expression at position "+start);
                 } else if (!inBox && i+1!==length && !/[\[\.]/.test(str[i+1])) {
-                    throw new Error("Invalid property expression: unexpected "+str[i+1]+" expression at position "+(i+1));
+                    throw createError("INVALID_EXPR","Invalid property expression: unexpected "+str[i+1]+" expression at position "+(i+1));
                 }
                 start = i+1;
                 inString = false;
@@ -226,7 +232,7 @@ function normalisePropertyExpression(str) {
 
     }
     if (inBox || inString) {
-        throw new Error("Invalid property expression: unterminated expression");
+        throw new createError("INVALID_EXPR","Invalid property expression: unterminated expression");
     }
     if (start < length) {
         parts.push(str.substring(start));

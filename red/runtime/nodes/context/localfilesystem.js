@@ -230,14 +230,31 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
     }
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     loadFile(storagePath + ".json").then(function(data){
+        var value;
         if(data){
             data = JSON.parse(data);
             if (!Array.isArray(key)) {
-                callback(null, util.getObjectProperty(data,key));
+                try {
+                    value = util.getObjectProperty(data,key);
+                } catch(err) {
+                    if (err.code === "INVALID_EXPR") {
+                        throw err;
+                    }
+                    value = undefined;
+                }
+                callback(null, value);
             } else {
                 var results = [undefined];
                 for (var i=0;i<key.length;i++) {
-                    results.push(util.getObjectProperty(data,key[i]))
+                    try {
+                        value = util.getObjectProperty(data,key[i]);
+                    } catch(err) {
+                        if (err.code === "INVALID_EXPR") {
+                            throw err;
+                        }
+                        value = undefined;
+                    }
+                    results.push(value)
                 }
                 callback.apply(null,results);
             }
