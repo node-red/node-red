@@ -191,15 +191,26 @@ describe('context', function() {
         });
 
 
-
         it('returns functionGlobalContext value if store value undefined', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
-            Context.load().then(function(){
+            return Context.load().then(function(){
                 var context = Context.get("1","flowA");
                 var v = context.global.get('foo');
                 v.should.equal('bar');
             });
         })
+
+        it('returns functionGlobalContext sub-value if store value undefined', function() {
+            Context.init({functionGlobalContext: {foo:{bar:123}}});
+            return Context.load().then(function(){
+                var context = Context.get("1","flowA");
+                var v = context.global.get('foo.bar');
+                should.equal(v,123);
+            });
+        })
+
+
+
     });
 
     describe('external context storage',function() {
@@ -579,16 +590,16 @@ describe('context', function() {
             });
 
             it('should return multiple functionGlobalContext values if key is an array', function(done) {
-                var fGC = { "foo1": 456, "foo2": 789 };
+                var fGC = { "foo1": 456, "foo2": {"bar":789} };
                 Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                    context.global.get(["foo1","foo2.bar","foo3"], "memory", function(err,foo1,foo2,foo3){
                         if (err) {
                             done(err);
                         } else {
-                            foo1.should.be.equal(456);
-                            foo2.should.be.equal(789);
+                            should.equal(foo1, 456);
+                            should.equal(foo2, 789);
                             should.not.exist(foo3);
                             done();
                         }

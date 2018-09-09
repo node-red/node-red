@@ -17,6 +17,7 @@
 var clone = require("clone");
 var log = require("../../log");
 var memory = require("./memory");
+var util = require("../../util");
 
 var settings;
 
@@ -209,12 +210,12 @@ function createContext(id,seed) {
         insertSeedValues = function(keys,values) {
             if (!Array.isArray(keys)) {
                 if (values[0] === undefined) {
-                    values[0] = seed[keys];
+                    values[0] = util.getObjectProperty(seed,keys);
                 }
             } else {
                 for (var i=0;i<keys.length;i++) {
                     if (values[i] === undefined) {
-                        values[i] = seed[keys[i]];
+                        values[i] = util.getObjectProperty(seed,keys[i]);
                     }
                 }
             }
@@ -258,7 +259,7 @@ function createContext(id,seed) {
                 if (Array.isArray(key)) {
                     insertSeedValues(key,results);
                 } else if (results === undefined){
-                    results = seed[key];
+                    results = util.getObjectProperty(seed,key);
                 }
             }
             return results;
