@@ -113,6 +113,21 @@ describe('context', function() {
             context2.global.get("foo").should.equal("test");
         });
 
+        it('context.flow/global are not enumerable', function() {
+            var context1 = Context.get("1","flowA");
+            Object.keys(context1).length.should.equal(0);
+            Object.keys(context1.flow).length.should.equal(0);
+            Object.keys(context1.global).length.should.equal(0);
+        })
+
+        it('context.flow/global cannot be deleted', function() {
+            var context1 = Context.get("1","flowA");
+            delete context1.flow;
+            should.exist(context1.flow);
+            delete context1.global;
+            should.exist(context1.global);
+        })
+
         it('deletes context',function() {
             var context = Context.get("1","flowA");
             should.not.exist(context.get("foo"));

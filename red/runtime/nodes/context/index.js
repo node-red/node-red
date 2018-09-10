@@ -221,93 +221,100 @@ function createContext(id,seed) {
             }
         }
     }
-
-    obj.get = function(key, storage, callback) {
-        var context;
-        if (!storage && !callback) {
-            context = stores["_"];
-        } else {
-            if (typeof storage === 'function') {
-                callback = storage;
-                storage = "_";
-            }
-            if (callback && typeof callback !== 'function'){
-                throw new Error("Callback must be a function");
-            }
-            context = getContextStorage(storage);
-        }
-        if (callback) {
-            if (!seed) {
-                context.get(scope,key,callback);
-            } else {
-                context.get(scope,key,function() {
-                    if (arguments[0]) {
-                        callback(arguments[0]);
-                        return;
+    Object.defineProperties(obj, {
+        get: {
+            value: function(key, storage, callback) {
+                var context;
+                if (!storage && !callback) {
+                    context = stores["_"];
+                } else {
+                    if (typeof storage === 'function') {
+                        callback = storage;
+                        storage = "_";
                     }
-                    var results = Array.prototype.slice.call(arguments,[1]);
-                    insertSeedValues(key,results);
-                    // Put the err arg back
-                    results.unshift(undefined);
-                    callback.apply(null,results);
-                });
-            }
-        } else {
-            // No callback, attempt to do this synchronously
-            var results = context.get(scope,key);
-            if (seed) {
-                if (Array.isArray(key)) {
-                    insertSeedValues(key,results);
-                } else if (results === undefined){
-                    results = util.getObjectProperty(seed,key);
+                    if (callback && typeof callback !== 'function'){
+                        throw new Error("Callback must be a function");
+                    }
+                    context = getContextStorage(storage);
+                }
+                if (callback) {
+                    if (!seed) {
+                        context.get(scope,key,callback);
+                    } else {
+                        context.get(scope,key,function() {
+                            if (arguments[0]) {
+                                callback(arguments[0]);
+                                return;
+                            }
+                            var results = Array.prototype.slice.call(arguments,[1]);
+                            insertSeedValues(key,results);
+                            // Put the err arg back
+                            results.unshift(undefined);
+                            callback.apply(null,results);
+                        });
+                    }
+                } else {
+                    // No callback, attempt to do this synchronously
+                    var results = context.get(scope,key);
+                    if (seed) {
+                        if (Array.isArray(key)) {
+                            insertSeedValues(key,results);
+                        } else if (results === undefined){
+                            results = util.getObjectProperty(seed,key);
+                        }
+                    }
+                    return results;
                 }
             }
-            return results;
+        },
+        set: {
+            value: function(key, value, storage, callback) {
+                var context;
+                if (!storage && !callback) {
+                    context = stores["_"];
+                } else {
+                    if (typeof storage === 'function') {
+                        callback = storage;
+                        storage = "_";
+                    }
+                    if (callback && typeof callback !== 'function') {
+                        throw new Error("Callback must be a function");
+                    }
+                    context = getContextStorage(storage);
+                }
+                context.set(scope, key, value, callback);
+            }
+        },
+        keys: {
+            value: function(storage, callback) {
+                var context;
+                if (!storage && !callback) {
+                    context = stores["_"];
+                } else {
+                    if (typeof storage === 'function') {
+                        callback = storage;
+                        storage = "_";
+                    }
+                    if (callback && typeof callback !== 'function') {
+                        throw new Error("Callback must be a function");
+                    }
+                    context = getContextStorage(storage);
+                }
+                if (seed) {
+                    if (callback) {
+                        context.keys(scope, function(err,keys) {
+                            callback(err,Array.from(new Set(seedKeys.concat(keys)).keys()));
+                        });
+                    } else {
+                        var keys = context.keys(scope);
+                        return Array.from(new Set(seedKeys.concat(keys)).keys())
+                    }
+                } else {
+                    return context.keys(scope, callback);
+                }
+            }
         }
-    };
-    obj.set = function(key, value, storage, callback) {
-        var context;
-        if (!storage && !callback) {
-            context = stores["_"];
-        } else {
-            if (typeof storage === 'function') {
-                callback = storage;
-                storage = "_";
-            }
-            if (callback && typeof callback !== 'function') {
-                throw new Error("Callback must be a function");
-            }
-            context = getContextStorage(storage);
-        }
-        context.set(scope, key, value, callback);
-    };
-    obj.keys = function(storage, callback) {
-        var context;
-        if (!storage && !callback) {
-            context = stores["_"];
-        } else {
-            if (typeof storage === 'function') {
-                callback = storage;
-                storage = "_";
-            }
-            if (callback && typeof callback !== 'function') {
-                throw new Error("Callback must be a function");
-            }
-            context = getContextStorage(storage);
-        }
-        if (seed) {
-            if (callback) {
-                context.keys(scope, function(err,keys) {
-                    callback(err,Array.from(new Set(seedKeys.concat(keys)).keys()));
-                });
-            } else {
-                var keys = context.keys(scope);
-                return Array.from(new Set(seedKeys.concat(keys)).keys())
-            }
-        } else {
-            return context.keys(scope, callback);
-        }
-    };
+    });
     return obj;
 }
 
@@ -321,9 +328,13 @@ function getContext(localId,flowId) {
     }
     var newContext = createContext(contextId);
     if (flowId) {
-        newContext.flow = getContext(flowId);
+        Object.defineProperty(newContext, 'flow', {
+            value: getContext(flowId)
+        });
     }
-    newContext.global = contexts['global'];
+    Object.defineProperty(newContext, 'global', {
+        value: contexts['global']
+    })
     contexts[contextId] = newContext;
     return newContext;
 }
