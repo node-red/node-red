@@ -40,8 +40,9 @@ function init(runtime) {
     settings = runtime.settings;
     log = runtime.log;
     if (settings.adminAuth) {
-        Users.init(settings.adminAuth,settings.apiAccessTokens);
-        Tokens.init(settings.adminAuth,runtime.storage,settings.apiAccessTokens);
+        var mergedAdminAuth = Object.assign(settings.adminAuth, settings.adminAuth.module);
+        Users.init(mergedAdminAuth);
+        Tokens.init(mergedAdminAuth,runtime.storage);
         strategies.init(runtime);
     }
 }
@@ -81,23 +82,24 @@ function getToken(req,res,next) {
 function login(req,res) {
     var response = {};
     if (settings.adminAuth) {
-        if (settings.adminAuth.type === "credentials") {
+        var mergedAdminAuth = Object.assign(settings.adminAuth, settings.adminAuth.module);
+        if (mergedAdminAuth.type === "credentials") {
             response = {
                 "type":"credentials",
                 "prompts":[{id:"username",type:"text",label:"user.username"},{id:"password",type:"password",label:"user.password"}]
             }
-        } else if (settings.adminAuth.type === "strategy") {
+        } else if (mergedAdminAuth.type === "strategy") {
 
             var urlPrefix = (settings.httpAdminRoot==='/')?"":settings.httpAdminRoot;
             response = {
                 "type":"strategy",
-                "prompts":[{type:"button",label:settings.adminAuth.strategy.label, url: urlPrefix + "auth/strategy"}]
+                "prompts":[{type:"button",label:mergedAdminAuth.strategy.label, url: urlPrefix + "auth/strategy"}]
             }
-            if (settings.adminAuth.strategy.icon) {
-                response.prompts[0].icon = settings.adminAuth.strategy.icon;
+            if (mergedAdminAuth.strategy.icon) {
+                response.prompts[0].icon = mergedAdminAuth.strategy.icon;
             }
-            if (settings.adminAuth.strategy.image) {
-                response.prompts[0].image = theme.serveFile('/login/',settings.adminAuth.strategy.image);
+            if (mergedAdminAuth.strategy.image) {
+                response.prompts[0].image = theme.serveFile('/login/',mergedAdminAuth.strategy.image);
             }
         }
         if (theme.context().login && theme.context().login.image) {

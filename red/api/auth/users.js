@@ -57,35 +57,18 @@ function getDefaultUser() {
 }
 
 var api = {
-    get: wrapperGetUserFromSettings(get),
+    get: get,
     authenticate: authenticate,
     default: getDefaultUser
 }
 
-var apiAccessUsers = {};
-function wrapperGetUserFromSettings (getFunc) {
-    return function (username) {
-        if (apiAccessUsers[username]) {
-            return Promise.resolve(apiAccessUsers[username]);
-        } else {
-            return getFunc(username);
-        }
-    };
-}
-
-function init(config, apiAccessTokensSettings) {
+function init(config) {
     users = {};
     defaultUser = null;
-    apiAccessUsers = apiAccessTokensSettings.reduce(function (prev, current) {
-        if (current.username) {
-            prev[current.username] = current.username;
-        }
-        return prev;
-    }, {});
     if (config.type == "credentials" || config.type == "strategy") {
         if (config.users) {
             if (typeof config.users === "function") {
-                api.get = wrapperGetUserFromSettings(config.users);
+                api.get = config.users;
             } else {
                 var us = config.users;
                 /* istanbul ignore else */

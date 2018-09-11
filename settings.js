@@ -124,6 +124,25 @@ module.exports = {
     //    }]
     //},
 
+    // If you would like to use not only this access token feature but also a Node-RED
+    // plugin module for authenticatiing users such as node-red-auth-github,
+    // you can define the module in adminAuth.module property.
+    //adminAuth: {
+    //    module: require('node-red-auth-github')({
+    //        clientID: GITHUB_CLIENT_ID,
+    //        clientSecret: GITHUB_CLIENT_SECRET,
+    //        baseURL: "http://localhost:1880/",
+    //        users: [
+    //            { username: "knolleary",permissions: ["*"]}
+    //        ]
+    //    })
+    //    tokens: [{
+    //        token: "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    //        user: "knolleary",
+    //        scope: ["*"]
+    //    }]
+    //},
+
     // To password protect the node-defined HTTP endpoints (httpNodeRoot), or
     // the static content (httpStatic), the following properties can be used.
     // The pass field is a bcrypt hash of the password.

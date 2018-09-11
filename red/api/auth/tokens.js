@@ -63,7 +63,7 @@ function loadSessions() {
 }
 
 module.exports = {
-    init: function(adminAuthSettings, _storage, apiAccessTokensSettings) {
+    init: function(adminAuthSettings, _storage) {
         storage = _storage;
         sessionExpiryTime = adminAuthSettings.sessionExpiryTime || 604800; // 1 week in seconds
         // At this point, storage will not have been initialised, so defer loading
@@ -71,11 +71,11 @@ module.exports = {
         loadedSessions = null;
 
         apiAccessTokens = {};
-        if ( Array.isArray(apiAccessTokensSettings) ) {
-            apiAccessTokens = apiAccessTokensSettings.reduce(function(prev, current) {
+        if ( Array.isArray(adminAuthSettings.tokens) ) {
+            apiAccessTokens = adminAuthSettings.tokens.reduce(function(prev, current) {
                 prev[current.token] = {
-                    user: current.username,
-                    scope: current.permissions
+                    user: current.user,
+                    scope: current.scope
                 };
                 return prev;
             }, {});
