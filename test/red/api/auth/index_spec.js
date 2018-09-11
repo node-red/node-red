@@ -114,6 +114,174 @@ describe("api/auth/index",function() {
             }});
         });
 
+        it("returns login details - strategy - merged a adminAuth.module object to a adminAuth object", function(done) {
+            auth.init({
+                settings: {
+                    adminAuth: {
+                        type: "strategy",
+                        strategy:{
+                            label:"test-strategy",
+                            icon:"test-icon"
+                        },
+                        tokens: [{
+                            token: "test-token",
+                            user: "test-user",
+                            scope: ["*"]
+                        }]
+                    }
+                },
+                log:{audit:function(){}}
+            });
+            auth.login(null,{json: function(resp) {
+                resp.should.have.a.property("type","strategy");
+                resp.should.have.a.property("prompts");
+                resp.prompts.should.have.a.lengthOf(1);
+                resp.prompts[0].should.have.a.property("type","button");
+                resp.prompts[0].should.have.a.property("label","test-strategy");
+                resp.prompts[0].should.have.a.property("icon","test-icon");
+
+                done();
+            }});
+        });
+
+    });
+
+    describe("init", function() {
+        var spyTokensInit;
+        var spyUsersInit;
+        beforeEach(function() {
+            spyTokensInit = sinon.spy(Tokens,"init");
+            spyUsersInit = sinon.spy(Users,"init");
+        });
+        this.afterEach(function() {
+            spyTokensInit.restore();
+            spyUsersInit.restore();
+        });
+        it("merges an adminAuth object and an adminAuth.module object - module object is null", function(done) {
+            auth.init({
+                settings: {
+                    adminAuth: {
+                        type: "strategy",
+                        strategy:{
+                            label:"test-strategy",
+                            icon:"test-icon"
+                        },
+                        tokens: [{
+                            token: "test-token",
+                            user: "test-user",
+                            scope: ["*"]
+                        }]
+                    }
+                },
+                log:{audit:function(){}}
+            });
+            spyTokensInit.args[0][0].should.have.a.property("type","strategy");
+            spyTokensInit.args[0][0].should.have.a.property("strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyTokensInit.args[0][0].should.have.a.property("tokens");
+            spyTokensInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyTokensInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].should.have.a.property("type","strategy");
+            spyUsersInit.args[0][0].should.have.a.property("strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyUsersInit.args[0][0].should.have.a.property("tokens");
+            spyUsersInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyUsersInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            done();
+        });
+        it("merges an adminAuth object and an adminAuth.module object - not conflict", function(done) {
+            auth.init({
+                settings: {
+                    adminAuth: {
+                        module: {
+                            type: "strategy",
+                            strategy:{
+                                label:"test-strategy",
+                                icon:"test-icon"
+                            }
+                        },
+                        tokens: [{
+                            token: "test-token",
+                            user: "test-user",
+                            scope: ["*"]
+                        }]
+                    }
+                },
+                log:{audit:function(){}}
+            });
+            spyTokensInit.args[0][0].should.have.a.property("type","strategy");
+            spyTokensInit.args[0][0].should.have.a.property("strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyTokensInit.args[0][0].should.have.a.property("tokens");
+            spyTokensInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyTokensInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].should.have.a.property("type","strategy");
+            spyUsersInit.args[0][0].should.have.a.property("strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyUsersInit.args[0][0].should.have.a.property("tokens");
+            spyUsersInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyUsersInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            done();
+        });
+        it("merges an adminAuth object and an adminAuth.module object - conflict", function(done) {
+            auth.init({
+                settings: {
+                    adminAuth: {
+                        module: {
+                            type: "strategy",
+                            strategy:{
+                                label:"test-strategy",
+                                icon:"test-icon"
+                            }
+                        },
+                        type: "credentials",
+                        tokens: [{
+                            token: "test-token",
+                            user: "test-user",
+                            scope: ["*"]
+                        }]
+                    }
+                },
+                log:{audit:function(){}}
+            });
+            spyTokensInit.args[0][0].should.have.a.property("type","strategy");
+            spyTokensInit.args[0][0].should.have.a.property("strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyTokensInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyTokensInit.args[0][0].should.have.a.property("tokens");
+            spyTokensInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyTokensInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyTokensInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].should.have.a.property("type","strategy");
+            spyUsersInit.args[0][0].should.have.a.property("strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("label","test-strategy");
+            spyUsersInit.args[0][0].strategy.should.have.a.property("icon","test-icon");
+            spyUsersInit.args[0][0].should.have.a.property("tokens");
+            spyUsersInit.args[0][0].tokens.should.have.a.lengthOf(1);
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("token","test-token");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("user","test-user");
+            spyUsersInit.args[0][0].tokens[0].should.have.a.property("scope");
+            spyUsersInit.args[0][0].tokens[0].scope.should.have.a.lengthOf(1);
+            done();
+        });
     });
 
 });
