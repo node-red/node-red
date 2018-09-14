@@ -142,6 +142,7 @@ function LocalFileSystem(config){
     this.storageBaseDir = getBasePath(this.config);
     if (config.hasOwnProperty('cache')?config.cache:true) {
         this.cache = MemoryStore({});
+        this.writePromise = Promise.resolve();
     }
     this.pendingWrites = {};
     this.knownCircularRefs = {};
@@ -278,8 +279,10 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             return;
         } else {
             this._pendingWriteTimeout = setTimeout(function() {
-                self._flushPendingWrites.call(self).catch(function(err) {
-                    log.error(log._("context.localfilesystem.error-write",{message:err.toString()}))
+                self.writePromise = self.writePromise.then(function(){
+                    return self._flushPendingWrites.call(self).catch(function(err) {
+                        log.error(log._("context.localfilesystem.error-write",{message:err.toString()}));
+                    });
                 });
             }, this.flushInterval);
         }
