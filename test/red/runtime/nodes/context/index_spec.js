@@ -499,6 +499,23 @@ describe('context', function() {
                     done();
                 }).catch(done);
             });
+            
+            it('should allow the store name to be provide in the key', function(done) {
+                Context.init({contextStorage:contextDefaultStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    var cb = function(){done("An error occurred")}
+                    context.set("#:(test)::foo","bar");
+                    context.get("#:(test)::foo");
+                    stubGet2.called.should.be.false();
+                    stubSet2.called.should.be.false();
+                    stubSet.calledWithExactly("1:flow","foo","bar",undefined).should.be.true();
+                    stubGet.calledWith("1:flow","foo").should.be.true();
+                    done();
+                }).catch(done);
+            });
+
+
             it('should use default as the alias of other context', function(done) {
                 Context.init({contextStorage:contextAlias});
                 Context.load().then(function(){

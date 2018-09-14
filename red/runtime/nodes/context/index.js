@@ -225,18 +225,28 @@ function createContext(id,seed) {
         get: {
             value: function(key, storage, callback) {
                 var context;
-                if (!storage && !callback) {
-                    context = stores["_"];
+
+                if (!callback && typeof storage === 'function') {
+                    callback = storage;
+                    storage = undefined;
+                }
+                if (callback && typeof callback !== 'function'){
+                    throw new Error("Callback must be a function");
+                }
+
+                if (!Array.isArray(key)) {
+                    var keyParts = util.parseContextStore(key);
+                    key = keyParts.key;
+                    if (!storage) {
+                        storage = keyParts.store || "_";
+                    }
                 } else {
-                    if (typeof storage === 'function') {
-                        callback = storage;
+                    if (!storage) {
                         storage = "_";
                     }
-                    if (callback && typeof callback !== 'function'){
-                        throw new Error("Callback must be a function");
-                    }
-                    context = getContextStorage(storage);
                 }
+                context = getContextStorage(storage);
+
                 if (callback) {
                     if (!seed) {
                         context.get(scope,key,callback);
@@ -270,18 +280,28 @@ function createContext(id,seed) {
         set: {
             value: function(key, value, storage, callback) {
                 var context;
-                if (!storage && !callback) {
-                    context = stores["_"];
+
+                if (!callback && typeof storage === 'function') {
+                    callback = storage;
+                    storage = undefined;
+                }
+                if (callback && typeof callback !== 'function'){
+                    throw new Error("Callback must be a function");
+                }
+
+                if (!Array.isArray(key)) {
+                    var keyParts = util.parseContextStore(key);
+                    key = keyParts.key;
+                    if (!storage) {
+                        storage = keyParts.store || "_";
+                    }
                 } else {
-                    if (typeof storage === 'function') {
-                        callback = storage;
+                    if (!storage) {
                         storage = "_";
                     }
-                    if (callback && typeof callback !== 'function') {
-                        throw new Error("Callback must be a function");
-                    }
-                    context = getContextStorage(storage);
                 }
+                context = getContextStorage(storage);
+
                 context.set(scope, key, value, callback);
             }
         },
