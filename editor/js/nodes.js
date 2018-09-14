@@ -509,9 +509,9 @@ RED.nodes = (function() {
                     node.icon = n.icon;
                 }
             }
-            if (n.info) {
-                node.info = n.info;
-            }
+        }
+        if (n.info) {
+            node.info = n.info;
         }
         return node;
     }
@@ -907,7 +907,14 @@ RED.nodes = (function() {
                 }
 
                 if (!existingConfigNode || existingConfigNode._def.exclusive) { //} || !compareNodes(existingConfigNode,n,true) || existingConfigNode.z !== n.z) {
-                    configNode = {id:n.id, z:n.z, type:n.type, users:[], _config:{}};
+                    configNode = {
+                        id:n.id,
+                        z:n.z,
+                        type:n.type,
+                        info: n.info,
+                        users:[],
+                        _config:{}
+                    };
                     for (d in def.defaults) {
                         if (def.defaults.hasOwnProperty(d)) {
                             configNode[d] = n[d];
