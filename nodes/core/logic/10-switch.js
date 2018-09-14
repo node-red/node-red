@@ -92,31 +92,80 @@ module.exports = function(RED) {
     }
 
     function getProperty(node,msg) {
-        return new Promise((resolve,reject) => {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
+                if (node.propertyType === 'jsonata') {
+                    RED.util.evaluateJSONataExpression(node.property,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else {
+                    RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg,(err,value) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                }
+            });
+        } else {
             if (node.propertyType === 'jsonata') {
-                RED.util.evaluateJSONataExpression(node.property,msg,(err,value) => {
-                    if (err) {
-                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateJSONataExpression(node.property,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
             } else {
-                RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg,(err,value) => {
-                    if (err) {
-                        resolve(undefined);
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
             }
-        });
+        }
     }
 
     function getV1(node,msg,rule,hasParts) {
-        return new Promise( (resolve,reject) => {
+        if (node.useAsyncRules) {
+            return new Promise( (resolve,reject) => {
+                if (rule.vt === 'prev') {
+                    resolve(node.previousValue);
+                } else if (rule.vt === 'jsonata') {
+                    var exp = rule.v;
+                    if (rule.t === 'jsonata_exp') {
+                        if (hasParts) {
+                            exp.assign("I", msg.parts.index);
+                            exp.assign("N", msg.parts.count);
+                        }
+                    }
+                    RED.util.evaluateJSONataExpression(exp,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else if (rule.vt === 'json') {
+                    resolve("json"); // TODO: ?! invalid case
+                } else if (rule.vt === 'null') {
+                    resolve("null");
+                } else {
+                    RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg, function(err,value) {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                }
+            });
+        } else {
             if (rule.vt === 'prev') {
-                resolve(node.previousValue);
+                return node.previousValue;
             } else if (rule.vt === 'jsonata') {
                 var exp = rule.v;
                 if (rule.t === 'jsonata_exp') {
@@ -125,83 +174,120 @@ module.exports = function(RED) {
                         exp.assign("N", msg.parts.count);
                     }
                 }
-                RED.util.evaluateJSONataExpression(exp,msg,(err,value) => {
-                    if (err) {
-                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateJSONataExpression(exp,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
             } else if (rule.vt === 'json') {
-                resolve("json");
+                return "json"; // TODO: ?! invalid case
             } else if (rule.vt === 'null') {
-                resolve("null");
+                return "null";
             } else {
-                RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg, function(err,value) {
-                    if (err) {
-                        resolve(undefined);
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
             }
-        });
+        }
     }
 
     function getV2(node,msg,rule) {
-        return new Promise((resolve,reject) => {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
+                var v2 = rule.v2;
+                if (rule.v2t === 'prev') {
+                    resolve(node.previousValue);
+                } else if (rule.v2t === 'jsonata') {
+                    RED.util.evaluateJSONataExpression(rule.v2,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else if (typeof v2 !== 'undefined') {
+                    RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg, function(err,value) {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else {
+                    resolve(v2);
+                }
+            })
+        } else {
             var v2 = rule.v2;
             if (rule.v2t === 'prev') {
-                resolve(node.previousValue);
+                return node.previousValue;
             } else if (rule.v2t === 'jsonata') {
-                RED.util.evaluateJSONataExpression(rule.v2,msg,(err,value) => {
-                    if (err) {
-                        reject(RED._("switch.errors.invalid-expr",{error:err.message}));
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateJSONataExpression(rule.v2,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
             } else if (typeof v2 !== 'undefined') {
-                RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg, function(err,value) {
-                    if (err) {
-                        resolve(undefined);
-                    } else {
-                        resolve(value);
-                    }
-                });
+                try {
+                    return RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
             } else {
-                resolve(v2);
+                return v2;
             }
-        })
+        }
     }
 
     function applyRule(node, msg, property, state) {
-        return new Promise((resolve,reject) => {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
 
-            var rule = node.rules[state.currentRule];
-            var v1,v2;
+                var rule = node.rules[state.currentRule];
+                var v1,v2;
 
-            getV1(node,msg,rule,state.hasParts).then(value => {
-                v1 = value;
-            }).then(()=>getV2(node,msg,rule)).then(value => {
-                v2 = value;
-            }).then(() => {
-                if (rule.t == "else") {
-                    property = state.elseflag;
-                    state.elseflag = true;
-                }
-                if (operators[rule.t](property,v1,v2,rule.case,msg.parts)) {
-                    state.onward.push(msg);
-                    state.elseflag = false;
-                    if (node.checkall == "false") {
-                        return resolve(false);
+                getV1(node,msg,rule,state.hasParts).then(value => {
+                    v1 = value;
+                }).then(()=>getV2(node,msg,rule)).then(value => {
+                    v2 = value;
+                }).then(() => {
+                    if (rule.t == "else") {
+                        property = state.elseflag;
+                        state.elseflag = true;
                     }
-                } else {
-                    state.onward.push(null);
+                    if (operators[rule.t](property,v1,v2,rule.case,msg.parts)) {
+                        state.onward.push(msg);
+                        state.elseflag = false;
+                        if (node.checkall == "false") {
+                            return resolve(false);
+                        }
+                    } else {
+                        state.onward.push(null);
+                    }
+                    resolve(state.currentRule < node.rules.length - 1);
+                });
+            })
+        } else {
+            var rule = node.rules[state.currentRule];
+            var v1 = getV1(node,msg,rule,state.hasParts);
+            var v2 = getV2(node,msg,rule);
+            if (rule.t == "else") {
+                property = state.elseflag;
+                state.elseflag = true;
+            }
+            if (operators[rule.t](property,v1,v2,rule.case,msg.parts)) {
+                state.onward.push(msg);
+                state.elseflag = false;
+                if (node.checkall == "false") {
+                    return false;
                 }
-                resolve(state.currentRule < node.rules.length - 1);
-            });
-        })
+            } else {
+                state.onward.push(null);
+            }
+            return state.currentRule < node.rules.length - 1
+        }
     }
 
     function applyRules(node, msg, property,state) {
@@ -215,7 +301,18 @@ module.exports = function(RED) {
                                 msg.parts.hasOwnProperty("index")
             }
         }
-        return applyRule(node,msg,property,state).then(hasMore => {
+        if (node.useAsyncRules) {
+            return applyRule(node,msg,property,state).then(hasMore => {
+                if (hasMore) {
+                    state.currentRule++;
+                    return applyRules(node,msg,property,state);
+                } else {
+                    node.previousValue = property;
+                    return state.onward;
+                }
+            });
+        } else {
+            var hasMore = applyRule(node,msg,property,state);
             if (hasMore) {
                 state.currentRule++;
                 return applyRules(node,msg,property,state);
@@ -223,7 +320,7 @@ module.exports = function(RED) {
                 node.previousValue = property;
                 return state.onward;
             }
-        });
+        }
     }
 
 
@@ -248,6 +345,14 @@ module.exports = function(RED) {
         var valid = true;
         var repair = n.repair;
         var needsCount = repair;
+        this.useAsyncRules = (
+            this.propertyType === 'flow' ||
+            this.propertyType === 'global' || (
+                this.propertyType === 'jsonata' &&
+                /\$(flow|global)Context/.test(this.property)
+            )
+        );
+
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
             needsCount = needsCount || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
@@ -258,6 +363,13 @@ module.exports = function(RED) {
                     rule.vt = 'str';
                 }
             }
+            this.useAsyncRules = this.useAsyncRules || (
+                rule.vt === 'flow' ||
+                rule.vt === 'global' || (
+                    rule.vt === 'jsonata' &&
+                    /\$(flow|global)Context/.test(rule.v)
+                )
+            );
             if (rule.vt === 'num') {
                 if (!isNaN(Number(rule.v))) {
                     rule.v = Number(rule.v);
@@ -270,6 +382,9 @@ module.exports = function(RED) {
                     valid = false;
                 }
             }
+            if (rule.vt === 'flow' || rule.vt === 'global' || rule.vt === 'jsonata') {
+                this.useAsyncRules = true;
+            }
             if (typeof rule.v2 !== 'undefined') {
                 if (!rule.v2t) {
                     if (!isNaN(Number(rule.v2))) {
@@ -278,6 +393,13 @@ module.exports = function(RED) {
                         rule.v2t = 'str';
                     }
                 }
+                this.useAsyncRules = this.useAsyncRules || (
+                    rule.v2t === 'flow' ||
+                    rule.v2t === 'global' || (
+                        rule.v2t === 'jsonata' &&
+                        /\$(flow|global)Context/.test(rule.v2)
+                    )
+                );
                 if (rule.v2t === 'num') {
                     rule.v2 = Number(rule.v2);
                 } else if (rule.v2t === 'jsonata') {
@@ -290,7 +412,6 @@ module.exports = function(RED) {
                 }
             }
         }
-
         if (!valid) {
             return;
         }
@@ -420,18 +541,32 @@ module.exports = function(RED) {
             if (needsCount && checkParts && hasParts) {
                 return addMessageToPending(msg);
             }
-            return getProperty(node,msg)
-                    .then(property => applyRules(node,msg,property))
-                    .then(onward => {
-                        if (!repair || !hasParts) {
-                            node.send(onward);
-                        }
-                        else {
-                            sendGroupMessages(onward, msg);
-                        }
-                    }).catch(err => {
-                        node.warn(err);
-                    });
+            if (node.useAsyncRules) {
+                return getProperty(node,msg)
+                        .then(property => applyRules(node,msg,property))
+                        .then(onward => {
+                            if (!repair || !hasParts) {
+                                node.send(onward);
+                            }
+                            else {
+                                sendGroupMessages(onward, msg);
+                            }
+                        }).catch(err => {
+                            node.warn(err);
+                        });
+            } else {
+                try {
+                    var property = getProperty(node,msg);
+                    var onward = applyRules(node,msg,property);
+                    if (!repair || !hasParts) {
+                        node.send(onward);
+                    } else {
+                        sendGroupMessages(onward, msg);
+                    }
+                } catch(err) {
+                    node.warn(err);
+                }
+            }
         }
 
         function clearPending() {
@@ -473,7 +608,11 @@ module.exports = function(RED) {
         }
 
         this.on('input', function(msg) {
-            processMessageQueue(msg);
+            if (node.useAsyncRules) {
+                processMessageQueue(msg);
+            } else {
+                processMessage(msg,true);
+            }
         });
 
         this.on('close', function() {
