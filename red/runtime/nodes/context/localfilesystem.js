@@ -215,10 +215,16 @@ LocalFileSystem.prototype.open = function(){
 }
 
 LocalFileSystem.prototype.close = function(){
-    if (this.cache && this._flushPendingWrites) {
+    var self = this;
+    if (this.cache && this._pendingWriteTimeout) {
         clearTimeout(this._pendingWriteTimeout);
         delete this._pendingWriteTimeout;
-        return this._flushPendingWrites();
+        this.flushInterval = 0;
+        return this.writePromise.then(function(){
+            if(Object.keys(self.pendingWrites).length > 0) {
+                return self._flushPendingWrites();
+            }
+        });
     }
     return Promise.resolve();
 }
