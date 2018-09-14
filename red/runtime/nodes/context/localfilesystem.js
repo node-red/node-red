@@ -205,7 +205,20 @@ LocalFileSystem.prototype.open = function(){
                     promises.push(fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8"));
                 });
                 return Promise.all(promises).then(function(){
-                    delete self._pendingWriteTimeout;
+                    if(Object.keys(self.pendingWrites).length > 0){
+                        // Rerun flushing if pendingWrites was added when the promise was running
+                        return new Promise(function(resolve, reject) {
+                            setTimeout(function() {
+                                self._flushPendingWrites.call(self).then(function(){
+                                    resolve();
+                                }).catch(function(err) {
+                                    reject(err);
+                                });
+                            }, self.flushInterval);
+                        });
+                    } else {
+                        delete self._pendingWriteTimeout;
+                    }
                 });
             }
         });
