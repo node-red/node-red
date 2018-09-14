@@ -203,8 +203,9 @@ LocalFileSystem.prototype.open = function(){
                     log.debug("Flushing localfilesystem context scope "+scope);
                     promises.push(fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8"));
                 });
-                delete self._pendingWriteTimeout;
-                return Promise.all(promises);
+                return Promise.all(promises).then(function(){
+                    delete self._pendingWriteTimeout;
+                });
             }
         });
     } else {
