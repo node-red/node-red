@@ -204,22 +204,8 @@ LocalFileSystem.prototype.open = function(){
                     log.debug("Flushing localfilesystem context scope "+scope);
                     promises.push(fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8"));
                 });
-                return Promise.all(promises).then(function(){
-                    if(Object.keys(self.pendingWrites).length > 0){
-                        // Rerun flushing if pendingWrites was added when the promise was running
-                        return new Promise(function(resolve, reject) {
-                            setTimeout(function() {
-                                self._flushPendingWrites.call(self).then(function(){
-                                    resolve();
-                                }).catch(function(err) {
-                                    reject(err);
-                                });
-                            }, self.flushInterval);
-                        });
-                    } else {
-                        delete self._pendingWriteTimeout;
-                    }
-                });
+                delete self._pendingWriteTimeout;
+                return Promise.all(promises);
             }
         });
     } else {
@@ -233,11 +219,7 @@ LocalFileSystem.prototype.close = function(){
         clearTimeout(this._pendingWriteTimeout);
         delete this._pendingWriteTimeout;
         this.flushInterval = 0;
-        return this.writePromise.then(function(){
-            if(Object.keys(self.pendingWrites).length > 0) {
-                return self._flushPendingWrites();
-            }
-        });
+        return this.writePromise;
     }
     return Promise.resolve();
 }
