@@ -142,6 +142,7 @@ function LocalFileSystem(config){
     this.storageBaseDir = getBasePath(this.config);
     if (config.hasOwnProperty('cache')?config.cache:true) {
         this.cache = MemoryStore({});
+        this.writePromise = Promise.resolve();
     }
     this.pendingWrites = {};
     this.knownCircularRefs = {};
@@ -203,8 +204,22 @@ LocalFileSystem.prototype.open = function(){
                     log.debug("Flushing localfilesystem context scope "+scope);
                     promises.push(fs.outputFile(storagePath + ".json", stringifiedContext.json, "utf8"));
                 });
-                delete self._pendingWriteTimeout;
-                return Promise.all(promises);
+                return Promise.all(promises).then(function(){
+                    if(Object.keys(self.pendingWrites).length > 0){
+                        // Rerun flushing if pendingWrites was added when the promise was running
+                        return new Promise(function(resolve, reject) {
+                            setTimeout(function() {
+                                self._flushPendingWrites.call(self).then(function(){
+                                    resolve();
+                                }).catch(function(err) {
+                                    reject(err);
+                                });
+                            }, self.flushInterval);
+                        });
+                    } else {
+                        delete self._pendingWriteTimeout;
+                    }
+                });
             }
         });
     } else {
@@ -213,10 +228,16 @@ LocalFileSystem.prototype.open = function(){
 }
 
 LocalFileSystem.prototype.close = function(){
-    if (this.cache && this._flushPendingWrites) {
+    var self = this;
+    if (this.cache && this._pendingWriteTimeout) {
         clearTimeout(this._pendingWriteTimeout);
         delete this._pendingWriteTimeout;
-        return this._flushPendingWrites();
+        this.flushInterval = 0;
+        return this.writePromise.then(function(){
+            if(Object.keys(self.pendingWrites).length > 0) {
+                return self._flushPendingWrites();
+            }
+        });
     }
     return Promise.resolve();
 }
@@ -277,8 +298,10 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             return;
         } else {
             this._pendingWriteTimeout = setTimeout(function() {
-                self._flushPendingWrites.call(self).catch(function(err) {
-                    log.error(log._("context.localfilesystem.error-write",{message:err.toString()}))
+                self.writePromise = self.writePromise.then(function(){
+                    return self._flushPendingWrites.call(self).catch(function(err) {
+                        log.error(log._("context.localfilesystem.error-write",{message:err.toString()}));
+                    });
                 });
             }, this.flushInterval);
         }
