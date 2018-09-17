@@ -40,7 +40,7 @@ function init(runtime) {
     settings = runtime.settings;
     log = runtime.log;
     if (settings.adminAuth) {
-        var mergedAdminAuth = Object.assign(settings.adminAuth, settings.adminAuth.module);
+        var mergedAdminAuth = Object.assign({}, settings.adminAuth, settings.adminAuth.module);
         Users.init(mergedAdminAuth);
         Tokens.init(mergedAdminAuth,runtime.storage);
         strategies.init(runtime);
@@ -82,7 +82,7 @@ function getToken(req,res,next) {
 function login(req,res) {
     var response = {};
     if (settings.adminAuth) {
-        var mergedAdminAuth = Object.assign(settings.adminAuth, settings.adminAuth.module);
+        var mergedAdminAuth = Object.assign({}, settings.adminAuth, settings.adminAuth.module);
         if (mergedAdminAuth.type === "credentials") {
             response = {
                 "type":"credentials",
