@@ -32,7 +32,14 @@ Memory.prototype._getOne = function(scope, key) {
     var value;
     var error;
     if(this.data[scope]){
-        value = util.getObjectProperty(this.data[scope], key);
+        try {
+            value = util.getObjectProperty(this.data[scope], key);
+        } catch(err) {
+            if (err.code === "INVALID_EXPR") {
+                throw err;
+            }
+            value = undefined;
+        }
     }
     return value;
 }

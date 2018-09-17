@@ -266,6 +266,7 @@
         "defaultLabel": "既定の名前を使用",
         "searchIcons": "アイコンを検索",
         "useDefault":  "デフォルトを使用",
+        "description": "詳細",
         "errors": {
             "scopeChange": "スコープの変更は、他のフローで使われているノードを無効にします"
         }

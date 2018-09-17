@@ -114,6 +114,21 @@ describe('context', function() {
             context2.global.get("foo").should.equal("test");
         });
 
+        it('context.flow/global are not enumerable', function() {
+            var context1 = Context.get("1","flowA");
+            Object.keys(context1).length.should.equal(0);
+            Object.keys(context1.flow).length.should.equal(0);
+            Object.keys(context1.global).length.should.equal(0);
+        })
+
+        it('context.flow/global cannot be deleted', function() {
+            var context1 = Context.get("1","flowA");
+            delete context1.flow;
+            should.exist(context1.flow);
+            delete context1.global;
+            should.exist(context1.global);
+        })
+
         it('deletes context',function() {
             var context = Context.get("1","flowA");
             should.not.exist(context.get("foo"));
@@ -192,15 +207,26 @@ describe('context', function() {
         });
 
 
-
         it('returns functionGlobalContext value if store value undefined', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
-            Context.load().then(function(){
+            return Context.load().then(function(){
                 var context = Context.get("1","flowA");
                 var v = context.global.get('foo');
                 v.should.equal('bar');
             });
         })
+
+        it('returns functionGlobalContext sub-value if store value undefined', function() {
+            Context.init({functionGlobalContext: {foo:{bar:123}}});
+            return Context.load().then(function(){
+                var context = Context.get("1","flowA");
+                var v = context.global.get('foo.bar');
+                should.equal(v,123);
+            });
+        })
+
+
+
     });
 
     describe('external context storage',function() {
@@ -474,6 +500,23 @@ describe('context', function() {
                     done();
                 }).catch(done);
             });
+            
+            it('should allow the store name to be provide in the key', function(done) {
+                Context.init({contextStorage:contextDefaultStorage});
+                Context.load().then(function(){
+                    var context =  Context.get("1","flow");
+                    var cb = function(){done("An error occurred")}
+                    context.set("#:(test)::foo","bar");
+                    context.get("#:(test)::foo");
+                    stubGet2.called.should.be.false();
+                    stubSet2.called.should.be.false();
+                    stubSet.calledWithExactly("1:flow","foo","bar",undefined).should.be.true();
+                    stubGet.calledWith("1:flow","foo").should.be.true();
+                    done();
+                }).catch(done);
+            });
+
+
             it('should use default as the alias of other context', function(done) {
                 Context.init({contextStorage:contextAlias});
                 Context.load().then(function(){
@@ -580,16 +623,16 @@ describe('context', function() {
             });
 
             it('should return multiple functionGlobalContext values if key is an array', function(done) {
-                var fGC = { "foo1": 456, "foo2": 789 };
+                var fGC = { "foo1": 456, "foo2": {"bar":789} };
                 Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
                 Context.load().then(function(){
                     var context =  Context.get("1","flow");
-                    context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
+                    context.global.get(["foo1","foo2.bar","foo3"], "memory", function(err,foo1,foo2,foo3){
                         if (err) {
                             done(err);
                         } else {
-                            foo1.should.be.equal(456);
-                            foo2.should.be.equal(789);
+                            should.equal(foo1, 456);
+                            should.equal(foo2, 789);
                             should.not.exist(foo3);
                             done();
                         }

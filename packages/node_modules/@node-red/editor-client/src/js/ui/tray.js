@@ -232,6 +232,7 @@ RED.tray = (function() {
             }
 
         },
+        resize: handleWindowResize,
         close: function close(done) {
             if (stack.length > 0) {
                 var tray = stack.pop();
