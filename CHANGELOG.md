@@ -1,3 +1,18 @@
+#### 0.19.4: Maintenance Release
+
+ - Fix race condition in non-cache lfs context Fixes #1888
+ - LocalFileSystem Context: Remove extra flush code
+ - Prevent race condition in caching mode of lfs context (#1889)
+ - Allow context store name to be provided in the key
+ - Switch node: only use promises when absolutely necessary
+ - Fix dbl-click handling on webkit-based browsers
+ - Ensure context.flow/global cannot be deleted or enumerated
+ - Handle context.get with multiple levels of unknown key Fixes #1883
+ - Fix global.get("foo.bar") for functionGlobalContext set values
+ - Fix node color bug (#1877)
+ - Merge pull request #1857 from cclauss/patch-1
+ - Define raw_input() in Python 3 & fix time.sleep()
+
 #### 0.19.3: Maintenance Release
 
  - Split node - fix complete to send msg for k/v object
