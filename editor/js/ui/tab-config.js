@@ -140,7 +140,8 @@ RED.sidebar.config = (function() {
                 var entry = $('<li class="palette_node config_node palette_node_id_'+node.id.replace(/\./g,"-")+'"></li>').appendTo(list);
                 $('<div class="palette_label"></div>').text(label).appendTo(entry);
                 if (node._def.hasUsers !== false) {
-                    var iconContainer = $('<div/>',{class:"palette_icon_container  palette_icon_container_right"}).text(node.users.length).appendTo(entry);
+                    var iconContainer = $('<div/>',{class:"palette_icon_container palette_icon_container_right"}).appendTo(entry);
+                    var butt = $('<a href="#"/>').click(function(e) { e.preventDefault(); RED.search.show(node.id); }).text(node.users.length).appendTo(iconContainer);
                     if (node.users.length === 0) {
                         entry.addClass("config_node_unused");
                     }
@@ -161,7 +162,6 @@ RED.sidebar.config = (function() {
                     });
                     RED.view.redraw();
                 });
-
                 entry.on('mouseout',function(e) {
                     RED.nodes.eachNode(function(node) {
                         if(node.highlighted) {
