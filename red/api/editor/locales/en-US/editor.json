@@ -457,6 +457,7 @@
             "flows": "flows",
             "filterUnused":"unused",
             "filterAll":"all",
+            "deleteUnused":"Delete unused",
             "filtered": "__count__ hidden"
         },
         "context": {

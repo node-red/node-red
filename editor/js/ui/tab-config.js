@@ -15,16 +15,15 @@
  **/
 RED.sidebar.config = (function() {
 
-
     var content = document.createElement("div");
     content.className = "sidebar-node-config";
 
     $('<div class="button-group sidebar-header">'+
-      '<a class="sidebar-header-button-toggle selected" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
-      '<a class="sidebar-header-button-toggle" id="workspace-config-node-filter-unused" href="#"><span data-i18n="sidebar.config.filterUnused"></span></a> '+
+      '<a style="float:left;" class="sidebar-header-button selected" id="workspace-config-node-delete-all" href="#"><span data-i18n="sidebar.config.deleteUnused"></a>'+
+      '<a class="sidebar-header-button-toggle" id="workspace-config-node-filter-all" href="#"><span data-i18n="sidebar.config.filterAll"></span></a>'+
+      '<a class="sidebar-header-button-toggle selected" id="workspace-config-node-filter-unused" href="#"><span data-i18n="sidebar.config.filterUnused"></span></a> '+
       '</div>'
     ).appendTo(content);
-
 
     var toolbar = $('<div>'+
         '<a class="sidebar-footer-button" id="workspace-config-node-collapse-all" href="#"><i class="fa fa-angle-double-up"></i></a> '+
@@ -36,7 +35,7 @@ RED.sidebar.config = (function() {
     var subflowCategories = $("<div>").appendTo(content);
 
     var showUnusedOnly = false;
-
+    var unused = [];
     var categories = {};
 
     function getOrCreateCategory(name,parent,label) {
@@ -110,12 +109,20 @@ RED.sidebar.config = (function() {
             if (A.type > B.type) { return 1;}
             return 0;
         });
+
+        unused = nodes.filter(function(n) {
+            return n._def.hasUsers!==false && n.users.length === 0;
+        })
+
+        if (unused.length > 0) {
+            $('#workspace-config-node-delete-all').addClass("selected");
+        } else {
+            $('#workspace-config-node-delete-all').removeClass("selected");
+        }
+
         if (showUnusedOnly) {
-            var hiddenCount = nodes.length;
-            nodes = nodes.filter(function(n) {
-                return n._def.hasUsers!==false && n.users.length === 0;
-            })
-            hiddenCount = hiddenCount - nodes.length;
+            var hiddenCount = nodes.length - unused.length;
+            nodes = unused;
             if (hiddenCount > 0) {
                 list.parent().find('.config-node-filter-info').text(RED._('sidebar.config.filtered',{count:hiddenCount})).show();
             } else {
@@ -152,6 +159,7 @@ RED.sidebar.config = (function() {
                 entry.on('dblclick',function(e) {
                     RED.editor.editConfig("", node.type, node.id);
                 });
+                
                 var userArray = node.users.map(function(n) { return n.id });
                 entry.on('mouseover',function(e) {
                     RED.nodes.eachNode(function(node) {
@@ -244,11 +252,46 @@ RED.sidebar.config = (function() {
                 }
             }
         });
+        $("#workspace-config-node-delete-all").on("click", function(e) {
+            e.preventDefault();
+            unused.forEach(function(node) {
+                var configTypeDef = RED.nodes.getType(node.type);
+                if (configTypeDef.oneditdelete) {
+                    configTypeDef.oneditdelete.call(node);
+                }
+                var historyEvent = {
+                    t:'delete',
+                    nodes:[node],
+                    changes: {},
+                    dirty: RED.nodes.dirty()
+                }
+                for (var i=0; i<node.users.length; i++) {
+                    var user = node.users[i];
+                    historyEvent.changes[user.id] = {
+                        changed: user.changed,
+                        valid: user.valid
+                    };
+                    for (var d in user._def.defaults) {
+                        if (user._def.defaults.hasOwnProperty(d) && user[d] == configId) {
+                            historyEvent.changes[user.id][d] = configId
+                            user[d] = "";
+                            user.changed = true;
+                            user.dirty = true;
+                        }
+                    }
+                    validateNode(user);
+                }
+                RED.nodes.remove(node.id);
+                RED.nodes.dirty(true);
+                RED.view.redraw(true);
+                RED.history.push(historyEvent);
+            });
+        });
         $('#workspace-config-node-filter-all').on("click",function(e) {
             e.preventDefault();
             if (showUnusedOnly) {
-                $(this).addClass('selected');
-                $('#workspace-config-node-filter-unused').removeClass('selected');
+                $(this).removeClass('selected');
+                $('#workspace-config-node-filter-unused').addClass('selected');
                 showUnusedOnly = !showUnusedOnly;
                 refreshConfigNodeList();
             }
@@ -256,15 +299,14 @@ RED.sidebar.config = (function() {
         $('#workspace-config-node-filter-unused').on("click",function(e) {
             e.preventDefault();
             if (!showUnusedOnly) {
-                $(this).addClass('selected');
-                $('#workspace-config-node-filter-all').removeClass('selected');
+                $(this).removeClass('selected');
+                $('#workspace-config-node-filter-all').addClass('selected');
                 showUnusedOnly = !showUnusedOnly;
                 refreshConfigNodeList();
             }
         });
-
-
     }
+
     function show(id) {
         if (typeof id === 'boolean') {
             if (id) {
@@ -306,6 +348,7 @@ RED.sidebar.config = (function() {
         }
         RED.sidebar.show("config");
     }
+
     return {
         init:init,
         show:show,
