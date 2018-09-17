@@ -140,9 +140,9 @@ function stringify(value) {
 function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getBasePath(this.config);
+    this.writePromise = Promise.resolve();
     if (config.hasOwnProperty('cache')?config.cache:true) {
         this.cache = MemoryStore({});
-        this.writePromise = Promise.resolve();
     }
     this.pendingWrites = {};
     this.knownCircularRefs = {};
@@ -219,9 +219,8 @@ LocalFileSystem.prototype.close = function(){
         clearTimeout(this._pendingWriteTimeout);
         delete this._pendingWriteTimeout;
         this.flushInterval = 0;
-        return this.writePromise;
     }
-    return Promise.resolve();
+    return this.writePromise;
 }
 
 LocalFileSystem.prototype.get = function(scope, key, callback) {
@@ -290,7 +289,7 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
     } else if (callback && typeof callback !== 'function') {
         throw new Error("Callback must be a function");
     } else {
-        loadFile(storagePath + ".json").then(function(data){
+        self.writePromise = self.writePromise.then(function() { return loadFile(storagePath + ".json") }).then(function(data){
             var obj = data ? JSON.parse(data) : {}
             if (!Array.isArray(key)) {
                 key = [key];
