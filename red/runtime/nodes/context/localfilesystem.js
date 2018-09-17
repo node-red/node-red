@@ -140,6 +140,7 @@ function stringify(value) {
 function LocalFileSystem(config){
     this.config = config;
     this.storageBaseDir = getBasePath(this.config);
+    this.writePromise = Promise.resolve();
     if (config.hasOwnProperty('cache')?config.cache:true) {
         this.cache = MemoryStore({});
     }
@@ -213,12 +214,13 @@ LocalFileSystem.prototype.open = function(){
 }
 
 LocalFileSystem.prototype.close = function(){
-    if (this.cache && this._flushPendingWrites) {
+    var self = this;
+    if (this.cache && this._pendingWriteTimeout) {
         clearTimeout(this._pendingWriteTimeout);
         delete this._pendingWriteTimeout;
-        return this._flushPendingWrites();
+        this.flushInterval = 0;
     }
-    return Promise.resolve();
+    return this.writePromise;
 }
 
 LocalFileSystem.prototype.get = function(scope, key, callback) {
@@ -230,14 +232,31 @@ LocalFileSystem.prototype.get = function(scope, key, callback) {
     }
     var storagePath = getStoragePath(this.storageBaseDir ,scope);
     loadFile(storagePath + ".json").then(function(data){
+        var value;
         if(data){
             data = JSON.parse(data);
             if (!Array.isArray(key)) {
-                callback(null, util.getObjectProperty(data,key));
+                try {
+                    value = util.getObjectProperty(data,key);
+                } catch(err) {
+                    if (err.code === "INVALID_EXPR") {
+                        throw err;
+                    }
+                    value = undefined;
+                }
+                callback(null, value);
             } else {
                 var results = [undefined];
                 for (var i=0;i<key.length;i++) {
-                    results.push(util.getObjectProperty(data,key[i]))
+                    try {
+                        value = util.getObjectProperty(data,key[i]);
+                    } catch(err) {
+                        if (err.code === "INVALID_EXPR") {
+                            throw err;
+                        }
+                        value = undefined;
+                    }
+                    results.push(value)
                 }
                 callback.apply(null,results);
             }
@@ -260,15 +279,17 @@ LocalFileSystem.prototype.set = function(scope, key, value, callback) {
             return;
         } else {
             this._pendingWriteTimeout = setTimeout(function() {
-                self._flushPendingWrites.call(self).catch(function(err) {
-                    log.error(log._("context.localfilesystem.error-write",{message:err.toString()}))
+                self.writePromise = self.writePromise.then(function(){
+                    return self._flushPendingWrites.call(self).catch(function(err) {
+                        log.error(log._("context.localfilesystem.error-write",{message:err.toString()}));
+                    });
                 });
             }, this.flushInterval);
         }
     } else if (callback && typeof callback !== 'function') {
         throw new Error("Callback must be a function");
     } else {
-        loadFile(storagePath + ".json").then(function(data){
+        self.writePromise = self.writePromise.then(function() { return loadFile(storagePath + ".json") }).then(function(data){
             var obj = data ? JSON.parse(data) : {}
             if (!Array.isArray(key)) {
                 key = [key];

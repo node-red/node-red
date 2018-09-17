@@ -826,7 +826,11 @@ RED.utils = (function() {
             }
             result = nodeColorCache[type];
         }
-        return result;
+        if (result) {
+            return result;
+        } else {
+            return "#ddd";
+        }
     }
 
     function addSpinnerOverlay(container,contain) {
