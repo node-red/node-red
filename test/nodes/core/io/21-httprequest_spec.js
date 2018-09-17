@@ -46,6 +46,9 @@ describe('HTTP Request Node', function() {
     var preEnvNoProxyLowerCase;
     var preEnvNoProxyUpperCase;
 
+    //rediect cookie variables
+    var receivedCookies = {};
+
     function startServer(done) {
         testPort += 1;
         testServer = stoppable(http.createServer(testApp));
@@ -96,6 +99,10 @@ describe('HTTP Request Node', function() {
 
     function getSslTestURL(url) {
         return "https://localhost:"+testSslPort+url;
+    }
+
+    function getDifferentTestURL(url) {
+        return "http://127.0.0.1:"+testPort+url;
     }
 
     function getSslTestURLWithoutProtocol(url) {
@@ -180,6 +187,24 @@ describe('HTTP Request Node', function() {
             res.json(result);
         });
         testApp.options('/*', function(req,res) {
+            res.status(200).end();
+        });
+        testApp.get('/redirectToSameDomain', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectToSameDomainCookie','same1');
+            res.redirect(getTestURL('/redirectReturn'));
+        });
+        testApp.get('/redirectToDifferentDomain', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectToDifferentDomain','different1');
+            res.redirect(getDifferentTestURL('/redirectReturn'));
+        });
+        testApp.get('/redirectReturn', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectReturn','return1');
             res.status(200).end();
         });
         startServer(function(err) {
@@ -1237,6 +1262,164 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:"foo"});
+            });
+        });
+    });
+
+    describe('redirect-cookie', function() {
+        it('should send cookies to the same domain when redirected(no cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if (cookies1 && Object.keys(cookies1).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 1) ||
+                        cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                       return;
+                    }
+                    done();
+                });
+                n1.receive({});
+            });
+        });
+        it('should not send cookies to the different domain when redirected(no cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if (cookies1 && Object.keys(cookies1).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({});
+            });
+        });
+        it('should send cookies to the same domain when redirected(msg.cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 2) ||
+                         cookies1['requestCookie'] !== 'request1' ||
+                         cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    cookies: { requestCookie: 'request1' }
+                });
+            });
+        });
+        it('should not send cookies to the different domain when redirected(msg.cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToDifferentDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    cookies: { requestCookie: 'request1' }
+                });
+            });
+        });
+        it('should send cookies to the same domain when redirected(msg.headers.cookie)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 2) ||
+                        cookies1['requestCookie'] !== 'request1' ||
+                        cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    headers: { cookie: 'requestCookie=request1' }
+                });
+            });
+        });
+        it('should not send cookies to the different domain when redirected(msg.headers.cookie)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToDifferentDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    headers: { cookie: 'requestCookie=request1' }
+                });
             });
         });
     });

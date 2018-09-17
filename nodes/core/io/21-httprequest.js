@@ -83,6 +83,7 @@ module.exports = function(RED) {
             opts.headers = {};
             opts.encoding = null;  // Force NodeJs to return a Buffer (instead of a string)
             opts.maxRedirects = 21;
+            opts.jar = request.jar();
             var ctSet = "Content-Type"; // set default camel case
             var clSet = "Content-Length";
             if (msg.headers) {
@@ -112,27 +113,41 @@ module.exports = function(RED) {
             }
             if (msg.hasOwnProperty('followRedirects')) {
                 opts.followRedirect = msg.followRedirects;
+            }
+            if (!opts.hasOwnProperty('followRedirect') || opts.followRedirect) {
+                opts.followRedirect = function(res) {
+                    if (this.headers.cookie) {
+                        delete this.headers.cookie;
+                    }
+                    return true;
+                };
+            }
+            if (opts.headers.hasOwnProperty('cookie')) {
+                var cookies = cookie.parse(opts.headers.cookie);
+                for (var name in cookies) {
+                    if (cookies.hasOwnProperty(name)) {
+                        if (cookies[name] === null) {
+                            // This case clears a cookie for HTTP In/Response nodes.
+                            // Ignore for this node.
+                        } else {
+                            opts.jar.setCookie(name + '=' + cookies[name], url);
+                        }
+                    }
                 }
+                delete opts.headers.cookie;
+            }
             if (msg.cookies) {
-                var cookies = [];
-                if (opts.headers.hasOwnProperty('cookie')) {
-                    cookies.push(opts.headers.cookie);
-                }
-
                 for (var name in msg.cookies) {
                     if (msg.cookies.hasOwnProperty(name)) {
                         if (msg.cookies[name] === null || msg.cookies[name].value === null) {
                             // This case clears a cookie for HTTP In/Response nodes.
                             // Ignore for this node.
                         } else if (typeof msg.cookies[name] === 'object') {
-                            cookies.push(cookie.serialize(name,msg.cookies[name].value));
+                            opts.jar.setCookie(name + '=' + msg.cookies[name].value, url);
                         } else {
-                            cookies.push(cookie.serialize(name,msg.cookies[name]));
+                            opts.jar.setCookie(name + '=' + msg.cookies[name], url);
                         }
                     }
-                }
-                if (cookies.length > 0) {
-                    opts.headers.cookie = cookies.join("; ");
                 }
             }
             if (this.credentials && this.credentials.user) {
