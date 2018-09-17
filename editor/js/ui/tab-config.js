@@ -158,6 +158,7 @@ RED.sidebar.config = (function() {
                 entry.on('dblclick',function(e) {
                     RED.editor.editConfig("", node.type, node.id);
                 });
+                
                 var userArray = node.users.map(function(n) { return n.id });
                 entry.on('mouseover',function(e) {
                     RED.nodes.eachNode(function(node) {
@@ -168,7 +169,6 @@ RED.sidebar.config = (function() {
                     });
                     RED.view.redraw();
                 });
-
                 entry.on('mouseout',function(e) {
                     RED.nodes.eachNode(function(node) {
                         if(node.highlighted) {
