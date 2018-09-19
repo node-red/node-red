@@ -102,9 +102,10 @@ module.exports = {
                 var fullPath = redNodes.getNodeExampleFlowPath(module,path);
                 if (fullPath) {
                     try {
-                        fs.statSync(fullPath);
+                        var resolvedPath = fspath.resolve(fullPath);
+                        fs.statSync(resolvedPath);
                         log.audit({event: "library.get",type:"flow",path:req.params[0]},req);
-                        return res.sendFile(fullPath,{
+                        return res.sendFile(resolvedPath,{
                             headers:{
                                 'Content-Type': 'application/json'
                             }
