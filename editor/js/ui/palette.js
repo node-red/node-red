@@ -34,7 +34,7 @@ RED.palette = (function() {
     function createCategoryContainer(originalCategory,category, labelId) {
         var label = RED._(labelId, {defaultValue:category});
         label = (label || category).replace(/_/g, " ");
-        var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide">'+
+        var catDiv = $('<div id="palette-container-'+category+'" class="palette-category palette-close hide palette-open">'+
             '<div id="palette-header-'+category+'" class="palette-header"><i class="expanded fa fa-angle-down"></i><span>'+label+'</span></div>'+
             '<div class="palette-content" id="palette-base-category-'+category+'">'+
             '<div id="palette-'+category+'-input"></div>'+
