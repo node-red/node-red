@@ -28,8 +28,9 @@ RED.sidebar.info = (function() {
 
     var content;
     var sections;
-    var nodeSection;
+    var propertiesSection;
     var infoSection;
+    var helpSection;
     var tipBox;
 
     var expandedSections = {
@@ -49,18 +50,25 @@ RED.sidebar.info = (function() {
             container: stackContainer
         }).hide();
 
-        nodeSection = sections.add({
+        propertiesSection = sections.add({
             title: RED._("sidebar.info.info"),
             collapsible: true
         });
-        nodeSection.expand();
+        propertiesSection.expand();
+
         infoSection = sections.add({
-            title: RED._("sidebar.info.nodeHelp"),
+            title: RED._("sidebar.info.desc"),
             collapsible: true
         });
         infoSection.expand();
         infoSection.content.css("padding","6px");
-        infoSection.container.css("border-bottom","none");
+
+        helpSection = sections.add({
+            title: RED._("sidebar.info.nodeHelp"),
+            collapsible: true
+        });
+        helpSection.expand();
+        helpSection.content.css("padding","6px");
 
         var tipContainer = $('<div class="node-info-tips"></div>').appendTo(content);
         tipBox = $('<div class="node-info-tip"></div>').appendTo(tipContainer);
@@ -116,12 +124,13 @@ RED.sidebar.info = (function() {
             return;
         }
         sections.show();
-        $(nodeSection.content).empty();
+        $(propertiesSection.content).empty();
         $(infoSection.content).empty();
+        $(helpSection.content).empty();
 
         var propRow;
 
-        var table = $('<table class="node-info"></table>').appendTo(nodeSection.content);
+        var table = $('<table class="node-info"></table>').appendTo(propertiesSection.content);
         var tableBody = $('<tbody>').appendTo(table);
         var subflowNode;
         var subflowUserCount;
@@ -138,14 +147,23 @@ RED.sidebar.info = (function() {
                     RED.projects.editProject();
                 });
         }
+        propertiesSection.container.show();
         infoSection.container.show();
+        helpSection.container.show();
         if (node === null) {
             return;
         } else if (Array.isArray(node)) {
+            // Multiple things selected
+            // - hide help and info sections
+            helpSection.container.hide();
             infoSection.container.hide();
+            // - show the count of selected nodes
             propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.selection")+"</td><td></td></tr>").appendTo(tableBody);
             $(propRow.children()[1]).text(RED._("sidebar.info.nodes",{count:node.length}))
         } else {
+            // A single 'thing' selected.
+
+            // Check to see if this is a subflow or subflow instance
             var m = /^subflow(:(.+))?$/.exec(node.type);
             if (m) {
                 if (m[2]) {
@@ -163,6 +181,7 @@ RED.sidebar.info = (function() {
                 });
             }
             if (node.type === "tab" || node.type === "subflow") {
+                // If nothing is selected, but we're on a flow or subflow tab.
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info."+(node.type==='tab'?'flow':'subflow'))+'</td><td></td></tr>').appendTo(tableBody);
                 RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.tabName")+"</td><td></td></tr>").appendTo(tableBody);
@@ -170,16 +189,11 @@ RED.sidebar.info = (function() {
                 if (node.type === "tab") {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.status")+'</td><td></td></tr>').appendTo(tableBody);
                     $(propRow.children()[1]).text((!!!node.disabled)?RED._("sidebar.info.enabled"):RED._("sidebar.info.disabled"))
-                } else if (node.type === "subflow") {
-                    propRow = $('<tr class="node-info-node-row"><td>'+RED._("subflow.category")+'</td><td></td></tr>').appendTo(tableBody);
-                    var category = node.category||"subflows";
-                    $(propRow.children()[1]).text(RED._("palette.label."+category,{defaultValue:category}))
                 }
             } else {
+                // An actual node is selected in the editor - build up its properties table
                 propRow = $('<tr class="node-info-node-row"><td>'+RED._("sidebar.info.node")+"</td><td></td></tr>").appendTo(tableBody);
                 RED.utils.createObjectElement(node.id).appendTo(propRow.children()[1]);
-
-
                 if (node.type !== "subflow" && node.type !== "unknown" && node.name) {
                     propRow = $('<tr class="node-info-node-row"><td>'+RED._("common.label.name")+'</td><td></td></tr>').appendTo(tableBody);
                     $('<span class="bidiAware" dir="'+RED.text.bidi.resolveBaseTextDir(node.name)+'"></span>').text(node.name).appendTo(propRow.children()[1]);
@@ -191,7 +205,7 @@ RED.sidebar.info = (function() {
                         $('<span style="float: right; font-size: 0.8em"><i class="fa fa-warning"></i></span>').prependTo($(propRow.children()[1]))
                     }
                 }
-                if (!m && node.type != "subflow" && node.type != "comment") {
+                if (!m && node.type != "subflow") {
                     var defaults;
                     if (node.type === 'unknown') {
                         defaults = {};
@@ -206,7 +220,7 @@ RED.sidebar.info = (function() {
                     if (defaults) {
                         var count = 0;
                         for (var n in defaults) {
-                            if (n != "name" && defaults.hasOwnProperty(n)) {
+                            if (n != "name" && n != "info" && defaults.hasOwnProperty(n)) {
                                 var val = node[n];
                                 var type = typeof val;
                                 count++;
@@ -257,33 +271,33 @@ RED.sidebar.info = (function() {
                 $('<tr class="node-info-subflow-row"><td>'+RED._("sidebar.info.instances")+"</td><td>"+subflowUserCount+'</td></tr>').appendTo(tableBody);
             }
 
-            var infoText = "";
-            if (!subflowNode && node.type !== "comment" && node.type !== "tab") {
-                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
-                var helpText = $("script[data-help-name='"+node.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
-                infoText = helpText;
-            } else if (node.type === "tab") {
-                infoSection.title.text(RED._("sidebar.info.flowDesc"));
-                infoText = marked(node.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
+            var helpText = "";
+            if (node.type === "tab" || node.type === "subflow") {
+                $(helpSection.container).hide();
+            } else {
+                $(helpSection.container).show();
+                if (subflowNode && node.type !== "subflow") {
+                    // Selected a subflow instance node.
+                    // - The subflow template info goes into help
+                    helpText = (marked(subflowNode.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>'));
+                } else {
+                    helpText = $("script[data-help-name='"+node.type+"']").html()||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>');
+                }
+                setInfoText(helpText, helpSection.content);
             }
 
-            if (subflowNode) {
-                infoText = infoText + (marked(subflowNode.info||"")||('<span class="node-info-none">'+RED._("sidebar.info.none")+'</span>'));
-                infoSection.title.text(RED._("sidebar.info.subflowDesc"));
-            } else if (node._def && node._def.info) {
-                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
+            var infoText = "";
+
+            if (node._def && node._def.info) {
                 var info = node._def.info;
                 var textInfo = (typeof info === "function" ? info.call(node) : info);
-                // TODO: help
                 infoText = infoText + marked(textInfo);
             }
             if (node.info) {
-                infoSection.title.text(RED._("sidebar.info.nodeHelp"));
-                infoText = marked(node.info || "") || ('<span class="node-info-none">' + RED._("sidebar.info.none") + '</span>');
+                infoText = infoText + marked(node.info || "")
             }
-            if (infoText) {
-                setInfoText(infoText);
-            }
+            setInfoText(infoText, infoSection.content);
+
             $(".sidebar-node-info-stack").scrollTop(0);
             $(".node-info-property-header").click(function(e) {
                 e.preventDefault();
@@ -293,8 +307,8 @@ RED.sidebar.info = (function() {
             });
         }
     }
-    function setInfoText(infoText) {
-        var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(infoSection.content);
+    function setInfoText(infoText,target) {
+        var info = addTargetToExternalLinks($('<div class="node-help"><span class="bidiAware" dir=\"'+RED.text.bidi.resolveBaseTextDir(infoText)+'">'+infoText+'</span></div>')).appendTo(target);
         info.find(".bidiAware").contents().filter(function() { return this.nodeType === 3 && this.textContent.trim() !== "" }).wrap( "<span></span>" );
         var foldingHeader = "H3";
         info.find(foldingHeader).wrapInner('<a class="node-info-header expanded" href="#"></a>')
@@ -399,9 +413,11 @@ RED.sidebar.info = (function() {
         // tips.stop();
         // sections.show();
         refresh(null);
-        nodeSection.container.hide();
-        infoSection.title.text(title||RED._("sidebar.info.info"));
-        setInfoText(html);
+        propertiesSection.container.hide();
+        helpSection.container.hide();
+        infoSection.container.show();
+        //helpSection.title.text(title||RED._("sidebar.info.info"));
+        setInfoText(html,infoSection.content);
         $(".sidebar-node-info-stack").scrollTop(0);
     }
 
