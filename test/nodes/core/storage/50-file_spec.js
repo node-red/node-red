@@ -540,6 +540,49 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should write to multiple files', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":true, "createDir":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            var tmp_path = path.join(resourcesDir, "tmp");
+            var len = 1024*1024*10;
+            var file_count = 5;
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                var count = 0;
+                n2.on("input", function(msg) {
+		    try {
+                        count++;
+                        if (count == file_count) {
+                            for(var i = 0; i < file_count; i++) {
+                                var name = path.join(tmp_path, String(i));
+			        var f = fs.readFileSync(name);
+			        f.should.have.length(len);
+                                f[0].should.have.equal(i);
+                            }
+                            fs.removeSync(tmp_path);
+			    done();
+                        }
+		    }
+		    catch (e) {
+                        try {
+                            fs.removeSync(tmp_path);
+                        }
+                        catch (e1) {
+                        }
+			done(e);
+		    }
+                });
+                for(var i = 0; i < file_count; i++) {
+                    var data = new Buffer(len);
+                    data.fill(i);
+                    var name = path.join(tmp_path, String(i));
+                    var msg = {payload:data, filename:name};
+                    n1.receive(msg);
+                }
+            });
+        });
+
     });
 
 

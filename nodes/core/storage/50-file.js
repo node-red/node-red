@@ -29,8 +29,9 @@ module.exports = function(RED) {
         var node = this;
         node.wstream = null;
         node.data = [];
+        node.msgQueue = [];
 
-        this.on("input",function(msg) {
+        function processMsg(msg, done) {
             var filename = node.filename || msg.filename || "";
             if ((!node.filename) && (!node.tout)) {
                 node.tout = setTimeout(function() {
@@ -41,6 +42,7 @@ module.exports = function(RED) {
             }
             if (filename === "") {
                 node.warn(RED._("file.errors.nofilename"));
+                done();
             } else if (node.overwriteFile === "delete") {
                 fs.unlink(filename, function (err) {
                     if (err) {
@@ -51,6 +53,7 @@ module.exports = function(RED) {
                         }
                         node.send(msg);
                     }
+                    done();
                 });
             } else if (msg.hasOwnProperty("payload") && (typeof msg.payload !== "undefined")) {
                 var dir = path.dirname(filename);
@@ -59,6 +62,7 @@ module.exports = function(RED) {
                         fs.ensureDirSync(dir);
                     } catch(err) {
                         node.error(RED._("file.errors.createfail",{error:err.toString()}),msg);
+                        done();
                         return;
                     }
                 }
@@ -82,6 +86,7 @@ module.exports = function(RED) {
                             node.wstream.on("open", function() {
                                 node.wstream.end(packet.data, function() {
                                     node.send(packet.msg);
+                                    done();
                                 });
                             })
                         })(node.data.shift());
@@ -130,6 +135,7 @@ module.exports = function(RED) {
                             var packet = node.data.shift()
                             node.wstream.write(packet.data, function() {
                                 node.send(packet.msg);
+                                done();
                             });
 
                         } else {
@@ -137,14 +143,34 @@ module.exports = function(RED) {
                             var packet = node.data.shift()
                             node.wstream.end(packet.data, function() {
                                 node.send(packet.msg);
+                                delete node.wstream;
+                                delete node.wstreamIno;
+                                done();
                             });
-                            delete node.wstream;
-                            delete node.wstreamIno;
                         }
                     }
                 }
             }
+        }
+
+        this.on("input", function(msg) {
+            var msgQueue = node.msgQueue;
+            function processQ() {
+                var msg = msgQueue[0];
+                processMsg(msg, function() {
+                    msgQueue.shift();
+                    if (msgQueue.length > 0) {
+                        processQ();
+                    }
+                });
+            }
+            if (msgQueue.push(msg) > 1) {
+                // pending write exists
+                return;
+            }
+            processQ();
         });
+
         this.on('close', function() {
             if (node.wstream) { node.wstream.end(); }
             if (node.tout) { clearTimeout(node.tout); }
