@@ -19,7 +19,7 @@ var path = require('path');
 var os = require('os');
 var fs = require('fs-extra');
 var sinon = require('sinon');
-var tailNode = require("../../../../nodes/core/storage/28-tail.js");
+var tailNode = require("nr-test-utils").require("@node-red/nodes/core/storage/28-tail.js");
 var helper = require("node-red-node-test-helper");
 
 describe('tail Node', function() {

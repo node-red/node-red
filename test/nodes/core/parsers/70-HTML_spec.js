@@ -18,7 +18,7 @@ var should = require("should");
 var path = require("path");
 var fs = require('fs-extra');
 
-var htmlNode = require("../../../../nodes/core/parsers/70-HTML.js");
+var htmlNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-HTML.js");
 var helper = require("node-red-node-test-helper");
 
 describe('html node', function() {

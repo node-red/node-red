@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var csvNode = require("../../../../nodes/core/parsers/70-CSV.js");
+var csvNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-CSV.js");
 var helper = require("node-red-node-test-helper");
 
 describe('CSV node', function() {

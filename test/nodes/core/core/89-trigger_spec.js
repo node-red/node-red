@@ -17,9 +17,9 @@
 var should = require("should");
 var sinon = require("sinon");
 var helper = require("node-red-node-test-helper");
-var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
-var Context = require("../../../../red/runtime/nodes/context");
-var RED = require("../../../../red/red.js");
+var triggerNode = require("nr-test-utils").require("@node-red/nodes/core/core/89-trigger.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 
 describe('trigger node', function() {
 
@@ -157,7 +157,7 @@ describe('trigger node', function() {
             });
         });
     }
-    
+
     basicTest("num", 10);
     basicTest("str", "10");
     basicTest("bool", true);
@@ -166,7 +166,7 @@ describe('trigger node', function() {
     var val_buf = "[1,2,3,4,5]";
     basicTest("bin", val_buf, Buffer.from(JSON.parse(val_buf)));
     basicTest("env", "NR-TEST", "env-val");
-    
+
     it('should output 1 then 0 when triggered (default)', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:"20", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];

@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var sentimentNode = require("../../../../nodes/core/analysis/72-sentiment.js");
+var sentimentNode = require("nr-test-utils").require("@node-red/nodes/core/analysis/72-sentiment.js");
 var helper = require("node-red-node-test-helper");
 
 describe('sentiment Node', function() {

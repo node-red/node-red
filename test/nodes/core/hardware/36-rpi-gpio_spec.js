@@ -15,8 +15,8 @@
  **/
 
 var should = require("should");
-var rpiNode    = require("../../../../nodes/core/hardware/36-rpi-gpio.js");
-var statusNode = require("../../../../nodes/core/core/25-status.js");
+var rpiNode = require("nr-test-utils").require("@node-red/nodes/core/hardware/36-rpi-gpio.js");
+var statusNode = require("nr-test-utils").require("@node-red/nodes/core/core/25-status.js");
 var helper = require("node-red-node-test-helper");
 var fs = require("fs");
 
