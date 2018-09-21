@@ -354,7 +354,6 @@ RED.nodes = (function() {
         subflows[sf.id] = sf;
         RED.nodes.registerType("subflow:"+sf.id, {
             defaults:{name:{value:""}},
-            info: sf.info,
             icon: function() { return sf.icon||"subflow.png" },
             category: sf.category || "subflows",
             inputs: sf.in.length,
