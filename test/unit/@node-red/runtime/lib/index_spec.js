@@ -78,7 +78,7 @@ describe("runtime", function() {
         it("returns version", function() {
             runtime.init({testSettings: true, httpAdminRoot:"/"},mockUtil());
             return runtime.version().then(version => {
-                /^\d+\.\d+\.\d+(-git)?$/.test(version).should.be.true();
+                /^\d+\.\d+\.\d+(-.*)?$/.test(version).should.be.true();
             });
 
 
