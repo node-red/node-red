@@ -153,22 +153,23 @@ module.exports = function(RED) {
             }
         }
 
+        function processQ(queue) {
+            var msg = queue[0];
+            processMsg(msg, function() {
+                queue.shift();
+                if (queue.length > 0) {
+                    processQ(queue);
+                }
+            });
+        }
+
         this.on("input", function(msg) {
             var msgQueue = node.msgQueue;
-            function processQ() {
-                var msg = msgQueue[0];
-                processMsg(msg, function() {
-                    msgQueue.shift();
-                    if (msgQueue.length > 0) {
-                        processQ();
-                    }
-                });
-            }
             if (msgQueue.push(msg) > 1) {
                 // pending write exists
                 return;
             }
-            processQ();
+            processQ(msgQueue);
         });
 
         this.on('close', function() {
