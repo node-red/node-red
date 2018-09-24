@@ -320,9 +320,9 @@ RED.palette = (function() {
             }
             setLabel(nt,$(d),label,nodeInfo);
 
-            var categoryNode = $("#palette-container-"+category);
+            var categoryNode = $("#palette-container-"+rootCategory);
             if (categoryNode.find(".palette_node").length === 1) {
-                categoryContainers[category].open();
+                categoryContainers[rootCategory].open();
             }
 
         }
@@ -459,7 +459,6 @@ RED.palette = (function() {
             }
         });
         RED.events.on('registry:node-set-disabled', function(nodeSet) {
-            console.log(nodeSet);
             for (var j=0;j<nodeSet.types.length;j++) {
                 hideNodeType(nodeSet.types[j]);
                 var def = RED.nodes.getType(nodeSet.types[j]);
