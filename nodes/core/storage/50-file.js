@@ -30,6 +30,7 @@ module.exports = function(RED) {
         node.wstream = null;
         node.data = [];
         node.msgQueue = [];
+        node.closing = false;
 
         function processMsg(msg, done) {
             var filename = node.filename || msg.filename || "";
@@ -170,12 +171,31 @@ module.exports = function(RED) {
                 return;
             }
             processQ(msgQueue);
+            if (node.closing) {
+                closeNode();
+            }
         });
 
-        this.on('close', function() {
+        function closeNode() {
             if (node.wstream) { node.wstream.end(); }
             if (node.tout) { clearTimeout(node.tout); }
             node.status({});
+            node.closing = false;
+        }
+
+        this.on('close', function() {
+            if (node.closing) {
+                // already closing
+                return;
+            }
+            node.closing = true;
+            if (node.msgQueue.length > 0) {
+                // close after queue processed
+                return;
+            }
+            else {
+                closeNode();
+            }
         });
     }
     RED.nodes.registerType("file",FileNode);
