@@ -19,6 +19,7 @@ var request = require('supertest');
 var express = require('express');
 var sinon = require('sinon');
 var when = require('when');
+var bodyParser = require('body-parser');
 
 var app = express();
 var info = require("../../../../red/api/editor/settings");
@@ -29,6 +30,7 @@ describe("api/editor/settings", function() {
         before(function() {
             sinon.stub(theme,"settings",function() { return { test: 456 };});
             app = express();
+            app.use(bodyParser.json());
             app.get("/settings",info.runtimeSettings);
             app.get("/settingsWithUser",function(req,res,next) {
                 req.user = {
@@ -40,12 +42,13 @@ describe("api/editor/settings", function() {
                 }
                 next();
             },info.runtimeSettings);
+            app.get("/settings/user", info.userSettings);
+            app.post("/settings/user", info.updateUserSettings);
         });
 
         after(function() {
             theme.settings.restore();
         });
-
         it('returns the filtered settings', function(done) {
             info.init({
                 settings: {
@@ -117,6 +120,83 @@ describe("api/editor/settings", function() {
                     res.body.user.should.have.property("anonymous",false);
                     res.body.user.should.not.have.property("private");
 
+                    done();
+                });
+        });
+        it('returns user settings', function (done) {
+            info.init({
+                settings: {
+                    getUserSettings: function () {
+                        return {
+                            "editor": {
+                                "view": {
+                                    "view-grid-size": "20",
+                                    "view-node-status": true,
+                                    "view-show-tips": true,
+                                    "view-snap-grid": true,
+                                    "view-show-grid": true
+                                }
+                            }
+                        };
+                    }
+                }
+            });
+            request(app)
+                .get("/settings/user")
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property("editor");
+                    res.body.editor.should.have.property("view");
+                    res.body.editor.view.should.have.property("view-grid-size", "20");
+                    res.body.editor.view.should.have.property("view-node-status", true);
+                    res.body.editor.view.should.have.property("view-show-tips", true);
+                    res.body.editor.view.should.have.property("view-snap-grid", true);
+                    res.body.editor.view.should.have.property("view-show-grid", true);
+                    done();
+                });
+        });
+        it('sets user settings', function (done) {
+            info.init({
+                settings: {
+                    getUserSettings: function () {
+                        return {};
+                    },
+                    setUserSettings: function (username, currentSettings) {
+                        currentSettings.should.have.property("editor");
+                        currentSettings.editor.should.have.property("view");
+                        currentSettings.editor.view.should.have.property("view-grid-size", "21");
+                        currentSettings.editor.view.should.have.property("view-node-status", false);
+                        currentSettings.editor.view.should.have.property("view-show-tips", false);
+                        currentSettings.editor.view.should.have.property("view-snap-grid", false);
+                        currentSettings.editor.view.should.have.property("view-show-grid", false);
+                        return when.resolve();
+                    }
+                },
+                log: {
+                    audit: function () {}
+                }
+            });
+            request(app)
+                .post("/settings/user")
+                .send({
+                    "editor": {
+                        "view": {
+                            "view-grid-size": "21",
+                            "view-node-status": false,
+                            "view-show-tips": false,
+                            "view-snap-grid": false,
+                            "view-show-grid": false
+                        }
+                    }
+                })
+                .expect(204)
+                .end(function (err, res) {
+                    res.should.have.property("status");
+                    res.status.should.equal(204);
+                    res.should.have.property("text", "");
                     done();
                 });
         });
@@ -277,7 +357,7 @@ describe("api/editor/settings", function() {
                     res.body.editorTheme.should.have.property("palette",{editable:false});
                     done();
                 });
-        })
+        });
     });
 
 });
