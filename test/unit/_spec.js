@@ -41,7 +41,7 @@ var walkDirectory = function(dir) {
         list.forEach(function(file) {
             var filePath = path.join(dir,file);
 
-            if (!/@node-red\/(editor-client|nodes)/.test(filePath)) {
+            if (!/@node-red\/(editor-client|nodes)/.test(filePath) && !/node-red\/settings\.js/.test(filePath) && !/\/docs\//.test(filePath)) {
                 promises.push(fs.stat(filePath).then(function(stat){
                     if (stat.isDirectory()) {
                         return walkDirectory(filePath).then(function(results) {
