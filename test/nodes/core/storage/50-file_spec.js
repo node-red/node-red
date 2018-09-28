@@ -140,7 +140,7 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("helperNode1");
                 var data = ["one", "two", "three", "four"];
                 var count = 0;
-                
+
                 n2.on("input", function (msg) {
 		    try {
 			msg.should.have.property("payload");
@@ -174,7 +174,7 @@ describe('file Nodes', function() {
 			done(e);
 		    }
                 });
-                
+
                 // Send two messages to the file
                 n1.receive({payload:"one"});
                 n1.receive({payload:"two"});
@@ -193,7 +193,7 @@ describe('file Nodes', function() {
                 var n2 = helper.getNode("helperNode1");
                 var data = ["one", "two", "three", "four"];
                 var count = 0;
-                
+
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property("payload");
@@ -254,7 +254,7 @@ describe('file Nodes', function() {
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
                 var n2 = helper.getNode("helperNode1");
-                
+
                 n2.on("input", function (msg) {
 		    try {
 			msg.should.have.property("payload", "fine");
@@ -286,7 +286,7 @@ describe('file Nodes', function() {
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
                 var n2 = helper.getNode("helperNode1");
-                
+
                 n2.on("input", function (msg) {
                     try {
                         var f = fs.readFileSync(fileToTest).toString();
@@ -547,6 +547,7 @@ describe('file Nodes', function() {
 
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
         var fileToTest = path.join(resourcesDir,"50-file-test-file.txt");
+        var fileToTest2 = "\t"+path.join(resourcesDir,"50-file-test-file.txt")+"\r\n";
         var wait = 150;
 
         beforeEach(function(done) {
@@ -589,6 +590,27 @@ describe('file Nodes', function() {
 
         it('should read in a file and output a utf8 string', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"utf8", wires:[["n2"]]},
+                {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.have.length(40)
+                        msg.payload.should.equal("File message line 1\nFile message line 2\n");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:""});
+            });
+        });
+
+        it('should read in a file ending in cr and output a utf8 string', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest2, "format":"utf8", wires:[["n2"]]},
                 {id:"n2", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
