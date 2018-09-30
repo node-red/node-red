@@ -31,6 +31,7 @@ module.exports = function(RED) {
         node.data = [];
         node.msgQueue = [];
         node.closing = false;
+        node.closeCallbacks = [];
 
         function processMsg(msg, done) {
             var filename = node.filename || msg.filename || "";
@@ -180,10 +181,19 @@ module.exports = function(RED) {
             if (node.wstream) { node.wstream.end(); }
             if (node.tout) { clearTimeout(node.tout); }
             node.status({});
+            var callbacks = node.closeCallbacks;
+            node.closeCallbacks = [];
             node.closing = false;
+            for (cb in callbacks) {
+                cb();
+            }
         }
 
-        this.on('close', function() {
+        this.on('close', function(arg1, arg2) {
+            var cb  = arg2 ? arg2 : arg1;
+            if (cb) {
+                node.closeCallbacks.push(done);
+            }
             if (node.closing) {
                 // already closing
                 return;
