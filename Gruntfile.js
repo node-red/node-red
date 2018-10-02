@@ -369,6 +369,12 @@ module.exports = function(grunt) {
                     {
                         src: 'CHANGELOG.md',
                         dest: 'packages/node_modules/@node-red/editor-client/public/red/about'
+                    },
+                    {
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/ace/bin/',
+                        src: '**',
+                        expand: true,
+                        dest: 'packages/node_modules/@node-red/editor-client/public/vendor/ace/'
                     }
                 ]
             }
