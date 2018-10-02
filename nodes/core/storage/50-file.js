@@ -189,8 +189,7 @@ module.exports = function(RED) {
             }
         }
 
-        this.on('close', function(arg1, arg2) {
-            var cb  = arg2 ? arg2 : arg1;
+        this.on('close', function(cb) {
             if (cb) {
                 node.closeCallbacks.push(done);
             }
