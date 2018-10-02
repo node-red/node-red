@@ -128,6 +128,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/text/format.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/state.js",
                     "packages/node_modules/@node-red/editor-client/src/js/nodes.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/font-awesome.js",
                     "packages/node_modules/@node-red/editor-client/src/js/history.js",
                     "packages/node_modules/@node-red/editor-client/src/js/validators.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/utils.js",
