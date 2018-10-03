@@ -227,7 +227,7 @@ module.exports = function(grunt) {
             messages: {
                 src: [
                     'packages/node_modules/@node-red/nodes/locales/**/*.json',
-                    'packages/node_modules/@node-red/editor-api/lib/editor/locales/**/*.json',
+                    'packages/node_modules/@node-red/editor-client/locales/**/*.json',
                     'packages/node_modules/@node-red/runtime/locales/**/*.json'
                 ]
             },
@@ -282,7 +282,7 @@ module.exports = function(grunt) {
             json: {
                 files: [
                     'packages/node_modules/@node-red/nodes/locales/**/*.json',
-                    'packages/node_modules/@node-red/editor-api/lib/editor/locales/**/*.json',
+                    'packages/node_modules/@node-red/editor-client/locales/**/*.json',
                     'packages/node_modules/@node-red/runtime/locales/**/*.json'
                 ],
                 tasks: ['jsonlint:messages']
