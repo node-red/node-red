@@ -270,7 +270,7 @@ module.exports = {
     //  'strict routing': false,
     //  'subdomain offset': false,
     //  'trust proxy': false,
-    // 'views': false,
+    //  'views': false,
     //  'view cache': false,
     //  'view engine': false,
     //  'x-powered-by': false
