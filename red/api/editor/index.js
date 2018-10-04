@@ -60,6 +60,11 @@ module.exports = {
                     }
                 });
             }
+            if (settings.editorOptions) {
+                for (var eOption in settings.editorOptions) {
+                    editorApp.set(eOption, settings.editorOptions[eOption]);
+                }
+            }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
 
             editorApp.get("/icons",needsPermission("nodes.read"),nodes.getIcons,apiUtil.errorHandler);
