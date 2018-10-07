@@ -358,7 +358,15 @@ Project.prototype.update = function (user, data) {
         promises.push(util.writeFile(this.paths['README.md'], this.description));
     }
     if (savePackage) {
-        promises.push(util.writeFile(this.paths['package.json'], JSON.stringify(this.package,"",4)));
+        promises.push(fs.readFile(project.paths['package.json'],"utf8").then(content => {
+            var currentPackage = {};
+            try {
+                currentPackage = util.parseJSON(content);
+            } catch(err) {
+            }
+            this.package = Object.assign(currentPackage,this.package);
+            return util.writeFile(this.paths['package.json'], JSON.stringify(this.package,"",4));
+        }));
     }
     return when.settle(promises).then(function(res) {
         return {
