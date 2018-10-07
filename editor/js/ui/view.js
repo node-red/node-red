@@ -2415,6 +2415,7 @@ RED.view = (function() {
                 var l = d3.select(this);
                 d.added = true;
                 l.append("svg:path").attr("class","link_background link_path")
+                   .classed("link_link", function(d) { return d.link })
                    .on("mousedown",function(d) {
                         mousedown_link = d;
                         clearSelection();
