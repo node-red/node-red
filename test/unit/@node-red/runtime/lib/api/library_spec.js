@@ -412,7 +412,7 @@ describe("api/editor/library", function() {
                         throw err;
                     }
                     res.body.should.have.property('sendFile',
-                        'node-module:example-one');
+                        fspath.resolve('node-module') + ':example-one');
                     done();
                 });
         });
@@ -430,7 +430,8 @@ describe("api/editor/library", function() {
                         throw err;
                     }
                     res.body.should.have.property('sendFile',
-                        '@org_scope/node_package:example-one');
+                        fspath.resolve('@org_scope/node_package') +
+                        ':example-one');
                     done();
                 });
         });

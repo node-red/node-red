@@ -461,7 +461,11 @@ RED.projects.settings = (function() {
                                             setTimeout(function() {
                                                 depsList.editableList('removeItem',entry);
                                                 refreshModuleInUseCounts();
-                                                entry.count = modulesInUse[entry.id].count;
+                                                if (modulesInUse.hasOwnProperty(entry.id)) {
+                                                    entry.count = modulesInUse[entry.id].count;
+                                                } else {
+                                                    entry.count = 0;
+                                                }
                                                 depsList.editableList('addItem',entry);
                                             },500);
                                         }
