@@ -275,7 +275,8 @@ RED.palette = (function() {
                                 }
 
                                 for (var i=0;i<nodes.length;i++) {
-                                    if (d3.select(nodes[i]).classed('link_background')) {
+                                    var node = d3.select(nodes[i]);
+                                    if (node.classed('link_background') && !node.classed('link_link')) {
                                         var length = nodes[i].getTotalLength();
                                         for (var j=0;j<length;j+=10) {
                                             var p = nodes[i].getPointAtLength(j);
