@@ -409,7 +409,11 @@
         "label": {
             "type": "Type",
             "path": "Path",
-            "url": "URL"
+            "url": "URL",
+            "protocol": "Protocol"
+        },
+        "placeholder": {
+            "protocol": "(optional) Subprotocol to negotiate"
         },
         "listenon": "Listen on",
         "connectto": "Connect to",

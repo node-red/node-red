@@ -339,6 +339,18 @@ describe('websocket Node', function() {
             });
         });
 
+        it('should handle protocol property', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws") },
+                { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), protocol: "testprotocol" }];
+            helper.load(websocketNode, flow, function() {
+                helper.getNode("n1").should.have.property("protocol", undefined);
+                helper.getNode("n2").should.have.property("protocol", "testprotocol");
+                done();
+            });
+        });
+
         it('should connect to server', function(done) {
             var flow = [
                 { id: "server", type: "websocket-listener", path: "/ws" },

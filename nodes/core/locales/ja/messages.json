@@ -409,7 +409,8 @@
         "label": {
             "type": "種類",
             "path": "パス",
-            "url": "URL"
+            "url": "URL",
+            "protocol": "協定"
         },
         "listenon": "待ち受け",
         "connectto": "接続",
