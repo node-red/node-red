@@ -392,13 +392,14 @@ module.exports = function(RED) {
         if (!/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/.test(this.topic)) {
             return this.warn(RED._("mqtt.errors.invalid-topic"));
         }
+        this.datatype = n.datatype || "utf8";
         var node = this;
         if (this.brokerConn) {
             this.status({fill:"red",shape:"ring",text:"node-red:common.status.disconnected"});
             if (this.topic) {
                 node.brokerConn.register(this);
                 this.brokerConn.subscribe(this.topic,this.qos,function(topic,payload,packet) {
-                    if (isUtf8(payload)) { payload = payload.toString(); }
+                    if (this.datatype == "utf8" && isUtf8(payload)) { payload = payload.toString(); }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {
                         msg._topic = topic;

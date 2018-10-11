@@ -324,6 +324,7 @@
         "label": {
             "broker": "サーバ",
             "example": "例) localhost",
+            "output": "出力",
             "qos": "QoS",
             "retain": "保持",
             "clientid": "クライアント",
@@ -358,6 +359,10 @@
             "connect-failed": "ブローカへの接続に失敗しました: __broker__"
         },
         "retain": "保持",
+        "output": {
+            "buffer": "バイナリバッファ",
+            "string": "文字列"
+        },
         "true": "する",
         "false": "しない",
         "tip": "注釈: トピックやQoSをメッセージのプロパティを用いて設定する場合は、無記入にしてください。",
