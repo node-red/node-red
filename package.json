@@ -99,6 +99,7 @@
         "istanbul": "0.4.5",
         "minami": "1.2.3",
         "mocha": "^5.2.0",
+        "mosca": "^2.8.3",
         "should": "^8.4.0",
         "sinon": "1.17.7",
         "stoppable": "^1.0.6",

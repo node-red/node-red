@@ -29,7 +29,7 @@ debugNode.prototype.setOutput = function(complete) {
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
     if (complete !== 'true') {
         // Select the "msg" type.
-        browser.clickWithWait('/html/body/div[11]/a[1]');
+        browser.clickWithWait('//div[@class="red-ui-typedInput-options"][1]/a[1]');
         // Input the path in msg.
         browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
         browser.keys(['Control', 'a', 'Control']);
