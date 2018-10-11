@@ -91,6 +91,30 @@ describe("api/editor/locales", function() {
                     done();
                 });
         });
+
+        it('returns for locale defined only with primary tag ', function(done) {
+            var orig = i18n.i.getResourceBundle;
+            i18n.i.getResourceBundle = function (lang, ns) {
+                if (lang === "ja-JP") {
+                    return undefined;
+                }
+                return orig(lang, ns);
+            };
+            request(app)
+                 // returns `ja` instead of `ja-JP`
+                .get("/locales/message-catalog?lng=ja-JP")
+                .expect(200)
+                .end(function(err,res) {
+                    i18n.i.getResourceBundle = orig;
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.have.property('namespace','message-catalog');
+                    res.body.should.have.property('lang','ja');
+                    done();
+                });
+        });
+
     });
 
     // describe('get all node resource catalogs',function() {
