@@ -21,7 +21,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var app = express();
 
-var RED = require("../../packages/node_modules/node-red/lib/red.js");
+var RED = require("nr-test-utils").require("node-red/lib/red.js");
 
 var utilPage = require("./pageobjects/util/util_page");
 

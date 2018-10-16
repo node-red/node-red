@@ -16,7 +16,7 @@
 
  var when = require("when");
 
-var events = require("../../../../packages/node_modules/@node-red/runtime/lib/events.js");
+var events = require("nr-test-utils").require("@node-red/runtime/lib/events.js");
 
 var palette = require("./palette_page");
 var nodeFactory = require("../nodes/nodefactory_page");
