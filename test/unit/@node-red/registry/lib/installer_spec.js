@@ -21,9 +21,6 @@ var path = require("path");
 var fs = require('fs');
 var EventEmitter = require('events');
 
-var child_process = require('child_process');
-
-
 var NR_TEST_UTILS = require("nr-test-utils");
 
 var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
@@ -42,16 +39,21 @@ describe('nodes/registry/installer', function() {
         _: function() { return "abc"}
     }
 
-    before(function() {
-        installer.init({log:mockLog, settings:{}, events: new EventEmitter()});
+    beforeEach(function() {
+        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
+            run: function() {
+                return Promise.resolve("");
+            }
+        }});
     });
+    function initInstaller(execResult) {
+        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
+            run: function() {
+                return execResult;
+            }
+        }});
+    }
     afterEach(function() {
-        if (child_process.spawn.restore) {
-            child_process.spawn.restore();
-        }
-        if (child_process.execFile.restore) {
-            child_process.execFile.restore();
-        }
         if (registry.addModule.restore) {
             registry.addModule.restore();
         }
@@ -76,39 +78,33 @@ describe('nodes/registry/installer', function() {
 
     describe("installs module", function() {
         it("rejects when npm returns a 404", function(done) {
-            sinon.stub(child_process,"spawn",function(cmd,args,opt) {
-                var ee = new EventEmitter();
-                ee.stdout = new EventEmitter();
-                ee.stderr = new EventEmitter();
-                setTimeout(function() {
-                    ee.stderr.emit('data'," 404  this_wont_exist");
-                    ee.emit('close',1);
-                },10)
-                return ee;
-            });
-
+            var res = {
+                code: 1,
+                stdout:"",
+                stderr:" 404  this_wont_exist"
+            }
+            var p = Promise.reject(res);
+            p.catch((err)=>{});
+            initInstaller(p)
             installer.installModule("this_wont_exist").catch(function(err) {
                 err.should.have.property("code",404);
                 done();
             });
         });
         it("rejects when npm does not find specified version", function(done) {
-            sinon.stub(child_process,"spawn",function(cmd,args,opt) {
-                var ee = new EventEmitter();
-                ee.stdout = new EventEmitter();
-                ee.stderr = new EventEmitter();
-                setTimeout(function() {
-                    ee.stderr.emit('data'," version not found: this_wont_exist@0.1.2");
-                    ee.emit('close',1);
-                },10)
-                return ee;
-            });
+            var res = {
+                code: 1,
+                stdout:"",
+                stderr:" version not found: this_wont_exist@0.1.2"
+            }
+            var p = Promise.reject(res);
+            p.catch((err)=>{});
+            initInstaller(p)
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
                     version: "0.1.1"
                 }
             });
-
             installer.installModule("this_wont_exist","0.1.2").catch(function(err) {
                 err.code.should.be.eql(404);
                 done();
@@ -126,17 +122,14 @@ describe('nodes/registry/installer', function() {
             });
         });
         it("rejects with generic error", function(done) {
-            sinon.stub(child_process,"spawn",function(cmd,args,opt,cb) {
-                var ee = new EventEmitter();
-                ee.stdout = new EventEmitter();
-                ee.stderr = new EventEmitter();
-                setTimeout(function() {
-                    ee.stderr.emit('data'," kaboom!");
-                    ee.emit('close',1);
-                },10)
-                return ee;
-            });
-
+            var res = {
+                code: 1,
+                stdout:"",
+                stderr:" kaboom!"
+            }
+            var p = Promise.reject(res);
+            p.catch((err)=>{});
+            initInstaller(p)
             installer.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
             }).catch(function(err) {
@@ -145,15 +138,16 @@ describe('nodes/registry/installer', function() {
         });
         it("succeeds when module is found", function(done) {
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
-            sinon.stub(child_process,"spawn",function(cmd,args,opt) {
-                var ee = new EventEmitter();
-                ee.stdout = new EventEmitter();
-                ee.stderr = new EventEmitter();
-                setTimeout(function() {
-                    ee.emit('close',0);
-                },10)
-                return ee;
-            });
+
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            initInstaller(p)
+
             var addModule = sinon.stub(registry,"addModule",function(md) {
                 return when.resolve(nodeInfo);
             });
@@ -191,15 +185,15 @@ describe('nodes/registry/installer', function() {
                 return when.resolve(nodeInfo);
             });
             var resourcesDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule","node_modules","TestNodeModule"));
-            sinon.stub(child_process,"spawn",function(cmd,args,opt) {
-                var ee = new EventEmitter();
-                ee.stdout = new EventEmitter();
-                ee.stderr = new EventEmitter();
-                setTimeout(function() {
-                    ee.emit('close',0);
-                },10)
-                return ee;
-            });
+
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            initInstaller(p)
             installer.installModule(resourcesDir).then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
@@ -226,9 +220,14 @@ describe('nodes/registry/installer', function() {
             var removeModule = sinon.stub(registry,"removeModule",function(md) {
                 return when.resolve(nodeInfo);
             });
-            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
-                cb(new Error("test_error"),"","");
-            });
+            var res = {
+                code: 1,
+                stdout:"",
+                stderr:"error"
+            }
+            var p = Promise.reject(res);
+            p.catch((err)=>{});
+            initInstaller(p)
 
             installer.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
@@ -244,9 +243,14 @@ describe('nodes/registry/installer', function() {
             var getModuleInfo = sinon.stub(registry,"getModuleInfo",function(md) {
                 return {nodes:[]};
             });
-            sinon.stub(child_process,"execFile",function(cmd,args,opt,cb) {
-                cb(null,"","");
-            });
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            initInstaller(p)
 
             sinon.stub(fs,"statSync", function(fn) { return {}; });
 
