@@ -60,9 +60,9 @@ module.exports = {
                     }
                 });
             }
-            if (settings.editorOptions) {
-                for (var eOption in settings.editorOptions) {
-                    editorApp.set(eOption, settings.editorOptions[eOption]);
+            if (settings.httpServerOptions) {
+                for (var eOption in settings.httpServerOptions) {
+                    editorApp.set(eOption, settings.httpServerOptions[eOption]);
                 }
             }
             editorApp.get("/",ensureRuntimeStarted,ui.ensureSlash,ui.editor);
