@@ -258,7 +258,7 @@ module.exports = {
         }
     },
     // http://expressjs.com/en/api.html#app.settings.table
-    //editorOptions: {
+    //httpServerOptions: {
     //  'case sensitive routing': false,
     //  'env': false,
     //  'etag': false,
