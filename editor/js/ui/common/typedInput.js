@@ -537,6 +537,10 @@
                     } else {
                         this.selectLabel.text(opt.label);
                     }
+                    if (this.optionMenu) {
+                        this.optionMenu.remove();
+                        this.optionMenu = null;
+                    }
                     if (opt.options) {
                         if (this.optionExpandButton) {
                             this.optionExpandButton.hide();
@@ -627,10 +631,6 @@
                             }
                         }
                     } else {
-                        if (this.optionMenu) {
-                            this.optionMenu.remove();
-                            this.optionMenu = null;
-                        }
                         if (this.optionSelectTrigger) {
                             this.optionSelectTrigger.hide();
                         }
