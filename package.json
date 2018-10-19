@@ -66,6 +66,7 @@
         "request": "2.88.0",
         "semver": "5.5.1",
         "sentiment": "2.1.0",
+        "tick-id": "1.0.2",
         "uglify-js": "3.4.9",
         "when": "3.7.8",
         "ws": "1.1.5",
