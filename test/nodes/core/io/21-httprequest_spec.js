@@ -22,12 +22,13 @@ var express = require("express");
 var bodyParser = require('body-parser');
 var stoppable = require('stoppable');
 var helper = require("node-red-node-test-helper");
-var httpRequestNode = require("../../../../nodes/core/io/21-httprequest.js");
-var tlsNode = require("../../../../nodes/core/io/05-tls.js");
+var httpRequestNode = require("nr-test-utils").require("@node-red/nodes/core/io/21-httprequest.js");
+var tlsNode = require("nr-test-utils").require("@node-red/nodes/core/io/05-tls.js");
+var httpProxyNode = require("nr-test-utils").require("@node-red/nodes/core/io/06-httpproxy.js");
 var hashSum = require("hash-sum");
 var httpProxy = require('http-proxy');
 var cookieParser = require('cookie-parser');
-var RED = require("../../../../red/red.js");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 var fs = require('fs-extra');
 var auth = require('basic-auth');
 
@@ -45,6 +46,9 @@ describe('HTTP Request Node', function() {
     var preEnvHttpProxyUpperCase;
     var preEnvNoProxyLowerCase;
     var preEnvNoProxyUpperCase;
+
+    //rediect cookie variables
+    var receivedCookies = {};
 
     function startServer(done) {
         testPort += 1;
@@ -98,40 +102,19 @@ describe('HTTP Request Node', function() {
         return "https://localhost:"+testSslPort+url;
     }
 
+    function getDifferentTestURL(url) {
+        return "http://127.0.0.1:"+testPort+url;
+    }
+
     function getSslTestURLWithoutProtocol(url) {
         return "localhost:"+testSslPort+url;
     }
 
-    function saveProxySetting() {
-        preEnvHttpProxyLowerCase = process.env.http_proxy;
-        preEnvHttpProxyUpperCase = process.env.HTTP_PROXY;
-        preEnvNoProxyLowerCase = process.env.no_proxy;
-        preEnvNoProxyUpperCase = process.env.NO_PROXY;
+    function deleteProxySetting() {
         delete process.env.http_proxy;
         delete process.env.HTTP_PROXY;
         delete process.env.no_proxy;
         delete process.env.NO_PROXY;
-    }
-
-    function restoreProxySetting() {
-        process.env.http_proxy = preEnvHttpProxyLowerCase;
-        process.env.HTTP_PROXY = preEnvHttpProxyUpperCase;
-        // On Windows, if environment variable of NO_PROXY that includes lower cases
-        // such as No_Proxy is replaced with NO_PROXY.
-        process.env.no_proxy = preEnvNoProxyLowerCase;
-        process.env.NO_PROXY = preEnvNoProxyUpperCase;
-        if (preEnvHttpProxyLowerCase == undefined){
-            delete process.env.http_proxy;
-        }
-        if (preEnvHttpProxyUpperCase == undefined){
-            delete process.env.HTTP_PROXY;
-        }
-        if (preEnvNoProxyLowerCase == undefined){
-            delete process.env.no_proxy;
-        }
-        if (preEnvNoProxyUpperCase == undefined){
-            delete process.env.NO_PROXY;
-        }
     }
 
     before(function(done) {
@@ -207,6 +190,24 @@ describe('HTTP Request Node', function() {
         testApp.options('/*', function(req,res) {
             res.status(200).end();
         });
+        testApp.get('/redirectToSameDomain', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectToSameDomainCookie','same1');
+            res.redirect(getTestURL('/redirectReturn'));
+        });
+        testApp.get('/redirectToDifferentDomain', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectToDifferentDomain','different1');
+            res.redirect(getDifferentTestURL('/redirectReturn'));
+        });
+        testApp.get('/redirectReturn', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectReturn','return1');
+            res.status(200).end();
+        });
         startServer(function(err) {
             if (err) {
                 done(err);
@@ -225,7 +226,35 @@ describe('HTTP Request Node', function() {
         });
     });
 
+
+    beforeEach(function() {
+        preEnvHttpProxyLowerCase = process.env.http_proxy;
+        preEnvHttpProxyUpperCase = process.env.HTTP_PROXY;
+        preEnvNoProxyLowerCase = process.env.no_proxy;
+        preEnvNoProxyUpperCase = process.env.NO_PROXY;
+        process.env.no_proxy = 'localhost';
+        process.env.NO_PROXY = 'localhost';
+    });
+
     afterEach(function() {
+        process.env.http_proxy = preEnvHttpProxyLowerCase;
+        process.env.HTTP_PROXY = preEnvHttpProxyUpperCase;
+        // On Windows, if environment variable of NO_PROXY that includes lower cases
+        // such as No_Proxy is replaced with NO_PROXY.
+        process.env.no_proxy = preEnvNoProxyLowerCase;
+        process.env.NO_PROXY = preEnvNoProxyUpperCase;
+        if (preEnvHttpProxyLowerCase == undefined) {
+            delete process.env.http_proxy;
+        }
+        if (preEnvHttpProxyUpperCase == undefined) {
+            delete process.env.HTTP_PROXY;
+        }
+        if (preEnvNoProxyLowerCase == undefined) {
+            delete process.env.no_proxy;
+        }
+        if (preEnvNoProxyUpperCase == undefined) {
+            delete process.env.NO_PROXY;
+        }
         helper.unload();
     });
 
@@ -1060,13 +1089,12 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1083,13 +1111,12 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy when environment variable is invalid', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "invalidvalue";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1106,13 +1133,12 @@ describe('HTTP Request Node', function() {
         it('should use HTTP_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1129,14 +1155,13 @@ describe('HTTP Request Node', function() {
         it('should use no_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             process.env.no_proxy = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1152,14 +1177,87 @@ describe('HTTP Request Node', function() {
         it('should use NO_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             process.env.NO_PROXY = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should use http-proxy-config', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2",type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should not use http-proxy-config when invalid url is specified', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"invalidvalue"}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should use http-proxy-config when valid noproxy is specified', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort,noproxy:["foo","localhost"]}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1198,13 +1296,12 @@ describe('HTTP Request Node', function() {
         it('should authenticate on proxy server', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://foouser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('user', 'foouser');
@@ -1223,13 +1320,12 @@ describe('HTTP Request Node', function() {
         it('should output an error when proxy authentication was failed', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://xxxuser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',407);
                         msg.headers.should.have.property('proxy-authenticate', 'BASIC realm="test"');
@@ -1241,6 +1337,221 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on proxy server(http-proxy-config)', function(done) {
+            var flow = [
+                {id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                n3.credentials = {username:'foouser', password:'barpassword'};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('user', 'foouser');
+                        msg.payload.should.have.property('pass', 'barpassword');
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should output an error when proxy authentication was failed(http-proxy-config)', function(done) {
+            var flow = [
+                {id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://@localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                n3.credentials = {username:'xxxuser', password:'barpassword'};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',407);
+                        msg.headers.should.have.property('proxy-authenticate', 'BASIC realm="test"');
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+    });
+
+    describe('redirect-cookie', function() {
+        it('should send cookies to the same domain when redirected(no cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if (cookies1 && Object.keys(cookies1).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 1) ||
+                        cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                       return;
+                    }
+                    done();
+                });
+                n1.receive({});
+            });
+        });
+        it('should not send cookies to the different domain when redirected(no cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if (cookies1 && Object.keys(cookies1).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({});
+            });
+        });
+        it('should send cookies to the same domain when redirected(msg.cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 2) ||
+                         cookies1['requestCookie'] !== 'request1' ||
+                         cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    cookies: { requestCookie: 'request1' }
+                });
+            });
+        });
+        it('should not send cookies to the different domain when redirected(msg.cookies)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToDifferentDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    cookies: { requestCookie: 'request1' }
+                });
+            });
+        });
+        it('should send cookies to the same domain when redirected(msg.headers.cookie)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToSameDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToSame)'));
+                        return;
+                    }
+                    if ((cookies2 && Object.keys(cookies2).length != 2) ||
+                        cookies1['requestCookie'] !== 'request1' ||
+                        cookies2['redirectToSameDomainCookie'] !== 'same1') {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    headers: { cookie: 'requestCookie=request1' }
+                });
+            });
+        });
+        it('should not send cookies to the different domain when redirected(msg.headers.cookie)', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectToDifferentDomain')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToDifferentDomain'];
+                    var cookies2 = receivedCookies['127.0.0.1:'+testPort+'/redirectReturn'];
+                    if ((cookies1 && Object.keys(cookies1).length != 1) ||
+                        cookies1['requestCookie'] !== 'request1') {
+                        done(new Error('Invalid cookie(path:/rediectToDiffer)'));
+                        return;
+                    }
+                    if (cookies2 && Object.keys(cookies2).length != 0) {
+                        done(new Error('Invalid cookie(path:/rediectReurn)'));
+                        return;
+                    }
+                    done();
+                });
+                n1.receive({
+                    headers: { cookie: 'requestCookie=request1' }
+                });
             });
         });
     });

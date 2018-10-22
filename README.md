@@ -2,7 +2,7 @@
 
 http://nodered.org
 
-[![Build Status](https://travis-ci.org/node-red/node-red.svg)](https://travis-ci.org/node-red/node-red)
+[![Build Status](https://travis-ci.org/node-red/node-red.svg?branch=master)](https://travis-ci.org/node-red/node-red)
 [![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
 
 A visual tool for wiring the Internet of Things.
@@ -44,9 +44,6 @@ If you want to run the latest code from git, here's how to get started:
 4. Run
 
         npm start
-   or
-
-        node red.js
 
 ## Contributing
 

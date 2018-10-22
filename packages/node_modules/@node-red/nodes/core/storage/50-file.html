@@ -1,0 +1,186 @@
+
+<script type="text/x-red" data-template-name="file">
+    <div class="form-row node-input-filename">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input id="node-input-filename" type="text">
+    </div>
+    <div class="form-row">
+        <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
+        <select type="text" id="node-input-overwriteFile" style="width: 250px;">
+            <option value="false" data-i18n="file.action.append"></option>
+            <option value="true" data-i18n="file.action.overwrite"></option>
+            <option value="delete" data-i18n="file.action.delete"></option>
+        </select>
+    </div>
+    <div class="form-row form-row-file-write-options">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-appendNewline" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-appendNewline" style="width: 70%;"><span data-i18n="file.label.addnewline"></span></label>
+    </div>
+    <div class="form-row form-row-file-write-options">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-createDir" style="width: 70%;"><span data-i18n="file.label.createdir"></span></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="file.tip"></span></div>
+</script>
+
+<script type="text/x-red" data-help-name="file">
+    <p>Writes <code>msg.payload</code> to a file, either adding to the end or replacing the existing content.
+       Alternatively, it can delete the file.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the name of the file to be updated.</dd>
+    </dl>
+    <h3>Output</h3>
+    <p>On completion of write, input message is sent to output port.</p>
+    <h3>Details</h3>
+    <p>Each message payload will be added to the end of the file, optionally appending
+    a newline (\n) character between each one.</p>
+    <p>If <code>msg.filename</code> is used the file will be closed after every write.
+    For best performance use a fixed filename.</p>
+    <p>It can be configured to overwrite the entire file rather than append. For example,
+    when writing binary data to a file, such as an image, this option should be used
+    and the option to append a newline should be disabled.</p>
+    <p>Alternatively, this node can be configured to delete the file.</p>
+</script>
+
+<script type="text/x-red" data-template-name="file in">
+    <div class="form-row">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input id="node-input-filename" type="text" data-i18n="[placeholder]file.label.filename">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
+        <select id="node-input-format">
+            <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="lines" data-i18n="file.output.lines"></option>
+            <option value="" data-i18n="file.output.buffer"></option>
+            <option value="stream" data-i18n="file.output.stream"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label></label>
+        <input type="checkbox" id="node-input-sendError" style="width:auto">
+        <label style="width:auto; margin-bottom:0; vertical-align: middle;" for="node-input-sendError" data-i18n="file.label.sendError"></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="file.tip"></span></div>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>Reads the contents of a file as either a string or binary buffer.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>if not set in the node configuration, this property sets the filename to read.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | buffer</span></dt>
+        <dd>The contents of the file as either a string or binary buffer.</dd>
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the name of the file to be read.</dd>
+        <dt class="optional">error <span class="property-type">object</span></dt>
+        <dd><i>deprecated</i>: If enabled in the node, when the node hits an error
+            reading the file, it will send a message with no <code>payload</code>
+            and this <code>error</code> property set to the error details. This
+            mode of behaviour is deprecated and not enabled by default for new
+            instances of the node. See below for more information.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The filename should be an absolute path, otherwise it will be relative to
+    the working directory of the Node-RED process.</p>
+    <p>On Windows, path separators may need to be escaped, for example: <code>\\Users\\myUser</code>.</p>
+    <p>Optionally, a text file can be split into lines, outputting one message per line, or a binary file
+    split into smaller buffer chunks - the chunk size being operating system dependant, but typically 64k (Linux/Mac) or 41k (Windows).</p>
+    <p>When split into multiple messages, each message will have a <code>parts</code>
+    property set, forming a complete message sequence.</p>
+    <h4>Legacy error handling</h4>
+    <p>Before Node-RED 0.17, if this node hit an error whilst reading the file, it would
+    send a message with no <code>msg.payload</code> and <code>msg.error</code> set to the
+    details of the error. This is a deprecated mode of behaviour for the node that new
+    instances will not do. If required, this mode can be re-enabled within the node
+    configuration.</p>
+    <p>Errors should be caught and handled using a Catch node.</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('file',{
+        category: 'storage-output',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            appendNewline: {value:true},
+            createDir: {value:false},
+            overwriteFile: {value:"false"}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        icon: "file-out.png",
+        label: function() {
+            if (this.overwriteFile === "delete") {
+                return this.name||this._("file.label.deletelabel",{file:this.filename});
+            } else {
+                return this.name||this.filename||this._("file.label.filelabel");
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            $("#node-input-overwriteFile").on("change",function() {
+                if (this.value === "delete") { $(".form-row-file-write-options").hide(); }
+                else { $(".form-row-file-write-options").show(); }
+            });
+        }
+    });
+
+    RED.nodes.registerType('file in',{
+        category: 'storage-input',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            format: {value:"utf8"},
+            chunk: {value:false},
+            sendError: {value: false}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        outputLabels: function(i) {
+            return (this.format === "utf8") ? "UTF8 string" : "binary buffer";
+        },
+        icon: "file-in.png",
+        label: function() {
+            return this.name||this.filename||this._("file.label.filelabel");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.sendError === undefined) {
+                $("#node-input-sendError").prop("checked",true);
+            }
+            $("#node-input-format").on("change",function() {
+                if ($("#node-input-format").val() === "utf8") {
+                    $("#buffer-input-type").hide();
+                    $("#line-input-type").show();
+                }
+                else {
+                    $("#buffer-input-type").show();
+                    $("#line-input-type").hide();
+                }
+            });
+        }
+    });
+</script>

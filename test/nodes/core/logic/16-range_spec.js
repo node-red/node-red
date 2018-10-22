@@ -16,7 +16,7 @@
 
 var should = require("should");
 
-var rangeNode = require("../../../../nodes/core/logic/16-range.js");
+var rangeNode = require("nr-test-utils").require("@node-red/nodes/core/logic/16-range.js");
 var helper = require("node-red-node-test-helper");
 
 describe('range Node', function() {
@@ -131,9 +131,8 @@ describe('range Node', function() {
         helper.load(rangeNode, flow, function() {
             var rangeNode1 = helper.getNode("rangeNode1");
             var helperNode1 = helper.getNode("helperNode1");
-
-            var sinon = require('sinon');
-            sinon.stub(rangeNode1, 'log', function(log) {
+            rangeNode1.on("call:log",function(args) {
+                var log = args.args[0];
                 if (log.indexOf("notnumber") > -1) {
                     rangeNode1.log.restore();
                     done();

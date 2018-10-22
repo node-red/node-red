@@ -1,3 +1,115 @@
+#### 0.19.4: Maintenance Release
+
+ - Fix race condition in non-cache lfs context Fixes #1888
+ - LocalFileSystem Context: Remove extra flush code
+ - Prevent race condition in caching mode of lfs context (#1889)
+ - Allow context store name to be provided in the key
+ - Switch node: only use promises when absolutely necessary
+ - Fix dbl-click handling on webkit-based browsers
+ - Ensure context.flow/global cannot be deleted or enumerated
+ - Handle context.get with multiple levels of unknown key Fixes #1883
+ - Fix global.get("foo.bar") for functionGlobalContext set values
+ - Fix node color bug (#1877)
+ - Merge pull request #1857 from cclauss/patch-1
+ - Define raw_input() in Python 3 & fix time.sleep()
+
+#### 0.19.3: Maintenance Release
+
+ - Split node - fix complete to send msg for k/v object
+ - Remove unused Join node merged object key typed input
+ - Set the JavaScript editor to full-screen
+ - Filter global modules installed locally
+ - Add svg to permitted icon extension list
+ - Debug node - indicate status all the time if selected to do so
+ - pi nodes - increase test coverage slightly
+ - TCP-request node - only write payload
+ - JSON schema: perform validation when obj -> obj or str -> str
+ - JSON schema: add draft-06 support (via $schema keyword)
+ - Mqtt proxy configuration for websocket connection, #1651.
+ - Allows MQTT Shared Subscriptions for MQTT-In core node
+ - Fix use of HTML tag or CSS class specification as icon of typedInput
+
+#### 0.19.2: Maintenance Release
+
+ - Ensure node default colour is used if palette.theme has no match
+ - fix lost messages / properties in TCPRequest Node; closes #1863 (#1864)
+ - Fix typo in template.html
+ - Improve error reporting from context plugin loading
+ - Prevent no-op edit of node marking as changed due to icon
+ - Change node must handle empty rule set
+
+#### 0.19.1: Maintenance Release
+
+ - Pull in latest twitter node
+ - Handle windows paths for context storage
+ - Handle persisting objects with circular refs in context
+ - Ensure js editor can expand to fill available space
+ - Add example localfilesystem contextStorage to settings
+ - Fix template node handling of nested context tags
+
+#### 0.19: Milestone Release
+
+Editor
+
+ - Add editorTheme.palette.theme to allow overriding colours
+ - Index all node properties when searching Fixes #1446
+ - Handle NaN and Infinity properly in debug sidebar Fixes #1778 #1779
+ - Prevent horizontal scroll when palette name cannot wrap
+ - Ignore middle-click on node/ports to enable panning
+ - Better wire layout when looping back
+ - fix appearence of retry button of remote branch management dialog
+ - Handle releasing ctrl when using quick-add node dialog
+ - Add $env function to JSONata expressions
+ - Widen support for env var to use ${} or $() syntax
+ - Add env-var support to TypedInput
+ - Show unknown node properties in info tab
+ - Add node icon picker widget
+ - Only edit nodes on dbl click on primary button with no modifiers
+ - Allow subflows to be put in any palette category
+ - Add flow navigator widget
+ - Cache flow library result to improve response time Fixes #1753
+ - Add middle-button-drag to pan the workspace
+ - allow multi-line category name in editor
+ - Redesign sidebar tabs
+ - Do not disable the export-clipboard menu option with empty selection
+
+Nodes
+
+ - Change: Ensure runtime errors in Change node can be caught Fixes #1769
+ - File: Add output to File Out node
+ - Function: add expandable JavaScript editor pane
+ - Function: allow id and name reference in function node code (#1731)
+ - HTTP Request: Move to request module
+ - HTTP: Ensure apiMaxLength applies to HTTP Nodes Fixes #1278
+ - Join: accumulate top level properties
+ - Join: allow environment variable as reduce init value
+ - JSON: add JSON schema validation via msg.schema
+ - Pi: Let nrgpio code work with python 3
+ - Pi: let Pi nodes be visible/editable on all platforms
+ - Switch: add isEmpty rule
+ - TCP: queue messages while connecting; closes #1414
+ - TLS: Add servername option to TLS config node for SNI Fixes #1805
+ - UDP: Don't accidentally re-use udp port when set to not do so
+
+Persistent Context
+
+ - Add Context data sidebar
+ - Add persistable context option
+ - Add default memory store
+ - Add file-based context store
+ - Add async mode to evaluateJSONataExpression
+ - Update RED.util.evaluateNodeProperty to support context stores
+
+Runtime
+
+ - Support flow.disabled and .info in /flow API
+ - Node errors should be Strings not Errors Fixes #1781
+ - Add detection of connection timeout in git communication Fixes #1770
+ - Handle loading empty nodesDir
+ - Add 'private' property to userDir generated package.json
+ - Add RED.require to allow nodes to access other modules
+ - Ensure add/remove modules are run sequentially
+
 #### 0.18.7: Maintenance Release
 
 Editor Fixes
