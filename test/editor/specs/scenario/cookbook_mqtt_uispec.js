@@ -24,8 +24,6 @@ var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
 var mqttConfig = require('../../pageobjects/nodes/core/io/10-mqttconfig_page.js');
 
-var nodeWidth = 200;
-var nodeHeight = 100;
 var httpNodeRoot = "/api";
 
 var mqttServer;
@@ -42,7 +40,7 @@ var moscaSettings = {
 // https://cookbook.nodered.org/
 describe('cookbook', function() {
     beforeEach(function() {
-        workspace.deleteAllNodes();
+        workspace.init();
     });
 
     before(function() {
@@ -69,7 +67,7 @@ describe('cookbook', function() {
 
     describe('MQTT', function() {
         it('Add an MQTT broker to prepare for UI test', function() {
-            var mqttOutNode = workspace.addNode("mqttOut", nodeWidth);
+            var mqttOutNode = workspace.addNode("mqttOut");
 
             mqttOutNode.edit();
             mqttConfig.edit();
@@ -82,10 +80,10 @@ describe('cookbook', function() {
 
         it('Connect to an MQTT broker', function() {
             var injectNode = workspace.addNode("inject");
-            var mqttOutNode = workspace.addNode("mqttOut", nodeWidth);
+            var mqttOutNode = workspace.addNode("mqttOut");
 
-            var mqttInNode = workspace.addNode("mqttIn", 0, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var mqttInNode = workspace.addNode("mqttIn", 0, 100);
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("num", 22);
@@ -117,7 +115,7 @@ describe('cookbook', function() {
 
         it('Set the topic of a published message', function() {
             var injectNode = workspace.addNode("inject");
-            var mqttOutNode = workspace.addNode("mqttOut", nodeWidth * 2);
+            var mqttOutNode = workspace.addNode("mqttOut");
 
             injectNode.edit();
             injectNode.setPayload("num", 22);
@@ -130,8 +128,8 @@ describe('cookbook', function() {
             injectNode.connect(mqttOutNode);
 
             // The code for confirmation starts from here.
-            var mqttInNode = workspace.addNode("mqttIn", 0, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var mqttInNode = workspace.addNode("mqttIn", 0, 100);
+            var debugNode = workspace.addNode("debug");
 
             mqttInNode.edit();
             mqttInNode.setTopic("sensors/kitchen/temperature");
@@ -150,7 +148,7 @@ describe('cookbook', function() {
 
         it('Publish a retained message to a topic', function() {
             var injectNode = workspace.addNode("inject");
-            var mqttOutNode = workspace.addNode("mqttOut", nodeWidth);
+            var mqttOutNode = workspace.addNode("mqttOut");
 
             injectNode.edit();
             injectNode.setPayload("num", 22);
@@ -169,8 +167,8 @@ describe('cookbook', function() {
             debugTab.clearMessage();
 
             // The code for confirmation starts from here.
-            var mqttInNode = workspace.addNode("mqttIn", 0, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var mqttInNode = workspace.addNode("mqttIn", 0, 100);
+            var debugNode = workspace.addNode("debug");
 
             mqttInNode.edit();
             mqttInNode.setTopic("sensors/livingroom/temp");
@@ -189,11 +187,11 @@ describe('cookbook', function() {
 
         it('Receive a parsed JSON message', function() {
             var injectNode = workspace.addNode("inject");
-            var mqttOutNode = workspace.addNode("mqttOut", nodeWidth);
+            var mqttOutNode = workspace.addNode("mqttOut");
 
-            var mqttInNode = workspace.addNode("mqttIn", 0, nodeHeight);
-            var jsonNode = workspace.addNode("json", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var mqttInNode = workspace.addNode("mqttIn", 0, 100);
+            var jsonNode = workspace.addNode("json");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("json", '{"sensor_id": 1234, "temperature": 13 }');
