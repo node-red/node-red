@@ -881,9 +881,9 @@ describe('exec node', function() {
                 var received = 0;
                 var messages = [null,null];
                 var completeTest = function() {
-                    received++;
-                    if (received < 2) {
-                        return;
+                    if (messages[0] === null || messages[1] === null) {
+                        // We have not yet had responses on both ports.
+                        return
                     }
                     try {
                         var msg = messages[0];
