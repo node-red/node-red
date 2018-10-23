@@ -315,8 +315,9 @@ describe('cookbook', function() {
             debugTab.open();
             debugTab.clearMessage();
             injectNode.clickLeftButton();
-            var message = debugTab.getMessage();
-            message[1].indexOf('application/json').should.not.eql(-1);
+            var messages = debugTab.getMessage();
+            var contents = messages.join([separator = ""]);
+            contents.indexOf('application/json').should.not.eql(-1);
         });
 
         it('serve a local file', function () {

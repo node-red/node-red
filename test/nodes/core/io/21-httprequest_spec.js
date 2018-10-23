@@ -24,6 +24,7 @@ var stoppable = require('stoppable');
 var helper = require("node-red-node-test-helper");
 var httpRequestNode = require("nr-test-utils").require("@node-red/nodes/core/io/21-httprequest.js");
 var tlsNode = require("nr-test-utils").require("@node-red/nodes/core/io/05-tls.js");
+var httpProxyNode = require("nr-test-utils").require("@node-red/nodes/core/io/06-httpproxy.js");
 var hashSum = require("hash-sum");
 var httpProxy = require('http-proxy');
 var cookieParser = require('cookie-parser');
@@ -1194,6 +1195,80 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
+
+        it('should use http-proxy-config', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2",type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should not use http-proxy-config when invalid url is specified', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"invalidvalue"}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should use http-proxy-config when valid noproxy is specified', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort,noproxy:["foo","localhost"]}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
     });
 
     describe('authentication', function() {
@@ -1250,6 +1325,63 @@ describe('HTTP Request Node', function() {
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',407);
+                        msg.headers.should.have.property('proxy-authenticate', 'BASIC realm="test"');
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on proxy server(http-proxy-config)', function(done) {
+            var flow = [
+                {id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                n3.credentials = {username:'foouser', password:'barpassword'};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('user', 'foouser');
+                        msg.payload.should.have.property('pass', 'barpassword');
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('x-testproxy-header','foobar');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should output an error when proxy authentication was failed(http-proxy-config)', function(done) {
+            var flow = [
+                {id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate'),proxy:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3",type:"http proxy",url:"http://@localhost:" + testProxyPort}
+            ];
+            var testNode = [ httpRequestNode, httpProxyNode ];
+            deleteProxySetting();
+            helper.load(testNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                n3.credentials = {username:'xxxuser', password:'barpassword'};
                 n2.on("input", function(msg) {
                     try {
                         msg.should.have.property('statusCode',407);

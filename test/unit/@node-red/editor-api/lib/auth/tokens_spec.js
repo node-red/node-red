@@ -94,6 +94,29 @@ describe("api/auth/tokens", function() {
                 });
             });
         });
+
+        it('returns a valid api token', function(done) {
+            Tokens.init({
+                tokens: [{
+                    token: "1234",
+                    user: "fred",
+                }]    
+            },{
+                getSessions:function() {
+                    return when.resolve({});
+                }
+            }).then(function() {
+                Tokens.get("1234").then(function(token) {
+                    try {
+                        token.should.have.a.property("user","fred");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            });
+
+        });
     });
 
     describe("#create",function() {

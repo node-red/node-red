@@ -138,14 +138,16 @@ module.exports = function(RED) {
                         //console.log('[exec] stdout: ' + stdout);
                         //console.log('[exec] stderr: ' + stderr);
                         if (error !== null) {
-                            msg3 = {payload:{code:error.code, message:error.message}};
+                            msg3 = RED.util.cloneMessage(msg);
+                            msg3.payload = {code:error.code, message:error.message};
                             if (error.signal) { msg3.payload.signal = error.signal; }
                             if (error.code === null) { node.status({fill:"red",shape:"dot",text:"killed"}); }
                             else { node.status({fill:"red",shape:"dot",text:"error:"+error.code}); }
                             node.log('error:' + error);
                         }
                         else if (node.oldrc === "false") {
-                            msg3 = {payload:{code:0}};
+                            msg3 = RED.util.cloneMessage(msg);
+                            msg3.payload = {code:0};
                         }
                         if (!msg3) { node.status({}); }
                         else {
