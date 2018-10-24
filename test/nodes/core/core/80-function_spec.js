@@ -251,7 +251,7 @@ describe('function node', function() {
         testNonObjectMessage('return "foo"', done)
     });
     it('should drop and log non-object message types - buffer', function(done) {
-        testNonObjectMessage('return new Buffer("hello")', done)
+        testNonObjectMessage('return Buffer.from("hello")', done)
     });
     it('should drop and log non-object message types - array', function(done) {
         testNonObjectMessage('return [[[1,2,3]]]', done)

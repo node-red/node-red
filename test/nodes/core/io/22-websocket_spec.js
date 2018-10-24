@@ -454,7 +454,7 @@ describe('websocket Node', function() {
                 });
                 getSocket("n1").on("open", function() {
                     helper.getNode("n3").send({
-                        payload: new Buffer("hello")
+                        payload: Buffer.from("hello")
                     });
                 });
             });

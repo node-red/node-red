@@ -169,7 +169,7 @@ describe('YAML node', function() {
             },150);
             yn1.receive({payload:true});
             yn1.receive({payload:1});
-            yn1.receive({payload:new Buffer("a")});
+            yn1.receive({payload:Buffer.from("a")});
         });
     });
 

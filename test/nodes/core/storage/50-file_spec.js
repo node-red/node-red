@@ -574,7 +574,7 @@ describe('file Nodes', function() {
                     }
                 });
                 for(var i = 0; i < file_count; i++) {
-                    var data = new Buffer(len);
+                    var data = Buffer.alloc?Buffer.alloc(len):new Buffer(len);
                     data.fill(i);
                     var name = path.join(tmp_path, String(i));
                     var msg = {payload:data, filename:name};
@@ -617,7 +617,7 @@ describe('file Nodes', function() {
                     }
                 });
                 for(var i = 0; i < file_count; i++) {
-                    var data = new Buffer(len);
+                    var data = Buffer.alloc?Buffer.alloc(len):new Buffer(len);
                     data.fill(i);
                     var name = path.join(tmp_path, String(i));
                     var msg = {payload:data, filename:name};

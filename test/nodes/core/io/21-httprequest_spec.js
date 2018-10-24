@@ -390,7 +390,7 @@ describe('HTTP Request Node', function() {
                         done(err);
                     }
                 });
-                n1.receive({payload:new Buffer('hello'), headers: { 'content-type': 'text/plain'}});
+                n1.receive({payload:Buffer.from('hello'), headers: { 'content-type': 'text/plain'}});
             });
         });
 

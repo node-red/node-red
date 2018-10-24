@@ -127,7 +127,7 @@ describe('JSON node', function() {
             },150);
             jn1.receive({payload:true});
             jn1.receive({payload:1});
-            jn1.receive({payload:new Buffer("a")});
+            jn1.receive({payload:Buffer.from("a")});
         });
     });
 

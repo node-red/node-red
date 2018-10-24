@@ -236,7 +236,7 @@ describe('SPLIT node', function() {
                     done(err);
                 }
             });
-            var b = new Buffer.from("12345678");
+            var b = Buffer.from("12345678");
             sn1.receive({payload:b});
         });
     });
@@ -260,8 +260,8 @@ describe('SPLIT node', function() {
                     done(err);
                 }
             });
-            var b1 = new Buffer.from("123412");
-            var b2 = new Buffer.from("341234");
+            var b1 = Buffer.from("123412");
+            var b2 = Buffer.from("341234");
             sn1.receive({payload:b1});
             sn1.receive({payload:b2});
         });
@@ -364,7 +364,7 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
                 if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
             });
-            var b = new Buffer.from("123");
+            var b = Buffer.from("123");
             sn1.receive({ payload: b });
         });
     });
@@ -382,7 +382,7 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
                 if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
             });
-            var b = new Buffer.from("123");
+            var b = Buffer.from("123");
             sn1.receive({ payload: b });
         });
     });

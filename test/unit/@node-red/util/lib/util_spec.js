@@ -59,9 +59,9 @@ describe("@node-red/util/util", function() {
             util.compareObjects({"b":1,"a":1},{"a":1,"b":1}).should.equal(true);
         });
         it('Buffer', function() {
-            util.compareObjects(new Buffer("hello"),new Buffer("hello")).should.equal(true);
-            util.compareObjects(new Buffer("hello"),new Buffer("hello ")).should.equal(false);
-            util.compareObjects(new Buffer("hello"),"hello").should.equal(false);
+            util.compareObjects(Buffer.from("hello"),Buffer.from("hello")).should.equal(true);
+            util.compareObjects(Buffer.from("hello"),Buffer.from("hello ")).should.equal(false);
+            util.compareObjects(Buffer.from("hello"),"hello").should.equal(false);
         });
 
     });
@@ -71,7 +71,7 @@ describe("@node-red/util/util", function() {
             util.ensureString('string').should.equal('string');
         });
         it('Buffer is converted', function() {
-            var s = util.ensureString(new Buffer('foo'));
+            var s = util.ensureString(Buffer.from('foo'));
             s.should.equal('foo');
             (typeof s).should.equal('string');
         });
@@ -89,12 +89,12 @@ describe("@node-red/util/util", function() {
 
     describe('ensureBuffer', function() {
         it('Buffers are preserved', function() {
-            var b = new Buffer('');
+            var b = Buffer.from('');
             util.ensureBuffer(b).should.equal(b);
         });
         it('string is converted', function() {
             var b = util.ensureBuffer('foo');
-            var expected = new Buffer('foo');
+            var expected = Buffer.from('foo');
             for (var i = 0; i < expected.length; i++) {
                 b[i].should.equal(expected[i]);
             }
@@ -109,7 +109,7 @@ describe("@node-red/util/util", function() {
         it('stringifies other things', function() {
             var b = util.ensureBuffer(123);
             Buffer.isBuffer(b).should.equal(true);
-            var expected = new Buffer('123');
+            var expected = Buffer.from('123');
             for (var i = 0; i < expected.length; i++) {
                 b[i].should.equal(expected[i]);
             }
@@ -747,7 +747,7 @@ describe("@node-red/util/util", function() {
                 resultJson[2].data.should.eql('-Infinity');
             });
             it('constructor of Buffer in msg', function() {
-                var msg = { msg:{buffer:new Buffer([1,2,3,4])} };
+                var msg = { msg:{buffer:Buffer.from([1,2,3,4])} };
                 var result = util.encodeObject(msg,{maxLength:2});
                 result.format.should.eql("Object");
                 var resultJson = JSON.parse(result.msg);

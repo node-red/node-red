@@ -177,7 +177,7 @@ describe('exec node', function() {
                 function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
-                    arg3("error",new Buffer([0x01,0x02,0x03,0x88]),new Buffer([0x01,0x02,0x03,0x88]));
+                    arg3("error",Buffer.from([0x01,0x02,0x03,0x88]),Buffer.from([0x01,0x02,0x03,0x88]));
                 });
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -595,7 +595,7 @@ describe('exec node', function() {
                     }
                     catch(err) { done(err); }
                 });
-                n1.receive({payload:new Buffer([0x01,0x02,0x03,0x88])});
+                n1.receive({payload:Buffer.from([0x01,0x02,0x03,0x88])});
             });
         });
 

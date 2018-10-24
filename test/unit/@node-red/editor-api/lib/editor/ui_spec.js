@@ -84,7 +84,7 @@ describe("api/editor/ui", function() {
                 res.data += chunk;
             });
             res.on('end', function () {
-                callback(null, new Buffer(res.data, 'binary'));
+                callback(null, Buffer.from(res.data, 'binary'));
             });
         }
         function compareBuffers(b1,b2) {

@@ -506,7 +506,7 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: new Buffer.from('HELLO', 'utf8')});
+                n1.emit("input", {payload: Buffer.from('HELLO', 'utf8')});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
