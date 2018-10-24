@@ -100,9 +100,9 @@
         defaults: {
             name: {value:""},
             mode: {value:"count"},
-            count: {value:10},
-            overlap: {value:0},
-            interval: {value:10},
+            count: {value:10,validate:function(v) { return RED.validators.number(v) && (v >= 1); }},
+            overlap: {value:0,validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            interval: {value:10,validate:function(v) { return RED.validators.number(v) && (v >= 1); }},
             allowEmptySequence: {value:false},
             topics: {value:[{topic:""}]}
         },
@@ -149,12 +149,9 @@
                     removable: true
                 });
 
-            $("#node-input-count").spinner({
-            });
-            $("#node-input-overlap").spinner({
-            });
-            $("#node-input-interval").spinner({
-            });
+            $("#node-input-count").spinner({min:1});
+            $("#node-input-overlap").spinner({min:0});
+            $("#node-input-interval").spinner({min:1});
             $("#node-input-mode").change(function(e) {
                 var val = $(this).val();
                 $(".node-row-msg-count").toggle(val==="count");
