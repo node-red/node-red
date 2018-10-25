@@ -19,7 +19,7 @@ var NR_TEST_UTILS = require("nr-test-utils");
 var settings = NR_TEST_UTILS.require("@node-red/runtime/lib/settings");
 
 
-describe("red/settings", function() {
+describe("runtime/settings", function() {
 
     afterEach(function() {
         settings.reset();
@@ -239,5 +239,95 @@ describe("red/settings", function() {
         safeSettings.should.not.have.property("mqttColor");
         safeSettings.should.have.property("httpRequestColor", "yellow");
     });
+
+
+    it('delete global setting', function() {
+        // read-only
+        var localSettings = {a:1};
+        // read-write
+        var globalSettings = {b:2};
+        var storage = {
+            getSettings: function() {
+                return Promise.resolve(globalSettings);
+            },
+            saveSettings: function() {
+                return Promise.resolve();
+            }
+        }
+        settings.init(localSettings);
+        return settings.load(storage).then(function() {
+            settings.get('a').should.eql(1);
+            settings.get('b').should.eql(2);
+            return settings.delete('b')
+        }).then(function() {
+            should.not.exist(settings.get('b'));
+        })
+    });
+
+    it('refused to delete local setting', function(done) {
+        // read-only
+        var localSettings = {a:1};
+        // read-write
+        var globalSettings = {b:2};
+        var storage = {
+            getSettings: function() {
+                return Promise.resolve(globalSettings);
+            }
+        }
+        settings.init(localSettings);
+        settings.load(storage).then(function() {
+            settings.get('a').should.eql(1);
+            settings.get('b').should.eql(2);
+            try {
+                settings.delete('a');
+                return done("Did not throw error");
+            } catch(err) {
+                // expected
+            }
+            done();
+        }).catch(done)
+    });
+
+
+    it('get user settings', function() {
+        var userSettings = {
+            admin: {a:1}
+        }
+        var storage = {
+            getSettings: function() {
+                return Promise.resolve({a:1,users:userSettings});
+            }
+        }
+        settings.init(userSettings);
+        return settings.load(storage).then(function() {
+            var result = settings.getUserSettings('admin');
+            result.should.eql(userSettings.admin);
+            // Check it has been cloned
+            result.should.not.equal(userSettings.admin);
+        })
+    })
+    it('set user settings', function() {
+        var userSettings = {
+            admin: {a:1}
+        }
+        var savedSettings;
+        var storage = {
+            getSettings: function() {
+                return Promise.resolve({c:3,users:userSettings});
+            },
+            saveSettings: function(s) {
+                savedSettings = s;
+                return Promise.resolve();
+            }
+        }
+        settings.init(userSettings);
+        return settings.load(storage).then(function() {
+            return settings.setUserSettings('admin',{b:2})
+        }).then(function() {
+            savedSettings.should.have.property("c",3);
+            savedSettings.should.have.property('users');
+            savedSettings.users.should.eql({admin:{b:2}})
+        })
+    })
 
 });
