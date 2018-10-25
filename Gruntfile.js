@@ -57,7 +57,8 @@ module.exports = function(grunt) {
                 ignoreLeaks: false,
                 ui: 'bdd',
                 reportFormats: ['lcov','html'],
-                print: 'both'
+                print: 'both',
+                istanbulOptions: ['--no-default-excludes', '-i','**/packages/node_modules/**']
             },
             all: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js","test/nodes/**/*_spec.js"] },
             core: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js"]},
