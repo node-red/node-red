@@ -392,6 +392,28 @@ module.exports = function(grunt) {
                 ]
             }
         },
+        'npm-command': {
+            options: {
+                cmd: "pack",
+                cwd: "<%= paths.dist %>/modules"
+            },
+            'node-red': { options: { args: [__dirname+'/packages/node_modules/node-red'] } },
+            '@node-red/editor-api': { options: { args: [__dirname+'/packages/node_modules/@node-red/editor-api'] } },
+            '@node-red/editor-client': { options: { args: [__dirname+'/packages/node_modules/@node-red/editor-client'] } },
+            '@node-red/nodes': { options: { args: [__dirname+'/packages/node_modules/@node-red/nodes'] } },
+            '@node-red/registry': { options: { args: [__dirname+'/packages/node_modules/@node-red/registry'] } },
+            '@node-red/runtime': { options: { args: [__dirname+'/packages/node_modules/@node-red/runtime'] } },
+            '@node-red/util': { options: { args: [__dirname+'/packages/node_modules/@node-red/util'] } }
+
+
+        },
+        mkdir: {
+            release: {
+                options: {
+                    create: ['<%= paths.dist %>/modules']
+                },
+            },
+        },
         compress: {
             release: {
                 options: {
@@ -456,6 +478,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-webdriver');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-jsdoc-to-markdown');
+    grunt.loadNpmTasks('grunt-npm-command');
+    grunt.loadNpmTasks('grunt-mkdir');
 
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
@@ -542,7 +566,12 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','verifyPackageDependencies','clean:release','chmod:release','compress:release']);
+        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules']);
+
+    grunt.registerTask('pack-modules',
+        'Create module pack files for release',
+        ['mkdir:release','npm-command']);
+
 
     grunt.registerTask('coverage',
         'Run Istanbul code test coverage task',
