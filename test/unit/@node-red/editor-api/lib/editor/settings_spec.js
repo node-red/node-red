@@ -29,7 +29,7 @@ var theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
 
 describe("api/editor/settings", function() {
     before(function() {
-        sinon.stub(theme,"settings",function() { return { test: 456 };});
+        sinon.stub(theme,"settings",function() { return { existing: 123, test: 456 };});
         app = express();
         app.use(bodyParser.json());
         app.get("/settings",info.runtimeSettings);
@@ -47,7 +47,8 @@ describe("api/editor/settings", function() {
                 getRuntimeSettings: function(opts) {
                     return Promise.resolve({
                         a:1,
-                        b:2
+                        b:2,
+                        editorTheme: { existing: 789 }
                     })
                 }
             }
@@ -61,7 +62,7 @@ describe("api/editor/settings", function() {
             }
             res.body.should.have.property("a",1);
             res.body.should.have.property("b",2);
-            res.body.should.have.property("editorTheme",{test:456});
+            res.body.should.have.property("editorTheme",{existing: 789, test:456});
             done();
         });
     });

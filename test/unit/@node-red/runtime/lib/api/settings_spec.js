@@ -17,6 +17,7 @@
 
 var should = require("should");
 var sinon = require("sinon");
+var clone = require("clone");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 var settings = NR_TEST_UTILS.require("@node-red/runtime/lib/api/settings")
@@ -33,128 +34,90 @@ var mockLog = () => ({
 })
 
 describe("runtime-api/settings", function() {
-    describe.skip("getRuntimeSettings", function() {});
-    describe.skip("getUserSettings", function() {});
-    describe.skip("updateUserSettings", function() {});
-    describe.skip("getUserKeys", function() {});
-    describe.skip("getUserKey", function() {});
-    describe.skip("generateUserKey", function() {});
-    describe.skip("removeUserKey", function() {});
-
-});
-
-
-
-/*
-
-before(function() {
-    sinon.stub(theme,"settings",function() { return { test: 456 };});
-    app = express();
-    app.get("/settings",info.runtimeSettings);
-    app.get("/settingsWithUser",function(req,res,next) {
-        req.user = {
-            username: "nick",
-            permissions: "*",
-            image: "http://example.com",
-            anonymous: false,
-            private: "secret"
-        }
-        next();
-    },info.runtimeSettings);
-});
-after(function() {
-    theme.settings.restore();
-});
-
-
-
-        it('returns the filtered settings', function(done) {
-            info.init({
+    describe("getRuntimeSettings", function() {
+        it("gets the runtime settings", function() {
+            settings.init({
                 settings: {
                     foo: 123,
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
                     paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
+                    exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
                     }
                 },
                 nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
                 },
-                log: { error: console.error },
                 storage: {}
-            });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
-                    res.body.should.have.property("version","testVersion");
-                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
-                    res.body.should.have.property("editorTheme",{test:456});
-                    res.body.should.have.property("testNodeSetting","helloWorld");
-                    res.body.should.not.have.property("foo",123);
-                    res.body.should.have.property("flowEncryptionType","test-key-type");
-                    res.body.should.not.have.property("user");
-                    done();
-                });
-        });
-        it('returns the filtered user in settings', function(done) {
-            info.init({
-                settings: {
-                    foo: 123,
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
-                        obj.testNodeSetting = "helloWorld";
-                    }
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-                },
-                log: { error: console.error },
-                storage: {}
-            });
-            request(app)
-                .get("/settingsWithUser")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("user");
-                    res.body.user.should.have.property("username","nick");
-                    res.body.user.should.have.property("permissions","*");
-                    res.body.user.should.have.property("image","http://example.com");
-                    res.body.user.should.have.property("anonymous",false);
-                    res.body.user.should.not.have.property("private");
+            })
+            return settings.getRuntimeSettings({}).then(result => {
+                result.should.have.property("httpNodeRoot","testHttpNodeRoot");
+                result.should.have.property("version","testVersion");
+                result.should.have.property("paletteCategories",["red","blue","green"]);
+                result.should.have.property("testNodeSetting","helloWorld");
+                result.should.not.have.property("foo",123);
+                result.should.have.property("flowEncryptionType","test-key-type");
+                result.should.not.have.property("user");
+                result.should.have.property("editorTheme");
+                result.editorTheme.should.eql({palette:{editable:false}});
 
-                    done();
-                });
+            })
         });
-        it('includes project settings if projects available', function(done) {
-            info.init({
+        it("gets the filtered user settings", function() {
+            settings.init({
                 settings: {
                     foo: 123,
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
                     paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
+                    exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
                     }
                 },
                 nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
                 },
-                log: { error: console.error },
+                storage: {}
+            })
+            return settings.getRuntimeSettings({
+                user: {
+                    username: "nick",
+                    anonymous: false,
+                    image: "http://example.com",
+                    permissions: "*",
+                    private: "secret"
+                }
+            }).then(result => {
+                result.should.have.property("user");
+                result.user.should.have.property("username","nick");
+                result.user.should.have.property("permissions","*");
+                result.user.should.have.property("image","http://example.com");
+                result.user.should.have.property("anonymous",false);
+                result.user.should.not.have.property("private");
+            })
+        });
+
+        it('includes project settings if projects available', function() {
+            settings.init({
+                settings: {
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: (obj) => {
+                        obj.testNodeSetting = "helloWorld";
+                    }
+                },
+                nodes: {
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
+                },
                 storage: {
                     projects: {
                         getActiveProject: () => 'test-active-project',
@@ -163,37 +126,39 @@ after(function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 }
+            })
+            return settings.getRuntimeSettings({
+                user: {
+                    username: "nick",
+                    anonymous: false,
+                    image: "http://example.com",
+                    permissions: "*",
+                    private: "secret"
+                }
+            }).then(result => {
+                result.should.have.property("project","test-active-project");
+                result.should.not.have.property("files");
+                result.should.have.property("git");
+                result.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
             });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("project","test-active-project");
-                    res.body.should.not.have.property("files");
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
         });
-        it('includes existing files details if projects enabled but no active project and files exist', function(done) {
-            info.init({
+
+        it('includes existing files details if projects enabled but no active project and files exist', function() {
+            settings.init({
                 settings: {
                     foo: 123,
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
                     paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
+                    exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
                     }
                 },
                 nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
                 },
-                log: { error: console.error },
                 storage: {
                     projects: {
                         flowFileExists: () => true,
@@ -203,39 +168,42 @@ after(function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 }
+            })
+            return settings.getRuntimeSettings({
+                user: {
+                    username: "nick",
+                    anonymous: false,
+                    image: "http://example.com",
+                    permissions: "*",
+                    private: "secret"
+                }
+            }).then(result => {
+                result.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
+                result.should.not.have.property("project");
+                result.should.have.property("files");
+                result.files.should.have.property("flow",'test-flow-file');
+                result.files.should.have.property("credentials",'test-creds-file');
+                result.should.have.property("git");
+                result.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
             });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.not.have.property("project");
-                    res.body.should.have.property("files");
-                    res.body.files.should.have.property("flow",'test-flow-file');
-                    res.body.files.should.have.property("credentials",'test-creds-file');
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
         });
-        it('does not include file details if projects enabled but no active project and files do not exist', function(done) {
-            info.init({
+
+        it('does not include file details if projects enabled but no active project and files do not exist', function() {
+            settings.init({
                 settings: {
                     foo: 123,
                     httpNodeRoot: "testHttpNodeRoot",
                     version: "testVersion",
                     paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function(obj) {
+                    exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
                     }
                 },
                 nodes: {
-                    paletteEditorEnabled: function() { return true; },
-                    getCredentialKeyType: function() { return "test-key-type"}
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
                 },
-                log: { error: console.error },
                 storage: {
                     projects: {
                         flowFileExists: () => false,
@@ -245,57 +213,318 @@ after(function() {
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
                 }
+            })
+            return settings.getRuntimeSettings({
+                user: {
+                    username: "nick",
+                    anonymous: false,
+                    image: "http://example.com",
+                    permissions: "*",
+                    private: "secret"
+                }
+            }).then(result => {
+                result.should.not.have.property("project");
+                result.should.not.have.property("files");
+                result.should.have.property("git");
+                result.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
             });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.not.have.property("project");
-                    res.body.should.not.have.property("files");
-                    res.body.should.have.property("git");
-                    res.body.git.should.have.property("globalUser",{name:'foo',email:'foo@example.com'});
-                    done();
-                });
         });
-        it('overrides palette editable if runtime says it is disabled', function(done) {
-            info.init({
+    });
+    describe("getUserSettings", function() {
+        before(function() {
+            settings.init({
                 settings: {
-                    httpNodeRoot: "testHttpNodeRoot",
-                    version: "testVersion",
-                    paletteCategories :["red","blue","green"],
-                    exportNodeSettings: function() {}
-                },
-                nodes: {
-                    paletteEditorEnabled: function() { return false; },
-                    getCredentialKeyType: function() { return "test-key-type"}
-
-                },
-                log: { error: console.error },
-                storage: {}
-
+                    getUserSettings: username => username
+                }
             });
-            request(app)
-                .get("/settings")
-                .expect(200)
-                .end(function(err,res) {
-                    if (err) {
-                        return done(err);
-                    }
-                    res.body.should.have.property("httpNodeRoot","testHttpNodeRoot");
-                    res.body.should.have.property("version","testVersion");
-                    res.body.should.have.property("paletteCategories",["red","blue","green"]);
-                    res.body.should.have.property("editorTheme");
-                    res.body.editorTheme.should.have.property("test",456);
+        })
+        it("returns default user settings", function() {
+            return settings.getUserSettings({}).then(result => {
+                result.should.eql("_");
+            })
+        })
+        it("returns default user settings for anonymous", function() {
+            return settings.getUserSettings({user:{anonymous:true}}).then(result => {
+                result.should.eql("_");
+            })
+        })
+        it("returns user settings", function() {
+            return settings.getUserSettings({user:{username:'nick'}}).then(result => {
+                result.should.eql("nick");
+            })
+        })
+    });
 
-                    res.body.editorTheme.should.have.property("palette",{editable:false});
-                    done();
-                });
+    describe("updateUserSettings", function() {
+        var userSettings;
+        before(function() {
+            settings.init({
+                settings: {
+                    getUserSettings: username => clone(userSettings[username]),
+                    setUserSettings: (username, settings) => {
+                        if (username === 'error') {
+                            var p = Promise.reject(new Error("unknown user"));
+                            p.catch(()=>{});
+                            return p;
+                        } else if (username === 'throw') {
+                            throw new Error("thrown error");
+                        }
+                        userSettings[username] = clone(settings);
+                        return  Promise.resolve();
+                    }
+                },
+                log: mockLog()
+            });
+        })
+        beforeEach(function() {
+            userSettings = {
+                "_": { abc: 123 },
+                "nick": {abc: 456}
+            }
+        })
+        it('sets default user settings', function() {
+            return settings.updateUserSettings({settings:{abc:789}}).then(function() {
+                userSettings._.abc.should.eql(789)
+            })
+        })
+        it('merges user settings', function() {
+            return settings.updateUserSettings({settings:{def:789}}).then(function() {
+                userSettings._.abc.should.eql(123)
+                userSettings._.def.should.eql(789)
+            })
+        })
+        it('sets default user settings for anonymous user', function() {
+            return settings.updateUserSettings({user:{anonymous:true},settings:{def:789}}).then(function() {
+                userSettings._.abc.should.eql(123)
+                userSettings._.def.should.eql(789)
+            })
+        })
+        it('sets named user settings', function() {
+            return settings.updateUserSettings({user:{username:'nick'},settings:{def:789}}).then(function() {
+                userSettings.nick.abc.should.eql(456)
+                userSettings.nick.def.should.eql(789)
+            })
+        })
+        it('rejects with suitable error', function(done) {
+            settings.updateUserSettings({user:{username:'error'},settings:{def:789}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
+        })
+        it('rejects with suitable error - thrown', function(done) {
+            settings.updateUserSettings({user:{username:'throw'},settings:{def:789}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
+        })
+    });
+    describe("getUserKeys", function() {
+        before(function() {
+            settings.init({
+                storage: {
+                    projects: {
+                        ssh: {
+                            listSSHKeys: username => {
+                                if (username === 'error') {
+                                    var p = Promise.reject(new Error("unknown user"));
+                                    p.catch(()=>{});
+                                    return p;
+                                }
+                                return Promise.resolve([username])
+                            }
+                        }
+                    }
+                }
+            })
+        })
+        it('returns the default users keys', function() {
+            return settings.getUserKeys({}).then(result => {
+                result.should.eql(['__default']);
+            })
+        })
+        it('returns the default users keys for anonymous', function() {
+            return settings.getUserKeys({user:{anonymous:true}}).then(result => {
+                result.should.eql(['__default']);
+            })
+        })
+        it('returns the users keys', function() {
+            return settings.getUserKeys({user:{username:'nick'}}).then(result => {
+                result.should.eql(['nick']);
+            })
+        })
+        it('rejects with suitable error', function(done) {
+            settings.getUserKeys({user:{username:'error'}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
+        })
+    });
+
+    describe("getUserKey", function() {
+        before(function() {
+            settings.init({
+                storage: {
+                    projects: {
+                        ssh: {
+                            getSSHKey: (username, id) => {
+                                if (username === 'error') {
+                                    var p = Promise.reject(new Error("unknown user"));
+                                    p.catch(()=>{});
+                                    return p;
+                                } else if (username === '404') {
+                                    return Promise.resolve(null);
+                                }
+                                return Promise.resolve({username,id})
+                            }
+                        }
+                    }
+                }
+            })
+        })
+        it('returns the default user key', function() {
+            return settings.getUserKey({id:'keyid'}).then(result => {
+                result.should.eql({id:'keyid',username:"__default"});
+            })
+        })
+        it('returns the default user key - anonymous', function() {
+            return settings.getUserKey({user:{anonymous:true},id:'keyid'}).then(result => {
+                result.should.eql({id:'keyid',username:"__default"});
+            })
+        })
+        it('returns the user key', function() {
+            return settings.getUserKey({user:{username:'nick'},id:'keyid'}).then(result => {
+                result.should.eql({id:'keyid',username:"nick"});
+            })
+        })
+        it('404s for unknown key', function(done) {
+            settings.getUserKey({user:{username:'404'},id:'keyid'}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 404);
+                err.should.have.property('code', 'not_found');
+                done();
+            }).catch(done);
+        })
+        it('rejects with suitable error', function(done) {
+            settings.getUserKey({user:{username:'error'}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
+        })
+    });
+    describe("generateUserKey", function() {
+        before(function() {
+            settings.init({
+                storage: {
+                    projects: {
+                        ssh: {
+                            generateSSHKey: (username, opts) => {
+                                if (username === 'error') {
+                                    var p = Promise.reject(new Error("unknown user"));
+                                    p.catch(()=>{});
+                                    return p;
+                                }
+                                return Promise.resolve(JSON.stringify({username,opts}))
+                            }
+                        }
+                    }
+                }
+            })
+        })
+        it('generates for the default user', function() {
+            return settings.generateUserKey({id:'keyid'}).then(result => {
+                var data = JSON.parse(result);
+                data.should.eql({opts:{id:'keyid'},username:"__default"});
+            })
+        })
+        it('generates for the default user - anonymous', function() {
+            return settings.generateUserKey({user:{anonymous:true},id:'keyid'}).then(result => {
+                var data = JSON.parse(result);
+                data.should.eql({opts:{user:{anonymous:true},id:'keyid'},username:"__default"});
+            })
+        })
+        it('generates for the user', function() {
+            return settings.generateUserKey({user:{username:'nick'},id:'keyid'}).then(result => {
+                var data = JSON.parse(result);
+                data.should.eql({opts:{user:{username:'nick'},id:'keyid'},username:"nick"});
+            })
+        })
+        it('rejects with suitable error', function(done) {
+            settings.generateUserKey({user:{username:'error'}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
         })
 
-*/
+    });
+    describe("removeUserKey", function() {
+        var received = {};
+        before(function() {
+            settings.init({
+                storage: {
+                    projects: {
+                        ssh: {
+                            deleteSSHKey: (username, id) => {
+                                if (username === 'error') {
+                                    var p = Promise.reject(new Error("unknown user"));
+                                    p.catch(()=>{});
+                                    return p;
+                                }
+                                received.username = username;
+                                received.id = id;
+                                return Promise.resolve();
+                            }
+                        }
+                    }
+                }
+            })
+        });
+        beforeEach(function() {
+            received.username = "";
+            received.id = "";
+        })
+        it('removes for the default user', function() {
+            return settings.removeUserKey({id:'keyid'}).then(() => {
+                received.username.should.eql("__default");
+                received.id.should.eql("keyid");
+            })
+        })
+        it('removes for the default user key - anonymous', function() {
+            return settings.removeUserKey({user:{anonymous:true},id:'keyid'}).then(() => {
+                received.username.should.eql("__default");
+                received.id.should.eql("keyid");
+            })
+        })
+        it('returns the user key', function() {
+            return settings.removeUserKey({user:{username:'nick'},id:'keyid'}).then(() => {
+                received.username.should.eql("nick");
+                received.id.should.eql("keyid");
+            })
+        })
+        it('rejects with suitable error', function(done) {
+            settings.removeUserKey({user:{username:'error'}}).then(result => {
+                done("Unexpected resolve for error case");
+            }).catch(err => {
+                err.should.have.property('status', 400);
+                done();
+            }).catch(done);
+        })
+    });
+
+});
+
+
+
 /*
 
 
