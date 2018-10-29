@@ -399,7 +399,15 @@ module.exports = function(RED) {
             if (this.topic) {
                 node.brokerConn.register(this);
                 this.brokerConn.subscribe(this.topic,this.qos,function(topic,payload,packet) {
-                    if (this.datatype == "utf8" && isUtf8(payload)) { payload = payload.toString(); }
+                    if (node.datatype =="buffer") {
+                        // payload = payload;
+                    } else if (node.datatype =="base64") {
+                        payload = payload.toString('base64');
+                    } else if (node.datatype =="utf8") {
+                        payload = payload.toString('utf8');
+                    } else {
+                        if (isUtf8(payload)) { payload = payload.toString(); }
+                    }
                     var msg = {topic:topic,payload:payload, qos: packet.qos, retain: packet.retain};
                     if ((node.brokerConn.broker === "localhost")||(node.brokerConn.broker === "127.0.0.1")) {
                         msg._topic = topic;

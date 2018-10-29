@@ -31,8 +31,10 @@
     <div class="form-row">
         <label for="node-input-datatype"><i class="fa fa-sign-out"></i> <span data-i18n="mqtt.label.output"></span></label>
         <select id="node-input-datatype" style="width:70%;">
+            <option value="auto" data-i18n="mqtt.output.auto"></option>
             <option value="buffer" data-i18n="mqtt.output.buffer"></option>
             <option value="utf8" data-i18n="mqtt.output.string"></option>
+            <option value="base64" data-i18n="mqtt.output.base64"></option>
         </select>
     </div>
     <div class="form-row">
@@ -68,7 +70,7 @@
             name: {value:""},
             topic: {value:"",required:true,validate: RED.validators.regex(/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/)},
             qos: {value: "2"},
-            datatype: {value:"utf8",required:true},
+            datatype: {value:"auto",required:true},
             broker: {type:"mqtt-broker", required:true}
         },
         color:"#d8bfd8",
@@ -86,7 +88,7 @@
                 $("#node-input-qos").val("2");
             }
             if (this.datatype === undefined) {
-                $("#node-input-datatype").val("utf8");
+                $("#node-input-datatype").val("auto");
             }
         }
     });

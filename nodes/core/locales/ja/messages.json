@@ -361,7 +361,8 @@
         "retain": "保持",
         "output": {
             "buffer": "バイナリバッファ",
-            "string": "文字列"
+            "string": "文字列",
+            "base64": "Base64文字列"
         },
         "true": "する",
         "false": "しない",

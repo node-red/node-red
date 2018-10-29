@@ -361,7 +361,9 @@
         "retain": "Retain",
         "output": {
             "buffer": "a Buffer",
-            "string": "a String"
+            "string": "a String",
+            "base64": "a Base64 encoded string",
+            "auto": "auto-detect"
         },
         "true": "true",
         "false": "false",

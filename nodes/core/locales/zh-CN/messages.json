@@ -345,7 +345,8 @@
         "retain": "保留",
         "output": {
             "buffer": "Buffer",
-            "string": "字符串"
+            "string": "字符串",
+            "base64": "Base64编码字符串"
         },
         "true": "是",
         "false": "否",
