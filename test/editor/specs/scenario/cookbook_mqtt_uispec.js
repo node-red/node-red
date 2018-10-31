@@ -105,7 +105,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"22"');
         });
@@ -141,7 +140,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"22"');
         });
@@ -164,7 +162,6 @@ describe('cookbook', function() {
             workspace.deploy();
             debugTab.open();
             injectNode.clickLeftButton();
-            debugTab.clearMessage();
 
             // The code for confirmation starts from here.
             var mqttInNode = workspace.addNode("mqttIn", 0, 100);
@@ -178,7 +175,7 @@ describe('cookbook', function() {
             // The code for confirmation ends here.
 
             workspace.deploy();
-            debugTab.open();
+            debugTab.open(true);
             debugTab.getMessage().should.eql('"22"');
         });
 
@@ -218,7 +215,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql(['1234', '13']);
         });

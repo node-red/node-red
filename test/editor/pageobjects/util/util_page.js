@@ -14,35 +14,68 @@
  * limitations under the License.
  **/
 
+var waitTime = 5000;
+
+function repeatUntilSuccess(operation, args) {
+    // Wait at most 10 seconds.
+    for (var i = 0; i < 200; i++) {
+        try {
+            var ret = operation(args);
+            return ret;
+        } catch (e) {
+            if (i === 199) {
+                console.trace();
+                throw e;
+            }
+            browser.pause(50);
+        }
+    }
+}
+
 function init() {
     browser.addCommand("clickWithWait", function(selector) {
-        browser.waitForVisible(selector);
-        // Wait at most 10 seconds.
-        for (var i = 0; i < 50; i++) {
-            try {
-                var ret = browser.click(selector);
-                return ret;
-            } catch (err) {
-                if (err.message.indexOf('is not clickable') !== -1) {
-                    browser.pause(200);
-                } else {
-                    throw err;
-                }
-            }
+        try {
+            // This is necessary because there is a case that the target may exist but still moving.
+            browser.pause(50);
+            browser.waitForVisible(selector);
+
+            var ret = repeatUntilSuccess(function(selector) {
+                return browser.click(selector);
+            }, selector);
+            return ret;
+        } catch (e) {
+            console.trace();
+            throw e;
         }
     }, false);
 
     browser.addCommand("getTextWithWait", function(selector) {
-        browser.waitForExist(selector);
-        browser.waitForValue(selector);
-        var ret = browser.getText(selector);
-        return ret;
+        try {
+            browser.waitForExist(selector);
+            browser.waitForValue(selector);
+
+            var ret = repeatUntilSuccess(function(selector) {
+                return browser.getText(selector);
+            }, selector);
+            return ret;
+        } catch (e) {
+            console.trace();
+            throw e;
+        }
     }, false);
 
     browser.addCommand("selectWithWait", function(selector, value) {
-        browser.waitForVisible(selector, 5000);
-        var ret = browser.selectByValue(selector, value);
-        return ret;
+        try {
+            browser.waitForVisible(selector, waitTime);
+
+            var ret = repeatUntilSuccess(function(args) {
+                return browser.selectByValue(args[0], args[1]);
+            }, [selector, value]);
+            return ret;
+        } catch (e) {
+            console.trace();
+            throw e;
+        }
     }, false);
 }
 

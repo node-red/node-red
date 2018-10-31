@@ -75,7 +75,6 @@ module.exports = {
             var flowFilename = getFlowFilename();
             browser.windowHandleMaximize();
             browser.call(function () {
-                // return when.promise(function(resolve, reject) {
                 return new Promise(function(resolve, reject) {
                     cleanup(flowFilename);
                     app.use("/",express.static("public"));

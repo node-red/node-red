@@ -41,6 +41,8 @@ templateNode.prototype.setTemplate = function(template) {
     }
     browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
     browser.keys(['Delete']);
+    // Need to wait until ace editor correctly checks the syntax.
+    browser.pause(300);
 }
 
 module.exports = templateNode;

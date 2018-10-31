@@ -72,7 +72,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello World!').should.not.eql(-1);
         });
@@ -112,7 +111,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
@@ -152,7 +150,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Dave!').should.not.eql(-1);
         });
@@ -198,7 +195,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Mozilla').should.not.eql(-1);
         });
@@ -257,7 +253,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNodeTimestamp.clickLeftButton();
             injectNodeCheck.clickLeftButton();
             var index = debugTab.getMessage().indexOf('Time: ') + 6;
@@ -294,6 +289,7 @@ describe('cookbook', function() {
             // The code for confirmation starts from here.
             var injectNode = workspace.addNode("inject", 0, 200);
             var httpRequestNode = workspace.addNode("httpRequest");
+            var changeNodeCheck = workspace.addNode("change");
             var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
@@ -301,21 +297,20 @@ describe('cookbook', function() {
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-json');
             httpRequestNode.clickOk();
 
-            debugNode.edit();
-            debugNode.setOutput("headers");
-            debugNode.clickOk();
+            changeNodeCheck.edit();
+            changeNodeCheck.ruleSet("payload", "msg", "headers.content-type", "msg", "1");
+            changeNodeCheck.clickOk();
 
             injectNode.connect(httpRequestNode);
-            httpRequestNode.connect(debugNode);
+            httpRequestNode.connect(changeNodeCheck);
+            changeNodeCheck.connect(debugNode);
             // The code for confirmation ends here.
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             var messages = debugTab.getMessage();
-            var contents = messages.join([separator = ""]);
-            contents.indexOf('application/json').should.not.eql(-1);
+            messages.indexOf('application/json').should.not.eql(-1);
         });
 
         it('serve a local file', function () {
@@ -360,7 +355,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Text file').should.not.eql(-1);
         });
@@ -404,7 +398,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
@@ -454,7 +447,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
@@ -504,7 +496,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });

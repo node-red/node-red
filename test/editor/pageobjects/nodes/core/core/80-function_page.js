@@ -34,7 +34,7 @@ functionNode.prototype.setFunction = function(func) {
     browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
     browser.keys(['Delete']);
     // Need to wait until ace editor correctly checks the syntax.
-    browser.pause(50);
+    browser.pause(300);
 }
 
 module.exports = functionNode;
