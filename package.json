@@ -60,7 +60,7 @@
     "mqtt": "2.18.8",
     "multer": "1.4.1",
     "mustache": "2.3.2",
-    "node-red-node-email": "0.1.*",
+    "node-red-node-email": "1.0.*",
     "node-red-node-feedparser": "^0.1.12",
     "node-red-node-rbe": "0.2.*",
     "node-red-node-twitter": "^1.1.0",
