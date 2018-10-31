@@ -1,3 +1,30 @@
+#### 0.19.5: Maintenance Release
+
+ - Recognize pip installs of RPi.GPIO (#1934)
+ - Merge pull request #1941 from node-red-hitachi/master-batch
+ - Merge pull request #1931 from node-red-hitachi/master-typedinput
+ - Set min value of properties and spinners for batch
+ - Fix that unnecessary optionMenu remains
+ - Merge pull request #1894 from node-red-hitachi/fix-overlapping-file-node-execution
+ - Merge pull request #1924 from imZack/patch-1
+ - Add missing comma
+ - Do not disable context sidebar during node edit Fixes #1921
+ - Don't allow virtual links to be spliced Fixes #1920
+ - Merge project package changes to avoid overwritten changes
+ - Handle manually added project deps that are unused Fixes #1908
+ - update close & input handling of File node
+ - make close handler argument only one
+ - Merge pull request #1907 from amilajack/patch-2
+ - Change repo badge to point to master branch
+ - invoke callbacks if async handler is specified
+ - Merge pull request #1891 from camlow325/resolve-example-path-for-windows-support
+ - Merge pull request #1900 from kazuhitoyokoi/master-addtestcases4settings.js
+ - wait closing while pending messages exist
+ - Add test cases for red/api/editor/settings.js
+ - Ensure all palette categories are opened properly Closes #1893
+ - Resolve path when sending example file for Windows support
+ - fix multiple input message processing of file node
+
 #### 0.19.4: Maintenance Release
 
  - Fix race condition in non-cache lfs context Fixes #1888
