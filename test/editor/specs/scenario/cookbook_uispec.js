@@ -55,7 +55,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello World!"');
         });
@@ -75,7 +74,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql("undefined");
         });
@@ -99,7 +97,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello"');
         });
@@ -134,7 +131,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode1.clickLeftButton();
             debugTab.getMessage(1).should.eql('0');
             injectNode2.clickLeftButton();
@@ -156,7 +152,6 @@ describe('cookbook', function() {
             injectNode.connect(debugNode);
 
             debugTab.open();
-            debugTab.clearMessage();
             workspace.deploy();
             debugTab.getMessage().should.eql('"Started!"');
         });
@@ -174,12 +169,11 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             specUtil.pause(1000);
             var t1 = Number(debugTab.getMessage(1));
             t1.should.within(1500000000000, 3000000000000);
             specUtil.pause(1000);
-            debugTab.getMessage(2).should.within(t1 + 1000, 3000000000000);
+            debugTab.getMessage(2).should.within(t1 + 900, 3000000000000);
         });
 
         // skip this case since it needs up to one minite.
@@ -209,7 +203,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Node-RED"');
         });
@@ -235,7 +228,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.containEql('<title>Node-RED</title>');
         });
@@ -265,7 +257,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.containEql('httpNodeRoot');
         });
@@ -314,7 +305,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello Nick"');
         });
@@ -376,7 +366,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello"');
         });
@@ -398,7 +387,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
 
             debugTab.getMessage().should.eql(['123', '34', '104', '116', '116', '112', '78', '111', '100', '101']);
@@ -446,7 +434,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"data to post"');
         });

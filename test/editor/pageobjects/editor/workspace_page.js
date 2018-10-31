@@ -73,6 +73,8 @@ function deploy() {
         });
     });
     browser.waitForText('#btn-deploy', 2000);
+    // Need additional wait until buttons becomes clickable.
+    browser.pause(50);
 }
 
 function init(width, height) {

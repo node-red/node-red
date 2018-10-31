@@ -48,7 +48,6 @@ describe('Workspace', function() {
         workspace.deploy();
 
         debugTab.open();
-        debugTab.clearMessage();
         injectNode.clickLeftButton();
         debugTab.getMessage().should.within(1500000000000, 3000000000000);
     });
