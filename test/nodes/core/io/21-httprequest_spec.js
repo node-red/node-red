@@ -35,11 +35,11 @@ var auth = require('basic-auth');
 describe('HTTP Request Node', function() {
     var testApp;
     var testServer;
-    var testPort = 9000;
+    var testPort = 10234;
     var testSslServer;
-    var testSslPort = 9100;
+    var testSslPort = 10334;
     var testProxyServer;
-    var testProxyPort = 9200;
+    var testProxyPort = 10444;
 
     //save environment variables
     var preEnvHttpProxyLowerCase;
@@ -131,6 +131,11 @@ describe('HTTP Request Node', function() {
             setTimeout(function() {
                 res.send('hello');
             }, 10000);
+        });
+        testApp.get('/timeout50ms', function(req, res){
+            setTimeout(function() {
+                res.send('hello');
+            }, 50);
         });
         testApp.get('/checkCookie', function(req, res){
             var value = req.cookies.data;
@@ -844,7 +849,7 @@ describe('HTTP Request Node', function() {
             });
         });
 
-        it('shuold output an error when request timeout occurred', function(done) {
+        it('should output an error when request timeout occurred', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout')},
                 {id:"n2", type:"helper"}];
             var timeout = RED.settings.httpRequestTimeout;
@@ -871,8 +876,95 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
-    });
 
+        it('should output an error when request timeout occurred when set via msg.requestTimeout', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(1);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().ERROR, id:'n1',type:'http request',msg:'common.notification.errors.no-response', timestamp:tstmp});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: 50});
+            });
+        });
+        it('should show a warning if msg.requestTimeout is not a number', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/text')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode', 200);
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(2);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().WARN, id:'n1',type:'http request',msg:'httpin.errors.timeout-isnan', timestamp:tstmp});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: "foo"});
+            });
+        });
+        it('should show a warning if msg.requestTimeout is negative', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/text')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode', 200);
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(2);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().WARN, id:'n1',type:'http request',msg:'httpin.errors.timeout-isnegative', timestamp:tstmp});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: -4});
+            });
+        });
+        it('should pass if response time is faster than timeout set via msg.requestTimeout', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout50ms')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: 100});
+            });
+        });
+
+    });
     describe('HTTP header', function() {
         it('should receive cookie', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/setCookie')},
@@ -913,7 +1005,7 @@ describe('HTTP Request Node', function() {
             });
         });
 
-        it('should send cookie with obejct data', function(done) {
+        it('should send cookie with object data', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
