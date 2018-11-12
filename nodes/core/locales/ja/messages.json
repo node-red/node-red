@@ -203,7 +203,7 @@
         "template": "template",
         "label": {
             "template": "テンプレート",
-            "property": "設定先",
+            "property": "プロパティ",
             "format": "構文",
             "syntax": "形式",
             "output": "出力形式",
