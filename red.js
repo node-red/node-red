@@ -240,7 +240,7 @@ function basicAuthMiddleware(user,pass) {
         }
         var requestUser = basicAuth(req);
         if (!requestUser || requestUser.name !== user || !checkPasswordAndCache(requestUser.pass)) {
-            res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
+            res.set('WWW-Authenticate', 'Basic realm="Authorization Required"');
             return res.sendStatus(401);
         }
         next();
