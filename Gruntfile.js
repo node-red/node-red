@@ -450,7 +450,7 @@ module.exports = function(grunt) {
                     separators: true
                 },
                 src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
-                dest: 'docs/runtime-api.md'
+                dest: 'packages/node_modules/@node-red/runtime/docs/api.md'
             },
             nodeREDUtil: {
                 options: {
