@@ -255,24 +255,24 @@ function handleStatus(node,statusMessage) {
 }
 
 // propagete successful completion to nodes in flow
-function delegateDone(node, msg) {
+function delegateComplete(node, msg) {
     if (activeFlows[node.z]) {
-        activeFlows[node.z].handleDone(node, msg);
+        activeFlows[node.z].handleComplete(node, msg);
     } else if (activeNodesToFlow[node.z] && activeFlows[activeNodesToFlow[node.z]]) {
-        activeFlows[activeNodesToFlow[node.z]].handleDone(node, msg);
+        activeFlows[activeNodesToFlow[node.z]].handleComplete(node, msg);
     }
 }
 
-function handleDone(node, msg) {
+function handleComplete(node, msg) {
     if (node.z) {
-        delegateDone(node, msg);
+        delegateComplete(node, msg);
     } else {
         if (activeFlowConfig &&
             activeFlowConfig.configs &&
             activeFlowConfig.configs[node.id]) {
             activeFlowConfig.configs[node.id]._users.forEach(function(id) {
                 var userNode = activeFlowConfig.allNodes[id];
-                delegateDone(userNode, msg);
+                delegateComplete(userNode, msg);
             })
         }
     }
@@ -742,7 +742,7 @@ module.exports = {
 
     handleError: handleError,
     handleStatus: handleStatus,
-    handleDone: handleDone, // propages successful completion 
+    handleComplete: handleComplete, // propages successful completion 
 
     checkTypeInUse: checkTypeInUse,
 

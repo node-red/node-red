@@ -17,7 +17,7 @@
 module.exports = function(RED) {
     "use strict";
 
-    function DoneTest00Node(n) {
+    function CompleteTest00Node(n) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.on("input", function(msg, send, done) {
@@ -26,5 +26,5 @@ module.exports = function(RED) {
         });
     }
 
-    RED.nodes.registerType("done-test00", DoneTest00Node);
+    RED.nodes.registerType("complete-test00", CompleteTest00Node);
 }

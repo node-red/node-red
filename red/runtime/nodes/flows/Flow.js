@@ -31,7 +31,7 @@ function Flow(global,flow) {
     var subflowInstanceNodes = {};
     var catchNodeMap = {};
     var statusNodeMap = {};
-    var doneNodeMap = {}; // records `Done` nodes in flow
+    var completeNodeMap = {}; // records `Complete` nodes in flow
 
     this.start = function(diff) {
         var node;
@@ -39,7 +39,7 @@ function Flow(global,flow) {
         var id;
         catchNodeMap = {};
         statusNodeMap = {};
-        doneNodeMap = {};
+        completeNodeMap = {};
 
         var configNodes = Object.keys(flow.configs);
         var configNodeAttempts = {};
@@ -120,26 +120,26 @@ function Flow(global,flow) {
                 } else if (node.type === "status") {
                     statusNodeMap[node.z] = statusNodeMap[node.z] || [];
                     statusNodeMap[node.z].push(node);
-                } else if (node.type === "done") {
-                    doneNodeMap[node.z] = doneNodeMap[node.z] || [];
-                    doneNodeMap[node.z].push(node);
+                } else if (node.type === "complete") {
+                    completeNodeMap[node.z] = completeNodeMap[node.z] || [];
+                    completeNodeMap[node.z].push(node);
                 }
             }
         }
-        // clear `node._canSendDone`
+        // clear `node._canSendComplete`
         for (id in activeNodes) {
-            node.setCanSendDone(false);
+            node.setCanSendComplete(false);
         }
-        // if a node is target of `Done` node make
-        // `node._canSendDone` `true`.
+        // if a node is target of `Complete` node make
+        // `node._canSendComplete` `true`.
         for (id in activeNodes) {
             var node = activeNodes[id];
-            if ((node.type === "done") && node.hasOwnProperty("scope")) {
+            if ((node.type === "complete") && node.hasOwnProperty("scope")) {
                 var scope = node.scope;
                 if (scope) {
                     for (var src_id of scope) {
                         var src = activeNodes[src_id];
-                        src.setCanSendDone(true);
+                        src.setCanSendComplete(true);
                     }
                 }
             }
@@ -313,34 +313,34 @@ function Flow(global,flow) {
     };
 
     // notify successful completion of `node` with output message
-    // `msg` to `Done` node.
-    this.handleDone = function(node, msg) {
+    // `msg` to `Complete` node.
+    this.handleComplete = function(node, msg) {
         var sourceNode = node;
-        var targetDoneNodes = doneNodeMap[sourceNode.z];
-        if (targetDoneNodes) {
-            targetDoneNodes.forEach(function(targetDoneNode) {
-                if (targetDoneNode.scope && targetDoneNode.scope.indexOf(sourceNode.id) === -1) {
+        var targetCompleteNodes = completeNodeMap[sourceNode.z];
+        if (targetCompleteNodes) {
+            targetCompleteNodes.forEach(function(targetCompleteNode) {
+                if (targetCompleteNode.scope && targetCompleteNode.scope.indexOf(sourceNode.id) === -1) {
                     return;
                 }
-                var doneMessage;
+                var completeMessage;
                 if (msg) {
-                    doneMessage = redUtil.cloneMessage(msg);
+                    completeMessage = redUtil.cloneMessage(msg);
                 } else {
-                    doneMessage = {};
+                    completeMessage = {};
                 }
-                // save `done` property if already exist
-                if (doneMessage.hasOwnProperty("done")) {
-                    doneMessage._done = succMessage.done;
+                // save `complete` property if already exist
+                if (completeMessage.hasOwnProperty("complete")) {
+                    completeMessage._complete = succMessage.complete;
                 }
-                // send message to `Done` node
-                doneMessage.done = {
+                // send message to `Complete` node
+                completeMessage.complete = {
                     source: {
                         id: node.id,
                         type: node.type,
                         name: node.name
                     }
                 };
-                targetDoneNode.receive(doneMessage);
+                targetCompleteNode.receive(completeMessage);
             });
         }
     };

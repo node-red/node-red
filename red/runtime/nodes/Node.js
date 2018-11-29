@@ -106,8 +106,8 @@ Node.prototype.on = function(event, callback) {
                     }
                 }
                 // define `done` callback with optimization
-                if (node.maySendDone()) {
-                    // if this node is specified as target of Done node,
+                if (node.maySendComplete()) {
+                    // if this node is specified as target of Complete node,
                     // process `error` & `done`.
                     done = function (err, msg) {
                         clearNodeTimeout();
@@ -145,8 +145,8 @@ Node.prototype.on = function(event, callback) {
                 node._msgIn = msg;
                 callback.call(node, msg);
                 // implicitly notify successful completion if this
-                // node is target of `Done` node.
-                if (node.maySendDone()) {
+                // node is target of `Complete` node.
+                if (node.maySendComplete()) {
                     node.done(msg);
                 }
             });
@@ -344,20 +344,20 @@ Node.prototype.error = function(logMessage,msg) {
     }
 };
 
-// true if node is candidate for handling by `Done` node.
+// true if node is candidate for handling by `Complete` node.
 // (see `Flow` function in `red/runtime/nodes/flows/Flow.js` for details)
-Node.prototype.setCanSendDone = function(val) {
-    this._canSendDone = val;
+Node.prototype.setCanSendComplete = function(val) {
+    this._canSendComplete = val;
 }
 
-Node.prototype.maySendDone = function() {
-    return (this._canSendDone !== false);
+Node.prototype.maySendComplete = function() {
+    return (this._canSendComplete !== false);
 }
 
-// notify successful completion of the node to `Done` node.
+// notify successful completion of the node to `Complete` node.
 Node.prototype.done = function(msg) {
     try {
-        flows.handleDone(this, msg);
+        flows.handleComplete(this, msg);
     }
     catch(e) {
         console.log(e.stack);
