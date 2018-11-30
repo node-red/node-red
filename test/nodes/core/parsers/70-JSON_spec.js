@@ -247,4 +247,190 @@ describe('JSON node', function() {
             });
         });
     });
+
+    it('should pass an object if provided a valid JSON string and schema', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload.number, 3);
+                should.equal(msg.payload.string, "allo");
+                done();
+            });
+            var jsonString =  '{"number": 3, "string": "allo"}';
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonString, schema:schema});
+        });
+    });
+
+    it('should pass an object if provided a valid object and schema and action is object', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"obj",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload.number, 3);
+                should.equal(msg.payload.string, "allo");
+                done();
+            });
+            var obj =  {"number": 3, "string": "allo"};
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:obj, schema:schema});
+        });
+    });
+
+    it('should pass a string if provided a valid object and schema', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, '{"number":3,"string":"allo"}');
+                done();
+            });
+            var obj =  {"number": 3, "string": "allo"};
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:obj, schema:schema});
+        });
+    });
+
+    it('should pass a string if provided a valid JSON string and schema and action is string', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, '{"number":3,"string":"allo"}');
+                done();
+            });
+            var jsonString =  '{"number":3,"string":"allo"}';
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonString, schema:schema});
+        });
+    });
+
+    it('should log an error if passed an invalid object and valid schema', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+                var obj =  {"number": "foo", "string": 3};
+                jn1.receive({payload:obj, schema:schema});
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "json";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
+    it('should log an error if passed an invalid object and valid schema and action is object', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"obj",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+                var obj =  {"number": "foo", "string": 3};
+                jn1.receive({payload:obj, schema:schema});
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "json";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
+    it('should log an error if passed an invalid JSON string and valid schema', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+                var jsonString =  '{"number":"Hello","string":3}';
+                jn1.receive({payload:jsonString, schema:schema});
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "json";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
+    it('should log an error if passed an invalid JSON string and valid schema and action is string', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+                var jsonString =  '{"number":"Hello","string":3}';
+                jn1.receive({payload:jsonString, schema:schema});
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "json";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
+
+    it('should log an error if passed a valid object and invalid schema', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            try {
+                var jn1 = helper.getNode("jn1");
+                var jn2 = helper.getNode("jn2");
+                var schema = "garbage";
+                var obj =  {"number": "foo", "string": 3};
+                jn1.receive({payload:obj, schema:schema});
+                var logEvents = helper.log().args.filter(function(evt) {
+                    return evt[0].type == "json";
+                });
+                logEvents.should.have.length(1);
+                logEvents[0][0].should.have.a.property('msg');
+                logEvents[0][0].msg.should.equal("json.errors.schema-error-compile");
+                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                done();
+            } catch(err) {
+                done(err);
+            }
+        });
+    });
 });

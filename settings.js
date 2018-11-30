@@ -41,6 +41,10 @@ module.exports = {
     //  defaults to no timeout
     //socketTimeout: 120000,
 
+    // Maximum number of messages to wait in queue while attempting to connect to TCP socket
+    //  defaults to 1000
+    //tcpMsgQueueSize: 2000,
+
     // Timeout in milliseconds for HTTP request connections
     //  defaults to 120 seconds
     //httpRequestTimeout: 120000,
@@ -144,7 +148,7 @@ module.exports = {
 
     // The following property can be used to cause insecure HTTP connections to
     // be redirected to HTTPS.
-    //requireHttps: true
+    //requireHttps: true,
 
     // The following property can be used to disable the editor. The admin API
     // is not affected by this option. To disable both the editor and the admin
@@ -209,6 +213,17 @@ module.exports = {
         // j5board:require("johnny-five").Board({repl:false})
     },
 
+    // Context Storage
+    // The following property can be used to enable context storage. The configuration
+    // provided here will enable file-based context that flushes to disk every 30 seconds.
+    // Refer to the documentation for further options: https://nodered.org/docs/api/context/
+    //
+    //contextStorage: {
+    //    default: {
+    //        module:"localfilesystem"
+    //    },
+    //},
+
     // The following property can be used to order the categories in the editor
     // palette. If a node's category is not in the list, the category will get
     // added to the end of the palette.
@@ -241,5 +256,5 @@ module.exports = {
             // To enable the Projects feature, set this value to true
             enabled: false
         }
-    }
+    },
 }

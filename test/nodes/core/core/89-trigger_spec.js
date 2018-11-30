@@ -18,6 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var helper = require("node-red-node-test-helper");
 var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
+var Context = require("../../../../red/runtime/nodes/context");
 var RED = require("../../../../red/red.js");
 
 describe('trigger node', function() {
@@ -26,8 +27,31 @@ describe('trigger node', function() {
         helper.startServer(done);
     });
 
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
+                    module: "memory"
+                },
+                memory2: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
+
     afterEach(function(done) {
-        helper.unload().then(function() {
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
             helper.stopServer(done);
         });
     });
@@ -75,6 +99,74 @@ describe('trigger node', function() {
         });
     });
 
+    function basicTest(type, val, rval) {
+        it('should output 1st value when triggered ('+type+')', function(done) {
+            var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:val, op1type:type, op2:"", op2type:"null", duration:"20", wires:[["n2"]] },
+                        {id:"n2", type:"helper"} ];
+            process.env[val] = rval;
+            helper.load(triggerNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+			if (rval) {
+			    msg.should.have.property("payload");
+			    should.deepEqual(msg.payload, rval);
+			}
+			else {
+			    msg.should.have.property("payload", val);
+			}
+                        delete process.env[val];
+                        done();
+                    }
+                    catch(err) { done(err); }
+                });
+                n1.emit("input", {payload:null});
+            });
+        });
+
+        it('should output 2st value when triggered ('+type+')', function(done) {
+            var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"str", op2:val, op2type:type, duration:"20", wires:[["n2"]] },
+                        {id:"n2", type:"helper"} ];
+            process.env[val] = rval;
+            helper.load(triggerNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    try {
+                        if (c === 0) {
+			    msg.should.have.property("payload", "foo");
+                            c++;
+                        }
+                        else {
+			    if (rval) {
+			        msg.should.have.property("payload");
+			        should.deepEqual(msg.payload, rval);
+			    }
+			    else {
+			        msg.should.have.property("payload", val);
+			    }
+                            delete process.env[val];
+                            done();
+                        }
+                    }
+                    catch(err) { done(err); }
+                });
+                n1.emit("input", {payload:null});
+            });
+        });
+    }
+    
+    basicTest("num", 10);
+    basicTest("str", "10");
+    basicTest("bool", true);
+    var val_json = '{ "x":"vx", "y":"vy", "z":"vz" }';
+    basicTest("json", val_json, JSON.parse(val_json));
+    var val_buf = "[1,2,3,4,5]";
+    basicTest("bin", val_buf, Buffer.from(JSON.parse(val_buf)));
+    basicTest("env", "NR-TEST", "env-val");
+    
     it('should output 1 then 0 when triggered (default)', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:"20", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -288,7 +380,7 @@ describe('trigger node', function() {
 
     it('should be able to return things from flow and global context variables', function(done) {
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
-            function(arg1, arg2, arg3, arg4) { return arg1; }
+            function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"flow", op2:"bar", op2type:"global", duration:"20", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -312,7 +404,159 @@ describe('trigger node', function() {
             });
             n1.emit("input", {payload:null});
         });
+    });
 
+    it('should be able to return things from persistable flow and global context variables', function (done) {
+        var flow = [{"id": "n1", "type": "trigger", "name": "triggerNode", "op1": "#:(memory1)::foo", "op1type": "flow",
+                     "op2": "#:(memory1)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (c === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                            c += 1;
+                        } else {
+                            msg.should.have.a.property("payload", "bar");
+                            done();
+                        }
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                var context = n1.context();
+                var flow = context.flow;
+                var global = context.global;
+                flow.set("foo", "foo", "memory1", function (err) {
+                    global.set("bar", "bar", "memory1", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
+    });
+
+    it('should be able to return things from multiple persistable global context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory1)::val", "op1type": "global",
+                     "op2": "#:(memory2)::val", "op2type": "global"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var global = n1.context().global;
+                global.set("val", "foo", "memory1", function (err) {
+                    global.set("val", "bar", "memory2", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
+    });
+
+    it('should be able to return things from multiple persistable flow context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory1)::val", "op1type": "flow",
+                     "op2": "#:(memory2)::val", "op2type": "flow"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var flow = n1.context().flow;
+                flow.set("val", "foo", "memory1", function (err) {
+                    flow.set("val", "bar", "memory2", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
+    });
+
+    it('should be able to return things from multiple persistable flow & global context variables', function (done) {
+        var flow = [{"id": "n1", "z": "flow", "type": "trigger",
+                     "duration": "20", "wires": [["n2"]],
+                     "op1": "#:(memory1)::val", "op1type": "flow",
+                     "op2": "#:(memory2)::val", "op2type": "global"
+                    },
+                    {"id": "n2", "type": "helper"}];
+        helper.load(triggerNode, flow, function () {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function (msg) {
+                    try {
+                        if (count === 0) {
+                            msg.should.have.a.property("payload", "foo");
+                        }
+                        else {
+                            msg.should.have.a.property("payload", "bar");
+                        }
+                        count++;
+                        if (count === 1) {
+                            done();
+                        }
+                    }
+                    catch (err) {
+                        done(err);
+                    }
+                });
+                var context = n1.context();
+                var flow = context.flow;
+                var global = context.flow;
+                flow.set("val", "foo", "memory1", function (err) {
+                    global.set("val", "bar", "memory2", function (err) {
+                        n1.emit("input", { payload: null });
+                    });
+                });
+            });
+        });
     });
 
     it('should be able to not output anything on first trigger', function(done) {
@@ -386,7 +630,7 @@ describe('trigger node', function() {
     it('should be able to extend the delay', function(done) {
         this.timeout(5000); // add extra time for flake
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
-            function(arg1, arg2, arg3, arg4) { return arg1; }
+            function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"flow", op1:"foo",  op2:"bar", op2type:"global", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -433,8 +677,7 @@ describe('trigger node', function() {
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
-                        //console.log(Date.now() - ss);
-                        (Date.now() - ss).should.be.greaterThan(140);
+                        (Date.now() - ss).should.be.greaterThan(149);
                         done();
                     }
                 }
@@ -444,7 +687,7 @@ describe('trigger node', function() {
             n1.emit("input", {payload:"Hello"});
             setTimeout( function() {
                 n1.emit("input", {payload:"Error"});
-            },20);
+            },30);
             setTimeout( function() {
                 n1.emit("input", {payload:"World"});
             },150);

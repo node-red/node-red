@@ -77,7 +77,9 @@
 }</pre>
     <p>The resulting property will be:
     <pre>Hello Fred. Today is Monday</pre>
-    <p>It is possible to use a property from the flow context or global context. Just use <code>{{flow.name}}</code> or <code>{{global.name}}</code>.
+    <p>It is possible to use a property from the flow context or global context. Just use <code>{{flow.name}}</code> or
+    <code>{{global.name}}</code>, or for persistable store <code>store</code> use <code>{{flow[store].name}}</code> or
+    <code>{{global[store].name}}</code>.
     <p><b>Note: </b>By default, <i>mustache</i> will escape any HTML entities in the values it substitutes.
        To prevent this, use <code>{{{triple}}}</code> braces.
 </script>

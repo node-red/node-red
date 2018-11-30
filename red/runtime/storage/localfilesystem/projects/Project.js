@@ -162,7 +162,7 @@ Project.prototype.initialise = function(user,data) {
         if (defaultFileSet.hasOwnProperty(file)) {
             var path = fspath.join(project.path,file);
             if (!fs.existsSync(path)) {
-                promises.push(util.writeFile(path,defaultFileSet[file](project)));
+                promises.push(util.writeFile(path,defaultFileSet[file](project, runtime)));
             }
 
         }
@@ -358,7 +358,15 @@ Project.prototype.update = function (user, data) {
         promises.push(util.writeFile(this.paths['README.md'], this.description));
     }
     if (savePackage) {
-        promises.push(util.writeFile(this.paths['package.json'], JSON.stringify(this.package,"",4)));
+        promises.push(fs.readFile(project.paths['package.json'],"utf8").then(content => {
+            var currentPackage = {};
+            try {
+                currentPackage = util.parseJSON(content);
+            } catch(err) {
+            }
+            this.package = Object.assign(currentPackage,this.package);
+            return util.writeFile(this.paths['package.json'], JSON.stringify(this.package,"",4));
+        }));
     }
     return when.settle(promises).then(function(res) {
         return {
@@ -850,7 +858,7 @@ function createDefaultProject(user, project) {
         }
         for (var file in defaultFileSet) {
             if (defaultFileSet.hasOwnProperty(file)) {
-                promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project)));
+                promises.push(util.writeFile(fspath.join(projectPath,file),defaultFileSet[file](project, runtime)));
             }
         }
 

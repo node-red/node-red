@@ -287,7 +287,7 @@ describe("storage/localfilesystem/projects/ssh", function() {
     });
 
     it('should generate sshkey file with size data', function(done) {
-        this.timeout(10000);
+        this.timeout(20000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {
@@ -311,7 +311,7 @@ describe("storage/localfilesystem/projects/ssh", function() {
     });
 
     it('should generate sshkey file with password & size data', function(done) {
-        this.timeout(10000);
+        this.timeout(20000);
         var sshkeyDirPath = path.join(userDir, 'projects', '.sshkeys');
         var username = 'test';
         var options = {

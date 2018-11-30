@@ -40,6 +40,8 @@ module.exports = {
             })
         }
 
+        safeSettings.context = runtime.nodes.listContextStores();
+
         var themeSettings = theme.settings();
         if (themeSettings) {
             safeSettings.editorTheme = themeSettings;

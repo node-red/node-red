@@ -221,8 +221,7 @@ RED.sidebar.config = (function() {
             name: RED._("sidebar.config.name"),
             content: content,
             toolbar: toolbar,
-            closeable: true,
-            visible: false,
+            iconClass: "fa fa-cog",
             onchange: function() { refreshConfigNodeList(); }
         });
         RED.actions.add("core:show-config-tab",function() {RED.sidebar.show('config')});

@@ -154,7 +154,9 @@
                 name: this._("debug.sidebar.name"),
                 content: uiComponents.content,
                 toolbar: uiComponents.footer,
-                enableOnEdit: true
+                enableOnEdit: true,
+                pinned: true,
+                iconClass: "fa fa-bug"
             });
             RED.actions.add("core:show-debug-tab",function() { RED.sidebar.show('debug'); });
 

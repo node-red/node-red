@@ -16,6 +16,7 @@
 
 var should = require("should");
 var templateNode = require("../../../../nodes/core/core/80-template.js");
+var Context = require("../../../../red/runtime/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('template node', function() {
@@ -28,8 +29,35 @@ describe('template node', function() {
         helper.stopServer(done);
     });
 
+    beforeEach(function(done) {
+        done();
+    });
+
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+		memory0: { // do not use (for excluding effect fallback)
+		    module: "memory"
+		},
+                memory1: {
+                    module: "memory"
+                },
+                memory2: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
+
     afterEach(function() {
-        helper.unload();
+        helper.unload().then(function () {
+            return Context.clean({allNodes:{}});
+        }).then(function () {
+            return Context.close();
+        });
     });
 
 
@@ -116,7 +144,6 @@ describe('template node', function() {
         });
     });
 
-
     it('should modify payload from flow context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
@@ -132,6 +159,91 @@ describe('template node', function() {
         });
     });
 
+    it('should modify payload from persistable flow context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow[memory1].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo');
+                    done();
+                });
+                n1.context().flow.set("value","foo","memory1",function (err) {
+                    n1.receive({payload:"foo",topic: "bar"});
+                });
+            });
+        });
+    });
+
+    it('should handle nested context tags - property not set', function(done) {
+        // This comes from the Coursera Node-RED course and is a good example of
+        // multiple conditional tags
+        var template = `{{#flow.time}}time={{flow.time}}{{/flow.time}}{{^flow.time}}!time{{/flow.time}}{{#flow.random}}random={{flow.random}}randomtime={{flow.randomtime}}{{/flow.random}}{{^flow.random}}!random{{/flow.random}}`;
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:template,wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', '!time!random');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            });
+        });
+    })
+    it('should handle nested context tags - property set', function(done) {
+        // This comes from the Coursera Node-RED course and is a good example of
+        // multiple conditional tags
+        var template = `{{#flow.time}}time={{flow.time}}{{/flow.time}}{{^flow.time}}!time{{/flow.time}}{{#flow.random}}random={{flow.random}}randomtime={{flow.randomtime}}{{/flow.random}}{{^flow.random}}!random{{/flow.random}}`;
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:template,wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', 'time=123random=456randomtime=789');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.context().flow.set(["time","random","randomtime"],["123","456","789"],function (err) {
+                    n1.receive({payload:"foo",topic: "bar"});
+                });
+            });
+        });
+    })
+
+    it('should modify payload from two persistable flow context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow[memory1].value}}/{{flow[memory2].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo/bar');
+                    done();
+                });
+                n1.context().flow.set("value","foo","memory1",function (err) {
+                    n1.context().flow.set("value","bar","memory2",function (err) {
+                        n1.receive({payload:"foo",topic: "bar"});
+                    });
+                });
+            });
+        });
+    });
+
     it('should modify payload from global context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{global.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
@@ -144,6 +256,64 @@ describe('template node', function() {
                 done();
             });
             n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should modify payload from persistable global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{global[memory1].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo');
+                    done();
+                });
+                n1.context().global.set("value","foo","memory1", function (err) {
+                    n1.receive({payload:"foo",topic: "bar"});
+                });
+            });
+        });
+    });
+
+    it('should modify payload from two persistable global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{global[memory1].value}}/{{global[memory2].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo/bar');
+                    done();
+                });
+                n1.context().global.set("value","foo","memory1", function (err) {
+                    n1.context().global.set("value","bar","memory2", function (err) {
+                        n1.receive({payload:"foo",topic: "bar"});
+                    });
+                });
+            });
+        });
+    });
+
+    it('should modify payload from persistable flow & global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow[memory1].value}}/{{global[memory1].value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'payload=foo/bar');
+                    done();
+                });
+                n1.context().flow.set("value","foo","memory1", function (err) {
+                    n1.context().global.set("value","bar","memory1", function (err) {
+                        n1.receive({payload:"foo",topic: "bar"});
+                    });
+                });
+            });
         });
     });
 
@@ -206,6 +376,27 @@ describe('template node', function() {
         });
     });
 
+    it('should modify persistable flow context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"#:(memory1)::payload", fieldType:"flow", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    // mesage is intact
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'foo');
+                    // result is in flow context
+                    n2.context().flow.get("payload", "memory1", function (err, val) {
+                        val.should.equal("payload=foo");
+                        done();
+                    });
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            });
+        });
+    });
+
     it('should modify global context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", fieldType:"global", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
@@ -220,6 +411,27 @@ describe('template node', function() {
                 done();
             });
             n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should modify persistable global context', function(done) {
+        var flow = [{id:"n1",z:"t1", type:"template", field:"#:(memory1)::payload", fieldType:"global", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+        helper.load(templateNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    // mesage is intact
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'foo');
+                    // result is in global context
+                    n2.context().global.get("payload", "memory1", function (err, val) {
+                        val.should.equal("payload=foo");
+                        done();
+                    });
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            });
         });
     });
 
@@ -264,6 +476,7 @@ describe('template node', function() {
             n1.receive({payload:{A:"abc"}});
         });
     });
+
     it('should raise error if passed bad template', function(done) {
         var flow = [{id:"n1", type:"template", field: "payload", template: "payload={{payload",wires:[["n2"]]},{id:"n2",type:"helper"}];
         helper.load(templateNode, flow, function() {

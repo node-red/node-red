@@ -162,10 +162,10 @@ function start() {
                 if (settings.httpStatic) {
                     log.info(log._("runtime.paths.httpStatic",{path:path.resolve(settings.httpStatic)}));
                 }
-                redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
-                started = true;
-            }).catch(function(err) {
-                console.log(err);
+                return redNodes.loadContextsPlugin().then(function () {
+                    redNodes.loadFlows().then(redNodes.startFlows).catch(function(err) {});
+                    started = true;
+                });
             });
         });
 }
@@ -229,7 +229,9 @@ function stop() {
         clearTimeout(reinstallTimeout);
     }
     started = false;
-    return redNodes.stopFlows();
+    return redNodes.stopFlows().then(function(){
+        return redNodes.closeContextsPlugin();
+    });
 }
 
 var runtime = module.exports = {

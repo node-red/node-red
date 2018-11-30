@@ -295,7 +295,8 @@
     For object outputs, once this count has been reached, the node can be configured to send a message for each subsequent message
     received.</p>
     <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
-    <p>If a message is received with the <b>msg.complete</b> property set, the output message is sent.</p>
+    <p>If a message is received with the <b>msg.complete</b> property set, the output message is finalised and sent.
+    This resets any part counts.</p>
 
     <h4>Reduce Sequence mode</h4>
     <p>When configured to join in reduce mode, an expression is applied to each
@@ -415,7 +416,7 @@
                     $("#node-input-reduceExp").typedInput({types:[jsonata_or_empty]});
                     $("#node-input-reduceInit").typedInput({
                         default: 'num',
-                        types:['flow','global','str','num','bool','json','bin','date','jsonata'],
+                        types:['flow','global','str','num','bool','json','bin','date','jsonata','env'],
                         typeField: $("#node-input-reduceInitType")
                     });
                     $("#node-input-reduceFixup").typedInput({types:[jsonata_or_empty]});
@@ -439,10 +440,7 @@
             $("#node-input-joiner").typedInput({
                 default: 'str',
                 typeField: $("#node-input-joinerType"),
-                types:[
-                    'str',
-                    'bin'
-                ]
+                types:['str', 'bin']
             });
 
             $("#node-input-property").typedInput({
@@ -451,7 +449,7 @@
             });
 
             $("#node-input-key").typedInput({
-                types:['msg', {value:"merge", label:"", hasValue:false}]
+                types:['msg']
             });
 
             $("#node-input-build").change();

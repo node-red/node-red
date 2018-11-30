@@ -15,6 +15,7 @@
  **/
 
 var i18n = require("i18next");
+
 var when = require("when");
 var path = require("path");
 var fs = require("fs");
@@ -34,7 +35,7 @@ function registerMessageCatalogs(catalogs) {
 function registerMessageCatalog(namespace,dir,file) {
     return when.promise(function(resolve,reject) {
         resourceMap[namespace] = { basedir:dir, file:file};
-        i18n.loadNamespace(namespace,function() {
+        i18n.loadNamespaces(namespace,function() {
             resolve();
         });
     });
@@ -53,7 +54,9 @@ function mergeCatalog(fallback,catalog) {
 }
 
 var MessageFileLoader = {
-    fetchOne: function(lng, ns, callback) {
+    type: "backend",
+    init: function(services, backendOptions, i18nextOptions) {},
+    read: function(lng, ns, callback) {
         if (resourceMap[ns]) {
             var file = path.join(resourceMap[ns].basedir,lng,resourceMap[ns].file);
             //console.log(file);
@@ -81,16 +84,37 @@ var MessageFileLoader = {
 
 }
 
+function getCurrentLocale() {
+    var env = process.env;
+    for (var name of ['LC_ALL', 'LC_MESSAGES', 'LANG']) {
+        if (name in env) {
+            var val = env[name];
+            return val.substring(0, 2);
+        }
+    }
+    return undefined;
+}
+
 function init() {
     return when.promise(function(resolve,reject) {
-        i18n.backend(MessageFileLoader);
-        i18n.init({
-            ns: {
-                namespaces: [],
-                defaultNs: "runtime"
-            },
-            fallbackLng: [defaultLang]
-        },function() {
+        i18n.use(MessageFileLoader);
+        var opt = {
+            // debug: true,
+            defaultNS: "runtime",
+            ns: [],
+            fallbackLng: defaultLang,
+            interpolation: {
+                unescapeSuffix: 'HTML',
+                escapeValue: false,
+                prefix: '__',
+                suffix: '__'
+            }
+        };
+        var lang = getCurrentLocale();
+        if (lang) {
+            opt.lng = lang;
+        }
+        i18n.init(opt ,function() {
             resolve();
         });
     });
@@ -126,5 +150,6 @@ obj['_'] = function() {
     //    opts.defaultValue = def;
     //}
     //console.log(arguments);
-    return i18n.t.apply(null,arguments);
+    var res = i18n.t.apply(i18n,arguments);
+    return res;
 }

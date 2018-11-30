@@ -10,7 +10,11 @@
             "load": "読み込み",
             "save": "保存",
             "import": "読み込み",
-            "export": "書き出し"
+            "export": "書き出し",
+            "back": "戻る",
+            "next": "進む",
+            "clone": "プロジェクトをクローン",
+            "cont": "続ける"
         }
     },
     "workspace": {
@@ -67,7 +71,11 @@
             "editPalette": "パレットの管理",
             "other": "その他",
             "showTips": "ヒントを表示",
-            "help": "Node-REDウェブサイト"
+            "help": "Node-REDウェブサイト",
+            "projects": "プロジェクト",
+            "projects-new": "新規",
+            "projects-open": "開く",
+            "projects-settings": "設定"
         }
     },
     "user": {
@@ -90,10 +98,13 @@
             "nodeActionDisabled": "ノードのアクションは、サブフロー内で無効になっています",
             "missing-types": "不明なノードが存在するため、フローを停止しました。詳細はログを確認してください。",
             "restartRequired": "更新されたモジュールを有効化するため、Node-REDを再起動する必要があります",
-            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報は暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "credentials_load_failed": "<p>認証情報を復号できないため、フローを停止しました</p><p>フローの認証情報ファイルは暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です</p>",
+            "credentials_load_failed_reset": "<p>認証情報を復号できません</p><p>フローの認証情報ファイルは暗号化されています。しかし、プロジェクトの暗号鍵が存在しない、または不正です。</p><p>次回のデプロイでフローの認証情報ファイルがリセットされます。既存フローの認証情報は削除されます。</p>",
             "missing_flow_file": "<p>プロジェクトのフローファイルが存在しません</p><p>本プロジェクトにフローファイルが登録されていません</p>",
+            "missing_package_file": "<p>プロジェクトのパッケージファイルが存在しません</p><p>本プロジェクトにはpackage.jsonファイルがありません</p>",
             "project_empty": "<p>空のプロジェクトです</p><p>デフォルトのプロジェクトファイルを作成しますか？<br/>作成しない場合、エディタの外でファイルをプロジェクトへ手動で追加する必要があります</p>",
-            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>"
+            "project_not_found": "<p>プロジェクト '__project__' が存在しません</p>",
+            "git_merge_conflict": "<p>変更の自動マージが失敗しました</p><p>マージされていない競合を解決し、コミットしてください</p>"
         },
         "error": "<strong>エラー</strong>: __message__",
         "errors": {
@@ -102,7 +113,26 @@
             "lostConnectionTry": "すぐに接続",
             "cannotAddSubflowToItself": "サブフロー自身を追加できません",
             "cannotAddCircularReference": "循環参照を検出したため、サブフローを追加できません",
-            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。"
+            "unsupportedVersion": "サポートされていないバージョンのNode.jsを使用しています。<br/>最新のNode.js LTSに更新してください。",
+            "failedToAppendNode": "<p>'__module__'がロードできませんでした。</p><p>__error__</p>"
+        },
+        "project": {
+            "change-branch": "ローカルブランチ'__project__'に変更しました",
+            "merge-abort": "Gitマージを中止しました",
+            "loaded": "プロジェクト'__project__'をロードしました",
+            "updated": "プロジェクト'__project__'を更新しました",
+            "pull": "プロジェクト'__project__'を再ロードしました",
+            "revert": "プロジェクト'__project__'を再ロードしました",
+            "merge-complete": "Gitマージが完了しました"
+        },
+        "label": {
+            "manage-project-dep": "プロジェクトの依存関係の管理",
+            "setup-cred": "認証情報の設定",
+            "setup-project": "プロジェクトファイルの設定",
+            "create-default-package": "デフォルトパッケージファイルの作成",
+            "no-thanks": "不要",
+            "create-default-project": "デフォルトプロジェクトファイルの作成",
+            "show-merge-conflicts": "マージ競合を表示"
         }
     },
     "clipboard": {
@@ -188,7 +218,16 @@
         "nodeCount": "__count__ 個のノード",
         "nodeCount_plural": "__count__ 個のノード",
         "local": "ローカルの変更",
-        "remote": "リモートの変更"
+        "remote": "リモートの変更",
+        "reviewChanges": "変更を表示",
+        "noBinaryFileShowed": "バイナリファイルの中身は表示することができません",
+        "viewCommitDiff": "コミットの内容を表示",
+        "compareChanges": "変更を比較",
+        "saveConflict": "解決して保存",
+        "conflictHeader": "<span>__unresolved__</span> 個中 <span>__resolved__</span> 個のコンフリクトを解決",
+        "commonVersionError": "共通バージョンは正しいJSON形式ではありません:",
+        "oldVersionError": "古いバージョンは正しいJSON形式ではありません:",
+        "newVersionError": "新しいバージョンは正しいJSON形式ではありません:"
     },
     "subflow": {
         "editSubflow": "フローのテンプレートを編集: __name__",
@@ -200,6 +239,7 @@
         "output": "出力:",
         "deleteSubflow": "サブフローを削除",
         "info": "詳細",
+        "category": "カテゴリ",
         "format": "マークダウン形式",
         "errors": {
             "noNodesSelected": "<strong>サブフローを作成できません</strong>: ノードが選択されていません",
@@ -224,6 +264,8 @@
         "settingIcon": "アイコン",
         "noDefaultLabel": "なし",
         "defaultLabel": "既定の名前を使用",
+        "searchIcons": "アイコンを検索",
+        "useDefault":  "デフォルトを使用",
         "errors": {
             "scopeChange": "スコープの変更は、他のフローで使われているノードを無効にします"
         }
@@ -276,6 +318,7 @@
         "noInfo": "情報がありません",
         "filter": "ノードを検索",
         "search": "ノードを検索",
+        "addCategory": "新規追加...",
         "label": {
             "subflows": "サブフロー",
             "input": "入力",
@@ -413,6 +456,16 @@
             "filterAll": "全て",
             "filtered": "__count__ 個が無効"
         },
+        "context": {
+            "name": "コンテキストデータ",
+            "label": "コンテキストデータ",
+            "none": "選択されていません",
+            "refresh": "読み込みのため更新してください",
+            "empty": "データが存在しません",
+            "node": "Node",
+            "flow": "Flow",
+            "global": "Global"
+        },
         "palette": {
             "name": "パレットの管理",
             "label": "パレット"
@@ -423,8 +476,136 @@
             "description": "詳細",
             "dependencies": "依存関係",
             "settings": "設定",
+            "noSummaryAvailable": "サマリが存在しません",
             "editDescription": "プロジェクトの詳細を編集",
-            "editDependencies": "プロジェクトの依存関係を編集"
+            "editDependencies": "プロジェクトの依存関係を編集",
+            "editReadme": "README.mdを編集",
+            "projectSettings": {
+                "edit": "編集",
+                "none": "なし",
+                "install": "インストール",
+                "removeFromProject": "プロジェクトから削除",
+                "addToProject": "プロジェクトへ追加",
+                "files": "ファイル",
+                "flow": "フロー",
+                "credentials": "認証情報",
+                "invalidEncryptionKey": "不正な暗号化キー",
+                "encryptionEnabled": "暗号化が有効になっています",
+                "encryptionDisabled": "暗号化が無効になっています",
+                "setTheEncryptionKey": "暗号化キーを設定:",
+                "resetTheEncryptionKey": "暗号化キーを初期化:",
+                "changeTheEncryptionKey": "暗号化キーを変更:",
+                "currentKey": "現在のキー",
+                "newKey": "新規のキー",
+                "credentialsAlert": "既存の認証情報は全て削除されます",
+                "versionControl": "バージョン管理",
+                "branches": "ブランチ",
+                "noBranches": "ブランチなし",
+                "deleteConfirm": "本当にローカルブランチ'__name__'を削除しますか？削除すると元に戻すことはできません。",
+                "unmergedConfirm": "ローカルブランチ'__name__'にはマージされていない変更があります。この変更は削除されます。本当に削除しますか？",
+                "deleteUnmergedBranch": "マージされていないブランチを削除",
+                "gitRemotes": "Gitリモート",
+                "addRemote": "リモートを追加",
+                "addRemote2": "リモートを追加",
+                "remoteName": "リモート名",
+                "nameRule": "A-Z 0-9 _ - のみを含む",
+                "url": "URL",
+                "urlRule": "https://、ssh:// または file://",
+                "urlRule2": "URLにユーザ名、パスワードを含んではいけません",
+                "noRemotes": "リモートなし",
+                "deleteRemoteConfrim": "本当にリモート'__name__'を削除しますか？",
+                "deleteRemote": "リモートを削除"
+            },
+            "userSettings": {
+                "committerDetail": "コミッター詳細",
+                "committerTip": "システムのデフォルトを使用する場合、空白のままにしてください",
+                "userName": "ユーザ名",
+                "email": "メールアドレス",
+                "sshKeys": "SSH キー",
+                "sshKeysTip": "gitリポジトリへのセキュアな接続を作成できます。",
+                "add": "キーを追加",
+                "addSshKey": "SSHキーを追加",
+                "addSshKeyTip": "新しい公開鍵/秘密鍵ペアを生成します",
+                "name": "名前",
+                "nameRule": "A-Z 0-9 _ - のみを含む",
+                "passphrase": "パスフレーズ",
+                "passphraseShort": "パスフレーズが短すぎます",
+                "optional": "任意",
+                "cancel": "中止",
+                "generate": "キーを生成",
+                "noSshKeys": "SSHキーがありません",
+                "copyPublicKey": "公開鍵をクリップボードにコピー",
+                "delete": "キーを削除",
+                "gitConfig": "Git設定",
+                "deleteConfirm": "SSHキー __name__ を削除してもよいですか？ 削除したSSHキーを元に戻すことはできません。"
+            },
+            "versionControl": {
+                "unstagedChanges": "ステージングされていない変更",
+                "stagedChanges": "ステージングされた変更",
+                "resolveConflicts": "コンフリクトの解決",
+                "head": "最新",
+                "staged": "ステージング",
+                "unstaged": "未ステージング",
+                "local": "ローカル",
+                "remote": "リモート",
+                "revert": "'__file__'への変更を本当に戻しますか？この操作は元に戻せません。",
+                "revertChanges": "変更を戻す",
+                "localChanges": "ローカルの変更",
+                "none": "なし",
+                "conflictResolve": "全てのコンフリクトが解消されました。マージを完了するため、変更をコミットしてください。",
+                "localFiles": "ローカルファイル",
+                "all": "全て",
+                "unmergedChanges": "マージされていない変更",
+                "abortMerge": "マージ中止",
+                "commit": "コミット",
+                "changeToCommit": "コミット対象とする変更",
+                "commitPlaceholder": "コミットメッセージを入力してください。",
+                "cancelCapital": "キャンセル",
+                "commitCapital": "コミット",
+                "commitHistory": "コミット履歴",
+                "branch": "ブランチ:",
+                "moreCommits": "個のコミット",
+                "changeLocalBranch": "ローカルブランチの変更",
+                "createBranchPlaceholder": "ブランチの検索または作成",
+                "upstream": "アップストリーム",
+                "localOverwrite": "ブランチの変更によって上書きされたローカルの変更があります。これらの変更を先にコミットするか、あるいは元に戻さなければなりません。",
+                "manageRemoteBranch": "リモートブランチの管理",
+                "unableToAccess": "リモートのリポジトリにアクセスできません。",
+                "retry": "リトライ",
+                "setUpstreamBranch": "アップストリームとして設定する",
+                "createRemoteBranchPlaceholder": "リモートブランチの検索または作成",
+                "trackedUpstreamBranch": "作成されたブランチは、トラッキングされたアップストリームブランチとなります。",
+                "selectUpstreamBranch": "ブランチが作成されました。トラッキングするアップストリームブランチを選択してください。",
+                "pushFailed": "リモートに新しいコミットがあるため、プッシュに失敗しました。プルしてマージしてから、再度プッシュしてください。",
+                "push": "プッシュ",
+                "pull": "プル",
+                "unablePull": "<p>リモートの変更のプル失敗：ステージングされていないローカルの変更を上書きされてしまいます。</p><p>変更をコミットしてから再度実行してください。</p>",
+                "showUnstagedChanges": "ステージングされていない変更を表示",
+                "connectionFailed": "リモートリポジトリに接続できません: ",
+                "pullUnrelatedHistory": "<p>リモートに関連のないコミット履歴があります。</p><p>本当に変更をプルしてローカルリポジトリに反映しますか？</p>",
+                "pullChanges": "プル変更",
+                "history": "履歴",
+                "daysAgo": "__count__ 日前",
+                "daysAgo_plural": "__count__ 日前",
+                "hoursAgo": "__count__ 時間前",
+                "hoursAgo_plural": "__count__ 時間前",
+                "minsAgo": "__count__ 分前",
+                "minsAgo_plural": "__count__ 分前",
+                "secondsAgo": "数秒前",
+                "notTracking": "ローカルブランチは現在リモートブランチをトラッキングしていません。",
+                "statusUnmergedChanged": "リポジトリ内にマージされていない変更があります。コンフリクトを解決してコミットしてください。",
+                "repositoryUpToDate": "リポジトリは最新です。",
+                "commitsAhead": "あなたのリポジトリはリモートより__count__コミット進んでいます。現在のコミットをプッシュできます。",
+                "commitsAhead_plural": "あなたのリポジトリはリモートより__count__コミット進んでいます。現在のコミットをプッシュできます。",
+                "commitsBehind": "あなたのリポジトリはリモートより__count__コミット遅れています。現在のコミットをプルできます。",
+                "commitsBehind_plural": "あなたのリポジトリはリモートより__count__コミット遅れています。現在のコミットをプルできます。",
+                "commitsAheadAndBehind1": "あなたのリポジトリはリモートより__count__コミット遅れており、かつ",
+                "commitsAheadAndBehind1_plural": "あなたのリポジトリはリモートより__count__コミット遅れており、かつ",
+                "commitsAheadAndBehind2": "__count__コミット進んでいます。 ",
+                "commitsAheadAndBehind2_plural": "__count__コミット進んでいます。 ",
+                "commitsAheadAndBehind3": "プッシュする前にリモートのコミットをプルしてください。",
+                "commitsAheadAndBehind3_plural": "プッシュする前にリモートのコミットをプルしてください。"
+            }
         }
     },
     "typedInput": {
@@ -435,7 +616,9 @@
             "bool": "真偽",
             "json": "JSON",
             "bin": "バッファ",
-            "date": "日時"
+            "date": "日時",
+            "jsonata": "JSONata式",
+            "env": "環境変数"
         }
     },
     "editableList": {
@@ -464,6 +647,9 @@
             "eval": "表現評価エラー:\n  __message__"
         }
     },
+    "jsEditor": {
+        "title": "JavaScriptエディタ"
+    },
     "jsonEditor": {
         "title": "JSONエディタ",
         "format": "JSONフォーマット"
@@ -476,5 +662,168 @@
         "modeString": "UTF-8文字列として処理",
         "modeArray": "JSON配列として処理",
         "modeDesc": "<h3>バッファエディタ</h3><p>バッファ型は、バイト値から成るJSON配列として格納されます。このエディタは、入力値をJSON配列として構文解析します。もし不正なJSON配列の場合、UTF-8文字列として扱い、各文字コード番号から成る配列へ変換します。</p><p>例えば、 <code>Hello World</code> という値を、以下のJSON配列へ変換します。<pre>[72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100]</pre></p>"
+    },
+    "projects": {
+        "config-git": "Gitクライアントの設定",
+        "welcome": {
+            "hello": "こんにちは！ Node-REDで「プロジェクト」機能が利用できるようになりました。",
+            "desc0": "フローファイルの管理方法が刷新され、バージョン管理も可能です。",
+            "desc1": "まず最初にプロジェクトを作成するか、既存のGitリポジトリからプロジェクトをクローンしてください。",
+            "desc2": "とりあえずこの処理をスキップしてもかまいません。「プロジェクト」メニューから、いつでもプロジェクトの作成を開始できます。",
+            "create": "プロジェクトの作成",
+            "clone": "プロジェクトのクローン",
+            "not-right-now": "後にする"
+        },
+        "git-config": {
+            "setup": "バージョン管理クライアントの設定",
+            "desc0": "Node-REDはオープンソースツールのGitを使ってバージョン管理を行います。Gitによりプロジェクトファイルに対する変化を記録し、外部リポジトリに保存することができます。",
+            "desc1": "変更をコミットする際、変更を行った人物の情報としてユーザ名とEmailアドレスをGitが記憶します。ユーザ名は本名でなくても構いません。好きな名前を使ってください。",
+            "desc2": "Gitクライアントの現在の設定は以下の通りです。",
+            "desc3": "設定ダイアログの「Git設定」タブから別途変更することもできます。",
+            "username": "ユーザ名",
+            "email": "Email"
+        },
+        "project-details": {
+            "create": "プロジェクトの作成",
+            "desc0": "プロジェクトはGitリポジトリとして管理します。Gitリポジトリを使ってフローの共有やコラボレーションが簡単にできます。",
+            "desc1": "複数のプロジェクトを作成し、エディタから即座に変更できます。",
+            "desc2": "まず、プロジェクト名と説明(任意)を指定してください。",
+            "already-exists": "既に存在するプロジェクトです",
+            "must-contain": "A-Z 0-9 _ - のみ指定可能",
+            "project-name": "プロジェクト名",
+            "desc": "説明",
+            "opt": "任意"
+        },
+        "clone-project": {
+            "clone": "プロジェクトをクローン",
+            "desc0": "プロジェクトを含んだGitリポジトリを作成済みの場合、クローンを作成することができます。",
+            "already-exists": "既に存在するプロジェクトです",
+            "must-contain": "A-Z 0-9 _ - のみ指定可能",
+            "project-name": "プロジェクト名",
+            "no-info-in-url": "URLにユーザ名/パスワードを含めないようにしてください",
+            "git-url": "GitリポジトリのURL",
+            "protocols": "https://, ssh:// もしくは file://",
+            "auth-failed": "認証に失敗しました",
+            "username": "ユーザ名",
+            "passwd": "パスワード",
+            "ssh-key": "SSHキー",
+            "passphrase": "パスフレーズ",
+            "ssh-key-desc": "SSHでリポジトリをクローンする前にSSHキーを追加してください。",
+            "ssh-key-add": "SSHキーの追加",
+            "credential-key": "認証情報の暗号化キー",
+            "cant-get-ssh-key": "エラー! 選択したSSHキーのパスを取得できません。",
+            "already-exists2": "既に存在します",
+            "git-error": "Gitエラー",
+            "connection-failed": "接続に失敗しました",
+            "not-git-repo": "Gitリポジトリではありません",
+            "repo-not-found": "リポジトリが見つかりません"
+        },
+        "default-files": {
+            "create": "プロジェクト関連ファアイルの作成",
+            "desc0": "プロジェクトはフローファイル、README、package.jsonを含みます。",
+            "desc1": "その他、Gitリポジトリで管理したいファイルを含めても構いません。",
+            "desc2": "既存のフローと認証情報ファイルをプロジェクトにコピーします。",
+            "flow-file": "フローファイル",
+            "credentials-file": "認証情報ファイル"
+        },
+        "encryption-config": {
+            "setup": "認証情報ファイルの暗号化設定",
+            "desc0": "フロー認証情報ファイルを暗号化して内容の安全性を担保できます。",
+            "desc1": "認証情報を公開Gitリポジトリに保存する際には、秘密キーフレーズによって暗号化します。",
+            "desc2": "認証情報ファイルは暗号化されていません。",
+            "desc3": "パスワードやアクセストークンといった認証情報を他人が参照できます。",
+            "desc4": "認証情報を公開Gitリポジトリに保存する際には、秘密キーフレーズによって暗号化します。",
+            "desc5": "フロー認証情報ファイルはsettingsファイルのcredentialSecretプロパティで暗号化されています。",
+            "desc6": "フロー認証情報ファイルはシステムが生成したキーによって暗号化されています。このプロジェクト用に新しい秘密キーを指定してください。",
+            "desc7": "キーはプロジェクトファイルとば別に保存されます。他のNode-REDでこのプロジェクトを利用するには、このプロジェクトのキーが必要です。",
+            "credentials": "認証情報",
+            "enable": "暗号化を有効にする",
+            "disable": "暗号化を無効にする",
+            "disabled": "無効",
+            "copy": "既存のキーをコピー",
+            "use-custom": "カスタムキーを使用",
+            "desc8": "認証情報ファイルが暗号化されないため、簡単に読み出すことができます。",
+            "create-project-files": "プロジェクト関連ファイル作成",
+            "create-project": "プロジェクト作成",
+            "already-exists": "既に存在",
+            "git-error": "Gitエラー",
+            "git-auth-error": "Git認証エラー"
+        },
+        "create-success": {
+            "success": "最初のプロジェクトの作成が成功しました!",
+            "desc0": "以降は、これまでと同様にNode-REDを利用できます。",
+            "desc1": "サイドバーの「情報」タブに現在選択されたプロジェクトを表示します。プロジェクト名の隣のボタンでプロジェクト設定画面を呼び出すことができます。",
+            "desc2": "サイドバーの「履歴」タブで変更が加えられたプロジェクト内のファイルを確認しコミットできます。このサイドバーでは、全てのコミット履歴を確認し、変更を外部リポジトリにプッシュすることが可能です。"
+        },
+        "create": {
+            "projects": "プロジェクト",
+            "already-exists": "プロジェクトは既に存在します",
+            "must-contain": "A-Z 0-9 _ - のみ指定可能",
+            "no-info-in-url": "URLにユーザ名/パスワードを含めないようにしてください",
+            "open": "プロジェクトを開く",
+            "create": "プロジェクトを作成",
+            "clone": "プロジェクトをクローン",
+            "project-name": "プロジェクト名",
+            "desc": "説明",
+            "opt": "任意",
+            "flow-file": "フローファイル",
+            "credentials": "認証情報",
+            "enable-encryption": "暗号化を有効にする",
+            "disable-encryption": "暗号化を無効にする",
+            "encryption-key": "暗号化キー",
+            "desc0": "認証情報をセキュアにするためのフレーズ",
+            "desc1": "認証情報ファイルが暗号化されないため、簡単に読み出すことができます",
+            "git-url": "GitリポジトリのURL",
+            "protocols": "https://, ssh:// もしくは file://",
+            "auth-failed": "認証に失敗しました",
+            "username": "ユーザ名",
+            "password": "パスワード",
+            "ssh-key": "SSHキー",
+            "passphrase": "パスフレーズ",
+            "desc2": "SSHでリポジトリをクローンする前にSSHキーを追加してください。",
+            "add-ssh-key": "SSHキーの追加",
+            "credentials-encryption-key": "認証情報の暗号化キー",
+            "already-exists-2": "既に存在します",
+            "git-error": "Gitエラー",
+            "con-failed": "接続に失敗しました",
+            "not-git": "Gitリポジトリではありません",
+            "no-resource": "リポジトリが見つかりません",
+            "cant-get-ssh-key-path": "エラー! 選択したSSHキーのパスを取得できません。",
+            "unexpected_error": "予期しないエラー"
+        },
+        "delete": {
+            "confirm": "プロジェクトを削除しても良いですか?"
+        },
+        "create-project-list": {
+            "search": "プロジェクトを検索",
+            "current": "有効"
+        },
+        "require-clean": {
+            "confirm": "<p>デプロイされていない変更は失われます。</p><p>続けますか?</p>"
+        },
+        "send-req": {
+            "auth-req": "リポジトリ対する認証が必要です",
+            "username": "ユーザ名",
+            "password": "パスワード",
+            "passphrase": "パスフレーズ",
+            "retry": "リトライ",
+            "update-failed": "認証の更新に失敗しました",
+            "unhandled": "エラー応答が処理されませんでした"
+        },
+        "create-branch-list": {
+            "invalid": "不正なブランチ",
+            "create": "ブランチの作成",
+            "current": "有効"
+        },
+        "create-default-file-set": {
+            "no-active": "有効なプロジェクトが無い場合、デフォルトのファイル群を作成できません。",
+            "no-empty": "デフォルトのファイル群を空でないプロジェクトに作成することはできません。",
+            "git-error": "Gitエラー"
+        },
+        "errors": {
+            "no-username-email": "Gitクライアントのユーザ名/emailが設定されていません。",
+            "unexpected": "予期しないエラーが発生しました",
+            "code": "コード"
+        }
     }
 }

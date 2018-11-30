@@ -102,36 +102,11 @@ describe('HTTP Request Node', function() {
         return "localhost:"+testSslPort+url;
     }
 
-    function saveProxySetting() {
-        preEnvHttpProxyLowerCase = process.env.http_proxy;
-        preEnvHttpProxyUpperCase = process.env.HTTP_PROXY;
-        preEnvNoProxyLowerCase = process.env.no_proxy;
-        preEnvNoProxyUpperCase = process.env.NO_PROXY;
+    function deleteProxySetting() {
         delete process.env.http_proxy;
         delete process.env.HTTP_PROXY;
         delete process.env.no_proxy;
         delete process.env.NO_PROXY;
-    }
-
-    function restoreProxySetting() {
-        process.env.http_proxy = preEnvHttpProxyLowerCase;
-        process.env.HTTP_PROXY = preEnvHttpProxyUpperCase;
-        // On Windows, if environment variable of NO_PROXY that includes lower cases
-        // such as No_Proxy is replaced with NO_PROXY.
-        process.env.no_proxy = preEnvNoProxyLowerCase;
-        process.env.NO_PROXY = preEnvNoProxyUpperCase;
-        if (preEnvHttpProxyLowerCase == undefined){
-            delete process.env.http_proxy;
-        }
-        if (preEnvHttpProxyUpperCase == undefined){
-            delete process.env.HTTP_PROXY;
-        }
-        if (preEnvNoProxyLowerCase == undefined){
-            delete process.env.no_proxy;
-        }
-        if (preEnvNoProxyUpperCase == undefined){
-            delete process.env.NO_PROXY;
-        }
     }
 
     before(function(done) {
@@ -225,7 +200,35 @@ describe('HTTP Request Node', function() {
         });
     });
 
+
+    beforeEach(function() {
+        preEnvHttpProxyLowerCase = process.env.http_proxy;
+        preEnvHttpProxyUpperCase = process.env.HTTP_PROXY;
+        preEnvNoProxyLowerCase = process.env.no_proxy;
+        preEnvNoProxyUpperCase = process.env.NO_PROXY;
+        process.env.no_proxy = 'localhost';
+        process.env.NO_PROXY = 'localhost';
+    });
+
     afterEach(function() {
+        process.env.http_proxy = preEnvHttpProxyLowerCase;
+        process.env.HTTP_PROXY = preEnvHttpProxyUpperCase;
+        // On Windows, if environment variable of NO_PROXY that includes lower cases
+        // such as No_Proxy is replaced with NO_PROXY.
+        process.env.no_proxy = preEnvNoProxyLowerCase;
+        process.env.NO_PROXY = preEnvNoProxyUpperCase;
+        if (preEnvHttpProxyLowerCase == undefined) {
+            delete process.env.http_proxy;
+        }
+        if (preEnvHttpProxyUpperCase == undefined) {
+            delete process.env.HTTP_PROXY;
+        }
+        if (preEnvNoProxyLowerCase == undefined) {
+            delete process.env.no_proxy;
+        }
+        if (preEnvNoProxyUpperCase == undefined) {
+            delete process.env.NO_PROXY;
+        }
         helper.unload();
     });
 
@@ -796,6 +799,25 @@ describe('HTTP Request Node', function() {
             });
         });
 
+        it('should prevent following redirect when msg.followRedirects is false', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getTestURL('/redirectToText')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',302);
+                        msg.should.have.property('responseUrl', getTestURL('/redirectToText'));
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",followRedirects:false});
+            });
+        });
+
         it('shuold output an error when request timeout occurred', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout')},
                 {id:"n2", type:"helper"}];
@@ -806,7 +828,13 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('statusCode','ECONNRESET');
+                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(1);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().ERROR, id:'n1',type:'http request',msg:'common.notification.errors.no-response', timestamp:tstmp});
                         done();
                     } catch(err) {
                         done(err);
@@ -1035,13 +1063,12 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1058,13 +1085,12 @@ describe('HTTP Request Node', function() {
         it('should use http_proxy when environment variable is invalid', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "invalidvalue";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1081,13 +1107,12 @@ describe('HTTP Request Node', function() {
         it('should use HTTP_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('headers');
@@ -1104,14 +1129,13 @@ describe('HTTP Request Node', function() {
         it('should use no_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://localhost:" + testProxyPort;
             process.env.no_proxy = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1127,14 +1151,13 @@ describe('HTTP Request Node', function() {
         it('should use NO_PROXY', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.HTTP_PROXY = "http://localhost:" + testProxyPort;
             process.env.NO_PROXY = "foo,localhost";
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.headers.should.not.have.property('x-testproxy-header','foobar');
@@ -1173,13 +1196,12 @@ describe('HTTP Request Node', function() {
         it('should authenticate on proxy server', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://foouser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',200);
                         msg.payload.should.have.property('user', 'foouser');
@@ -1198,13 +1220,12 @@ describe('HTTP Request Node', function() {
         it('should output an error when proxy authentication was failed', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
-            saveProxySetting();
+            deleteProxySetting();
             process.env.http_proxy = "http://xxxuser:barpassword@localhost:" + testProxyPort;
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    restoreProxySetting();
                     try {
                         msg.should.have.property('statusCode',407);
                         msg.headers.should.have.property('proxy-authenticate', 'BASIC realm="test"');

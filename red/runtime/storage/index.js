@@ -25,6 +25,8 @@ var storageModule;
 var settingsAvailable;
 var sessionsAvailable;
 
+var libraryFlowsCachedResult = null;
+
 function moduleSelector(aSettings) {
     var toReturn;
     if (aSettings.storageModule) {
@@ -156,7 +158,14 @@ var storageModuleInterface = {
             if (storageModule.hasOwnProperty("getAllFlows")) {
                 return storageModule.getAllFlows();
             } else {
-                return listFlows("/");
+                if (libraryFlowsCachedResult) {
+                    return Promise.resolve(libraryFlowsCachedResult);
+                } else {
+                    return listFlows("/").then(function(result) {
+                        libraryFlowsCachedResult = result;
+                        return result;
+                    });
+                }
             }
         },
         getFlow: function(fn) {
@@ -178,6 +187,7 @@ var storageModuleInterface = {
                 err.code = "forbidden";
                 return when.reject(err);
             }
+            libraryFlowsCachedResult = null;
             if (storageModule.hasOwnProperty("saveFlow")) {
                 return storageModule.saveFlow(fn, data);
             } else {

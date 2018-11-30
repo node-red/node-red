@@ -38,6 +38,12 @@ function init() {
         var ret = browser.getText(selector);
         return ret;
     }, false);
+
+    browser.addCommand("selectWithWait", function(selector, value) {
+        browser.waitForVisible(selector, 5000);
+        var ret = browser.selectByValue(selector, value);
+        return ret;
+    }, false);
 }
 
  module.exports = {

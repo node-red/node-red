@@ -26,6 +26,24 @@ RED.search = (function() {
     var keys = [];
     var results = [];
 
+
+    function indexProperty(node,label,property) {
+        if (typeof property === 'string' || typeof property === 'number') {
+            property = (""+property).toLowerCase();
+            index[property] = index[property] || {};
+            index[property][node.id] = {node:node,label:label};
+        } else if (Array.isArray(property)) {
+            property.forEach(function(prop) {
+                indexProperty(node,label,prop);
+            })
+        } else if (typeof property === 'object') {
+            for (var prop in property) {
+                if (property.hasOwnProperty(prop)) {
+                    indexProperty(node,label,property[prop])
+                }
+            }
+        }
+    }
     function indexNode(n) {
         var l = RED.utils.getNodeLabel(n);
         if (l) {
@@ -42,17 +60,11 @@ RED.search = (function() {
         }
         for (var i=0;i<properties.length;i++) {
             if (n.hasOwnProperty(properties[i])) {
-                var v = n[properties[i]];
-                if (typeof v === 'string' || typeof v === 'number') {
-                    v = (""+v).toLowerCase();
-                    index[v] = index[v] || {};
-                    index[v][n.id] = {node:n,label:l};
-                }
+                indexProperty(n, l, n[properties[i]]);
             }
         }
-
-
     }
+
     function indexWorkspace() {
         index = {};
         RED.nodes.eachWorkspace(indexNode);
@@ -181,7 +193,7 @@ RED.search = (function() {
                     var div = $('<a>',{href:'#',class:"red-ui-search-result"}).appendTo(container);
 
                     var nodeDiv = $('<div>',{class:"red-ui-search-result-node"}).appendTo(div);
-                    var colour = def.color;
+                    var colour = RED.utils.getNodeColor(node.type,def);
                     var icon_url = RED.utils.getNodeIcon(def,node);
                     if (node.type === 'tab') {
                         colour = "#C0DEED";

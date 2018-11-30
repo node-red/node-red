@@ -19,6 +19,7 @@ var should = require("should");
 var switchNode = require("../../../../nodes/core/logic/10-switch.js");
 var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
+var Context = require("../../../../red/runtime/nodes/context");
 
 describe('switch Node', function() {
 
@@ -26,10 +27,31 @@ describe('switch Node', function() {
         helper.startServer(done);
     });
 
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+                memory0: {
+                    module: "memory"
+                },
+                memory1: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
+
     afterEach(function(done) {
-        helper.unload();
-        RED.settings.nodeMessageBufferMaxLength = 0;
-        helper.stopServer(done);
+        helper.unload().then(function () {
+            return Context.clean({allNodes: {}});
+        }).then(function () {
+            return Context.close();
+        }).then(function () {
+            RED.settings.nodeMessageBufferMaxLength = 0;
+            helper.stopServer(done);
+        });
     });
 
     it('should be loaded with some defaults', function(done) {
@@ -125,7 +147,7 @@ describe('switch Node', function() {
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
-            var sid = undefined;
+            var sid;
             var count = 0;
             if (modifier !== undefined) {
                 modifier(switchNode1);
@@ -293,6 +315,102 @@ describe('switch Node', function() {
         genericSwitchTest("istype", "undefined", true, true, undefined, done);
     });
 
+    it('should handle flow context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "foo", "propertyType": "flow",
+                     "rules": [{"t": "eq", "v": "bar", "vt": "flow"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]], "z": "flow"},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("value");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().flow.set("foo", "flowValue");
+            switchNode1.context().flow.set("bar", "flowValue");
+            switchNode1.receive({payload: "value"});
+        });
+    });
+
+    it('should handle persistable flow context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "#:(memory1)::foo", "propertyType": "flow",
+                     "rules": [{"t": "eq", "v": "#:(memory1)::bar", "vt": "flow"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]], "z": "flow"},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            initContext(function () {
+                var switchNode1 = helper.getNode("switchNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function (msg) {
+                    try {
+                        msg.payload.should.equal("value");
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                switchNode1.context().flow.set("foo", "flowValue", "memory1", function (err) {
+                    switchNode1.context().flow.set("bar", "flowValue", "memory1", function (err) {
+                        switchNode1.receive({payload: "value"});
+                    });
+                });
+            });
+        });
+    });
+
+    it('should handle global context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "foo", "propertyType": "global",
+                     "rules": [{"t": "eq", "v": "bar", "vt": "global"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]]},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.payload.should.equal("value");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            switchNode1.context().global.set("foo", "globalValue");
+            switchNode1.context().global.set("bar", "globalValue");
+            switchNode1.receive({payload: "value"});
+        });
+    });
+
+    it('should handle persistable global context', function (done) {
+        var flow = [{"id": "switchNode1", "type": "switch", "property": "#:(memory1)::foo", "propertyType": "global",
+                     "rules": [{"t": "eq", "v": "#:(memory1)::bar", "vt": "global"}],
+                     "checkall": "true", "outputs": "1", "wires": [["helperNode1"]]},
+                     {"id": "helperNode1", "type": "helper", "wires": []}];
+        helper.load(switchNode, flow, function () {
+            initContext(function () {
+                var switchNode1 = helper.getNode("switchNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function (msg) {
+                    try {
+                        msg.payload.should.equal("foo");
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                switchNode1.context().global.set("foo", "globalValue", "memory1", function (err) {
+                    switchNode1.context().global.set("bar", "globalValue", "memory1", function (err) {
+                        switchNode1.receive({payload: "foo"});
+                    });
+                });
+            });
+        });
+    });
+
     it('should match regex with ignore-case flag set true', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree","case":true}],checkall:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -332,6 +450,75 @@ describe('switch Node', function() {
     it('sends nothing when input is false and checking for true', function(done) {
         singularSwitchTest(false, true, false, true, done);
     });
+
+    it('should check if payload is empty (string)', function(done) {
+        singularSwitchTest("empty", true, true, "", done);
+    });
+    it('should check if payload is empty (array)', function(done) {
+        singularSwitchTest("empty", true, true, [], done);
+    });
+    it('should check if payload is empty (buffer)', function(done) {
+        singularSwitchTest("empty", true, true, Buffer.alloc(0), done);
+    });
+    it('should check if payload is empty (object)', function(done) {
+        singularSwitchTest("empty", true, true, {}, done);
+    });
+    it('should check if payload is empty (non-empty string)', function(done) {
+        singularSwitchTest("empty", true, false, "1", done);
+    });
+    it('should check if payload is empty (non-empty array)', function(done) {
+        singularSwitchTest("empty", true, false, [1], done);
+    });
+    it('should check if payload is empty (non-empty buffer)', function(done) {
+        singularSwitchTest("empty", true, false, Buffer.alloc(1), done);
+    });
+    it('should check if payload is empty (non-empty object)', function(done) {
+        singularSwitchTest("empty", true, false, {a:1}, done);
+    });
+    it('should check if payload is empty (null)', function(done) {
+        singularSwitchTest("empty", true, false, null, done);
+    });
+    it('should check if payload is empty (undefined)', function(done) {
+        singularSwitchTest("empty", true, false, undefined, done);
+    });
+    it('should check if payload is empty (0)', function(done) {
+        singularSwitchTest("empty", true, false, 0, done);
+    });
+
+    it('should check if payload is not empty (string)', function(done) {
+        singularSwitchTest("nempty", true, !true, "", done);
+    });
+    it('should check if payload is not empty (array)', function(done) {
+        singularSwitchTest("nempty", true, !true, [], done);
+    });
+    it('should check if payload is not empty (buffer)', function(done) {
+        singularSwitchTest("nempty", true, !true, Buffer.alloc(0), done);
+    });
+    it('should check if payload is not empty (object)', function(done) {
+        singularSwitchTest("nempty", true, !true, {}, done);
+    });
+    it('should check if payload is not empty (non-empty string)', function(done) {
+        singularSwitchTest("nempty", true, !false, "1", done);
+    });
+    it('should check if payload is not empty (non-empty array)', function(done) {
+        singularSwitchTest("nempty", true, !false, [1], done);
+    });
+    it('should check if payload is not empty (non-empty buffer)', function(done) {
+        singularSwitchTest("nempty", true, !false, Buffer.alloc(1), done);
+    });
+    it('should check if payload is not empty (non-empty object)', function(done) {
+        singularSwitchTest("nempty", true, !false, {a:1}, done);
+    });
+    it('should check if payload is not empty (null)', function(done) {
+        singularSwitchTest("nempty", true, false, null, done);
+    });
+    it('should check if payload is not empty (undefined)', function(done) {
+        singularSwitchTest("nempty", true, false, undefined, done);
+    });
+    it('should check if payload is not empty (0)', function(done) {
+        singularSwitchTest("nempty", true, false, 0, done);
+    });
+
 
     it('should check input against a previous value', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{ "t": "gt", "v": "", "vt": "prev" }],checkall:true,outputs:1,wires:[["helperNode1"]]},
@@ -460,7 +647,7 @@ describe('switch Node', function() {
                 } catch(err) {
                     done(err);
                 }
-            },100)
+            },500)
         });
     });
 
@@ -584,6 +771,53 @@ describe('switch Node', function() {
         customFlowSwitchTest(flow, true, -5, done);
     });
 
+    it('should handle flow and global contexts with JSONata expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs($flowContext(\"payload\"))",propertyType:"jsonata",rules:[{"t":"btwn","v":"$flowContext(\"vt\")","vt":"jsonata","v2":"$globalContext(\"v2t\")","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]],z:"flow"},
+                    {id:"helperNode1", type:"helper", wires:[],z:"flow"},
+                    {id:"flow",type:"tab"}];
+        helper.load(switchNode, flow, function() {
+            var switchNode1 = helper.getNode("switchNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            switchNode1.context().flow.set("payload",-5);
+            switchNode1.context().flow.set("vt",4);
+            switchNode1.context().global.set("v2t",6);
+            helperNode1.on("input", function(msg) {
+                try {
+                    should.equal(msg.payload,"pass");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            switchNode1.receive({payload:"pass"});
+        });
+    });
+
+    it('should handle persistable flow and global contexts with JSONata expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$abs($flowContext(\"payload\",\"memory1\"))",propertyType:"jsonata",rules:[{"t":"btwn","v":"$flowContext(\"vt\",\"memory1\")","vt":"jsonata","v2":"$globalContext(\"v2t\",\"memory1\")","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]],z:"flow"},
+                    {id:"helperNode1", type:"helper", wires:[],z:"flow"},
+                    {id:"flow",type:"tab"}];
+        helper.load(switchNode, flow, function() {
+            initContext(function () {
+                var switchNode1 = helper.getNode("switchNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                switchNode1.context().flow.set(["payload","vt"],[-7,6],"memory1",function(){
+                    switchNode1.context().global.set("v2t",8,"memory1",function(){
+                        helperNode1.on("input", function(msg) {
+                            try {
+                                should.equal(msg.payload,"pass");
+                                done();
+                            } catch(err) {
+                                done(err);
+                            }
+                        });
+                        switchNode1.receive({payload:"pass"});
+                    });
+                });
+            });
+        });
+    });
+
     it('should take head of message sequence (no repair)', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"head","v":3}],checkall:false,repair:false,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -599,7 +833,7 @@ describe('switch Node', function() {
     it('should take head of message sequence (w. context)', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"head","v":"count",vt:"global"}],checkall:false,repair:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
-        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [0, 1, 2], true, 
+        customFlowSequenceSwitchTest(flow, [0, 1, 2, 3, 4], [0, 1, 2], true,
                                      function(node) {
                                          node.context().global.set("count", 3);
                                      }, done);
@@ -642,7 +876,7 @@ describe('switch Node', function() {
                     {id:"helperNode1", type:"helper", wires:[]}];
         customFlowSwitchTest(flow, true, 9, done);
     });
-    
+
     it('should be able to use $I in JSONata expression', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"jsonata_exp","v":"$I % 2 = 1",vt:"jsonata"}],checkall:true,repair:true,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
@@ -666,9 +900,11 @@ describe('switch Node', function() {
             var vals = new Array(port_count);
             var recv_count = 0;
             for (var id in outs) {
-                var out = outs[id];
-                vals[out.port] = out.vals;
-                recv_count += out.vals.length;
+                if (outs.hasOwnProperty(id)) {
+                    var out = outs[id];
+                    vals[out.port] = out.vals;
+                    recv_count += out.vals.length;
+                }
             }
             var count = 0;
             function check_msg(msg, ix, vf) {
@@ -676,7 +912,7 @@ describe('switch Node', function() {
                     msg.should.have.property("payload");
                     var payload = msg.payload;
                     msg.should.have.property("parts");
-                    vf(payload).should.be.ok;
+                    vf(payload).should.be.ok();
                     var parts = msg.parts;
                     var evals = vals[ix];
                     parts.should.have.property("id");
@@ -703,8 +939,8 @@ describe('switch Node', function() {
                     }
                     var index = parts.index;
                     var eindex = counts[ix];
-                    var eval = evals[eindex];
-                    payload.should.equal(eval);
+                    var value = evals[eindex];
+                    payload.should.equal(value);
                     counts[ix]++;
                     count++;
                     if (count === recv_count) {
@@ -716,18 +952,22 @@ describe('switch Node', function() {
                 }
             }
             for (var id in outs) {
-                (function() {
-                    var node = helper.getNode(id);
-                    var port = outs[id].port;
-                    var vf = outs[id].vf;
-                    node.on("input", function(msg) {
-                        check_msg(msg, port, vf);
-                    });
-                })();
+                if (outs.hasOwnProperty(id)) {
+                    (function() {
+                        var node = helper.getNode(id);
+                        var port = outs[id].port;
+                        var vf = outs[id].vf;
+                        node.on("input", function(msg) {
+                            check_msg(msg, port, vf);
+                        });
+                    })();
+                }
             }
             for(var i in seq_in) {
-                n1.receive({payload:seq_in[i], xindex:i,
-                            parts:{index:i, count:seq_in.length, id:222}});
+                if (seq_in.hasOwnProperty(i)) {
+                    n1.receive({payload:seq_in[i], xindex:i,
+                                parts:{index:i, count:seq_in.length, id:222}});
+                }
             }
         });
     }
@@ -786,9 +1026,9 @@ describe('switch Node', function() {
         var data = [ 1, -2, 2, 0, -1 ];
         var outs = {
             "n2" : { port:0, vals:[1, 2, 0],
-                     vf:function(x) { return(x > 0); } },
+                     vf:function(x) { return(x >= 0); } },
             "n3" : { port:1, vals:[-2, 0, -1],
-                     vf:function(x) { return(x < 0); } },
+                     vf:function(x) { return(x <= 0); } },
             "n4" : { port:2, vals:[],
                      vf:function(x) { return(false); } },
         };
@@ -821,4 +1061,24 @@ describe('switch Node', function() {
             n1.receive({payload:1, parts:{index:0, count:4, id:222}});
         });
     });
+
+    it('should handle invalid jsonata expression', function(done) {
+
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"$invalidExpression(payload)",propertyType:"jsonata",rules:[{"t":"btwn","v":"$sqrt(16)","vt":"jsonata","v2":"$sqrt(36)","v2t":"jsonata"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("switchNode1");
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "switch";
+                });
+                var evt = logEvents[0][0];
+                evt.should.have.property('id', "switchNode1");
+                evt.should.have.property('type', "switch");
+                done();
+            }, 150);
+            n1.receive({payload:1});
+        });
+    });
+
 });

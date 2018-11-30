@@ -19,6 +19,9 @@ var splitNode = require("../../../../nodes/core/logic/17-split.js");
 var joinNode = require("../../../../nodes/core/logic/17-split.js");
 var helper = require("node-red-node-test-helper");
 var RED = require("../../../../red/red.js");
+var Context = require("../../../../red/runtime/nodes/context");
+
+var TimeoutForErrorCase = 20;
 
 describe('SPLIT node', function() {
 
@@ -264,21 +267,156 @@ describe('SPLIT node', function() {
         });
     });
 
+    it('should handle invalid spltType (not an array)', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "1", spltType: "bin", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle invalid splt length', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: 0, spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle invalid array splt length', function (done) {
+        var flow = [{ id: "sn1", type: "split", arraySplt: 0, arraySpltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            sn2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should ceil count value when msg.payload type is string', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should handle spltBufferString value of undefined', function (done) {
+        var flow = [{ id: "sn1", type: "split", wires: [["sn2"]], splt: "[52]", spltType: "bin" },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("parts");
+                    msg.parts.should.have.property("index");
+                    if (msg.parts.index === 0) { msg.payload.toString().should.equal("123"); done(); }
+                } catch (err) {
+                    done(err);
+                }
+            });
+            sn1.receive({ payload: "123" });
+        });
+    });
+
+    it('should ceil count value when msg.payload type is Buffer', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "len", wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            var b = new Buffer.from("123");
+            sn1.receive({ payload: b });
+        });
+    });
+
+    it('should set msg.parts.ch when node.spltType is str', function (done) {
+        var flow = [{ id: "sn1", type: "split", splt: "2", spltType: "str", stream: false, wires: [["sn2"]] },
+                    { id: "sn2", type: "helper" }];
+        helper.load(splitNode, flow, function () {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function (msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count", 2);
+                msg.parts.should.have.property("index");
+                if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
+                if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
+            });
+            var b = new Buffer.from("123");
+            sn1.receive({ payload: b });
+        });
+    });
+
 });
 
 describe('JOIN node', function() {
 
-    before(function(done) {
+    beforeEach(function(done) {
         helper.startServer(done);
     });
 
-    after(function(done) {
-        helper.stopServer(done);
-    });
+    function initContext(done) {
+        Context.init({
+            contextStorage: {
+                memory: {
+                    module: "memory"
+                }
+            }
+        });
+        Context.load().then(function () {
+            done();
+        });
+    }
 
-    afterEach(function() {
-        helper.unload();
-        RED.settings.nodeMessageBufferMaxLength = 0;
+    afterEach(function(done) {
+        helper.unload().then(function(){
+            return Context.clean({allNodes:{}});
+        }).then(function(){
+            return Context.close();
+        }).then(function(){
+            RED.settings.nodeMessageBufferMaxLength = 0;
+            helper.stopServer(done);
+        });
     });
 
     it('should be loaded', function(done) {
@@ -465,14 +603,14 @@ describe('JOIN node', function() {
     });
 
     it('should accumulate a merged object', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true, count:1},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",mode:"custom",accumulate:true, count:3},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 5) {
+                if (c === 3) {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("a",3);
@@ -494,14 +632,14 @@ describe('JOIN node', function() {
     });
 
     it('should be able to reset an accumulation', function(done) {
-        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom", count:1},
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"merged",accumulate:true,mode:"custom", count:3},
                     {id:"n2", type:"helper"}];
         helper.load(joinNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
-                if (c === 3) {
+                if (c === 1) {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.have.property("a",1);
@@ -511,11 +649,20 @@ describe('JOIN node', function() {
                     }
                     catch(e) { done(e) }
                 }
-                if (c === 5) {
+                if (c === 2) {
                     try {
                         msg.should.have.property("payload");
-                        msg.payload.should.have.property("b",2);
-                        msg.payload.should.have.property("c",1);
+                        msg.payload.should.have.property("e",2);
+                        msg.payload.should.have.property("f",1);
+                    }
+                    catch(e) { done(e) }
+                }
+                if (c === 3) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("g",2);
+                        msg.payload.should.have.property("h",1);
+                        msg.payload.should.have.property("i",3);
                         done();
                     }
                     catch(e) { done(e) }
@@ -526,8 +673,11 @@ describe('JOIN node', function() {
             n1.receive({payload:{b:2}, topic:"b"});
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d", complete:true});
-            n1.receive({payload:{b:2}, topic:"e"});
-            n1.receive({payload:{c:1}, topic:"f"});
+            n1.receive({payload:{e:2}, topic:"e"});
+            n1.receive({payload:{f:1}, topic:"f", complete:true});
+            n1.receive({payload:{g:2}, topic:"g"});
+            n1.receive({payload:{h:1}, topic:"h"});
+            n1.receive({payload:{i:3}, topic:"i"});
         });
     });
 
@@ -696,6 +846,57 @@ describe('JOIN node', function() {
         });
     });
 
+        it('should manually join things into an array, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"array"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Array();
+                        msg.payload.length.should.equal(3);
+                        msg.payload[0].should.equal(1);
+                        msg.payload[1].should.equal(2);
+                        msg.payload[2].should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
+
+        it('should manually join things into an object, send when told complete', function(done) {
+            var flow = [{id:"n1", type:"join", wires:[["n2"]], timeout:1, mode:"custom", build:"object"},
+                        {id:"n2", type:"helper"}];
+            helper.load(joinNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.an.Object();
+                        Object.keys(msg.payload).length.should.equal(3);
+                        msg.payload.A.should.equal(1);
+                        msg.payload.B.should.equal(2);
+                        msg.payload.C.should.equal(3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:1, topic:"A"});
+                n1.receive({payload:2, topic:"B"});
+                n1.receive({payload:3, topic:"C"});
+                n1.receive({complete:true});
+            });
+        });
+
     it('should join split strings back into a word', function(done) {
         var flow = [{id:"n1", type:"join", mode:"auto", wires:[["n2"]]},
                     {id:"n2", type:"helper"}];
@@ -739,7 +940,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages', function(done) {
+    it('should reduce messages', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -767,7 +968,137 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages using $I', function(done) {
+    it('should reduce messages - count only in last part', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+payload",
+                     reduceInit:"0",
+                     reduceInitType:"num",
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(10);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.receive({payload:3, parts:{index:2, id:222}});
+            n1.receive({payload:2, parts:{index:1, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4,id:222}});
+            n1.receive({payload:1, parts:{index:0, id:222}});
+        });
+    });
+
+    function checkInitTypes(itype, ival, rval, initializer, checker, done) {
+        var flow = [{id:"n1", z:"f0", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A",
+                     reduceInit:ival,
+                     reduceInitType:itype,
+                     reduceFixup:undefined,
+                     wires:[["n2"]]},
+                    {id:"n2", type:"helper"}];
+        if (!initializer) {
+            initializer = (node, cb) => {
+                cb();
+            };
+        }
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            initializer(n1, function () {
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        checker(msg.payload, rval);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+                n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+                n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+                n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+            });
+        });
+    }
+
+    function checkInitTypesSimple(itype, val, done) {
+        checkInitTypes(itype, val, val, undefined, should.equal, done);
+    }
+
+    function checkInitTypesComplex(itype, ival, rval, done) {
+        checkInitTypes(itype, ival, rval, undefined, should.deepEqual, done);
+    }
+
+    it('should reduce messages with init types (str)', function(done) {
+        checkInitTypesSimple('str', "xyz", done);
+    });
+
+    it('should reduce messages with init types (num)', function(done) {
+        checkInitTypesSimple('num', 10, done);
+    });
+
+    it('should reduce messages with init types (bool)', function(done) {
+        checkInitTypesSimple('bool', true, done);
+    });
+
+    it('should reduce messages with init types (json)', function(done) {
+        var ival = '{"x":"vx", "y":"vy", "z":"vz"}';
+        var rval = JSON.parse(ival);
+        checkInitTypesComplex('json', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (bin)', function(done) {
+        var ival = "[1,2,3]";
+        var rval = Buffer.from(JSON.parse(ival));
+        checkInitTypesComplex('bin', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (JSONata)', function(done) {
+        var ival = "1+2+3";
+        var rval = 6;
+        checkInitTypesComplex('jsonata', ival, rval, done);
+    });
+
+    it('should reduce messages with init types (env)', function(done) {
+        function init(node, cb) {
+            process.env.NR_XYZ = "nr_xyz";
+            cb();
+        }
+        function fin(err) {
+            delete process.env.NR_XYZ;
+            done(err);
+        }
+        checkInitTypes('env', "NR_XYZ", "nr_xyz", init, should.equal, fin);
+    });
+
+    it('should reduce messages with init types (flow.name)', function(done) {
+        function init(node, cb) {
+            var context = node.context();
+            context.flow.set("foo", "bar");
+            cb();
+        }
+        checkInitTypes('flow', "foo", "bar", init, should.equal, done);
+    });
+
+    it('should reduce messages with init types (global.name)', function(done) {
+        function init(node, cb) {
+            var context = node.context();
+            context.global.set("foo", "bar");
+            cb();
+        }
+        checkInitTypes('global', "foo", "bar", init, should.equal, done);
+    });
+
+    it('should reduce messages using $I', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+$I",
@@ -795,7 +1126,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with fixup', function(done) {
+    it('should reduce messages with fixup', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$A+payload",
@@ -824,7 +1155,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (left)', function(done) {
+    it('should reduce messages (left)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -853,7 +1184,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages (right)', function(done) {
+    it('should reduce messages (right)', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:true,
                      reduceExp:"'(' & $A & '+' & payload & ')'",
@@ -882,7 +1213,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should redece messages with array result', function(done) {
+    it('should reduce messages with array result', function(done) {
         var flow = [{id:"n1", type:"join", mode:"reduce",
                      reduceRight:false,
                      reduceExp:"$append($A,[payload])",
@@ -942,11 +1273,327 @@ describe('JOIN node', function() {
                 evt.should.have.property('type', "join");
                 evt.should.have.property('msg', "join.too-many");
                 done();
-            }, 150);
+            }, TimeoutForErrorCase);
             n1.receive({payload:3, parts:{index:2, count:4, id:222}});
             n1.receive({payload:2, parts:{index:1, count:4, id:222}});
             n1.receive({payload:4, parts:{index:3, count:4, id:222}});
             n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should reduce messages with flow context', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+(payload*$flowContext(\"two\"))",
+                     reduceInit:"$flowContext(\"one\")",
+                     reduceInitType:"jsonata",
+                     reduceFixup:"$A*$flowContext(\"three\")",
+                     wires:[["n2"]],z:"flow"},
+                    {id:"n2", type:"helper",z:"flow"},
+                    {id:"flow", type:"tab"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(((((1+1*2)+2*2)+3*2)+4*2)*3);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.context().flow.set("one",1);
+            n1.context().flow.set("two",2);
+            n1.context().flow.set("three",3);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should reduce messages with global context', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+(payload/$globalContext(\"two\"))",
+                     reduceInit:"$globalContext(\"one\")",
+                     reduceInitType:"jsonata",
+                     reduceFixup:"$A*$globalContext(\"three\")",
+                     wires:[["n2"]],z:"flow"},
+                    {id:"n2", type:"helper",z:"flow"},
+                    {id:"flow", type:"tab"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal(((((1+1/2)+2/2)+3/2)+4/2)*3);
+                    done();
+                }
+                catch(e) { done(e); }
+            });
+            n1.context().global.set("one",1);
+            n1.context().global.set("two",2);
+            n1.context().global.set("three",3);
+            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+        });
+    });
+
+    it('should reduce messages with persistable flow context', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+(payload*$flowContext(\"two\",\"memory\"))",
+                     reduceInit:"$flowContext(\"one\",\"memory\")",
+                     reduceInitType:"jsonata",
+                     reduceFixup:"$A*$flowContext(\"three\",\"memory\")",
+                     wires:[["n2"]],z:"flow"},
+                    {id:"n2", type:"helper",z:"flow"},
+                    {id:"flow", type:"tab"}];
+        helper.load(joinNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                    try {
+                    n2.on("input", function(msg) {
+                        try {
+                            msg.should.have.property("payload");
+                            msg.payload.should.equal(((((1+1*2)+2*2)+3*2)+4*2)*3);
+                            done();
+                        }
+                        catch(e) { done(e); }
+                    });
+                    n1.context().flow.set(["one","two","three"],[1,2,3],"memory",function(err){
+                        if(err){
+                            done(err);
+                        } else{
+                            n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+                            n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+                            n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+                            n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+                        }
+                    });
+                }catch(err) {
+                done(err);
+            }
+            });
+        });
+    });
+
+    it('should reduce messages with persistable global context', function(done) {
+        var flow = [{id:"n1", type:"join", mode:"reduce",
+                     reduceRight:false,
+                     reduceExp:"$A+(payload/$globalContext(\"two\",\"memory\"))",
+                     reduceInit:"$globalContext(\"one\",\"memory\")",
+                     reduceInitType:"jsonata",
+                     reduceFixup:"$A*$globalContext(\"three\",\"memory\")",
+                     wires:[["n2"]],z:"flow"},
+                    {id:"n2", type:"helper",z:"flow"},
+                    {id:"flow", type:"tab"}];
+        helper.load(joinNode, flow, function() {
+            initContext(function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        msg.payload.should.equal(((((1+1/2)+2/2)+3/2)+4/2)*3);
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                n1.context().global.set(["one","two","three"],[1,2,3],"memory",function(err){
+                    if(err){
+                        done(err);
+                    } else{
+                        n1.receive({payload:3, parts:{index:2, count:4, id:222}});
+                        n1.receive({payload:2, parts:{index:1, count:4, id:222}});
+                        n1.receive({payload:4, parts:{index:3, count:4, id:222}});
+                        n1.receive({payload:1, parts:{index:0, count:4, id:222}});
+                    }
+                });
+            });
+        });
+    });
+
+    it('should handle invalid JSONata reduce expression - syntax error"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "invalid expr",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: undefined,
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should handle invalid JSONata reduce expression - runtime error"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$uknown()",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: undefined,
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should handle invalid JSONata fixup expression - syntax err"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$A",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: "invalid expr",
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+    it('should handle invalid JSONata fixup expression - runtime err"', function (done) {
+        var flow = [{
+            id: "n1", type: "join", mode: "reduce",
+            reduceRight: false,
+            reduceExp: "$A",
+            reduceInit: "0",
+            reduceInitType: "num",
+            reduceFixup: "$unknown()",
+            wires: [["n2"]]
+        },
+        { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { id: 1, type: "string", ch: ",", index: 0, count: 1 } });
+        });
+    });
+
+    it('should concat payload when group.type is array', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.equal("ab");
+                    msg.payload[1].should.equal("cd");
+                    msg.payload[2].should.equal("ef");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "ab", parts: { id: 1, type: "array", ch: ",", index: 0, count: 3, len:2}});
+            n1.receive({ payload: "cd", parts: { id: 1, type: "array", ch: ",", index: 1, count: 3, len:2}});
+            n1.receive({ payload: "ef", parts: { id: 1, type: "array", ch: ",", index: 2, count: 3, len:2}});
+        });
+    });
+
+    it('should concat payload when group.type is buffer and group.joinChar is undefined', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: ",", build: "buffer", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.toString().should.equal("ABC");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: Buffer.from("A"), parts: { id: 1, type: "buffer", index: 0, count: 3 } });
+            n1.receive({ payload: Buffer.from("B"), parts: { id: 1, type: "buffer", index: 1, count: 3 } });
+            n1.receive({ payload: Buffer.from("C"), parts: { id: 1, type: "buffer", index: 2, count: 3 } });
+        });
+    });
+
+    it('should concat payload when group.type is string and group.joinChar is not string', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: ",", build: "buffer", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.toString().should.equal("A0B0C");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: Buffer.from("A"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 0, count: 3 } });
+            n1.receive({ payload: Buffer.from("B"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 1, count: 3 } });
+            n1.receive({ payload: Buffer.from("C"), parts: { id: 1, type: "string", ch: Buffer.from("0"), index: 2, count: 3 } });
+        });
+    });
+
+    it('should handle msg.parts property when mode is auto and parts or id are missing', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "string", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                done(new Error("This path does not go through."));
+            });
+            n1.receive({ payload: "A", parts: { type: "string", ch: ",", index: 0, count: 2 } });
+            n1.receive({ payload: "B", parts: { type: "string", ch: ",", index: 1, count: 2 } });
+            setTimeout(function () {
+                done();
+            }, TimeoutForErrorCase);
         });
     });
 

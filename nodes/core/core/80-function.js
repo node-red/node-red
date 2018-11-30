@@ -42,7 +42,7 @@ module.exports = function(RED) {
                             if (type === 'object') {
                                 type = Buffer.isBuffer(msg)?'Buffer':(util.isArray(msg)?'Array':'Date');
                             }
-                            node.error(RED._("function.error.non-message-returned",{ type: type }))
+                            node.error(RED._("function.error.non-message-returned",{ type: type }));
                         }
                     }
                 }
@@ -62,6 +62,8 @@ module.exports = function(RED) {
                            "results = (function(msg){ "+
                               "var __msgid__ = msg._msgid;"+
                               "var node = {"+
+                                 "id:__node__.id,"+
+                                 "name:__node__.name,"+
                                  "log:__node__.log,"+
                                  "error:__node__.error,"+
                                  "warn:__node__.warn,"+
@@ -80,10 +82,13 @@ module.exports = function(RED) {
             console:console,
             util:util,
             Buffer:Buffer,
+            Date: Date,
             RED: {
                 util: RED.util
             },
             __node__: {
+                id: node.id,
+                name: node.name,
                 log: function() {
                     node.log.apply(node, arguments);
                 },
@@ -198,9 +203,9 @@ module.exports = function(RED) {
         if (util.hasOwnProperty('promisify')) {
             sandbox.setTimeout[util.promisify.custom] = function(after, value) {
                 return new Promise(function(resolve, reject) {
-                    sandbox.setTimeout(function(){ resolve(value) }, after);
+                    sandbox.setTimeout(function(){ resolve(value); }, after);
                 });
-            }
+            };
         }
         var context = vm.createContext(sandbox);
         try {
@@ -236,7 +241,6 @@ module.exports = function(RED) {
 
                     var line = 0;
                     var errorMessage;
-                    var stack = err.stack.split(/\r?\n/);
                     if (stack.length > 0) {
                         while (line < stack.length && stack[line].indexOf("ReferenceError") !== 0) {
                             line++;
@@ -260,13 +264,13 @@ module.exports = function(RED) {
             });
             this.on("close", function() {
                 while (node.outstandingTimers.length > 0) {
-                    clearTimeout(node.outstandingTimers.pop())
+                    clearTimeout(node.outstandingTimers.pop());
                 }
                 while (node.outstandingIntervals.length > 0) {
-                    clearInterval(node.outstandingIntervals.pop())
+                    clearInterval(node.outstandingIntervals.pop());
                 }
                 this.status({});
-            })
+            });
         } catch(err) {
             // eg SyntaxError - which v8 doesn't include line number information
             // so we can't do better than this
@@ -275,4 +279,4 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("function",FunctionNode);
     RED.library.register("functions");
-}
+};

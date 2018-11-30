@@ -31,6 +31,23 @@ module.exports = function(RED) {
         'false': function(a) { return a === false; },
         'null': function(a) { return (typeof a == "undefined" || a === null); },
         'nnull': function(a) { return (typeof a != "undefined" && a !== null); },
+        'empty': function(a) {
+            if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                return a.length === 0;
+            } else if (typeof a === 'object' && a !== null) {
+                return Object.keys(a).length === 0;
+            }
+            return false;
+        },
+        'nempty': function(a) {
+            if (typeof a === 'string' || Array.isArray(a) || Buffer.isBuffer(a)) {
+                return a.length !== 0;
+            } else if (typeof a === 'object' && a !== null) {
+                return Object.keys(a).length !== 0;
+            }
+            return false;
+        },
+
         'istype': function(a, b) {
             if (b === "array") { return Array.isArray(a); }
             else if (b === "buffer") { return Buffer.isBuffer(a); }
@@ -59,20 +76,253 @@ module.exports = function(RED) {
         'else': function(a) { return a === true; }
     };
 
-    var _max_kept_msgs_count = undefined;
+    var _maxKeptCount;
 
-    function max_kept_msgs_count(node) {
-        if (_max_kept_msgs_count === undefined) {
+    function getMaxKeptCount() {
+        if (_maxKeptCount === undefined) {
             var name = "nodeMessageBufferMaxLength";
             if (RED.settings.hasOwnProperty(name)) {
-                _max_kept_msgs_count = RED.settings[name];
+                _maxKeptCount = RED.settings[name];
             }
             else {
-                _max_kept_msgs_count = 0;
+                _maxKeptCount = 0;
             }
         }
-        return _max_kept_msgs_count;
+        return _maxKeptCount;
     }
+
+    function getProperty(node,msg) {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
+                if (node.propertyType === 'jsonata') {
+                    RED.util.evaluateJSONataExpression(node.property,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else {
+                    RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg,(err,value) => {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                }
+            });
+        } else {
+            if (node.propertyType === 'jsonata') {
+                try {
+                    return RED.util.evaluateJSONataExpression(node.property,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
+            } else {
+                try {
+                    return RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
+            }
+        }
+    }
+
+    function getV1(node,msg,rule,hasParts) {
+        if (node.useAsyncRules) {
+            return new Promise( (resolve,reject) => {
+                if (rule.vt === 'prev') {
+                    resolve(node.previousValue);
+                } else if (rule.vt === 'jsonata') {
+                    var exp = rule.v;
+                    if (rule.t === 'jsonata_exp') {
+                        if (hasParts) {
+                            exp.assign("I", msg.parts.index);
+                            exp.assign("N", msg.parts.count);
+                        }
+                    }
+                    RED.util.evaluateJSONataExpression(exp,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else if (rule.vt === 'json') {
+                    resolve("json"); // TODO: ?! invalid case
+                } else if (rule.vt === 'null') {
+                    resolve("null");
+                } else {
+                    RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg, function(err,value) {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                }
+            });
+        } else {
+            if (rule.vt === 'prev') {
+                return node.previousValue;
+            } else if (rule.vt === 'jsonata') {
+                var exp = rule.v;
+                if (rule.t === 'jsonata_exp') {
+                    if (hasParts) {
+                        exp.assign("I", msg.parts.index);
+                        exp.assign("N", msg.parts.count);
+                    }
+                }
+                try {
+                    return RED.util.evaluateJSONataExpression(exp,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
+            } else if (rule.vt === 'json') {
+                return "json"; // TODO: ?! invalid case
+            } else if (rule.vt === 'null') {
+                return "null";
+            } else {
+                try {
+                    return RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
+            }
+        }
+    }
+
+    function getV2(node,msg,rule) {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
+                var v2 = rule.v2;
+                if (rule.v2t === 'prev') {
+                    resolve(node.previousValue);
+                } else if (rule.v2t === 'jsonata') {
+                    RED.util.evaluateJSONataExpression(rule.v2,msg,(err,value) => {
+                        if (err) {
+                            reject(RED._("switch.errors.invalid-expr",{error:err.message}));
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else if (typeof v2 !== 'undefined') {
+                    RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg, function(err,value) {
+                        if (err) {
+                            resolve(undefined);
+                        } else {
+                            resolve(value);
+                        }
+                    });
+                } else {
+                    resolve(v2);
+                }
+            })
+        } else {
+            var v2 = rule.v2;
+            if (rule.v2t === 'prev') {
+                return node.previousValue;
+            } else if (rule.v2t === 'jsonata') {
+                try {
+                    return RED.util.evaluateJSONataExpression(rule.v2,msg);
+                } catch(err) {
+                    throw new Error(RED._("switch.errors.invalid-expr",{error:err.message}))
+                }
+            } else if (typeof v2 !== 'undefined') {
+                try {
+                    return RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
+                } catch(err) {
+                    return undefined;
+                }
+            } else {
+                return v2;
+            }
+        }
+    }
+
+    function applyRule(node, msg, property, state) {
+        if (node.useAsyncRules) {
+            return new Promise((resolve,reject) => {
+
+                var rule = node.rules[state.currentRule];
+                var v1,v2;
+
+                getV1(node,msg,rule,state.hasParts).then(value => {
+                    v1 = value;
+                }).then(()=>getV2(node,msg,rule)).then(value => {
+                    v2 = value;
+                }).then(() => {
+                    if (rule.t == "else") {
+                        property = state.elseflag;
+                        state.elseflag = true;
+                    }
+                    if (operators[rule.t](property,v1,v2,rule.case,msg.parts)) {
+                        state.onward.push(msg);
+                        state.elseflag = false;
+                        if (node.checkall == "false") {
+                            return resolve(false);
+                        }
+                    } else {
+                        state.onward.push(null);
+                    }
+                    resolve(state.currentRule < node.rules.length - 1);
+                });
+            })
+        } else {
+            var rule = node.rules[state.currentRule];
+            var v1 = getV1(node,msg,rule,state.hasParts);
+            var v2 = getV2(node,msg,rule);
+            if (rule.t == "else") {
+                property = state.elseflag;
+                state.elseflag = true;
+            }
+            if (operators[rule.t](property,v1,v2,rule.case,msg.parts)) {
+                state.onward.push(msg);
+                state.elseflag = false;
+                if (node.checkall == "false") {
+                    return false;
+                }
+            } else {
+                state.onward.push(null);
+            }
+            return state.currentRule < node.rules.length - 1
+        }
+    }
+
+    function applyRules(node, msg, property,state) {
+        if (!state) {
+            state = {
+                currentRule: 0,
+                elseflag: true,
+                onward: [],
+                hasParts: msg.hasOwnProperty("parts") &&
+                                msg.parts.hasOwnProperty("id") &&
+                                msg.parts.hasOwnProperty("index")
+            }
+        }
+        if (node.useAsyncRules) {
+            return applyRule(node,msg,property,state).then(hasMore => {
+                if (hasMore) {
+                    state.currentRule++;
+                    return applyRules(node,msg,property,state);
+                } else {
+                    node.previousValue = property;
+                    return state.onward;
+                }
+            });
+        } else {
+            var hasMore = applyRule(node,msg,property,state);
+            if (hasMore) {
+                state.currentRule++;
+                return applyRules(node,msg,property,state);
+            } else {
+                node.previousValue = property;
+                return state.onward;
+            }
+        }
+    }
+
 
     function SwitchNode(n) {
         RED.nodes.createNode(this, n);
@@ -94,10 +344,18 @@ module.exports = function(RED) {
         var node = this;
         var valid = true;
         var repair = n.repair;
-        var needs_count = repair;
+        var needsCount = repair;
+        this.useAsyncRules = (
+            this.propertyType === 'flow' ||
+            this.propertyType === 'global' || (
+                this.propertyType === 'jsonata' &&
+                /\$(flow|global)Context/.test(this.property)
+            )
+        );
+
         for (var i=0; i<this.rules.length; i+=1) {
             var rule = this.rules[i];
-            needs_count = needs_count || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
+            needsCount = needsCount || ((rule.t === "tail") || (rule.t === "jsonata_exp"));
             if (!rule.vt) {
                 if (!isNaN(Number(rule.v))) {
                     rule.vt = 'num';
@@ -105,6 +363,13 @@ module.exports = function(RED) {
                     rule.vt = 'str';
                 }
             }
+            this.useAsyncRules = this.useAsyncRules || (
+                rule.vt === 'flow' ||
+                rule.vt === 'global' || (
+                    rule.vt === 'jsonata' &&
+                    /\$(flow|global)Context/.test(rule.v)
+                )
+            );
             if (rule.vt === 'num') {
                 if (!isNaN(Number(rule.v))) {
                     rule.v = Number(rule.v);
@@ -117,6 +382,9 @@ module.exports = function(RED) {
                     valid = false;
                 }
             }
+            if (rule.vt === 'flow' || rule.vt === 'global' || rule.vt === 'jsonata') {
+                this.useAsyncRules = true;
+            }
             if (typeof rule.v2 !== 'undefined') {
                 if (!rule.v2t) {
                     if (!isNaN(Number(rule.v2))) {
@@ -125,6 +393,13 @@ module.exports = function(RED) {
                         rule.v2t = 'str';
                     }
                 }
+                this.useAsyncRules = this.useAsyncRules || (
+                    rule.v2t === 'flow' ||
+                    rule.v2t === 'global' || (
+                        rule.v2t === 'jsonata' &&
+                        /\$(flow|global)Context/.test(rule.v2)
+                    )
+                );
                 if (rule.v2t === 'num') {
                     rule.v2 = Number(rule.v2);
                 } else if (rule.v2t === 'jsonata') {
@@ -137,31 +412,30 @@ module.exports = function(RED) {
                 }
             }
         }
-
         if (!valid) {
             return;
         }
 
-        var pending_count = 0;
-        var pending_id = 0;
-        var pending_in = {};
-        var pending_out = {};
+        var pendingCount = 0;
+        var pendingId = 0;
+        var pendingIn = {};
+        var pendingOut = {};
         var received = {};
 
-        function add2group_in(id, msg, parts) {
-            if (!(id in pending_in)) {
-                pending_in[id] = {
+        function addMessageToGroup(id, msg, parts) {
+            if (!(id in pendingIn)) {
+                pendingIn[id] = {
                     count: undefined,
                     msgs: [],
-                    seq_no: pending_id++
+                    seq_no: pendingId++
                 };
             }
-            var group = pending_in[id];
+            var group = pendingIn[id];
             group.msgs.push(msg);
-            pending_count++;
-            var max_msgs = max_kept_msgs_count(node);
-            if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                clear_pending();
+            pendingCount++;
+            var max_msgs = getMaxKeptCount();
+            if ((max_msgs > 0) && (pendingCount > max_msgs)) {
+                clearPending();
                 node.error(RED._("switch.errors.too-many"), msg);
             }
             if (parts.hasOwnProperty("count")) {
@@ -170,32 +444,29 @@ module.exports = function(RED) {
             return group;
         }
 
-        function del_group_in(id, group) {
-            pending_count -= group.msgs.length;
-            delete pending_in[id];
-        }
 
-        function add2pending_in(msg) {
+        function addMessageToPending(msg) {
             var parts = msg.parts;
-            if (parts.hasOwnProperty("id") &&
-                parts.hasOwnProperty("index")) {
-                var group = add2group_in(parts.id, msg, parts);
-                var msgs = group.msgs;
-                var count = group.count;
-                if (count === msgs.length) {
-                    for (var i = 0; i < msgs.length; i++) {
-                        var msg = msgs[i];
+            // We've already checked the msg.parts has the require bits
+            var group = addMessageToGroup(parts.id, msg, parts);
+            var msgs = group.msgs;
+            var count = group.count;
+            if (count === msgs.length) {
+                // We have a complete group - send the individual parts
+                return msgs.reduce((promise, msg) => {
+                    return promise.then((result) => {
                         msg.parts.count = count;
-                        process_msg(msg, false);
-                    }
-                    del_group_in(parts.id, group);
-                }
-                return true;
+                        return processMessage(msg, false);
+                    })
+                }, Promise.resolve()).then( () => {
+                    pendingCount -= group.msgs.length;
+                    delete pendingIn[parts.id];
+                });
             }
-            return false;
+            return Promise.resolve();
         }
 
-        function send_group(onwards, port_count) {
+        function sendGroup(onwards, port_count) {
             var counts = new Array(port_count).fill(0);
             for (var i = 0; i < onwards.length; i++) {
                 var onward = onwards[i];
@@ -230,141 +501,122 @@ module.exports = function(RED) {
             }
         }
 
-        function send2ports(onward, msg) {
+        function sendGroupMessages(onward, msg) {
             var parts = msg.parts;
             var gid = parts.id;
             received[gid] = ((gid in received) ? received[gid] : 0) +1;
             var send_ok = (received[gid] === parts.count);
 
-            if (!(gid in pending_out)) {
-                pending_out[gid] = {
+            if (!(gid in pendingOut)) {
+                pendingOut[gid] = {
                     onwards: []
                 };
             }
-            var group = pending_out[gid];
+            var group = pendingOut[gid];
             var onwards = group.onwards;
             onwards.push(onward);
-            pending_count++;
+            pendingCount++;
             if (send_ok) {
-                send_group(onwards, onward.length, msg);
-                pending_count -= onward.length;
-                delete pending_out[gid];
+                sendGroup(onwards, onward.length, msg);
+                pendingCount -= onward.length;
+                delete pendingOut[gid];
                 delete received[gid];
             }
-            var max_msgs = max_kept_msgs_count(node);
-            if ((max_msgs > 0) && (pending_count > max_msgs)) {
-                clear_pending();
+            var max_msgs = getMaxKeptCount();
+            if ((max_msgs > 0) && (pendingCount > max_msgs)) {
+                clearPending();
                 node.error(RED._("switch.errors.too-many"), msg);
             }
         }
 
-        function msg_has_parts(msg) {
-            if (msg.hasOwnProperty("parts")) {
-                var parts = msg.parts;
-                return (parts.hasOwnProperty("id") &&
-                        parts.hasOwnProperty("index"));
-            }
-            return false;
-        }
 
-        function process_msg(msg, check_parts) {
-            var has_parts = msg_has_parts(msg);
-            if (needs_count && check_parts && has_parts &&
-                add2pending_in(msg)) {
-                return;
+
+
+
+        function processMessage(msg, checkParts) {
+            var hasParts = msg.hasOwnProperty("parts") &&
+                            msg.parts.hasOwnProperty("id") &&
+                            msg.parts.hasOwnProperty("index");
+
+            if (needsCount && checkParts && hasParts) {
+                return addMessageToPending(msg);
             }
-            var onward = [];
-            try {
-                var prop;
-                if (node.propertyType === 'jsonata') {
-                    prop = RED.util.evaluateJSONataExpression(node.property,msg);
-                } else {
-                    prop = RED.util.evaluateNodeProperty(node.property,node.propertyType,node,msg);
-                }
-                var elseflag = true;
-                for (var i=0; i<node.rules.length; i+=1) {
-                    var rule = node.rules[i];
-                    var test = prop;
-                    var v1,v2;
-                    if (rule.vt === 'prev') {
-                        v1 = node.previousValue;
-                    } else if (rule.vt === 'jsonata') {
-                        try {
-                            var exp = rule.v;
-                            if (rule.t === 'jsonata_exp') {
-                                if (has_parts) {
-                                    exp.assign("I", msg.parts.index);
-                                    exp.assign("N", msg.parts.count);
-                                }
+            if (node.useAsyncRules) {
+                return getProperty(node,msg)
+                        .then(property => applyRules(node,msg,property))
+                        .then(onward => {
+                            if (!repair || !hasParts) {
+                                node.send(onward);
                             }
-                            v1 = RED.util.evaluateJSONataExpression(exp,msg);
-                        } catch(err) {
-                            node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
-                            return;
-                        }
-                    } else if (rule.vt === 'json') {
-                        v1 = "json";
-                    } else if (rule.vt === 'null') {
-                        v1 = "null";
+                            else {
+                                sendGroupMessages(onward, msg);
+                            }
+                        }).catch(err => {
+                            node.warn(err);
+                        });
+            } else {
+                try {
+                    var property = getProperty(node,msg);
+                    var onward = applyRules(node,msg,property);
+                    if (!repair || !hasParts) {
+                        node.send(onward);
                     } else {
-                        try {
-                            v1 = RED.util.evaluateNodeProperty(rule.v,rule.vt,node,msg);
-                        } catch(err) {
-                            v1 = undefined;
-                        }
+                        sendGroupMessages(onward, msg);
                     }
-                    v2 = rule.v2;
-                    if (rule.v2t === 'prev') {
-                        v2 = node.previousValue;
-                    } else if (rule.v2t === 'jsonata') {
-                        try {
-                            v2 = RED.util.evaluateJSONataExpression(rule.v2,msg);
-                        } catch(err) {
-                            node.error(RED._("switch.errors.invalid-expr",{error:err.message}));
-                            return;
-                        }
-                    } else if (typeof v2 !== 'undefined') {
-                        try {
-                            v2 = RED.util.evaluateNodeProperty(rule.v2,rule.v2t,node,msg);
-                        } catch(err) {
-                            v2 = undefined;
-                        }
-                    }
-                    if (rule.t == "else") { test = elseflag; elseflag = true; }
-                    if (operators[rule.t](test,v1,v2,rule.case,msg.parts)) {
-                        onward.push(msg);
-                        elseflag = false;
-                        if (node.checkall == "false") { break; }
-                    } else {
-                        onward.push(null);
-                    }
+                } catch(err) {
+                    node.warn(err);
                 }
-                node.previousValue = prop;
-                if (!repair || !has_parts) {
-                    node.send(onward);
-                }
-                else {
-                    send2ports(onward, msg);
-                }
-            } catch(err) {
-                node.warn(err);
             }
         }
 
-        function clear_pending() {
-            pending_count = 0;
-            pending_id = 0;
-            pending_in = {};
-            pending_out = {};
+        function clearPending() {
+            pendingCount = 0;
+            pendingId = 0;
+            pendingIn = {};
+            pendingOut = {};
             received = {};
         }
 
+        var pendingMessages = [];
+        var activeMessagePromise = null;
+        var processMessageQueue = function(msg) {
+            if (msg) {
+                // A new message has arrived - add it to the message queue
+                pendingMessages.push(msg);
+                if (activeMessagePromise !== null) {
+                    // The node is currently processing a message, so do nothing
+                    // more with this message
+                    return;
+                }
+            }
+            if (pendingMessages.length === 0) {
+                // There are no more messages to process, clear the active flag
+                // and return
+                activeMessagePromise = null;
+                return;
+            }
+
+            // There are more messages to process. Get the next message and
+            // start processing it. Recurse back in to check for any more
+            var nextMsg = pendingMessages.shift();
+            activeMessagePromise = processMessage(nextMsg,true)
+                .then(processMessageQueue)
+                .catch((err) => {
+                    node.error(err,nextMsg);
+                    return processMessageQueue();
+                });
+        }
+
         this.on('input', function(msg) {
-            process_msg(msg, true);
+            if (node.useAsyncRules) {
+                processMessageQueue(msg);
+            } else {
+                processMessage(msg,true);
+            }
         });
 
         this.on('close', function() {
-            clear_pending();
+            clearPending();
         });
     }
 

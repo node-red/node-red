@@ -24,4 +24,21 @@ function debugNode(id) {
 
 util.inherits(debugNode, nodePage);
 
+debugNode.prototype.setOutput = function(complete) {
+    // Open a payload type list.
+    browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
+    if (complete !== 'true') {
+        // Select the "msg" type.
+        browser.clickWithWait('/html/body/div[11]/a[1]');
+        // Input the path in msg.
+        browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
+        browser.keys(['Control', 'a', 'Control']);
+        browser.keys(['Delete']);
+        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', complete);
+    } else {
+        // Select the "complete msg object" type.
+        browser.clickWithWait('/html/body/div[11]/a[2]');
+    }
+}
+
 module.exports = debugNode;

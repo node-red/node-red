@@ -67,6 +67,7 @@
         },
         inputs:1,               // set the number of inputs - only 0 or 1
         outputs:1,              // set the number of outputs - 0 to n
+        color: "#ddd",          // set icon color
         // set the icon (held in icons dir below where you save the node)
         icon: "myicon.png",     // saved in  icons/myicon.png
         label: function() {     // sets the default label contents

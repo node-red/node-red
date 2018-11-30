@@ -23,7 +23,7 @@
     margin: 0;
     vertical-align: middle;
     box-sizing: border-box;
-    overflow:hidden;
+    overflow:visible;
     position: relative;
     .red-ui-typedInput-input {
         position: absolute;
@@ -43,6 +43,7 @@
         border-bottom-left-radius: 0;
         box-shadow: none;
         vertical-align: middle;
+        // backgroun/d: #f0fff0;
     }
 
     &.red-ui-typedInput-focus:not(.input-error) {
@@ -63,7 +64,7 @@
         line-height: 32px;
         vertical-align: middle;
         color: #555;
-        i {
+        i.red-ui-typedInput-icon {
             position: relative;
             top: -3px;
             margin-left: 1px;
@@ -76,11 +77,11 @@
         }
         &.disabled {
             cursor: default;
-            i {
+            i.red-ui-typedInput-icon {
                 color: #bbb;
             }
         }
-        span {
+        .red-ui-typedInput-type-label,.red-ui-typedInput-option-label {
             display: inline-block;
             height: 100%;
             padding: 0 1px 0 5px;
@@ -121,26 +122,25 @@
         border-bottom-right-radius: 4px;
         padding: 0 0 0 0;
         position:absolute;
-        width: calc( 100% );
-
-        i {
-            position:absolute;
-            right: 4px;
-            top: 7px;
-        }
+        right: 0;
         .red-ui-typedInput-option-label {
-            background:#fff;
+            background:$typedInput-button-background;
             position:absolute;
             left:0;
             right:23px;
             top: 0;
-            padding: 0 5px 0 5px;
+            padding: 0 5px 0 8px;
+            i.red-ui-typedInput-icon {
+                margin-right: 4px;
+                margin-top: 4px;
+            }
         }
         .red-ui-typedInput-option-caret {
             top: 0;
             position: absolute;
             right: 0;
             width: 17px;
+            padding-left: 6px;
         }
         &:focus {
             box-shadow: none;
@@ -174,5 +174,8 @@
             text-decoration: none;
             background: $typedInput-button-background-active;
         }
+    }
+    .red-ui-typedInput-icon {
+        margin-right: 4px;
     }
 }

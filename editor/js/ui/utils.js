@@ -34,6 +34,10 @@ RED.utils = (function() {
                 result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('buffer['+value.length+']');
             } else if (value.hasOwnProperty('type') && value.type === 'array' && value.hasOwnProperty('data')) {
                 result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('array['+value.length+']');
+            } else if (value.hasOwnProperty('type') && value.type === 'function') {
+                result = $('<span class="debug-message-object-value debug-message-type-meta"></span>').text('function');
+            } else if (value.hasOwnProperty('type') && value.type === 'number') {
+                result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(value.data);
             } else {
                 result = $('<span class="debug-message-object-value debug-message-type-meta">object</span>');
             }
@@ -45,6 +49,8 @@ RED.utils = (function() {
                 subvalue = sanitize(value);
             }
             result = $('<span class="debug-message-object-value debug-message-type-string"></span>').html('"'+formatString(subvalue)+'"');
+        } else if (typeof value === 'number') {
+            result = $('<span class="debug-message-object-value debug-message-type-number"></span>').text(""+value);
         } else {
             result = $('<span class="debug-message-object-value debug-message-type-other"></span>').text(""+value);
         }
@@ -125,7 +131,7 @@ RED.utils = (function() {
             e.stopPropagation();
             RED.clipboard.copyText(msg,copyPayload,"clipboard.copyMessageValue");
         })
-        if (strippedKey !== '') {
+        if (strippedKey !== undefined && strippedKey !== '') {
             var isPinned = pinnedPaths[sourceId].hasOwnProperty(strippedKey);
 
             var pinPath = $('<button class="editor-button editor-button-small debug-message-tools-pin"><i class="fa fa-map-pin"></i></button>').appendTo(tools).click(function(e) {
@@ -292,13 +298,18 @@ RED.utils = (function() {
 
         var isArray = Array.isArray(obj);
         var isArrayObject = false;
-        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__encoded__ && obj.type === 'array') || obj.type === 'Buffer')) {
+        if (obj && typeof obj === 'object' && obj.hasOwnProperty('type') && obj.hasOwnProperty('data') && ((obj.__enc__ && obj.type === 'array') || obj.type === 'Buffer')) {
             isArray = true;
             isArrayObject = true;
         }
-
         if (obj === null || obj === undefined) {
             $('<span class="debug-message-type-null">'+obj+'</span>').appendTo(entryObj);
+        } else if (obj.__enc__ && obj.type === 'number') {
+            e = $('<span class="debug-message-type-number debug-message-object-header"></span>').text(obj.data).appendTo(entryObj);
+        } else if (typeHint === "function" || (obj.__enc__ && obj.type === 'function')) {
+            e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("function").appendTo(entryObj);
+        } else if (typeHint === "internal" || (obj.__enc__ && obj.type === 'internal')) {
+            e = $('<span class="debug-message-type-meta debug-message-object-header"></span>').text("[internal]").appendTo(entryObj);
         } else if (typeof obj === 'string') {
             if (/[\t\n\r]/.test(obj)) {
                 element.addClass('collapsed');
@@ -343,7 +354,7 @@ RED.utils = (function() {
                 if (originalLength === undefined) {
                     originalLength = data.length;
                 }
-                if (data.__encoded__) {
+                if (data.__enc__) {
                     data = data.data;
                 }
                 type = obj.type.toLowerCase();
@@ -783,12 +794,92 @@ RED.utils = (function() {
         return RED.text.bidi.enforceTextDirectionWithUCC(l);
     }
 
+    var nodeColorCache = {};
+    function getNodeColor(type, def) {
+        var result = def.color;
+        var paletteTheme = RED.settings.theme('palette.theme') || [];
+        if (paletteTheme.length > 0) {
+            if (!nodeColorCache.hasOwnProperty(type)) {
+                nodeColorCache[type] = def.color;
+                var l = paletteTheme.length;
+                for (var i = 0; i < l; i++ ){
+                    var themeRule = paletteTheme[i];
+                    if (themeRule.hasOwnProperty('category')) {
+                        if (!themeRule.hasOwnProperty('_category')) {
+                            themeRule._category = new RegExp(themeRule.category);
+                        }
+                        if (!themeRule._category.test(def.category)) {
+                            continue;
+                        }
+                    }
+                    if (themeRule.hasOwnProperty('type')) {
+                        if (!themeRule.hasOwnProperty('_type')) {
+                            themeRule._type = new RegExp(themeRule.type);
+                        }
+                        if (!themeRule._type.test(type)) {
+                            continue;
+                        }
+                    }
+                    nodeColorCache[type] = themeRule.color || def.color;
+                    break;
+                }
+            }
+            result = nodeColorCache[type];
+        }
+        if (result) {
+            return result;
+        } else {
+            return "#ddd";
+        }
+    }
+
     function addSpinnerOverlay(container,contain) {
         var spinner = $('<div class="projects-dialog-spinner "><img src="red/images/spin.svg"/></div>').appendTo(container);
         if (contain) {
             spinner.addClass('projects-dialog-spinner-contain');
         }
         return spinner;
+    }
+
+    function decodeObject(payload,format) {
+        if ((format === 'number') && (payload === "NaN")) {
+            payload = Number.NaN;
+        } else if ((format === 'number') && (payload === "Infinity")) {
+            payload = Infinity;
+        } else if ((format === 'number') && (payload === "-Infinity")) {
+            payload = -Infinity;
+        } else if (format === 'Object' || /^array/.test(format) || format === 'boolean' || format === 'number' ) {
+            payload = JSON.parse(payload);
+        } else if (/error/i.test(format)) {
+            payload = JSON.parse(payload);
+            payload = (payload.name?payload.name+": ":"")+payload.message;
+        } else if (format === 'null') {
+            payload = null;
+        } else if (format === 'undefined') {
+            payload = undefined;
+        } else if (/^buffer/.test(format)) {
+            var buffer = payload;
+            payload = [];
+            for (var c = 0; c < buffer.length; c += 2) {
+                payload.push(parseInt(buffer.substr(c, 2), 16));
+            }
+        }
+        return payload;
+    }
+
+    function parseContextKey(key) {
+        var parts = {};
+        var m = /^#:\((\S+?)\)::(.*)$/.exec(key);
+        if (m) {
+            parts.store = m[1];
+            parts.key = m[2];
+        } else {
+            parts.key = key;
+            if (RED.settings.context) {
+                parts.store = RED.settings.context.default;
+            }
+        }
+        return parts;
     }
 
     return {
@@ -800,6 +891,9 @@ RED.utils = (function() {
         getDefaultNodeIcon: getDefaultNodeIcon,
         getNodeIcon: getNodeIcon,
         getNodeLabel: getNodeLabel,
-        addSpinnerOverlay: addSpinnerOverlay
+        getNodeColor: getNodeColor,
+        addSpinnerOverlay: addSpinnerOverlay,
+        decodeObject: decodeObject,
+        parseContextKey: parseContextKey
     }
 })();
