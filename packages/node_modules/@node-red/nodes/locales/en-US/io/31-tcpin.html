@@ -1,0 +1,45 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="tcp in">
+    <p>Provides a choice of TCP inputs. Can either connect to a remote TCP port,
+       or accept incoming connections.</p>
+    <p><b>Note: </b>On some systems you may need root or administrator access
+    to access ports below 1024.</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp out">
+    <p>Provides a choice of TCP outputs. Can either connect to a remote TCP port,
+    accept incoming connections, or reply to messages received from a TCP In node.</p>
+    <p>Only the <code>msg.payload</code> is sent.</p>
+    <p>If <code>msg.payload</code> is a string containing a Base64 encoding of binary
+    data, the Base64 decoding option will cause it to be converted back to binary
+    before being sent.</p>
+    <p>If <code>msg._session</code> is not present the payload is
+    sent to <b>all</b> connected clients.</p>
+    <p><b>Note: </b>On some systems you may need root or administrator access
+    to access ports below 1024.</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>A simple TCP request node - sends the <code>msg.payload</code> to a server tcp port and expects a response.</p>
+    <p>Connects, sends the "request", and reads the "response". It can either count a number of
+    returned characters into a fixed buffer, match a specified character before returning,
+    wait a fixed timeout from first reply and then return, sit and wait for data, or send then close the connection
+    immediately, without waiting for a reply.</p>
+    <p>The response will be output in <code>msg.payload</code> as a buffer, so you may want to .toString() it.</p>
+    <p>If you leave tcp host or port blank they must be set by using the <code>msg.host</code> and <code>msg.port</code> properties.</p>
+</script>

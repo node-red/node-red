@@ -1,0 +1,84 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="mqtt in">
+<p>Connects to a MQTT broker and subscribes to messages from the specified topic.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">string | buffer</span></dt>
+       <dd>a string unless detected as a binary buffer.</dd>
+       <dt>topic <span class="property-type">string</span></dt>
+       <dd>the MQTT topic, uses / as a hierarchy separator.</dd>
+       <dt>qos <span class="property-type">number</span> </dt>
+       <dd>0, fire and forget - 1, at least once - 2, once and once only.</dd>
+       <dt>retain <span class="property-type">boolean</span></dt>
+       <dd>true indicates the message was retained and may be old.</dd>
+    </dl>
+    <h3>Details</h3>
+    The subscription topic can include MQTT wildcards, + for one level, # for multiple levels.</p>
+    <p>This node requires a connection to a MQTT broker to be configured. This is configured by clicking
+    the pencil icon.</p>
+    <p>Several MQTT nodes (in or out) can share the same broker connection if required.</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt out">
+    <p>Connects to a MQTT broker and publishes messages.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">string | buffer</span></dt>
+       <dd> most users prefer simple text payloads, but binary buffers can also be published.</dd>
+
+       <dt class="optional">topic <span class="property-type">string</span></dt>
+       <dd> the MQTT topic to publish to.</dd>
+
+       <dt class="optional">qos <span class="property-type">number</span></dt>
+       <dd>0, fire and forget - 1, at least once - 2, once and once only. Default 0.</dd>
+
+       <dt class="optional">retain <span class="property-type">boolean</span></dt>
+       <dd>set to true to retain the message on the broker. Default false.</dd>
+    </dl>
+    <h3>Details</h3>
+    <code>msg.payload</code> is used as the payload of the published message.
+    If it contains an Object it will be converted to a JSON string before being sent.
+    If it contains a binary Buffer the message will be published as-is.</p>
+    <p>The topic used can be configured in the node or, if left blank, can be set by <code>msg.topic</code>.</p>
+    <p>Likewise the QoS and retain values can be configured in the node or, if left
+    blank, set by <code>msg.qos</code> and <code>msg.retain</code> respectively. To clear a previously
+    retained topic from the broker, send a blank message to that topic with the retain flag set.</p>
+    <p>This node requires a connection to a MQTT broker to be configured. This is configured by clicking
+    the pencil icon.</p>
+    <p>Several MQTT nodes (in or out) can share the same broker connection if required.</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt-broker">
+    <p>Configuration for a connection to an MQTT broker.</p>
+    <p>This configuration will create a single connection to the broker which can
+       then be reused by <code>MQTT In</code> and <code>MQTT Out</code> nodes.</p>
+    <p>The node will generate a random Client ID if one is not set and the
+       node is configured to use a Clean Session connection. If a Client ID is set,
+       it must be unique to the broker you are connecting to.</p>
+    <h4>Birth Message</h4>
+    <p>This is a message that will be published on the configured topic whenever the
+       connection is established.</p>
+    <h4>Close Message</h4>
+    <p>This is a message that will be published on the configured topic before the
+       connection is closed normally, either by re-deploying the node, or by shutting down.</p>
+    <h4>Will Message</h4>
+    <p>This is a message that will be published by the broker in the event the node
+       unexpectedly loses its connection.</p>
+    <h4>WebSockets</h4>
+    <p>The node can be configured to use a WebSocket connection. To do so, the Server
+       field should be configured with a full URI for the connection. For example:</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+
+</script>
