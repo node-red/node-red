@@ -430,7 +430,11 @@ module.exports = function(grunt) {
         },
         jsdoc : {
             runtimeAPI: {
-                src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
+                src: [
+                    'packages/node_modules/node-red/lib/red.js',
+                    'packages/node_modules/@node-red/runtime/lib/index.js',
+                    'packages/node_modules/@node-red/runtime/lib/api/*.js',
+                    ],
                 options: {
                     destination: 'docs',
                     configure: './jsdoc.json'
@@ -449,7 +453,8 @@ module.exports = function(grunt) {
                 options: {
                     separators: true
                 },
-                src: 'packages/node_modules/@node-red/runtime/lib/api/*.js',
+                src: ['packages/node_modules/@node-red/runtime/lib/index.js',
+                      'packages/node_modules/@node-red/runtime/lib/api/*.js'],
                 dest: 'packages/node_modules/@node-red/runtime/docs/api.md'
             },
             nodeREDUtil: {
