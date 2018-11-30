@@ -1,0 +1,45 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="csv">
+    <p>Converts between a CSV formatted string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | array | string</span></dt>
+        <dd>A JavaScript object, array or CSV string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | array | string</span></dt>
+        <dd>
+        <ul>
+            <li>If the input is a string it tries to parse it as CSV and creates a JavaScript object of key/value pairs for each line.
+                The node will then either send a message for each line, or a single message containing an array of objects.</li>
+            <li>If the input is a JavaScript object it tries to build a CSV string.</li>
+            <li>If the input is an array of simple values, it builds a single line CSV string.</li>
+            <li>If the input is an array of arrays, or an array of objects, a multiple-line CSV string is created.</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The column template can contain an ordered list of column names. When converting CSV to an object, the column names
+    will be used as the property names. Alternatively, the column names can be taken from the first row of the CSV.</p>
+    <p>When converting to CSV, the column template is used to identify which properties to extract from the object and in what order.</p>
+    <p>If the input is an array then the columns template is only used to optionally generate a row of column titles.</p>
+    <p>The node can accept a multi-part input as long as the <code>parts</code> property is set correctly.</p>
+    <p>If outputting multiple messages they will have their <code>parts</code> property set and form a complete message sequence.</p>
+    <p><b>Note:</b> the column template must be comma separated - even if a different separator is chosen for the data.</p>
+</script>
