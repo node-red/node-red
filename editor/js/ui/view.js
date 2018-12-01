@@ -33,6 +33,7 @@ RED.view = (function() {
 
     var gridSize = 20;
     var snapGrid = false;
+    var virtical = false;
 
     var activeSpliceLink;
     var spliceActive = false;
@@ -659,10 +660,13 @@ RED.view = (function() {
         nn.changed = true;
         nn.moved = true;
 
-        // nn.w = node_width;
-        // nn.h = Math.max(node_height,(nn.outputs||0) * 15);
-        nn.w = Math.max(node_width,(nn.outputs||0) * 15);
-        nn.h = node_height;
+        if (virtical) {
+            nn.w = Math.max(node_width,(nn.outputs||0) * 15);
+            nn.h = node_height;
+        }else{
+            nn.w = node_width;
+            nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+        }
 
         var historyEvent = {
             t:"add",
@@ -937,11 +941,18 @@ RED.view = (function() {
                 var drag_line = drag_lines[i];
                 var numOutputs = (drag_line.portType === PORT_TYPE_OUTPUT)?(drag_line.node.outputs || 1):1;
                 var sourcePort = drag_line.port;
-                var portX = -((numOutputs-1)/2)*13 +13*sourcePort;
+                if (virtical) {
+                    var portX = -((numOutputs-1)/2)*13 +13*sourcePort;
+                }else{
+                    var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
+                }
 
                 var sc = (drag_line.portType === PORT_TYPE_OUTPUT)?1:-1;
-
-                drag_line.el.attr("d",generateLinkPathV(drag_line.node.x+portX,drag_line.node.y,mousePos[0],mousePos[1],sc));
+                if (virtical) {
+                    drag_line.el.attr("d",generateLinkPathV(drag_line.node.x+portX,drag_line.node.y,mousePos[0],mousePos[1],sc));
+                }else{
+                    drag_line.el.attr("d",generateLinkPath(drag_line.node.x+sc*drag_line.node.w/2,drag_line.node.y+portY,mousePos[0],mousePos[1],sc))
+                }
             }
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
@@ -2077,10 +2088,17 @@ RED.view = (function() {
                     if (isLink) {
                         d.w = node_height;
                     } else {
-                        d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
+                        if (virtical) {
+                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
+                        }else{
+                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
+                        }
                     }
-                    // d.h = Math.max(node_height,(d.outputs||0) * 15);
-                    d.h = node_height;
+                    if (virtical) {
+                        d.h = node_height;
+                    }else{
+                        d.h = Math.max(node_height,(d.outputs||0) * 15);
+                    }
 
                     if (d._def.badge) {
                         var badge = node.append("svg:g").attr("class","node_badge_group");
@@ -2266,9 +2284,13 @@ RED.view = (function() {
                         if (!isLink && d.resize) {
                             var l = RED.utils.getNodeLabel(d);
                             var ow = d.w;
-                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
-                            // d.h = Math.max(node_height,(d.outputs||0) * 15);
-                            d.h = node_height;
+                            if (virtical) {
+                                d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
+                                d.h = node_height;
+                            }else{
+                                d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
+                                d.h = Math.max(node_height,(d.outputs||0) * 15);
+                            }
                             d.x += (d.w-ow)/2;
                             d.resize = false;
                         }
@@ -2308,8 +2330,11 @@ RED.view = (function() {
                             }
 
                             var numOutputs = d.outputs;
-                            // var y = (d.h/2)-((numOutputs-1)/2)*13;
-                            var x = (d.w/2)-((numOutputs-1)/2)*13;
+                            if (virtical) {
+                                var x = (d.w/2)-((numOutputs-1)/2)*13;
+                            }else{
+                                var y = (d.h/2)-((numOutputs-1)/2)*13;
+                            }
                             d.ports = d.ports || d3.range(numOutputs);
                             d._ports = thisNode.selectAll(".port_output").data(d.ports);
                             var output_group = d._ports.enter().append("g").attr("class","port_output");
@@ -2325,15 +2350,21 @@ RED.view = (function() {
                             d._ports.exit().remove();
                             if (d._ports) {
                                 numOutputs = d.outputs || 1;
-                                // y = (d.h/2)-((numOutputs-1)/2)*13;
-                                // var x = d.w - 5;
-                                x = (d.w/2)-((numOutputs-1)/2)*13;
-                                var y = d.h - 5;
+                                if (virtical) {
+                                    x = (d.w/2)-((numOutputs-1)/2)*13;
+                                    var y = d.h - 5;
+                                }else{
+                                    y = (d.h/2)-((numOutputs-1)/2)*13;
+                                    var x = d.w - 5;
+                                }
                                 d._ports.each(function(d,i) {
                                         var port = d3.select(this);
                                         //port.attr("y",(y+13*i)-5).attr("x",x);
-                                        // port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
-                                        port.attr("transform", function(d) { return "translate("+((x+13*i)-5)+","+ y +")";});
+                                        if (virtical) {
+                                            port.attr("transform", function(d) { return "translate("+((x+13*i)-5)+","+ y +")";});
+                                        }else{
+                                            port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                        }
                                 });
                             }
                             thisNode.selectAll("text.node_label").text(function(d,i){
@@ -2396,8 +2427,11 @@ RED.view = (function() {
 
                             thisNode.selectAll(".port_input").each(function(d,i) {
                                     var port = d3.select(this);
-                                    // port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
-                                    port.attr("transform",function(d){return "translate("+((d.w/2)-5)+", -5)";})
+                                    if (virtical) {
+                                        port.attr("transform",function(d){return "translate("+((d.w/2)-5)+", -5)";})
+                                    }else{
+                                        port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
+                                    }
                             });
 
                             thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
@@ -2533,18 +2567,27 @@ RED.view = (function() {
                     link.attr("d",function(d){
                         var numOutputs = d.source.outputs || 1;
                         var sourcePort = d.sourcePort || 0;
-                        var x = -((numOutputs-1)/2)*13 +13*sourcePort;
-                        d.x1 = d.source.x+x;
-                        d.y1 = d.source.y+d.source.h/2;
-                        d.x2 = d.target.x;
-                        d.y2 = d.target.y-d.target.h/2;
+                        if (virtical) {
+                            var x = -((numOutputs-1)/2)*13 +13*sourcePort;
+                            d.x1 = d.source.x+x;
+                            d.y1 = d.source.y+d.source.h/2;
+                            d.x2 = d.target.x;
+                            d.y2 = d.target.y-d.target.h/2;
+                            return generateLinkPathV(d.x1,d.y1,d.x2,d.y2,1);
+                        }else{
+                            var y = -((numOutputs-1)/2)*13 +13*sourcePort;
+                            d.x1 = d.source.x+d.source.w/2;
+                            d.y1 = d.source.y+y;
+                            d.x2 = d.target.x-d.target.w/2;
+                            d.y2 = d.target.y;
+                            return generateLinkPath(d.x1,d.y1,d.x2,d.y2,1);
+                        }
 
                         // return "M "+d.x1+" "+d.y1+
                         //     " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
                         //     (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
                         //     d.x2+" "+d.y2;
 
-                        return generateLinkPathV(d.x1,d.y1,d.x2,d.y2,1);
                     });
                 }
             })
@@ -2953,6 +2996,14 @@ RED.view = (function() {
             } else {
                 gridSize = Math.max(5,v);
                 updateGrid();
+            }
+        },
+        virtical: function(v) {
+            if (v === undefined) {
+                return virtical;
+            } else {
+                virtical = v;
+                RED.view.redraw();
             }
         },
         getActiveNodes: function() {
