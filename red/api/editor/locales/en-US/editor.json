@@ -41,7 +41,8 @@
                 "defaultDir": "Default",
                 "ltr": "Left-to-right",
                 "rtl": "Right-to-left",
-                "auto": "Contextual"
+                "auto": "Contextual",
+                "flowVirtical": "Virtical flow"
             },
             "sidebar": {
                 "show": "Show sidebar"
