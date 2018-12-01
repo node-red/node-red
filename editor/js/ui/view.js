@@ -540,6 +540,75 @@ RED.view = (function() {
         }
     }
 
+    function generateLinkPathV(origX,origY, destX, destY, sc) {
+        var dy = destY-origY;
+        var dx = destX-origX;
+        var delta = Math.sqrt(dy*dy+dx*dx);
+        var scale = lineCurveScale;
+        var scaleX = 0;
+        if (dy*sc > 0) {
+            if (delta < node_height) {
+                scale = 0.75-0.75*((node_height-delta)/node_height);
+                // scale += 2*(Math.min(5*node_height,Math.abs(dx))/(5*node_height));
+                // if (Math.abs(dy) < 3*node_height) {
+                //     scaleY = ((dy>0)?0.5:-0.5)*(((3*node_height)-Math.abs(dy))/(3*node_height))*(Math.min(node_height,Math.abs(dx))/(node_height)) ;
+                // }
+            }
+        } else {
+            scale = 0.4-0.2*(Math.max(0,(node_height-Math.min(Math.abs(dx),Math.abs(dy)))/node_height));
+        }
+        if (dy*sc > 0) {
+            return "M "+origX+" "+origY+
+                " C "+(origX+(node_width*scaleX))+" "+(origY+sc*scale*node_height)+" "+
+                (destX-(node_width*scaleX))+" "+(destY-sc*scale*node_height)+" "+
+                destX+" "+destY
+        } else {
+
+            var midX = Math.floor(destX-dx/2);
+            var midY = Math.floor(destY-dy/2);
+            //
+            if (dx === 0) {
+                midX = destX + node_width;
+            }
+            var cp_width = node_width/2;
+            var x1 = (destX + midX)/2;
+            var topX = dx>0? Math.min(x1 - dx/2 , origX+cp_width) : Math.max(x1 - dx/2 , origX-cp_width);
+            var topY = origY + sc*node_height*scale;
+            var bottomX = dx>0?Math.max(x1, destX-cp_width):Math.min(x1, destX+cp_width);
+            var bottomY = destY - sc*node_height*scale;
+            var y1 = (origY+topY)/2;
+            var scx = dx>0?1:-1;
+            var cp = [
+                [origX,y1],
+                [dx>0 ? Math.max(origX, topX-cp_width)  : Math.min(origX, topX+cp_width), topY],
+                [dx>0 ? Math.max(midX, topX-cp_width)   : Math.min(midX, topX-cp_width), y1],
+                [dx>0 ? Math.max(midX, bottomX-cp_width): Math.min(midX, bottomX+cp_width), bottomY],
+                [destX,(destY+bottomY)/2]
+            ];
+            if (cp[2][0] === topX+scx*cp_width) {
+                if (Math.abs(dx) < cp_width*10) {
+                    cp[1][0] = topX-scx*cp_width/2;
+                    cp[3][0] = bottomX-scx*cp_width/2;
+                }
+                cp[2][1] = topY;
+            }
+            return "M "+origX+" "+origY+
+                " C "+
+                   cp[0][0]+" "+cp[0][1]+" "+
+                   cp[1][0]+" "+cp[1][1]+" "+
+                   topX+" "+topY+
+                " S "+
+                   cp[2][0]+" "+cp[2][1]+" "+
+                   midX+" "+midY+
+                " S "+
+                  cp[3][0]+" "+cp[3][1]+" "+
+                  bottomX+" "+bottomY+
+                " S "+
+                    cp[4][0]+" "+cp[4][1]+" "+
+                    destX+" "+destY
+        }
+    }
+
 
     function addNode(type,x,y) {
         var m = /^subflow:(.+)$/.exec(type);
@@ -590,8 +659,10 @@ RED.view = (function() {
         nn.changed = true;
         nn.moved = true;
 
-        nn.w = node_width;
-        nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+        // nn.w = node_width;
+        // nn.h = Math.max(node_height,(nn.outputs||0) * 15);
+        nn.w = Math.max(node_width,(nn.outputs||0) * 15);
+        nn.h = node_height;
 
         var historyEvent = {
             t:"add",
@@ -866,11 +937,11 @@ RED.view = (function() {
                 var drag_line = drag_lines[i];
                 var numOutputs = (drag_line.portType === PORT_TYPE_OUTPUT)?(drag_line.node.outputs || 1):1;
                 var sourcePort = drag_line.port;
-                var portY = -((numOutputs-1)/2)*13 +13*sourcePort;
+                var portX = -((numOutputs-1)/2)*13 +13*sourcePort;
 
                 var sc = (drag_line.portType === PORT_TYPE_OUTPUT)?1:-1;
 
-                drag_line.el.attr("d",generateLinkPath(drag_line.node.x+sc*drag_line.node.w/2,drag_line.node.y+portY,mousePos[0],mousePos[1],sc));
+                drag_line.el.attr("d",generateLinkPathV(drag_line.node.x+portX,drag_line.node.y,mousePos[0],mousePos[1],sc));
             }
             d3.event.preventDefault();
         } else if (mouse_mode == RED.state.MOVING) {
@@ -2006,9 +2077,10 @@ RED.view = (function() {
                     if (isLink) {
                         d.w = node_height;
                     } else {
-                        d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
+                        d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
                     }
-                    d.h = Math.max(node_height,(d.outputs||0) * 15);
+                    // d.h = Math.max(node_height,(d.outputs||0) * 15);
+                    d.h = node_height;
 
                     if (d._def.badge) {
                         var badge = node.append("svg:g").attr("class","node_badge_group");
@@ -2194,8 +2266,9 @@ RED.view = (function() {
                         if (!isLink && d.resize) {
                             var l = RED.utils.getNodeLabel(d);
                             var ow = d.w;
-                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)) );
-                            d.h = Math.max(node_height,(d.outputs||0) * 15);
+                            d.w = Math.max(node_width,20*(Math.ceil((calculateTextWidth(l, "node_label", 50)+(d._def.inputs>0?7:0))/20)),(d.outputs||0) * 15 );
+                            // d.h = Math.max(node_height,(d.outputs||0) * 15);
+                            d.h = node_height;
                             d.x += (d.w-ow)/2;
                             d.resize = false;
                         }
@@ -2235,7 +2308,8 @@ RED.view = (function() {
                             }
 
                             var numOutputs = d.outputs;
-                            var y = (d.h/2)-((numOutputs-1)/2)*13;
+                            // var y = (d.h/2)-((numOutputs-1)/2)*13;
+                            var x = (d.w/2)-((numOutputs-1)/2)*13;
                             d.ports = d.ports || d3.range(numOutputs);
                             d._ports = thisNode.selectAll(".port_output").data(d.ports);
                             var output_group = d._ports.enter().append("g").attr("class","port_output");
@@ -2251,12 +2325,15 @@ RED.view = (function() {
                             d._ports.exit().remove();
                             if (d._ports) {
                                 numOutputs = d.outputs || 1;
-                                y = (d.h/2)-((numOutputs-1)/2)*13;
-                                var x = d.w - 5;
+                                // y = (d.h/2)-((numOutputs-1)/2)*13;
+                                // var x = d.w - 5;
+                                x = (d.w/2)-((numOutputs-1)/2)*13;
+                                var y = d.h - 5;
                                 d._ports.each(function(d,i) {
                                         var port = d3.select(this);
                                         //port.attr("y",(y+13*i)-5).attr("x",x);
-                                        port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                        // port.attr("transform", function(d) { return "translate("+x+","+((y+13*i)-5)+")";});
+                                        port.attr("transform", function(d) { return "translate("+((x+13*i)-5)+","+ y +")";});
                                 });
                             }
                             thisNode.selectAll("text.node_label").text(function(d,i){
@@ -2319,7 +2396,8 @@ RED.view = (function() {
 
                             thisNode.selectAll(".port_input").each(function(d,i) {
                                     var port = d3.select(this);
-                                    port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
+                                    // port.attr("transform",function(d){return "translate(-5,"+((d.h/2)-5)+")";})
+                                    port.attr("transform",function(d){return "translate("+((d.w/2)-5)+", -5)";})
                             });
 
                             thisNode.selectAll(".node_icon").attr("y",function(d){return (d.h-d3.select(this).attr("height"))/2;});
@@ -2415,7 +2493,6 @@ RED.view = (function() {
                 var l = d3.select(this);
                 d.added = true;
                 l.append("svg:path").attr("class","link_background link_path")
-                   .classed("link_link", function(d) { return d.link })
                    .on("mousedown",function(d) {
                         mousedown_link = d;
                         clearSelection();
@@ -2456,18 +2533,18 @@ RED.view = (function() {
                     link.attr("d",function(d){
                         var numOutputs = d.source.outputs || 1;
                         var sourcePort = d.sourcePort || 0;
-                        var y = -((numOutputs-1)/2)*13 +13*sourcePort;
-                        d.x1 = d.source.x+d.source.w/2;
-                        d.y1 = d.source.y+y;
-                        d.x2 = d.target.x-d.target.w/2;
-                        d.y2 = d.target.y;
+                        var x = -((numOutputs-1)/2)*13 +13*sourcePort;
+                        d.x1 = d.source.x+x;
+                        d.y1 = d.source.y+d.source.h/2;
+                        d.x2 = d.target.x;
+                        d.y2 = d.target.y-d.target.h/2;
 
                         // return "M "+d.x1+" "+d.y1+
                         //     " C "+(d.x1+scale*node_width)+" "+(d.y1+scaleY*node_height)+" "+
                         //     (d.x2-scale*node_width)+" "+(d.y2-scaleY*node_height)+" "+
                         //     d.x2+" "+d.y2;
 
-                        return generateLinkPath(d.x1,d.y1,d.x2,d.y2,1);
+                        return generateLinkPathV(d.x1,d.y1,d.x2,d.y2,1);
                     });
                 }
             })

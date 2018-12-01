@@ -146,7 +146,7 @@
 .palette_port {
     position: absolute;
     top:8px;
-    left: -5px;
+    left: 55px;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     background:#d9d9d9;
@@ -157,7 +157,7 @@
 }
 .palette_port_output {
     left:auto;
-    right: -6px;
+    right: 55px;
 }
 
 .palette_node:hover .palette_port {
