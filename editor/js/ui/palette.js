@@ -105,7 +105,7 @@ RED.palette = (function() {
         var labelElement = el.find(".palette_label");
         labelElement.html(lines).attr('dir', RED.text.bidi.resolveBaseTextDir(lines));
 
-        if (RED.view.virtical()) {
+        if (RED.view.vertical()) {
             el.find(".palette_port").css({top:(multiLineNodeHeight/2-5)+"px", left: "55px"});
             el.find(".palette_port_output").css({top:(multiLineNodeHeight-5)+"px", right: "55px"});
             el.find(".palette_port_input").css({top: "-5px"});

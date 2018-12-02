@@ -121,7 +121,7 @@ RED.userSettings = (function() {
             title: "menu.label.other",
             options: [
                 {setting:"view-show-tips",oldSettings:"menu-menu-item-show-tips",label:"menu.label.showTips",toggle:true,default:true,onchange:"core:toggle-show-tips"},
-                {setting:"view-flow-virtical",label:"menu.label.view.flowVirtical",toggle:true,default:true,onchange:RED.view.virtical}
+                {setting:"view-flow-vertical",label:"menu.label.view.flowVirtical",toggle:true,default:true,onchange:RED.view.vertical}
             ]
         }
     ];
