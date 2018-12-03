@@ -42,7 +42,7 @@
                 "ltr": "左から右",
                 "rtl": "右から左",
                 "auto": "文脈",
-                "flowVirtical": "縦フロー"
+                "flowVertical": "縦フロー"
             },
             "sidebar": {
                 "show": "サイドバーを表示"

@@ -42,7 +42,7 @@
                 "ltr": "Left-to-right",
                 "rtl": "Right-to-left",
                 "auto": "Contextual",
-                "flowVirtical": "Virtical flow"
+                "flowVertical": "Vertical flow"
             },
             "sidebar": {
                 "show": "Show sidebar"

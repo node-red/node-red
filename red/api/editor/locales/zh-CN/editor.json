@@ -38,7 +38,7 @@
                 "ltr": "从左到右",
                 "rtl": "从右到左",
                 "auto": "上下文",
-                "flowVirtical": "Virtical flow"
+                "flowVertical": "Vertical flow"
             },
             "sidebar": {
                 "show": "显示侧边栏"
