@@ -207,6 +207,12 @@ describe('HTTP Request Node', function() {
             res.cookie('redirectToDifferentDomain','different1');
             res.redirect(getDifferentTestURL('/redirectReturn'));
         });
+        testApp.get('/redirectMultipleTimes', function(req, res) {
+            var key = req.headers.host + req.url;
+            receivedCookies[key] = req.cookies;
+            res.cookie('redirectMultipleTimes','multiple1');
+            res.redirect(getTestURL('/redirectToDifferentDomain'));
+        });
         testApp.get('/redirectReturn', function(req, res) {
             var key = req.headers.host + req.url;
             receivedCookies[key] = req.cookies;
@@ -277,6 +283,7 @@ describe('HTTP Request Node', function() {
                         msg.should.have.property('headers');
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.redirectList.length.should.equal(0);
                         done();
                     } catch(err) {
                         done(err);
@@ -1510,6 +1517,10 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                        return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
                     done();
                 });
                 n1.receive({});
@@ -1533,6 +1544,10 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                         return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
                     done();
                 });
                 n1.receive({});
@@ -1559,6 +1574,10 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                         return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
                     done();
                 });
                 n1.receive({
@@ -1585,6 +1604,10 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                         return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
                     done();
                 });
                 n1.receive({
@@ -1613,6 +1636,10 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                         return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
                     done();
                 });
                 n1.receive({
@@ -1639,6 +1666,33 @@ describe('HTTP Request Node', function() {
                         done(new Error('Invalid cookie(path:/rediectReurn)'));
                         return;
                     }
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
+                    done();
+                });
+                n1.receive({
+                    headers: { cookie: 'requestCookie=request1' }
+                });
+            });
+        });
+        it('should return all redirect information when redirected multiple times', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:getTestURL('/redirectMultipleTimes')},
+                {id:"n2", type:"helper"}];
+            receivedCookies = {};
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    var redirect1 = msg.redirectList[0];
+                    redirect1.location.should.equal('http://localhost:'+testPort+'/redirectToDifferentDomain');
+                    redirect1.cookies.redirectMultipleTimes.Path.should.equals('/');
+                    redirect1.cookies.redirectMultipleTimes.value.should.equals('multiple1');
+                    var redirect2 = msg.redirectList[1];
+                    redirect2.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
+                    redirect2.cookies.redirectToDifferentDomain.Path.should.equals('/');
+                    redirect2.cookies.redirectToDifferentDomain.value.should.equals('different1');
                     done();
                 });
                 n1.receive({
