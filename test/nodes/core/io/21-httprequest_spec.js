@@ -1519,8 +1519,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
-                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equal('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equal('same1');
                     done();
                 });
                 n1.receive({});
@@ -1546,8 +1546,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
-                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equal('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equal('different1');
                     done();
                 });
                 n1.receive({});
@@ -1576,8 +1576,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
-                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equal('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equal('same1');
                     done();
                 });
                 n1.receive({
@@ -1606,8 +1606,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
-                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equal('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equal('different1');
                     done();
                 });
                 n1.receive({
@@ -1638,8 +1638,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equals('/');
-                    redirect1.cookies.redirectToSameDomainCookie.value.should.equals('same1');
+                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equal('/');
+                    redirect1.cookies.redirectToSameDomainCookie.value.should.equal('same1');
                     done();
                 });
                 n1.receive({
@@ -1668,8 +1668,8 @@ describe('HTTP Request Node', function() {
                     }
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToDifferentDomain.Path.should.equals('/');
-                    redirect1.cookies.redirectToDifferentDomain.value.should.equals('different1');
+                    redirect1.cookies.redirectToDifferentDomain.Path.should.equal('/');
+                    redirect1.cookies.redirectToDifferentDomain.value.should.equal('different1');
                     done();
                 });
                 n1.receive({
@@ -1687,12 +1687,12 @@ describe('HTTP Request Node', function() {
                 n2.on("input", function(msg) {
                     var redirect1 = msg.redirectList[0];
                     redirect1.location.should.equal('http://localhost:'+testPort+'/redirectToDifferentDomain');
-                    redirect1.cookies.redirectMultipleTimes.Path.should.equals('/');
-                    redirect1.cookies.redirectMultipleTimes.value.should.equals('multiple1');
+                    redirect1.cookies.redirectMultipleTimes.Path.should.equal('/');
+                    redirect1.cookies.redirectMultipleTimes.value.should.equal('multiple1');
                     var redirect2 = msg.redirectList[1];
                     redirect2.location.should.equal('http://127.0.0.1:'+testPort+'/redirectReturn');
-                    redirect2.cookies.redirectToDifferentDomain.Path.should.equals('/');
-                    redirect2.cookies.redirectToDifferentDomain.value.should.equals('different1');
+                    redirect2.cookies.redirectToDifferentDomain.Path.should.equal('/');
+                    redirect2.cookies.redirectToDifferentDomain.value.should.equal('different1');
                     done();
                 });
                 n1.receive({
