@@ -59,8 +59,8 @@ describe("api/index", function() {
     afterEach(afterEach);
 
     it("does not setup admin api if httpAdminRoot is false", function(done) {
-        api.init({},{ httpAdminRoot: false },{},{});
-        should.not.exist(api.adminApp);
+        api.init({ httpAdminRoot: false },{},{},{});
+        should.not.exist(api.httpAdmin);
         done();
     });
     describe('initalises admin api without adminAuth', function(done) {
@@ -70,30 +70,30 @@ describe("api/index", function() {
         });
         after(afterEach);
         it('exposes the editor',function(done) {
-            request(api.adminApp).get("/editor").expect(200).end(done);
+            request(api.httpAdmin).get("/editor").expect(200).end(done);
         })
         it('exposes the admin api',function(done) {
-            request(api.adminApp).get("/admin").expect(200).end(done);
+            request(api.httpAdmin).get("/admin").expect(200).end(done);
         })
         it('exposes the auth api',function(done) {
-            request(api.adminApp).get("/auth/login").expect(200).end(done);
+            request(api.httpAdmin).get("/auth/login").expect(200).end(done);
         })
     });
 
     describe('initalises admin api without editor', function(done) {
         before(function() {
             beforeEach();
-            api.init({},{ disableEditor: true },{},{});
+            api.init({ disableEditor: true },{},{},{});
         });
         after(afterEach);
         it('does not expose the editor',function(done) {
-            request(api.adminApp).get("/editor").expect(404).end(done);
+            request(api.httpAdmin).get("/editor").expect(404).end(done);
         })
         it('exposes the admin api',function(done) {
-            request(api.adminApp).get("/admin").expect(200).end(done);
+            request(api.httpAdmin).get("/admin").expect(200).end(done);
         })
         it('exposes the auth api',function(done) {
-            request(api.adminApp).get("/auth/login").expect(200).end(done)
+            request(api.httpAdmin).get("/auth/login").expect(200).end(done)
         })
     });
 });
