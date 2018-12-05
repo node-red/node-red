@@ -203,7 +203,7 @@
         "template": "template",
         "label": {
             "template": "Template",
-            "property": "Set property",
+            "property": "Property",
             "format": "Syntax Highlight",
             "syntax": "Format",
             "output": "Output as",
