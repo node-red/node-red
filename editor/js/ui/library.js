@@ -447,7 +447,8 @@ RED.library = (function() {
                             click: function() {
                                 //TODO: move this to RED.library
                                 var flowName = $("#node-input-library-filename").val();
-                                if(flowName.split(/[\\/]/).pop() === "" || /^\s*$/.test(flowName)) {
+                                flowName = flowName.trim();
+                                if(flowName === "" || flowName.endsWith("/")) {
                                     RED.notify(RED._("library.invalidFilename"),"warning");
                                 } else {
                                     $.ajax({
