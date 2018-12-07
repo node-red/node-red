@@ -1,4 +1,4 @@
-#### 0.20.0.beta.1: Beta Release
+#### 0.20.0.beta.2: Beta Release
 
  - Split Node-RED internals into multiple sub-modules
 
