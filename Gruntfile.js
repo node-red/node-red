@@ -526,12 +526,15 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('verifyPackageDependencies', function() {
+        var done = this.async();
         var verifyDependencies = require("./scripts/verify-package-dependencies.js");
-        var failures = verifyDependencies();
-        if (failures.length > 0) {
-            failures.forEach(f => grunt.log.error(f));
-            grunt.fail.fatal("Failed to verify package dependencies");
-        }
+        verifyDependencies().then(function(failures) {
+            if (failures.length > 0) {
+                failures.forEach(f => grunt.log.error(f));
+                grunt.fail.fatal("Failed to verify package dependencies");
+            }
+            done();
+        });
     });
 
     grunt.registerTask('setDevEnv',
