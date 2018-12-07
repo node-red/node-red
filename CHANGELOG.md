@@ -54,7 +54,6 @@ Editor
 
 Runtime
 
- - Add
  - Allow a project to be loaded from cmdline
  - Handle lookup of undefined property in Global context Fixes #1978
  - Refuse to enable Manage Palette if npm too old
@@ -81,9 +80,9 @@ Nodes
  - HTTP Request: add msg.requestTimeout option for per-message setting - @natcl #1959
  - MQTT: add auto-detect and base64 output to mqtt node Fixes #1912 - @DurandA
  - MQTT: only unsubscribe node that is being removed
- - Sentiment: move to node-red-nodes-sentiment
+ - Sentiment: move to node-red-node-sentiment
  - Switch: add missing edit dialog icon
- - Tail: move to node-red-nodes-tail
+ - Tail: move to node-red-node-tail
  - TCPGet: clear status if user changes target per message
  - Template: tidy up edit dialog
  - UDP: more resilient binding to correct port for udp, give input side priority
