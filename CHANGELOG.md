@@ -1,3 +1,97 @@
+#### 0.20.0-beta.2: Beta Release
+
+ - Split Node-RED internals into multiple sub-modules
+
+Editor
+
+ - Allow the editor to use a custom admin api url root
+ - Improve performance of Flow Diff dialog - @TothiViseo #1989
+ - Add 'open project' option to Projects Welcome dialog
+ - Add 'type already registered' check in palette editor
+ - Handle missing tab.disabled property
+ - Handle missing wires prop and string x/y props on import
+ - Add RED.notifications.hide flag - for UI testing
+ - Improve alignment of node label edit inputs
+ - Show arrow-in node when invalid font-awesome icon name was specified for default icon
+ - Add ability to delete context values from sidebar
+ - Allow copy-to-clipboard copy whole tabs
+ - Make disabled flows more obvious in editor
+ - Allow import/export from file in editor
+ - Allow config nodes to be selected in sidebar and deleted
+ - Show port label of subflow with input port
+ - Support ctrl-click selection of flow tabs
+ - Allow left-hand node button to act as toggle
+ - Support dbl-click in tab bar to add new flow in position
+ - Fix duplicate subflow detection on import
+ - Add import notification with info on what has been imported Closes #1862
+ - Show error details when trying to import invalid json
+ - Show default icon when non-existent font-awesome icon was specified
+ - Add configurable option for showing node label
+ - Avoid http redirects as Safari doesn't reuse Auth header Fixes #1903
+ - Tidy up ace tooltip styling
+ - Add event log to editor
+ - Add tooltips to multiple editor elements
+ - Allow palette to be hidden
+ - Add node module into to sidebar and palette popover
+ - Mark all newly imported nodes as changed
+ - Allow a node label to be hidden
+ - Add markdown formatting toolbar
+ - Add markdown toolbar to various editors
+ - Fix i18n handling for ja-JP locale on Safari/MacOS
+ - Add node body tooltip
+ - Decrease opacity of flow-navigator
+ - Update tooltip style
+ - Update ACE to 1.4.1-src-min-noconflict
+ - Cache node locales by language
+ - Show icon element with either icon image or fa-icon
+ - Added font-awesome icons to user defined icon
+ - Update info side bar with node description section
+ - One-click search of config node users
+ - Redesign node edit dialog to tabbed style
+ - Add 'restart flows' option to deploy menu
+ - Add node description property UI
+
+
+Runtime
+
+ - Allow a project to be loaded from cmdline
+ - Handle lookup of undefined property in Global context Fixes #1978
+ - Refuse to enable Manage Palette if npm too old
+ - Remove restriction on upgrading non-local modules
+ - Remove deprecated Buffer constructor usage Fixes #1709
+ - Update httpServerOptions doc in settings.js
+ - Exclude non-testable .js files from the unit tests
+ - Add --safe mode flag to allow starting without flows running
+ - Add setting-defined accessToken for automated access to the adminAPI - #1789
+
+Nodes
+
+ - Move all core node EN help to their own locale files - #1990
+ - CSV: better regex for number detection
+ - Debug: hide button if not configured to send to sidebar
+ - Delay: report queue activity when in by-topic mode
+ - Delay: add msg.flush mode
+ - Exec: Preserve existing properties on msg object
+ - File: remove CR/LF from incoming filename
+ - Function: create custom ace javascript mode to handle ES6 Fixes #1911
+ - Function: add env.get
+ - HTTP Request: Add http-proxy config #1913
+ - HTTP Request: add msg.redirectList to output
+ - HTTP Request: add msg.requestTimeout option for per-message setting - @natcl #1959
+ - MQTT: add auto-detect and base64 output to mqtt node Fixes #1912 - @DurandA
+ - MQTT: only unsubscribe node that is being removed
+ - Sentiment: move to node-red-node-sentiment
+ - Switch: add missing edit dialog icon
+ - Tail: move to node-red-node-tail
+ - TCPGet: clear status if user changes target per message
+ - Template: tidy up edit dialog
+ - UDP: more resilient binding to correct port for udp, give input side priority
+ - Split/Join: add msg.reset to info panel
+ - Split/Join: reset join without sending part array
+ - Watch: add msg.filename so can feed direct to file in node
+ - WebSocket: preserve \_session on msg but don't send as part of wholemsg
+
+
 #### 0.19.5: Maintenance Release
 
  - Recognize pip installs of RPi.GPIO (#1934)

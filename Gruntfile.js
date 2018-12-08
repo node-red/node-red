@@ -374,6 +374,10 @@ module.exports = function(grunt) {
                         dest: 'packages/node_modules/@node-red/editor-client/public/red/about'
                     },
                     {
+                        src: 'CHANGELOG.md',
+                        dest: 'packages/node_modules/node-red/'
+                    },
+                    {
                         cwd: 'packages/node_modules/@node-red/editor-client/src/ace/bin/',
                         src: '**',
                         expand: true,
@@ -429,21 +433,16 @@ module.exports = function(grunt) {
             }
         },
         jsdoc : {
-            runtimeAPI: {
+            modules: {
                 src: [
                     'packages/node_modules/node-red/lib/red.js',
                     'packages/node_modules/@node-red/runtime/lib/index.js',
                     'packages/node_modules/@node-red/runtime/lib/api/*.js',
+                    'packages/node_modules/@node-red/runtime/lib/events.js',
+                    'packages/node_modules/@node-red/util/**/*.js',
                     ],
                 options: {
                     destination: 'docs',
-                    configure: './jsdoc.json'
-                }
-            },
-            nodeREDUtil: {
-                src: 'packages/node_modules/@node-red/util/**/*.js',
-                options: {
-                    destination: 'packages/node_modules/@node-red/util/docs',
                     configure: './jsdoc.json'
                 }
             }
@@ -453,8 +452,11 @@ module.exports = function(grunt) {
                 options: {
                     separators: true
                 },
-                src: ['packages/node_modules/@node-red/runtime/lib/index.js',
-                      'packages/node_modules/@node-red/runtime/lib/api/*.js'],
+                src: [
+                    'packages/node_modules/@node-red/runtime/lib/index.js',
+                    'packages/node_modules/@node-red/runtime/lib/api/*.js',
+                    'packages/node_modules/@node-red/runtime/lib/events.js'
+                ],
                 dest: 'packages/node_modules/@node-red/runtime/docs/api.md'
             },
             nodeREDUtil: {
@@ -528,12 +530,15 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('verifyPackageDependencies', function() {
+        var done = this.async();
         var verifyDependencies = require("./scripts/verify-package-dependencies.js");
-        var failures = verifyDependencies();
-        if (failures.length > 0) {
-            failures.forEach(f => grunt.log.error(f));
-            grunt.fail.fatal("Failed to verify package dependencies");
-        }
+        verifyDependencies().then(function(failures) {
+            if (failures.length > 0) {
+                failures.forEach(f => grunt.log.error(f));
+                grunt.fail.fatal("Failed to verify package dependencies");
+            }
+            done();
+        });
     });
 
     grunt.registerTask('setDevEnv',

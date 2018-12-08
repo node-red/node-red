@@ -25,6 +25,8 @@ var runtime = NR_TEST_UTILS.require("@node-red/runtime");
 var redNodes = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes");
 var storage = NR_TEST_UTILS.require("@node-red/runtime/lib/storage");
 var settings = NR_TEST_UTILS.require("@node-red/runtime/lib/settings");
+var util = NR_TEST_UTILS.require("@node-red/util");
+
 var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 describe("runtime", function() {
@@ -41,6 +43,7 @@ describe("runtime", function() {
         delete process.env.NODE_RED_HOME;
     });
     function mockUtil(metrics) {
+
         return {
             log:{
                 log: sinon.stub(),
@@ -95,6 +98,7 @@ describe("runtime", function() {
         var redNodesLoadFlows;
         var redNodesStartFlows;
         var redNodesLoadContextsPlugin;
+        var i18nRegisterMessageCatalog;
 
         beforeEach(function() {
             storageInit = sinon.stub(storage,"init",function(settings) {return Promise.resolve();});
@@ -104,6 +108,7 @@ describe("runtime", function() {
             redNodesLoadFlows = sinon.stub(redNodes,"loadFlows",function() {return Promise.resolve()});
             redNodesStartFlows = sinon.stub(redNodes,"startFlows",function() {});
             redNodesLoadContextsPlugin = sinon.stub(redNodes,"loadContextsPlugin",function() {return Promise.resolve()});
+            i18nRegisterMessageCatalog = sinon.stub(util.i18n,"registerMessageCatalog",function() {return Promise.resolve()});
         });
         afterEach(function() {
             storageInit.restore();
@@ -114,6 +119,7 @@ describe("runtime", function() {
             redNodesLoadFlows.restore();
             redNodesStartFlows.restore();
             redNodesLoadContextsPlugin.restore();
+            i18nRegisterMessageCatalog.restore();
         });
         it("reports errored/missing modules",function(done) {
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function(cb) {
@@ -199,10 +205,14 @@ describe("runtime", function() {
             var stopFlows = sinon.stub(redNodes,"stopFlows",function() { return Promise.resolve();} );
             redNodesGetNodeList = sinon.stub(redNodes,"getNodeList", function() {return []});
             var util = mockUtil(true);
-            runtime.init({testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return Promise.resolve();}},util);
-            sinon.stub(console,"log");
+            runtime.init(
+                {testSettings: true, runtimeMetricInterval:200, httpAdminRoot:"/", load:function() { return Promise.resolve();}},
+                {},
+                undefined,
+                util);
+            // sinon.stub(console,"log");
             runtime.start().then(function() {
-                console.log.restore();
+                // console.log.restore();
                 setTimeout(function() {
                     try {
                         util.log.log.args.should.have.lengthOf(3);
