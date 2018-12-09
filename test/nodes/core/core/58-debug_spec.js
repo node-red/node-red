@@ -356,25 +356,9 @@ describe('debug node', function() {
         });
     });
 
-    it('should publish payload with edit', function(done) {
-        var flow = [{id:"n1", type:"debug", name:"Debug",
-                     editType: "jsonata", edit: '"<" & $ & ">"'}];
-        helper.load(debugNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            websocket_test(function() {
-                n1.emit("input", {payload:"test"});
-            }, function(msg) {
-                JSON.parse(msg).should.eql([{
-                    topic:"debug",data:{id:"n1",name:"Debug",msg:"<test>",
-                    format:"string[6]",property:"payload"}
-                }]);
-            }, done);
-        });
-    });
-
     it('should publish complete message with edit', function(done) {
         var flow = [{id:"n1", type:"debug", name:"Debug", complete: "true",
-                     editType: "jsonata", edit: '"<" & payload & ">"'}];
+                     targetType: "jsonata", complete: '"<" & payload & ">"'}];
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
