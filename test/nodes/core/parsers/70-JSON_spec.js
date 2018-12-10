@@ -433,4 +433,36 @@ describe('JSON node', function() {
             }
         });
     });
+
+    it('msg.schema property should be deleted before sending to next node (string input)', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.schema, undefined);
+                done();
+            });
+            var jsonString =  '{"number":3,"string":"allo"}';
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonString, schema:schema});
+        });
+    });
+
+    it('msg.schema property should be deleted before sending to next node (object input)', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.schema, undefined);
+                done();
+            });
+            var jsonObject =  {"number":3,"string":"allo"};
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonObject, schema:schema});
+        });
+    });
 });
