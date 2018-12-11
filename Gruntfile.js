@@ -445,7 +445,17 @@ module.exports = function(grunt) {
                     destination: 'docs',
                     configure: './jsdoc.json'
                 }
+            },
+            editor: {
+                src: [
+                    'packages/node_modules/@node-red/editor-client/src/js'
+                    ],
+                options: {
+                    destination: 'packages/node_modules/@node-red/editor-client/docs',
+                    configure: './jsdoc.json'
+                }
             }
+
         },
         jsdoc2md: {
             runtimeAPI: {
