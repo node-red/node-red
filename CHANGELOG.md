@@ -1,3 +1,45 @@
+#### 0.19.5: Maintenance Release
+
+ - Recognize pip installs of RPi.GPIO (#1934)
+ - Merge pull request #1941 from node-red-hitachi/master-batch
+ - Merge pull request #1931 from node-red-hitachi/master-typedinput
+ - Set min value of properties and spinners for batch
+ - Fix that unnecessary optionMenu remains
+ - Merge pull request #1894 from node-red-hitachi/fix-overlapping-file-node-execution
+ - Merge pull request #1924 from imZack/patch-1
+ - Add missing comma
+ - Do not disable context sidebar during node edit Fixes #1921
+ - Don't allow virtual links to be spliced Fixes #1920
+ - Merge project package changes to avoid overwritten changes
+ - Handle manually added project deps that are unused Fixes #1908
+ - update close & input handling of File node
+ - make close handler argument only one
+ - Merge pull request #1907 from amilajack/patch-2
+ - Change repo badge to point to master branch
+ - invoke callbacks if async handler is specified
+ - Merge pull request #1891 from camlow325/resolve-example-path-for-windows-support
+ - Merge pull request #1900 from kazuhitoyokoi/master-addtestcases4settings.js
+ - wait closing while pending messages exist
+ - Add test cases for red/api/editor/settings.js
+ - Ensure all palette categories are opened properly Closes #1893
+ - Resolve path when sending example file for Windows support
+ - fix multiple input message processing of file node
+
+#### 0.19.4: Maintenance Release
+
+ - Fix race condition in non-cache lfs context Fixes #1888
+ - LocalFileSystem Context: Remove extra flush code
+ - Prevent race condition in caching mode of lfs context (#1889)
+ - Allow context store name to be provided in the key
+ - Switch node: only use promises when absolutely necessary
+ - Fix dbl-click handling on webkit-based browsers
+ - Ensure context.flow/global cannot be deleted or enumerated
+ - Handle context.get with multiple levels of unknown key Fixes #1883
+ - Fix global.get("foo.bar") for functionGlobalContext set values
+ - Fix node color bug (#1877)
+ - Merge pull request #1857 from cclauss/patch-1
+ - Define raw_input() in Python 3 & fix time.sleep()
+
 #### 0.19.3: Maintenance Release
 
  - Split node - fix complete to send msg for k/v object

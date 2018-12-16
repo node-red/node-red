@@ -132,7 +132,7 @@ RED.sidebar.context = (function() {
             content: content,
             toolbar: footerToolbar,
             // pinned: true,
-            enableOnEdit: false
+            enableOnEdit: true
         });
 
         // var toggleLiveButton = $("#sidebar-context-toggle-live");

@@ -275,7 +275,8 @@ RED.palette = (function() {
                                 }
 
                                 for (var i=0;i<nodes.length;i++) {
-                                    if (d3.select(nodes[i]).classed('link_background')) {
+                                    var node = d3.select(nodes[i]);
+                                    if (node.classed('link_background') && !node.classed('link_link')) {
                                         var length = nodes[i].getTotalLength();
                                         for (var j=0;j<length;j+=10) {
                                             var p = nodes[i].getPointAtLength(j);
@@ -320,9 +321,9 @@ RED.palette = (function() {
             }
             setLabel(nt,$(d),label,nodeInfo);
 
-            var categoryNode = $("#palette-container-"+category);
+            var categoryNode = $("#palette-container-"+rootCategory);
             if (categoryNode.find(".palette_node").length === 1) {
-                categoryContainers[category].open();
+                categoryContainers[rootCategory].open();
             }
 
         }
@@ -459,7 +460,6 @@ RED.palette = (function() {
             }
         });
         RED.events.on('registry:node-set-disabled', function(nodeSet) {
-            console.log(nodeSet);
             for (var j=0;j<nodeSet.types.length;j++) {
                 hideNodeType(nodeSet.types[j]);
                 var def = RED.nodes.getType(nodeSet.types[j]);

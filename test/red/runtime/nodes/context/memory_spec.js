@@ -96,7 +96,7 @@ describe('memory',function() {
                 context.set("nodeX","three","test3");
                 context.set("nodeX","four","test4");
 
-                var values = context.get("nodeX",["one","unknown"]);
+                var values = context.get("nodeX",["one","unknown.with.multiple.levels"]);
                 values.should.eql(["test1",undefined])
             })
             it('should throw error if bad key included in multiple keys', function() {

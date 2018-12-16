@@ -1766,7 +1766,7 @@ RED.view = (function() {
         clickTime = now;
 
         dblClickPrimed = (lastClickNode == mousedown_node &&
-            d3.event.buttons === 1 &&
+            d3.event.button === 0 &&
             !d3.event.shiftKey && !d3.event.metaKey && !d3.event.altKey && !d3.event.ctrlKey);
         lastClickNode = mousedown_node;
 
@@ -2415,6 +2415,7 @@ RED.view = (function() {
                 var l = d3.select(this);
                 d.added = true;
                 l.append("svg:path").attr("class","link_background link_path")
+                   .classed("link_link", function(d) { return d.link })
                    .on("mousedown",function(d) {
                         mousedown_link = d;
                         clearSelection();
