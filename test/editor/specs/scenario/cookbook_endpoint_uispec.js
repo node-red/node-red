@@ -513,7 +513,7 @@ describe('cookbook', function() {
             var changeNode = workspace.addNode("change", 400);
 
             var httpinNodeClear = workspace.addNode("httpin", 0, 200);
-            var functionNodeClear = workspace.addNode("function", 240);
+            var functionNodeClear = workspace.addNode("function", 250);
 
             httpinNodeFormat.edit();
             httpinNodeFormat.setMethod("get");

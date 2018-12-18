@@ -18,6 +18,8 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
+var keyPage = require("../../../util/key_page");
+
 function debugNode(id) {
     nodePage.call(this, id);
 }
@@ -32,7 +34,7 @@ debugNode.prototype.setOutput = function(complete) {
         browser.clickWithWait('//div[@class="red-ui-typedInput-options"][1]/a[1]');
         // Input the path in msg.
         browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
-        browser.keys(['Control', 'a', 'Control']);
+        browser.keys(keyPage.selectAll());
         browser.keys(['Delete']);
         browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', complete);
     } else {
