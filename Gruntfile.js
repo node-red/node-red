@@ -135,6 +135,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/validators.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/utils.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/editableList.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/treeList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/checkboxSet.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/menu.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/panels.js",
