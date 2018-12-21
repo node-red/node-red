@@ -58,7 +58,7 @@ describe('file Nodes', function() {
         });
 
         it('should write to a file', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+            var flow = [{id:"fileNode1", type:"file", name:"fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires:[["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
