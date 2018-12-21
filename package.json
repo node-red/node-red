@@ -48,6 +48,7 @@
         "jsonata": "1.5.4",
         "media-typer": "1.0.1",
         "memorystore": "1.6.0",
+        "micromatch": "~3.1.10",
         "mime": "2.4.0",
         "mqtt": "2.18.8",
         "multer": "1.4.1",
