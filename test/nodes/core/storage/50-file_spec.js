@@ -671,7 +671,8 @@ describe('file Nodes', function() {
                 },wait);
                 n1.receive({payload:"test"});
             });
-            RED.settings.fileNodeBlockList = [ ];
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
         });
 
     });
@@ -907,6 +908,8 @@ describe('file Nodes', function() {
                 },wait);
                 n1.receive({payload:""});
             });
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
         });
 
         it('should fail to read from the settings file', function(done) {
@@ -929,6 +932,8 @@ describe('file Nodes', function() {
                 },wait);
                 n1.receive({payload:""});
             });
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
         });
 
     });
