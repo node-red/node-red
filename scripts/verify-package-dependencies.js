@@ -64,6 +64,7 @@ if (require.main === module) {
     verifyDependencies().then(failures => {
         if (failures.length > 0) {
             failures.forEach(f => console.log(` - ${f}`));
+            console.log("Run with --fix option to fix up versions")
             process.exit(1);
         }
     }).catch(e => {
