@@ -70,7 +70,7 @@
         "sentiment": "2.1.0",
         "uglify-js": "3.4.9",
         "when": "3.7.8",
-        "ws": "1.1.5",
+        "ws": "6.1.2",
         "xml2js": "0.4.19"
     },
     "optionalDependencies": {
