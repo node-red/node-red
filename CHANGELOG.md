@@ -1,3 +1,44 @@
+#### 0.20.0-beta.3: Beta Release
+
+Editor
+
+ - Update palette manager view properly when module updated
+ - Add TreeList common widget
+ - Fix visual jump when opening Comment editor on Safari Part of #2008
+ - Fix vertical align of markdown editor in Safari Fixes #2008
+ - Avoid marking node as changed if label state is default Fixes #2009
+ - Highlight port on node hover while joining
+ - Support drag-wiring of link nodes
+ - Allow TypeSearch to include a filter option
+ - Improve diff colouring
+ - Allow sections to toggle in 2-element stack
+ - Add support for ${} env var syntax when skipping validation Closes #1980
+ - i18 support for markdown editor tooltip
+ - Add RED.editor.registerTypeEditor for custom type editors
+ - Tidy up markdown toolbar handling across all editors
+ - Added validation while export into library
+
+Runtime
+
+ - Bump JSONata to 1.6.4 Fixes #2023
+ - Add audit logging to admin api
+ - Fix failure of RED.require #2010
+ - Allow oauth strategy callback method to be customised Closes #1998
+ - Ensure fs context cache is flushed on close Fixes #2001
+ - Fix library Buffer( to Buffer.alloc( for node 10
+ - Catch file-not-found on startup when non-existant flow file specified
+ - Actively expire login sesssions and notify user
+ - Add quotation marks for basic auth challenge #1976
+
+Nodes
+
+ - Change: remove promises to improve performance
+ - Debug: add ability to apply JSONata expression to message
+ - Join: remove promises to improve performance
+ - JSON: delete msg.schema before sending msg to avoid conflicts
+ - Link: update UI to use common TreeList widget
+ - Switch: remove promises to improve performance
+
 #### 0.20.0-beta.2: Beta Release
 
  - Split Node-RED internals into multiple sub-modules
