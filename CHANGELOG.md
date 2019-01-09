@@ -17,6 +17,7 @@ Editor
  - Add RED.editor.registerTypeEditor for custom type editors
  - Tidy up markdown toolbar handling across all editors
  - Added validation while export into library
+ - Reuse notification boxes rather than stack multiple of the same type
 
 Runtime
 
