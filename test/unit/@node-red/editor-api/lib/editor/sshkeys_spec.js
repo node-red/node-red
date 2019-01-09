@@ -102,7 +102,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.getUserKeys.returns(p);
         request(app)
         .get("/settings/user/keys")
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -139,7 +139,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.getUserKeys.returns(p)
         request(app)
         .get("/settings/user/keys")
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -179,7 +179,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.getUserKey.returns(p);
         request(app)
         .get("/settings/user/keys/" + key_file_name)
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -200,7 +200,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.getUserKey.returns(p);
         request(app)
         .get("/settings/user/keys/" + key_file_name)
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -238,7 +238,7 @@ describe("api/editor/sshkeys", function() {
         request(app)
         .post("/settings/user/keys")
         .send({ name: key_file_name })
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -260,7 +260,7 @@ describe("api/editor/sshkeys", function() {
         request(app)
         .post("/settings/user/keys")
         .send({ name: key_file_name })
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -297,7 +297,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.removeUserKey.returns(p);
         request(app)
         .delete("/settings/user/keys/" + key_file_name)
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);
@@ -318,7 +318,7 @@ describe("api/editor/sshkeys", function() {
         mockRuntime.settings.removeUserKey.returns(p);
         request(app)
         .delete("/settings/user/keys/" + key_file_name)
-        .expect(500)
+        .expect(400)
         .end(function(err,res) {
             if (err) {
                 return done(err);

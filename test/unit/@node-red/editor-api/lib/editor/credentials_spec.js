@@ -74,7 +74,7 @@ describe('api/editor/credentials', function() {
         request(app)
             .get("/credentials/unknown-type/n2")
             .expect("Content-Type",/json/)
-            .expect(500)
+            .expect(400)
             .end(function(err,res) {
                 if (err) {
                     done(err);
