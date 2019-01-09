@@ -26,6 +26,7 @@ var auth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
 var nodes = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/nodes");
 var flows = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/flows");
 var flow = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/flow");
+var context = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/context");
 
 /**
 * Ensure all API routes are correctly mounted, with the expected permissions checks
@@ -34,8 +35,8 @@ describe("api/admin/index", function() {
     describe("Ensure all API routes are correctly mounted, with the expected permissions checks", function() {
         var app;
         var mockList = [
-            flows,flow,nodes
-        ]
+            flows,flow,nodes,context
+        ];
         var permissionChecks = {};
         var lastRequest;
         var stubApp = function(req,res,next) {
@@ -50,7 +51,7 @@ describe("api/admin/index", function() {
                 return function(req,res,next) {
                     permissionChecks[permission] = (permissionChecks[permission]||0)+1;
                     next();
-                }
+                };
             });
 
             sinon.stub(flows,"get",stubApp);
@@ -70,6 +71,9 @@ describe("api/admin/index", function() {
             sinon.stub(nodes,"putSet",stubApp);
             sinon.stub(nodes,"getModuleCatalog",stubApp);
             sinon.stub(nodes,"getModuleCatalogs",stubApp);
+
+            sinon.stub(context,"get",stubApp);
+            sinon.stub(context,"delete",stubApp);
         });
         after(function() {
             mockList.forEach(function(m) {
@@ -92,15 +96,19 @@ describe("api/admin/index", function() {
             nodes.putSet.restore();
             nodes.getModuleCatalog.restore();
             nodes.getModuleCatalogs.restore();
+            context.get.restore();
+            context.delete.restore();
 
         });
 
         before(function() {
             app = adminApi.init({});
         });
+
         beforeEach(function() {
             permissionChecks = {};
-        })
+        });
+
         it('GET /flows', function(done) {
             request(app).get("/flows").expect(200).end(function(err,res) {
                 if (err) {
@@ -108,8 +116,9 @@ describe("api/admin/index", function() {
                 }
                 permissionChecks.should.have.property('flows.read',1);
                 done();
-            })
+            });
         });
+
         it('POST /flows', function(done) {
             request(app).post("/flows").expect(200).end(function(err,res) {
                 if (err) {
@@ -117,7 +126,7 @@ describe("api/admin/index", function() {
                 }
                 permissionChecks.should.have.property('flows.write',1);
                 done();
-            })
+            });
         });
 
         it('GET /flow/1234', function(done) {
@@ -126,10 +135,11 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.read',1);
-                lastRequest.params.should.have.property('id','1234')
+                lastRequest.params.should.have.property('id','1234');
                 done();
-            })
+            });
         });
+
         it('POST /flow', function(done) {
             request(app).post("/flow").expect(200).end(function(err,res) {
                 if (err) {
@@ -137,27 +147,29 @@ describe("api/admin/index", function() {
                 }
                 permissionChecks.should.have.property('flows.write',1);
                 done();
-            })
+            });
         });
+
         it('DELETE /flow/1234', function(done) {
             request(app).del("/flow/1234").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.write',1);
-                lastRequest.params.should.have.property('id','1234')
+                lastRequest.params.should.have.property('id','1234');
                 done();
-            })
+            });
         });
+
         it('PUT /flow/1234', function(done) {
             request(app).put("/flow/1234").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('flows.write',1);
-                lastRequest.params.should.have.property('id','1234')
+                lastRequest.params.should.have.property('id','1234');
                 done();
-            })
+            });
         });
 
         it('GET /nodes', function(done) {
@@ -167,8 +179,9 @@ describe("api/admin/index", function() {
                 }
                 permissionChecks.should.have.property('nodes.read',1);
                 done();
-            })
+            });
         });
+
         it('POST /nodes', function(done) {
             request(app).post("/nodes").expect(200).end(function(err,res) {
                 if (err) {
@@ -176,27 +189,29 @@ describe("api/admin/index", function() {
                 }
                 permissionChecks.should.have.property('nodes.write',1);
                 done();
-            })
+            });
         });
+
         it('GET /nodes/module', function(done) {
             request(app).get("/nodes/module").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'module')
+                lastRequest.params.should.have.property(0,'module');
                 done();
-            })
+            });
         });
+
         it('GET /nodes/@scope/module', function(done) {
             request(app).get("/nodes/@scope/module").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'@scope/module')
+                lastRequest.params.should.have.property(0,'@scope/module');
                 done();
-            })
+            });
         });
 
         it('PUT /nodes/module', function(done) {
@@ -205,19 +220,20 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module')
+                lastRequest.params.should.have.property(0,'module');
                 done();
-            })
+            });
         });
+
         it('PUT /nodes/@scope/module', function(done) {
             request(app).put("/nodes/@scope/module").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module')
+                lastRequest.params.should.have.property(0,'@scope/module');
                 done();
-            })
+            });
         });
 
         it('DELETE /nodes/module', function(done) {
@@ -226,19 +242,20 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module')
+                lastRequest.params.should.have.property(0,'module');
                 done();
-            })
+            });
         });
+
         it('DELETE /nodes/@scope/module', function(done) {
             request(app).del("/nodes/@scope/module").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module')
+                lastRequest.params.should.have.property(0,'@scope/module');
                 done();
-            })
+            });
         });
 
         it('GET /nodes/module/set', function(done) {
@@ -247,21 +264,22 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'module')
-                lastRequest.params.should.have.property(2,'set')
+                lastRequest.params.should.have.property(0,'module');
+                lastRequest.params.should.have.property(2,'set');
                 done();
-            })
+            });
         });
+
         it('GET /nodes/@scope/module/set', function(done) {
             request(app).get("/nodes/@scope/module/set").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-                lastRequest.params.should.have.property(0,'@scope/module')
-                lastRequest.params.should.have.property(2,'set')
+                lastRequest.params.should.have.property(0,'@scope/module');
+                lastRequest.params.should.have.property(2,'set');
                 done();
-            })
+            });
         });
 
         it('PUT /nodes/module/set', function(done) {
@@ -270,21 +288,22 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'module')
-                lastRequest.params.should.have.property(2,'set')
+                lastRequest.params.should.have.property(0,'module');
+                lastRequest.params.should.have.property(2,'set');
                 done();
-            })
+            });
         });
+
         it('PUT /nodes/@scope/module/set', function(done) {
             request(app).put("/nodes/@scope/module/set").expect(200).end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.write',1);
-                lastRequest.params.should.have.property(0,'@scope/module')
-                lastRequest.params.should.have.property(2,'set')
+                lastRequest.params.should.have.property(0,'@scope/module');
+                lastRequest.params.should.have.property(2,'set');
                 done();
-            })
+            });
         });
 
         it('GET /nodes/messages', function(done) {
@@ -293,10 +312,10 @@ describe("api/admin/index", function() {
                     return done(err);
                 }
                 permissionChecks.should.have.property('nodes.read',1);
-
                 done();
-            })
+            });
         });
+
         it('GET /nodes/module/set/messages', function(done) {
             request(app).get("/nodes/module/set/messages").expect(200).end(function(err,res) {
                 if (err) {
@@ -305,8 +324,9 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('nodes.read',1);
                 lastRequest.params.should.have.property(0,'module/set');
                 done();
-            })
+            });
         });
+
         it('GET /nodes/@scope/module/set/messages', function(done) {
             request(app).get("/nodes/@scope/module/set/messages").expect(200).end(function(err,res) {
                 if (err) {
@@ -315,7 +335,124 @@ describe("api/admin/index", function() {
                 permissionChecks.should.have.property('nodes.read',1);
                 lastRequest.params.should.have.property(0,'@scope/module/set');
                 done();
-            })
+            });
+        });
+
+        it('GET /context/global', function(done) {
+            request(app).get("/context/global").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','global');
+                done();
+            });
+        });
+
+        it('GET /context/global/key?store=memory', function(done) {
+            request(app).get("/context/global/key?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','global');
+                lastRequest.params.should.have.property(0,'key');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
+        });
+
+        it('GET /context/flow/1234', function(done) {
+            request(app).get("/context/flow/1234").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','flow');
+                lastRequest.params.should.have.property('id','1234');
+                done();
+            });
+        });
+
+        it('GET /context/flow/1234/key?store=memory', function(done) {
+            request(app).get("/context/flow/1234/key?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','flow');
+                lastRequest.params.should.have.property('id','1234');
+                lastRequest.params.should.have.property(0,'key');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
+        });
+
+        it('GET /context/node/5678', function(done) {
+            request(app).get("/context/node/5678").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','node');
+                lastRequest.params.should.have.property('id','5678');
+                done();
+            });
+        });
+
+        it('GET /context/node/5678/foo?store=memory', function(done) {
+            request(app).get("/context/node/5678/foo?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.read',1);
+                lastRequest.params.should.have.property('scope','node');
+                lastRequest.params.should.have.property('id','5678');
+                lastRequest.params.should.have.property(0,'foo');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
+        });
+
+        it('DELETE /context/global/key?store=memory', function(done) {
+            request(app).del("/context/global/key?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.write',1);
+                lastRequest.params.should.have.property('scope','global');
+                lastRequest.params.should.have.property(0,'key');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
+        });
+
+        it('DELETE /context/flow/1234/key?store=memory', function(done) {
+            request(app).del("/context/flow/1234/key?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.write',1);
+                lastRequest.params.should.have.property('scope','flow');
+                lastRequest.params.should.have.property('id','1234');
+                lastRequest.params.should.have.property(0,'key');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
+        });
+
+        it('DELETE /context/node/5678/foo?store=memory', function(done) {
+            request(app).del("/context/node/5678/foo?store=memory").expect(200).end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                permissionChecks.should.have.property('context.write',1);
+                lastRequest.params.should.have.property('scope','node');
+                lastRequest.params.should.have.property('id','5678');
+                lastRequest.params.should.have.property(0,'foo');
+                lastRequest.query.should.have.property('store','memory');
+                done();
+            });
         });
     });
 });
