@@ -18,6 +18,7 @@ Editor
  - Tidy up markdown toolbar handling across all editors
  - Added validation while export into library
  - Reuse notification boxes rather than stack multiple of the same type
+ - Make ssh key dialog accessible when opened from new proj dialog
 
 Runtime
 
