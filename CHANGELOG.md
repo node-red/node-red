@@ -1,3 +1,9 @@
+#### 0.20.0-beta.4: Beta Release
+
+Runtime
+
+ - Bump JSONata to 1.6.5
+
 #### 0.20.0-beta.3: Beta Release
 
 Editor

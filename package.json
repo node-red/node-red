@@ -45,7 +45,7 @@
         "is-utf8": "0.2.1",
         "js-yaml": "3.12.1",
         "json-stringify-safe": "5.0.1",
-        "jsonata": "1.6.3",
+        "jsonata": "1.6.4",
         "media-typer": "1.0.1",
         "memorystore": "1.6.0",
         "mime": "2.4.0",
