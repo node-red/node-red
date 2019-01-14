@@ -48,6 +48,10 @@ If you want to run the latest code from git, here's how to get started:
 
         node red.js
 
+Alternatively, you can open the code base in a ready-to-code dev environment:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/node-red/node-red)
+
 ## Contributing
 
 Before raising a pull-request, please read our
