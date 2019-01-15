@@ -47,7 +47,7 @@
     }
 
     &.red-ui-typedInput-focus:not(.input-error) {
-        border-color: $form-input-focus-color !important;
+        border-color: $form-input-focus-color;
     }
 
     button {

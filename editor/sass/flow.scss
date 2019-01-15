@@ -54,10 +54,10 @@
 }
 .node_label_unknown {
     font-style: italic;
-    fill: #e00 !important;
+    fill: #e00;
 }
 .node_label_white {
-    fill: #eee !important;
+    fill: #eee;
 }
 .node_label {
     stroke-width: 0;
@@ -154,11 +154,11 @@
 }
 .node_selected {
     stroke-width: 2;
-    stroke: $node-selected-color !important;
+    stroke: $node-selected-color;
 }
 .node_highlighted {
-    border-color: #dd1616 !important;
-    border-style: dashed !important;
+    border-color: #dd1616;
+    border-style: dashed;
     stroke: #dd1616;
     stroke-width: 2;
     stroke-dasharray: 10, 4;

@@ -71,11 +71,11 @@
 
         a {
             font-style: italic;
-            color: #aaa !important;
+            color: #aaa;
         }
         &.active a {
             font-weight: normal;
-            color: #999 !important;
+            color: #999;
         }
         .workspace-disabled-icon {
             display: inline;

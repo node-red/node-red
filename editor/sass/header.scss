@@ -50,7 +50,7 @@ span.logo {
 
     span {
         vertical-align: middle;
-        font-size: 16px !important;
+        font-size: 16px;
     }
     img {
         height: 18px;
@@ -122,7 +122,7 @@ span.logo {
 
 .deploy-button {
     background: $deployButton;
-    color: #eee !important;
+    color: #eee;
 
     &:hover {
         background: $deployButtonHover;
@@ -130,7 +130,7 @@ span.logo {
 
     &:active {
         background: $deployButtonActive;
-        color: #ccc !important;
+        color: #ccc;
     }
 }
 
@@ -155,7 +155,7 @@ span.logo {
     &.disabled {
         cursor: default;
         background: $deployDisabledButton;
-        color: #999 !important;
+        color: #999;
 
         .deploy-button-content>img {
             opacity: 0.3;
@@ -180,7 +180,7 @@ span.logo {
 
 .deploy-button-group.open {
     #btn-deploy-options {
-        background: $activeButton !important;
+        background: $activeButton;
     }
 }
 
@@ -202,7 +202,7 @@ span.logo {
 
 #header ul.dropdown-menu {
     background: $headerMenuBackground;
-    width: 250px !important;
+    width: 250px;
     margin-top: 0;
 }
 
@@ -241,7 +241,7 @@ span.logo {
 
 #header ul.dropdown-menu > li:hover > a,
 #header ul.dropdown-menu > li:focus > a {
-    background: $headerMenuItemHover !important;
+    background: $headerMenuItemHover;
 }
 
 #header ul.dropdown-menu li.divider {
@@ -254,12 +254,12 @@ span.logo {
 
 #header ul.dropdown-menu > li.disabled:hover > a,
 #header ul.dropdown-menu > li.disabled:focus > a {
-    background: none !important;
+    background: none;
 }
 
 /* Deploy menu customisations */
 #header ul#btn-deploy-options-submenu {
-    width: 300px !important;
+    width: 300px;
 }
 #header ul#btn-deploy-options-submenu li a span.menu-label {
     font-size: 16px;
@@ -271,7 +271,7 @@ span.logo {
     color: #fff;
 }
 #header ul#btn-deploy-options-submenu li a > i.fa {
-    display: none !important;
+    display: none;
 }
 
 /* User menu customisations */

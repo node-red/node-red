@@ -40,13 +40,13 @@
 
 
 .dropdown-menu>li.disabled>a:hover>[class^="icon-"] {
-    background-image: url("vendor/bootstrap/img/glyphicons-halflings.png") !important;
+    background-image: url("vendor/bootstrap/img/glyphicons-halflings.png");
 }
 /** Fix for unreachable dropdown menu **/
 .dropdown-menu  {
     border-radius: 0;
-    width: 200px !important;
-    margin-left: 0px !important;
+    width: 200px;
+    margin-left: 0px;
 }
 .dropdown-menu > li > a > i {
     width: 10px;
@@ -56,7 +56,7 @@
 .dropdown-menu > li > a {
      padding-left: 38px ;
      text-indent: -8px ;
-     white-space: normal !important;
+     white-space: normal;
 }
 
 .dropdown-submenu>a:after {

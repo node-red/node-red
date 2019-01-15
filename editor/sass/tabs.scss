@@ -89,7 +89,7 @@
                     color: #aaa;
                     background: $tab-background-active;
                     &:hover {
-                        background: $workspace-button-background-hover !important;
+                        background: $workspace-button-background-hover;
                         color: $workspace-button-color-hover;
                     }
                 }
@@ -317,7 +317,7 @@ i.red-ui-tab-icon {
     padding: 0px;
     color: #aaa;
     &:hover {
-        background: $workspace-button-background-hover !important;
+        background: $workspace-button-background-hover;
         opacity: 1;
     }
 }

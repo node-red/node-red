@@ -40,7 +40,7 @@
     @include disable-selection;
     box-sizing: border-box;
     display: inline-block;
-    color: $workspace-button-color !important;
+    color: $workspace-button-color;
     background: $workspace-button-background;
     border: 1px solid $form-input-border-color;
     text-align: center;
@@ -50,25 +50,25 @@
 
     &.disabled, &:disabled  {
         cursor: default;
-        color: $workspace-button-color-disabled !important;
+        color: $workspace-button-color-disabled;
     }
     &:hover, &:focus {
         text-decoration: none;
     }
     &:not(.disabled):not(:disabled):hover, {
-        color: $workspace-button-color-hover !important;
+        color: $workspace-button-color-hover;
         background: $workspace-button-background-hover;
     }
     &:not(.disabled):not(:disabled):focus {
-        color: $workspace-button-color-focus !important;
+        color: $workspace-button-color-focus;
     }
     &:not(.disabled):not(:disabled):active {
-        color: $workspace-button-color-active !important;
+        color: $workspace-button-color-active;
         background: $workspace-button-background-active;
         text-decoration: none;
     }
     // &.selected:not(.disabled):not(:disabled) {
-    //     color: $workspace-button-color-selected !important;
+    //     color: $workspace-button-color-selected;
     //     background: $workspace-button-background-active;
     //     background: #9f9;
     // }
@@ -105,17 +105,17 @@
 
     &.primary {
         border-color: $editor-button-background-primary;
-        color: $editor-button-color-primary !important;
+        color: $editor-button-color-primary;
         background: $editor-button-background-primary;
         &.disabled, &.ui-state-disabled {
             background: none;
-            color: $editor-button-color !important;
+            color: $editor-button-color;
             border-color: $form-input-border-color;
         }
         &:not(.disabled):not(.ui-button-disabled):hover {
             border-color: $editor-button-background-primary-hover;
             background: $editor-button-background-primary-hover;
-            color: $editor-button-color-primary !important;
+            color: $editor-button-color-primary;
         }
     }
 
@@ -131,12 +131,12 @@
 
 @mixin workspace-button-toggle {
     @include workspace-button;
-    color: $workspace-button-toggle-color !important;
+    color: $workspace-button-toggle-color;
     background:$workspace-button-background-active;
     margin-bottom: 1px;
 
     &.selected:not(.disabled):not(:disabled) {
-        color: $workspace-button-toggle-color-selected !important;
+        color: $workspace-button-toggle-color-selected;
         background: $workspace-button-background;
         border-bottom-width: 2px;
         border-bottom-color: $form-input-border-selected-color;
@@ -146,7 +146,7 @@
         }
     }
     &.disabled,&:disabled {
-        color: $workspace-button-toggle-color-disabled !important;
+        color: $workspace-button-toggle-color-disabled;
     }
 }
 @mixin editor-button {
@@ -154,22 +154,22 @@
     font-size: 14px;
     padding: 6px 14px;
     margin-right: 8px;
-    color: $editor-button-color !important;
+    color: $editor-button-color;
     background: $editor-button-background;
 
     // &.primary {
     //     border-color: $editor-button-background-primary;
-    //     color: $editor-button-color-primary !important;
+    //     color: $editor-button-color-primary;
     //     background: $editor-button-background-primary;
     //     &.disabled, &.ui-state-disabled {
     //         background: none;
-    //         color: $editor-button-color !important;
+    //         color: $editor-button-color;
     //         border-color: $form-input-border-color;
     //     }
     //     &:not(.disabled):not(.ui-button-disabled):hover {
     //         border-color: $editor-button-background-primary-hover;
     //         background: $editor-button-background-primary-hover;
-    //         color: $editor-button-color-primary !important;
+    //         color: $editor-button-color-primary;
     //     }
     // }
     &:not(.disabled):hover {

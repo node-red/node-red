@@ -274,7 +274,7 @@
 }
 .node-diff-node-deleted {
     //background: #fadddd;
-    cursor: default !important;
+    cursor: default;
     .node-diff-status {
         color: #f80000;
     }
@@ -288,7 +288,7 @@
 }
 .node-diff-node-added {
     //background: #eefaee;
-    cursor: default !important;
+    cursor: default;
     .node-diff-status {
         color: #009900;
     }
@@ -412,7 +412,7 @@
         width: 15px;
     }
     ul,li,ol {
-        background: none !important;
+        background: none;
     }
     ul {
         vertical-align: middle;
@@ -420,7 +420,7 @@
         margin-left: 5px;
     }
     li {
-        list-style-type: none !important;
+        list-style-type: none;
     }
     ol {
         font-size: 0.9em;
@@ -453,10 +453,10 @@
     //min-height: 30px;
 
     &.node-diff-node-changed {
-        background: #fff2e1 !important;
+        background: #fff2e1;
     }
     &.node-diff-node-conflict {
-        background: #ffdad4 !important;
+        background: #ffdad4;
     }
 }
 

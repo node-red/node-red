@@ -122,7 +122,7 @@
         }
 
         .palette-module-set-button {
-            background:#f3f3f3 !important;
+            background:#f3f3f3;
         }
     }
     .palette-module-set {
@@ -172,7 +172,7 @@
         }
     }
     .palette-module-more {
-        padding: 0 !important;
+        padding: 0;
         margin-top: 10px;
         margin-bottom: 10px;
         background: $tab-background-inactive;
@@ -213,8 +213,8 @@
     @include enable-selection;
 }
 .palette-module-section {
-    padding:0 !important;
-    background: #f9f9f9 !important;
+    padding:0;
+    background: #f9f9f9;
     font-size: 0.9em;
     color: #666;
 

@@ -184,7 +184,7 @@
 }
 .projects-dialog-project-list {
     li {
-        padding: 0 !important;
+        padding: 0;
     }
 }
 .projects-dialog-project-list-entry {
@@ -250,8 +250,8 @@
     }
 }
 .projects-dialog-screen-create-type.editor-button.toggle.selected:not(.disabled):not(:disabled) {
-    background: #fff !important;
-    color: #666 !important;
+    background: #fff;
+    color: #666;
 }
 .projects-dialog-screen-input-status {
     text-align: right;
@@ -616,7 +616,7 @@
         border: none;
     }
     li {
-        padding: 0 !important;
+        padding: 0;
         border: none;
     }
     .red-ui-editableList-container {
@@ -696,7 +696,7 @@
 
 .projects-dialog-sshkey-list {
     li {
-        padding: 0 !important;
+        padding: 0;
     }
     &.projects-dialog-sshkey-list-small {
         .projects-dialog-sshkey-list-entry {
@@ -790,7 +790,7 @@ div.projects-dialog-ssh-public-key {
 
 .projects-dialog-ssh-key-list {
     li {
-        padding: 0 !important;
+        padding: 0;
     }
     .projects-dialog-ssh-key-header {
         padding: 10px 5px;
@@ -855,9 +855,9 @@ div.projects-dialog-ssh-public-key {
     border-radius: 4px;
     border: 1px solid $secondary-border-color;
     .projects-edit-form-sublabel {
-        margin-top: -8px !important;
-        display: block !important;
-        width: auto !important;
+        margin-top: -8px;
+        display: block;
+        width: auto;
     }
     &:after {
         content: "";
@@ -868,7 +868,7 @@ div.projects-dialog-ssh-public-key {
     .projects-dialog-list-dialog-header {
         font-weight: bold;
         background: #f3f3f3;
-        margin-top: 0 !important;
+        margin-top: 0;
         padding: 5px 10px;
         margin-bottom: 10px;
     }

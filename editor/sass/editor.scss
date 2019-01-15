@@ -168,7 +168,7 @@
 }
 
 .input-error {
-    border-color: rgb(214, 97, 95) !important;
+    border-color: rgb(214, 97, 95);
 }
 
 .form-row {
@@ -207,8 +207,8 @@
     border:1px solid #ccc;
     border-radius:5px;
     overflow: hidden;
-    font-size: 14px !important;
-    font-family: Menlo, Consolas, 'DejaVu Sans Mono', Courier, monospace !important;
+    font-size: 14px;
+    font-family: Menlo, Consolas, 'DejaVu Sans Mono', Courier, monospace;
 }
 
 .editor-button {
@@ -238,7 +238,7 @@
 #node-config-dialog-scope-container {
     cursor: auto;
     float: right;
-    font-size: 12px !important;
+    font-size: 12px;
     line-height: 35px;
 }
 #node-config-dialog-scope-warning {
@@ -347,9 +347,9 @@
 }
 
 .ace_read-only {
-    background: #eee !important;
+    background: #eee;
     .ace_cursor {
-       color: transparent !important;
+       color: transparent;
     }
 
 }

@@ -33,13 +33,13 @@
         width: 380px;
         box-shadow: 1px 0 6px rgba(0,0,0,0.1);
     }
-    & #workspace { left: 379px !important; }
+    & #workspace { left: 379px; }
     & #palette-collapse-all { display: none; }
     & #palette-expand-all { display: none; }
-    & #palette-container { display: none !important; }
-    & #palette-search { display: none !important; }
+    & #palette-container { display: none; }
+    & #palette-search { display: none; }
     & #palette-edit { background: $workspace-button-background-active }
-    & #palette-editor { display: block !important }
+    & #palette-editor { display: block }
 }
 
 

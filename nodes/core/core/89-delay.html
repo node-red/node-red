@@ -17,7 +17,7 @@
 <script type="text/x-red" data-template-name="delay">
     <div class="form-row">
         <label for="node-input-delay-action"><i class="fa fa-tasks"></i> <span data-i18n="delay.action"></span></label>
-        <select id="node-input-delay-action" style="width:270px !important">
+        <select id="node-input-delay-action" style="width:270px">
             <option value="delay" data-i18n="delay.delaymsg"></option>
             <option value="rate" data-i18n="delay.limitrate"></option>
         </select>
@@ -26,7 +26,7 @@
     <div id="delay-details">
         <div class="form-row">
             <label></label>
-            <select id="node-input-delay-type" style="width:270px !important">
+            <select id="node-input-delay-type" style="width:270px">
                 <option value="delay" data-i18n="delay.delayfixed"></option>
                 <option value="random" data-i18n="delay.randomdelay"></option>
                 <option value="delayv" data-i18n="delay.delayvarmsg"></option>
@@ -34,8 +34,8 @@
         </div>
         <div class="form-row" id="delay-details-for">
             <label for="node-input-timeout"><i class="fa fa-clock-o"></i> <span data-i18n="delay.for"></span></label>
-            <input type="text" id="node-input-timeout" style="text-align:end; width:50px !important">
-            <select id="node-input-timeoutUnits" style="width:200px !important">
+            <input type="text" id="node-input-timeout" style="text-align:end; width:50px">
+            <select id="node-input-timeoutUnits" style="width:200px">
               <option value="milliseconds" data-i18n="delay.milisecs"></option>
               <option value="seconds" data-i18n="delay.secs"></option>
               <option value="minutes" data-i18n="delay.mins"></option>
@@ -45,10 +45,10 @@
         </div>
         <div id="random-details" class="form-row">
             <label for="node-input-randomFirst"><i class="fa fa-clock-o"></i> <span data-i18n="delay.between"></span></label>
-            <input type="text" id="node-input-randomFirst" placeholder="" style="text-align:end; width:30px !important">
+            <input type="text" id="node-input-randomFirst" placeholder="" style="text-align:end; width:30px">
             <span data-i18n="delay.and"></span>
-            <input type="text" id="node-input-randomLast" placeholder="" style="text-align:end; width:30px !important">
-            <select id="node-input-randomUnits" style="width:140px !important">
+            <input type="text" id="node-input-randomLast" placeholder="" style="text-align:end; width:30px">
+            <select id="node-input-randomUnits" style="width:140px">
               <option value="milliseconds" data-i18n="delay.milisecs"></option>
               <option value="seconds" data-i18n="delay.secs"></option>
               <option value="minutes" data-i18n="delay.mins"></option>
@@ -61,17 +61,17 @@
     <div id="rate-details">
         <div class="form-row">
             <label></label>
-            <select id="node-input-rate-type" style="width:270px !important">
+            <select id="node-input-rate-type" style="width:270px">
                 <option value="all" data-i18n="delay.limitall"></option>
                 <option value="topic" data-i18n="delay.limittopic"></option>
             </select>
         </div>
         <div class="form-row">
             <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
-            <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:40px !important">
+            <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:40px">
             <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
-            <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:40px !important">
-            <select id="node-input-rateUnits" style="width:90px !important">
+            <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:40px">
+            <select id="node-input-rateUnits" style="width:90px">
               <option value="second" data-i18n="delay.label.units.second.singular"></option>
               <option value="minute" data-i18n="delay.label.units.minute.singular"></option>
               <option value="hour" data-i18n="delay.label.units.hour.singular"></option>
@@ -83,7 +83,7 @@
         </div>
         <div class="form-row" id="rate-details-per-topic">
             <label></label>
-            <select id="node-input-rate-topic-type" style="width:270px !important">
+            <select id="node-input-rate-topic-type" style="width:270px">
                 <option value="queue" data-i18n="delay.fairqueue"></option>
                 <option value="timed" data-i18n="delay.timedqueue"></option>
             </select>
