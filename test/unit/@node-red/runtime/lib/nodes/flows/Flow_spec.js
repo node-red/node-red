@@ -300,7 +300,7 @@ describe('Flow', function() {
                 {id:"5",x:10,y:10,z:"t1",type:"test",foo:"$(NODE_RED_TEST_VALUE_NONE)",wires:[]},
                 {id:"6",x:10,y:10,z:"t1",type:"test",foo:["$(NODE_RED_TEST_VALUE)"],wires:[]}
             ]);
-            var flow = Flow.create({},config,config.flows["t1"]);
+            var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
             flow.start();
 
             var activeNodes = flow.getActiveNodes();

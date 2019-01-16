@@ -64,6 +64,18 @@ describe('flows/util', function() {
             }
             foo.should.eql({ a: 'bar1', b: 'bar2', c: { d: 'bar3' } } );
         });
+
+        it('gets ENV from parent flow', function() {
+            var foo = {a:"$(unknown)",b:"$(foo2)",c:{d:"$(foo3)"}};
+            for (var p in foo) {
+                if (foo.hasOwnProperty(p)) {
+                    flowUtil.mapEnvVarProperties(foo,p,{
+                        getSetting: name => name[0]==='f'?name.toUpperCase():undefined
+                    });
+                }
+            }
+            foo.should.eql({ a: '$(unknown)', b: 'FOO2', c: { d: 'FOO3' } } );
+        });
     });
 
     describe('#diffNodes',function() {
