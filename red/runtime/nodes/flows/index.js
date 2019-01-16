@@ -394,6 +394,7 @@ function stop(type,diff,muteLog) {
             }
         }
     }
+    events.emit("nodes-stopped");
 
     return when.promise(function(resolve,reject) {
         when.settle(promises).then(function() {
