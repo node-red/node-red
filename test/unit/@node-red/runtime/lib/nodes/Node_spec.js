@@ -55,8 +55,7 @@ describe('Node', function() {
             n.on('close',function() {
                 done();
             });
-            var p = n.close();
-            should.not.exist(p);
+            n.close();
         });
 
         it('returns a promise when provided a callback with a done parameter',function(testdone) {

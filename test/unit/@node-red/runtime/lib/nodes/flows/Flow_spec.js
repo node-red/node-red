@@ -346,7 +346,7 @@ describe('Flow', function() {
                 stoppedNodes.should.have.a.property("2");
                 stoppedNodes.should.have.a.property("3");
                 done();
-            });
+            }).catch(done);
         });
 
         it("stops specified nodes",function(done) {
