@@ -1,0 +1,958 @@
+{
+  "common" : {
+    "label" : {
+      "payload" : "Nutzdaten",
+      "topic" : "Thema",
+      "name" : "Name",
+      "username" : "Benutzername",
+      "password" : "Kennwort",
+      "property" : "Eigenschaft"
+    },
+    "status" : {
+      "connected" : "verbunden",
+      "not-connected" : "nicht verbunden ",
+      "disconnected" : "Verbindung getrennt",
+      "connecting" : "Verbindung wird hergestellt",
+      "error" : "Fehler",
+      "ok" : "OK"
+    },
+    "notification" : {
+      "error" : "<strong> Fehler </strong>: __message__",
+      "errors" : {
+        "not-deployed" : "Knoten nicht vorhanden",
+        "no-response" : "Keine Antwort vom Server",
+        "unexpected" : "Unerwarteter Fehler (__status__) __message__"
+      }
+    },
+    "errors" : {
+      "nooverride" : "Warnung: Nachrichten-Eigenschaften können die Eigenschaften des festgelegten Knotens nicht mehr außer Kraft setzen. Siehe Bit.ly/nr-override-msg-props"
+    }
+  },
+  "inject" : {
+    "inject" : "Injizieren",
+    "repeat" : "Wiederholen = __repeat__",
+    "crontab" : "Crontab = __crontab__",
+    "stopped" : "Gestoppt",
+    "failed" : "Injizieren fehlgeschlagen: __error__",
+    "label" : {
+      "repeat" : "Wiederholen"
+    },
+    "timestamp" : "Zeitmarke",
+    "none" : "keine",
+    "interval" : "Intervall",
+    "interval-time" : "Intervall zwischen den Uhrzeiten",
+    "time" : "zu einem bestimmten Zeitpunkt",
+    "seconds" : "Sekunden",
+    "minutes" : "Minuten",
+    "hours" : "Stunden",
+    "between" : "zwischen",
+    "previous" : "vorheriger Wert",
+    "at" : "bei",
+    "and" : "und",
+    "every" : "alle",
+    "days" : [ "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag" ],
+    "on" : "am",
+    "onstart" : "Einmal nach der Injektion",
+    "onceDelay" : "Sekunden, dann",
+    "tip" : "<b> Hinweis: </b>  \"Intervall zwischen den Uhrzeiten\" und \"zu einem bestimmten Zeitpunkt\" verwendet \"cron\". <br/> \"Intervall\" sollte weniger als 596 Stunden betragen. <br/> Siehe Informationsfenster für Details.",
+    "success" : "Erfolgreich injiziert: __label__",
+    "errors" : {
+      "failed" : "Injizieren fehlgeschlagen, siehe Protokoll für Details",
+      "toolong" : "Intervall zu groß"
+    }
+  },
+  "catch" : {
+    "catch" : "Catch: all",
+    "catchNodes" : "Catch: __number__",
+    "label" : {
+      "source" : "Catch-Fehler von",
+      "node" : "Knoten",
+      "type" : "Typ",
+      "selectAll" : "Alle auswählen",
+      "sortByLabel" : "Sortieren nach Bezeichnung",
+      "sortByType" : "Sortieren nach Typ"
+    },
+    "scope" : {
+      "all" : "allen Knoten",
+      "selected" : "ausgewählten Knoten"
+    }
+  },
+  "status" : {
+    "status" : "Status: alle",
+    "statusNodes" : "Status: __number__",
+    "label" : {
+      "source" : "Berichtsstatus von",
+      "node" : "Knoten",
+      "type" : "Typ",
+      "selectAll" : "Alle auswählen",
+      "sortByLabel" : "Sortieren nach Bezeichnung",
+      "sortByType" : "Sortieren nach Typ"
+    },
+    "scope" : {
+      "all" : "allen Knoten",
+      "selected" : "ausgewählten Knoten"
+    }
+  },
+  "debug" : {
+    "output" : "Ausgabe",
+    "msgprop" : "Nachrichteneigenschaft",
+    "msgobj" : "Volles Nachrichten-Objekt",
+    "to" : "Ziel",
+    "debtab" : "Debug, Registerkarte",
+    "tabcon" : "Debug-Registerkarte und -Konsole",
+    "toSidebar" : "Debugfenster",
+    "toConsole" : "Systemkonsole",
+    "toStatus" : "Knotenstatus (32 Zeichen)",
+    "severity" : "Ebene",
+    "notification" : {
+      "activated" : "Erfolgreich aktiviert: __label__",
+      "deactivated" : "Erfolgreich inaktiviert: __label__"
+    },
+    "sidebar" : {
+      "label" : "Debugging",
+      "name" : "Debugnachrichten",
+      "filterAll" : "Alle Knoten",
+      "filterSelected" : "Ausgewählte Knoten",
+      "filterCurrent" : "Aktueller Fluss",
+      "debugNodes" : "Debugknoten",
+      "clearLog" : "Protokoll löschen",
+      "openWindow" : "In neuem Fenster öffnen"
+    },
+    "messageMenu" : {
+      "collapseAll" : "Alle Pfade ausblenden",
+      "clearPinned" : "Angeheftete Pfade löschen",
+      "filterNode" : "Dieser Knoten filtern",
+      "clearFilter" : "Filter löschen"
+    }
+  },
+  "link" : {
+    "linkIn" : "eingehende Verbindung",
+    "linkOut" : "ausgehende Verbindung",
+    "label" : {
+      "event" : "Ereignisname",
+      "node" : "Name",
+      "type" : "Fluss",
+      "sortByFlow" : "Nach Fluss sortieren",
+      "sortByLabel" : "Nach Namen sortieren"
+    }
+  },
+  "tls" : {
+    "tls" : "TLS-Konfiguration",
+    "label" : {
+      "use-local-files" : "Schlüssel und Zertifikate aus lokalen Dateien verwenden",
+      "upload" : "Hochladen",
+      "cert" : "Zertifikat",
+      "key" : "Privater Schlüssel",
+      "passphrase" : "Passwort",
+      "ca" : "CA-Zertifikat",
+      "verify-server-cert" : "Serverzertifikat überprüfen",
+      "servername" : "Servername"
+    },
+    "placeholder" : {
+      "cert" : "Pfad zu Zertifikat (PEM-Format)",
+      "key" : "Pfad zum privaten Schlüssel (PEM-Format)",
+      "ca" : "Pfad zu CA-Zertifikat (PEM-Format)",
+      "passphrase" : "Verschlüsselungstext für privaten Schlüssel (optional)",
+      "servername" : "zur Verwendung mit SNI"
+    },
+    "error" : {
+      "missing-file" : "Es wurde keine Zertifikats-/Schlüsseldatei angegeben."
+    }
+  },
+  "exec" : {
+    "exec" : "Ausführen",
+    "spawn" : "Ausführen in neuem Prozess",
+    "label" : {
+      "command" : "Befehl",
+      "append" : "Anfügen",
+      "timeout" : "Zeitlimit",
+      "timeoutplace" : "optional",
+      "return" : "Ausgabe",
+      "seconds" : "Sekunden"
+    },
+    "placeholder" : {
+      "extraparams" : "zusätzliche Eingabeparameter"
+    },
+    "opt" : {
+      "exec" : "wartet bis der Befehl vollständig ausgeführt wurde",
+      "spawn" : "während der Befehl ausgeführt wird (spawn)"
+    },
+    "oldrc" : "Ausgabe im alten Stil verwenden (Kompatibilitätsmodus)"
+  },
+  "function" : {
+    "function" : "",
+    "label" : {
+      "function" : "Funktion",
+      "outputs" : "Ausgänge"
+    },
+    "error" : {
+      "inputListener" : "Das Empfangsprogramm kann nicht zum 'input' -Ereignis in Funktion hinzugefügt werden.",
+      "non-message-returned" : "Funktion hat versucht, eine Nachricht vom Typ __type__ zu senden"
+    },
+    "tip" : "Informationen zum Schreiben von Funktionen finden Sie auf der Registerkarte \"Info\"."
+  },
+  "template" : {
+    "template" : "Vorlage",
+    "label" : {
+      "template" : "Vorlage",
+      "property" : "Eigenschaft festlegen",
+      "format" : "Syntaxhervorhebung",
+      "syntax" : "Format",
+      "output" : "Ausgabe als",
+      "mustache" : "Mustache-Vorlage",
+      "plain" : "Klartext",
+      "json" : "Parsed JSON",
+      "yaml" : "Parsed YAML",
+      "none" : "keine"
+    },
+    "templatevalue" : "Dies sind die Nutzdaten: { { payload } }!"
+  },
+  "delay" : {
+    "action" : "Aktion",
+    "for" : "Für",
+    "delaymsg" : "Jede Nachricht verzögern",
+    "delayfixed" : "Feste Verzögerung",
+    "delayvarmsg" : "Verzögerung mit msg.delay bestimmen",
+    "randomdelay" : "Zufällige Verzögerung",
+    "limitrate" : "Geschwindigkeitslimit",
+    "limitall" : "Alle Nachrichten",
+    "limittopic" : "Für jedes msg.topic",
+    "fairqueue" : "Jedes Thema im Gegenzug senden",
+    "timedqueue" : "Alle Themen senden",
+    "milisecs" : "Milisekunden",
+    "secs" : "Sekunden",
+    "sec" : "Zweiter",
+    "mins" : "Minuten",
+    "min" : "Minute",
+    "hours" : "Stunden",
+    "hour" : "Stunde",
+    "days" : "Tage",
+    "day" : "Tag",
+    "between" : "Zwischen",
+    "and" : "&",
+    "rate" : "Satz",
+    "msgper" : "msg (s) pro",
+    "dropmsg" : "Zwischennachrichten löschen",
+    "label" : {
+      "delay" : "Verzögerung",
+      "variable" : "Variable",
+      "limit" : "Begrenzung",
+      "limitTopic" : "Grenzwert, Thema",
+      "random" : "Zufall",
+      "units" : {
+        "second" : {
+          "plural" : "Sekunden",
+          "singular" : "Sekunde"
+        },
+        "minute" : {
+          "plural" : "Minuten",
+          "singular" : "Minute"
+        },
+        "hour" : {
+          "plural" : "Stunden",
+          "singular" : "Stunde"
+        },
+        "day" : {
+          "plural" : "Tage",
+          "singular" : "Tag"
+        }
+      }
+    },
+    "error" : {
+      "buffer" : "Buffer hat 1000 Nachrichten überschritten",
+      "buffer1" : "Der Buffer hat 10000 Nachrichten überschritten."
+    }
+  },
+  "trigger" : {
+    "send" : "Senden",
+    "then" : "dann",
+    "then-send" : "dann senden",
+    "output" : {
+      "string" : "die Zeichenfolge",
+      "number" : "die Zahl",
+      "existing" : "das vorhandene Nachrichtenobjekt",
+      "original" : "das ursprüngliche Nachrichtenobjekt",
+      "latest" : "das neueste Nachrichtenobjekt",
+      "nothing" : "nichts"
+    },
+    "wait-reset" : "warten auf Zurücksetzen",
+    "wait-for" : "warten auf",
+    "wait-loop" : "erneut senden aller",
+    "for" : "Handhabung",
+    "bytopics" : "für jeden <code>msg.topic</code> Wert unabhängig",
+    "alltopics" : "alle Nachrichten",
+    "duration" : {
+      "ms" : "Millisek.",
+      "s" : "Sekunden",
+      "m" : "Minuten",
+      "h" : "Stunden"
+    },
+    "extend" : " Verlängerung der Verzögerung bei Eingang neuer Nachricht",
+    "label" : {
+      "trigger" : "Auslöser",
+      "trigger-block" : "Auslöser & Block",
+      "trigger-loop" : "alle erneut senden",
+      "reset" : "Setzen Sie den Auslöser zurück, wenn:",
+      "resetMessage" : "msg.reset gesetzt ist oder ",
+      "resetPayload" : "msg.payload ist gleich" ,
+      "resetprompt" : "optional"
+    }
+  },
+  "comment" : {
+    "comment" : "Kommentar",
+    "label" : {
+      "title" : "Titel",
+      "body" : "Text"
+    },
+    "tip" : "Tipp: Der Text kann als  <a href=\"https://help.github.com/articles/markdown-basics/\" target=\"_blank\"> Github Markdown geschrieben werden</a>"
+  },
+  "unknown" : {
+    "label" : {
+      "unknown" : "unbekannt"
+    },
+    "tip" : "<p> Dieser Knoten ist ein Typ, der Ihrer Installation von Node-RED unbekannt ist. </p> <p> <i> Wenn Sie mit dem Knoten in diesem Status implementieren, wird die Konfiguration beibehalten, aber der Fluss wird erst gestartet, wenn der fehlende Typ installiert ist. </i> </p> <p> Weitere Informationen finden Sie in der Info-Seitenleiste für. Weitere Hilfe </p>"
+  },
+  "mqtt" : {
+    "label" : {
+      "broker" : "Server",
+      "example" : "z. B. lokaler_Host",
+      "qos" : "QoS",
+      "retain" : "Beibehalten",
+      "clientid" : "Client-ID",
+      "port" : "Port",
+      "keepalive" : "Keepalive-Zeit (en)",
+      "cleansession" : "Bereinigte Sitzung verwenden",
+      "use-tls" : "Sichere Verbindung (SSL/TLS) aktivieren",
+      "tls-config" : "TLS-Konfiguration",
+      "verify-server-cert" : "Serverzertifikat überprüfen",
+      "compatmode" : "Traditionelle MQTT 3.1-Unterstützung verwenden"
+    },
+    "sections-label" : {
+      "birth-message" : "Nachricht über Verbindungsaufbau ",
+      "will-message" : "Nachricht über unerwarteten Abschaltung",
+      "close-message" : "Nachricht bevor die Verbindung beendet wird"
+    },
+    "tabs-label" : {
+      "connection" : "Verbindung",
+      "security" : "Sicherheit",
+      "messages" : "Nachrichten"
+    },
+    "placeholder" : {
+      "clientid" : "Leerer Wert für automatische Generierung",
+      "clientid-nonclean" : "Muss für nicht bereinigte Sitzungen festgelegt werden.",
+      "will-topic" : "inaktivieren wenn leer",
+      "birth-topic" : "inaktivieren wenn leer",
+      "close-topic" : "inaktivieren wenn leer"
+    },
+    "state" : {
+      "connected" : "Verbindung zum Broker __broker__ hergestellt.",
+      "disconnected" : "Verbindung zum Broker  __broker__ wurde beendet.",
+      "connect-failed" : "Verbindung zum Broker __broker__ konnte nicht hergestellt werden."
+    },
+    "retain" : "Beibehalten",
+    "true" : "Wahr",
+    "false" : "Falsch",
+    "tip" : "Tipp: Behalten Sie das Thema \"Artikel\", \"qos\" oder \"retain\" bei, wenn Sie diese über die Eigenschaft \"msg\" festlegen",
+    "errors" : {
+      "not-defined" : "Thema nicht definiert",
+      "missing-config" : "Fehlende Brokerkonfiguration",
+      "invalid-topic" : "Ungültiges Thema angegeben",
+      "nonclean-missingclientid" : "Keine Client-ID-Gruppe unter Verwendung einer bereinigten Sitzung"
+    }
+  },
+  "httpin" : {
+    "label" : {
+      "method" : "Methode",
+      "url" : "URL",
+      "doc" : "Docs",
+      "return" : "Rückgabe",
+      "upload" : "Dateiuploads akzeptieren?",
+      "status" : "Statuscode",
+      "headers" : "Kopfzeilen",
+      "other" : "andere"
+    },
+    "setby" : "-durch msg.method festgelegt-",
+    "basicauth" : "Basisauthentifizierung verwenden",
+    "use-tls" : "Sichere Verbindung (SSL/TLS) aktivieren",
+    "tls-config" : "TLS-Konfiguration",
+    "utf8" : "eine UTF-8-Zeichenfolge",
+    "binary" : "einen binären Buffer",
+    "json" : "ein analysiertes JSON-Objekt",
+    "tip" : {
+      "in" : "Die URL ist relativ zu ",
+      "res" : "Die an diesen Knoten gesendeten Nachrichten  <b> müssen </b>  von einem  <i> http-Input </i>  -Knoten stammen",
+      "req" : "Tipp: Wenn die JSON-Syntaxanalyse fehlschlägt, wird die abgerufene Zeichenfolge als-ist zurückgegeben."
+    },
+    "httpreq" : "HTTP-Anforderung",
+    "errors" : {
+      "not-created" : "http-in-Knoten kann nicht erstellt werden, wenn httpNodeRoot auf 'false' gesetzt ist.",
+      "missing-path" : "Fehlendes Pfad",
+      "no-response" : "Kein Antwortobjekt",
+      "json-error" : "JSON-Parsing-Fehler",
+      "no-url" : "Keine URL angegeben",
+      "deprecated-call" : "Nicht weiter unterstützter Aufruf von __method__",
+      "invalid-transport" : "Nicht-http-Transport angefordert"
+    },
+    "status" : {
+      "requesting" : "anfordern"
+    }
+  },
+  "websocket" : {
+    "label" : {
+      "type" : "Typ",
+      "path" : "Pfad",
+      "url" : "URL"
+    },
+    "listenon" : "Empfangsbereit",
+    "connectto" : "Verbinden mit",
+    "sendrec" : "Senden/Empfangen",
+    "payload" : "Nutzdaten",
+    "message" : "gesamte Nachricht",
+    "tip" : {
+      "path1" : "Standardmäßig enthält  <code> Nutzdaten </code>  die Daten, die über einen Websocket gesendet oder von einem Websocket empfangen werden. Der Listener kann so konfiguriert werden, dass er das gesamte Nachrichtenobjekt als eine JSON-formatierte Zeichenfolge sendet oder empfängt.",
+      "path2" : "Dieser Pfad ist relativ zu ",
+      "url1" : "URL sollte ws: &#47; & #47; oder wss: &#47; & #47; Schema verwenden und auf einen vorhandenen Websocket-Listener verweisen.",
+      "url2" : "Standardmäßig enthält  <code> Nutzdaten </code>  die Daten, die über einen Websocket gesendet oder von einem Websocket empfangen werden. Der Client kann so konfiguriert werden, dass er das gesamte Nachrichtenobjekt als eine JSON-formatierte Zeichenfolge sendet oder empfängt."
+    },
+    "status" : {
+      "connected" : "angeschlossener __count__",
+      "connected_plural" : "angeschlossener __count__"
+    },
+    "errors" : {
+      "connect-error" : "Bei der WS-Verbindung ist ein Fehler aufgetreten: ",
+      "send-error" : "Beim Senden ist ein Fehler aufgetreten: ",
+      "missing-conf" : "Fehlende Serverkonfiguration"
+    }
+  },
+  "watch" : {
+    "watch" : "Überwachung",
+    "label" : {
+      "files" : "Datei (en)",
+      "recursive" : "Unterverzeichnisse rekursiv überwachen"
+    },
+    "placeholder" : {
+      "files" : "Durch Komma getrennte Liste von Dateien und/oder Verzeichnissen"
+    },
+    "tip" : "Unter Windows müssen Sie doppelte Backslashes \\\\ in beliebigen Verzeichnisnamen verwenden."
+  },
+  "tcpin" : {
+    "label" : {
+      "type" : "Typ",
+      "output" : "Ausgabe",
+      "port" : "Port",
+      "host" : "auf Host",
+      "payload" : "Nutzlast (en)",
+      "delimited" : "begrenzt durch",
+      "close-connection" : "Schließen Sie die Verbindung, nachdem jede Nachricht gesendet wurde?",
+      "decode-base64" : "Nachricht aus Base64 dekodierien?",
+      "server" : "Server",
+      "return" : "Rückgabe",
+      "ms" : "ms",
+      "chars" : "Chars"
+    },
+    "type" : {
+      "listen" : "Empfangsbereit",
+      "connect" : "Verbinden mit",
+      "reply" : "Auf TCP antworten"
+    },
+    "output" : {
+      "stream" : "Datenstrom von",
+      "single" : "Single",
+      "buffer" : "Buffer",
+      "string" : "Zeichenfolge",
+      "base64" : "Base64-Zeichenfolge"
+    },
+    "return" : {
+      "timeout" : "nach einem festen Zeitlimit von",
+      "character" : "wenn folgendes Zeichen empfangen wird",
+      "number" : "eine festgelegte Anzahl von Zeichen",
+      "never" : "keine Rückgabe - Verbindung wird offen gehalten",
+      "immed" : "sofort - Wartet nicht auf Antwort."
+    },
+    "status" : {
+      "connecting" : "Verbindung zu __host__: __port__",
+      "connected" : "Verbindung zu __host__: __port__",
+      "listening-port" : "empfangsbereit an Port __port__",
+      "stopped-listening" : "Empfangsbereitschaft an Port gestoppt",
+      "connection-from" : "Verbindung von __host__: __port__",
+      "connection-closed" : "Verbindung geschlossen von __host__: __port__",
+      "connections" : "__count__connection",
+      "connections_plural" : "__count__connections"
+    },
+    "errors" : {
+      "connection-lost" : "Verbindung verloren zu __host__: __port__",
+      "timeout" : "Zeitlimit für geschlossenen Socket-Port __port__",
+      "cannot-listen" : "Port __port__ kann nicht empfangsbereit sein. Fehler: __error__",
+      "error" : "Fehler: __error__",
+      "socket-error" : "Socketfehler von __host__: __port__",
+      "no-host" : "Host und/oder Port nicht festgelegt",
+      "connect-timeout" : "Verbindungszeitlimit",
+      "connect-fail" : "Verbindung fehlgeschlagen"
+    }
+  },
+  "udp" : {
+    "label" : {
+      "listen" : "Empfangsbereit",
+      "onport" : "an Port",
+      "using" : "verwenden",
+      "output" : "Ausgabe",
+      "group" : "Gruppe",
+      "interface" : "Lokal IF",
+      "send" : "Schicken Sie eine",
+      "toport" : "an Port",
+      "address" : "Adresse",
+      "decode-base64" : "Dekodiere Base64-kodierte Nutzdaten?"
+    },
+    "placeholder" : {
+      "interface" : "(optional) lokale Schnittstelle oder Adresse, an die gebunden werden soll",
+      "interfaceprompt" : "(optional) lokale Schnittstelle oder Adresse, an die gebunden werden soll",
+      "address" : "Ziel-IP"
+    },
+    "udpmsgs" : "udp-Nachrichten",
+    "mcmsgs" : "Multicastnachrichten",
+    "udpmsg" : "udp-Nachricht",
+    "bcmsg" : "Broadcastnachricht",
+    "mcmsg" : "Multicastnachricht",
+    "output" : {
+      "buffer" : "ein Buffer",
+      "string" : "eine Zeichenfolge",
+      "base64" : "Eine Base64-codierte Zeichenfolge"
+    },
+    "bind" : {
+      "random" : "an zufälliger lokaler Port binden",
+      "local" : "Bindung an lokalen Port",
+      "target" : "Bindung an Zielport"
+    },
+    "tip" : {
+      "in" : "Tipp: Stellen Sie sicher, dass Ihre Firewall die Daten in zulässt.",
+      "out" : "Tipp: Lassen Sie die Adresse und den Port leer, wenn Sie mit  <code> msg.ip </code>  und  <code> msg.port </code> festlegen möchten.",
+      "port" : "Ports, die bereits verwendet werden: "
+    },
+    "status" : {
+      "listener-at" : "udp listener at __host__: __port__",
+      "mc-group" : "udp Multicastgruppe __Gruppe__",
+      "listener-stopped" : "udp-Listener gestoppt",
+      "output-stopped" : "udp-Ausgabe gestoppt",
+      "mc-ready" : "udp multicast ready: __iface__: __outport__-> __host__: __port__",
+      "bc-ready" : "udp broadcast ready: __outport__-> __host__: __port__",
+      "ready" : "udp ready: __outport__-> __host__: __port__",
+      "ready-nolocal" : "udp bereit: __host__: __port__",
+      "re-use" : "udp re-use socket: __outport__-> __host__: __port__"
+    },
+    "errors" : {
+      "access-error" : "UDP-Zugriffsfehler, Sie benötigen möglicherweise Rootzugriff für Ports unter 1024",
+      "error" : "Fehler: __error__",
+      "bad-mcaddress" : "Ungültige Multicastadresse",
+      "interface" : "Sie müssen die IP-Adresse der erforderlichen Schnittstelle sein.",
+      "ip-notset" : "udp: ip-Adresse nicht festgelegt",
+      "port-notset" : "udp: Port nicht festgelegt",
+      "port-invalid" : "udp: Portnummer nicht gültig",
+      "alreadyused" : "udp: Port __port__ wird bereits verwendet",
+      "ifnotfound" : "udp: interface __iface__ nicht gefunden"
+    }
+  },
+  "switch" : {
+    "switch" : "Switch",
+    "label" : {
+      "property" : "Eigenschaft",
+      "rule" : "Regel",
+      "repair" : "Nachrichtenfolgen erneut erstellen"
+    },
+    "and" : "und",
+    "checkall" : "Alle Regeln überprüfen",
+    "stopfirst" : "Nach erster Übereinstimmung stoppen",
+    "ignorecase" : "Groß-/Kleinschreibung ignorieren",
+    "rules" : {
+      "btwn" : "liegt zwischen",
+      "cont" : "enthält",
+      "regex" : "Übereinstimmungen mit regex",
+      "true" : "ist wahr",
+      "false" : "ist falsch",
+      "null" : "ist null",
+      "nnull" : "ist nicht null",
+      "istype" : "ist vom Typ",
+      "empty" : "ist leer",
+      "nempty" : "ist nicht leer",
+      "head" : "Header",
+      "tail" : "Trailer",
+      "index" : "Index zwischen",
+      "exp" : "JSONata Ausdruck",
+      "else" : "Andernfalls"
+    },
+    "errors" : {
+      "invalid-expr" : "Ungültiger JSONata Ausdruck: __error__",
+      "too-many" : "Zu viele anstehende Nachrichten im Switchknoten"
+    }
+  },
+  "change" : {
+    "label" : {
+      "rules" : "Regeln",
+      "rule" : "Regel",
+      "set" : "setze __property__",
+      "change" : "__property__ ändern",
+      "delete" : "__property__ löschen",
+      "move" : "bewege __property__",
+      "changeCount" : "Ändern: __count__rules",
+      "regex" : "Reguläre Ausdrücke verwenden"
+    },
+    "action" : {
+      "set" : "Festlegen",
+      "change" : "Ändern",
+      "delete" : "Löschen",
+      "move" : "Bewegen",
+      "to" : "bis",
+      "search" : "Suchen nach",
+      "replace" : "Ersetzen durch"
+    },
+    "errors" : {
+      "invalid-from" : "Ungültiges 'from' Merkmal: __error__",
+      "invalid-json" : "Ungültiges 'to' JSON Merkmal",
+      "invalid-expr" : "Ungültiger JSONata Ausdruck: __error__"
+    }
+  },
+  "range" : {
+    "range" : "Bereich",
+    "label" : {
+      "action" : "Aktion",
+      "inputrange" : "von einem Eingabebereich",
+      "resultrange" : "in einen Zielbereich",
+      "from" : "von",
+      "to" : "bis",
+      "roundresult" : "Runde das Ergebnis auf die nächste ganze Zahl?"
+    },
+    "placeholder" : {
+      "min" : "z. B. 0",
+      "maxin" : "z. B. 99",
+      "maxout" : "z. B. 255"
+    },
+    "scale" : {
+      "payload" : "Skaliere die Nachrichteneigenschaft",
+      "limit" : "Skalieren und Begrenzen auf den Zielbereich",
+      "wrap" : "Skaliere und Einhüllen innerhalb des Zielbereichs"
+    },
+    "tip" : "Tipp: Dieser Knoten funktioniert NUR mit Zahlen.",
+    "errors" : {
+      "notnumber" : "Keine Zahl"
+    }
+  },
+  "csv" : {
+    "label" : {
+      "columns" : "Spalten",
+      "separator" : "Trennzeichen",
+      "c2o" : "Optionen für CSV-zu-Objekt",
+      "o2c" : "Objekt-zu-CSV-Optionen",
+      "input" : "Eingabe",
+      "skip-s" : "Zuerst überspringen",
+      "skip-e" : "Zeilen",
+      "firstrow" : "erste Zeile enthält Spaltennamen",
+      "output" : "Ausgabe",
+      "includerow" : "Spaltennamenszeile einschließen",
+      "newline" : "Zeilenneuerzeile"
+    },
+    "placeholder" : {
+      "columns" : "durch Kommas getrennte Spaltennamen"
+    },
+    "separator" : {
+      "comma" : "Komma",
+      "tab" : "Tabulatorzunge",
+      "space" : "Leerzeichen",
+      "semicolon" : "Semikolon",
+      "colon" : "Doppelpunkt",
+      "hashtag" : "hashtag",
+      "other" : "andere ..."
+    },
+    "output" : {
+      "row" : "eine Nachricht pro Zeile",
+      "array" : "eine einzelne Nachricht [ Array]"
+    },
+    "newline" : {
+      "linux" : "Linux (\\n)",
+      "mac" : "Mac (\\r)",
+      "windows" : "Windows (\\r \\n)"
+    },
+    "errors" : {
+      "csv_js" : "Dieser Knoten verarbeitet nur CSV-Zeichenfolgen oder JS-Objekte.",
+      "obj_csv" : "Es wurde keine Spaltenschablone für Objekt-> CSV angegeben."
+    }
+  },
+  "html" : {
+    "label" : {
+      "select" : "Selektor",
+      "output" : "Ausgabe",
+      "in" : "in"
+    },
+    "output" : {
+      "html" : "den HTML-Inhalt der Elemente",
+      "text" : "nur der Textinhalt der Elemente",
+      "attr" : "ein Objekt mit allen Attributen der Elemente"
+    },
+    "format" : {
+      "single" : "als einzelne Nachricht mit einem Array",
+      "multi" : "als mehrere Nachrichten, eine für jedes Element"
+    }
+  },
+  "json" : {
+    "errors" : {
+      "dropped-object" : "Ignorierte Nicht-Objekt-Nutzdaten",
+      "dropped" : "Ignorierter nicht unterstützter Nutzdatentyp",
+      "dropped-error" : "Fehler beim Konvertieren der Nutzdaten",
+      "schema-error" : "JSON-Schema-Fehler",
+      "schema-error-compile" : "JSON-Schema-Fehler: Schema konnte nicht kompiliert werden"
+    },
+    "label" : {
+      "o2j" : "Objekt zu JSON-Optionen",
+      "pretty" : "JSON-Zeichenfolge formatieren",
+      "action" : "Aktion",
+      "property" : "Eigenschaft",
+      "actions" : {
+        "toggle" : "Konvertieren zwischen JSON-Zeichenfolge und Objekt",
+        "str" : "Immer in JSON-Zeichenfolge konvertieren",
+        "obj" : "Immer in JavaScript-Objekt konvertieren"
+      }
+    }
+  },
+  "yaml" : {
+    "errors" : {
+      "dropped-object" : "Ignorierte Nicht-Objekt-Nutzdaten",
+      "dropped" : "Ignorierter nicht unterstützter Nutzdatentyp",
+      "dropped-error" : "Fehler beim Konvertieren der Nutzdaten"
+    }
+  },
+  "xml" : {
+    "label" : {
+      "represent" : "Eigenschaftsname für XML-Tagattribute",
+      "prefix" : "Eigenschaftsname für Tagtextinhalt",
+      "advanced" : "Erweiterte Optionen",
+      "x2o" : "Optionen für XML zu Objekt"
+    },
+    "errors" : {
+      "xml_js" : "Dieser Knoten verarbeitet nur XML-Zeichenfolgen oder JS-Objekte."
+    }
+  },
+  "rpi-gpio" : {
+    "label" : {
+      "gpiopin" : "GPIO",
+      "selectpin" : "Auswahlstift",
+      "resistor" : "Widerstand?",
+      "readinitial" : "Anfangsstatus des Pins bei Implementierung/Neustart lesen?",
+      "type" : "Typ",
+      "initpin" : "Pin-Status initialisieren?",
+      "debounce" : "Debounce",
+      "freq" : "Frequenz",
+      "button" : "Knopf",
+      "pimouse" : "Pi-Maus",
+      "pikeyboard" : "Pi-Tastatur",
+      "left" : "Links",
+      "right" : "Rechts",
+      "middle" : "Mitte"
+    },
+    "resistor" : {
+      "none" : "keine",
+      "pullup" : "pullup",
+      "pulldown" : "Pulldown"
+    },
+    "digout" : "Digitale Ausgabe",
+    "pwmout" : "PWM-Ausgabe",
+    "servo" : "Servo-Ausgabe",
+    "initpin0" : "Anfangsstand des Pin-Niedrig (0)",
+    "initpin1" : "Anfangsebene von Pin-High (1)",
+    "left" : "links",
+    "right" : "rechts",
+    "middle" : "Mitte",
+    "any" : "beliebig",
+    "pinname" : "Pin",
+    "alreadyuse" : "bereits im Gebrauch",
+    "alreadyset" : "bereits festgelegt als",
+    "tip" : {
+      "pin" : "<b> Verwender Pins </b>: ",
+      "in" : "Tipp: Es wird nur die digitale Eingabe unterstützt. Die Eingabe muss 0 oder 1 sein.",
+      "dig" : "Tipp: Für die digitale Ausgabe muss der Wert 0 oder 1 sein.",
+      "pwm" : "Tipp: Für die PWM-Ausgabe muss der Wert zwischen 0 und 100 liegen; die Einstellung der Hochfrequenz kann mehr CPU beanspruchen als erwartet.",
+      "ser" : "<b> Tipp </b>: Für die Servo-Ausgabe muss ein Wert zwischen 0 und 100 eingegeben werden. 50 ist das Zentrum."
+    },
+    "types" : {
+      "digout" : "digitale Ausgabe",
+      "input" : "Eingabe",
+      "pullup" : "Eingabe mit Pull-up",
+      "pulldown" : "Eingabe mit Pull-down",
+      "pwmout" : "PWM-Ausgabe",
+      "servo" : "Servo-Ausgabe"
+    },
+    "status" : {
+      "stopped" : "Gestoppt",
+      "closed" : "geschlossen",
+      "not-running" : "nicht aktiv",
+      "not-available" : "nicht verfügbar",
+      "na" : "N/A: __Wert__"
+    },
+    "errors" : {
+      "ignorenode" : "Raspberry Pi-spezifischer Knotenset inaktiv",
+      "version" : "Abrufen der Version von Pi fehlgeschlagen",
+      "sawpitype" : "Saw-Pi-Typ",
+      "libnotfound" : "Pi RPi.GPIO-Python-Bibliothek nicht gefunden",
+      "alreadyset" : "GPIO-Stift __pin__ ist bereits als Typ festgelegt: __type__",
+      "invalidpin" : "Ungültiger GPIO-Pin",
+      "invalidinput" : "Ungültige Eingabe",
+      "needtobeexecutable" : "__command__ muss ausführbar sein",
+      "mustbeexecutable" : "nrgpio muss ausführbar sein",
+      "commandnotfound" : "Befehl 'nrgpio' nicht gefunden",
+      "commandnotexecutable" : "nrgpio-Befehl nicht ausführbar",
+      "error" : "Fehler: __error__",
+      "pythoncommandnotfound" : "Befehl 'nrpgio python' nicht aktiv"
+    }
+  },
+  "tail" : {
+    "tail" : "Tail",
+    "label" : {
+      "filename" : "Name der Datei",
+      "type" : "Dateityp",
+      "splitlines" : "Zeilen in \\n teilen?"
+    },
+    "action" : {
+      "text" : "Textdatei: gibt Zeichenfolge zurück",
+      "binary" : "Binärdatei: gibt Buffer zurück"
+    },
+    "errors" : {
+      "windowsnotsupport" : "Wird derzeit unter Windows nicht unterstützt."
+    }
+  },
+  "file" : {
+    "label" : {
+      "filename" : "Name der Datei",
+      "action" : "Aktion",
+      "addnewline" : "Neue Zeile (\\n) zu den einzelnen Nutzdaten hinzufügen?",
+      "createdir" : "Verzeichnis erstellen, wenn es nicht vorhanden ist?",
+      "outputas" : "Ausgabe",
+      "breakchunks" : "In Chunks aufbrechen",
+      "breaklines" : "In Linien aufbrechen",
+      "filelabel" : "Datei",
+      "sendError" : "Nachricht bei Fehler senden (traditioneller Modus)",
+      "deletelabel" : "__file__ löschen"
+    },
+    "action" : {
+      "append" : "an Datei anhängen",
+      "overwrite" : "Datei überschreiben",
+      "delete" : "Datei löschen"
+    },
+    "output" : {
+      "utf8" : "eine einzelne utf8-Zeichenfolge",
+      "buffer" : "ein einzelnes Bufferobjekt",
+      "lines" : "ein Nachricht pro Zeile",
+      "stream" : "ein Datenstrom von Buffers"
+    },
+    "status" : {
+      "wrotefile" : "in Datei geschrieben: __file__",
+      "deletedfile" : "gelöschte Datei: __file__",
+      "appendedfile" : "an Datei angefügt: __file__"
+    },
+    "errors" : {
+      "nofilename" : "Kein Dateiname angegeben",
+      "invaliddelete" : "Warnung: Ungültiges Löschen. Bitte verwenden Sie im Konfigurationsdialog eine bestimmte Löschoption.",
+      "deletefail" : "Fehler beim Löschen der Datei: __error__",
+      "writefail" : "Schreiben in Datei fehlgeschlagen: __error__",
+      "appendfail" : "Anhängen an Datei fehlgeschlagen: __error__",
+      "createfail" : "Fehler beim Erstellen der Datei: __error__"
+    },
+    "tip" : "Tipp: Der Dateiname muss ein absoluter Pfad sein. Andernfalls wird er relativ zum Arbeitsverzeichnis des Knotens-RED-Prozesses verwendet."
+  },
+  "split" : {
+    "split" : "aufteilen",
+    "intro" : "Trennen Sie  <code> msg.payload </code>  basierend auf dem Typ:",
+    "object" : "<b> Objekt </b>",
+    "objectSend" : "Eine Nachricht für jedes Schlüssel/Wert-Paar senden",
+    "strBuff" : "<b> Zeichenfolge </b> / <b> Buffer </b>",
+    "array" : "<b> Array </b>",
+    "splitUsing" : "Trennen mit",
+    "splitLength" : "Feste Länge von",
+    "stream" : "Behandeln als Strom von Nachrichten",
+    "addname" : "Schlüssel kopieren nach "
+  },
+  "join" : {
+    "join" : "Join",
+    "mode" : {
+      "mode" : "Modus",
+      "auto" : "Automatisch",
+      "merge" : "Sequenzen zusammenführen",
+      "reduce" : "Reihenfolge bestimmen",
+      "custom" : "Manuell"
+    },
+    "combine" : "Kombiniere alle",
+    "create" : "und erstelle",
+    "type" : {
+      "string" : "eine Zeichenfolge",
+      "array" : "ein Array",
+      "buffer" : "ein Buffer",
+      "object" : "ein Schlüssel/Wert-Objekt",
+      "merged" : "ein zusammengefasstes Objekt"
+    },
+    "using" : "mit dem Wert von",
+    "key" : "als Schlüssel",
+    "joinedUsing" : "verbunden mit",
+    "send" : "Senden Sie die Nachricht:",
+    "afterCount" : "nach einer Reihe von Nachrichtenteilen",
+    "count" : "Zähler",
+    "subsequent" : "und jede nachfolgende Nachricht.",
+    "afterTimeout" : "nach Zeitlimitüberschreitung von",
+    "seconds" : "Sekunden",
+    "complete" : "Nach einer Nachricht mit der gesetzten Eigenschaft <code>msg.complete</code>",
+    "tip" : "Dieser Modus setzt voraus, dass dieser Knoten entweder mit einem  <i> split </i> Knoten verbunden ist oder dass die empfangenen Nachrichten über eine ordnungsgemäß konfigurierte Eigenschaft  <code> msg.parts </code>  verfügen.",
+    "too-many" : "Zu viele anstehende Nachrichten im Verknüpfungsknoten",
+    "merge" : {
+      "topics-label" : "Zusammengemiedene Themen",
+      "topics" : "Themen",
+      "topic" : "Thema",
+      "on-change" : "Zusammengefügte Nachricht bei Ankunft eines neuen Themas senden"
+    },
+    "reduce" : {
+      "exp" : "Zusammenfassen durch",
+      "exp-value" : "Ausdruck",
+      "init" : "Anfangswert",
+      "right" : "In umgekehrter Reihenfolge auswerten (letzter auf den ersten)",
+      "fixup" : "Fix-up"
+    },
+    "errors" : {
+      "invalid-expr" : "Ungültiger JSONata-Ausdruck: __error__"
+    }
+  },
+  "sort" : {
+    "sort" : "sortieren",
+    "target" : "Sortieren",
+    "seq" : "Nachrichtenfolge",
+    "key" : "Schlüssel",
+    "elem" : "Elementwert",
+    "order" : "Sortierung",
+    "ascending" : "aufsteigend",
+    "descending" : "absteigend",
+    "as-number" : "als Zahl",
+    "invalid-exp" : "Ungültiger JSONata-Ausdruck in Sortierknoten: __message__",
+    "too-many" : "Zu viele anstehende Nachrichten in Sortierknoten",
+    "clear" : "Anstehende Nachricht in Sortierknoten löschen"
+  },
+  "batch" : {
+    "batch" : "Batch",
+    "mode" : {
+      "label" : "Modus",
+      "num-msgs" : "Gruppieren nach Anzahl der Nachrichten",
+      "interval" : "Gruppieren nach Zeitintervall",
+      "concat" : "Sequenzen katalogisieren"
+    },
+    "count" : {
+      "label" : "Anzahl der Nachrichten",
+      "overlap" : "Überlappung",
+      "count" : "Zähler",
+      "invalid" : "Ungültige Anzahl und Überlappung"
+    },
+    "interval" : {
+      "label" : "Intervall",
+      "seconds" : "Sekunden",
+      "empty" : "Leere Nachricht senden, wenn keine Nachricht eingeht"
+    },
+    "concat" : {
+      "topics-label" : "Topics",
+      "topic" : "Thema"
+    },
+    "too-many" : "Zu viele anstehende Nachrichten im Stapelknoten",
+    "unexpected" : "Unerwarteter Modus",
+    "no-parts" : "Keine Teileeigenschaft in Nachricht"
+  }
+}

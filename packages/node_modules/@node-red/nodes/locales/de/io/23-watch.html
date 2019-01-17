@@ -1,0 +1,29 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="watch">
+    <p>Überwacht ein Verzeichnis oder eine Datei auf Änderungen.</p>
+    <p>Es kann eine kommagetrennte Liste von Verzeichnissen und/oder Dateien eingeben werden. 
+      Es müssen Anführungszeichen "...." um alle Einträge gesetzt werden, die Leerzeichen enthalten.</p>
+    <p>Unter Windows muss in allen Verzeichnisnamen doppelte Backslashes \\\ verwendet werden.</p>
+    <p>Der vollständige Dateiname der tatsächlich geänderten Datei wird in <code>msg.payload</code> und <code>msg.filename</code> eingetragen, 
+      während eine stringifizierte Version der Überwachungsliste in <code>msg.topic</code> zurückgegeben wird.</p>
+    <p><code>msg.file</code> enthält nur den kurzen Dateinamen der geänderten Datei. <code>msg.type</code> hat den Typ des geänderten  Elements, 
+      normalerweise <i>file</i> oder <i>directory</i>, während <code>msg.size</code> die Dateigröße in Bytes enthält.</p>
+    <p>Natürlich ist unter Linux <i>alles</i> eine Datei und kann somit beobachtet werden...</p>
+    <p><b>Note: </b>Das Verzeichnis oder die Datei muss vorhanden sein, um beobachtet zu werden. Wenn die Datei
+      oder das Verzeichnis gelöscht wird, kann es nicht mehr überwacht werden, auch wenn es wieder neu erstellt wird.</p>
+</script>
