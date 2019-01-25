@@ -386,7 +386,7 @@ describe('Subflow', function() {
         });
     });
     describe("#handleStatus",function() {
-        it("passes a status event to the subflow's parent tab status node",function(done) {
+        it("passes a status event to the subflow's parent tab status node - all scope",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -419,10 +419,49 @@ describe('Subflow', function() {
                 done();
             });
         });
+
+        it("passes a status event to the subflow's parent tab status node - targetted scope",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",type:"testStatus",name:"test-status-node","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",scope:["2"],wires:[]}
+            ]);
+            var parentFlowStatusCalled = false;
+
+            var flow = Flow.create({handleStatus:() => { parentFlowStatusCalled = true} },config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({payload:"test"});
+
+            parentFlowStatusCalled.should.be.false();
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","test status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("type","testStatus");
+            statusMessage.status.source.should.have.a.property("name","test-status-node");
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+
     });
 
     describe("#handleError",function() {
-        it("passes an error event to the subflow's parent tab catch node",function(done) {
+        it("passes an error event to the subflow's parent tab catch node - all scope",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -453,8 +492,45 @@ describe('Subflow', function() {
             flow.stop().then(function() {
                 done();
             });
+        });
+
+        it("passes an error event to the subflow's parent tab catch node - targetted scope",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"sf1",type:"subflow","name":"Subflow 2","info":"",
+                    "in":[{"wires":[{"id":"sf1-1"}]}],"out":[{"wires":[{"id":"sf1-1","port":0}]}]},
+                {id:"sf1-1",name:"test-error-node",type:"testError","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"catch",scope:["2"],wires:[]}
+            ]);
+            var parentFlowErrorCalled = false;
+            var flow = Flow.create({handleError:() => { parentFlowErrorCalled = true} },config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({payload:"test"});
+
+            parentFlowErrorCalled.should.be.false();
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","test error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("type","testError");
+            statusMessage.error.source.should.have.a.property("name","test-error-node");
+
+            flow.stop().then(function() {
+                done();
+            });
 
         });
+
     });
 
 });
