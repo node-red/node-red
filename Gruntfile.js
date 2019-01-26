@@ -15,6 +15,7 @@
  **/
 
 var path = require("path");
+var fs = require("fs-extra");
 
 module.exports = function(grunt) {
 
@@ -553,6 +554,13 @@ module.exports = function(grunt) {
         });
     });
 
+    grunt.registerTask('verifyUiTestDependencies', function() {
+        if (!fs.existsSync(path.join("node_modules", "chromedriver"))) {
+            grunt.fail.fatal('You need to run "npm install chromedriver@2" before running UI test.');
+            return false;
+        }
+    });
+
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -573,7 +581,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test-ui',
         'Builds editor content then runs unit tests on editor ui',
-        ['build','jshint:editor','webdriver:all']);
+        ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',
