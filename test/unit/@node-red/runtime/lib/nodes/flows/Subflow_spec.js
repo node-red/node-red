@@ -67,10 +67,12 @@ describe('Subflow', function() {
         this.foo = n.foo;
         this.handled = 0;
         this.stopped = false;
+        this.received = null;
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
             // console.log(this.id,msg.payload);
             node.handled++;
+            node.received = msg.payload;
             node.send(msg);
         });
         this.on('close',function() {
@@ -170,6 +172,34 @@ describe('Subflow', function() {
     }
     util.inherits(TestAsyncNode,Node);
 
+    var TestEnvNode = function(n) {
+        Node.call(this,n);
+        this._index = createCount++;
+        this.scope = n.scope;
+        this.foo = n.foo;
+        var node = this;
+        this.stopped = false;
+        this.received = null;
+        currentNodes[node.id] = node;
+        this.on('input',function(msg) {
+            var val = node.getenv("__KEY__");
+            node.received = val;
+            node.send({payload: val});
+        });
+        this.on('close',function() {
+            node.stopped = true;
+            stoppedNodes[node.id] = node;
+            delete currentNodes[node.id];
+        });
+        this.__updateWires = this.updateWires;
+        this.updateWires = function(newWires) {
+            rewiredNodes[node.id] = node;
+            node.newWires = newWires;
+            node.__updateWires(newWires);
+        };
+    }
+    util.inherits(TestEnvNode,Node);
+
     before(function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
             if (type=="test") {
@@ -178,6 +208,8 @@ describe('Subflow', function() {
                 return TestErrorNode;
             } else if (type=="testStatus"){
                 return TestStatusNode;
+            } else if (type=="testEnv"){
+                return TestEnvNode;
             } else {
                 return TestAsyncNode;
             }
@@ -533,4 +565,128 @@ describe('Subflow', function() {
 
     });
 
+    describe("#env var", function() {
+        it("can access process env var", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
+                {id:"sf1",type:"subflow",name:"Subflow 2",info:"",
+                 "in":[ {wires:[{id:"sf1-1"}]} ],
+                 "out":[ {wires:[{id:"sf1-2",port:0}]} ]},
+                {id:"sf1-1",type:"test",z:"sf1",foo:"sf1.1",x:166,y:99,wires:[["sf1-2"]]},
+                {id:"sf1-2",type:"testEnv",z:"sf1",foo:"sf1-cn",x:166,y:99,wires:[[]]}
+            ]);
+            var flow = Flow.create({
+                getSetting: k=> process.env[k],
+                handleError: (a,b,c) => { console.log(a,b,c); }
+            },config,config.flows["t1"]);
+
+            flow.start();
+
+            process.env["__KEY__"] = "__VAL__";
+
+            currentNodes["1"].receive({payload: "test"});
+            currentNodes["3"].should.have.a.property("received", "__VAL__");
+            
+            flow.stop().then(function() {
+                done();
+            });
+        });
+
+        it("can access subflow env var", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
+                {id:"sf1",type:"subflow",name:"Subflow 2",info:"",
+                 "in":[ {wires:[{id:"sf1-1"}]} ],
+                 "out":[ {wires:[{id:"sf1-2",port:0}]} ]},
+                {id:"sf1-1",type:"test",z:"sf1",foo:"sf1.1",x:166,y:99,wires:[["sf1-2"]]},
+                {id:"sf1-2",type:"testEnv",z:"sf1",foo:"sf1.2",x:166,y:99,wires:[[]]}
+            ]);
+            var flow = Flow.create({
+                getSetting: k=> process.env[k],
+                handleError: (a,b,c) => { console.log(a,b,c); }
+            },config,config.flows["t1"]);
+
+            flow.start();
+
+            var testenv_node = null;
+            for (var n in currentNodes) {
+                var node = currentNodes[n];
+                if (node.type === "testEnv") {
+                    testenv_node = node;
+                    break;
+                }
+            }
+            process.env["__KEY__"] = "__VAL0__";
+            testenv_node.setenv("__KEY__", "__VAL1__");
+            
+            currentNodes["1"].receive({payload: "test"});
+            currentNodes["3"].should.have.a.property("received", "__VAL1__");
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
+
+        it("can access nested subflow env var", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"t1.1",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"t1.3",wires:[]},
+                {id:"sf1",type:"subflow",name:"Subflow 1",info:"",
+                 in:[{wires:[{id:"sf1-1"}]}],
+                 out:[{wires:[{id:"sf1-2",port:0}]}]},
+                {id:"sf2",type:"subflow",name:"Subflow 2",info:"",
+                 in:[{wires:[{id:"sf2-1"}]}],
+                 out:[{wires:[{id:"sf2-2",port:0}]}]},
+                {id:"sf1-1",type:"test",z:"sf1",foo:"sf1.1",x:166,y:99,wires:[["sf1-2"]]},
+                {id:"sf1-2",type:"subflow:sf2",z:"sf1",x:166,y:99,wires:[[]]},
+                {id:"sf2-1",type:"test",z:"sf2",foo:"sf2.1",x:166,y:99,wires:[["sf2-2"]]},
+                {id:"sf2-2",type:"testEnv",z:"sf2",foo:"sf2.2",x:166,y:99,wires:[[]]},
+            ]);
+            var flow = Flow.create({
+                getSetting: k=> process.env[k],
+                handleError: (a,b,c) => { console.log(a,b,c); }
+            },config,config.flows["t1"]);
+
+            flow.start();
+
+            var node_sf1_1 = null;
+            var node_sf2_1 = null;
+            var testenv_node = null;
+            for (var n in currentNodes) {
+                var node = currentNodes[n];
+                if (node.foo === "sf1.1") {
+                    node_sf1_1 = node;
+                }
+                if (node.foo === "sf2.1") {
+                    node_sf2_1 = node;
+                }
+            }
+
+            process.env["__KEY__"] = "__VAL0__";
+            currentNodes["1"].receive({payload: "test"});
+            currentNodes["3"].should.have.a.property("received", "__VAL0__");
+
+            node_sf1_1.setenv("__KEY__", "__VAL1__");
+            currentNodes["1"].receive({payload: "test"});
+            currentNodes["3"].should.have.a.property("received", "__VAL1__");
+
+            node_sf2_1.setenv("__KEY__", "__VAL2__");
+            currentNodes["1"].receive({payload: "test"});
+            currentNodes["3"].should.have.a.property("received", "__VAL2__");
+
+            flow.stop().then(function() {
+                done();
+            });
+        });
+        
+    });
+    
 });
