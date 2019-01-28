@@ -24,7 +24,7 @@
         }
     ],
     "dependencies": {
-        "ajv": "6.6.2",
+        "ajv": "6.7.0",
         "basic-auth": "2.0.1",
         "bcryptjs": "2.4.3",
         "body-parser": "1.18.3",
@@ -56,7 +56,7 @@
         "node-red-node-feedparser": "^0.1.14",
         "node-red-node-rbe": "0.2.*",
         "node-red-node-sentiment": "^0.1.0",
-        "node-red-node-tail": "^0.0.1",
+        "node-red-node-tail": "^0.0.2",
         "node-red-node-twitter": "^1.1.0",
         "nopt": "4.0.1",
         "oauth2orize": "1.11.0",
@@ -67,10 +67,9 @@
         "raw-body": "2.3.3",
         "request": "2.88.0",
         "semver": "5.6.0",
-        "sentiment": "2.1.0",
         "uglify-js": "3.4.9",
         "when": "3.7.8",
-        "ws": "6.1.2",
+        "ws": "6.1.3",
         "xml2js": "0.4.19"
     },
     "optionalDependencies": {
@@ -106,7 +105,7 @@
         "should": "^8.4.0",
         "sinon": "1.17.7",
         "stoppable": "^1.1.0",
-        "supertest": "3.3.0",
+        "supertest": "3.4.2",
         "wdio-chromedriver-service": "^0.1.5",
         "wdio-mocha-framework": "^0.6.4",
         "wdio-spec-reporter": "^0.1.5",
