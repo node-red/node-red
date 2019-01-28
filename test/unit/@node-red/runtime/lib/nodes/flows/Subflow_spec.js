@@ -182,7 +182,8 @@ describe('Subflow', function() {
         this.received = null;
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
-            var val = node.getenv("__KEY__");
+            var flow = node._flow;
+            var val = flow.getSetting("__KEY__");
             node.received = val;
             node.send({payload: val});
         });
@@ -566,6 +567,19 @@ describe('Subflow', function() {
     });
 
     describe("#env var", function() {
+        function setEnv(node, key, val) {
+            var flow = node._flow;
+            if (flow) {
+                var sfi = flow.subflowInstance;
+                sfi.env = [
+                    {
+                        name: key,
+                        value: val
+                    }
+                ];
+            }
+        }
+
         it("can access process env var", function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
@@ -623,7 +637,7 @@ describe('Subflow', function() {
                 }
             }
             process.env["__KEY__"] = "__VAL0__";
-            testenv_node.setenv("__KEY__", "__VAL1__");
+            setEnv(testenv_node, "__KEY__", "__VAL1__");
             
             currentNodes["1"].receive({payload: "test"});
             currentNodes["3"].should.have.a.property("received", "__VAL1__");
@@ -674,11 +688,11 @@ describe('Subflow', function() {
             currentNodes["1"].receive({payload: "test"});
             currentNodes["3"].should.have.a.property("received", "__VAL0__");
 
-            node_sf1_1.setenv("__KEY__", "__VAL1__");
+            setEnv(node_sf1_1, "__KEY__", "__VAL1__");
             currentNodes["1"].receive({payload: "test"});
             currentNodes["3"].should.have.a.property("received", "__VAL1__");
 
-            node_sf2_1.setenv("__KEY__", "__VAL2__");
+            setEnv(node_sf2_1, "__KEY__", "__VAL2__");
             currentNodes["1"].receive({payload: "test"});
             currentNodes["3"].should.have.a.property("received", "__VAL2__");
 

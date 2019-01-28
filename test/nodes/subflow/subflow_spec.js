@@ -176,7 +176,7 @@ describe('subflow', function() {
             n1.receive({payload:"foo"});
         });
     });
-
+    
     it('should access env var of subflow instance', function(done) {
         var flow = [
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
