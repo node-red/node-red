@@ -2,7 +2,31 @@
 
 Runtime
 
- - Bump JSONata to 1.6.5
+ - Bump JSONata to 1.6.4
+ - Add Flow.getSetting for resolving env-var properties
+ - Refactor Subflow logic into own class
+ - Restore RED.auth to node-red module api
+ - Tidy up when usage in Flow and Node
+
+Editor
+
+ - German translation
+ - Change default dropdown appearance and sidebar tab menu handling
+ - Handle multiple-select box when nothing selected Fixes #2021
+ - Handle i18n properly when key is a valid sub-identifier Fixes #2028
+ - Avoid duplicate links when missing node type installed Fixes #2032
+ - Add View Tools
+ - Don't collapse version control header when clicking refresh
+ - Add fast entry via keyboard for string of nodes
+ - Check for undeployed change before showing open project dialog
+ - Add placeholder node when in quick-add mode
+ - Move nodes to top-left corner when converting to subflow
+
+Nodes
+
+ - Debug: Allow debug edit expression to be sent to status
+ - WebSocket: Fix missing translated help
+
 
 #### 0.20.0-beta.3: Beta Release
 
