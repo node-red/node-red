@@ -228,6 +228,73 @@ describe('subflow', function() {
         });
     });
 
+    it('should access last env var with same name', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:""},
+            {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
+             env: [
+                 {name: "K", type: "T", value: "V0",
+                  info: {
+                      name: "K",
+                      label: "",
+                      value: "V1",
+                      type: "T",
+                      target_type: "env var",
+                      "target": "K"
+                  }},
+                 {name: "X", type: "T", value: "V",
+                  info: {
+                      name: "X",
+                      label: "",
+                      value: "V",
+                      type: "T",
+                      target_type: "env var",
+                      "target": "X"
+                  }},
+                 {name: "K", type: "T", value: "V1",
+                  info: {
+                      name: "K",
+                      label: "",
+                      value: "V1",
+                      type: "T",
+                      target_type: "env var",
+                      "target": "K"
+                  }},
+             ],
+             wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"",
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.V = env.get('K'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("V", "V1");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
     it('should overwrite env var of subflow template by env var of subflow instance', function(done) {
         var flow = [
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
