@@ -259,7 +259,7 @@ describe('subflow', function() {
                       type: "T",
                       target_type: "env var",
                       "target": "K"
-                  }},
+                  }}
              ],
              wires:[["n2"]]},
             {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
@@ -284,6 +284,85 @@ describe('subflow', function() {
             n2.on("input", function(msg) {
                 try {
                     msg.should.have.property("V", "V1");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
+    it('should access typed value of env var', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:""},
+            {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
+             env: [
+                 {name: "KS", type: "str", value: "STR",
+                  info: {
+                      name: "KS",
+                      label: "",
+                      value: "STR",
+                      type: "str",
+                      target_type: "env var",
+                      target: "KS"
+                  }},
+                 {name: "KN", type: "num", value: "100",
+                  info: {
+                      name: "KN",
+                      label: "",
+                      value: "100",
+                      type: "num",
+                      target_type: "env var",
+                      target: "KN"
+                  }},
+                 {name: "KB", type: "bool", value: "true",
+                  info: {
+                      name: "KB",
+                      label: "",
+                      value: "true",
+                      type: "bool",
+                      target_type: "env var",
+                      target: "KB"
+                  }},
+                 {name: "KJ", type: "json", value: "[1,2,3]",
+                  info: {
+                      name: "KJ",
+                      label: "",
+                      value: "[1,2,3]",
+                      type: "json",
+                      target_type: "env var",
+                      target: "KJ"
+                  }},
+             ],
+             wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"",
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.VS = env.get('KS'); msg.VN = env.get('KN'); msg.VB = env.get('KB'); msg.VJ = env.get('KJ'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("VS", "STR");
+                    msg.should.have.property("VN", 100);
+                    msg.should.have.property("VB", true);
+                    msg.should.have.property("VJ", [1,2,3]);
                     done();
                 }
                 catch (e) {
