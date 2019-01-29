@@ -413,6 +413,69 @@ describe('Flow', function() {
         });
 
     });
+    describe('#getNode',function() {
+        it("gets a node known to the flow",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(4);
+
+            flow.getNode('1').should.have.a.property('id','1');
+
+            flow.stop().then(() => { done() });
+        });
+
+        it("passes to parent if node not known locally",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"}
+            ]);
+            var flow = Flow.create({
+                getNode: id => { return {id:id}}
+            },config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(4);
+
+            flow.getNode('1').should.have.a.property('id','1');
+
+            flow.getNode('parentNode').should.have.a.property('id','parentNode');
+
+
+            flow.stop().then(() => { done() });
+        });
+
+        it("does not pass to parent if cancelBubble set",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"}
+            ]);
+            var flow = Flow.create({
+                getNode: id => { return {id:id}}
+            },config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(4);
+
+            flow.getNode('1').should.have.a.property('id','1');
+
+            should.not.exist(flow.getNode('parentNode',true));
+            flow.stop().then(() => { done() });
+        });
+    });
 
     describe("#handleStatus",function() {
         it("passes a status event to the adjacent status node",function(done) {
