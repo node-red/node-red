@@ -574,6 +574,7 @@ describe('Subflow', function() {
                 sfi.env = [
                     {
                         name: key,
+                        type: "str",
                         value: val
                     }
                 ];
