@@ -567,17 +567,19 @@ describe('Subflow', function() {
     });
 
     describe("#env var", function() {
+        // should be changed according to internal env var representation
         function setEnv(node, key, val) {
             var flow = node._flow;
             if (flow) {
-                var sfi = flow.subflowInstance;
-                sfi.env = [
-                    {
+                var env = flow.env;
+                if (!env) {
+                    env = flow.env = {};
+                }
+                env[key] = {
                         name: key,
                         type: "str",
                         value: val
-                    }
-                ];
+                };
             }
         }
 
