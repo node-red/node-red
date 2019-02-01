@@ -1106,27 +1106,27 @@ describe('HTTP Request Node', function() {
                         done(err);
                     }
                 });
-                n1.receive({payload:"foo", cookies:{data:{value:value}}});
+                n1.receive({payload:"foo", cookies:{data:{value:value, encode:true}}});
             });
         });
 
-        it('should encode cookie by specified function', function(done) {
+        it('should not encode cookie when encode option is false', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
-                var value = ',/?:@ &+$#';
+                var value = '!#$%&\'()*+-./:<>?@[]^_`{|}~';
                 n2.on("input", function(msg) {
                     try {
-                        msg.payload.should.have.property('data',encodeURI(value));
+                        msg.payload.should.have.property('data',value);
                         msg.should.have.property('statusCode',200);
                         done();
                     } catch(err) {
                         done(err);
                     }
                 });
-                n1.receive({payload:"foo", cookies:{data:{value:value,encode:encodeURI}}});
+                n1.receive({payload:"foo", cookies:{data:{value:value, encode:false}}});
             });
         });
 
