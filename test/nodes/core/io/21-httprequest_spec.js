@@ -218,6 +218,12 @@ describe('HTTP Request Node', function() {
             res.cookie('redirectReturn','return1');
             res.status(200).end();
         });
+        testApp.get('/getQueryParams', function(req,res) {
+            res.json({
+                query:req.query,
+                url: req.originalUrl
+            });
+        })
         startServer(function(err) {
             if (err) {
                 done(err);
@@ -235,7 +241,6 @@ describe('HTTP Request Node', function() {
             });
         });
     });
-
 
     beforeEach(function() {
         preEnvHttpProxyLowerCase = process.env.http_proxy;
@@ -970,7 +975,31 @@ describe('HTTP Request Node', function() {
             });
         });
 
+
+        it('should append query params to url - obj', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",paytoqs:true,ret:"obj",url:getTestURL('/getQueryParams')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload',{
+                            query:{a:'1',b:'2',c:'3'},
+                            url: '/getQueryParams?a=1&b=2&c=3'
+                        });
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:{a:1,b:2,c:3}});
+            });
+        });
     });
+
     describe('HTTP header', function() {
         it('should receive cookie', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/setCookie')},
