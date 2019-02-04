@@ -120,7 +120,7 @@ describe('HTTP Request Node', function() {
     before(function(done) {
         testApp = express();
         testApp.use(bodyParser.raw({type:"*/*"}));
-        testApp.use(cookieParser());
+        testApp.use(cookieParser(undefined,{decode:String}));
         testApp.get('/statusCode204', function(req,res) { res.status(204).end();});
         testApp.get('/text', function(req, res){ res.send('hello'); });
         testApp.get('/redirectToText', function(req, res){ res.status(302).set('Location', getTestURL('/text')).end(); });
@@ -138,8 +138,7 @@ describe('HTTP Request Node', function() {
             }, 50);
         });
         testApp.get('/checkCookie', function(req, res){
-            var value = req.cookies.data;
-            res.send(value);
+            res.send(req.cookies);
         });
         testApp.get('/setCookie', function(req, res){
             res.cookie('data','hello');
@@ -1001,7 +1000,7 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload','abc');
+                        msg.payload.should.have.property('data','abc');
                         msg.should.have.property('statusCode',200);
                         done();
                     } catch(err) {
@@ -1009,6 +1008,26 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:"foo", cookies:{data:'abc'}});
+            });
+        });
+
+        it('should send multiple cookies with string', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data','abc');
+                        msg.payload.should.have.property('foo','bar');
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{data:'abc',foo:'bar'}});
             });
         });
 
@@ -1020,7 +1039,7 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload','abc');
+                        msg.payload.should.have.property('data','abc');
                         msg.should.have.property('statusCode',200);
                         done();
                     } catch(err) {
@@ -1028,6 +1047,86 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:"foo", cookies:{data:{value:'abc'}}});
+            });
+        });
+
+        it('should send multiple cookies with object data', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data','abc');
+                        msg.payload.should.have.property('foo','bar');
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{data:{value:'abc'},foo:{value:'bar'}}});
+            });
+        });
+
+        it('should encode cookie value', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var value = ';,/?:@ &=+$#';
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data',encodeURIComponent(value));
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{data:value}});
+            });
+        });
+
+        it('should encode cookie object', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var value = ';,/?:@ &=+$#';
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data',encodeURIComponent(value));
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{data:{value:value, encode:true}}});
+            });
+        });
+
+        it('should not encode cookie when encode option is false', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var value = '!#$%&\'()*+-./:<>?@[]^_`{|}~';
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data',value);
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{data:{value:value, encode:false}}});
             });
         });
 
@@ -1039,7 +1138,7 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload','abc');
+                        msg.payload.should.have.property('data','abc');
                         msg.should.have.property('statusCode',200);
                         done();
                     } catch(err) {
@@ -1047,6 +1146,26 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:"foo", cookies:{boo:'123'}, headers:{'cookie':'data=abc'}});
+            });
+        });
+
+        it('should send multiple cookies by msg.headers', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/checkCookie')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property('data','abc');
+                        msg.payload.should.have.property('foo','bar');
+                        msg.should.have.property('statusCode',200);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", cookies:{boo:'123'}, headers:{'cookie':'data=abc; foo=bar;'}});
             });
         });
 
