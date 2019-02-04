@@ -298,7 +298,6 @@ describe('Subflow', function() {
                 done();
             });
         });
-
         it("instantiates a subflow inside a subflow and stops it",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
@@ -452,7 +451,6 @@ describe('Subflow', function() {
                 done();
             });
         });
-
         it("passes a status event to the subflow's parent tab status node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
@@ -490,8 +488,163 @@ describe('Subflow', function() {
                 done();
             });
         });
-
     });
+
+    describe("status node", function() {
+        it("emits a status event when a message is passed to a subflow-status node - msg.payload as string", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {
+                    id:"sf1",
+                    type:"subflow",
+                    name:"Subflow 2",
+                    info:"",
+                    in:[{wires:[{id:"sf1-1"}]}],
+                    out:[{wires:[{id:"sf1-1",port:0}]}],
+                    status:{wires:[{id:"sf1-1", port:0}]}
+                },
+                {id:"sf1-1",type:"test",name:"test","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({payload:"test-payload"});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","test-payload");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","2");
+            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+        it("emits a status event when a message is passed to a subflow-status node - msg.payload as status obj", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {
+                    id:"sf1",
+                    type:"subflow",
+                    name:"Subflow 2",
+                    info:"",
+                    in:[{wires:[{id:"sf1-1"}]}],
+                    out:[{wires:[{id:"sf1-1",port:0}]}],
+                    status:{wires:[{id:"sf1-1", port:0}]}
+                },
+                {id:"sf1-1",type:"test",name:"test","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({payload:{text:"payload-obj"}});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","payload-obj");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","2");
+            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+        it("emits a status event when a message is passed to a subflow-status node - msg.status", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {
+                    id:"sf1",
+                    type:"subflow",
+                    name:"Subflow 2",
+                    info:"",
+                    in:[{wires:[{id:"sf1-1"}]}],
+                    out:[{wires:[{id:"sf1-1",port:0}]}],
+                    status:{wires:[{id:"sf1-1", port:0}]}
+                },
+                {id:"sf1-1",type:"test",name:"test","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({status:{text:"status-obj"}});
+
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","status-obj");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","2");
+            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+        it("does not emit a regular status event if it contains a subflow-status node", function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"subflow:sf1",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {
+                    id:"sf1",
+                    type:"subflow",
+                    name:"Subflow 2",
+                    info:"",
+                    in:[{wires:[{id:"sf1-1"}]}],
+                    out:[{wires:[{id:"sf1-1",port:0}]}],
+                    status:{wires:[]}
+                },
+                {id:"sf1-1",type:"testStatus",name:"test-status-node","z":"sf1",x:166,y:99,"wires":[[]]},
+                {id:"sn",x:10,y:10,z:"t1",type:"status",foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].receive({payload:"test-payload"});
+
+            currentNodes["sn"].should.have.a.property("handled",0);
+
+            flow.stop().then(function() {
+
+                done();
+            });
+        });
+    })
 
     describe("#handleError",function() {
         it("passes an error event to the subflow's parent tab catch node - all scope",function(done) {
@@ -526,7 +679,6 @@ describe('Subflow', function() {
                 done();
             });
         });
-
         it("passes an error event to the subflow's parent tab catch node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
@@ -563,7 +715,6 @@ describe('Subflow', function() {
             });
 
         });
-
     });
 
     describe("#env var", function() {
