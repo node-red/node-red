@@ -226,33 +226,31 @@ describe('context', function() {
         })
 
         describe("$parent", function() {
-            it('should access $parent', function() {
+            it('should get undefined for $parent without key', function() {
                 var context0 = Context.get("0","flowA");
                 var context1 = Context.get("1","flowB", context0);
                 var parent = context1.get("$parent");
-                parent.should.equal(context0);
+                should.equal(parent, undefined);
             });
 
             it('should get undefined for $parent of root', function() {
                 var context0 = Context.get("0","flowA");
                 var context1 = Context.get("1","flowB", context0);
-                var parent = context1.get("$parent.$parent");
+                var parent = context1.get("$parent.$parent.K");
                 should.equal(parent, undefined);
             });
 
-            it('should get $parent', function() {
+            it('should get value in $parent', function() {
                 var context0 = Context.get("0","flowA");
                 var context1 = Context.get("1","flowB", context0);
-                var parent = context1.get("$parent");
                 context0.set("K", "v");
                 var v = context1.get("$parent.K");
                 should.equal(v, "v");
             });
 
-            it('should set $parent', function() {
+            it('should set value in $parent', function() {
                 var context0 = Context.get("0","flowA");
                 var context1 = Context.get("1","flowB", context0);
-                var parent = context1.get("$parent");
                 context1.set("$parent.K", "v");
                 var v = context0.get("K");
                 should.equal(v, "v");
@@ -269,7 +267,6 @@ describe('context', function() {
                 keys[0].should.equal("K1");
             });
         });
-
 
     });
 
