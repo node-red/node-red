@@ -21,6 +21,7 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,n);
         var node = this;
         this.scope = n.scope;
+        this.uncaught = n.uncaught;
         this.on("input",function(msg) {
             this.send(msg);
         });

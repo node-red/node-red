@@ -113,6 +113,7 @@ describe('Flow', function() {
         Node.call(this,n);
         var node = this;
         this.scope = n.scope;
+        this.uncaught = n.uncaught;
         this.foo = n.foo;
         this.handled = 0;
         this.messages = [];
@@ -159,6 +160,7 @@ describe('Flow', function() {
             Object.keys(flow.getActiveNodes()).length.should.equal(0);
         });
     });
+
     describe('#start',function() {
         it("instantiates an initial configuration and stops it",function(done) {
             var config = flowUtils.parseConfig([
@@ -413,6 +415,7 @@ describe('Flow', function() {
         });
 
     });
+
     describe('#getNode',function() {
         it("gets a node known to the flow",function(done) {
             var config = flowUtils.parseConfig([
@@ -560,7 +563,6 @@ describe('Flow', function() {
 
     });
 
-
     describe("#handleError",function() {
         it("passes an error event to the adjacent catch node",function(done) {
             var config = flowUtils.parseConfig([
@@ -569,14 +571,15 @@ describe('Flow', function() {
                 {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sn",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]},
-                {id:"sn2",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]}
+                {id:"sn2",x:10,y:10,z:"t1",type:"catch",foo:"a",wires:[]},
+                {id:"sn3",x:10,y:10,z:"t1",type:"catch",uncaught:true,wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
             flow.start();
 
             var activeNodes = flow.getActiveNodes();
-            Object.keys(activeNodes).should.have.length(5);
+            Object.keys(activeNodes).should.have.length(6);
 
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
@@ -601,6 +604,9 @@ describe('Flow', function() {
             statusMessage.error.source.should.have.a.property("type","test");
             statusMessage.error.source.should.have.a.property("name","a");
 
+            // Node sn3 has uncaught:true - so should not get called
+            currentNodes["sn3"].should.have.a.property("handled",0);
+
 
             flow.stop().then(function() {
                 done();
@@ -613,14 +619,16 @@ describe('Flow', function() {
                 {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
                 {id:"sn",x:10,y:10,z:"t1",type:"catch",scope:["2"],foo:"a",wires:[]},
-                {id:"sn2",x:10,y:10,z:"t1",type:"catch",scope:["1"],foo:"a",wires:[]}
+                {id:"sn2",x:10,y:10,z:"t1",type:"catch",scope:["1"],foo:"a",wires:[]},
+                {id:"sn3",x:10,y:10,z:"t1",type:"catch",uncaught:true,wires:[]},
+                {id:"sn4",x:10,y:10,z:"t1",type:"catch",uncaught:true,wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
             flow.start();
 
             var activeNodes = flow.getActiveNodes();
-            Object.keys(activeNodes).should.have.length(5);
+            Object.keys(activeNodes).should.have.length(7);
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
 
@@ -635,13 +643,29 @@ describe('Flow', function() {
             statusMessage.error.source.should.have.a.property("type","test");
             statusMessage.error.source.should.have.a.property("name","a");
 
+            // Node sn3/4 have uncaught:true - so should not get called
+            currentNodes["sn3"].should.have.a.property("handled",0);
+            currentNodes["sn4"].should.have.a.property("handled",0);
+
+            // Inject error that sn1/2 will ignore - so should get picked up by sn3
+            flow.handleError(config.flows["t1"].nodes["3"],"my-error-2",{a:"foo-2"});
+
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            currentNodes["sn4"].should.have.a.property("handled",1);
+
+            statusMessage = currentNodes["sn3"].messages[0];
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error-2");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","3");
+            statusMessage.error.source.should.have.a.property("type","test");
 
             flow.stop().then(function() {
                 done();
             });
         });
-
-
         it("moves any existing error object sideways",function(done){
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
