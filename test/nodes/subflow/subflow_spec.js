@@ -166,7 +166,7 @@ describe('subflow', function() {
             n1.receive({payload:"foo"});
         });
     });
-    
+
     it('should access env var of subflow instance', function(done) {
         var flow = [
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
@@ -256,13 +256,11 @@ describe('subflow', function() {
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
             {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
              env: [
-                 {name: "KS", type: "str", value: "STR"},
                  {name: "KN", type: "num", value: "100"},
                  {name: "KB", type: "bool", value: "true"},
                  {name: "KJ", type: "json", value: "[1,2,3]"},
                  {name: "Kb", type: "bin", value: "[65,65]"},
-                 {name: "KR", type: "re", value: "[A-Z]"},
-                 {name: "KD", type: "date", value: ""}
+                 {name: "Ke", type: "env", value: "KS"}
              ],
              wires:[["n2"]]},
             {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
@@ -275,10 +273,13 @@ describe('subflow', function() {
              out:[{
                  x:10, y:10,
                  wires:[ {id:"s1-n1", port:0} ]
-             }]
+             }],
+             env: [
+                 {name: "KS", type: "str", value: "STR"}
+             ]
             },
             {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
-             func:"msg.VS = env.get('KS'); msg.VN = env.get('KN'); msg.VB = env.get('KB'); msg.VJ = env.get('KJ'); msg.Vb = env.get('Kb'); msg.VR = env.get('KR'); msg.VD = env.get('KD'); return msg;",
+             func:"msg.VE = env.get('Ke'); msg.VS = env.get('KS'); msg.VN = env.get('KN'); msg.VB = env.get('KB'); msg.VJ = env.get('KJ'); msg.Vb = env.get('Kb'); return msg;",
              wires:[]}
         ];
         helper.load(functionNode, flow, function() {
@@ -292,14 +293,10 @@ describe('subflow', function() {
                     msg.should.have.property("VJ", [1,2,3]);
                     msg.should.have.property("Vb");
                     should.ok(msg.Vb instanceof Buffer);
-                    msg.should.have.property("VR");
-                    should.ok(msg.VR instanceof RegExp);
-                    msg.should.have.property("VD");
-                    should.ok((typeof msg.VD) === "number");
+                    msg.should.have.property("VE","STR");
                     done();
                 }
                 catch (e) {
-                    console.log(e);
                     done(e);
                 }
             });
