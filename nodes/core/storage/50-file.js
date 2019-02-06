@@ -76,7 +76,7 @@ module.exports = function(RED) {
                 if (typeof data === "number") { data = data.toString(); }
                 if ((node.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
                 if (node.overwriteFile === "true") {
-                    var wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
+                    var wstream = fs.createWriteStream(filename, { encoding:'utf8', flags:'w', autoClose:true });
                     node.wstream = wstream;
                     wstream.on("error", function(err) {
                         node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
@@ -117,7 +117,7 @@ module.exports = function(RED) {
                         }
                     }
                     if (recreateStream) {
-                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'a', autoClose:true });
+                        node.wstream = fs.createWriteStream(filename, { encoding:'utf8', flags:'a', autoClose:true });
                         node.wstream.on("open", function(fd) {
                             try {
                                 var stat = fs.statSync(filename);
