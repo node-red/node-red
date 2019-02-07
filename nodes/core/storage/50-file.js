@@ -75,15 +75,16 @@ module.exports = function(RED) {
                 if (typeof data === "boolean") { data = data.toString(); }
                 if (typeof data === "number") { data = data.toString(); }
                 if ((node.appendNewline) && (!Buffer.isBuffer(data))) { data += os.EOL; }
+                var buf = Buffer.from(data);
                 if (node.overwriteFile === "true") {
-                    var wstream = fs.createWriteStream(filename, { encoding:'utf8', flags:'w', autoClose:true });
+                    var wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'w', autoClose:true });
                     node.wstream = wstream;
                     wstream.on("error", function(err) {
                         node.error(RED._("file.errors.writefail",{error:err.toString()}),msg);
                         done();
                     });
                     wstream.on("open", function() {
-                        wstream.end(data, function() {
+                        wstream.end(buf, function() {
                             node.send(msg);
                             done();
                         });
@@ -117,7 +118,7 @@ module.exports = function(RED) {
                         }
                     }
                     if (recreateStream) {
-                        node.wstream = fs.createWriteStream(filename, { encoding:'utf8', flags:'a', autoClose:true });
+                        node.wstream = fs.createWriteStream(filename, { encoding:'binary', flags:'a', autoClose:true });
                         node.wstream.on("open", function(fd) {
                             try {
                                 var stat = fs.statSync(filename);
@@ -132,13 +133,13 @@ module.exports = function(RED) {
                     }
                     if (node.filename) {
                         // Static filename - write and reuse the stream next time
-                        node.wstream.write(data, function() {
+                        node.wstream.write(buf, function() {
                             node.send(msg);
                             done();
                         });
                     } else {
                         // Dynamic filename - write and close the stream
-                        node.wstream.end(data, function() {
+                        node.wstream.end(buf, function() {
                             node.send(msg);
                             delete node.wstream;
                             delete node.wstreamIno;
