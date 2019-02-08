@@ -1,3 +1,33 @@
+#### 0.20.0-beta.5: Beta Release
+
+Runtime
+
+ - Bump dependencies
+ - Allow `$parent` access of flow context
+ - Make Node.\_flow a writeable property
+ - Do not propagate Flow.getNode to parent when called from outside flow
+ - Add support of subflow env var
+
+Editor
+
+ - Properly sanitize node names in deploy warning dialogs
+ - Fix XSS issues in library ui code
+ - Add env type to subflow env var types
+ - Display parent subflow properties in edit dialog
+ - Fix direction value of subflow output
+ - Add Status Node to Subflow to allow subflow-specific status Closes #597
+ - Better handling of multiple flow merges Fixes #2039
+
+Nodes
+
+ - Various translation updates
+ - Catch: Add 'catch uncaught only' mode. Closes #1747
+ - Link: scroll to current flow in node list
+ - HTTPRequest: add option to urlencode cookies
+ - HTTPRequest: option to use msg.payload as query params on GET. #1981
+ - Debug: Add local time display option to numerics in debug window
+ - MQTT: Add parsed JSON output option
+
 #### 0.20.0-beta.4: Beta Release
 
 Runtime
