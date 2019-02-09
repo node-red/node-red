@@ -15,6 +15,7 @@
  **/
 
 var path = require("path");
+var fs = require("fs-extra");
 
 module.exports = function(grunt) {
 
@@ -442,7 +443,9 @@ module.exports = function(grunt) {
                     'packages/node_modules/@node-red/runtime/lib/api/*.js',
                     'packages/node_modules/@node-red/runtime/lib/events.js',
                     'packages/node_modules/@node-red/util/**/*.js',
-                    ],
+                    'packages/node_modules/@node-red/editor-api/lib/index.js',
+                    'packages/node_modules/@node-red/editor-api/lib/auth/index.js'
+                ],
                 options: {
                     destination: 'docs',
                     configure: './jsdoc.json'
@@ -553,6 +556,13 @@ module.exports = function(grunt) {
         });
     });
 
+    grunt.registerTask('verifyUiTestDependencies', function() {
+        if (!fs.existsSync(path.join("node_modules", "chromedriver"))) {
+            grunt.fail.fatal('You need to run "npm install chromedriver@2" before running UI test.');
+            return false;
+        }
+    });
+
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -573,7 +583,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('test-ui',
         'Builds editor content then runs unit tests on editor ui',
-        ['build','jshint:editor','webdriver:all']);
+        ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',

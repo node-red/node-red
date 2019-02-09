@@ -1,8 +1,62 @@
+#### 0.20.0-beta.5: Beta Release
+
+Runtime
+
+ - Bump dependencies
+ - Allow `$parent` access of flow context
+ - Make Node.\_flow a writeable property
+ - Do not propagate Flow.getNode to parent when called from outside flow
+ - Add support of subflow env var
+
+Editor
+
+ - Properly sanitize node names in deploy warning dialogs
+ - Fix XSS issues in library ui code
+ - Add env type to subflow env var types
+ - Display parent subflow properties in edit dialog
+ - Fix direction value of subflow output
+ - Add Status Node to Subflow to allow subflow-specific status Closes #597
+ - Better handling of multiple flow merges Fixes #2039
+
+Nodes
+
+ - Various translation updates
+ - Catch: Add 'catch uncaught only' mode. Closes #1747
+ - Link: scroll to current flow in node list
+ - HTTPRequest: add option to urlencode cookies
+ - HTTPRequest: option to use msg.payload as query params on GET. #1981
+ - Debug: Add local time display option to numerics in debug window
+ - MQTT: Add parsed JSON output option
+
 #### 0.20.0-beta.4: Beta Release
 
 Runtime
 
- - Bump JSONata to 1.6.5
+ - Bump JSONata to 1.6.4
+ - Add Flow.getSetting for resolving env-var properties
+ - Refactor Subflow logic into own class
+ - Restore RED.auth to node-red module api
+ - Tidy up when usage in Flow and Node
+
+Editor
+
+ - German translation
+ - Change default dropdown appearance and sidebar tab menu handling
+ - Handle multiple-select box when nothing selected Fixes #2021
+ - Handle i18n properly when key is a valid sub-identifier Fixes #2028
+ - Avoid duplicate links when missing node type installed Fixes #2032
+ - Add View Tools
+ - Don't collapse version control header when clicking refresh
+ - Add fast entry via keyboard for string of nodes
+ - Check for undeployed change before showing open project dialog
+ - Add placeholder node when in quick-add mode
+ - Move nodes to top-left corner when converting to subflow
+
+Nodes
+
+ - Debug: Allow debug edit expression to be sent to status
+ - WebSocket: Fix missing translated help
+
 
 #### 0.20.0-beta.3: Beta Release
 
