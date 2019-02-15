@@ -80,6 +80,66 @@ describe('JSON node', function() {
         });
     });
 
+    it('should convert a boolean to a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, 'true');
+                done();
+            });
+            var obj = true;
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a json string to a boolean', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, true);
+                done();
+            });
+            var obj = "true";
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a number to a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, '2019');
+                done();
+            });
+            var obj = 2019;
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a json string to a number', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, 1962);
+                done();
+            });
+            var obj = '1962';
+            jn1.receive({payload:obj});
+        });
+    });
+
     it('should log an error if asked to parse an invalid json string', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
