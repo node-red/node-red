@@ -173,20 +173,14 @@ describe('JSON node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "json";
                     });
-                    logEvents.should.have.length(3);
+                    logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.eql('json.errors.dropped');
-                    logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.eql('json.errors.dropped');
-                    logEvents[2][0].should.have.a.property('msg');
-                    logEvents[2][0].msg.toString().should.eql('json.errors.dropped-object');
+                    logEvents[0][0].msg.toString().should.eql('json.errors.dropped-object');
                     done();
                 } catch(err) {
                     done(err);
                 }
-            },150);
-            jn1.receive({payload:true});
-            jn1.receive({payload:1});
+            },50);
             jn1.receive({payload:Buffer.from("a")});
         });
     });
