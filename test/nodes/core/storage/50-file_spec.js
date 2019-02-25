@@ -79,6 +79,29 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should write multi-byte string to a file', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function(msg) {
+                    try {
+                        var f = fs.readFileSync(fileToTest).toString();
+                        f.should.have.length(2);
+                        f.should.equal("試験");
+                        fs.unlinkSync(fileToTest);
+                        msg.should.have.property("payload", "試験");
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:"試験"});
+            });
+        });
+
         it('should append to a file and add newline', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
