@@ -1,3 +1,7 @@
+#### 0.19.6: Maintenance Release
+
+ - Fix encoding of file node from binary to utf8 - #2051 
+
 #### 0.19.5: Maintenance Release
 
  - Recognize pip installs of RPi.GPIO (#1934)
