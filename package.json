@@ -111,7 +111,8 @@
         "wdio-spec-reporter": "^0.1.5",
         "webdriverio": "^4.14.1",
         "node-red-node-test-helper": "node-red/node-red-node-test-helper",
-        "jsdoc-nr-template": "node-red/jsdoc-nr-template"
+        "jsdoc-nr-template": "node-red/jsdoc-nr-template",
+        "iconv-lite": "^0.4.24"
     },
     "engines": {
         "node": ">=8"
