@@ -438,6 +438,7 @@ module.exports = function(grunt) {
         jsdoc : {
             modules: {
                 src: [
+                    'API.md',
                     'packages/node_modules/node-red/lib/red.js',
                     'packages/node_modules/@node-red/runtime/lib/index.js',
                     'packages/node_modules/@node-red/runtime/lib/api/*.js',
@@ -451,7 +452,7 @@ module.exports = function(grunt) {
                     configure: './jsdoc.json'
                 }
             },
-            editor: {
+            _editor: {
                 src: [
                     'packages/node_modules/@node-red/editor-client/src/js'
                     ],
@@ -612,5 +613,5 @@ module.exports = function(grunt) {
 
     grunt.registerTask('docs',
         'Generates API documentation',
-        ['jsdoc','jsdoc2md']);
+        ['jsdoc']);
 };
