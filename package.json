@@ -70,7 +70,8 @@
         "uglify-js": "3.4.9",
         "when": "3.7.8",
         "ws": "6.1.3",
-        "xml2js": "0.4.19"
+        "xml2js": "0.4.19",
+        "iconv-lite": "0.4.24"
     },
     "optionalDependencies": {
         "bcrypt": "~2.0.0"
@@ -111,8 +112,7 @@
         "wdio-spec-reporter": "^0.1.5",
         "webdriverio": "^4.14.1",
         "node-red-node-test-helper": "node-red/node-red-node-test-helper",
-        "jsdoc-nr-template": "node-red/jsdoc-nr-template",
-        "iconv-lite": "^0.4.24"
+        "jsdoc-nr-template": "node-red/jsdoc-nr-template"
     },
     "engines": {
         "node": ">=8"
