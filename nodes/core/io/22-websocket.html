@@ -181,7 +181,8 @@
         defaults: {
             path: {value:"",required:true,validate:RED.validators.regex(/^((?!\/debug\/ws).)*$/)},
             tls: {type:"tls-config",required: false},
-            wholemsg: {value:"false"}
+            wholemsg: {value:"false"},
+            protocol: {value:""}
         },
         inputs:0,
         outputs:0,
@@ -280,6 +281,10 @@
             <option value="false" data-i18n="websocket.payload"></option>
             <option value="true" data-i18n="websocket.message"></option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-protocol"><i class="fa fa-tag"></i> <span data-i18n="websocket.label.protocol"></span></label>
+        <input id="node-config-input-protocol" type="text" data-i18n="[placeholder]websocket.placeholder.protocol">
     </div>
     <div class="form-tips">
         <p><span data-i18n="[html]websocket.tip.url1"></span></p>

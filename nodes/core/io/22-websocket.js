@@ -28,6 +28,7 @@ module.exports = function(RED) {
         // Store local copies of the node configuration (as defined in the .html)
         node.path = n.path;
         node.wholemsg = (n.wholemsg === "true");
+        node.protocol = n.protocol; // optional client protocol
 
         node._inputNodes = [];    // collection of nodes that want to receive events
         node._clients = {};
@@ -45,7 +46,7 @@ module.exports = function(RED) {
                     tlsNode.addTLSOptions(options);
                 }
             }
-            var socket = new ws(node.path,options);
+            var socket = new ws(node.path,node.protocol,options);
             socket.setMaxListeners(0);
             node.server = socket; // keep for closing
             handleConnection(socket);
