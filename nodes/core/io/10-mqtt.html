@@ -181,6 +181,13 @@
                 <input type="text" id="node-config-input-port" data-i18n="[placeholder]mqtt.label.port" style="width:55px">
             </div>
             <div class="form-row">
+                <input type="checkbox" id="node-config-input-usews" style="display: inline-block; width: auto; vertical-align: top;">
+                <label for="node-config-input-usews" style="width: auto" data-i18n="mqtt.label.use-ws"></label>
+                <div id="node-config-row-ws" class="hide">
+                    <label style="width: auto; margin-left: 20px; margin-right: 10px;" for="node-config-input-ws"><span data-i18n="mqtt.label.ws-config"></span></label><input style="width: 300px;" type="text" id="node-config-input-tls">
+                </div>
+            </div>
+            <div class="form-row">
                 <input type="checkbox" id="node-config-input-usetls" style="display: inline-block; width: auto; vertical-align: top;">
                 <label for="node-config-input-usetls" style="width: auto" data-i18n="mqtt.label.use-tls"></label>
                 <div id="node-config-row-tls" class="hide">
@@ -335,6 +342,7 @@
                 }
             }},
             usetls: {value: false},
+            usews: {value: false},
             verifyservercert: { value: false},
             compatmode: { value: true},
             keepalive: {value:60,validate:RED.validators.number()},
@@ -428,6 +436,10 @@
                 this.usetls = false;
                 $("#node-config-input-usetls").prop("checked",false);
             }
+            if (typeof this.usews === 'undefined') {
+                this.usews = false;
+                $("#node-config-input-usews").prop("checked",false);
+            }
             if (typeof this.compatmode === 'undefined') {
                 this.compatmode = true;
                 $("#node-config-input-compatmode").prop('checked', true);
@@ -459,6 +471,18 @@
             updateTLSOptions();
             $("#node-config-input-usetls").on("click",function() {
                 updateTLSOptions();
+            });
+
+            function updateWSOptions() {
+                if ($("#node-config-input-usews").is(':checked')) {
+                    $("#node-config-row-ws").show();
+                } else {
+                    $("#node-config-row-ws").hide();
+                }
+            }
+            updateWSOptions();
+            $("#node-config-input-usews").on("click",function() {
+                updateWSOptions();
             });
             var node = this;
             function updateClientId() {
@@ -499,6 +523,9 @@
         oneditsave: function() {
             if (!$("#node-config-input-usetls").is(':checked')) {
                 $("#node-config-input-tls").val("");
+            }
+            if (!$("#node-config-input-usews").is(':checked')) {
+                $("#node-config-input-ws").val("");
             }
         }
     });
