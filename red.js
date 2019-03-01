@@ -101,8 +101,18 @@ if (parsedArgs.settings) {
             var settingsStat = fs.statSync(defaultSettings);
             if (settingsStat.mtime.getTime() <= settingsStat.ctime.getTime()) {
                 // Default settings file has not been modified - safe to copy
-                fs.copySync(defaultSettings,userSettingsFile);
-                settingsFile = userSettingsFile;
+                try {
+                    fs.copySync(defaultSettings,userSettingsFile);
+                    settingsFile = userSettingsFile;
+                }
+                catch (err) {
+                    console.log("Failed to copy settings file to "+userSettingsFile);
+                    console.log("Error: "+err.toString());
+                    if (err.code == "EACCES") {
+                        console.log("You may need to set readOnly: true, in settings.js");
+                    }
+                    process.exit(1);
+                }
             } else {
                 // Use default settings.js as it has been modified
                 settingsFile = defaultSettings;
