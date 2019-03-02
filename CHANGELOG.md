@@ -194,6 +194,9 @@ Nodes
  - Watch: add msg.filename so can feed direct to file in node
  - WebSocket: preserve \_session on msg but don't send as part of wholemsg
 
+#### 0.19.6: Maintenance Release
+
+ - Fix encoding of file node from binary to utf8 - #2051
 
 #### 0.19.5: Maintenance Release
 
