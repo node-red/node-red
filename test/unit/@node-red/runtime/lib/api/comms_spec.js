@@ -64,11 +64,14 @@ describe("runtime-api/comms", function() {
             eventHandlers.should.have.property('node-status');
             eventHandlers['node-status']({
                 id: "my-event",
-                status: "my-status"
+                status: {text:"my-status",badProperty:"should be filtered"}
             })
             messages.should.have.length(1);
             messages[0].should.have.property("topic","status/my-event");
-            messages[0].should.have.property("data","my-status")
+            messages[0].should.have.property("data");
+            messages[0].data.should.have.property("text","my-status");
+            messages[0].data.should.not.have.property("badProperty");
+
         })
         it('comms events',function(){
             eventHandlers.should.have.property('runtime-event');
