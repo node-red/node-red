@@ -9,6 +9,7 @@ Runtime
  - Fix use of custom auth strategy plugins
  - Remove remnants of when library in git/index Fixes #2057
  - Clear subflow status on close
+ - Add exportGlobalContextKeys to prevent exposing functionGlobalContext keys
 
 Editor
  - Transfer placeholder and type to generated TypedInput field
