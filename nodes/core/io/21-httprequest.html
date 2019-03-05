@@ -132,7 +132,9 @@
     <p>For form-based file uploads, some services require that <code>msg.headers["content-type"]</code> be set to <code>multipart/form-data</code>.
     To construct <code>msg.payload</code> for this type of request, use the following structure and substitue the <code>KEY</code>, <code>DATA</code>, and <code>FILENAME</code> 
     values for your own.
-<pre><code>req.formData = { 
+<pre><code>msg.headers = {'content-type':'multipart/form-data'}
+
+msg.payload = { 
     KEY: { 
         value: DATA, 
         options: { 
