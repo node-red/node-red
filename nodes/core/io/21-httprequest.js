@@ -78,6 +78,7 @@ module.exports = function(RED) {
             }
             var opts = {};
             opts.url = url;
+            opts.formData = {};
             opts.timeout = node.reqTimeout;
             opts.method = method;
             opts.headers = {};
@@ -144,28 +145,33 @@ module.exports = function(RED) {
             var payload = null;
 
             if (method !== 'GET' && method !== 'HEAD' && typeof msg.payload !== "undefined") {
-                if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
-                    payload = msg.payload;
-                } else if (typeof msg.payload == "number") {
-                    payload = msg.payload+"";
+                if (opts.headers['content-type'] == 'multipart/form-data' && typeof payload === "object") {
+                    opts.formData = msg.payload;
                 } else {
-                    if (opts.headers['content-type'] == 'application/x-www-form-urlencoded') {
-                        payload = querystring.stringify(msg.payload);
+                    if (typeof msg.payload === "string" || Buffer.isBuffer(msg.payload)) {
+                        payload = msg.payload;
+                    } else if (typeof msg.payload == "number") {
+                        payload = msg.payload+"";
                     } else {
-                        payload = JSON.stringify(msg.payload);
-                        if (opts.headers['content-type'] == null) {
-                            opts.headers[ctSet] = "application/json";
+                        if (opts.headers['content-type'] == 'application/x-www-form-urlencoded') {
+                            payload = querystring.stringify(msg.payload);
+                        } else {
+                            payload = JSON.stringify(msg.payload);
+                            if (opts.headers['content-type'] == null) {
+                                opts.headers[ctSet] = "application/json";
+                            }
                         }
                     }
-                }
-                if (opts.headers['content-length'] == null) {
-                    if (Buffer.isBuffer(payload)) {
-                        opts.headers[clSet] = payload.length;
-                    } else {
-                        opts.headers[clSet] = Buffer.byteLength(payload);
+                    if (opts.headers['content-length'] == null) {
+                        if (Buffer.isBuffer(payload)) {
+                            opts.headers[clSet] = payload.length;
+                        } else {
+                            opts.headers[clSet] = Buffer.byteLength(payload);
+                        }
                     }
-                }
-                opts.body = payload;
+                    opts.body = payload;
+            }
+
             }
             // revert to user supplied Capitalisation if needed.
             if (opts.headers.hasOwnProperty('content-type') && (ctSet !== 'content-type')) {
