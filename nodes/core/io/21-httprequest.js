@@ -78,7 +78,6 @@ module.exports = function(RED) {
             }
             var opts = {};
             opts.url = url;
-            opts.formData = {};
             opts.timeout = node.reqTimeout;
             opts.method = method;
             opts.headers = {};
@@ -170,8 +169,7 @@ module.exports = function(RED) {
                         }
                     }
                     opts.body = payload;
-            }
-
+                }
             }
             // revert to user supplied Capitalisation if needed.
             if (opts.headers.hasOwnProperty('content-type') && (ctSet !== 'content-type')) {
