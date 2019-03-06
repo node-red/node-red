@@ -498,7 +498,7 @@ describe('Flow', function() {
             Object.keys(activeNodes).should.have.length(5);
 
 
-            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status",random:"otherProperty"});
 
             currentNodes["sn"].should.have.a.property("handled",1);
             var statusMessage = currentNodes["sn"].messages[0];
@@ -515,6 +515,7 @@ describe('Flow', function() {
 
             statusMessage.should.have.a.property("status");
             statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("random","otherProperty");
             statusMessage.status.should.have.a.property("source");
             statusMessage.status.source.should.have.a.property("id","1");
             statusMessage.status.source.should.have.a.property("type","test");

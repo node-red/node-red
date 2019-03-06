@@ -50,10 +50,9 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){ return {};}));
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
             loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return false;}}});
-            loader.load("foo",true).then(function() {
+            loader.load(true).then(function() {
                 localfilesystem.getNodeFiles.called.should.be.true();
-                localfilesystem.getNodeFiles.lastCall.args[0].should.eql('foo');
-                localfilesystem.getNodeFiles.lastCall.args[1].should.be.true();
+                localfilesystem.getNodeFiles.lastCall.args[0].should.be.true();
                 registry.saveNodeList.called.should.be.false();
                 done();
             })
@@ -62,7 +61,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){ return {};}));
             stubs.push(sinon.stub(registry,"saveNodeList", function(){ return {};}));
             loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
-            loader.load("foo",true).then(function() {
+            loader.load(true).then(function() {
                 registry.saveNodeList.called.should.be.true();
                 done();
             }).catch(function(err) {
