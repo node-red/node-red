@@ -19,10 +19,25 @@ var path = require('path');
 var fs = require('fs-extra');
 var os = require('os');
 var sinon = require("sinon");
+var iconv = require("iconv-lite");
 var fileNode = require("nr-test-utils").require("@node-red/nodes/core/storage/50-file.js");
 var helper = require("node-red-node-test-helper");
 
 describe('file Nodes', function() {
+
+    function encode(s, enc) {
+        if (enc === "none") {
+            return Buffer.from(s);
+        }
+        return iconv.encode(s, enc);
+    }
+    
+    function decode(data, enc) {
+        if (enc === "none") {
+            return data.toString();
+        }
+        return iconv.decode(data, enc);
+    }
 
     describe('file out Node', function() {
 
@@ -650,6 +665,372 @@ describe('file Nodes', function() {
             });
         });
 
+        describe('encodings', function() {
+
+            function checkWriteWithEncoding(enc, data, done) {
+                var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, encoding:enc, wires: [["helperNode1"]]},
+                            {id:"helperNode1", type:"helper"}];
+                helper.load(fileNode, flow, function() {
+                    var n1 = helper.getNode("fileNode1");
+                    var n2 = helper.getNode("helperNode1");
+                    n2.on("input", function(msg) {
+                        try {
+                            var f = fs.readFileSync(fileToTest);
+                            f.equals(encode(data, enc)).should.be.true();
+                            fs.unlinkSync(fileToTest);
+                            msg.should.have.property("payload", data);
+                            done();
+                        }
+                        catch (e) {
+                            done(e);
+                        }
+                    });
+                    n1.receive({payload:data});
+                });
+            }
+
+            // default
+            it('should write to a file with "none" encoding', function(done) {
+                checkWriteWithEncoding("none", "test", done);
+            });
+
+            // Native
+            it('should write to a file with "utf8" encoding', function(done) {
+                checkWriteWithEncoding("utf8", "試験", done);
+            });
+
+            it('should write to a file with "ucs2" encoding', function(done) {
+                checkWriteWithEncoding("ucs2", "試験", done);
+            });
+
+            it('should write to a file with "utf-16le" encoding', function(done) {
+                checkWriteWithEncoding("utf-16le", "試験", done);
+            });
+
+            it('should write to a file with "binary" encoding', function(done) {
+                checkWriteWithEncoding("binary", "test", done);
+            });
+
+            it('should write to a file with "base64" encoding', function(done) {
+                checkWriteWithEncoding("base64", "5pel5pys6KqeCg==", done);
+            });
+
+            it('should write to a file with "hex" encoding', function(done) {
+                checkWriteWithEncoding("hex", "deadbeef", done);
+            });
+
+            // Unicode
+            it('should write to a file with "utf-16be" encoding', function(done) {
+                checkWriteWithEncoding("utf-16be", "試験", done);
+            });
+
+            // Japanese
+            it('should write to a file with "Shift_JIS" encoding', function(done) {
+                checkWriteWithEncoding("Shift_JIS", "試験", done);
+            });
+
+            it('should write to a file with "Windows-31j" encoding', function(done) {
+                checkWriteWithEncoding("Windows-31j", "試験", done);
+            });
+
+            it('should write to a file with "Windows932" encoding', function(done) {
+                checkWriteWithEncoding("Windows932", "試験", done);
+            });
+
+            it('should write to a file with "EUC-JP" encoding', function(done) {
+                checkWriteWithEncoding("EUC-JP", "試験", done);
+            });
+
+            // following encoding tests should be more specific
+            // Chinese
+            it('should write to a file with "GB2312" encoding', function(done) {
+                checkWriteWithEncoding("GB2312", "test", done);
+            });
+
+            it('should write to a file with "GBK" encoding', function(done) {
+                checkWriteWithEncoding("GBK", "test", done);
+            });
+
+            it('should write to a file with "GB18030" encoding', function(done) {
+                checkWriteWithEncoding("GB18030", "test", done);
+            });
+
+            it('should write to a file with "Windows936" encoding', function(done) {
+                checkWriteWithEncoding("Windows936", "test", done);
+            });
+
+            it('should write to a file with "EUC-CN" encoding', function(done) {
+                checkWriteWithEncoding("EUC-CN", "test", done);
+            });
+
+            // Korean
+            it('should write to a file with "KS_C_5601" encoding', function(done) {
+                checkWriteWithEncoding("KS_C_5601", "test", done);
+            });
+
+            it('should write to a file with "Windows949" encoding', function(done) {
+                checkWriteWithEncoding("Windows949", "test", done);
+            });
+
+            it('should write to a file with "EUC-KR" encoding', function(done) {
+                checkWriteWithEncoding("EUC-KR", "test", done);
+            });
+
+            // Taiwan/Hong Kong
+            it('should write to a file with "Big5" encoding', function(done) {
+                checkWriteWithEncoding("Big5", "test", done);
+            });
+            
+            it('should write to a file with "Big5-HKSCS" encoding', function(done) {
+                checkWriteWithEncoding("Big5-HKSCS", "test", done);
+            });
+
+            it('should write to a file with "Windows950" encoding', function(done) {
+                checkWriteWithEncoding("Windows950", "test", done);
+            });
+
+            // Windows
+            it('should write to a file with "cp874" encoding', function(done) {
+                checkWriteWithEncoding("cp874", "test", done);
+            });
+
+            it('should write to a file with "cp1250" encoding', function(done) {
+                checkWriteWithEncoding("cp1250", "test", done);
+            });
+
+            it('should write to a file with "cp1251" encoding', function(done) {
+                checkWriteWithEncoding("cp1251", "test", done);
+            });
+
+            it('should write to a file with "cp1252" encoding', function(done) {
+                checkWriteWithEncoding("cp1252", "test", done);
+            });
+
+            it('should write to a file with "cp1253" encoding', function(done) {
+                checkWriteWithEncoding("cp1253", "test", done);
+            });
+
+            it('should write to a file with "cp1254" encoding', function(done) {
+                checkWriteWithEncoding("cp1254", "test", done);
+            });
+
+            it('should write to a file with "cp1255" encoding', function(done) {
+                checkWriteWithEncoding("cp1255", "test", done);
+            });
+
+            it('should write to a file with "cp1256" encoding', function(done) {
+                checkWriteWithEncoding("cp1256", "test", done);
+            });
+
+            it('should write to a file with "cp1257" encoding', function(done) {
+                checkWriteWithEncoding("cp1257", "test", done);
+            });
+
+            it('should write to a file with "cp1258" encoding', function(done) {
+                checkWriteWithEncoding("cp1258", "test", done);
+            });
+
+            // IBM
+            it('should write to a file with "cp437" encoding', function(done) {
+                checkWriteWithEncoding("cp437", "test", done);
+            });
+
+            it('should write to a file with "cp737" encoding', function(done) {
+                checkWriteWithEncoding("cp737", "test", done);
+            });
+
+            it('should write to a file with "cp775" encoding', function(done) {
+                checkWriteWithEncoding("cp775", "test", done);
+            });
+
+            it('should write to a file with "cp808" encoding', function(done) {
+                checkWriteWithEncoding("cp808", "test", done);
+            });
+
+            it('should write to a file with "cp850" encoding', function(done) {
+                checkWriteWithEncoding("cp850", "test", done);
+            });
+
+            it('should write to a file with "cp852" encoding', function(done) {
+                checkWriteWithEncoding("cp852", "test", done);
+            });
+
+            it('should write to a file with "cp855" encoding', function(done) {
+                checkWriteWithEncoding("cp855", "test", done);
+            });
+
+            it('should write to a file with "cp856" encoding', function(done) {
+                checkWriteWithEncoding("cp856", "test", done);
+            });
+
+            it('should write to a file with "cp857" encoding', function(done) {
+                checkWriteWithEncoding("cp857", "test", done);
+            });
+
+            it('should write to a file with "cp858" encoding', function(done) {
+                checkWriteWithEncoding("cp858", "test", done);
+            });
+
+            it('should write to a file with "cp860" encoding', function(done) {
+                checkWriteWithEncoding("cp860", "test", done);
+            });
+
+            it('should write to a file with "cp861" encoding', function(done) {
+                checkWriteWithEncoding("cp861", "test", done);
+            });
+
+            it('should write to a file with "cp866" encoding', function(done) {
+                checkWriteWithEncoding("cp866", "test", done);
+            });
+
+            it('should write to a file with "cp869" encoding', function(done) {
+                checkWriteWithEncoding("cp869", "test", done);
+            });
+
+            it('should write to a file with "cp922" encoding', function(done) {
+                checkWriteWithEncoding("cp922", "test", done);
+            });
+
+            it('should write to a file with "cp1046" encoding', function(done) {
+                checkWriteWithEncoding("cp1046", "test", done);
+            });
+
+            it('should write to a file with "cp1124" encoding', function(done) {
+                checkWriteWithEncoding("cp1124", "test", done);
+            });
+
+            it('should write to a file with "cp1125" encoding', function(done) {
+                checkWriteWithEncoding("cp1125", "test", done);
+            });
+
+            it('should write to a file with "cp1129" encoding', function(done) {
+                checkWriteWithEncoding("cp1129", "test", done);
+            });
+
+            it('should write to a file with "cp1133" encoding', function(done) {
+                checkWriteWithEncoding("cp1133", "test", done);
+            });
+
+            it('should write to a file with "cp1161" encoding', function(done) {
+                checkWriteWithEncoding("cp1161", "test", done);
+            });
+
+            it('should write to a file with "cp1162" encoding', function(done) {
+                checkWriteWithEncoding("cp1162", "test", done);
+            });
+
+            it('should write to a file with "cp1163" encoding', function(done) {
+                checkWriteWithEncoding("cp1163", "test", done);
+            });
+
+            // Mac
+            it('should write to a file with "maccroatian" encoding', function(done) {
+                checkWriteWithEncoding("maccroatian", "test", done);
+            });
+
+            it('should write to a file with "maccyrillic" encoding', function(done) {
+                checkWriteWithEncoding("maccyrillic", "test", done);
+            });
+
+            it('should write to a file with "macgreek" encoding', function(done) {
+                checkWriteWithEncoding("macgreek", "test", done);
+            });
+
+            it('should write to a file with "maciceland" encoding', function(done) {
+                checkWriteWithEncoding("maciceland", "test", done);
+            });
+
+            it('should write to a file with "macroman" encoding', function(done) {
+                checkWriteWithEncoding("macroman", "test", done);
+            });
+
+            it('should write to a file with "macromania" encoding', function(done) {
+                checkWriteWithEncoding("macromania", "test", done);
+            });
+
+            it('should write to a file with "macthai" encoding', function(done) {
+                checkWriteWithEncoding("macthai", "test", done);
+            });
+
+            it('should write to a file with "macturkish" encoding', function(done) {
+                checkWriteWithEncoding("macturkish", "test", done);
+            });
+
+            it('should write to a file with "macukraine" encoding', function(done) {
+                checkWriteWithEncoding("macukraine", "test", done);
+            });
+
+            it('should write to a file with "maccenteuro" encoding', function(done) {
+                checkWriteWithEncoding("maccenteuro", "test", done);
+            });
+
+            it('should write to a file with "macintosh" encoding', function(done) {
+                checkWriteWithEncoding("macintosh", "test", done);
+            });
+
+            // KOI8
+            it('should write to a file with "koi8-r" encoding', function(done) {
+                checkWriteWithEncoding("koi8-r", "test", done);
+            });
+
+            it('should write to a file with "koi8-u" encoding', function(done) {
+                checkWriteWithEncoding("koi8-u", "test", done);
+            });
+
+            it('should write to a file with "koi8-ru" encoding', function(done) {
+                checkWriteWithEncoding("koi8-ru", "test", done);
+            });
+
+            it('should write to a file with "koi8-t" encoding', function(done) {
+                checkWriteWithEncoding("koi8-t", "test", done);
+            });
+
+            // Misc
+            it('should write to a file with "armscii8" encoding', function(done) {
+                checkWriteWithEncoding("armscii8", "test", done);
+            });
+
+            it('should write to a file with "rk1048" encoding', function(done) {
+                checkWriteWithEncoding("rk1048", "test", done);
+            });
+
+            it('should write to a file with "tcvn" encoding', function(done) {
+                checkWriteWithEncoding("tcvn", "test", done);
+            });
+
+            it('should write to a file with "georgianacademy" encoding', function(done) {
+                checkWriteWithEncoding("georgianacademy", "test", done);
+            });
+
+            it('should write to a file with "georgianps" encoding', function(done) {
+                checkWriteWithEncoding("georgianps", "test", done);
+            });
+
+            it('should write to a file with "pt154" encoding', function(done) {
+                checkWriteWithEncoding("pt154", "test", done);
+            });
+
+            it('should write to a file with "viscii" encoding', function(done) {
+                checkWriteWithEncoding("viscii", "test", done);
+            });
+
+            it('should write to a file with "iso646cn" encoding', function(done) {
+                checkWriteWithEncoding("iso646cn", "test", done);
+            });
+
+            it('should write to a file with "iso646jp" encoding', function(done) {
+                checkWriteWithEncoding("iso646jp", "test", done);
+            });
+
+            it('should write to a file with "hproman8" encoding', function(done) {
+                checkWriteWithEncoding("hproman8", "test", done);
+            });
+
+            it('should write to a file with "tis620" encoding', function(done) {
+                checkWriteWithEncoding("tis620", "test", done);
+            });
+
+        });
     });
 
 
@@ -875,5 +1256,373 @@ describe('file Nodes', function() {
                 n1.receive({payload:""});
             });
         });
+
+        describe('encodings', function() {
+
+            function checkReadWithEncoding(enc, data, done) {
+                var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"utf8", encoding:enc, wires:[["n2"]]},
+                            {id:"n2", type:"helper"}];
+
+                fs.writeFileSync(fileToTest, encode(data, enc));
+                helper.load(fileNode, flow, function() {
+                    var n1 = helper.getNode("fileInNode1");
+                    var n2 = helper.getNode("n2");
+                    n2.on("input", function(msg) {
+                        try {
+                            msg.should.have.property('payload');
+                            msg.payload.should.be.a.String();
+                            msg.payload.should.equal(data);
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    n1.receive({payload:""});
+                });
+            }
+            
+            // default
+            it('should read in a file with "none" encoding', function(done) {
+                checkReadWithEncoding("none", "試験", done);                
+            });
+
+            // Native
+            it('should read in a file with "utf8" encoding', function(done) {
+                checkReadWithEncoding("utf8", "試験", done);
+            });
+
+            it('should read in a file with "ucs2" encoding', function(done) {
+                checkReadWithEncoding("ucs2", "試験", done);
+            });
+
+            it('should read in a file with "utf-16le" encoding', function(done) {
+                checkReadWithEncoding("utf-16le", "試験", done);
+            });
+
+            it('should read in a file with "binary" encoding', function(done) {
+                checkReadWithEncoding("binary", "test", done);
+            });
+
+            it('should read in a file with "base64" encoding', function(done) {
+                checkReadWithEncoding("base64", "5pel5pys6KqeCg==", done);
+            });
+
+            it('should read in a file with "hex" encoding', function(done) {
+                checkReadWithEncoding("hex", "deadbeef", done);
+            });
+
+            // Unicode
+            it('should read in a file with "utf-16be" encoding', function(done) {
+                checkReadWithEncoding("utf-16be", "試験", done);
+            });
+
+            // Japanese
+            it('should read in a file with "Shift_JIS" encoding', function(done) {
+                checkReadWithEncoding("Shift_JIS", "試験", done);
+            });
+
+            it('should read in a file with "Windows-31j" encoding', function(done) {
+                checkReadWithEncoding("Windows-31j", "試験", done);
+            });
+
+            it('should read in a file with "Windows932" encoding', function(done) {
+                checkReadWithEncoding("Windows932", "試験", done);
+            });
+
+            it('should read in a file with "EUC-JP" encoding', function(done) {
+                checkReadWithEncoding("EUC-JP", "試験", done);
+            });
+            
+            // following encoding tests should be more specific
+            // Chinese
+            it('should read in a file with "GB2312" encoding', function(done) {
+                checkReadWithEncoding("GB2312", "test", done);
+            });
+
+            it('should read in a file with "GBK" encoding', function(done) {
+                checkReadWithEncoding("GBK", "test", done);
+            });
+
+            it('should read in a file with "GB18030" encoding', function(done) {
+                checkReadWithEncoding("GB18030", "test", done);
+            });
+
+            it('should read in a file with "Windows936" encoding', function(done) {
+                checkReadWithEncoding("Windows936", "test", done);
+            });
+
+            it('should read in a file with "EUC-CN" encoding', function(done) {
+                checkReadWithEncoding("EUC-CN", "test", done);
+            });
+
+            // Korean
+            it('should read in a file with "KS_C_5601" encoding', function(done) {
+                checkReadWithEncoding("KS_C_5601", "test", done);
+            });
+
+            it('should read in a file with "Windows949" encoding', function(done) {
+                checkReadWithEncoding("Windows949", "test", done);
+            });
+
+            it('should read in a file with "EUC-KR" encoding', function(done) {
+                checkReadWithEncoding("EUC-KR", "test", done);
+            });
+
+            // Taiwan/Hong Kong
+            it('should read in a file with "Big5" encoding', function(done) {
+                checkReadWithEncoding("Big5", "test", done);
+            });
+            
+            it('should read in a file with "Big5-HKSCS" encoding', function(done) {
+                checkReadWithEncoding("Big5-HKSCS", "test", done);
+            });
+
+            it('should read in a file with "Windows950" encoding', function(done) {
+                checkReadWithEncoding("Windows950", "test", done);
+            });
+
+            // Windows
+            it('should read in a file with "cp874" encoding', function(done) {
+                checkReadWithEncoding("cp874", "test", done);
+            });
+
+            it('should read in a file with "cp1250" encoding', function(done) {
+                checkReadWithEncoding("cp1250", "test", done);
+            });
+
+            it('should read in a file with "cp1251" encoding', function(done) {
+                checkReadWithEncoding("cp1251", "test", done);
+            });
+
+            it('should read in a file with "cp1252" encoding', function(done) {
+                checkReadWithEncoding("cp1252", "test", done);
+            });
+
+            it('should read in a file with "cp1253" encoding', function(done) {
+                checkReadWithEncoding("cp1253", "test", done);
+            });
+
+            it('should read in a file with "cp1254" encoding', function(done) {
+                checkReadWithEncoding("cp1254", "test", done);
+            });
+
+            it('should read in a file with "cp1255" encoding', function(done) {
+                checkReadWithEncoding("cp1255", "test", done);
+            });
+
+            it('should read in a file with "cp1256" encoding', function(done) {
+                checkReadWithEncoding("cp1256", "test", done);
+            });
+
+            it('should read in a file with "cp1257" encoding', function(done) {
+                checkReadWithEncoding("cp1257", "test", done);
+            });
+
+            it('should read in a file with "cp1258" encoding', function(done) {
+                checkReadWithEncoding("cp1258", "test", done);
+            });
+
+            // IBM
+            it('should read in a file with "cp437" encoding', function(done) {
+                checkReadWithEncoding("cp437", "test", done);
+            });
+
+            it('should read in a file with "cp737" encoding', function(done) {
+                checkReadWithEncoding("cp737", "test", done);
+            });
+
+            it('should read in a file with "cp775" encoding', function(done) {
+                checkReadWithEncoding("cp775", "test", done);
+            });
+
+            it('should read in a file with "cp808" encoding', function(done) {
+                checkReadWithEncoding("cp808", "test", done);
+            });
+
+            it('should read in a file with "cp850" encoding', function(done) {
+                checkReadWithEncoding("cp850", "test", done);
+            });
+
+            it('should read in a file with "cp852" encoding', function(done) {
+                checkReadWithEncoding("cp852", "test", done);
+            });
+
+            it('should read in a file with "cp855" encoding', function(done) {
+                checkReadWithEncoding("cp855", "test", done);
+            });
+
+            it('should read in a file with "cp856" encoding', function(done) {
+                checkReadWithEncoding("cp856", "test", done);
+            });
+
+            it('should read in a file with "cp857" encoding', function(done) {
+                checkReadWithEncoding("cp857", "test", done);
+            });
+
+            it('should read in a file with "cp858" encoding', function(done) {
+                checkReadWithEncoding("cp858", "test", done);
+            });
+
+            it('should read in a file with "cp860" encoding', function(done) {
+                checkReadWithEncoding("cp860", "test", done);
+            });
+
+            it('should read in a file with "cp861" encoding', function(done) {
+                checkReadWithEncoding("cp861", "test", done);
+            });
+
+            it('should read in a file with "cp866" encoding', function(done) {
+                checkReadWithEncoding("cp866", "test", done);
+            });
+
+            it('should read in a file with "cp869" encoding', function(done) {
+                checkReadWithEncoding("cp869", "test", done);
+            });
+
+            it('should read in a file with "cp922" encoding', function(done) {
+                checkReadWithEncoding("cp922", "test", done);
+            });
+
+            it('should read in a file with "cp1046" encoding', function(done) {
+                checkReadWithEncoding("cp1046", "test", done);
+            });
+
+            it('should read in a file with "cp1124" encoding', function(done) {
+                checkReadWithEncoding("cp1124", "test", done);
+            });
+
+            it('should read in a file with "cp1125" encoding', function(done) {
+                checkReadWithEncoding("cp1125", "test", done);
+            });
+
+            it('should read in a file with "cp1129" encoding', function(done) {
+                checkReadWithEncoding("cp1129", "test", done);
+            });
+
+            it('should read in a file with "cp1133" encoding', function(done) {
+                checkReadWithEncoding("cp1133", "test", done);
+            });
+
+            it('should read in a file with "cp1161" encoding', function(done) {
+                checkReadWithEncoding("cp1161", "test", done);
+            });
+
+            it('should read in a file with "cp1162" encoding', function(done) {
+                checkReadWithEncoding("cp1162", "test", done);
+            });
+
+            it('should read in a file with "cp1163" encoding', function(done) {
+                checkReadWithEncoding("cp1163", "test", done);
+            });
+
+            // Mac
+            it('should read in a file with "maccroatian" encoding', function(done) {
+                checkReadWithEncoding("maccroatian", "test", done);
+            });
+
+            it('should read in a file with "maccyrillic" encoding', function(done) {
+                checkReadWithEncoding("maccyrillic", "test", done);
+            });
+
+            it('should read in a file with "macgreek" encoding', function(done) {
+                checkReadWithEncoding("macgreek", "test", done);
+            });
+
+            it('should read in a file with "maciceland" encoding', function(done) {
+                checkReadWithEncoding("maciceland", "test", done);
+            });
+
+            it('should read in a file with "macroman" encoding', function(done) {
+                checkReadWithEncoding("macroman", "test", done);
+            });
+
+            it('should read in a file with "macromania" encoding', function(done) {
+                checkReadWithEncoding("macromania", "test", done);
+            });
+
+            it('should read in a file with "macthai" encoding', function(done) {
+                checkReadWithEncoding("macthai", "test", done);
+            });
+
+            it('should read in a file with "macturkish" encoding', function(done) {
+                checkReadWithEncoding("macturkish", "test", done);
+            });
+
+            it('should read in a file with "macukraine" encoding', function(done) {
+                checkReadWithEncoding("macukraine", "test", done);
+            });
+
+            it('should read in a file with "maccenteuro" encoding', function(done) {
+                checkReadWithEncoding("maccenteuro", "test", done);
+            });
+
+            it('should read in a file with "macintosh" encoding', function(done) {
+                checkReadWithEncoding("macintosh", "test", done);
+            });
+
+            // KOI8
+            it('should read in a file with "koi8-r" encoding', function(done) {
+                checkReadWithEncoding("koi8-r", "test", done);
+            });
+
+            it('should read in a file with "koi8-u" encoding', function(done) {
+                checkReadWithEncoding("koi8-u", "test", done);
+            });
+
+            it('should read in a file with "koi8-ru" encoding', function(done) {
+                checkReadWithEncoding("koi8-ru", "test", done);
+            });
+
+            it('should read in a file with "koi8-t" encoding', function(done) {
+                checkReadWithEncoding("koi8-t", "test", done);
+            });
+
+            // Misc
+            it('should read in a file with "armscii8" encoding', function(done) {
+                checkReadWithEncoding("armscii8", "test", done);
+            });
+
+            it('should read in a file with "rk1048" encoding', function(done) {
+                checkReadWithEncoding("rk1048", "test", done);
+            });
+
+            it('should read in a file with "tcvn" encoding', function(done) {
+                checkReadWithEncoding("tcvn", "test", done);
+            });
+
+            it('should read in a file with "georgianacademy" encoding', function(done) {
+                checkReadWithEncoding("georgianacademy", "test", done);
+            });
+
+            it('should read in a file with "georgianps" encoding', function(done) {
+                checkReadWithEncoding("georgianps", "test", done);
+            });
+
+            it('should read in a file with "pt154" encoding', function(done) {
+                checkReadWithEncoding("pt154", "test", done);
+            });
+
+            it('should read in a file with "viscii" encoding', function(done) {
+                checkReadWithEncoding("viscii", "test", done);
+            });
+
+            it('should read in a file with "iso646cn" encoding', function(done) {
+                checkReadWithEncoding("iso646cn", "test", done);
+            });
+
+            it('should read in a file with "iso646jp" encoding', function(done) {
+                checkReadWithEncoding("iso646jp", "test", done);
+            });
+
+            it('should read in a file with "hproman8" encoding', function(done) {
+                checkReadWithEncoding("hproman8", "test", done);
+            });
+
+            it('should read in a file with "tis620" encoding', function(done) {
+                checkReadWithEncoding("tis620", "test", done);
+            });
+            
+        });
+        
     });
 });

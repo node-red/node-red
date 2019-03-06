@@ -69,8 +69,9 @@
         "semver": "5.6.0",
         "uglify-js": "3.4.9",
         "when": "3.7.8",
-        "ws": "6.1.4",
-        "xml2js": "0.4.19"
+        "ws": "6.1.3",
+        "xml2js": "0.4.19",
+        "iconv-lite": "0.4.24"
     },
     "optionalDependencies": {
         "bcrypt": "~2.0.0"
