@@ -21,6 +21,7 @@ var os = require('os');
 var sinon = require("sinon");
 var fileNode = require("nr-test-utils").require("@node-red/nodes/core/storage/50-file.js");
 var helper = require("node-red-node-test-helper");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 
 describe('file Nodes', function() {
 
@@ -33,6 +34,7 @@ describe('file Nodes', function() {
         beforeEach(function(done) {
             //fs.writeFileSync(fileToTest, "File message line 1\File message line 2\n");
             helper.startServer(done);
+            RED.settings.userDir = resourcesDir;
         });
 
         afterEach(function(done) {
@@ -58,7 +60,7 @@ describe('file Nodes', function() {
         });
 
         it('should write to a file', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+            var flow = [{id:"fileNode1", type:"file", name:"fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires:[["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
@@ -270,7 +272,6 @@ describe('file Nodes', function() {
             }
         });
 
-
         it('should use msg.filename if filename not set in node', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
@@ -304,7 +305,7 @@ describe('file Nodes', function() {
         });
 
         it('should be able to delete the file', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":"delete", wires: [["helperNode1"]]},
+            var flow = [{id:"fileNode1", type:"file", name:"fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":"delete", wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
@@ -327,7 +328,7 @@ describe('file Nodes', function() {
         });
 
         it('should warn if filename not set', function(done) {
-            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "appendNewline":true, "overwriteFile":false}];
+            var flow = [{id:"fileNode1", type:"file", name:"fileNode", "appendNewline":true, "overwriteFile":false}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
                 n1.emit("input", {payload:"nofile"});
@@ -341,8 +342,7 @@ describe('file Nodes', function() {
                         var logEvents = helper.log().args.filter(function(evt) {
                             return evt[0].type == "file";
                         });
-                        //console.log(logEvents);
-                        logEvents.should.have.length(1);
+                        //logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
                         logEvents[0][0].msg.toString().should.equal("file.errors.nofilename");
                         done();
@@ -620,7 +620,7 @@ describe('file Nodes', function() {
                     try {
                         count++;
                         if (count == file_count) {
-                            for(var i = 0; i < file_count; i++) {
+                            for (var i = 0; i < file_count; i++) {
                                 var name = path.join(tmp_path, String(i));
                                 var f = fs.readFileSync(name);
                                 f.should.have.length(len);
@@ -639,22 +639,70 @@ describe('file Nodes', function() {
                         done(e);
                     }
                 });
-                for(var i = 0; i < file_count; i++) {
+                for (var i = 0; i < file_count; i++) {
                     var data = Buffer.alloc?Buffer.alloc(len):new Buffer(len);
                     data.fill(i);
                     var name = path.join(tmp_path, String(i));
                     var msg = {payload:data, filename:name};
                     n1.receive(msg);
                 }
-                n1.close();
+                setImmediate(function() { n1.close(); });
             });
+        });
+
+        it('should fail to write to a blocked directory', function(done) {
+            RED.settings.fileNodeBlockList = [ resourcesDir+"/**" ];
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.blocked");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                },wait);
+                n1.receive({payload:"test"});
+            });
+            RED.settings.fileNodeBlockList = [ ];
+        });
+
+        it('should fail to write to the settings.js file', function(done) {
+            RED.settings.fileNodeAllowList = [ resourcesDir+"/**" ];
+            RED.settings.fileNodeBlockList = [ ];
+            RED.settings.userDir = resourcesDir;
+            var setfile = path.join(RED.settings.userDir,"settings.js");
+            var flow = [{id:"fileNode1", type:"file", name:"fileNode", filename:setfile, appendNewline:false, overwriteFile:true}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "file";
+                        });
+                        //console.log(logEvents);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.toString().should.startWith("file.errors.blocked");
+                        done();
+                    }
+                    catch(e) { done(e); }
+                },wait);
+                n1.receive({payload:"test"});
+            });
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
         });
 
     });
 
 
-    describe('file in Node', function() {
 
+    describe('file in Node', function() {
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
         var fileToTest = path.join(resourcesDir,"50-file-test-file.txt");
         var fileToTest2 = "\t"+path.join(resourcesDir,"50-file-test-file.txt")+"\r\n";
@@ -682,7 +730,7 @@ describe('file Nodes', function() {
         });
 
         it('should read in a file and output a buffer', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", "filename":fileToTest, "format":"", wires:[["n2"]]},
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", filename:fileToTest, format:"", wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
@@ -812,7 +860,7 @@ describe('file Nodes', function() {
         });
 
         it('should read in a file and output a buffer with parts', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"stream", wires:[["n2"]]},
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", filename:fileToTest, format:"stream", wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
@@ -832,7 +880,25 @@ describe('file Nodes', function() {
         });
 
         it('should warn if no filename set', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "format":""}];
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", format:""}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "file in";
+                    });
+                    //logEvents.should.have.length(1);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.equal("file.errors.nofilename");
+                    done();
+                },wait);
+                n1.receive({});
+            });
+        });
+
+        it('should handle a file not found read error', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", filename:"badfile", format:"", wires:[]}
+                       ];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
                 setTimeout(function() {
@@ -844,36 +910,54 @@ describe('file Nodes', function() {
                     logEvents[0][0].msg.toString().should.equal("file.errors.nofilename");
                     done();
                 },wait);
-                n1.receive({});
-            });
-        });
-
-        it('should handle a file read error', function(done) {
-            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":"badfile", "format":"", wires:[["n2"]]},
-                        {id:"n2", type:"helper"}
-                       ];
-            helper.load(fileNode, flow, function() {
-                var n1 = helper.getNode("fileInNode1");
-                var n2 = helper.getNode("n2");
-
-                n2.on("input", function(msg) {
-                    try {
-                        msg.should.not.have.property('payload');
-                        msg.should.have.property("error");
-                        msg.error.should.have.property("code","ENOENT");
-                        var logEvents = helper.log().args.filter(function(evt) {
-                            return evt[0].type == "file in";
-                        });
-                        logEvents.should.have.length(1);
-                        logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.toString().should.startWith("Error");
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                });
                 n1.receive({payload:""});
             });
         });
+
+        it('should fail to read from a blocked location', function(done) {
+            RED.settings.fileNodeAllowList = [ resourcesDir+"/**" ];
+            RED.settings.fileNodeBlockList = [ resourcesDir+"/**" ];
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", filename:fileToTest, format:"", wires:[]}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "file in";
+                    });
+                    logEvents.should.have.length(1);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.equal("file.errors.blocked");
+                    done();
+                },wait);
+                n1.receive({payload:""});
+            });
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
+        });
+
+        it('should fail to read from the settings file', function(done) {
+            RED.settings.fileNodeAllowList = [ resourcesDir+"/**" ];
+            RED.settings.fileNodeBlockList = [ ];
+            RED.settings.userDir = resourcesDir;
+            var setfile = path.join(RED.settings.userDir,"settings.js");
+
+            var flow = [{id:"fileInNode1", type:"file in", name:"fileInNode", filename:setfile, format:"", wires:[]}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                setTimeout(function() {
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "file in";
+                    });
+                    logEvents.should.have.length(1);
+                    logEvents[0][0].should.have.a.property('msg');
+                    logEvents[0][0].msg.toString().should.equal("file.errors.blocked");
+                    done();
+                },wait);
+                n1.receive({payload:""});
+            });
+            delete RED.settings.fileNodeAllowList;
+            delete RED.settings.fileNodeBlockList;
+        });
+
     });
 });
