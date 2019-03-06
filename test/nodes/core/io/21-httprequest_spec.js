@@ -28,6 +28,7 @@ var httpProxyNode = require("nr-test-utils").require("@node-red/nodes/core/io/06
 var hashSum = require("hash-sum");
 var httpProxy = require('http-proxy');
 var cookieParser = require('cookie-parser');
+var multer = require("multer");
 var RED = require("nr-test-utils").require("node-red/lib/red");
 var fs = require('fs-extra');
 var auth = require('basic-auth');
@@ -118,7 +119,28 @@ describe('HTTP Request Node', function() {
     }
 
     before(function(done) {
+
         testApp = express();
+
+        // The fileupload test needs a different set of middleware - so mount
+        // as a separate express instance
+        var fileUploadApp = express();
+        var mp = multer({ storage: multer.memoryStorage() }).any();
+        fileUploadApp.post("/file-upload",function(req,res,next) {
+            mp(req,res,function(err) {
+                req._body = true;
+                next(err);
+            })
+        },bodyParser.json(),function(req,res) {
+            res.json({
+                body: req.body,
+                files: req.files
+            })
+        });
+        testApp.use(fileUploadApp);
+
+
+
         testApp.use(bodyParser.raw({type:"*/*"}));
         testApp.use(cookieParser(undefined,{decode:String}));
         testApp.get('/statusCode204', function(req,res) { res.status(204).end();});
@@ -1644,6 +1666,44 @@ describe('HTTP Request Node', function() {
             });
         });
     });
+
+    describe('file-upload', function() {
+        it('should upload a file', function(done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'POST',ret:'obj',url:getTestURL('/file-upload')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.payload.should.have.property("body",{"other":"123"});
+                        msg.payload.should.have.property("files");
+                        msg.payload.files.should.have.length(1);
+                        msg.payload.files[0].should.have.property('fieldname','file');
+                        msg.payload.files[0].should.have.property('originalname','file.txt');
+                        msg.payload.files[0].should.have.property('buffer',{"type":"Buffer","data":[72,101,108,108,111,32,87,111,114,108,100]});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({
+                    headers: {
+                        'content-type':'multipart/form-data'
+                    },
+                    payload: {
+                        file: {
+                            value: Buffer.from("Hello World"),
+                            options: {
+                                filename: "file.txt"
+                            }
+                        },
+                        other: 123
+                    }
+                });
+            });
+        })
+    })
 
     describe('redirect-cookie', function() {
         it('should send cookies to the same domain when redirected(no cookies)', function(done) {
