@@ -1,0 +1,167 @@
+{
+    "runtime": {
+        "welcome": "Node-RED에 오신것을 환영합니다.",
+        "version": "__component__ 버전: __version__",
+        "unsupported_version": "__component__는 지원하지 않는 버전입니다. 요구버전: __requires__ 현재버전: __version__",
+        "paths": {
+            "settings": "설정 파일  : __path__",
+            "httpStatic": "HTTP Static    : __path__"
+        }
+    },
+    "server": {
+        "loading": "팔렛트 노드 읽는 중",
+        "palette-editor": {
+            "disabled": "팔렛트 에디터 사용불가 : 사용자 설정",
+            "npm-not-found": "팔렛트 에디터 사용불가 : npm 명령어가 없습니다.",
+            "npm-too-old": "팔렛트 에디터 사용불가 : npm 버전이 너무 오래되었습니다. 3.x이상의 npm을 사용하세요."
+        },
+        "errors": "__count__개의 노드타입 등록 에러",
+        "errors_plural": "__count__개의 노드타입 등록 에러",
+        "errors-help": "-v 를 실행하여 상세내역을 확인하세요",
+        "missing-modules": "노드모듈이 없습니다:",
+        "node-version-mismatch": "버전이 잘못 되었습니다. 요구버전: __version__ ",
+        "type-already-registered": "'__type__' 은 __module__ 으로 이미 등록되어 있습니다.",
+        "removing-modules": "설정에서 모듈 제거중",
+        "added-types": "노드타입 추가:",
+        "removed-types": "노드타입 제거:",
+        "install": {
+            "invalid": "잘못된 모듈명",
+            "installing": "모듈 설치중: __name__, 버전: __version__",
+            "installed": "모듈이 설치되었습니다: __name__",
+            "install-failed": "설치 실패",
+            "install-failed-long": "__name__ 모듈 설치 실패:",
+            "install-failed-not-found": "$t(install-failed-long) 모듈이 없습니다.",
+            "upgrading": "모듈 업그레이드: __name__ to 버전: __version__",
+            "upgraded": "모듈 업그레이드: __name__. 새 버전을 사용하기 위해 Node-RED를 재시작 합니다.",
+            "upgrade-failed-not-found": "$t(server.install.install-failed-long) 버전이 없습니다.",
+            "uninstalling": "모듈 제거중: __name__",
+            "uninstall-failed": "제거 실패",
+            "uninstall-failed-long": "__name__ 모듈 제거 실패:",
+            "uninstalled": "모듈 제거: __name__"
+        },
+        "unable-to-listen": "__listenpath__에서 listen 할 수 없습니다.",
+        "port-in-use": "에러: 포트 사용중",
+        "uncaught-exception": "Uncaught Exception:",
+        "admin-ui-disabled": "관리 UI 비활성화",
+        "now-running": "__listenpath__에서 서버가 실행중 입니다.",
+        "failed-to-start": "서버시작 실패:",
+        "headless-mode": "headless 모드로 실행중입니다.",
+        "httpadminauth-deprecated": "httpAdminAuth는 더 이상 사용되지 않습니다. adminAuth를 사용하세요."
+    },
+    "api": {
+        "flows": {
+            "error-save": "플로우 저장 에러: __message__",
+            "error-reload": "플로우 새로고침 에러: __message__"
+        },
+        "library": {
+            "error-load-entry": "라이브러리 '__path__'불러오기 에러: __message__",
+            "error-save-entry": "라이브러리 '__path__'저장 에러: __message__",
+            "error-load-flow": "플로우 '__path__'불러오기 에러: __message__",
+            "error-save-flow": "플로우 '__path__'저장 에러: __message__"
+        },
+        "nodes": {
+            "enabled": "노드타입 활성화:",
+            "disabled": "노드타입 비활성화:",
+            "error-enable": "노드 활성화 에러:"
+        }
+    },
+    "comms": {
+        "error": "통신채널 에러: __message__",
+        "error-server": "통신서버 에러: __message__",
+        "error-send": "전송 에러: __message__"
+    },
+    "settings": {
+        "user-not-available": "사용자 설정을 저장할수 없습니다: __message__",
+        "not-available": "설정을 사용할 수 없습니다.",
+        "property-read-only": "'__prop__' 속성은 읽기 전용입니다."
+    },
+    "nodes": {
+        "credentials": {
+            "error": "인증정보 읽어오기 에러: __message__",
+            "error-saving": "인증정보 저장 에러: __message__",
+            "not-registered": "인증정보 '__type__'는 등록되어 있지않습니다.",
+            "system-key-warning": "\n\n---------------------------------------------------------------------\n 시스템에서 생성한 키를 사용하여 플로우 자격증명 파일이 암호화되어 있습니다. \n\n 만일 시스템 생성 키가 어떤 이유로든 손실되면 자격증명파일을\n 복구 할 수 없습니다. 그러한 경우엔 삭제하고 자격증명을 다시 \n 입력해야 합니다.\n\n 'credentialSecret' 옵션을 사용하여 자신의 키를 설정해야 합니다. \n Node-RED는 변경내용을 다음 배포시에 선택한 키를 사용하여 \n 자격증명파일을 다시 암호화합니다.\n---------------------------------------------------------------------\n"
+        },
+        "flows": {
+            "safe-mode": "[안전모드] 플로우가 정지되었습니다. 시작하려면 배포하세요.",
+            "registered-missing": "누락된 노드를 등록합니다: __type__",
+            "error": "플로우 불러오기 에러: __message__",
+            "starting-modified-nodes": "수정된 노드 시작중",
+            "starting-modified-flows": "수정된 플로우 시작중",
+            "starting-flows": "플로우 시작중",
+            "started-modified-nodes": "수정된 노드 시작됨",
+            "started-modified-flows": "수정된 플로우 시작됨",
+            "started-flows": "플로우 시작됨",
+            "stopping-modified-nodes": "수정된 노드 중지중",
+            "stopping-modified-flows": "수정된 플로우 중지중",
+            "stopping-flows": "플로우 중지중",
+            "stopped-modified-nodes": "수정된 노드 중지됨",
+            "stopped-modified-flows": "수정된 플로우 중지됨",
+            "stopped-flows": "플로우 중지됨",
+            "stopped": "중지됨",
+            "stopping-error": "노드 중지 오류: __message__",
+            "added-flow": "플로우 추가: __label__",
+            "updated-flow": "플로우 변경: __label__",
+            "removed-flow": "플로우 삭제: __label__",
+            "missing-types": "누락된 플로우타입이 등록되기를 기다림:",
+            "missing-type-provided": " - __type__ (provided by npm module __module__)",
+            "missing-type-install-1": "누락된 모듈을 설치하려면, 실행:",
+            "missing-type-install-2": "디렉토리에서:"
+        },
+        "flow": {
+            "unknown-type": "알수없는 타입: __type__",
+            "missing-types": "누락된 타입",
+            "error-loop": "메세지 최대 캐치수를 초과했습니다."
+        },
+        "index": {
+            "unrecognised-id": "인식할 수 없는 ID: __id__",
+            "type-in-use": "사용하는 타입: __msg__",
+            "unrecognised-module": "인식할 수 없는 모듈: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "'__module__' 모듈을 찾을 수 없습니다."
+            }
+        }
+    },
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "올바르지 않은 플로우명"
+        },
+        "localfilesystem": {
+            "user-dir": "사용자 디렉토리: __path__",
+            "flows-file": "플로우 파일     : __path__",
+            "create": "새로운 __type__ 파일 만듭니다.",
+            "empty": "기존 __type__ 파일이 비어있습니다.",
+            "invalid": "기존 __type__ 파일이 json형식이 아닙니다.",
+            "restore": "__type__ 파일을 __path__ 에서 복원합니다.",
+            "restore-fail": "__type__ 파일 복원 실패 : __message__",
+            "fsync-fail": "__path__ 파일 디스크쓰기 실패 : __message__",
+            "projects": {
+                "changing-project": "프로젝트 설정: __project__",
+                "active-project": "선택중인 프로젝트: __project__",
+                "project-not-found": "프로젝트가 없습니다: __project__",
+                "no-active-project": "선택된 프로젝트가 없습니다: 기본 플로우 파일을 사용합니다.",
+                "disabled": "프로젝트가 비활성화 되어있습니다: editorTheme.projects.enabled=false",
+                "disabledNoFlag": "프로젝트가 비활성화 되어있습니다: set editorTheme.projects.enabled=true to enable",
+                "git-not-found": "프로젝트가 비활성화 되어있습니다: git 명령어가 없습니다.",
+                "git-version-old": "프로젝트가 비활성화 되어있습니다: git __version__ 을 지원하지 않습니다. 2.x가 요구됩니다.",
+                "summary": "Node-RED 프로젝트",
+                "readme": "### 설명\n\n 이것은 프로젝트 README.md 파일입니다. 이 파일에는 프로젝트의 설명, \n 이용방법, 그 외 정보를 기재합니다."
+            }
+        }
+    },
+    "context": {
+        "log-store-init": "Context 저장소  : '__name__' [__info__]",
+        "error-loading-module": "context 저장소 불러오기 에러: __message__",
+        "error-loading-module2": "context 저장소 불러오기 에러 '__module__': __message__ ",
+        "error-module-not-defined": "Context 저장소 '__storage__'에 'module'옵션이 지정되지 않았습니다.",
+        "error-invalid-module-name": "context 저장소 이름 에러: '__name__'",
+        "error-invalid-default-module": "기본 context 저장소가 없음: '__storage__'",
+        "unknown-store": "알 수 없는 context 저장소 '__name__' 가 지정되었습니다. 기본 저장소를 사용합니다.",
+        "localfilesystem": {
+            "error-circular": "Context __scope__ 는 지속할 수 없는 순환참조를 포함합니다.",
+            "error-write": "context 저장 에러: __message__"
+        }
+    }
+}
