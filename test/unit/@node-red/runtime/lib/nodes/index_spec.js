@@ -31,17 +31,18 @@ describe("red/nodes/index", function() {
     before(function() {
         sinon.stub(index,"startFlows");
         process.env.NODE_RED_HOME = NR_TEST_UTILS.resolve("node-red");
+        process.env.foo="bar";
     });
     after(function() {
         index.startFlows.restore();
         delete process.env.NODE_RED_HOME;
+        delete process.env.foo;
     });
 
     afterEach(function() {
         index.clearRegistry();
     });
 
-    process.env.foo="bar";
     var testFlows = [{"type":"test","id":"tab1","label":"Sheet 1"}];
     var testCredentials = {"tab1":{"b":1, "c":"2", "d":"$(foo)"}};
     var storage = {
@@ -68,8 +69,8 @@ describe("red/nodes/index", function() {
     };
 
     function TestNode(n) {
+        this._flow = {getSetting: p => process.env[p]};
         index.createNode(this, n);
-        var node = this;
         this.on("log", function() {
             // do nothing
         });

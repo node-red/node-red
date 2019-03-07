@@ -50,7 +50,7 @@ describe('flows/util', function() {
             var foo = {a:"$(foo1)",b:"$(foo2)",c:{d:"$(foo3)"}};
             for (var p in foo) {
                 if (foo.hasOwnProperty(p)) {
-                    flowUtil.mapEnvVarProperties(foo,p);
+                    flowUtil.mapEnvVarProperties(foo,p,{getSetting: p => process.env[p]});
                 }
             }
             foo.should.eql({ a: 'bar1', b: 'bar2', c: { d: 'bar3' } } );
@@ -59,7 +59,7 @@ describe('flows/util', function() {
             var foo = {a:"${foo1}",b:"${foo2}",c:{d:"${foo3}"}};
             for (var p in foo) {
                 if (foo.hasOwnProperty(p)) {
-                    flowUtil.mapEnvVarProperties(foo,p);
+                    flowUtil.mapEnvVarProperties(foo,p,{getSetting: p => process.env[p]});
                 }
             }
             foo.should.eql({ a: 'bar1', b: 'bar2', c: { d: 'bar3' } } );
@@ -76,6 +76,27 @@ describe('flows/util', function() {
             }
             foo.should.eql({ a: '$(unknown)', b: 'FOO2', c: { d: 'FOO3' } } );
         });
+    });
+    describe('#getEnvVar',function() {
+        before(function() {
+            process.env.foo1 = "bar1";
+        })
+        after(function() {
+            delete process.env.foo1;
+        })
+        it('returns a known env var', function() {
+            flowUtil.init({settings:{}});
+            flowUtil.getEnvVar("foo1").should.equal("bar1")
+        })
+        it('returns undefined for an unknown env var', function() {
+            flowUtil.init({settings:{}});
+            (flowUtil.getEnvVar("foo2") === undefined).should.be.true()
+        })
+        it('returns undefined for an excluded env var', function() {
+            flowUtil.init({settings:{envVarExcludes:['foo1']}});
+            (flowUtil.getEnvVar("foo1") === undefined).should.be.true()
+        })
+
     });
 
     describe('#diffNodes',function() {
