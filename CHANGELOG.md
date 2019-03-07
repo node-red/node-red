@@ -10,7 +10,7 @@ Runtime
  - Remove remnants of when library in git/index Fixes #2057
  - Clear subflow status on close
  - Add exportGlobalContextKeys to prevent exposing functionGlobalContext keys
- - Add --no-audit flag to npm commands to reduce workload
+ - Add --no-audit and --no-update-notifier flags to npm commands to reduce workload
 
 Editor
  - Transfer placeholder and type to generated TypedInput field
