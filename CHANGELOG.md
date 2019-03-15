@@ -1,3 +1,11 @@
+#### 0.20.1: Maintenance Release
+
+ - Ensure all subflow instances are stopped when flow stopping Fixes #2095
+ - modify name of korean locale forders #2091
+ - Ensure node names are sanitized before being presented
+ - Subflow status node must pass status to parent flow Fixes #2087
+ - fix problem on displaying option label on Firefox #2090
+
 #### 0.20.0: Milestone Release
 
 Runtime
