@@ -1,3 +1,8 @@
+#### 0.20.2: Maintenance Release
+
+ - Filter out duplicate nodes when importing a flow
+ - Handle node configs with multiple external scripts properly
+
 #### 0.20.1: Maintenance Release
 
  - Ensure all subflow instances are stopped when flow stopping Fixes #2095
