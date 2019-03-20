@@ -1,3 +1,10 @@
+#### 0.20.3: Maintenance Release
+
+- Do not dynamically add/remove upgrade listener in ws nodes
+- Avoid env var reference loops and support $parent. prefix Fixes #2099
+- Ensure config.\_flow is non-enumerable so is ignored by JSON.stringify
+- Block loading ACE from cdn
+
 #### 0.20.2: Maintenance Release
 
  - Filter out duplicate nodes when importing a flow
