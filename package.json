@@ -74,7 +74,7 @@
         "iconv-lite": "0.4.24"
     },
     "optionalDependencies": {
-        "bcrypt": "~2.0.0"
+        "bcrypt": "3.0.5"
     },
     "devDependencies": {
         "grunt": "~1.0.3",
