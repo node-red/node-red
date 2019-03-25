@@ -19,7 +19,7 @@ var should = require("should");
 var stoppable = require('stoppable');
 var helper = require("node-red-node-test-helper");
 
-var tcpinNode = require("../../../../nodes/core/io/31-tcpin.js");
+var tcpinNode = require("nr-test-utils").require("@node-red/nodes/core/io/31-tcpin.js");
 
 
 describe('TCP in Node', function() {

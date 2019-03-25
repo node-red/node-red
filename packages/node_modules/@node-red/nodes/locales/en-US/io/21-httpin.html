@@ -1,0 +1,100 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http in">
+    <p>Creates an HTTP end-point for creating web services.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>For a GET request, contains an object of any query string parameters.
+            Otherwise, contains the body of the HTTP request.</dd>
+        <dt>req<span class="property-type">object</span></dt>
+        <dd>An HTTP request object. This object contains multiple properties that
+            provide information about the request.
+            <ul>
+             <li><code>body</code> - the body of the incoming request. The format
+                 will depend on the request.</li>
+             <li><code>headers</code> - an object containing the HTTP request headers.</li>
+             <li><code>query</code> - an object containing any query string parameters.</li>
+             <li><code>params</code> - an object containing any route parameters.</li>
+             <li><code>cookies</code> - an object containing the cookies for the request.</li>
+             <li><code>files</code> - if enabled within the node, an object containing
+                 any files uploaded as part of a POST request.</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">object</span></dt>
+        <dd>An HTTP response object. This property should not be used directly;
+            the <code>HTTP Response</code> node documents how to respond to a request.
+            This property must remain attached to the message passed to the response node.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The node will listen on the configured path for requests of a particular type.
+       The path can be fully specified, such as <code>/user</code>, or include
+       named parameters that accept any value, such as <code>/user/:name</code>.
+       When named parameters are used, their actual value in a request can be accessed under <code>msg.req.params</code>.</p>
+    <p>For requests that include a body, such as a POST or PUT, the contents of
+       the request is made available as <code>msg.payload</code>.</p>
+    <p>If the content type of the request can be determined, the body will be parsed to
+       any appropriate type. For example, <code>application/json</code> will be parsed to
+       its JavaScript object representation.</p>
+    <p><b>Note:</b> this node does not send any response to the request. The flow
+       must include an HTTP Response node to complete the request.</p>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>Sends responses back to requests received from an HTTP Input node.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>The body of the response.</dd>
+        <dt class="optional">statusCode <span class="property-type">number</span></dt>
+        <dd>If set, this is used as the response status code. Default: 200.</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>If set, provides HTTP headers to include in the response.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>If set, can be used to set or delete cookies.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The <code>statusCode</code> and <code>headers</code> can also be set within
+    the node itself. If a property is set within the node, it cannot be overridden
+    by the corresponding message property.</p>
+    <h4>Cookie handling</h4>
+    <p>The <code>cookies</code> property must be an object of name/value pairs.
+    The value can be either a string to set the value of the cookie with default
+    options, or it can be an object of options.<p>
+    <p>The following example sets two cookies - one called <code>name</code> with
+    a value of <code>nick</code>, the other called <code>session</code> with a
+    value of <code>1234</code> and an expiry set to 15 minutes.</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>The valid options include:</p>
+    <ul>
+    <li><code>domain</code> - (String) domain name for the cookie</li>
+    <li><code>expires</code> - (Date) expiry date in GMT. If not specified or set to 0, creates a session cookie</li>
+    <li><code>maxAge</code> - (String) expiry date as relative to the current time in milliseconds</li>
+    <li><code>path</code> - (String) path for the cookie. Defaults to /</li>
+    <li><code>value</code> - (String) the value to use for the cookie</li>
+    </ul>
+    <p>To delete a cookie, set its <code>value</code> to <code>null</code>.</p>
+
+</script>

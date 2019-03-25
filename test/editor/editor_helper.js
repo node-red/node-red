@@ -21,7 +21,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var app = express();
 
-var RED = require("../../red/red.js");
+var RED = require("nr-test-utils").require("node-red/lib/red.js");
 
 var utilPage = require("./pageobjects/util/util_page");
 
@@ -75,7 +75,6 @@ module.exports = {
             var flowFilename = getFlowFilename();
             browser.windowHandleMaximize();
             browser.call(function () {
-                // return when.promise(function(resolve, reject) {
                 return new Promise(function(resolve, reject) {
                     cleanup(flowFilename);
                     app.use("/",express.static("public"));

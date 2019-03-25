@@ -16,10 +16,10 @@
 
 var should = require("should");
 
-var switchNode = require("../../../../nodes/core/logic/10-switch.js");
+var switchNode = require("nr-test-utils").require("@node-red/nodes/core/logic/10-switch.js");
 var helper = require("node-red-node-test-helper");
-var RED = require("../../../../red/red.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var RED = require("nr-test-utils").require("node-red/lib/red");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context/");
 
 describe('switch Node', function() {
 

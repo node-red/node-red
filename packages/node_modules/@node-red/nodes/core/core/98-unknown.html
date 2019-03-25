@@ -1,0 +1,23 @@
+
+<script type="text/x-red" data-template-name="unknown">
+    <div class="form-tips"><span data-i18n="[html]unknown.tip"></span></div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('unknown',{
+        category: 'unknown',
+        color:"#fff0f0",
+        defaults: {
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "",
+        label: function() {
+            return "("+this.name+")"||this._("unknown.label.unknown");
+        },
+        labelStyle: function() {
+            return "node_label_unknown";
+        }
+    });
+</script>

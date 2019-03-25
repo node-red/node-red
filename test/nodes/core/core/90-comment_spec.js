@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var commentNode = require("../../../../nodes/core/core/90-comment.js");
+var commentNode = require("nr-test-utils").require("@node-red/nodes/core/core/90-comment.js");
 var helper = require("node-red-node-test-helper");
 
 describe('comment Node', function() {

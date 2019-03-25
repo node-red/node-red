@@ -1,0 +1,200 @@
+/*!
+ * Copyright JS Foundation and other contributors, http://js.foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+var fs = require("fs");
+var path = require('path');
+
+var runtime = require("@node-red/runtime");
+var redUtil = require("@node-red/util");
+
+var api = require("@node-red/editor-api");
+
+var server = null;
+var apiEnabled = false;
+
+function checkVersion(userSettings) {
+    var semver = require('semver');
+    if (!semver.satisfies(process.version,">=4.8.0")) {
+        // TODO: in the future, make this a hard error.
+        // var e = new Error("Unsupported version of node.js");
+        // e.code = "unsupported_version";
+        // throw e;
+        userSettings.UNSUPPORTED_VERSION = process.version;
+    }
+}
+/**
+ * This module provides the full Node-RED application, with both the runtime
+ * and editor components built in.
+ *
+ * The API this module exposes allows it to be embedded within another node.js
+ * application.
+ *
+ * @namespace node-red
+ */
+module.exports = {
+    /**
+     * Initialise the Node-RED application.
+     * @param {server} httpServer - the HTTP server object to use
+     * @param {Object} userSettings - an object containing the runtime settings
+     * @memberof node-red
+     */
+    init: function(httpServer, userSettings) {
+        if (!userSettings) {
+            userSettings = httpServer;
+            httpServer = null;
+        }
+
+        if (!userSettings.SKIP_BUILD_CHECK) {
+            checkVersion(userSettings);
+        }
+
+        if (!userSettings.coreNodesDir) {
+            userSettings.coreNodesDir = path.dirname(require.resolve("@node-red/nodes"))
+        }
+        redUtil.init(userSettings);
+        if (userSettings.httpAdminRoot !== false) {
+            // Initialise the runtime
+            runtime.init(userSettings,httpServer,api);
+            // Initialise the editor-api
+            api.init(userSettings,httpServer,runtime.storage,runtime);
+            // Attach the runtime admin app to the api admin app
+            api.httpAdmin.use(runtime.httpAdmin);
+
+            apiEnabled = true;
+            server = httpServer;
+        } else {
+            runtime.init(userSettings);
+            apiEnabled = false;
+            if (httpServer) {
+                server = httpServer;
+            } else {
+                server = null;
+            }
+        }
+        return;
+    },
+    /**
+     * Start the Node-RED application.
+     * @return {Promise} - resolves when complete
+     * @memberof node-red
+     */
+    start: function() {
+        return runtime.start().then(function() {
+            if (apiEnabled) {
+                return api.start();
+            }
+        });
+    },
+    /**
+     * Stop the Node-RED application.
+     * @return {Promise} - resolves when complete
+     * @memberof node-red
+     */
+    stop: function() {
+        return runtime.stop().then(function() {
+            if (apiEnabled) {
+                return api.stop();
+            }
+        })
+    },
+
+    /**
+     * Logging utilities
+     * @see @node-red/util_log
+     * @memberof node-red
+     */
+    log: redUtil.log,
+
+    /**
+     * General utilities
+     * @see @node-red/util_util
+     * @memberof node-red
+     */
+    util: redUtil.util,
+
+
+    /**
+     * This provides access to the internal nodes module of the
+     * runtime. The details of this API remain undocumented as they should not
+     * be used directly.
+     *
+     * Most administrative actions should be performed use the runtime api
+     * under [node-red.runtime]{@link node-red.runtime}.
+     *
+     * @memberof node-red
+     */
+    get nodes() { return runtime._.nodes },
+
+    /**
+     * Runtime events emitter
+     * @see @node-red/runtime_events
+     * @memberof node-red
+     */
+    events: runtime.events,
+
+    /**
+     * This provides access to the internal settings module of the
+     * runtime.
+     *
+     * @memberof node-red
+     */
+    get settings() { return runtime._.settings },
+
+
+    /**
+     * Get the version of the runtime
+     * @return {String} - the runtime version
+     * @function
+     * @memberof node-red
+     */
+    get version() { return runtime._.version },
+
+
+    /**
+     * The express application for the Editor Admin API
+     * @type ExpressApplication
+     * @memberof node-red
+     */
+    get httpAdmin() { return api.httpAdmin },
+
+    /**
+     * The express application for HTTP Nodes
+     * @type ExpressApplication
+     * @memberof node-red
+     */
+    get httpNode() { return runtime.httpNode },
+
+    /**
+     * The HTTP Server used by the runtime
+     * @type HTTPServer
+     * @memberof node-red
+     */
+    get server() { return server },
+
+    /**
+     * The runtime api
+     * @see @node-red/runtime
+     * @memberof node-red
+     */
+    runtime: runtime,
+
+    /**
+     * The editor authentication api.
+     * @see @node-red/editor-api_auth
+     * @memberof node-red
+     */
+    auth: api.auth
+};

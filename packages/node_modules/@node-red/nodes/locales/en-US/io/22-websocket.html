@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="websocket in">
+    <p>WebSocket input node.</p>
+    <p>By default, the data received from the WebSocket will be in <code>msg.payload</code>.
+    The socket can be configured to expect a properly formed JSON string, in which
+    case it will parse the JSON and send on the resulting object as the entire message.</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket out">
+    <p>WebSocket out node.</p>
+    <p>By default, <code>msg.payload</code> will be sent over the WebSocket. The socket
+    can be configured to encode the entire <code>msg</code> object as a JSON string and send that
+    over the WebSocket.</p>
+
+    <p>If the message arriving at this node started at a WebSocket In node, the message
+    will be sent back to the client that triggered the flow. Otherwise, the message
+    will be broadcast to all connected clients.</p>
+    <p>If you want to broadcast a message that started at a WebSocket In node, you
+    should delete the <code>msg._session</code> property within the flow.</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-listener">
+   <p>This configuration node creates a WebSocket Server endpoint using the specified path.</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-client">
+   <p>This configuration node connects a WebSocket client to the specified URL.</p>
+</script>

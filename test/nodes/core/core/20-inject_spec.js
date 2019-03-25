@@ -15,8 +15,8 @@
  **/
 
 var should = require("should");
-var injectNode = require("../../../../nodes/core/core/20-inject.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var injectNode = require("nr-test-utils").require("@node-red/nodes/core/core/20-inject.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('inject node', function() {
@@ -52,30 +52,30 @@ describe('inject node', function() {
     });
 
     function basicTest(type, val, rval) {
-	it('inject value ('+type+')', function (done) {
+        it('inject value ('+type+')', function (done) {
             var flow = [{id: "n1", type: "inject", topic: "t1", payload: val, payloadType: type, wires: [["n2"]], z: "flow"},
-			{id: "n2", type: "helper"}];
+            {id: "n2", type: "helper"}];
             helper.load(injectNode, flow, function () {
-		var n1 = helper.getNode("n1");
-		var n2 = helper.getNode("n2");
-		n2.on("input", function (msg) {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
                     try {
-			msg.should.have.property("topic", "t1");
-			if (rval) {
-			    msg.should.have.property("payload");
-			    should.deepEqual(msg.payload, rval);
-			}
-			else {
-			    msg.should.have.property("payload", val);
-			}
-			done();
+                        msg.should.have.property("topic", "t1");
+                        if (rval) {
+                            msg.should.have.property("payload");
+                            should.deepEqual(msg.payload, rval);
+                        }
+                        else {
+                            msg.should.have.property("payload", val);
+                        }
+                        done();
                     } catch (err) {
-			done(err);
+                        done(err);
                     }
-		});
-		n1.receive({});
+                });
+                n1.receive({});
             });
-	});
+        });
     }
 
     basicTest("num", 10);
@@ -503,16 +503,21 @@ describe('inject node', function() {
                                      done();
                                  });
                              });
-                             helper.request()
+                             try {
+                                 helper.request()
                                  .post('/inject/n1')
                                  .expect(200).end(function(err) {
                                      if (err) {
+                                         console.log(err);
                                          return helper.clearFlows()
-                                             .then(function () {
-                                                 done(err);
-                                             });
+                                         .then(function () {
+                                             done(err);
+                                         });
                                      }
                                  });
+                             } catch(err) {
+                                 done(err);
+                             }
                          });
         });
 

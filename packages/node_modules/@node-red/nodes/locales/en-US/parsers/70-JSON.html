@@ -1,0 +1,53 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="json">
+    <p>Converts between a JSON string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or JSON string.</dd>
+        <dt>schema<span class="property-type">object</span></dt>
+        <dd>An optional JSON Schema object to validate the payload against.
+        The property will be deleted before the <code>msg</code> is sent to the next node.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a JSON string it tries to parse it to a JavaScript object.</li>
+                <li>If the input is a JavaScript object it creates a JSON string. The string can optionally be well-formatted.</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">array</span></dt>
+        <dd>If JSON schema validation fails, the catch node will have a <code>schemaError</code> property
+            containing an array of errors.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>By default, the node operates on <code>msg.payload</code>, but can be configured
+       to convert any message property.</p>
+    <p>The node can also be configured to ensure a particular encoding instead of toggling
+       between the two. This can be used, for example, with the <code>HTTP In</code>
+       node to ensure the payload is a parsed object even if an incoming request
+       did not set its content-type correctly for the HTTP In node to do the conversion.</p>
+    <p>If the node is configured to ensure the property is encoded as a String and it
+       receives a String, no further checks will be made of the property. It will
+       not check the String is valid JSON nor will it reformat it if the format option
+       is selected.</p>
+    <p>For more details about JSON Schema you can consult the specification
+    <a href="http://json-schema.org/latest/json-schema-validation.html">here</a>.</p>
+</script>

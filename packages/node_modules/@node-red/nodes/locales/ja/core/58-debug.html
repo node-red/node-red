@@ -1,0 +1,26 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="debug">
+    <p>サイドバーの「デバッグ」タブに、選択したメッセージプロパティの値を表示します。設定により、ランタイムログへの出力も可能です。デフォルトの表示対象は<code>msg.payload</code>ですが、設定により、指定したプロパティ、メッセージ全体、もしくは、JSONata式の評価結果を出力できます。</p>
+    <h3>詳細</h3>
+    <p>「デバッグ」サイドバーは受け取ったメッセージの階層構造を表示する機能を備えます。この機能によりメッセージの構造を容易に理解できます。</p>
+    <p>JavaScriptオブジェクトと配列は必要に応じて折り畳んだり展開したりできます。バッファオブジェクトを生データとして表示したり、表現可能な場合に文字列として表示したりすることも可能です。</p>
+    <p>メッセージを受信した時刻、送信ノード、メッセージの型に関する情報を「デバッグ」サイドバーに表示されたメッセージに付随して表示します。送信元ノードのIDを選択すると、ワークスペース内の対応ノードを確認できます。</p>
+    <p>出力の有効/無効はノード上のボタンで切り替えられます。フロー上で未使用のdebugノードは、無効化するか削除することを推奨します。</p>
+    <p>全てのメッセージをランタイムログに送付、もしくは、(32文字の)短いデータをdebugノードの下のステータステキストに表示することも可能です。</p>
+</script>
+

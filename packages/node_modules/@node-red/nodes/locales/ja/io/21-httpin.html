@@ -1,0 +1,81 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http in">
+    <p>HTTPエンドポイントを作成し、Webサービスを構成します。</p>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>GETリクエストの場合、クエリパラメータからなるオブジェクト。それ以外の場合、HTTPリクエストの本体を指します。</dd>
+        <dt>req<span class="property-type">オブジェクト</span></dt>
+        <dd>HTTPリクエストオブジェクト。オブジェクトはリクエストの情報に関する複数のプロパティを含みます。
+            <ul>
+             <li><code>body</code> - リクエスト本体。形式はリクエストに依存します</li>
+             <li><code>headers</code> - HTTPリクエストヘッダを含むオブジェクト</li>
+             <li><code>query</code> - クエリパラメータを含むオブジェクト</li>
+             <li><code>params</code> - ルーティングパラメータを含むオブジェクト</li>
+             <li><code>cookies</code> - リクエストのクッキーを含むオブジェクト</li>
+             <li><code>files</code> - POSTリクエストでファイルのアップロードが設定で有効化されている場合、アップロード対象のファイル</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">オブジェクト</span></dt>
+        <dd>HTTPレスポンスオブジェクト。このプロパティを直接利用することは推奨しません。リクエストの処理方法については<code>HTTP Response</code>ノードのドキュメントを参照してください。このプロパティはresponseノードに渡すメッセージに付けたままとしてください。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>このノードは設定で指定したパスとリクエスト種別でリクエストを待ち受けます。パス指定は完全に指定する形式(例: <code>/user</code>)、もしくは、任意の値を受け付ける名前付きパラメータを含む形式(例: <code>/user/:name</code>)のいずれでも構いません。名前付きパラメータを指定する場合、リクエストで指定された実際の値は<code>msg.req.params</code>から参照できます。</p>
+    <p>POSTやPUTのようにリクエストボディを含むリクエストの場合、リクエストの内容は<code>msg.payload</code>で参照できます。</p>
+    <p>リクエストの要素タイプが識別可能な場合には、リクエストボディを適切な形式に変換します。例えば、<code>application/json</code>はJavaScriptオブジェクトに変換します。</p>
+    <p><b>注:</b> このノードはリクエストに対するレスポンスの送信は行いません。リクエストを処理するにはフローにHTTP Responseノードを含めてください。</p>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>HTTP Inノードで受け付けたリクエストに対するレスポンスを送り返します。</p>
+
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">文字列</span></dt>
+        <dd>レスポンス本体</dd>
+        <dt class="optional">statusCode <span class="property-type">数値</span></dt>
+        <dd>設定するとレスポンスのステータスコードとします。デフォルト: 200</dd>
+        <dt class="optional">headers <span class="property-type">オブジェクト</span></dt>
+        <dd>設定するとレスポンスのHTTPヘッダとします</dd>
+        <dt class="optional">cookies <span class="property-type">オブジェクト</span></dt>
+        <dd>設定するとクッキーを設定もしくは削除するために使用します</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p><code>statusCode</code>と<code>headers</code>はノードの設定で指定することも可能です。ノードの設定でプロパティを指定した場合には、対応するメッセージプロパティは使用しません。</p>
+    <h4>クッキーの処理</h4>
+    <p><code>cookies</code>はキー/値の組からなるオブジェクトとします。値にはデフォルトオプションを使ってクッキーの値として設定する文字列、もしくは、オプションを含むオブジェクトを指定できます。</p>
+    <p>以下の例では2つのクッキーを設定しています。1つ目は<code>name</code>でその値は<code>nick</code>、2つ目は<code>session</code>で値は<code>1234</code>、有効期限として15分を指定しています。</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>有効なオプションには以下があります。</p>
+    <ul>
+    <li><code>domain</code> - (文字列) クッキーのドメイン指定</li>
+    <li><code>expires</code> - (日時) GMT表現での有効期限。未指定もしくは0を指定した場合、セッション終了まで有効</li>
+    <li><code>maxAge</code> - (文字列) 現時刻からの経過ミリ秒で表した有効期限</li>
+    <li><code>path</code> - (文字列) クッキーのパス。デフォルトは「/」</li>
+    <li><code>value</code> - (文字列) クッキーの値</li>
+    </ul>
+    <p>クッキーを削除するには、<code>value</code>に<code>null</code>を設定します。</p>
+
+</script>

@@ -18,7 +18,7 @@ var ws = require("ws");
 var when = require("when");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
-var websocketNode = require("../../../../nodes/core/io/22-websocket.js");
+var websocketNode = require("nr-test-utils").require("@node-red/nodes/core/io/22-websocket.js");
 
 var sockets = [];
 
@@ -454,7 +454,7 @@ describe('websocket Node', function() {
                 });
                 getSocket("n1").on("open", function() {
                     helper.getNode("n3").send({
-                        payload: new Buffer("hello")
+                        payload: Buffer.from("hello")
                     });
                 });
             });
@@ -481,7 +481,7 @@ describe('websocket Node', function() {
             });
         });
 
-        it('should feedback', function(done) {
+        it('should NOT feedback more than once', function(done) {
             var flow = [
                 { id: "server", type: "websocket-listener", path: "/ws", wholemsg: "true" },
                 { id: "client", type: "websocket-client", path: getWsUrl("/ws"), wholemsg: "true" },
@@ -497,11 +497,13 @@ describe('websocket Node', function() {
                 });
                 var acc = 0;
                 helper.getNode("output").on("input", function(msg) {
-                    if (acc++ > 20) {
-                        helper.clearFlows();
-                        done();
-                    }
+                    acc = acc + 1;
                 });
+                setTimeout( function() {
+                    acc.should.equal(1);
+                    helper.clearFlows();
+                    done();
+                }, 250);
             });
         });
     });

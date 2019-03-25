@@ -1,0 +1,74 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="rpi-gpio in">
+    <p> Raspberry Pi-Empfangsknoten. Generiert eine <code>msg.payload</code> mit einem Wert von 
+        0 oder 1 in Abhängigkeit vom Status des Eingabepins. </p>
+        <h3> Ausgaben </h3>
+        <dl class="message-properties">
+            <dt> payload  <span class="property-type"> Zahl </span> </dt>
+            <dd> Die Nutzdaten sind 1 oder 0. </dd>
+            <dt> topic  <span class="property-type"> Zeichenfolge </span> </dt>
+            <dd> Das Thema wird auf  <code>pi/ { the pin number }</code> gesetzt. </dd>
+        </dl>
+        <h3> Details </h3>
+        <p> Sie können auch den Eingangs-Pullup-Widerstand oder den Pulldown-Widerstand aktivieren. </p>
+        <p> Erfordert die Python-Bibliothek RPi.GPIO in der Version 0.5.10 (oder besser). </p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-gpio out">
+    <p> Raspberry Pi-Ausgabeknoten. Kann im Digital- oder PWM-Modus verwendet werden. </p>
+    <h3> Eingaben </h3>
+    <dl class="message-properties">
+        <dt> payload  <span class="property-type"> Zahl | Zeichen | Boolean </span> </dt>
+    </dl>
+    <h3> Details </h3>
+    <p> Der digitale Modus erwartet der Knoten eine <code>msg.payload</code>  von entweder 0 oder 1 (oder false oder true)
+    und schaltet den ausgewählten physischen Pin in Abhängigkeit von dem übergebenen Wert entweder auf LOW oder HIGH. </p>
+    <p> Der Anfangswert für den Pin kann bei der Implementierung auf 0 oder 1 gesetzt werden. </p>
+    <p> Im PWM-Modus erwartet der Knoten einen Eingabewert mit der Zahl 0-100. Es kann ein Gleitkommazahl sein. </p>
+    <p> Der PWM-Modus kann verwendet werden, um einen Servo unter Verwendung von Eingabewerten nur zwischen 10 und 20 zu steuern, 
+        akzeptiert aber auch Gleitkommawerte. Der GPIO2-Pin eignet sich am besten dafür, da er Hardware-PWM unterstützt. Für eine bessere Servounterstützung 
+        sollten Sie den alternativen Knoten <pre>Node-red-node-pi-gpiod</pre> berücksichtigen. </p>
+    <p> Erfordert die Python-Bibliothek RPi.GPIO in der Version 0.5.10 (oder besser). </p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-mouse">
+    <p> Raspberry Pi-Maustastenknoten. Erfordert eine USB-Maus. </p>
+    <h3>Ausgaben </h3>
+    <dl class="message-properties">
+        <dt> payload  <span class="property-type"> Zahl </span> </dt>
+        <dd> 1 oder 0, wenn die ausgewählte Maustaste gedrückt und losgelassen wird. </dd>
+        <dt> Schaltfläche  <span class="property-type"> Zahl </span> </dt>
+        <dd> 1, 2, 4 entsprechend der linken, der rechten und der mittleren Taste, so dass Sie herausfinden können, 
+            welche Schaltfläche oder Kombination gedrückt wurde. </dd>
+        <dt> topic  <span class="property-type"> Zeichenfolge </span> </dt>
+        <dd>wird auf: <code>pi/mouse</code> gesetzt</dd>
+    </dl>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-keyboard">
+    <p>Raspberry Pi Tastaturknoten. Benötigt eine USB Tastatur.</p>
+    <h3>Ausgaben</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">Zahl</span></dt>
+        <dd>enthält den Tastaturcode value</dd>
+        <dt>action <span class="property-type">Zeichenfolge</span></dt>
+        <dd>wird auf "up", "down", oder "repeat" gesetzt</dd>
+        <dt>topic <span class="property-type">Zeichenfolge</span></dt>
+        <dd>wird auf <code>pi/key</code> gesetzt</dd>
+    </dl>
+</script>

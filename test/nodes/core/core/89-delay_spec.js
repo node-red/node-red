@@ -16,7 +16,7 @@
 
 var should = require("should");
 
-var delayNode = require("../../../../nodes/core/core/89-delay.js");
+var delayNode = require("nr-test-utils").require("@node-red/nodes/core/core/89-delay.js");
 var helper = require("node-red-node-test-helper");
 
 var GRACE_PERCENTAGE=10;
@@ -570,6 +570,152 @@ describe('delay Node', function() {
             delayNode1.receive({payload:3,topic:"A"});  //  ditto
             delayNode1.receive({payload:2});            // so all should go on first tick
             delayNode1.receive({payload:4,topic:"A"});  //  and nothing on second
+        });
+    });
+
+    it('can flush delay queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,100);
+                        c = c + 1;
+                    }
+                    else {
+                        if (msg.topic === "bar") {
+                            msg.payload.should.equal(1);
+                            (Date.now() - t).should.be.approximately(0,100);
+                            c = c + 1;
+                        }
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});            // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({flush:true});  });          // reset the queue
+        });
+    });
+
+    it('can reset delay queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                c = c + 1;
+            });
+
+            setTimeout( function() {
+                if (c === 0) { done(); }
+            }, 700);
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});            // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({reset:true});  });          // reset the queue
+        });
+    });
+
+    it('can flush rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,100);
+                        c = c + 1;
+                    }
+                    else {
+                        if (msg.topic === "bar") {
+                            msg.payload.should.equal(1);
+                            (Date.now() - t).should.be.approximately(0,100);
+                            c = c + 1;
+                        }
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});            // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({flush:true});  });          // reset the queue
+        });
+    });
+
+    it('can reset rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,100);
+                        c = c + 1;
+                    }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            setTimeout( function() {
+                if (c === 1) { done(); }
+            }, 700);
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});            // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
+            setImmediate( function() { delayNode1.receive({reset:true});  });          // reset the queue
         });
     });
 });

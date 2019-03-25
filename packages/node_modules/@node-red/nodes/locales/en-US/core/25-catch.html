@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="catch">
+    <p>Catch errors thrown by nodes on the same tab.</p>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>error.message <span class="property-type">string</span></dt>
+        <dd>the error message.</dd>
+        <dt>error.source.id <span class="property-type">string</span></dt>
+        <dd>the id of the node that threw the error.</dd>
+        <dt>error.source.type <span class="property-type">string</span></dt>
+        <dd>the type of the node that threw the error.</dd>
+        <dt>error.source.name <span class="property-type">string</span></dt>
+        <dd>the name, if set, of the node that threw the error.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>If a node throws an error whilst handling a message, the flow will typically
+       halt. This node can be used to catch those errors and handle them with a
+       dedicated flow.</p>
+    <p>By default, the node will catch errors thrown by any node on the same tab. Alternatively
+    it can be targetted at specific nodes, or configured to only catch errors that
+    have not already been caught by a 'targeted' catch node.</p>
+    <p>When an error is thrown, all matching catch nodes will receive the message.</p>
+    <p>If an error is thrown within a subflow, the error will get handled by any
+       catch nodes within the subflow. If none exists, the error will be propagated
+       up to the tab the subflow instance is on.</p>
+   <p>If the message already has a <code>error</code> property, it is copied to <code>_error</code>.</p>
+</script>

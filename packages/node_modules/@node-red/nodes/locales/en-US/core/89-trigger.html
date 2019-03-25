@@ -1,0 +1,45 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="trigger">
+    <p>When triggered, can send a message, and then optionally a second message, unless extended or reset.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">reset</dt>
+        <dd>If a message is received with this property, any timeout or repeat
+        currently in progress will be cleared and no message triggered.</dd>
+    </dl>
+
+    <h3>Details</h3>
+    <p>This node can be used to create a timeout within a flow. By default, when
+    it receives a message, it sends on a message with a <code>payload</code> of <code>1</code>.
+    It then waits 250ms before sending a second message with a <code>payload</code> of <code>0</code>.
+    This could be used, for example, to blink an LED attached to a Raspberry Pi GPIO pin.</p>
+    <p>The payloads of each message sent can be configured to a variety of values, including
+    the option to not send anything. For example, setting the initial message to <i>nothing</i> and
+    selecting the option to extend the timer with each received message, the node will
+    act as a watchdog timer; only sending a message if nothing is received within the
+    set interval.</p>
+    <p>If set to a <i>string</i> type, the node supports the mustache template syntax.</p>
+    <p>If the node receives a message with a <code>reset</code> property, or a <code>payload</code>
+    that matches that configured in the node, any timeout or repeat currently in
+    progress will be cleared and no message triggered.</p>
+    <p>The node can be configured to resend a message at a regular interval until it
+    is reset by a received message.</p>
+    <p>Optionally, the node can be configured to treat messages with <code>msg.topic</code> as if they
+    are separate streams.</p>
+</script>

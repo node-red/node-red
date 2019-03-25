@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var debugNode = require("../../../../nodes/core/core/58-debug.js");
+var debugNode = require("nr-test-utils").require("@node-red/nodes/core/core/58-debug.js");
 var helper = require("node-red-node-test-helper");
 var WebSocket = require('ws');
 
@@ -356,6 +356,22 @@ describe('debug node', function() {
         });
     });
 
+    it('should publish complete message with edit', function(done) {
+        var flow = [{id:"n1", type:"debug", name:"Debug", complete: "true",
+                     targetType: "jsonata", complete: '"<" & payload & ">"'}];
+        helper.load(debugNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload:"test"});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",data:{id:"n1",name:"Debug",msg:"<test>",
+                    format:"string[6]"}
+                }]);
+            }, done);
+        });
+    });
+
     it('should truncate a long message', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
@@ -506,7 +522,7 @@ describe('debug node', function() {
         helper.load(debugNode, flow, function() {
             var n1 = helper.getNode("n1");
             websocket_test(function() {
-                n1.emit("input", {payload: new Buffer.from('HELLO', 'utf8')});
+                n1.emit("input", {payload: Buffer.from('HELLO', 'utf8')});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",

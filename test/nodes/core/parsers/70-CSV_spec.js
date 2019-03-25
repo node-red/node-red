@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var csvNode = require("../../../../nodes/core/parsers/70-CSV.js");
+var csvNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-CSV.js");
 var helper = require("node-red-node-test-helper");
 
 describe('CSV node', function() {
@@ -132,6 +132,38 @@ describe('CSV node', function() {
             });
         });
 
+        it('should leave numbers starting with 0 and + as strings (except 0.)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 123, b: "0123", c: '+123', d: -123 });
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '123,0123,+123,-123'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should leave handle strings with scientific notation as numbers', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 12000, b: 0.012, c: -12000, d: -0.012 });
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '12E3,12e-3,-12e3,-12E-3'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
 
         it('should allow quotes in the input', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
@@ -141,7 +173,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: '04', e: '-05', f: 'ab"cd', g: 'with,a,comma' });
                     check_parts(msg, 0, 1);
                     done();
                 });
@@ -200,7 +232,7 @@ describe('CSV node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    msg.should.have.property('payload', [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: 7, d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
+                    msg.should.have.property('payload', [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: '07', d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
                     msg.should.not.have.property('parts');
                     done();
                 });

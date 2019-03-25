@@ -14,8 +14,13 @@
  * limitations under the License.
  **/
 
-function open() {
+function open(retainMessage) {
     browser.clickWithWait('#red-ui-tab-debug-link-button');
+
+    if (!retainMessage) {
+        // Clear old messages
+        browser.clickWithWait('//a[@id="debug-tab-clear"]');
+    }
 }
 
 function getMessage(index) {

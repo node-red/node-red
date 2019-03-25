@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var jsonNode = require("../../../../nodes/core/parsers/70-JSON.js");
+var jsonNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-JSON.js");
 var helper = require("node-red-node-test-helper");
 
 describe('JSON node', function() {
@@ -80,6 +80,66 @@ describe('JSON node', function() {
         });
     });
 
+    it('should convert a boolean to a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, 'true');
+                done();
+            });
+            var obj = true;
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a json string to a boolean', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, true);
+                done();
+            });
+            var obj = "true";
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a number to a json string', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, '2019');
+                done();
+            });
+            var obj = 2019;
+            jn1.receive({payload:obj});
+        });
+    });
+
+    it('should convert a json string to a number', function(done) {
+        var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.payload, 1962);
+                done();
+            });
+            var obj = '1962';
+            jn1.receive({payload:obj});
+        });
+    });
+
     it('should log an error if asked to parse an invalid json string', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
@@ -113,21 +173,15 @@ describe('JSON node', function() {
                     var logEvents = helper.log().args.filter(function(evt) {
                         return evt[0].type == "json";
                     });
-                    logEvents.should.have.length(3);
+                    logEvents.should.have.length(1);
                     logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].msg.toString().should.eql('json.errors.dropped');
-                    logEvents[1][0].should.have.a.property('msg');
-                    logEvents[1][0].msg.toString().should.eql('json.errors.dropped');
-                    logEvents[2][0].should.have.a.property('msg');
-                    logEvents[2][0].msg.toString().should.eql('json.errors.dropped-object');
+                    logEvents[0][0].msg.toString().should.eql('json.errors.dropped-object');
                     done();
                 } catch(err) {
                     done(err);
                 }
-            },150);
-            jn1.receive({payload:true});
-            jn1.receive({payload:1});
-            jn1.receive({payload:new Buffer("a")});
+            },50);
+            jn1.receive({payload:Buffer.from("a")});
         });
     });
 
@@ -431,6 +485,38 @@ describe('JSON node', function() {
             } catch(err) {
                 done(err);
             }
+        });
+    });
+
+    it('msg.schema property should be deleted before sending to next node (string input)', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.schema, undefined);
+                done();
+            });
+            var jsonString =  '{"number":3,"string":"allo"}';
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonString, schema:schema});
+        });
+    });
+
+    it('msg.schema property should be deleted before sending to next node (object input)', function(done) {
+        var flow = [{id:"jn1",type:"json",action:"str",wires:[["jn2"]]},
+                    {id:"jn2", type:"helper"}];
+        helper.load(jsonNode, flow, function() {
+            var jn1 = helper.getNode("jn1");
+            var jn2 = helper.getNode("jn2");
+            jn2.on("input", function(msg) {
+                should.equal(msg.schema, undefined);
+                done();
+            });
+            var jsonObject =  {"number":3,"string":"allo"};
+            var schema = {title: "testSchema", type: "object", properties: {number: {type: "number"}, string: {type: "string" }}};
+            jn1.receive({payload:jsonObject, schema:schema});
         });
     });
 });
