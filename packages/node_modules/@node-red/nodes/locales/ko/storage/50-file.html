@@ -1,0 +1,59 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="file">
+    <p><code>msg.payload</code>를 파일로 내보냅니다. 내보내기는, 파일의 마지막에 추기 혹은 기존 내용의 치환을 선택할 수 있습니다. 또한, 파일을 삭제하는 것도 가능합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">문자열</span></dt>
+        <dd>대상 파일명을 노드에 설정하지않은 경우, 이 프로퍼티로 파일을 지정할 수 있습니다</dd>
+    </dl>
+    <h3>출력</h3>
+    <p>작성 완료시, 입력메세지를 출력단자로 송출합니다합니다.</p>
+    <h3>상세</h3>
+    <p>입력메세지의 페이로드를 파일의 마지막에 추가합니다. 줄 바꿈(\n)을 각 데이터의 마지막에 추가할 수도 있습니다.</p>
+    <p><code>msg.filename</code>을 사용하는 경우, 작성을 수행할 때 마다 파일을 클로즈 합니다. 보다 좋은 성능을 얻기 위해서는 파일명을 노드에 설정해 주세요.</p>
+    <p>추가하는 대신에, 파일전체를 덮어쓰기 하도록 설정할 수도 있습니다. 예를 들면, 이미지와 같은 바이너리 데이터를 파일로 작성하는 경우에는, 이 옵션을 지정하여, 줄 바꿈을 추가하는 옵션을 지정하지 않도록 합니다.</p>
+    <p>파일을 출력할 때의 인코딩은, 인코딩리스트에서 선택할 수 있습니다.</p>
+    <p>또한, 파일을 삭제할 수도 있습니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>파일 내용을 문자열 혹은 바이너리버퍼로 불러옵니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">문자열</span></dt>
+        <dd>불러올 대상 파일명을 노드에 설정하지않은 경우, 이 프로퍼티에서 파일을 지정할 수 있습니다</dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">문자열 | 버퍼</span></dt>
+        <dd>파일 내용을 문자열 혹은 버퍼로 표현합니다</dd>
+        <dt class="optional">filename <span class="property-type">문자열</span></dt>
+        <dd>불러올 대상 파일명을 노드에 설정하지않은 경우, 이 프로퍼티에서 파일을 지정합니다</dd>
+        <dt class="optional">error <span class="property-type">오브젝트</span></dt>
+        <dd><i>비권장</i>: 설정에서 유효로 한 경우, 파일을 불러올 때에 에러가 발생하면 <code>payload</code>을 갖지 않고 <code>error</code>프로퍼티에 에러의 상세정보를 설정한 메세지를 송신합니다. 이 동작모드는 권장하지 않으며, 새로운 노드를 사용할 때의 기본값으로는 무효로 하고 있습니다. 자세한 사항은 아래를 참조해 주세요.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>파일이름은 절대패스에서 지정할 것을 권장합니다. 절대패스를 지정하지 않는 경우에는, Node-RED프로세스의 워킹디렉토리로부터의 상대패스로서 취급합니다.</p>
+    <p>Windows에서는 패스를 나누는 문자를(예를 들면, <code>\\유저\\이름</code>과 같이)이스케이프 할 필요가 있습니다.</p>
+    <p>텍스트파일인 경우, 행 마다 분할하여 각각 메세지를 송신할 수 있습니다. 또, 바이너리파일인 경우, 작은 덩어리의 버퍼로 분할하여 송신할 수 있습니다. 버퍼의 분할단위는 오퍼레이팅시스템에 의존하지만, 일반적으로 64k(Linux/Mac) 혹은 41k(Windows)입니다.</p>
+    <p>복수의 메세지로 분할하는 경우, 각 메세지에는 <code>parts</code>프로퍼티가 설정되어, 메세지열을 구성합니다.</p>
+    <p>주력형식이 문자열인 경우, 입력데이터의 인코딩을 인코딩리스트로부터 선택할 수 있습니다.</p>
+    <h4>구식의 에러 처리</h4>
+    <p>Node-RED 0.17보다 이전의 버젼에서는, 파일을 불러올 때에 에러가 발생하면 <code>payload</code>를 갖지않고 <code>error</code>프로퍼티에 에러의 상세정보를 설정한 메세지를 송신합니다. 이 동작모드는 권장하지 않으며, 새로운 노드를 사용할 때의 기본값으로는 무효로 하고 있습니다. 노드설정으로, 필요에 따라 이 모드를 유효화 할 수 있습니다.</p>
+    <p>에러는 Catch노드로 보충하여 처리할것을 권장합니다.</p>
+</script>

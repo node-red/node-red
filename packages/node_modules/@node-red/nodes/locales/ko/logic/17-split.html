@@ -1,0 +1,138 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="split">
+    <p>메세지를 메세지열로 분할합니다.</p>
+
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 문자열 | 배열 | 버퍼</span></dt>
+        <dd><code>msg.payload</code>の타입에 의해 노드의 동작이 다릅니다.
+            <ul>
+                <li><b>문자열</b>/<b>버퍼</b> - 지정된 문자열 (기본값: <code>\n</code>), 버퍼열, 혹은 고정된 길이에 의해 메세지를 분할합니다.</li>
+                <li><b>배열</b> - 메세지을 배열요소마다 혹은 고정된 길이의 배열로 분할합니다.</li>
+                <li><b>오브젝트</b> - 키/값의 각 조합에 대해 메세지를 송신합니다.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">오브젝트</span></dt>
+        <dd>원래 메세지를 어떻게 분할했는지에 관한 정보를 이 프로퍼티에 유지합니다. 예를 들면, <b>join</b>노드에 전하여, 메세지열을 하나의 메세지로 재구성할 수 있습니다. <code>parts</code>프로퍼티는 다음 프로퍼티를 포함합니다.
+        <ul>
+            <li><code>id</code> - 메세지그룹의 식별자</li>
+            <li><code>index</code> - 그룹 내의 위치</li>
+            <li><code>count</code> - 이미 알고 있는 경우, 그룹 내의 메세지수를 설정. 아래의 '스트림모드'를 참조</li>
+            <li><code>type</code> - 메세지 타입 - 문자열/배열/오브젝트/버퍼</li>
+            <li><code>ch</code> - 문자열 혹은 버퍼인 경우, 메세지를 분할하기 위해 사용한 문자열 혹은 바이트배열</li>
+            <li><code>key</code> - 오브젝트인 경우, 메세지가 생성된 부분의 키.
+노드의 설정에 의해 키를 <code>msg.topic</code>등 다른 메세지프로퍼티로 복사할 수도 있습니다.</li>
+            <li><code>len</code> - 메세지를 고정된 길이로 분할한 경우의 길이.</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>상세</h3>
+    <p>이 노드는, 메세지열을 구성하는 메세지에 대해 공통 처리를 수행하고, <b>join</b>노드에서 하나의 메세지로 정리하는 플로우를 작성할 때에 유용합니다.</p>
+    <p><code>msg.parts</code>프로퍼티를 사용하여 원래의 메세지와 메세지열과의 대응관계를 기억합니다.</p>
+    <h4>스트림모드</h4>
+    <p>이 노드는 메세지열을 재구성하여 송신할 때에도 유용합니다. 예를 들면, 줄 바꿈 마지막의 커맨드를 송신하는 시리얼 디바이스에서는, 메세지의 마지막 커맨드부분이 끊어진 메세지를 송출하는 경우가 있습니다. '스트림모드'를 사용하여, 완결된 개별 커맨드에 메세지를 분할할 수 있습니다. 입력메세지 마지막에 미완성 부분이 있는 경우, <b>split</b>노드는 미완성부분을 기억하고, 다음에 수신한 메세지 앞부분에 추가합니다.</p>
+    <p>이 모드에서 처리할 때에는, 메세지 수를 미리 알 수 없기 때문에, <code>msg.parts.count</code>프로퍼티는 설정되지 않습니다. 따라서, <b>join</b>노드의 '자동모드'와 조합할 수 없습니다.</p>
+</script>
+
+
+<script type="text/x-red" data-help-name="join">
+    <p>메세지열를 결합하여 하나의 메세지로 만듭니다.</p>
+    <p>메세지의 결합에는 다음 3개의 모드를 이용할 수 있습니다.</p>
+    <dl>
+        <dt>자동</dt>
+        <dd><b>split</b>노드와 조합하여, split과 역으로 메세지를 결합하는 처리를 수행합니다.</dd>
+        <dt>수동</dt>
+        <dd>메세지열을 다양한 방법으로 결합합니다.</dd>
+        <dt>열의 집약</dt>
+        <dd>메세지열에 대해 지정한 식을 적용하여, 하나의 메세지로 집약합니다.</dd>
+    </dl>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">오브젝트</span></dt>
+        <dd>자동적으로 메세지열을 결합하기 위해서는, 모든 메세지가 이 프로퍼티를 갖고 있어야합니다. <b>split</b>노드로 이 프로퍼티를 생성할 수 있지만, 독자적으로 생성해도 무관합니다. <code>parts</code>프로퍼티는 아래의 프로퍼티를 포함합니다.
+        <ul>
+            <li><code>id</code> - 메세지그룹의 식별자</li>
+            <li><code>index</code> - 그룹 내의 순서</li>
+            <li><code>count</code> - 그룹을 구성하는 메세지 수</li>
+            <li><code>type</code> - 메세지 타입 - string/array/object/buffer</li>
+            <li><code>ch</code> - 문자열 혹은 버퍼인 경우, 메세지를 분할할 때 사용한 문자열 혹은 바이트배열</li>
+            <li><code>key</code> - 오브젝트인 경우, 메세지가 생성된 부분의 키</li>
+            <li><code>len</code> - 메세지를 고정된 길이로 분할한 경우의 길이</li>
+        </ul>
+        </dd>
+        <dt class="optional">complete</dt>
+        <dd>설정되어 있는 경우, 유지하고 있는 메세지를 결합하여 송신합니다.</dd>
+    </dl>
+    <h3>상세</h3>
+
+    <h4>자동모드</h4>
+    <p>자동모드에서는, 입력메세지의 <code>parts</code>프로퍼티를 이용하여 메세지열을 결합합니다. 이 모드는 <b>split</b>노드의 처리의 역을 자동적으로 수행합니다.</p>
+
+    <h4>수동모드</h4>
+    <p>수동모드에서는, 메세지열을 다양한 결과로 결합할 수 있습니다.</p>
+    <ul>
+        <li><b>문자열</b>혹은 <b>버퍼</b> - 지정한 문자열 혹은 버퍼값을 기준으로 나누어 각 메세지의 지정된 프로퍼티를 결합</li>
+        <li><b>배열</b> - 지정프로퍼티 혹은 메세지 전체를 요소로 하는 배열</li>
+        <li><b>key/value오브젝트</b> - 입력메세지의 지정된 프로퍼티 값을 키로 하여, 프로퍼티값을 스토어한 오브젝트</li>
+        <li><b>통합오브젝트</b> - 각 메세지의 프로퍼티를 하나의 오브젝트로 통합</li>
+    </ul>
+    <p>출력메세지의 그 외의 프로퍼티는 메세지를 송신하기 직전의 메세지를 복사합니다.</p>
+    <p>'<i>합계값</i>'에는 출력메세지를 송신하기 전에 수신해야 할 메세지 수를 지정합니다. 오브젝트 출력인 경우, 이 합계값에 달하면 후속 메세지가 도착할 때 마다 메세지를 출력하도록 설정할 수도 있습니다.</p>
+    <p>'<i>초</i>'에는 신규 메세지를 송신하기 까지의 경과시간을설정합니다.</p>
+    <p><code>msg.complete</code>프로퍼티를 설정한 메세지를 수신하면, 출력메세지를 송신합니다. 이 때, 메세지열 수를 리셋합니다.</p>
+    <p><code>msg.reset</code>프로퍼티를 설정한 메세지를 수신하면, 부분적으로 수신된 메세지를 파기합니다. 이러한 메세지는 송신되지 않습니다. 이 때, 메세지열 수를 리셋합니다.</p>
+
+    <h4>열의 집약모드</h4>
+    <p>열의 집약모드를 선택하면, 메세지열을 구성하는 각각의 메세지에 대해 식을 적용햐여, 집약한 값을 이용하여 하나의 메세지를 구성합니다.</p>
+    <dl class="message-properties">
+        <dt>초기값</dt>
+        <dd>
+            집약의 초기값(<code>$A</code>)
+        </dd>
+        <dt>집약식</dt>
+        <dd>메세지그룹을 구성하는 각 메세지에 적용되는 JSONata식.
+            식의 평가결과는 다음 호출때에 집약값으로 전달합니다.
+            <ul>
+                <li><code>$A</code> 집약값</li>
+                <li><code>$I</code> 그룹 내의 메세지 순서</li>
+                <li><code>$N</code> 그룹 내의 메세지 수</li>
+            </ul>
+        </dd>
+        <dt>최종조정식</dt>
+        <dd>메세지그룹의 집약이 완료된 후에 적용되는 JSONata식. 임의로 지정가능 합니다. 식에는 아래의 특수변수를 참조할 수 있습니다.
+            <ul>
+                <li><code>$A</code> 집약값</li>
+                <li><code>$N</code> 그룹 내의 메세지 수</li>
+            </ul>
+        </dd>
+        <p>메세지그룹의 메세지에 대해, 기본값으로는 집약식은 처음 메세지로 부터 마지막 메세지에 대해 순서대로 적용됩니다. 적용을 역순으로 하는 것도 가능합니다.</p>
+    </dl>
+    <p><b>예:</b> 아래의 설정으로, 수 값의 메세지열에 대해 평균값을 계산합니다.
+        <ul>
+            <li><b>집약식</b>: <code>$A+payload</code></li>
+            <li><b>초기값</b>: <code>0</code></li>
+            <li><b>최종조정식</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+
+    <h4>메세지의 축적</h4>
+    <p>이 노드의 처리에서는 메세지열의 처리를 위해 메세지를 내부에 축적합니다. <code>nodeMessageBufferMaxLength</code>를 지정하여 축적할 메세지의 최대값을 제한할 수 있습니다.</p>
+</script>

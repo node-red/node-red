@@ -1,0 +1,44 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="csv">
+    <p>CSV형식의 문자열과 그 JavaScript오브젝트 표현의 사이에서 쌍방향의 변환을 수행합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 배열 | 문자열</span></dt>
+        <dd>JavaScript오브젝트, 배열, CSV문자열 중 하나</dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 배열 | 문자열</span></dt>
+        <dd>
+        <ul>
+            <li>입력이 문자열인 경우, CSV로서 해석하여 CSV의 각 행을 키/값으로 구성된 JavaScript오브젝트를 생성합니다.
+                각 행마다 메세지를 송신할지, 오브젝트의 배열로 된 하나의 메세지를 송신할지를 선택할 수 있습니다.</li>
+            <li>입력이 JavaScript오브젝트인 경우, CSV문자열로의 변환을 수행합니다.</li>
+            <li>입력이 기본형인 배열의 경우, 1행의 CSV문자열로 변환합니다.</li>
+            <li>입력이 배열의 배열, 혹은 오브젝트의 배열인 경우, 복수행의 CSV문자열로 변환합니다.</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>상세</h3>
+    <p>'열 이름'에 컬럼명의 리스트를 지정할 수 있습니다. CSV에서 오브젝트로 변환을 수행할 때, 컬럼명을 프로퍼티명으로 사용합니다. '열 이름'대신에 CSV데이터의 첫번째 행에 컬럼명을 포함시킬 수 도 있습니다.</p>
+    <p>CSV로의 변환을 수행할 때에는, 오브젝트에서 취득해야 할 프로퍼티와 그 순서를 '열 이름'을 참조하여 결정합니다.</p>
+    <p>입력이 배열인 경우에는, '열 이름'은 컬럼명을 나타내는 행의 출력이 지정된 경우에만 사용합니다.</p>
+    <p><code>parts</code>프로퍼티가 정확하게 설정되어 있는 경우, 메세지열을 입력으로 접수합니다.</p>
+    <p>CSV를 복수의 메세지로 변환하여 출력할 경우, 출력이 메세지열이 되도록 <code>parts</code>프로퍼티를 설정합니다.</p>
+    <p><b>주:</b> 콤마 이외의 구분문자를 설정한 경우여도, '열 이름'은 콤마로 구분해 주세요.</p>
+</script>
