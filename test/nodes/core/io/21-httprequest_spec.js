@@ -979,6 +979,29 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo", requestTimeout: -4});
             });
         });
+        it('should show a warning if msg.requestTimeout is set to 0', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/text')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode', 200);
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(2);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().WARN, id:'n1',type:'http request',msg:'httpin.errors.timeout-isnegative', timestamp:tstmp});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: 0});
+            });
+        });
         it('should pass if response time is faster than timeout set via msg.requestTimeout', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout50ms')},
                 {id:"n2", type:"helper"}];
