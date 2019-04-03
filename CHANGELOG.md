@@ -4,13 +4,14 @@
 - Use userObj.username and not .name for ssh key lookup Closes #2109
 - Ensure mqtt message handlers are tidied up properly on partial deploy
 - Update package dependencies
+- Fix encoding menu in file node #2125
 - Update ACE to 1.4.3-src-min-noconflict Fixes #2106
 - Fix creating missing package.json when existing project imported Fixes #2115
 - Allow subflow instance to override env var with falsey values Fixes #2113
 - Prevent wire from normal node to link virtual port Fixes #2114
 - Add explanation to the help text on the new feature to build query string from msg.payload #2116
 - Bump bcrypt to latest
-- Add Korean locales files for nodes
+- Add Korean locales files for nodes #2100
 
 #### 0.20.3: Maintenance Release
 
