@@ -1,0 +1,35 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="tcp in">
+    <p>TCP로 부터의 입력을 수행합니다. 리모트 TCP포트에 접속하거나, 외부로부터의 접속을 접수합니다.</p>
+    <p><b>주: </b>1024번 보다 작은 번호의 포트를 액세스 하기 위해서는 root 혹은 administrator권한이 필요한 시스템도 있습니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp out">
+    <p>TCP로의 출력을 수행합니다. 리모트 TCP포트로 접속, 외부로부터의 접속을 접수, 혹은 TCP In노드에서 받은 메세지로의 리플라이를 수행합니다.</p>
+    <p><code>msg.payload</code>만이 송신대상입니다.</p>
+    <p><code>msg.payload</code>가 바이너리데이터를 Base64인코딩의 문자열로 변환한 것일 경우, Base64디코딩 옵션을 지정하면 데이터를 바이너리로 변환하여 송신합니다.</p>
+    <p><code>msg._session</code>가 존재하지 않는 경우, 접속하고 있는 <b>모든</b> 클라이언트에게 송신합니다.</p>
+    <p><b>주: </b>1024번 보다 작은 번호의 포트를 액세스 하기 위해서는 root 혹은 administrator권한이 필요한 시스템도 있습니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>간단한 TCP리퀘스트 노드. <code>msg.payload</code>를 서버의 TCP포트에 송신하여, 리스폰스를 기다립니다.</p>
+    <p>서버접속, "리퀘스트"송신, "리스폰스"수신을 수행합니다. 고정장의 문자수나 지정문자로의 매치, 첫 리플라이의 도착으로 부터 지정된 시간동안 대기, 데이터 도착 대기, 데이터 송신을 수행하여 리플라이를 기다리지 않고 접속을 즉시 삭제, 등의 동작을 선택할 수 있습니다.</p>
+    <p>리스폰스는 버퍼형식으로 <code>msg.payload</code>에 출력됩니다. 문자열로서 취급하기 위해서는, .toString()을 사용해 주세요.</p>
+    <p>TCP호스트의 포트번호설정을 공백으로 설정한 경우, <code>msg.host</code> 및 <code>msg.port</code>프로퍼티를 설정해야 합니다.</p>
+</script>

@@ -1,0 +1,74 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="mqtt in">
+<p>MQTT브로커에 접속하여, 지정한 토픽의 메세지를 서브스크랩(구독)합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">문자열 | 버퍼</span></dt>
+       <dd>바이너리버퍼가 아닌 경우에는 문자열</dd>
+       <dt>topic <span class="property-type">문자열</span></dt>
+       <dd>MQTT의 토픽. /로 계층을 구분한다</dd>
+       <dt>qos <span class="property-type">수치</span> </dt>
+       <dd>0: 최대 1번 도착, 1: 1번 이상 도착, 2: 1번만 도착</dd>
+       <dt>retain <span class="property-type">진위값</span></dt>
+       <dd>true일 경우, 메세지를 유지. 메세지가 오래된 값인 경우가 있습니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>구독토픽에는 MQTT의 와일드카드(+: 1레벨, #: 복수레벨)을 포함할 수 있습니다.</p>
+    <p>이 노드를 이용하기 위해서는 MQTT브로커로의 접속설정이 필요합니다. 연필아이콘을 클릭하여 설정할 수 있습니다.</p>
+    <p>MQTT(in 및 out)노드는 브로커로의 접속설정을 필요에 따라 공유할 수 있습니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt out">
+    <p>MQTT브로커에 접속하여, 메세지를 퍼블리쉬(발행) 합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">문자열 | 버퍼</span></dt>
+       <dd>보통 단순한 텍스트형식의 페이로드가 사용되지만, 바이너리버퍼를 발행하는 것도 가능합니다.</dd>
+
+       <dt class="optional">topic <span class="property-type">문자열</span></dt>
+       <dd>발생대상의 MQTT토픽</dd>
+
+       <dt class="optional">qos <span class="property-type">수치</span></dt>
+       <dd>0: 최대 1번 도착, 1: 1번 이상 도착, 2: 1번만 도착. 기본값은 0입니다.</dd>
+
+       <dt class="optional">retain <span class="property-type">진위값</span></dt>
+       <dd>true일 경우, 메세지를 브로커에 유지합니다. 기본값은 false입니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p><code>msg.payload</code>를 발행하는 메세지의 페이로드로 이용됩니다. 페이로드가 오브젝트인 경우, 송신할 때에 JSON문자열로 변환합니다. 페이로드가 바이너리버퍼인 경우, 그대로 송신합니다.</p>
+    <p>발행에 이용하는 토픽은 노드에 설정하거나, <code>msg.topic</code>으로 지정합니다.</p>
+    <p>이와 같이, QoS와 retain도 노드 설정, 혹은 노드의 설정이 공란일 경우에는, 각각 <code>msg.qos</code> 및 <code>msg.retain</code>으로 지정할 수 있습니다. 앞서 브로커에 보존한 토픽을 클리어 하려면, retain플래그를 설정하여 해당 토픽에 빈 메세지를 발행합니다.</p>
+    <p>이 노드를 이용하기 위해서는 MQTT브로커로의 접속설정이 필요합니다. 연필아이콘을 클릭하여 설정할 수 있습니다.</p>
+    <p>MQTT(in 및 out)노드는 브로커로의 접속설정을 필요에 따라 공유할 수 있습니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt-broker">
+    <p>MQTT브로커로의 접속설정</p>
+    <p>브로커로의 접속설정을 작성합니다. 설정은 <code>MQTT In</code> 및 <code>MQTT Out</code>노드로 재이용할 수 있습니다.</p>
+    <p>노드에 클라이언트 ID를 설정하지 않고 세션의 초기화를 설정하고 있는 경우, 랜덤한 클라이언트 ID를 생성합니다. 클라이언트 ID를 설정할 경우, 접속처의 브로커로 통일되게 해주세요.</p>
+    <h4>Birth메세지</h4>
+    <p>접속을 확립했을 때, 설정한 토픽에 대하여 발행되는 메세지</p>
+    <h4>Close메세지</h4>
+    <p>접속이 정상적으로 종료되기 전에, 노드의 재배포 혹은 셧다운 되었을 경우에, 설정된 토픅에 대하여 발행하는 메세지</p>
+    <h4>Will메세지</h4>
+    <p>예기치 못한 접속이 절단되었을 경우에, 브로커가 발행하는 메세지</p>
+    <h4>WebSocket</h4>
+    <p>WebSocket에 의한 접속을 실행하도록 설정할 수 있습니다. WebSocket을 이용하려면, 서버필드에 접속처 URI를 완전한 형식으로 기입합니다. 아래에 그 예시를 표시합니다.</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+
+</script>
