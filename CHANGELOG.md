@@ -1,3 +1,17 @@
+#### 0.20.4: Maintenance Release
+
+- Switch media-typer to content-type module Fixes #2122 #2123
+- Use userObj.username and not .name for ssh key lookup Closes #2109
+- Ensure mqtt message handlers are tidied up properly on partial deploy
+- Update package dependencies
+- Update ACE to 1.4.3-src-min-noconflict Fixes #2106
+- Fix creating missing package.json when existing project imported Fixes #2115
+- Allow subflow instance to override env var with falsey values Fixes #2113
+- Prevent wire from normal node to link virtual port Fixes #2114
+- Add explanation to the help text on the new feature to build query string from msg.payload #2116
+- Bump bcrypt to latest
+- Add Korean locales files for nodes
+
 #### 0.20.3: Maintenance Release
 
 - Do not dynamically add/remove upgrade listener in ws nodes
