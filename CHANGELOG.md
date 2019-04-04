@@ -12,6 +12,7 @@
 - Add explanation to the help text on the new feature to build query string from msg.payload #2116
 - Bump bcrypt to latest
 - Add Korean locales files for nodes #2100
+- Add error message if catalog is invalid json
 
 #### 0.20.3: Maintenance Release
 
