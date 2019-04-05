@@ -13,6 +13,7 @@
 - Bump bcrypt to latest
 - Add Korean locales files for nodes #2100
 - Add error message if catalog is invalid json
+- Reduce udp out timeout to be less than default inject at start #2127
 
 #### 0.20.3: Maintenance Release
 
