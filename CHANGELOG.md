@@ -1,3 +1,7 @@
+#### 0.20.5: Maintenance Release
+
+ - Revert error handling in palette manager
+
 #### 0.20.4: Maintenance Release
 
 - Switch media-typer to content-type module Fixes #2122 #2123
