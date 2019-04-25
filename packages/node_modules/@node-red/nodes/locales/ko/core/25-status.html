@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="status">
+    <p>같은 탭내 노드의 스테이터스 메시지를 취득합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>status.text <span class="property-type">문자열</span></dt>
+        <dd>스테이터스 문자열</dd>
+        <dt>status.source.type <span class="property-type">문자열</span></dt>
+        <dd>스테이터스를 표시한 노드의 종류</dd>
+        <dt>status.source.id <span class="property-type">문자열</span></dt>
+        <dd>스테이터스를 표시한 노드의 ID</dd>
+        <dt>status.source.name <span class="property-type">문자열</span></dt>
+        <dd>스테이터스를 표시한 노드의 명칭(설정되어 있는 경우)</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>이 노드는 <code>payload</code>를 설정하지 않습니다.</p>
+    <p>기본값으로는, 같은 워크스페이스 탭내의 모든 노드의 스테이터스를 취득합니다. 특정 노드의 스테이터스를 취득 대상으로 설정할 수도 있습니다.</p>
+</script>

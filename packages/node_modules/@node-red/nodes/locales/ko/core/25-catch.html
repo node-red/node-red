@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="catch">
+    <p>같은 탭내의 노드가 송출한 에러를 캐치합니다.</p>
+    <h3>출력</h3>
+    <dl class=message-properties>
+        <dt>error.message <span class="property-type">문자열</span></dt>
+        <dd>에러 메세지</dd>
+        <dt>error.source.id <span class="property-type">문자열</span></dt>
+        <dd>에러를 보낸 노드의 ID</dd>
+        <dt>error.source.type <span class="property-type">문자열</span></dt>
+        <dd>에러를 보낸 노드의 종류</dd>
+        <dt>error.source.name <span class="property-type">문자열</span></dt>
+        <dd>에러를 송출한 노드의 명칭(설정되어 있는 경우)</dd>
+  </dl>
+  <h3>상세</h3>
+  <p>메시지 처리중에 노드가 에러를 송출했을 경우, 플로우 실행은 기본적으로 정지합니다. 이 노드를 사용하면, 에러를 캐치하고 대응하는 플로우로 처리시킬 수 있습니다.
+  <p>기본값으로는, 같은 탭의 모든 노드가 송출한 에러를 캐치합니다. 특정 노드를 캐치대상으로 하거나 대상 catch노드에서 보충되지 않은 에러만 보충하도록 지정하는 것도 가능합니다.
+  <p>에러발생시에는 매치되는 모든 catch 노드가 메시지를 받습니다.
+  <p>서브플로우내에서 에러가 송출된 경우, 우선 서브플로우 내의 catch노드로 처리됩니다. 대응하는 노드가 존재하지 않을 경우에는 그 서브플로가 배치된 탭에 에러를 전파하여 처리합니다.
+  <p>메시지가<code>error</code>프로퍼티를 가지고 있는 경우, 원래의 <code>error</code>는 <code>_error</code>로 복사합니다.
+</script>

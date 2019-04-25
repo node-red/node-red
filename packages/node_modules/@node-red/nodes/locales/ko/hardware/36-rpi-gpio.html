@@ -1,0 +1,71 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="rpi-gpio in">
+    <p>Raspberry Pi의 입력노드. 입력 핀의 상태에 따라, 0 또는 1의 값을 갖는 <code>msg.payload</code>을 생성합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">수치</span></dt>
+        <dd>페이로드에는, 0 또는 1이 설정됩니다.</dd>
+        <dt>topic <span class="property-type">문자열</span></dt>
+        <dd>토픽에는, <code>pi/{핀 번호}</code>가 설정됩니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>입력의 풀 업 저항 또는, 풀 다운 저항을 유효화 할 수도 있습니다.</p>
+    <p>작동하려면 RPi.GPIO python라이브러리 버젼0.5.10 (또는 그 이상)이 필요합니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-gpio out">
+    <p>Raspberry Pi의 출력노드. 디지털모드 또는 PWM모드에서 이용할 수 있습니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">수치 | 문자열 | 진위값</span></dt>
+    </dl>
+    <h3>상세</h3>
+    <p>디지털모드 - <code>msg.payload</code>에 0 또는 1 (혹은 true 또는 false) 을 지정하면, 입력값에 따라 선택된 물리핀에 high 또는 low를 설정합니다.</p>
+    <p>배포시에 핀의 초기값으로 0 또는 1을 설정할 수도 있습니다.</p>
+    <p>PWM모드 - 입력값에 0에서 100의 수치를 지정할수 있고, 소수값도 지정할수 있습니다.</p>
+    <p>서보제어에 PWM모드를 이용할수 있으며, 입력에 소수값을 포함한 10에서 20의 값을 지정할 수 있습니다.
+    PWM를 실행하는 하드웨어를 이용하여, PWM모드의 지정에는 GPIO2핀이 가장 적합합니다.
+    보다 좋은 서보제어를 원하는 경우에는, node-red-node-pi-gpiod 노드를 이용할 것을 검토해 주십시오.</p>
+    <p>작동하려면 RPi.GPIO python라이브러리 버젼0.5.10 (또는 그 이상)이 필요합니다.</p>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-mouse">
+    <p>Raspberry Pi 의 마우스버튼노드. USB마우스가 필요합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">수치</span></dt>
+        <dd>선택된 마우스의 버튼이 눌려지거나 떨어졌을 경우에 1 또는 0이 설정됩니다.</dd>
+        <dt>button <span class="property-type">수치</span></dt>
+        <dd>좌, 우, 중앙 버튼에 따라 1, 2, 4 가 설정되어, 버튼 혹은 버튼의 조합에 따른 처리를 할 수 있습니다.</dd>
+        <dt>topic <span class="property-type">문자열</span></dt>
+        <dd><code>pi/mouse</code>이 설정됩니다.</dd>
+    </dl>
+</script>
+
+<script type="text/x-red" data-help-name="rpi-keyboard">
+    <p>Raspberry Pi 의 키보드를 제어하는 노드. USB키보드가 필요합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">수치</span></dt>
+        <dd>키 코드를 포함합니다.</dd>
+        <dt>action <span class="property-type">문자열</span></dt>
+        <dd>"up", "down", 또는 "repeat" 이 설정됩니다.</dd>
+        <dt>topic <span class="property-type">문자열</span></dt>
+        <dd><code>pi/key</code>가 설정됩니다.</dd>
+    </dl>
+</script>

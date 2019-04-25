@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="change">
+    <p>메세지, 플로우컨텍스트, 글로벌컨텍스트의 프로퍼티를 변경, 삭제, 이동합니다.</p>
+    <p>룰을 여러개 지정한 경우, 정의된 순으로 적용됩니다.</p>
+    <h3>상세</h3>
+    <p>이용가능한 처리</p>
+    <dl class="message-properties">
+    <dt>대입</dt>
+    <dd>프로퍼티를 셋팅합니다. 설정값에는, 다양한 타입의 값, 메세지나 컨텍스트의 기존 프로퍼티를 이용할 수 있습니다.<dd>
+    <dt>치환</dt>
+    <dd>프로퍼티에 대해 검색과 치환을 수행합니다. 정규표현을 지정한 경우, '치환 후의 문자열'에는 <code>$1</code>와 같은 캡쳐그룹을 지정할 수 있습니다. 치환처리에서는, 룰이 완전히 매치된 경우에만 프로퍼티를 변경할 수 있습니다.</dd>
+    <dt>삭제</dt>
+    <dd>프로퍼티를 삭제합니다.</dd>
+    <dt>이동</dt>
+    <dd>프로퍼티의 이동 또는 이름변경을 수행합니다.</dd>
+    </dl>
+    <p>'JSONata식'에는 <a href="http://jsonata.org/" target="_new">JSONata</a>언어를 지정할 수 있습니다.</p>
+</script>

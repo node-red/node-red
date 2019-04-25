@@ -1,0 +1,39 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="switch">
+    <p>프로퍼티 값에 의해 메세지를 분류합니다.</p>
+    <h3>상세</h3>
+    <p>수신한 메세지에 대해, 지정된 룰을 순서대로 평가하여 매치된 룰에 대응하는 출력포트에 메세지를 송출합니다.</p>
+    <p>처음에 룰이 매치된 시점에서 평가를 멈추는 것도 가능합니다.</p>
+    <p>평가 룰에는, 메세지 프로퍼티, 플로우/글로벌 컨텍스트 프로퍼티, JSONata식의 평가결과를 이용할 수 있습니다.</p>
+    <h4>룰</h4>
+    <p>분류 룰은 아래의 4개로 나뉩니다.</p>
+    <ol>
+        <li><b>값(value)</b>룰 - 지정된 프로퍼티에 대해 평가</li>
+        <li><b>열(sequence)</b>룰 - 메세지 열에 대해 적용(메세지열을 split노드 등으로 생성)</li>
+        <li><b>JSONata식</b> - 메세지 전체에 대해 평가를 수행하여, 결과가 true인 경우에 매치</li>
+        <li><b>그 외</b> - 이 전의 룰에 매치되는 것이 없는 경우에 적용</li>
+    </ol>
+
+    <h4>주석</h4>
+    <p><code>is true/false</code>와 <code>is null</code> 룰은, 타입에 대해 엄밀한 비교를 수행합니다. 타입 변환한 상태에서 비교는 하지 않습니다.</p>
+    <p><code>is empty</code> 룰은, 길이 0의 문자열/배열/버퍼/프로퍼티를 갖지않는 오브젝트를 출력합니다. <code>null</code>나 <code>undefined</code>는 출력하지 않습니다.</p>
+
+    <h4>메세지 열의 취급</h4>
+    <p>switch노드는 입력메세지 열에 관한 정보를 유지하는 <code>msg.parts</code>를 기본값으로는 변경하지 않습니다.</p>
+    <p>'<b>메세지 열의 보정</b>' 옵션을 지정하면, 매치한 각 룰에 대해 새로운 메세지를 생성합니다. 이 모드에서는, switch노드는 새로운 메세지열을 송신하기 전에, 입력메세지를 내부에 축적합니다. <b>settings.js</b>의 <code>nodeMessageBufferMaxLength</code>를 설장하면, 축적할 메세지 수를 제한할 수 있습니다.</p>
+</script>

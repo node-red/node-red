@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="debug">
+    <p>사이브바의 '디버그'탭에 선택한 메세지 프로퍼티의 값을 표시합니다. 설정에 의해, 랜덤로그로 출력도 가능합니다. 기본값의 표시대상은 <code>msg.payload</code>이지만, 설정에 의해 지정한 프로퍼티, 메세지 전체, 혹은 JSONata식의 평가결과를 출력할 수 있습니다.</p>
+    <h3>상세</h3>
+    <p>'디버그'사이드바는 받은 메시지의 계층구조를 표시하는 기능을 갖추고 있습니다. 이 기능으로 메시지의 구조를 쉽게 이해할 수 있습니다.</p>
+    <p>JavaScript오브젝트와 배열은 필요에 따라 접거나 펼칠 수 있습니다. 버퍼 오브젝트 데이터를 표시하거나, 표현가능한 경우에는 문자열로 표시할 수도 있습니다.</p>
+    <p>메세지를 받은 시각, 송신 노드, 메시지 타입에 관한 정보를 '디버그'사이드바에 표시된 메세지에 부수적으로 표시합니다. 송신한 노드의 ID를 선택하면, 워크스페이스내의 대응하는 노드를 확인할 수 있습니다.</p>
+    <p>출력의 유효/무효는 노드상의 버튼으로 전환할 수 있습니다. 플로우상에서 미사용중인 debug노드는, 무효화 하거나 삭제할 것을 권장합니다.</p>
+    <p>모든 메세지를 런타임 로그에 보내거나, 짧은(32자) 데이터를 debug노드 아래의 스테이터스텍스트에 표시할 수 있습니다.</p>
+</script>

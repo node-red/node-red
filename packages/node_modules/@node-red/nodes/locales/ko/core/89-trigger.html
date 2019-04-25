@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="trigger">
+    <p>메세지를 송신하면, 다른 메세지를 송신합니다. 지연 혹은 초기화가 지정되있지 않은 경우에는, 다음 2번째 메세지를 송신할 수 도 있습니다.</p>
+
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt class="optional">reset</dt>
+        <dd>이 프로퍼티를 갖는 메세지를 받으면, 준비중인 대기나 반복을 클리어하여 메세지 송신은 실행되지 않습니다.</dd>
+    </dl>
+
+    <h3>상세</h3>
+    <p>플로우 내에서 타임아웃을 작성하는데 이용합니다. 메세지를 받으면 기본값으로는 <code>payload</code>에 <code>1</code>을 설정하여 송신합니다. 송신후 250ms 대기하고 <code>payload</code>를 <code>0</code>에 설정한 2번째 메세지를 송신합니다. 이 기능은, 예를 들어 Raspberry Pi의 GPIO핀에 접속한 LED를 조작할때에 활동할 수 있습니다.</p>
+    <p>각 송신메세지의 페이로드는 다양한 종류의 값으로 설정할 수 있습니다. 재송신 데이터없음으로 하는 것도 가능합니다. 예를 들면, 재송신 데이터를 '<i>없음</i>'으로 하고, 메세지를 받았을 때에 지연을 연장하는 것으로 선택한 경우, trigger노드는 감시타이머로써 작동합니다. 즉, 지정한 간격내에 메세지를 수신하지 않은 경우에 메세지를 송신합니다.</p>
+    <p>페이로드에 <i>문자열</i>을 지정한 경우, mustache형식의 템플릿을 이용할 수 있습니다.</p>
+    <p><code>reset</code>프로퍼티를 갖는 메세지를 수신한 경우, 혹은 <code>payload</code>가 기정한 값에 매치하는 경우, 준비중인 대기나 반복을 클리어 하여 메세지 송신은 실행되지 않습니다.</p>
+    <p>수신메세지에서 리셋할 때까지 일정간격으로 메세지를 재송신하도록 지정할 수도 있습니다.</p>
+    <p><code>msg.topic</code>마다 다른 스트림으로 취급되도록 설정하는 것도 가능합니다.</p>
+</script>
