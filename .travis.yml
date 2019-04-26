@@ -1,6 +1,8 @@
 sudo: false
 language: node_js
 matrix:
+  allow_failures:
+    - node_js: "12"
   include:
     - node_js: "10"
       script:
