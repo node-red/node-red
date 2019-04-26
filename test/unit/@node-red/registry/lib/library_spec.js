@@ -38,7 +38,7 @@ describe("library api", function() {
         library.addExamplesDir("test-module",path.resolve(__dirname+'/resources/examples')).then(function() {
             try {
                 var flows = library.getExampleFlows();
-                flows.should.deepEqual({"d":{"test-module":{"f":["one"]}}});
+                flows.should.deepEqual({"test-module":{"f":["one"]}});
 
                 var examplePath = library.getExampleFlowPath('test-module','one');
                 examplePath.should.eql(path.resolve(__dirname+'/resources/examples/one.json'))
