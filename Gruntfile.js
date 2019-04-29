@@ -181,9 +181,10 @@ module.exports = function(grunt) {
             vendor: {
                 files: {
                     "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js": [
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-1.11.3.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.3.1.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/bootstrap/js/bootstrap.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui-1.10.3.custom.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
@@ -354,7 +355,7 @@ module.exports = function(grunt) {
                             'ace/**',
                             //'bootstrap/css/**',
                             'bootstrap/img/**',
-                            'jquery/css/**',
+                            'jquery/css/base/**',
                             'font-awesome/**'
                         ],
                         expand: true,
