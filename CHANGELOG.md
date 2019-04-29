@@ -1,3 +1,7 @@
+#### 0.20.5: Maintenance Release
+
+ - Revert error handling in palette manager
+
 #### 0.20.4: Maintenance Release
 
 - Switch media-typer to content-type module Fixes #2122 #2123
@@ -12,6 +16,8 @@
 - Add explanation to the help text on the new feature to build query string from msg.payload #2116
 - Bump bcrypt to latest
 - Add Korean locales files for nodes #2100
+- Add error message if catalog is invalid json
+- Reduce udp out timeout to be less than default inject at start #2127
 
 #### 0.20.3: Maintenance Release
 
