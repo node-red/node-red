@@ -46,7 +46,7 @@ function addNode(type, x, y) {
     }
     browser.moveToObject(palette.getId(type));
     browser.buttonDown();
-    browser.moveToObject("#palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
+    browser.moveToObject("#red-ui-palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
     browser.buttonUp();
     // Last node is the one that has been created right now.
     var nodeElement = browser.elements('//*[@class="node nodegroup"][last()]');
