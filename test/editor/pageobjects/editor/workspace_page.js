@@ -16,17 +16,37 @@
 
  var when = require("when");
 
-var events = require("../../../../red/runtime/events.js");
+var events = require("nr-test-utils").require("@node-red/runtime/lib/events.js");
 
 var palette = require("./palette_page");
 var nodeFactory = require("../nodes/nodefactory_page");
 
+var flowLayout = {
+    flowRightEnd : 600,
+    widthInterval : 300,
+    heightInterval : 80
+};
+
+var previousX = -flowLayout.widthInterval;
+var previousY = 0;
+
 function addNode(type, x, y) {
-    var offsetX = x ? x : 0;
-    var offsetY = y ? y : 0;
+    if (x !== undefined) {
+        previousX = x;
+        if (y !== undefined) {
+            previousY = y;
+        }
+    } else {
+        if (previousX < flowLayout.flowRightEnd) {
+            previousX = previousX + flowLayout.widthInterval;
+        } else {
+            previousX = 0;
+            previousY = previousY + flowLayout.heightInterval;
+        }
+    }
     browser.moveToObject(palette.getId(type));
     browser.buttonDown();
-    browser.moveToObject("#palette-search", offsetX + 300, offsetY + 100); // adjust to the top-left corner of workspace.
+    browser.moveToObject("#palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
     browser.buttonUp();
     // Last node is the one that has been created right now.
     var nodeElement = browser.elements('//*[@class="node nodegroup"][last()]');
@@ -53,10 +73,25 @@ function deploy() {
         });
     });
     browser.waitForText('#btn-deploy', 2000);
+    // Need additional wait until buttons becomes clickable.
+    browser.pause(50);
+}
+
+function init(width, height) {
+    deleteAllNodes();
+
+    if (width !== undefined) {
+        flowLayout.widthInterval = width;
+    }
+    if (height !== undefined) {
+        flowLayout.heightInterval = height;
+    }
+    previousX = -flowLayout.widthInterval;
+    previousY = 0;
 }
 
 module.exports = {
     addNode: addNode,
-    deleteAllNodes: deleteAllNodes,
-    deploy: deploy
+    deploy: deploy,
+    init: init
 };

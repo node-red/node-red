@@ -1,0 +1,138 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="split">
+    <p>メッセージをメッセージ列に分割します。</p>
+
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">オブジェクト | 文字列 | 配列 | バッファ</span></dt>
+        <dd><code>msg.payload</code>の型によってノードの動作が異なります。
+            <ul>
+                <li><b>文字列</b>/<b>バッファ</b> - 指定された文字列 (デフォルト: <code>\n</code>)、バッファ列、もしくは固定の長さによりメッセージを分割します。</li>
+                <li><b>配列</b> - メッセージを配列要素毎もしくは固定の長さの配列に分割します。</li>
+                <li><b>オブジェクト</b> - キー/値の各組に対してメッセージを送信します。</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">オブジェクト</span></dt>
+        <dd>元のメッセージをどのように分割したかに関する情報をこのプロパティに保持します。例えば、<b>join</b>ノードに渡すことで、メッセージ列を一つのメッセージに再構成することができます。<code>parts</code>プロパティは次のプロパティを含みます。
+        <ul>
+            <li><code>id</code> - メッセージグループの識別子</li>
+            <li><code>index</code> - グループ内の位置</li>
+            <li><code>count</code> - 既知の場合、グループ内のメッセージ数を設定。下記「ストリームモード」を参照</li>
+            <li><code>type</code> - メッセージの型 - 文字列/配列/オブジェクト/バッファ</li>
+            <li><code>ch</code> - 文字列もしくはバッファの場合、メッセージを分割するのに用いた文字列もしくはバイト配列</li>
+            <li><code>key</code> - オブジェクトの場合、メッセージ生成元のキー。
+ノードの設定によりキーを<code>msg.topic</code>など他のメッセージプロパティにコピーすることもできます。</li>
+            <li><code>len</code> - メッセージを固定の長さで分割した場合の長さ。</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>このノードは、メッセージ列を構成するメッセージに対して共通処理を行い、<b>join</b>ノードで一つのメッセージに纏めるようなフローを作成する際に有用です。</p>
+    <p><code>msg.parts</code>プロパティを用いて元のメッセージとメッセージ列との対応関係を記憶します。</p>
+    <h4>ストリームモード</h4>
+    <p>このノードはメッセージ列を再構成して送信する際にも有用です。例えば、改行終端のコマンドを送信するようなシリアルデバイスでは、メッセージの最後のコマンド部分が途切れたメッセージを送出する場合があります。「ストリームモード」を用いることで、完結した個別コマンドにメッセージを分割することができます。入力メッセージの最後に未完部分がある場合、<b>split</b>ノードは未完部分を記憶しておいて、次に受信したメッセージの先頭に付加します。</p>
+    <p>このモードで処理する際には、メッセージ数を予め知ることができないため、<code>msg.parts.count</code>プロパティは設定されません。従って、<b>join</b>ノードの「自動モード」と組み合わせることはできません。</p>
+</script>
+
+
+<script type="text/x-red" data-help-name="join">
+    <p>メッセージ列を結合して一つのメッセージにします。</p>
+    <p>メッセージの結合には次の3つのモードが利用できます。</p>
+    <dl>
+        <dt>自動</dt>
+        <dd><b>split</b>ノードと組み合わせると、splitと逆にメッセージを結合する処理を行います。</dd>
+        <dt>手動</dt>
+        <dd>メッセージ列をさまざまな方法で結合します。</dd>
+        <dt>列の集約</dt>
+        <dd>メッセージ列に対して指定した式を適用し、1つのメッセージに集約します。</dd>
+    </dl>
+    <h3>入力</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">オブジェクト</span></dt>
+        <dd>自動的にメッセージ列を結合するには、全メッセージがこのプロパティを持っていなければなりません。<b>split</b>ノードでこのプロパティを生成することが可能ですが、独自に生成しても構いません。<code>parts</code>プロパティは以下のプロパティを含みます。
+        <ul>
+            <li><code>id</code> - メッセージグループの識別子</li>
+            <li><code>index</code> - グループ内の順番</li>
+            <li><code>count</code> - グループを構成するメッセージの数</li>
+            <li><code>type</code> - メッセージの型 - string/array/object/buffer</li>
+            <li><code>ch</code> - 文字列もしくはバッファの場合、メッセージを分割するのに用いた文字列もしくはバイト配列</li>
+            <li><code>key</code> - オブジェクトの場合、メッセージ生成元のキー</li>
+            <li><code>len</code> - メッセージを固定の長さで分割した場合の長さ</li>
+        </ul>
+        </dd>
+        <dt class="optional">complete</dt>
+        <dd>設定されている場合、保持しているメッセージを結合して送信します。</dd>
+    </dl>
+    <h3>詳細</h3>
+
+    <h4>自動モード</h4>
+    <p>自動モードでは、入力メッセージの<code>parts</code>プロパティを用いてメッセージ列を結合します。このモードは<b>split</b>ノードの処理の逆を自動的に行います。</p>
+
+    <h4>手動モード</h4>
+    <p>手動モードでは、メッセージ列をさまざまな結果に結合できます。</p>
+    <ul>
+        <li><b>文字列</b>もしくは<b>バッファ</b> - 指定した文字列もしくはバッファ値を区切りとして各メッセージの指定プロパティを結合</li>
+        <li><b>配列</b> - 指定プロパティもしくはメッセージ全体を要素とする配列</li>
+        <li><b>key/valueオブジェクト</b> - 入力メッセージの指定プロパティの値をキーとして、プロパティ値をストアしたオブジェクト</li>
+        <li><b>統合オブジェクト</b> - 各メッセージのプロパティを一つのオブジェクトに統合</li>
+    </ul>
+    <p>出力メッセージのその他のプロパティはメッセージを送信する直前のメッセージをコピーします。</p>
+    <p>「<i>合計値</i>」には出力メッセージを送信する前に受信すべきメッセージ数を指定します。オブジェクト出力の場合、この合計値に達すると後続メッセージの到着毎にメッセージを出力するように設定することもできます。</p>
+    <p>「<i>秒</i>」には新規メッセージを送信するまでの経過時間を設定します。</p>
+    <p><code>msg.complete</code>プロパティを設定したメッセージを受信すると、出力メッセージを送信します。この時、メッセージ列の数をリセットします。</p>
+    <p><code>msg.reset</code>プロパティを設定したメッセージを受診すると、部分的に受信済みのメッセージを破棄します。これらのメッセージは送信されません。この時、メッセージ列の数をリセットします。</p>
+
+    <h4>列の集約モード</h4>
+    <p>列の集約モードを選択すると、メッセージ列を構成する各々のメッセージに対して式を適用し、集約した値を用いて一つのメッセージを構成します。</p>
+    <dl class="message-properties">
+        <dt>初期値</dt>
+        <dd>
+            集約の初期値(<code>$A</code>)
+        </dd>
+        <dt>集約式</dt>
+        <dd>メッセージグループを構成する各メッセージに適用するJSONata式。
+            式の評価結果は次回の呼び出しの際に集約値として渡します。
+            <ul>
+                <li><code>$A</code> 集約値</li>
+                <li><code>$I</code> グループ内のメッセージの順番</li>
+                <li><code>$N</code> グループ内のメッセージ数</li>
+            </ul>
+        </dd>
+        <dt>最終調整式</dt>
+        <dd>メッセージグループの集約が完了した後で適用されるJSONata式。任意で指定可能です。式中では以下の特殊変数を参照できます。
+            <ul>
+                <li><code>$A</code> 集約値</li>
+                <li><code>$N</code> グループ内のメッセージ数</li>
+            </ul>
+        </dd>
+        <p>メッセージグループのメッセージに対し、デフォルトでは集約式は最初のメッセージから最後のメッセージに対し順に適用します。指定により適用を逆順にすることも可能です。</p>
+    </dl>
+    <p><b>例:</b> 以下の設定で、数値のメッセージ列に対して平均値を計算します。
+        <ul>
+            <li><b>集約式</b>: <code>$A+payload</code></li>
+            <li><b>初期値</b>: <code>0</code></li>
+            <li><b>最終調整式</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+
+    <h4>メッセージの蓄積</h4>
+    <p>このノードの処理ではメッセージ列の処理のためメッセージを内部に蓄積します。<code>nodeMessageBufferMaxLength</code>を指定することで蓄積するメッセージの最大値を制限することができます。</p>
+</script>

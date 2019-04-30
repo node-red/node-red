@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="function">
+    <p>수신 메시지에 대해서 처리를 실시하는 JavaScript코드(함수의 본체)를 정의합니다.</p>
+    <p>입력 메시지는 <code>msg</code>라는 명칭의 JavaScript 객체로 전달됩니다.</p>
+    <p><code>msg</code>오브젝트는<code>msg.payload</code>프로퍼티에 메시지 본체를 유지하는 것이 관례입니다.</p>
+    <p>보통 코드는 메시지 오브젝트(혹은 여러 메시지 객체)를 반환합니다.후속 플로우의 실행을 정지하고 싶은 경우에는, 오브젝트를 반환하지 않아도 상관없습니다.</p>
+    <h3>상세</h3>
+    <p>코드 쓰는 방식에 대한 자세한 내용은, <a target="_blank" href="http://nodered.org/docs/writing-functions.html">공식 홈페이지</a>를 참조해 주세요.</p>
+    <h4>메세지 송신</h4>
+    <p>플로우 내의 다음 노드에 메세지를 전달하기 위해서는, 메세지를 반환하거나, <code>node.send(messages)</code>를 호출합니다.</p>
+    <p>반환/send 대상은 다음과 같습니다:</p>
+    <ul>
+      <li>단일 메세지 오브젝트 - 첫 출력에 접속된 노드에 전해집니다</li>
+      <li>메세지 오브젝트의 배열 - 대응하는 출력에 접속된 노드에 전해집니다</li>          
+    </ul>
+    <p>배열요소가 배열인 경우에는, 복수의 메세지에 대응하는 출력에 송출합니다.</p>
+    <p>반환방법이 단일값인지 배열오소인지 상관없이, 반환값이 null인 경우 메세지를 송출하지 않습니다.</p>
+    <h4>로그 출력과 에러처리</h4>
+    <p>로그 정보의 출력, 에러출력을 실행하려면 아래의 함수를 이용합니다:</p>
+      <ul>
+          <li><code>node.log("로그메세지")</code></li>
+          <li><code>node.warn("경고")</code></li>
+          <li><code>node.error("에러")</code></li>
+      </ul>
+    </p>
+    <p>catch노드를 이용하여 에러를 처리할 수 있습니다. catch노드로 처리하기 위해서는, <code>msg</code>를 <code>node.error</code>의 제2 인수로 전달합니다:</p>
+    <pre>node.error("에러",msg);</pre>
+    <h4>노드 정보 참조</h4>
+    <p>코드안에서 노드의 ID및 이름을 아래의 프로퍼티로 참조할 수 있습니다:</p>
+    <ul>
+        <li><code>node.id</code> - 노드 ID</li>
+        <li><code>node.name</code> - 노드의 별칭</li>
+    </ul>
+    <h4>환경변수의 이용</h4>
+    <p>환경변수는 <code>env.get("MY_ENV_VAR")</code>로 참조할 수 있습니다.</p>
+</script>

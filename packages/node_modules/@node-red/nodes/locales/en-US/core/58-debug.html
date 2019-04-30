@@ -1,0 +1,26 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="debug">
+    <p>Displays selected message properties in the debug sidebar tab and optionally the runtime log. By default it displays <code>msg.payload</code>, but can be configured to display any property, the full message or the result of a JSONata expression.</p>
+    <h3>Details</h3>
+    <p>The debug sidebar provides a structured view of the messages it is sent, making it easier to understand their structure.</p>
+    <p>JavaScript objects and arrays can be collapsed and expanded as required. Buffer objects can be displayed as raw data or as a string if possible.</p>
+    <p>Alongside each message, the debug sidebar includes information about the time the message was received, the node that sent it and the type of the message.
+       Clicking on the source node id will reveal that node within the workspace.</p>
+    <p>The button on the node can be used to enable or disable its output. It is recommended to disable or remove any Debug nodes that are not being used.</p>
+    <p>The node can also be configured to send all messages to the runtime log, or to send short (32 characters) to the status text under the debug node.</p>
+</script>

@@ -18,6 +18,8 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
+var keyPage = require("../../../util/key_page");
+
 function templateNode(id) {
     nodePage.call(this, id);
 }
@@ -33,14 +35,16 @@ templateNode.prototype.setFormat = function(format) {
 }
 
 templateNode.prototype.setTemplate = function(template) {
-    browser.click('#node-input-template-editor');
-    browser.keys(['Control', 'a', 'Control']); // call twice to release the keys.
+    browser.clickWithWait('#node-input-template-editor');
+    browser.keys(keyPage.selectAll());
     // Need to add a character one by one since some words such as 'Control' are treated as a special word.
     for (var i = 0; i < template.length; i++) {
         browser.keys([template.charAt(i)]);
     }
-    browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
+    browser.keys(keyPage.selectToEnd());
     browser.keys(['Delete']);
+    // Need to wait until ace editor correctly checks the syntax.
+    browser.pause(300);
 }
 
 module.exports = templateNode;

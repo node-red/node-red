@@ -1,0 +1,25 @@
+{
+    "opts": {
+        "template": "./node_modules/jsdoc-nr-template",
+        "destination": "./docs",
+        "recurse": true
+    },
+    "tags": {
+        "allowUnknownTags": false,
+        "dictionaries": ["jsdoc"]
+    },
+    "source": {
+        "_include": [
+            "./packages/node_modules/@node-red/runtime/lib/api"
+        ]
+    },
+    "templates": {
+        "systemName": "Node-RED Runtime API",
+        "footer": "",
+        "copyright": "Released under the Apache License v2.0",
+        "default": {
+            "outputSourceFiles": false
+        }
+    },
+    "plugins": ["plugins/markdown"]
+}

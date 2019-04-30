@@ -22,11 +22,10 @@ var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 
-var nodeWidth = 200;
 
 describe('Workspace', function() {
     beforeEach(function() {
-        workspace.deleteAllNodes();
+        workspace.init();
     });
 
     before(function() {
@@ -43,13 +42,12 @@ describe('Workspace', function() {
 
     it('should output a timestamp', function() {
         var injectNode = workspace.addNode("inject");
-        var debugNode = workspace.addNode("debug", nodeWidth);
+        var debugNode = workspace.addNode("debug");
         injectNode.connect(debugNode);
 
         workspace.deploy();
 
         debugTab.open();
-        debugTab.clearMessage();
         injectNode.clickLeftButton();
         debugTab.getMessage().should.within(1500000000000, 3000000000000);
     });

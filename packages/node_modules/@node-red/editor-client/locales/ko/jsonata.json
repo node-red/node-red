@@ -1,0 +1,222 @@
+{
+    "$string": {
+        "args": "arg",
+        "desc": "다음과 같은 규칙을 사용하여 인수 *arg*를 문자열로 변환합니다. \n\n - 문자열은 변경되지 않습니다. \n - 함수는 빈 문자열로 변환됩니다. \n - 무한대와 NaN은 JSON수치로 표현할 수 없기 때문에 오류처리 됩니다. \n - 다른 모든 값은 `JSON.stringify` 함수를 사용하여 JSON 문자열로 변환됩니다."
+    },
+    "$length": {
+        "args": "str",
+        "desc": "문자열 `str`의 문자 수를 반환합니다. `str`가 문자열이 아닌 경우 에러를 반환합니다."
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "(zero-offset)의 `start`에서 시작하는 첫번째 인수 `str`의 문자열을 반환합니다. 만약 `length`가 지정된 경우, 부분 문자열은 최대 `length`의 크기를 갖습니다. 만약 `start` 인수가 음수이면 `str`의 끝에서부터의 문자수를 나타냅니다."
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "`str`에 `chars`문자가 처음으로 나오기 전까지의 부분문자열을 반환합니다. 만약 `chars`가 없으면 `str`을 반환합니다."
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "`str`에 `chars`문자가 처음으로 나온 이후의 부분문자열을 반환합니다. 만약 `chars`가 없으면 `str`을 반환합니다."
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "`str`의 문자를 대문자로 반환합니다."
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "`str`의 문자를 소문자로 반환합니다."
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "다음의 순서대로 `str`의 모든 공백을 자르고 정규화 합니다:\n\n - 모든 탭, 캐리지 리턴 및 줄 바꿈은 공백으로 대체됩니다. \n- 연속된 공백은 하나로 줄입니다.\n- 후행 및 선행 공백은 삭제됩니다.\n\n 만일 `str`이 지정되지 않으면 (예: 이 함수를 인수없이 호출), context값을 `str`의 값으로 사용합니다. `str`이 문자열이 아니면 에러가 발생합니다."
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "`str`이 `pattern`과 일치하면 `true`를, 일치하지 않으면 `false`를 반환합니다. 만약 `str`이 지정되지 않으면 (예: 이 함수를 인수없이 호출), context값을 `str`의 값으로 사용합니다. `pattern` 인수는 문자열이나 정규표현으로 할 수 있습니다."
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "`str`인수를 분할하여 부분문자열로 배열합니다. `str`이 문자열이 아니면 에러가 발생합니다. 생략가능한 인수 `separator`는 `str`을 분할하는 문자를 문자열 또는 정규표현으로 지정합니다. `separator`를 지정하지 않은 경우, 공백의 문자열로 간주하여 `str`은 단일 문자의 배열로 분리됩니다. `separator`가 문자열이 아니면 에러가 발생합니다. 생략가능한 인수 'limit`는 결과의 배열이 갖는 부분문자열의 최대수를 지정합니다. 이 수를 넘는 부분문자열은 파기됩니다. `limit`가 지정되지 않으면`str`은 결과 배열의 크기의 제한없이 완전히 분리됩니다. `limit`이 음수인 경우 에러가 발생합니다."
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "문자열의 배열을 생략가능한 인수 `separator`로 구분한 하나의 문자열로 연결합니다. 배열 `array`가 문자열이 아닌 요소를 포함하는 경우, 에러가 발생합니다. `separator`를 지정하지 않은 경우, 공백의 문자열로 간주합니다(예: 문자열간의 `separator`없음). `separator`가 문자열이 아닌 경우, 에러가 발생합니다."
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "`str`문자열에 `pattern`를 적용하여, 오브젝트 배열을 반환합니다. 배열요소의 오브젝트는 `str`중 일치하는 부분의 정보를 보유합니다."
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "`str`문자열에서 `pattern` 패턴을 검색하여, `replacement`로 대체합니다.\n\n임의이ㅡ 인수 `limit`는 대체 횟수의 상한값을 지정합니다."
+    },
+    "$now": {
+        "args": "",
+        "desc": "ISO 8601 호환 형식으로 타임 스탬프를 생성하고 이를 문자열로 반환합니다."
+    },
+    "$base64encode": {
+        "args": "string",
+        "desc": "ASCII 문자열을 base 64 표현으로 변환합니다. 문자열의 각 문자는 이진 데이터의 바이트로 처리됩니다. 이렇게 하려면 문자열의 모든 문자가 URI로 인코딩 된 문자열을 포함하고, 0x00에서 0xFF 범위에 있어야합니다. 해당 범위를 벗어난 유니 코드 문자는 지원되지 않습니다"
+    },
+    "$base64decode": {
+        "args": "string",
+        "desc": "UTF-8코드페이지를 이용하여, Base 64형식의 바이트값을 문자열로 변환합니다."
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "`arg`를 다음과 같은 규칙을 사요하여 숫자로 변환합니다. :\n\n - 숫자는 변경되지 않습니다.\n – 올바른 JSON의 숫자는 숫자 그대로 변환됩니다.\n – 그 외의 형식은 에러를 발생합니다."
+    },
+    "$abs": {
+        "args": "number",
+        "desc": "`number`의 절대값을 반환합니다."
+    },
+    "$floor": {
+        "args": "number",
+        "desc": "`number`를 `number`보다 같거나 작은 정수로 내림하여 반환합니다."
+    },
+    "$ceil": {
+        "args": "number",
+        "desc": "`number`를 `number`와 같거나 큰 정수로 올림하여 반환합니다."
+    },
+    "$round": {
+        "args": "number [, precision]",
+        "desc": "인수 `number`를 반올림한 값을 반환합니다. 임의의 인수 `precision`에는 반올립에서 사용할 소수점이하의 자릿수를 지정합니다."
+    },
+    "$power": {
+        "args": "base, exponent",
+        "desc": "기수 `base`의 값을 지수 `exponent`만큼의 거듭 제곱으로 반환합니다."
+    },
+    "$sqrt": {
+        "args": "number",
+        "desc": "인수 `number`의 제곱근을 반환합니다."
+    },
+    "$random": {
+        "args": "",
+        "desc": "0이상 1미만의 의사난수를 반환합니다."
+    },
+    "$millis": {
+        "args": "",
+        "desc": "Unix Epoch (1970 년 1 월 1 일 UTC)부터 경과된 밀리 초 수를 숫자로 반환합니다. 평가대상식에 포함되는 $millis()의 모든 호출은 모두 같은 값을 반환합니다."
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "숫자 배열 `array`의 합계를 반환합니다. `array`에 숫자가 아닌 요소가 있는 경우, 에러가 발생합니다."
+    },
+    "$max": {
+        "args": "array",
+        "desc": "숫자 배열 `array`에서 최대값을 반환합니다. `array`에 숫자가 아닌 요소가 있는 경우, 에러가 발생합니다."
+    },
+    "$min": {
+        "args": "array",
+        "desc": "숫자 배열 `array`에서 최소값을 반환합니다. `array`에 숫자가 아닌 요소가 있는 경우, 에러가 발생합니다."
+    },
+    "$average": {
+        "args": "array",
+        "desc": "숫자 배열 `array`에서 평균값을 반환합니다. `array`에 숫자가 아닌 요소가 있는 경우, 에러가 발생합니다."
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "`arg` 값을 다음의 규칙에 의해 Boolean으로 변환합니다::\n\n - `Boolean` : 변환하지 않음\n - `string`: 비어있음 : `false`\n - `string`: 비어있지 않음 : `true`\n - `number`: `0` : `false`\n - `number`: 0이 아님 : `true`\n - `null` : `false`\n - `array`: 비어있음 : `false`\n - `array`: `true`로 변환된 요소를 가짐 : `true`\n - `array`: 모든 요소가 `false`로 변환 : `false`\n - `object`: 비어있음 : `false`\n - `object`: 비어있지 않음 : `true`\n - `function` : `false`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "인수의 부정을 Boolean으로 변환합니다. `arg`는 가장먼저boolean으로 변환됩니다."
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "`arg` 식의 평가값이 존재하는 경우 `true`, 식의 평가결과가 미정의인 경우 (예: 존재하지 않는 참조필드로의 경로)는 `false`를 반환합니다."
+    },
+    "$count": {
+        "args": "array",
+        "desc": "`array`의 요소 갯수를 반환합니다."
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "두개의 `array`를 병합합니다."
+    },
+    "$sort": {
+        "args": "array [, function]",
+        "desc": "배열 `array`의 모든 값을 순서대로 정렬하여 반환합니다. \n\n 비교함수 `function`을 이용하는 경우, 비교함수는 아래와 같은 두개의 인수를 가져야 합니다. \n\n `function(left,right)` \n\n 비교함수는 left와 right의 두개의 값을 비교하기에, 값을 정렬하는 처리에서 호출됩니다. 만약 요구되는 정렬에서 left값을 right값보다 뒤로 두고싶은 경우에는, 비교함수는 치환을 나타내는 Boolean형의 ``true`를, 그렇지 않은 경우에는 `false`를 반환해야 합니다."
+    },
+    "$reverse": {
+        "args": "array",
+        "desc": "`array`에 포함된 모든 값의 순서를 역순으로 변환하여 반환합니다."
+    },
+    "$shuffle": {
+        "args": "array",
+        "desc": "`array`에 포함된 모든 값의 순서를 랜덤으로 반환합니다."
+    },
+    "$zip": {
+        "args": "array, ...",
+        "desc": "배열 `array1` ... arrayN`의 위치 0, 1, 2…. 의 값으로 구성된 convolved (zipped) 배열을 반환합니다."
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "`object` 키를 포함하는 배열을 반환합니다. 인수가 오브젝트의 배열이면 반환되는 배열은 모든 오브젝트에있는 모든 키의 중복되지 않은 목록이 됩니다."
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "`object` 내의 `key`가 갖는 값을 반환합니다. 최초의 인수가 객체의 배열 인 경우, 배열 내의 모든 오브젝트를 검색하여, 존재하는 모든 키가 갖는 값을 반환합니다."
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "`object`의 키/값 쌍별로 각 요소가 하나인 오브젝트 배열로 분할합니다. 만일 오브젝트 배열인 경우, 배열의 결과는 각 오브젝트에서 얻은 키/값 쌍의 오브젝트를 갖습니다."
+    },
+    "$merge": {
+        "args": "array&lt;object&gt;",
+        "desc": "`object`배열을 하나의 `object`로 병합합니다. 병합결과의 오브젝트는 입력배열내의 각 오브젝트의 키/값 쌍을 포함합니다. 입력 오브젝트가 같은 키를 가질경우, 반환 된 `object`에는 배열 마지막의 오브젝트의 키/값이 격납됩니다. 입력 배열이 오브젝트가 아닌 요소를 포함하는 경우, 에러가 발생합니다."
+    },
+    "$sift": {
+        "args": "object, function",
+        "desc": "함수 `function`을 충족시키는 `object` 인수 키/값 쌍만 포함하는 오브젝트를 반환합니다. \n\n 함수 `function` 다음과 같은 인수를 가져야 합니다 : \n\n `function(value [, key [, object]])`"
+    },
+    "$each": {
+        "args": "object, function",
+        "desc": "`object`의 각 키/값 쌍에, 함수`function`을 적용한 값의 배열을 반환합니다."
+    },
+    "$map": {
+        "args": "array, function",
+        "desc": "`array`의 각 값에 `function`을 적용한 결과로 이루어진 배열을 반환합니다. \n\n 함수 `function`은 다음과 같은 인수를 가져야 합니다.  \n\n `function(value[, index[, array]])`"
+    },
+    "$filter": {
+        "args": "array, function",
+        "desc": "`array`의 값중, 함수 `function`의 조건을 만족하는 값으로 이루어진 배열을 반환합니다. \n\n 함수 `function`은 다음과 같은 형식을 가져야 합니다.  \n\n `function(value[, index[, array]])`"
+    },
+    "$reduce": {
+        "args": "array, function [, init]",
+        "desc": "배열의 각 요소값에 함수 `function`을 연속적으로 적용하여 얻어지는 집계값을 반환합니다. `function`의 적용에는 직전의 `function`의 적용결과와 요소값이 인수로 주어집니다. \n\n 함수 `function`은 인수를 두개 뽑아, 배열의 각 요소 사이에 배치하는 중치연산자처럼 작용해야 합니다. \n\n 임의의 인수 `init`에는 집약시의 초기값을 설정합니다."
+    },
+    "$flowContext": {
+        "args": "string[, string]",
+        "desc": "플로우 컨텍스트 속성을 취득합니다."
+    },
+    "$globalContext": {
+        "args": "string[, string]",
+        "desc": "플로우의 글로벌 컨텍스트 속성을 취득합니다."
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "문자수가 인수 `width`의 절대값이상이 되도록, 필요한 경우 여분의 패딩을 사용하여 `string`의 복사본을 반환합니다. \n\n `width`가 양수인 경우, 오른쪽으로 채워지고, 음수이면 왼쪽으로 채워집니다. \n\n 임의의 `char`인수에는 이 함수에서 사용할 패딩을 지정합니다. 지정하지 않는 경우에는, 기본값으로 공백을 사용합니다."
+    },
+    "$fromMillis": {
+        "args": "number",
+        "desc": "Unix Epoch (1970 년 1 월 1 일 UTC) 이후의 밀리 초를 나타내는 숫자를 ISO 8601 형식의 타임 스탬프 문자열로 변환합니다."
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "`number`를 문자열로 변환하고 `picture` 문자열에 지정된 표현으로 서식을 변경합니다. \n\n 이 함수의 동작은 XPath F&O 3.1사양에 정의된 XPath/XQuery함수의 fn:format-number의 동작과 같습니다. 인수의 문자열 picture은 fn:format-number 과 같은 구문으로 수치의 서식을 정의합니다. \n\n 임의의 제3 인수 `option`은 소수점기호와 같은 기본 로케일 고유의 서식설정문자를 덮어쓰는데에 사용됩니다. 이 인수를 지정할 경우, XPath F&O 3.1사양의 수치형식에 기술되어있는 name/value 쌍을 포함하는 오브젝트여야 합니다."
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "`number`를 인수 `radix`에 지정한 값을 기수로하는 문자열로 변환합니다. `radix`가 지정되지 않은 경우, 기수 10이 기본값으로 설정됩니다. `radix`에는 2~36의 값을 설정할 수 있고, 그 외의 값의 경우에는 에러가 발생합니다."
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "ISO 8601 형식의 `timestamp`를 Unix Epoch (1970 년 1 월 1 일 UTC) 이후의 밀리 초 수로 변환합니다. 문자열이 올바른 형식이 아닌 경우 에러가 발생합니다."
+    },
+    "$env": {
+        "args": "arg",
+        "desc": "환경변수를 값으로 반환합니다.\n\n 이 함수는 Node-RED 정의 함수입니다."
+    }
+}

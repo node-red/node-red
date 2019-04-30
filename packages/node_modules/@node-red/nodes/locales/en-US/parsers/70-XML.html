@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="xml">
+    <p>Converts between an XML string and its JavaScript object representation, in either direction.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>A JavaScript object or XML string.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string</span></dt>
+        <dd>
+            <ul>
+                <li>If the input is a string it tries to parse it as XML and creates a JavaScript object.</li>
+                <li>If the input is a JavaScript object it tries to build an XML string.</li>
+            </ul>
+        </dd>
+        <dt class="optional">options <span class="property-type">object</span></dt>
+        <dd>This optional property can be used to pass in any of the options supported by the underlying
+            library used to convert to and from XML. See <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">the xml2js docs</a>
+            for more information.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>When converting between XML and an object, any XML attributes are added as a property named <code>$</code> by default.
+    Any text content is added as a property named <code>_</code>. These property names can be specified in the node configuration.</p>
+    <p>For example, the following XML will be converted as shown:</p>
+    <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
+</script>

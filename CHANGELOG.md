@@ -1,3 +1,285 @@
+#### 0.20.5: Maintenance Release
+
+ - Revert error handling in palette manager
+
+#### 0.20.4: Maintenance Release
+
+- Switch media-typer to content-type module Fixes #2122 #2123
+- Use userObj.username and not .name for ssh key lookup Closes #2109
+- Ensure mqtt message handlers are tidied up properly on partial deploy
+- Update package dependencies
+- Fix encoding menu in file node #2125
+- Update ACE to 1.4.3-src-min-noconflict Fixes #2106
+- Fix creating missing package.json when existing project imported Fixes #2115
+- Allow subflow instance to override env var with falsey values Fixes #2113
+- Prevent wire from normal node to link virtual port Fixes #2114
+- Add explanation to the help text on the new feature to build query string from msg.payload #2116
+- Bump bcrypt to latest
+- Add Korean locales files for nodes #2100
+- Add error message if catalog is invalid json
+- Reduce udp out timeout to be less than default inject at start #2127
+
+#### 0.20.3: Maintenance Release
+
+- Do not dynamically add/remove upgrade listener in ws nodes
+- Avoid env var reference loops and support $parent. prefix Fixes #2099
+- Ensure config.\_flow is non-enumerable so is ignored by JSON.stringify
+- Block loading ACE from cdn
+
+#### 0.20.2: Maintenance Release
+
+ - Filter out duplicate nodes when importing a flow
+ - Handle node configs with multiple external scripts properly
+
+#### 0.20.1: Maintenance Release
+
+ - Ensure all subflow instances are stopped when flow stopping Fixes #2095
+ - modify name of korean locale forders #2091
+ - Ensure node names are sanitized before being presented
+ - Subflow status node must pass status to parent flow Fixes #2087
+ - fix problem on displaying option label on Firefox #2090
+
+#### 0.20.0: Milestone Release
+
+Runtime
+ - Pass complete status to Status node and filter to editor
+ - Ensure flows wait for all nodes to close before restarting Fixes #2067
+ - Fix git clone with password protected key
+ - Allow a project to be located below the root of repo
+ - Detect the cloning of an empty git repo properly
+ - Fix use of custom auth strategy plugins
+ - Remove remnants of when library in git/index Fixes #2057
+ - Clear subflow status on close
+ - Add exportGlobalContextKeys to prevent exposing functionGlobalContext keys
+ - Add --no-audit and --no-update-notifier flags to npm commands to reduce workload
+ - Add envVarExcludes setting to block named env vars
+ - Update settings.js docs on userDir to match reality Fixes #2082
+ - Add Korean Language
+
+
+Editor
+ - Automatic placing of node icon according to input/output counts
+ - Transfer placeholder and type to generated TypedInput field
+ - Hitting enter in Comment node name field clicks markdown button
+ - Shift status text left if no shape specified
+ - Better align node status text to status dot
+ - Handle treeList labels as text not html
+ - Change subflow edit dialog titles
+ - Resize subflow edit dialog properly
+ - Add flow list button to tab bar
+ - Handle node name as unsanitized text in debug sidebar
+
+Nodes
+
+ - HTTP Request: Add Digest and Bearer Auth modes to http request node (#2061)
+ - HTTP Request: Add multipart/form-data support to http request node (#2076)
+ - TCP: include session/event info in status events
+ - WebSocket: include session/event info in status events
+ - Add i18n support for port label of inject/exec/httprequest/file nodes
+ - Join node: handle merged objects with repeated properties and honour parts
+ - JSON node: handle single booleans and numbers
+ - File node: add encoding support to file in/out node (#2066)
+
+#### 0.20.0-beta.5: Beta Release
+
+Runtime
+
+ - Bump dependencies
+ - Allow `$parent` access of flow context
+ - Make Node.\_flow a writeable property
+ - Do not propagate Flow.getNode to parent when called from outside flow
+ - Add support of subflow env var
+
+Editor
+
+ - Properly sanitize node names in deploy warning dialogs
+ - Fix XSS issues in library ui code
+ - Add env type to subflow env var types
+ - Display parent subflow properties in edit dialog
+ - Fix direction value of subflow output
+ - Add Status Node to Subflow to allow subflow-specific status Closes #597
+ - Better handling of multiple flow merges Fixes #2039
+
+Nodes
+
+ - Various translation updates
+ - Catch: Add 'catch uncaught only' mode. Closes #1747
+ - Link: scroll to current flow in node list
+ - HTTPRequest: add option to urlencode cookies
+ - HTTPRequest: option to use msg.payload as query params on GET. #1981
+ - Debug: Add local time display option to numerics in debug window
+ - MQTT: Add parsed JSON output option
+
+#### 0.20.0-beta.4: Beta Release
+
+Runtime
+
+ - Bump JSONata to 1.6.4
+ - Add Flow.getSetting for resolving env-var properties
+ - Refactor Subflow logic into own class
+ - Restore RED.auth to node-red module api
+ - Tidy up when usage in Flow and Node
+
+Editor
+
+ - German translation
+ - Change default dropdown appearance and sidebar tab menu handling
+ - Handle multiple-select box when nothing selected Fixes #2021
+ - Handle i18n properly when key is a valid sub-identifier Fixes #2028
+ - Avoid duplicate links when missing node type installed Fixes #2032
+ - Add View Tools
+ - Don't collapse version control header when clicking refresh
+ - Add fast entry via keyboard for string of nodes
+ - Check for undeployed change before showing open project dialog
+ - Add placeholder node when in quick-add mode
+ - Move nodes to top-left corner when converting to subflow
+
+Nodes
+
+ - Debug: Allow debug edit expression to be sent to status
+ - WebSocket: Fix missing translated help
+
+
+#### 0.20.0-beta.3: Beta Release
+
+Editor
+
+ - Update palette manager view properly when module updated
+ - Add TreeList common widget
+ - Fix visual jump when opening Comment editor on Safari Part of #2008
+ - Fix vertical align of markdown editor in Safari Fixes #2008
+ - Avoid marking node as changed if label state is default Fixes #2009
+ - Highlight port on node hover while joining
+ - Support drag-wiring of link nodes
+ - Allow TypeSearch to include a filter option
+ - Improve diff colouring
+ - Allow sections to toggle in 2-element stack
+ - Add support for ${} env var syntax when skipping validation Closes #1980
+ - i18 support for markdown editor tooltip
+ - Add RED.editor.registerTypeEditor for custom type editors
+ - Tidy up markdown toolbar handling across all editors
+ - Added validation while export into library
+ - Reuse notification boxes rather than stack multiple of the same type
+ - Make ssh key dialog accessible when opened from new proj dialog
+
+Runtime
+
+ - Bump JSONata to 1.6.4 Fixes #2023
+ - Add audit logging to admin api
+ - Fix failure of RED.require #2010
+ - Allow oauth strategy callback method to be customised Closes #1998
+ - Ensure fs context cache is flushed on close Fixes #2001
+ - Fix library Buffer( to Buffer.alloc( for node 10
+ - Catch file-not-found on startup when non-existant flow file specified
+ - Actively expire login sesssions and notify user
+ - Add quotation marks for basic auth challenge #1976
+
+Nodes
+
+ - Change: remove promises to improve performance
+ - Debug: add ability to apply JSONata expression to message
+ - Join: remove promises to improve performance
+ - JSON: delete msg.schema before sending msg to avoid conflicts
+ - Link: update UI to use common TreeList widget
+ - Switch: remove promises to improve performance
+
+#### 0.20.0-beta.2: Beta Release
+
+ - Split Node-RED internals into multiple sub-modules
+
+Editor
+
+ - Allow the editor to use a custom admin api url root
+ - Improve performance of Flow Diff dialog - @TothiViseo #1989
+ - Add 'open project' option to Projects Welcome dialog
+ - Add 'type already registered' check in palette editor
+ - Handle missing tab.disabled property
+ - Handle missing wires prop and string x/y props on import
+ - Add RED.notifications.hide flag - for UI testing
+ - Improve alignment of node label edit inputs
+ - Show arrow-in node when invalid font-awesome icon name was specified for default icon
+ - Add ability to delete context values from sidebar
+ - Allow copy-to-clipboard copy whole tabs
+ - Make disabled flows more obvious in editor
+ - Allow import/export from file in editor
+ - Allow config nodes to be selected in sidebar and deleted
+ - Show port label of subflow with input port
+ - Support ctrl-click selection of flow tabs
+ - Allow left-hand node button to act as toggle
+ - Support dbl-click in tab bar to add new flow in position
+ - Fix duplicate subflow detection on import
+ - Add import notification with info on what has been imported Closes #1862
+ - Show error details when trying to import invalid json
+ - Show default icon when non-existent font-awesome icon was specified
+ - Add configurable option for showing node label
+ - Avoid http redirects as Safari doesn't reuse Auth header Fixes #1903
+ - Tidy up ace tooltip styling
+ - Add event log to editor
+ - Add tooltips to multiple editor elements
+ - Allow palette to be hidden
+ - Add node module into to sidebar and palette popover
+ - Mark all newly imported nodes as changed
+ - Allow a node label to be hidden
+ - Add markdown formatting toolbar
+ - Add markdown toolbar to various editors
+ - Fix i18n handling for ja-JP locale on Safari/MacOS
+ - Add node body tooltip
+ - Decrease opacity of flow-navigator
+ - Update tooltip style
+ - Update ACE to 1.4.1-src-min-noconflict
+ - Cache node locales by language
+ - Show icon element with either icon image or fa-icon
+ - Added font-awesome icons to user defined icon
+ - Update info side bar with node description section
+ - One-click search of config node users
+ - Redesign node edit dialog to tabbed style
+ - Add 'restart flows' option to deploy menu
+ - Add node description property UI
+
+
+Runtime
+
+ - Allow a project to be loaded from cmdline
+ - Handle lookup of undefined property in Global context Fixes #1978
+ - Refuse to enable Manage Palette if npm too old
+ - Remove restriction on upgrading non-local modules
+ - Remove deprecated Buffer constructor usage Fixes #1709
+ - Update httpServerOptions doc in settings.js
+ - Exclude non-testable .js files from the unit tests
+ - Add --safe mode flag to allow starting without flows running
+ - Add setting-defined accessToken for automated access to the adminAPI - #1789
+
+Nodes
+
+ - Move all core node EN help to their own locale files - #1990
+ - CSV: better regex for number detection
+ - Debug: hide button if not configured to send to sidebar
+ - Delay: report queue activity when in by-topic mode
+ - Delay: add msg.flush mode
+ - Exec: Preserve existing properties on msg object
+ - File: remove CR/LF from incoming filename
+ - Function: create custom ace javascript mode to handle ES6 Fixes #1911
+ - Function: add env.get
+ - HTTP Request: Add http-proxy config #1913
+ - HTTP Request: add msg.redirectList to output
+ - HTTP Request: add msg.requestTimeout option for per-message setting - @natcl #1959
+ - MQTT: add auto-detect and base64 output to mqtt node Fixes #1912 - @DurandA
+ - MQTT: only unsubscribe node that is being removed
+ - Sentiment: move to node-red-node-sentiment
+ - Switch: add missing edit dialog icon
+ - Tail: move to node-red-node-tail
+ - TCPGet: clear status if user changes target per message
+ - Template: tidy up edit dialog
+ - UDP: more resilient binding to correct port for udp, give input side priority
+ - Split/Join: add msg.reset to info panel
+ - Split/Join: reset join without sending part array
+ - Watch: add msg.filename so can feed direct to file in node
+ - WebSocket: preserve \_session on msg but don't send as part of wholemsg
+
+#### 0.19.6: Maintenance Release
+
+ - Fix encoding of file node from binary to utf8 - #2051
+
 #### 0.19.5: Maintenance Release
 
  - Recognize pip installs of RPi.GPIO (#1934)

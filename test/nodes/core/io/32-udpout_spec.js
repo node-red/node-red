@@ -17,7 +17,7 @@
 var dgram = require("dgram");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
-var udpNode = require("../../../../nodes/core/io/32-udp.js");
+var udpNode = require("nr-test-utils").require("@node-red/nodes/core/io/32-udp.js");
 
 
 describe('UDP out Node', function() {
@@ -38,49 +38,51 @@ describe('UDP out Node', function() {
     function recvData(data, done) {
         var sock = dgram.createSocket('udp4');
         sock.on('message', function(msg, rinfo) {
-            msg.should.deepEqual(data);
             sock.close(done);
+            msg.should.deepEqual(data);
         });
         sock.bind(port, '127.0.0.1');
         port++;
     }
-    
+
     function checkSend(proto, val0, val1, decode, dest_in_msg, done) {
         var dst_ip = dest_in_msg ? undefined : "127.0.0.1";
         var dst_port = dest_in_msg ? undefined : port;
         var flow = [{id:"n1", type:"udp out",
-                     addr:dst_ip, port:dst_port, iface: "", 
-                     ipv:proto, outport: "random",
+                     addr:dst_ip, port:dst_port, iface: "",
+                     ipv:proto, outport: "",
                      base64:decode, multicast:false,
                      wires:[] }];
         helper.load(udpNode, flow, function() {
             var n1 = helper.getNode("n1");
             var msg = {};
-            if(decode) {
-                msg.payload = Buffer("hello").toString('base64');
+            if (decode) {
+                msg.payload = Buffer.from("hello").toString('base64');
             }
             else {
                 msg.payload = "hello";
             }
-            if(dest_in_msg) {
+            if (dest_in_msg) {
                 msg.ip = "127.0.0.1";
                 msg.port = port;
             }
             recvData(val1, done);
-            n1.receive(msg);
+            setTimeout(function() {
+                n1.receive(msg);
+            }, 200);
         });
     }
-    
+
     it('should send IPv4 data', function(done) {
-        checkSend('udp4', 'hello', Buffer('hello'), false, false, done);
+        checkSend('udp4', 'hello', Buffer.from('hello'), false, false, done);
     });
 
     it('should send IPv4 data (base64)', function(done) {
-        checkSend('udp4', 'hello', Buffer('hello'), true, false, done);
+        checkSend('udp4', 'hello', Buffer.from('hello'), true, false, done);
     });
 
     it('should send IPv4 data with dest from msg', function(done) {
-        checkSend('udp4', 'hello', Buffer('hello'), false, true, done);
+        checkSend('udp4', 'hello', Buffer.from('hello'), false, true, done);
     });
 
 });

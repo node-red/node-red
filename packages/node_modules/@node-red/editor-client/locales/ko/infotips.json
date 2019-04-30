@@ -1,0 +1,23 @@
+{
+    "info": {
+        "tip0": "{{core:delete-selection}}를 사용하여 선택된 노드나 링크를 삭제할 수 있습니다.",
+        "tip1": "{{core:search}}를 활용하여 노드를 검색할 수 있습니다.",
+        "tip2": "{{core:toggle-sidebar}}를 사용하여 사이드바를 표시/비표시 전환 할 수 있습니다.",
+        "tip3": "{{core:manage-palette}}를 사용하여 노드 팔레트를 관리 할 수 있습니다.",
+        "tip4": "플로우 안의 설정노드가 사이드바에 표시됩니다. 메뉴 혹은 {{core:show-config-tab}}를 사용하여 엑세스 할 수 있습니다.",
+        "tip5": "설정에서 이 팁을 활성화/비활성화 할 수 있습니다.",
+        "tip6": "[left] [up] [down] [right] 키를 사용하여 선택된 노드를 움직일 수 있습니다. [shift]키를 누른 채로 움직이면 이동폭이 늘어납니다.",
+        "tip7": "노드를 와이어 사이로 드래그 하여 연결할 수도 있습니다.",
+        "tip8": "{{core:show-export-dialog}}를 사용하여 선택한 노드 또는 현재탭을 내보낼 수 있습니다.",
+        "tip9": "JSON파일을 에디터로 드래그하거나 {{core:show-import-dialog}}를 사용하여 플로우 가져올 수 있습니다.",
+        "tip10": "[shift] [click] 하고서 드래그하여 선택한 와이어를 이동할 수 있습니다.",
+        "tip11": "{{core:show-info-tab}}를 사용하여 정보탭을 표시하거나 {{core:show-debug-tab}}를 사용하여 디버그탭을 표시할 수 있습니다.",
+        "tip12": "작업공간에서 [ctrl] [click]을 사용하여 빠른추가 대회상자를 열 수 있습니다.",
+        "tip13": "[ctrl]을 누른 상태로 노드의 포트를 클릭하여 빠르게 연결할 수 있습니다.",
+        "tip14": "[shift]를 누른 상태로 노드를 클릭하여 연결된 모든 노드를 선택할 수 있습니다.",
+        "tip15": "[ctrl]을 누른 상태로 노드를 클릭하여 현재 선택영역에 노드를 추가/제거 할 수 있습니다.",
+        "tip16": "{{core:show-previous-tab}}와 {{core:show-next-tab}}를 사용하여 탭을 전환할 수 있습니다.",
+        "tip17": "노드 편집 창에서 {{core : confirm-edit-tray}}로 변경 사항을 확인하거나 {{core : cancel-edit-tray}}로 취소 할 수 있습니다.",
+        "tip18": "{{core : edit-selected-node}}를 누르면 현재 선택 영역의 첫 번째 노드가 편집됩니다."
+    }
+}

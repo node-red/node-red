@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="html">
+    <p><code>msg.payload</code>에 격납한 HTML다큐멘트에서 CSS셀렉터를 사용하여 요소를 추출합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+    <dt>payload <span class="property-type">문자열</span></dt>
+    <dd>요소를 추출할 HTML문자열</dd>
+    <dt class="optional">select <span class="property-type">문자열</span></dt>
+    <dd>편집패널에서 셀렉터를 지정하지 않은 경우, 메세지의 프로퍼티로서 설정할 수 있습니다.</dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">배열 | 문자열</span></dt>
+        <dd>결과는, 페이로드에 매치된 요소의 배열을 포함하는 단일 메세지, 혹은 매치된 요소 마다의 메세지 중 하나를 선택할 수 있습니다. 복수의 메세지를 송신하는 경우, 메세지에는 <code>parts</code>를 설정합니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>이 노드는 CSS 및 jQuery셀렉터의 조합을 지원합니다. 이용가능한 구문의 자세한 사항은 <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">css-select documentation</a>를 참조해 주세요.</p>
+</script>

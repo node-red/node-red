@@ -1,0 +1,75 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="file">
+    <p>Writes <code>msg.payload</code> to a file, either adding to the end or replacing the existing content.
+       Alternatively, it can delete the file.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the name of the file to be updated.</dd>
+    </dl>
+    <h3>Output</h3>
+    <p>On completion of write, input message is sent to output port.</p>
+    <h3>Details</h3>
+    <p>Each message payload will be added to the end of the file, optionally appending
+    a newline (\n) character between each one.</p>
+    <p>If <code>msg.filename</code> is used the file will be closed after every write.
+    For best performance use a fixed filename.</p>
+    <p>It can be configured to overwrite the entire file rather than append. For example,
+    when writing binary data to a file, such as an image, this option should be used
+    and the option to append a newline should be disabled.</p>
+    <p>Encoding of data written to a file can be specified from list of encodings.</p>
+    <p>Alternatively, this node can be configured to delete the file.</p>
+</script>
+
+<script type="text/x-red" data-help-name="file in">
+    <p>Reads the contents of a file as either a string or binary buffer.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>if not set in the node configuration, this property sets the filename to read.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | buffer</span></dt>
+        <dd>The contents of the file as either a string or binary buffer.</dd>
+        <dt class="optional">filename <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the name of the file to be read.</dd>
+        <dt class="optional">error <span class="property-type">object</span></dt>
+        <dd><i>deprecated</i>: If enabled in the node, when the node hits an error
+            reading the file, it will send a message with no <code>payload</code>
+            and this <code>error</code> property set to the error details. This
+            mode of behaviour is deprecated and not enabled by default for new
+            instances of the node. See below for more information.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The filename should be an absolute path, otherwise it will be relative to
+    the working directory of the Node-RED process.</p>
+    <p>On Windows, path separators may need to be escaped, for example: <code>\\Users\\myUser</code>.</p>
+    <p>Optionally, a text file can be split into lines, outputting one message per line, or a binary file
+    split into smaller buffer chunks - the chunk size being operating system dependant, but typically 64k (Linux/Mac) or 41k (Windows).</p>
+    <p>When split into multiple messages, each message will have a <code>parts</code>
+    property set, forming a complete message sequence.</p>
+    <p>Encoding of input data can be specified from list of encodings if output format is string.</p>
+    <h4>Legacy error handling</h4>
+    <p>Before Node-RED 0.17, if this node hit an error whilst reading the file, it would
+    send a message with no <code>msg.payload</code> and <code>msg.error</code> set to the
+    details of the error. This is a deprecated mode of behaviour for the node that new
+    instances will not do. If required, this mode can be re-enabled within the node
+    configuration.</p>
+    <p>Errors should be caught and handled using a Catch node.</p>
+</script>
