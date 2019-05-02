@@ -194,10 +194,10 @@ module.exports = function(grunt) {
                         "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js",
                     ],
-                    "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
-                        // TODO: resolve relative resource paths in
-                        //       bootstrap/FA/jquery
-                    ],
+                    // "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
+                    //     // TODO: resolve relative resource paths in
+                    //     //       bootstrap/FA/jquery
+                    // ],
                     "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
@@ -223,10 +223,6 @@ module.exports = function(grunt) {
                 files: [{
                     dest: 'packages/node_modules/@node-red/editor-client/public/red/style.min.css',
                     src: 'packages/node_modules/@node-red/editor-client/src/sass/style.scss'
-                },
-                {
-                    dest: 'packages/node_modules/@node-red/editor-client/public/vendor/bootstrap/css/bootstrap.min.css',
-                    src: 'packages/node_modules/@node-red/editor-client/src/vendor/bootstrap/css/bootstrap.css'
                 }]
             }
         },
@@ -353,8 +349,6 @@ module.exports = function(grunt) {
                         cwd: 'packages/node_modules/@node-red/editor-client/src/vendor',
                         src: [
                             'ace/**',
-                            //'bootstrap/css/**',
-                            'bootstrap/img/**',
                             'jquery/css/base/**',
                             'font-awesome/**'
                         ],
