@@ -184,20 +184,19 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js": [
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.3.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/bootstrap/js/bootstrap.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js"
+                        "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js",
+                        "node_modules/jsonata/jsonata-es5.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js",
                     ],
                     "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
                         // TODO: resolve relative resource paths in
                         //       bootstrap/FA/jquery
-                    ],
-                    "packages/node_modules/@node-red/editor-client/public/vendor/jsonata/jsonata.min.js": [
-                        "node_modules/jsonata/jsonata-es5.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js"
                     ],
                     "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
