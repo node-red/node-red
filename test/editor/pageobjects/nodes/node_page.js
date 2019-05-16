@@ -33,13 +33,13 @@ Node.prototype.clickOk = function() {
 }
 
 Node.prototype.connect = function(targetNode) {
-    var outputPort = this.id + '/*[@class="port_output"]';
-    var inputPort = targetNode.id + '/*[@class="port_input"]';
+    var outputPort = this.id + '/*[@class="red-ui-flow-port-output"]';
+    var inputPort = targetNode.id + '/*[@class="red-ui-flow-port-input"]';
     browser.dragAndDrop(outputPort, inputPort)
 }
 
 Node.prototype.clickLeftButton = function() {
-    browser.clickWithWait(this.id + '/*[@class="node_button node_left_button"]');
+    browser.clickWithWait(this.id + '/*[@class="red-ui-flow-node-button"]');
 }
 
 module.exports = Node;
