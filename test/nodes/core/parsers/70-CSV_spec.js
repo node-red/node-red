@@ -148,6 +148,22 @@ describe('CSV node', function() {
             });
         });
 
+        it('should not parse numbers when told not to do so', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", strings:false, wires:[["n2"]] },
+                    {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: "1.23", b: "0123", c: "+123", d: "e123", e: "0", f: "-123", g: "1e3" });
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '1.23,0123,+123,e123,0,-123,1e3'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
         it('should leave handle strings with scientific notation as numbers', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
