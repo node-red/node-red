@@ -102,7 +102,7 @@ module.exports = {
                 });
             });
             browser.url(url);
-            browser.waitForExist('#palette_node_inject');
+            browser.waitForExist('#red-ui-palette-node_inject');
         } catch (err) {
             console.log(err);
             throw err;
