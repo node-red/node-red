@@ -1,3 +1,8 @@
+#### 1.0.0-beta.2: Beta Release
+
+Runtime
+ - Fix length calculation when loading library file
+
 #### 1.0.0-beta.1: Beta Release
 
 Runtime
