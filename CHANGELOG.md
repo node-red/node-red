@@ -1,3 +1,49 @@
+#### 1.0.0-beta.1: Beta Release
+
+Runtime
+ - Update runtime apis to support multiple libraries
+ - Add Node 12 to travis (allow_failures)
+ - Bump all dependencies Fixes #2152
+
+Editor
+ - [BREAKING] complete overhaul of editor DOM/CSS structure
+ - [BREAKING] Get rid of Bootstrap
+ - Simplify index.mst to a single div to insert the editor
+ - Append node configs to div rather than body
+ - Only redraw node status when it has changed
+ - Minimise work done to calculate node label widths
+ - Allow script tags with src to reference esm modules
+ - Upgrade to jq 3.4.1 / jq-ui 1.12.1
+ - Allow editor language to be chosen in editor settings
+ - Only NLS status text that starts with a letter Fixes #2128
+ - Fix display of link node list within subflow Fixes #2140
+ - Blur the active element when closing edit dialog via action Fixes #2097
+ - Trigger change evnt on typedInput when type changes and options present Fixes #2160
+ - Move library import/export to single dialog
+ - Move type-library dialogs to new style dialog
+ - Fix node drag and drop animation
+ - let status be simple text if wanted
+ - Add workspace statusBar
+ - Complete refresh of German translations
+ - Fix memory leak in Debug sidebar #2163
+ - Introduce toggleButton and move flow-disabled to use it
+ - Allow RED.settings.get/set to use full property desc
+ - Add auto-refresh toggle to context sidebar
+ - Add build-custom-theme script
+ - Add RED.view.selectNodes api for node selection whilst editing
+ - Add node-select to typedInput
+
+Nodes
+ - http request node: warn user if msg.requestTimeout == 0
+ - hide delay node reset label on deploy
+ - Fix CSV regex to treat strings starting e as text
+ - Add "don't parse numbers" option to csv node
+ - Add expand editor button to Template node
+ - Update catch/status nodes to use selectNodes api and treeList
+
+
+
+
 #### 0.20.5: Maintenance Release
 
  - Revert error handling in palette manager
