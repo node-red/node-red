@@ -81,7 +81,7 @@ const result = sass.renderSync({
                 contents: updatedColors.join("\n")
             }
         }
-        return {file:"/Users/nol/code/node-red/node-red/packages/node_modules/@node-red/editor-client/src/sass/"+url+".scss"}
+        return {file:"../packages/node_modules/@node-red/editor-client/src/sass/"+url+".scss"}
     }
 });
 
