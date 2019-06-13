@@ -38,7 +38,8 @@ describe("@node-red/util/i18n", function() {
     });
 
     it.skip('ensures all messages.json files have the same keys', function() {
-        //fails, do we fallback to en-us? leaving this here just in case we are not
+        //fails, but because we do a fallback to en-us this is ok
+        //leaving this here in case we want to be able to use this to review translation coverage
         let results = getFiles('../../../../../packages/node_modules/@node-red/nodes/locales')
             .map((path) => {
                 //grab the paths
