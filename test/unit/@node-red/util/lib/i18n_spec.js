@@ -21,20 +21,11 @@ describe("@node-red/util/i18n", function() {
     const path = require('path');
     const fs = require('fs-extra');
 
-    it('ensures all messages.json files have the mqtt.label.protocolversion key', function() {
-        let results = getFiles('../../../../../packages/node_modules/@node-red/nodes/locales')
-            .map((path) => {
-                //grab the paths
-                return deepKeys(require(path), []);
-            })
-            .filter((paths, pos, arr) => {
-                return paths.indexOf('mqtt.label.protocolversion') == -1;
-            });
+    it('ensures fallback file has the mqtt.label.protocolversion key', function() {
 
-        //should have no results where this property key is missing
-        if (results.length > 0) {
-            throw new Error('some locale files are missing mqtt.label.protocolversion');
-        }
+        var enUS = require(path.resolve(__dirname, '../../../../../packages/node_modules/@node-red/nodes/locales/en-US/messages.json'));
+        var keys = deepKeys(enUS, []);
+        true.should.equal(keys.indexOf('mqtt.label.protocolversion') > -1);
     });
 
     it.skip('ensures all messages.json files have the same keys', function() {
@@ -57,6 +48,14 @@ describe("@node-red/util/i18n", function() {
     it.skip('more tests needed', function() {});
 
     //helper functions
+
+    function getFile(relativePath) {
+        let basePath = path.resolve(__dirname, relativePath);
+        return fs.readdirSync(basePath)
+            .map(function(path) {
+                return [basePath, path, 'messages.json'].join('/');
+            });
+    }
 
     function getFiles(relativePath, regex) {
         let basePath = path.resolve(__dirname, relativePath);
