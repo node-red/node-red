@@ -70,17 +70,17 @@ describe('MQTT Node', function() {
             id: "broker",
             type: "mqtt-broker",
             broker: "127.0.0.1",
-            protocolversion: 4
+            protocolversion: 5
         }];
         let mqttBroker = await loadNode(flow, "broker");
-        mqttBroker.should.have.property("protocolversion", 4);
+        mqttBroker.should.have.property("protocolversion", 5);
         helper.unload();
     });
 
-    it('gets the correct parameters from the broker - protocol version 4', async () => {
+    it('gets the correct parameters from the broker - protocol version 3', async () => {
 
         let id = "broker";
-        let protocolversion = 4;
+        let protocolversion = 3;
         let broker = mockBroker({
             protocolversion
         });
@@ -95,7 +95,7 @@ describe('MQTT Node', function() {
         ];
 
         let mqttNode = await loadNode(flow, "n1");
-        mqttNode.brokerConn.options.should.have.property("protocolVersion", 4);
+        mqttNode.brokerConn.options.should.have.property("protocolVersion", 3);
         helper.unload();
     });
 
