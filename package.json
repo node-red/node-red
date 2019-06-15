@@ -50,7 +50,7 @@
         "jsonata": "1.6.4",
         "memorystore": "1.6.1",
         "mime": "2.4.3",
-        "mqtt": "2.18.8",
+        "mqtt": "^3.0.0",
         "multer": "1.4.1",
         "mustache": "3.0.1",
         "node-red-node-email": "^1.4.0",
