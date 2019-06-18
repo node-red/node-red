@@ -319,6 +319,57 @@ describe('Flow', function() {
             });
         });
 
+        it("ignores disabled nodes",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",d:true,type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"},
+                {id:"5",z:"t1",type:"test",d:true,foo:"a"}
+
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(3);
+
+            flow.getNode('1').should.have.a.property('id','1');
+            should.not.exist(flow.getNode('2'));
+            flow.getNode('3').should.have.a.property('id','3');
+            flow.getNode('4').should.have.a.property('id','4');
+            should.not.exist(flow.getNode('5'));
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("4");
+
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
+
+            currentNodes["1"].receive({payload:"test"});
+
+            currentNodes["1"].should.have.a.property("handled",1);
+            // Message doesn't reach 3 as 2 is disabled
+            currentNodes["3"].should.have.a.property("handled",0);
+
+            flow.stop().then(function() {
+                try {
+                    currentNodes.should.not.have.a.property("1");
+                    currentNodes.should.not.have.a.property("2");
+                    currentNodes.should.not.have.a.property("3");
+                    currentNodes.should.not.have.a.property("4");
+                    stoppedNodes.should.have.a.property("1");
+                    stoppedNodes.should.not.have.a.property("2");
+                    stoppedNodes.should.have.a.property("3");
+                    stoppedNodes.should.have.a.property("4");
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
 
     });
 
