@@ -192,7 +192,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             list["node-red"].icons[0].should.have.property("path",path.join(__dirname,"resources/local/NestedDirectoryNode/NestedNode/icons"))
             list["node-red"].icons[0].should.have.property("icons");
             list["node-red"].icons[0].icons.should.have.length(1);
-            list["node-red"].icons[0].icons[0].should.eql("arrow-in.png");
+            list["node-red"].icons[0].icons[0].should.eql("arrow-in.svg");
             done();
         });
         it("scans icons dir in library",function(done) {
@@ -297,7 +297,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             nodeModule.TestNodeModule.icons.should.have.length(1);
             nodeModule.TestNodeModule.icons[0].should.have.property("path");
             nodeModule.TestNodeModule.icons[0].should.have.property("icons");
-            nodeModule.TestNodeModule.icons[0].icons[0].should.eql("arrow-in.png");
+            nodeModule.TestNodeModule.icons[0].icons[0].should.eql("arrow-in.svg");
             done();
         });
     });
