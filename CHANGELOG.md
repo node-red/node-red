@@ -1,3 +1,16 @@
+#### 0.20.6: Maintenance Release
+
+ - Revealing node position needs to account for zoom level Fixes #2172
+ - stop join tripping up if last message of buffer is blank.
+ - Improve handling of file upload in request node
+ - Handle subflow internal node wired to a non-existant node Fixes #2202
+ - Do not save subflow env vars with blank names
+ - Don't allow a link node virtual wire to connect to normal port
+ - Clear HTTP Request node authType when auth disabled Fixes #2215
+ - Fix parsing of content-type header Fixes #2216
+ - Fix join node reset issue with merging objects
+ - Copy data-i18n attribute on TypedInput Fixes #2211
+
 #### 0.20.5: Maintenance Release
 
  - Revert error handling in palette manager
