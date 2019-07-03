@@ -677,6 +677,9 @@ describe('JOIN node', function() {
             n1.receive({payload:{f:1}, topic:"f", complete:true});
             n1.receive({payload:{g:2}, topic:"g"});
             n1.receive({payload:{h:1}, topic:"h"});
+            n1.receive({reset:true});
+            n1.receive({payload:{g:2}, topic:"g"});
+            n1.receive({payload:{h:1}, topic:"h"});
             n1.receive({payload:{i:3}, topic:"i"});
         });
     });
@@ -700,6 +703,9 @@ describe('JOIN node', function() {
                 }
                 catch(e) { done(e) }
             });
+            n1.receive({payload:2, foo:"b"});
+            n1.receive({payload:3, foo:"c"});
+            n1.receive({reset:true});
             n1.receive({payload:1, foo:"a"});
             n1.receive({payload:2, foo:"b"});
             n1.receive({payload:3, foo:"c"});

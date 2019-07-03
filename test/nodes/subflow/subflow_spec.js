@@ -447,25 +447,17 @@ describe('subflow', function() {
         });
     });
 
-    it('should access env var of subflow instance UI', function(done) {
+    it('should access env var type of subflow instance', function(done) {
         var flow = [
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
             {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
-             ui: {
-                 params: [
-                     {
-                         id: 1,
-                         name: "K",
-                         type: "str",
-                         value: "V"
-                     }
-                 ]
-             },
+             env: [
+                 {name: "K", type: "str", value: "V"}
+             ],
              wires:[["n2"]]},
             {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
             // Subflow
             {id:"s1", type:"subflow", name:"Subflow", info:"",
-             env: [],
              in:[{
                  x:10, y:10,
                  wires:[ {id:"s1-n1"} ]
@@ -476,7 +468,7 @@ describe('subflow', function() {
              }]
             },
             {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
-             func:"msg.V = env.get('K'); return msg;",
+             func:"msg.V = env.get('K_type'); return msg;",
              wires:[]}
         ];
         helper.load(functionNode, flow, function() {
@@ -484,7 +476,7 @@ describe('subflow', function() {
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 try {
-                    msg.should.have.property("V", "V");
+                    msg.should.have.property("V", "str");
                     done();
                 }
                 catch (e) {
@@ -496,94 +488,44 @@ describe('subflow', function() {
         });
     });
 
-    it('should access env var of subflow template UI', function(done) {
-        var flow = [
-            {id:"t0", type:"tab", label:"", disabled:false, info:""},
-            {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1", wires:[["n2"]]},
-            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
-            // Subflow
-            {id:"s1", type:"subflow", name:"Subflow", info:"",
-             env: [],
-             ui: {
-                 params: [
-                     {
-                         id: 1,
-                         name: "K",
-                         type: "str",
-                         value: "V"
-                     }
-                 ]
-             },
-             ui_in: {
-             },
-             in:[{
-                 x:10, y:10,
-                 wires:[ {id:"s1-n1"} ]
-             }],
-             out:[{
-                 x:10, y:10,
-                 wires:[ {id:"s1-n1", port:0} ]
-             }]
-            },
-            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
-             func:"msg.V = env.get('K'); return msg;",
-             wires:[]}
-        ];
-        helper.load(functionNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            var n2 = helper.getNode("n2");
-            n2.on("input", function(msg) {
-                try {
-                    msg.should.have.property("V", "V");
-                    done();
-                }
-                catch (e) {
-                    console.log(e);
-                    done(e);
-                }
-            });
-            n1.receive({payload:"foo"});
-        });
-    });
-
-
-    it('should access env var of subflow UI value', function(done) {
+    it('should access env var info of subflow instance', function(done) {
         var flow = [
             {id:"t0", type:"tab", label:"", disabled:false, info:""},
             {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
-             ui: {
-                 params: [
-                     {
-                         id: 1,
-                         name: "K",
-                         type: "str",
-                         value: "Z"
+             env: [
+                 {name: "K", type: "str", value: "V"}
+             ],
+             wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"",
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }],
+             env:[
+                 {
+                     name: "K", type: "str", value: "",
+                     ui: {
+                         hasUI: true,
+                         icon: "icon",
+                         labels: {
+                             "en-US": "label"
+                         },
+                         type: "input",
+                         inputTypes: {
+                             str: true
+                         }
                      }
-                 ]
-             },
-             ui_in: {
-                 1: {
-                     name: "K",
-                     type: "str",
-                     value: "V"
                  }
-             },
-             wires:[["n2"]]},
-            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
-            // Subflow
-            {id:"s1", type:"subflow", name:"Subflow", info:"",
-             env: [],
-             in:[{
-                 x:10, y:10,
-                 wires:[ {id:"s1-n1"} ]
-             }],
-             out:[{
-                 x:10, y:10,
-                 wires:[ {id:"s1-n1", port:0} ]
-             }]
+             ]
             },
             {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
-             func:"msg.V = env.get('K'); return msg;",
+             func:"msg.V = env.get('K_info'); return msg;",
              wires:[]}
         ];
         helper.load(functionNode, flow, function() {
@@ -591,7 +533,22 @@ describe('subflow', function() {
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
                 try {
-                    msg.should.have.property("V", "V");
+                    msg.should.have.property("V");
+                    var v = msg.V;
+                    v.should.have.property("name", "K");
+                    v.should.have.property("value", "V");
+                    v.should.have.property("type", "str");
+                    v.should.have.property("ui");
+                    var ui = v.ui;
+                    ui.should.have.property("hasUI", true);
+                    ui.should.have.property("icon", "icon");
+                    ui.should.have.property("type", "input");
+                    ui.should.have.property("labels");
+                    var labels = ui.labels;
+                    labels.should.have.property("en-US", "label");
+                    ui.should.have.property("inputTypes");
+                    var types = ui.inputTypes;
+                    types.should.have.property("str", true);
                     done();
                 }
                 catch (e) {

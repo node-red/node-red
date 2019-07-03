@@ -33,7 +33,7 @@ describe("api/editor/ui", function() {
             nodes: {
                 getIcon: function(opts) {
                     return new Promise(function(resolve,reject) {
-                        fs.readFile(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.png"), function(err,data) {
+                        fs.readFile(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.svg"), function(err,data) {
                             resolve(data);
                         })
                     });
@@ -94,7 +94,7 @@ describe("api/editor/ui", function() {
             }
         }
         it('returns the requested icon', function(done) {
-            var defaultIcon = fs.readFileSync(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.png"));
+            var defaultIcon = fs.readFileSync(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.svg"));
             request(app)
                 .get("/icons/module/icon.png")
                 .expect("Content-Type", /image\/png/)
