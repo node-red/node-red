@@ -254,6 +254,16 @@ describe('switch Node', function() {
         genericSwitchTest("gte", 3, true, true, 3, done);
     });
 
+    it('should match if a payload has a required property', function(done) {
+        genericSwitchTest("exists", "a", true, true, {a:1}, done);
+    });
+    it('should not match if a payload does not have a required property', function(done) {
+        genericSwitchTest("exists", "a", true, false, {b:1}, done);
+    });
+    it('should not match if the key is not a string', function(done) {
+        genericSwitchTest("exists", 1, true, false, {a:1}, done);
+    });
+
     it('should check if payload is between given values', function(done) {
         twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });
@@ -518,7 +528,6 @@ describe('switch Node', function() {
     it('should check if payload is not empty (0)', function(done) {
         singularSwitchTest("nempty", true, false, 0, done);
     });
-
 
     it('should check input against a previous value', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{ "t": "gt", "v": "", "vt": "prev" }],checkall:true,outputs:1,wires:[["helperNode1"]]},
