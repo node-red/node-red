@@ -475,20 +475,21 @@ describe('SORT node', function() {
                     {id:"n2", type:"helper"}];
         helper.load(sortNode, flow, function() {
             var n1 = helper.getNode("n1");
-            setTimeout(function() {
-                var logEvents = helper.log().args.filter(function (evt) {
-                    return evt[0].type == "sort";
-                });
-                var evt = logEvents[0][0];
-                evt.should.have.property('id', "n1");
-                evt.should.have.property('type', "sort");
-                evt.should.have.property('msg', "sort.clear");
-                done();
-            }, 150);
             var msg = { payload: 0,
                         parts: { id: "X", index: 0, count: 2} };
             n1.receive(msg);
-            n1.close();
+            setTimeout(function() {
+                n1.close().then(function() {
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "sort";
+                    });
+                    var evt = logEvents[0][0];
+                    evt.should.have.property('id', "n1");
+                    evt.should.have.property('type', "sort");
+                    evt.should.have.property('msg', "sort.clear");
+                    done();
+                });
+            }, 150);
         });
     });
 

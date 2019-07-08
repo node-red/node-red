@@ -130,14 +130,18 @@ describe('YAML node', function() {
                 var yn1 = helper.getNode("yn1");
                 var yn2 = helper.getNode("yn2");
                 yn1.receive({payload:'employees:\n-firstName: John\n- lastName: Smith\n',topic: "bar"});
-                var logEvents = helper.log().args.filter(function(evt) {
-                    return evt[0].type == "yaml";
-                });
-                logEvents.should.have.length(1);
-                logEvents[0][0].should.have.a.property('msg');
-                logEvents[0][0].msg.should.startWith("end of the stream");
-                logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
-                done();
+                setTimeout(function() {
+                    try {
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == "yaml";
+                        });
+                        logEvents.should.have.length(1);
+                        logEvents[0][0].should.have.a.property('msg');
+                        logEvents[0][0].msg.should.startWith("end of the stream");
+                        logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                        done();
+                    } catch(err) { done(err) }
+                },50);
             } catch(err) {
                 done(err);
             }
