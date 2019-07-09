@@ -255,13 +255,13 @@ describe('switch Node', function() {
     });
 
     it('should match if a payload has a required property', function(done) {
-        genericSwitchTest("exists", "a", true, true, {a:1}, done);
+        genericSwitchTest("hask", "a", true, true, {a:1}, done);
     });
     it('should not match if a payload does not have a required property', function(done) {
-        genericSwitchTest("exists", "a", true, false, {b:1}, done);
+        genericSwitchTest("hask", "a", true, false, {b:1}, done);
     });
     it('should not match if the key is not a string', function(done) {
-        genericSwitchTest("exists", 1, true, false, {a:1}, done);
+        genericSwitchTest("hask", 1, true, false, {a:1}, done);
     });
 
     it('should check if payload is between given values', function(done) {
