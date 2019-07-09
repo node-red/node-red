@@ -176,7 +176,7 @@ describe('Node', function() {
             }});
 
             var message = {payload:"hello world"};
-            n.on('input',function(msg, nodeDone) {
+            n.on('input',function(msg, nodeSend, nodeDone) {
                 nodeDone();
             });
             n.receive(message);
@@ -186,7 +186,7 @@ describe('Node', function() {
             sinon.stub(n,"error",function(err,msg) {});
 
             var message = {payload:"hello world"};
-            n.on('input',function(msg, nodeDone) {
+            n.on('input',function(msg, nodeSend, nodeDone) {
                 nodeDone(new Error("test error"));
                 setTimeout(function() {
                     try {
@@ -251,6 +251,30 @@ describe('Node', function() {
             } catch(err) {
                 notSyncErr = err;
             }
+        });
+
+        it('emits a message with callback provided send', function(done) {
+            var flow = {
+                getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                handleComplete: (node,msg) => {}
+            };
+            var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
+            var message = {payload:"hello world"};
+            var messageReceived = false;
+            n1.on('input',function(msg,nodeSend,nodeDone) {
+                nodeSend(msg);
+                nodeDone();
+            });
+            n2.on('input',function(msg) {
+                // msg equals message, and is not a new copy
+                messageReceived = true;
+                should.deepEqual(msg,message);
+                should.strictEqual(msg,message);
+                done();
+            });
+            n1.receive(message);
+            messageReceived.should.be.false();
         });
 
         it('emits multiple messages on a single output', function(done) {
