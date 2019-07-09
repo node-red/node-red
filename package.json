@@ -112,7 +112,7 @@
         "wdio-mocha-framework": "^0.6.4",
         "wdio-spec-reporter": "^0.1.5",
         "webdriverio": "^4.14.1",
-        "node-red-node-test-helper": "^0.2.2",
+        "node-red-node-test-helper": "^0.2.3",
         "jsdoc-nr-template": "node-red/jsdoc-nr-template"
     },
     "engines": {
