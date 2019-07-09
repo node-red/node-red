@@ -15,7 +15,7 @@
 **/
 
 var should = require("should");
-var functionNode = require("nr-test-utils").require("@node-red/nodes/core/core/80-function.js");
+var functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
 var helper = require("node-red-node-test-helper");
 
 // Notice:
