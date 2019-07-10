@@ -979,6 +979,29 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo", requestTimeout: -4});
             });
         });
+        it('should show a warning if msg.requestTimeout is set to 0', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/text')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode', 200);
+                        var logEvents = helper.log().args.filter(function(evt) {
+                            return evt[0].type == 'http request';
+                        });
+                        logEvents.should.have.length(2);
+                        var tstmp = logEvents[0][0].timestamp;
+                        logEvents[0][0].should.eql({level:helper.log().WARN, id:'n1',type:'http request',msg:'httpin.errors.timeout-isnegative', timestamp:tstmp});
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", requestTimeout: 0});
+            });
+        });
         it('should pass if response time is faster than timeout set via msg.requestTimeout', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/timeout50ms')},
                 {id:"n2", type:"helper"}];
@@ -1268,6 +1291,7 @@ describe('HTTP Request Node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
+                    console.log(msg.payload);
                     try {
                         msg.payload.headers.should.have.property('content-type').which.startWith('application/json');
                         msg.payload.headers.should.not.have.property('x-node-red-request-node');
@@ -1278,7 +1302,11 @@ describe('HTTP Request Node', function() {
                 });
                 // Pass in a headers property with an unmodified x-node-red-request-node hash
                 // This should cause the node to ignore the headers
-                n1.receive({payload:{foo:"bar"}, headers: { 'content-type': 'text/plain', "x-node-red-request-node":"67690139"}});
+
+                var headers = { 'content-type': 'text/plain' };
+                headers['x-node-red-request-node'] = require("hash-sum")(headers);
+
+                n1.receive({payload:{foo:"bar"}, headers: headers});
             });
         });
 

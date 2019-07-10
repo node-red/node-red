@@ -145,6 +145,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/tabs.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/stack.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actions.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/deploy.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
@@ -168,6 +169,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/library.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/notifications.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/search.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/actionList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/typeSearch.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/subflow.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/userSettings.js",
@@ -182,7 +184,7 @@ module.exports = function(grunt) {
             vendor: {
                 files: {
                     "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js": [
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.3.1.min.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.4.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",

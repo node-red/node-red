@@ -818,6 +818,14 @@ describe('switch Node', function() {
         });
     });
 
+    it('should handle env var expression', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"VAR",propertyType:"env",rules:[{"t":"eq","v":"VAL"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        process.env.VAR = "VAL";
+        customFlowSwitchTest(flow, true, "OK", done);
+    });
+
+
     it('should take head of message sequence (no repair)', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"head","v":3}],checkall:false,repair:false,outputs:1,wires:[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];

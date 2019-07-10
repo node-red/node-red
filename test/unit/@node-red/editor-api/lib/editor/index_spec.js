@@ -96,9 +96,9 @@ describe("api/editor/index", function() {
         });
         it('serves icons', function(done) {
             request(app)
-            .get("/red/images/icons/node-changed.png")
+            .get("/red/images/icons/arrow-in.svg")
             .expect(200)
-            .expect("Content-Type", /image\/png/)
+            .expect("Content-Type", /image\/svg\+xml/)
             .end(function(err,res) {
                 done(err);
             });
