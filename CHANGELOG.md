@@ -46,6 +46,12 @@ Nodes
  - Add expand editor button to Template node
  - Update catch/status nodes to use selectNodes api and treeList
 
+#### 0.20.7: Maintenance Release
+
+ - Update jsonata to 1.6.5 which should fix #2183
+ - Ensure the subflow stop promise is waiting for before restarting
+ - Properly escape node types in palette
+
 #### 0.20.6: Maintenance Release
 
  - Revealing node position needs to account for zoom level Fixes #2172
