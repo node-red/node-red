@@ -56,7 +56,7 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a project of the [JS Foundation](http://js.foundation).
+Node-RED is a project of the [OpenJS Foundation](http://js.foundation).
 
 It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
 
