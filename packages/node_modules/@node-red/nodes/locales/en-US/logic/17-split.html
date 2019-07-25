@@ -1,0 +1,165 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="split">
+    <p>Splits a message into a sequence of messages.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | string | array | buffer</span></dt>
+        <dd>The behaviour of the node is determined by the type of <code>msg.payload</code>:
+            <ul>
+                <li><b>string</b>/<b>buffer</b> - the message is split using the specified character (default: <code>\n</code>), buffer sequence or into fixed lengths.</li>
+                <li><b>array</b> - the message is split into either individual array elements, or arrays of a fixed-length.</li>
+                <li><b>object</b> - a message is sent for each key/value pair of the object.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">object</span></dt>
+        <dd>This property contains information about how the message was split from
+        the original message. If passed to the <b>join</b> node, the sequence can be
+        reassembled into a single message. The property has the following properties:
+        <ul>
+            <li><code>id</code> - an identifier for the group of messages</li>
+            <li><code>index</code> - the position within the group</li>
+            <li><code>count</code> - if known, the total number of messages in the group. See 'streaming mode' below.</li>
+            <li><code>type</code> - the type of message - string/array/object/buffer</li>
+            <li><code>ch</code> - for a string or buffer, the data used to the split the message as either the string or an array of bytes</li>
+            <li><code>key</code> - for an object, the key of the property this message was created from. The node can be configured to also copy this value to another message properties, such as <code>msg.topic</code>.</li>
+            <li><code>len</code> - the length of each message when split using a fixed length value</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Details</h3>
+    <p>This node makes it easy to create a flow that performs common actions across
+    a sequence of messages before, using the <b>join</b> node, recombining the
+    sequence into a single message.</p>
+    <p>It uses the <code>msg.parts</code> property to track the individual parts
+    of a sequence.</p>
+    <h4>Streaming mode</h4>
+    <p>The node can also be used to reflow a stream of messages. For example, a
+    serial device that sends newline-terminated commands may deliver a single message
+    with a partial command at its end. In 'streaming mode', this node will split
+    a message and send each complete segment. If there is a partial segment at the end,
+    the node will hold on to it and prepend it to the next message that is received.
+    </p>
+    <p>When operating in this mode, the node will not set the <code>msg.parts.count</code>
+    property as it does not know how many messages to expect in the stream. This
+    means it cannot be used with the <b>join</b> node in its automatic mode</p>
+</script>
+
+<script type="text/x-red" data-help-name="join">
+    <p>Joins sequences of messages into a single message.</p>
+    <p>There are three modes available:</p>
+    <dl>
+        <dt>automatic</dt>
+        <dd>When paired with the <b>split</b> node, it will automatically join the messages to reverse the split that was performed.</dd>
+        <dt>manual</dt>
+        <dd>Join sequences of messages in a variety of ways.</dd>
+        <dt>reduce sequence</dt>
+        <dd>Apply an expression against all messages in a sequence to reduce it to a single message.</dd>
+    </dl>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">object</span></dt>
+        <dd>To automatically join a sequence of messages, they should all have
+        this property set. The <b>split</b> node generates this property but it
+        can be manually created. It has the following properties:
+        <ul>
+            <li><code>id</code> - an identifier for the group of messages</li>
+            <li><code>index</code> - the position within the group</li>
+            <li><code>count</code> - the total number of messages in the group</li>
+            <li><code>type</code> - the type of message - string/array/object/buffer</li>
+            <li><code>ch</code> - for a string or buffer, the data used to the split the message as either the string or an array of bytes</li>
+            <li><code>key</code> - for an object, the key of the property this message was created from</li>
+            <li><code>len</code> - the length of each message when split using a fixed length value</li>
+        </ul>
+        </dd>
+        <dt class="optional">complete</dt>
+        <dd>If set, the node will send its output message in its current state.</dd>
+    </dl>
+    <h3>Details</h3>
+
+    <h4>Automatic mode</h4>
+    <p>Automatic mode uses the <code>parts</code> property of incoming messages to
+       determine how the sequence should be joined. This allows it to automatically
+       reverse the action of a <b>split</b> node.
+
+    <h4>Manual mode</h4>
+    <p>When configured to join in manual mode, the node is able to join sequences
+     of messages into a number of different results:</p>
+    <ul>
+        <li>a <b>string</b> or <b>buffer</b> - created by joining the selected property of each message with the specified join characters or buffer.</li>
+        <li>an <b>array</b> - created by adding each selected property, or entire message, to the output array.</li>
+        <li>a <b>key/value object</b> - created by using a property of each message to determine the key under which
+        the required value is stored.</li>
+        <li>a <b>merged object</b> - created by merging the property of each message under a single object.</li>
+    </ul>
+    <p>The other properties of the output message are taken from the last message received before the result is sent.</p>
+    <p>A <i>count</i> can be set for how many messages should be received before generating the output message.
+    For object outputs, once this count has been reached, the node can be configured to send a message for each subsequent message
+    received.</p>
+    <p>A <i>timeout</i> can be set to trigger sending the new message using whatever has been received so far.</p>
+    <p>If a message is received with the <b>msg.complete</b> property set, the output message is finalised and sent.
+    This resets any part counts.</p>
+    <p>If a message is received with the <b>msg.reset</b> property set, the partly complete message is deleted and not sent.
+    This resets any part counts.</p>
+
+    <h4>Reduce Sequence mode</h4>
+    <p>When configured to join in reduce mode, an expression is applied to each
+       message in a sequence and the result accumulated to produce a single message.</p>
+
+    <dl class="message-properties">
+        <dt>Initial value</dt>
+        <dd>The initial value of the accumulated value (<code>$A</code>).</dd>
+        <dt>Reduce expression</dt>
+        <dd>A JSONata expression that is called for each message in the sequence.
+            The result is passed to the next call of the expression as the accumulated value.
+            In the expression, the following special variables can be used:
+            <ul>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$I</code>: index of the message in the sequence, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
+            </ul>
+        </dd>
+        <dt>Fix-up expression</dt>
+        <dd>An optional JSONata expression that is applied after the reduce expression
+            has been applied to all messages in the sequence.
+            In the expression, following special variables can be used:
+            <ul>
+                <li><code>$A</code>: the accumulated value, </li>
+                <li><code>$N</code>: number of messages in the sequence.</li>
+            </ul>
+        </dd>
+        <p>By default, the reduce expression is applied in order, from the first
+           to the last message of the sequence. It can optionally be applied in
+           reverse order.</p>
+    </dl>
+    <p><b>Example:</b> the following settings, given a sequence of numeric values,
+       calculates the average value:
+        <ul>
+            <li><b>Reduce expression</b>: <code>$A+payload</code></li>
+            <li><b>Initial value</b>: <code>0</code></li>
+            <li><b>Fix-up expression</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting <code>nodeMessageBufferMaxLength</code> can be used to limit how many messages nodes
+       will buffer.</p>
+</script>

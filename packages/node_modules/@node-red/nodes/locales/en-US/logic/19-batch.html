@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="batch">
+    <p>Creates sequences of messages based on various rules.</p>
+    <h3>Details</h3>
+    <p>There are three modes for creating message sequences:</p>
+    <dl>
+        <dt>Number of messages</dt>
+        <dd>groups messages into sequences of a given length. The <b>overlap</b>
+        option specifies how many messages at the end of one sequence should be
+        repeated at the start of the next sequence.</dd>
+
+        <dt>Time interval</dt>
+        <dd>groups messages that arrive within the specified interval. If no messages
+            arrive within the interval, the node can optionally send on an empty message.</dd>
+
+        <dt>Concatenate Sequences</dt>
+        <dd>creates a message sequence by concatenating incoming sequences. Each message
+            must have a <code>msg.topic</code> property and a <code>msg.parts</code> property
+            identifying its sequence. The node is configured with a list of <code>topic</code>
+            values to identify the order sequences are concatenated.
+        </dd>
+    </dl>
+    <h4>Storing messages</h4>
+    <p>This node will buffer messages internally in order to work across sequences. The
+       runtime setting <code>nodeMessageBufferMaxLength</code> can be used to limit how many messages nodes
+       will buffer.</p>
+</script>

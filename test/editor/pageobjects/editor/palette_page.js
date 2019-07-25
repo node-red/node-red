@@ -18,9 +18,11 @@ var idMap = {
     // input
     "inject": "#palette_node_inject",
     "httpin": "#palette_node_http_in",
+    "mqttIn": "#palette_node_mqtt_in",
     // output
     "debug": "#palette_node_debug",
     "httpResponse": "#palette_node_http_response",
+    "mqttOut": "#palette_node_mqtt_out",
     // function
     "function": "#palette_node_function",
     "template": "#palette_node_template",
@@ -28,6 +30,7 @@ var idMap = {
     "range": "#palette_node_range",
     "httpRequest": "#palette_node_http_request",
     "html": "#palette_node_html",
+    "json": "#palette_node_json",
     // storage
     "filein": "#palette_node_file_in",
 };

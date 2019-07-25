@@ -20,14 +20,12 @@ var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 
-var nodeWidth = 200;
-var nodeHeight = 100;
 var httpNodeRoot = "/api";
 
 // https://cookbook.nodered.org/
 describe('cookbook', function() {
     beforeEach(function() {
-        workspace.deleteAllNodes();
+        workspace.init();
     });
 
     before(function() {
@@ -41,8 +39,8 @@ describe('cookbook', function() {
     describe('HTTP endpoints', function () {
         it('create an HTTP endpoint', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -59,9 +57,9 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var injectNode = workspace.addNode("inject");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello');
@@ -74,15 +72,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello World!').should.not.eql(-1);
         });
 
         it('handle query parameters passed to an HTTP endpoint', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -99,9 +96,9 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var injectNode = workspace.addNode("inject");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-query?name=Nick');
@@ -114,15 +111,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
 
         it('handle url parameters in an HTTP endpoint', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth * 2);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -139,9 +135,9 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var injectNode = workspace.addNode("inject");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-param/Dave');
@@ -154,15 +150,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Dave!').should.not.eql(-1);
         });
 
         it('access HTTP request headers', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth * 1.5);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2.5);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -179,10 +174,10 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var changeNode = workspace.addNode("change", nodeWidth, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth * 2, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3, nodeHeight);
+            var injectNode = workspace.addNode("inject", 0, 100);
+            var changeNode = workspace.addNode("change");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             changeNode.edit();
             changeNode.ruleSet("headers", "msg", '{"user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}', "json");
@@ -200,19 +195,18 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Mozilla').should.not.eql(-1);
         });
 
         it('include data captured in another flow', function () {
             var injectNodeTimestamp = workspace.addNode("inject");
-            var changeNodeStore = workspace.addNode("change", nodeWidth);
+            var changeNodeStore = workspace.addNode("change");
 
-            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
-            var changeNodeCopy = workspace.addNode("change", nodeWidth * 2, nodeHeight);
-            var templateNode = workspace.addNode("template", nodeWidth * 3, nodeHeight);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 4, nodeHeight);
+            var httpinNode = workspace.addNode("httpin", 0, 100);
+            var changeNodeCopy = workspace.addNode("change");
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             injectNodeTimestamp.edit();
             injectNodeTimestamp.setPayload("date");
@@ -244,9 +238,9 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNodeCheck = workspace.addNode("inject", 0, nodeHeight * 2);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight * 2);
+            var injectNodeCheck = workspace.addNode("inject", 0, 300);
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setMethod("GET");
@@ -259,7 +253,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNodeTimestamp.clickLeftButton();
             injectNodeCheck.clickLeftButton();
             var index = debugTab.getMessage().indexOf('Time: ') + 6;
@@ -268,9 +261,9 @@ describe('cookbook', function() {
 
         it('serve JSON content', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth);
-            var changeNode = workspace.addNode("change", nodeWidth * 2);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3);
+            var templateNode = workspace.addNode("template");
+            var changeNode = workspace.addNode("change");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -294,36 +287,37 @@ describe('cookbook', function() {
             changeNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var injectNode = workspace.addNode("inject", 0, 200);
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var changeNodeCheck = workspace.addNode("change");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setMethod("GET");
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-json');
             httpRequestNode.clickOk();
 
-            debugNode.edit();
-            debugNode.setOutput("headers");
-            debugNode.clickOk();
+            changeNodeCheck.edit();
+            changeNodeCheck.ruleSet("payload", "msg", "headers.content-type", "msg", "1");
+            changeNodeCheck.clickOk();
 
             injectNode.connect(httpRequestNode);
-            httpRequestNode.connect(debugNode);
+            httpRequestNode.connect(changeNodeCheck);
+            changeNodeCheck.connect(debugNode);
             // The code for confirmation ends here.
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
-            var message = debugTab.getMessage();
-            message[1].indexOf('application/json').should.not.eql(-1);
+            var messages = debugTab.getMessage();
+            messages.indexOf('application/json').should.not.eql(-1);
         });
 
         it('serve a local file', function () {
             var httpinNode = workspace.addNode("httpin");
-            var fileinNode = workspace.addNode("filein", nodeWidth);
-            var changeNode = workspace.addNode("change", nodeWidth * 2, nodeHeight);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3.5, nodeHeight);
+            var fileinNode = workspace.addNode("filein");
+            var changeNode = workspace.addNode("change", 200, 100);
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -346,9 +340,9 @@ describe('cookbook', function() {
             changeNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight * 2);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight * 2);
+            var injectNode = workspace.addNode("inject", 0, 200);
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequestNode.edit();
             httpRequestNode.setUrl(helper.url() + httpNodeRoot + '/hello-file');
@@ -361,15 +355,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Text file').should.not.eql(-1);
         });
 
         it('post raw data to a flow', function() {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth * 2);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("post");
@@ -386,9 +379,9 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2, nodeHeight);
+            var injectNode = workspace.addNode("inject");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit()
             injectNode.setPayload("str", "Nick");
@@ -405,15 +398,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
 
         it('post form data to a flow', function () {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth * 1.5);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2.5);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("post");
@@ -430,10 +422,10 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var changeNode = workspace.addNode("change", nodeWidth, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth * 2, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3, nodeHeight);
+            var injectNode = workspace.addNode("inject", 0, 100);
+            var changeNode = workspace.addNode("change");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit()
             injectNode.setPayload("str", "name=Nick");
@@ -455,15 +447,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
 
         it('post JSON data to a flow', function() {
             var httpinNode = workspace.addNode("httpin");
-            var templateNode = workspace.addNode("template", nodeWidth * 2);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("post");
@@ -480,10 +471,10 @@ describe('cookbook', function() {
             templateNode.connect(httpResponseNode);
 
             // The code for confirmation starts from here.
-            var injectNode = workspace.addNode("inject", 0, nodeHeight);
-            var changeNode = workspace.addNode("change", nodeWidth, nodeHeight);
-            var httpRequestNode = workspace.addNode("httpRequest", nodeWidth * 2, nodeHeight);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3, nodeHeight);
+            var injectNode = workspace.addNode("inject", 0, 100);
+            var changeNode = workspace.addNode("change");
+            var httpRequestNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit()
             injectNode.setPayload("json", '{"name":"Nick"}');
@@ -505,7 +496,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
@@ -514,16 +504,16 @@ describe('cookbook', function() {
             this.timeout(60000);
 
             var httpinNodeFormat = workspace.addNode("httpin");
-            var functionNodeFormat = workspace.addNode("function", nodeWidth * 1.5);
-            var templateNode = workspace.addNode("template", nodeWidth * 2.5);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3.5);
+            var functionNodeFormat = workspace.addNode("function", 240);
+            var templateNode = workspace.addNode("template", 400);
+            var httpResponseNode = workspace.addNode("httpResponse", 600);
 
-            var httpinNodeAdd = workspace.addNode("httpin", 0, nodeHeight);
-            var functionNodeAdd = workspace.addNode("function", nodeWidth * 1.5, nodeHeight);
-            var changeNode = workspace.addNode("change", nodeWidth * 2.5, nodeHeight * 1.5);
+            var httpinNodeAdd = workspace.addNode("httpin", 0, 100);
+            var functionNodeAdd = workspace.addNode("function", 240);
+            var changeNode = workspace.addNode("change", 400);
 
-            var httpinNodeClear = workspace.addNode("httpin", 0, nodeHeight * 2);
-            var functionNodeClear = workspace.addNode("function", nodeWidth * 1.5, nodeHeight * 2);
+            var httpinNodeClear = workspace.addNode("httpin", 0, 200);
+            var functionNodeClear = workspace.addNode("function", 250);
 
             httpinNodeFormat.edit();
             httpinNodeFormat.setMethod("get");

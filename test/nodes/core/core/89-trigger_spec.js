@@ -17,9 +17,9 @@
 var should = require("should");
 var sinon = require("sinon");
 var helper = require("node-red-node-test-helper");
-var triggerNode = require("../../../../nodes/core/core/89-trigger.js");
-var Context = require("../../../../red/runtime/nodes/context");
-var RED = require("../../../../red/red.js");
+var triggerNode = require("nr-test-utils").require("@node-red/nodes/core/core/89-trigger.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 
 describe('trigger node', function() {
 
@@ -157,7 +157,7 @@ describe('trigger node', function() {
             });
         });
     }
-    
+
     basicTest("num", 10);
     basicTest("str", "10");
     basicTest("bool", true);
@@ -166,7 +166,7 @@ describe('trigger node', function() {
     var val_buf = "[1,2,3,4,5]";
     basicTest("bin", val_buf, Buffer.from(JSON.parse(val_buf)));
     basicTest("env", "NR-TEST", "env-val");
-    
+
     it('should output 1 then 0 when triggered (default)', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:"20", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
@@ -663,7 +663,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to extend the delay (but with no 2nd output)', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op2type:"nul", op1:"false",  op2:"true", duration:"100", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"pay", op2type:"nul", op1:"false",  op2:"true", duration:"200", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -677,20 +677,25 @@ describe('trigger node', function() {
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
-                        (Date.now() - ss).should.be.greaterThan(149);
+                        (Date.now() - ss).should.be.greaterThan(300);
                         done();
                     }
+                } catch(err) {
+                    console.log(err);
+                    done(err);
                 }
-                catch(err) { done(err); }
             });
             var ss = Date.now();
             n1.emit("input", {payload:"Hello"});
             setTimeout( function() {
                 n1.emit("input", {payload:"Error"});
-            },30);
+            },50);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Error"});
+            },100);
             setTimeout( function() {
                 n1.emit("input", {payload:"World"});
-            },150);
+            },330);
         });
     });
 

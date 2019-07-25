@@ -1,0 +1,96 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http request">
+    <p>Sends HTTP requests and returns the response.</p>
+
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the url of the request.</dd>
+        <dt class="optional">method <span class="property-type">string</span></dt>
+        <dd>If not configured in the node, this optional property sets the HTTP method of the request.
+            Must be one of <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code>.</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>Sets the HTTP headers of the request.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>If set, can be used to send cookies with the request.</dd>
+        <dt class="optional">payload</dt>
+        <dd>Sent as the body of the request.</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>If set to <code>false</code>, allows requests to be made to https sites that use
+            self signed certificates.</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>If set to <code>false</code> prevent following Redirect (HTTP 301).<code>true</code> by default</dd>
+        <dt class="optional">requestTimeout</dt>
+        <dd>If set to a positive number, will override the globally set <code>httpRequestTimeout</code> parameter.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string | object | buffer</span></dt>
+        <dd>The body of the response. The node can be configured to return the body
+             as a string, attempt to parse it as a JSON string or leave it as a
+             binary buffer.</dd>
+        <dt>statusCode <span class="property-type">number</span></dt>
+        <dd>The status code of the response, or the error code if the request could not be completed.</dd>
+        <dt>headers <span class="property-type">object</span></dt>
+        <dd>An object containing the response headers.</dd>
+        <dt>responseUrl <span class="property-type">string</span></dt>
+        <dd>In case any redirects occurred while processing the request, this property is the final redirected url.
+            Otherwise, the url of the original request.</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>If the response includes cookies, this propery is an object of name/value pairs for each cookie.</dd>
+        <dt>redirectList <span class="property-type">array</span></dt>
+        <dd>If the request was redirected one or more times, the accumulated information will be added to this property. `location` is the next redirect destination. `cookies` is the cookies returned from the redirect source.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>When configured within the node, the URL property can contain <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache-style</a> tags. These allow the
+    url to be constructed using values of the incoming message. For example, if the url is set to
+    <code>example.com/{{{topic}}}</code>, it will have the value of <code>msg.topic</code> automatically inserted.
+    Using {{{...}}} prevents mustache from escaping characters like / & etc.</p>
+    <p>The node can optionally automatically encode <code>msg.payload</code> as query string parameters for a GET request, in which case <code>msg.payload</code> has to be an object.</p>
+    <p><b>Note</b>: If running behind a proxy, the standard <code>http_proxy=...</code> environment variable should be set and Node-RED restarted, or use Proxy Configuration. If Proxy Configuration was set, the configuration take precedence over environment variable.</p>
+    <h4>Using multiple HTTP Request nodes</h4>
+    <p>In order to use more than one of these nodes in the same flow, care must be taken with
+    the <code>msg.headers</code> property. The first node will set this property with
+    the response headers. The next node will then use those headers for its request - this
+    is not usually the right thing to do. If <code>msg.headers</code> property is left unchanged
+    between nodes, it will be ignored by the second node. To set custom headers, <code>msg.headers</code>
+    should first be deleted or reset to an empty object: <code>{}</code>.
+    <h4>Cookie handling</h4>
+    <p>The <code>cookies</code> property passed to the node must be an object of name/value pairs.
+    The value can be either a string to set the value of the cookie or it can be an
+    object with a single <code>value</code> property.<p>
+    <p>Any cookies returned by the request are passed back under the <code>responseCookies</code> property.</p>
+    <h4>Content type handling</h4>
+    <p>If <code>msg.payload</code> is an Object, the node will automatically set the content type
+    of the request to <code>application/json</code> and encode the body as such.</p>
+    <p>To encode the request as form data, <code>msg.headers["content-type"]</code> should be set to <code>application/x-www-form-urlencoded</code>.</p>
+    <h4>File Upload</h4>
+    <p>To perform a file upload, <code>msg.headers["content-type"]</code> should be set to <code>multipart/form-data</code>
+        and the <code>msg.payload</code> passed to the node must be an object with the following structure:</p>
+    <pre><code>{
+    "KEY": {
+        "value": FILE_CONTENTS,
+        "options": {
+            "filename": "FILENAME"
+        }
+    }
+}</code></pre>
+    <p>The values of <code>KEY</code>, <code>FILE_CONTENTS</code> and <code>FILENAME</code>
+    should be set to the appropriate values.</p>
+
+</script>

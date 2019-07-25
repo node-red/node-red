@@ -29,6 +29,7 @@ Node.prototype.clickOk = function() {
     browser.clickWithWait('#node-dialog-ok');
     // Wait untile an edit dialog closes.
     browser.waitForVisible('#node-dialog-ok', 2000, true);
+    browser.pause(50);
 }
 
 Node.prototype.connect = function(targetNode) {

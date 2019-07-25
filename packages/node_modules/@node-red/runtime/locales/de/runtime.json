@@ -1,0 +1,164 @@
+{
+  "runtime" : {
+    "welcome" : "Willkommen bei Node-RED!",
+    "version" : "__component__ Version: __version__",
+    "unsupported_version" : "Nicht unterstützte Version von __component__. Erfordert: __requires__ Gefunden: __version__",
+    "paths" : {
+      "settings" : "Einstellungsdatei: __path__",
+      "httpStatic" : "HTTP-Statisch: __path__"
+    }
+  },
+  "server" : {
+    "loading" : "Paletten-Nodes werden geladen",
+    "palette-editor" : {
+      "disabled" : "Paletteneditor inaktiviert: Benutzereinstellungen",
+      "npm-not-found" : "Paletteneditor inaktiviert: Befehl 'npm' nicht gefunden"
+    },
+    "errors" : "Registrieren des Node-Typs __count__ ist fehlgeschlagen.",
+    "errors_plural" : "Fehler beim Registrieren von __count__ -Node-Typen",
+    "errors-help" : "Mit -v ausführen, um Details zu erfahren",
+    "missing-modules" : "Fehlende Node-Module:",
+    "node-version-mismatch" : "Das Node-Modul kann in dieser Version nicht geladen werden. Erfordert: __version__ ",
+    "type-already-registered" : "'__type__' bereits von Modul __module__ registriert",
+    "removing-modules" : "Module aus der Konfiguration entfernen",
+    "added-types" : "Hinzugefügte Node-Typen:",
+    "removed-types" : "Entfernte Node-Typen:",
+    "install" : {
+      "invalid" : "Ungültiger Modulname",
+      "installing" : "Modul wird installiert: __name__, Version: __version__",
+      "installed" : "Installiertes Modul: __name__",
+      "install-failed" : "Installation fehlgeschlagen",
+      "install-failed-long" : "Die Installation des Moduls __name__ ist fehlgeschlagen:",
+      "install-failed-not-found" : "Das Modul '$t(server.install.install-failed-long') wurde nicht gefunden.",
+      "upgrading" : "Modul wird aktualisiert: __name__ auf Version: __version__",
+      "upgraded" : "Erweitertes Modul: __name__. Neustart von Node-RED für die Verwendung der neuen Version",
+      "upgrade-failed-not-found" : "$t(server.install.install-failed-long) Version nicht gefunden",
+      "uninstalling" : "Modul wird deinstalliert: __name__",
+      "uninstall-failed" : "Deinstallation fehlgeschlagen",
+      "uninstall-failed-long" : "Das Deinstallieren des Moduls __name__ ist fehlgeschlagen:",
+      "uninstalled" : "Nicht installiertes Modul: __name__"
+    },
+    "unable-to-listen" : "Zuhören auf __listenpath__ nicht möglich.",
+    "port-in-use" : "Fehler: Port wird verwendet",
+    "uncaught-exception" : "Nicht abgefangene Ausnahmebedingung:",
+    "admin-ui-disabled" : "Administratorbenutzerschnittstelle inaktiviert",
+    "now-running" : "Server wird jetzt auf __listenpath__ ausgeführt.",
+    "failed-to-start" : "Starten des Servers fehlgeschlagen:",
+    "headless-mode" : "Ausführung im Headless-Modus",
+    "httpadminauth-deprecated" : "Die Verwendung von httpAdminAuth wird nicht weiter unterstützt. Verwenden Sie stattdessen adminAuth."
+  },
+  "api" : {
+    "flows" : {
+      "error-save" : "Fehler beim Speichern der Flows: __message__",
+      "error-reload" : "Fehler beim erneuten Laden von Flows: __message__"
+    },
+    "library" : {
+      "error-load-entry" : "Fehler beim Laden des Bibliothekseintrags '__path__': __message__",
+      "error-save-entry" : "Fehler beim Speichern des Bibliothekseintrags '__path__': __message__",
+      "error-load-flow" : "Fehler beim Laden von Flow '__path__': __message__",
+      "error-save-flow" : "Fehler beim Speichern des Flows '__path__': __message__"
+    },
+    "nodes" : {
+      "enabled" : "Aktivierte Node-Typen:",
+      "disabled" : "Inaktivierte Node-Typen:",
+      "error-enable" : "Der Node konnte nicht aktiviert werden:"
+    }
+  },
+  "comms" : {
+    "error" : "Kommunikationskanalfehler: __message__",
+    "error-server" : "Kommunikationsserverfehler: __message__",
+    "error-send" : "Fehler beim Senden der Kommunikation: __message__"
+  },
+  "settings" : {
+    "user-not-available" : "Benutzereinstellungen können nicht gespeichert werden: __message__",
+    "not-available" : "Einstellungen nicht verfügbar",
+    "property-read-only" : "Eigenschaft '__prop__' ist schreibgeschützt"
+  },
+  "nodes" : {
+    "credentials" : {
+      "error" : "Fehler beim Laden der Berechtigungsnachweise: __message__",
+      "error-saving" : "Fehler beim Speichern der Berechtigungsnachweise: __message__",
+      "not-registered" : "Der Berechtigungsnachweistyp '__type__' ist nicht registriert.",
+      "system-key-warning" : "\n\n---------------------------------------------------------------------\nDie Datei mit den Datenflowberechtigungsnachweisen wird mit einem vom System generierten Schlüssel verschlüsselt.\n\nWenn der vom System generierte Schlüssel aus irgendeinem Grund verloren geht, werden Ihre Berechtigungsnachweise\nDie Datei kann nicht wiederhergestellt werden. Sie müssen sie löschen und erneut eingeben.\nIhre Berechtigungsnachweise.\n\nSie sollten Ihren eigenen Schlüssel mit Hilfe der Option 'credentialSecret' in\nIhre Einstellungsdatei. Node-RED wird dann Ihre Berechtigungsnachweise erneut verschlüsseln.\nDatei mit dem ausgewählten Schlüssel beim nächsten Deployen einer Änderung verwenden.\n---------------------------------------------------------------------\n"
+    },
+    "flows" : {
+      "registered-missing" : "Fehlender Typ registriert: __type__",
+      "error" : "Fehler beim Laden von Flows: __message__",
+      "starting-modified-nodes" : "Modifizierte Nodes werden gestartet",
+      "starting-modified-flows" : "Modifizierte Flows werden gestartet",
+      "starting-flows" : "Flows starten",
+      "started-modified-nodes" : "Gestartete geänderte Nodes",
+      "started-modified-flows" : "Gestartete geänderte Flows",
+      "started-flows" : "Flows gestartet",
+      "stopping-modified-nodes" : "Modifizierte Nodes werden gestoppt",
+      "stopping-modified-flows" : "Modifizierte Flows werden gestoppt",
+      "stopping-flows" : "Flows stoppen",
+      "stopped-modified-nodes" : "Geänderte Nodes gestoppt",
+      "stopped-modified-flows" : "Geänderte Flows gestoppt",
+      "stopped-flows" : "Flows gestoppt",
+      "stopped" : "Gestoppt",
+      "stopping-error" : "Fehler beim Stoppen des Nodes: __message__",
+      "added-flow" : "Flow hinzufügen: __label__",
+      "updated-flow" : "Aktualisierter Flow: __label__",
+      "removed-flow" : "Entfernter Flow: __label__",
+      "missing-types" : "Warten auf fehlende Typen, die registriert werden sollen:",
+      "missing-type-provided" : " -__type__ (wird von npm Modul __module__ bereitgestellt)",
+      "missing-type-install-1" : "Führen Sie die folgenden Schritte aus, um eines der fehlenden Module zu installieren:",
+      "missing-type-install-2" : "im Verzeichnis:"
+    },
+    "flow" : {
+      "unknown-type" : "Unbekannter Typ: __type__",
+      "missing-types" : "Fehlende Typen",
+      "error-loop" : "Nachricht überschritt die maximale Anzahl der Wiederholungen"
+    },
+    "index" : {
+      "unrecognised-id" : "Nicht erkannte ID: __id__",
+      "type-in-use" : "Typ in Verwendung: __msg__",
+      "unrecognised-module" : "Nicht erkannes Modul: __module__"
+    },
+    "registry" : {
+      "localfilesystem" : {
+        "module-not-found" : "Modul '__module__' wurde nicht gefunden."
+      }
+    }
+  },
+  "storage" : {
+    "index" : {
+      "forbidden-flow-name" : "Unzulässiger Flowname"
+    },
+    "localfilesystem" : {
+      "user-dir" : "Benutzerverzeichnis: __path__",
+      "flows-file" : "Flow-Datei: __path__",
+      "create" : "Neue __type__-Datei wird erstellt",
+      "empty" : "Vorhandene __type__-Datei ist leer",
+      "invalid" : "Vorhandene __type__ Datei ist ungültig (json)",
+      "restore" : "__type__ Dateisicherung wird zurückgespeichert: __path__",
+      "restore-fail" : "Das Zurückschreiben der __type__ Dateisicherung ist fehlgeschlagen: __message__",
+      "fsync-fail" : "Das Löschen der Datei __path__ auf die Platte ist fehlgeschlagen: __message__",
+      "projects" : {
+        "changing-project" : "Aktives Projekt wird festgelegt: __project__",
+        "active-project" : "Aktives Projekt: __project__",
+        "project-not-found" : "Projekt nicht gefunden: __project__",
+        "no-active-project" : "Kein aktives Projekt: Standarddatei für DatenFlows verwenden",
+        "disabled" : "Projekte inaktiviert: editorTheme.projects.enabled=false",
+        "disabledNoFlag" : "Projekte inaktiviert: setze editorTheme.projects.enabled=true zum Aktivieren",
+        "git-not-found" : "Projekte inaktiviert: Git-Befehl nicht gefunden",
+        "git-version-old" : "Projekte inaktiviert: git __version__ wird nicht unterstützt. Erfordert 2.x",
+        "summary" : "Ein Node-RED-Projekt",
+        "readme" : "### Produktinfo\n\nDies ist die Datei README.md Ihres Projekts. Es hilft den Benutzern zu verstehen, was Ihr\nProjekt macht, wie man es verwendet und alles andere, was sie vielleicht wissen müssen."
+      }
+    }
+  },
+  "context" : {
+    "log-store-init" : "Kontextspeicher: '__name__' [ __info__]",
+    "error-loading-module" : "Fehler beim Laden des Kontextspeichers: __message__",
+    "error-module-not-defined" : "Kontextspeicher '__storage__' fehlt 'Modul' -Option",
+    "error-invalid-module-name" : "Ungültiger Kontextspeichername: '__name__'",
+    "error-invalid-default-module" : "Standardkontextspeicher unbekannt: '__storage__'",
+    "unknown-store" : "Unbekannter Kontextspeicher '__name__' angegeben. Standardspeicher wird verwendet.",
+    "localfilesystem" : {
+      "error-circular" : "Kontext __scope__ enthält einen kreisförmigen Verweis, der nicht persistent gespeichert werden kann.",
+      "error-write" : "Fehler beim Schreiben des Kontextes: __message__"
+    }
+  }
+}

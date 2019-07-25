@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="watch">
+    <p>ディレクトリもしくはファイルの変化を検知します。</p>
+    <p>カンマ区切りでディレクトリおよびファイルのリストを指定します。空白を含む場合は、引用符で"..."のように囲んでください。</p>
+    <p>Windowsでは、2重バックスラッシュ\\をディレクトリ名に使用します。</p>
+    <p>実際に変化したファイルのフルパス名を<code>msg.payload</code>に、検知対象リストの文字列を<code>msg.topic</code>に返します。</p>
+    <p><code>msg.file</code>は変化したファイルのファイル名を表します。<code>msg.type</code>は変化した対象の種別(<i>file</i>もしくは<i>directory</i>)を、<code>msg.size</code>はファイルサイズ(バイト数)を表します。</p>
+    <p>Linuxではファイルとして表されるもの<i>全て</i>が、検知対象にできます。</p>
+    <p><b>注: </b>検知対象のディレクトリもしくはファイルは存在していなくてはなりません。対象ファイルもしくはディレクトリが削除された場合、再作成されても検知対象から外れたままです。</p>
+</script>

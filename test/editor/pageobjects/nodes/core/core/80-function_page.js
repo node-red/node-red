@@ -18,6 +18,8 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
+var keyPage = require("../../../util/key_page");
+
 function functionNode(id) {
     nodePage.call(this, id);
 }
@@ -25,16 +27,16 @@ function functionNode(id) {
 util.inherits(functionNode, nodePage);
 
 functionNode.prototype.setFunction = function(func) {
-    browser.click('#node-input-func-editor');
-    browser.keys(['Control', 'Home', 'Control']);
+    browser.clickWithWait('#node-input-func-editor');
+    browser.keys(keyPage.selectAll());
     for (var i = 0; i < func.length; i++) {
         browser.keys([func.charAt(i)]);
     }
     // Delete the unnecessary code that ace editor does the autocompletion.
-    browser.keys(['Control', 'Shift', 'End', 'Shift', 'Control']);
+    browser.keys(keyPage.selectToEnd());
     browser.keys(['Delete']);
     // Need to wait until ace editor correctly checks the syntax.
-    browser.pause(50);
+    browser.pause(300);
 }
 
 module.exports = functionNode;

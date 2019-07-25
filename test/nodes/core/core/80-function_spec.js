@@ -15,8 +15,8 @@
 **/
 
 var should = require("should");
-var functionNode = require("../../../../nodes/core/core/80-function.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var functionNode = require("nr-test-utils").require("@node-red/nodes/core/core/80-function.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('function node', function() {
@@ -251,7 +251,7 @@ describe('function node', function() {
         testNonObjectMessage('return "foo"', done)
     });
     it('should drop and log non-object message types - buffer', function(done) {
-        testNonObjectMessage('return new Buffer("hello")', done)
+        testNonObjectMessage('return Buffer.from("hello")', done)
     });
     it('should drop and log non-object message types - array', function(done) {
         testNonObjectMessage('return [[[1,2,3]]]', done)
@@ -1244,6 +1244,36 @@ describe('function node', function() {
             n2.on("input", function(msg) {
                 msg.should.have.property('payload', true);
                 done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should allow accessing env vars', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = env.get('_TEST_FOO_'); return msg;"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            delete process.env._TEST_FOO_;
+
+            n2.on("input", function(msg) {
+                try {
+                    if (count === 0) {
+                        msg.should.have.property('payload', undefined);
+                        process.env._TEST_FOO_ = "hello";
+                        count++;
+                        n1.receive({payload:"foo",topic: "bar"});
+                    } else {
+                        msg.should.have.property('payload', "hello");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                } finally {
+                    delete process.env._TEST_FOO_;
+                }
             });
             n1.receive({payload:"foo",topic: "bar"});
         });

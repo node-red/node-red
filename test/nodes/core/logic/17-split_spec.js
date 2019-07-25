@@ -15,11 +15,11 @@
  **/
 
 var should = require("should");
-var splitNode = require("../../../../nodes/core/logic/17-split.js");
-var joinNode = require("../../../../nodes/core/logic/17-split.js");
+var splitNode = require("nr-test-utils").require("@node-red/nodes/core/logic/17-split.js");
+var joinNode = require("nr-test-utils").require("@node-red/nodes/core/logic/17-split.js");
 var helper = require("node-red-node-test-helper");
-var RED = require("../../../../red/red.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var RED = require("nr-test-utils").require("node-red/lib/red.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 
 var TimeoutForErrorCase = 20;
 
@@ -236,7 +236,7 @@ describe('SPLIT node', function() {
                     done(err);
                 }
             });
-            var b = new Buffer.from("12345678");
+            var b = Buffer.from("12345678");
             sn1.receive({payload:b});
         });
     });
@@ -260,8 +260,8 @@ describe('SPLIT node', function() {
                     done(err);
                 }
             });
-            var b1 = new Buffer.from("123412");
-            var b2 = new Buffer.from("341234");
+            var b1 = Buffer.from("123412");
+            var b2 = Buffer.from("341234");
             sn1.receive({payload:b1});
             sn1.receive({payload:b2});
         });
@@ -364,7 +364,7 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
                 if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
             });
-            var b = new Buffer.from("123");
+            var b = Buffer.from("123");
             sn1.receive({ payload: b });
         });
     });
@@ -382,7 +382,7 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 0) { msg.payload.length.should.equal(2); }
                 if (msg.parts.index === 1) { msg.payload.length.should.equal(1); done(); }
             });
-            var b = new Buffer.from("123");
+            var b = Buffer.from("123");
             sn1.receive({ payload: b });
         });
     });
@@ -531,8 +531,8 @@ describe('JOIN node', function() {
                     msg.payload.should.have.property("c",true);
                     msg.payload.should.have.property("d");
                     msg.payload.d.should.have.property("e",7);
-                    msg.payload.should.have.property("g");
-                    msg.payload.g.should.have.property("f",6);
+                    // msg.payload.should.have.property("g");
+                    // msg.payload.g.should.have.property("f",6);
                     done();
                 }
                 catch(e) { done(e)}
@@ -677,6 +677,9 @@ describe('JOIN node', function() {
             n1.receive({payload:{f:1}, topic:"f", complete:true});
             n1.receive({payload:{g:2}, topic:"g"});
             n1.receive({payload:{h:1}, topic:"h"});
+            n1.receive({reset:true});
+            n1.receive({payload:{g:2}, topic:"g"});
+            n1.receive({payload:{h:1}, topic:"h"});
             n1.receive({payload:{i:3}, topic:"i"});
         });
     });
@@ -700,6 +703,9 @@ describe('JOIN node', function() {
                 }
                 catch(e) { done(e) }
             });
+            n1.receive({payload:2, foo:"b"});
+            n1.receive({payload:3, foo:"c"});
+            n1.receive({reset:true});
             n1.receive({payload:1, foo:"a"});
             n1.receive({payload:2, foo:"b"});
             n1.receive({payload:3, foo:"c"});

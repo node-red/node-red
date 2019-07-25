@@ -1,0 +1,49 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="xml">
+    <p>XML문자열과 JavaScript오브젝트와의 사이에서 상호변환을 수행합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 문자열</span></dt>
+        <dd>JavaScript오브젝트 혹은 XML문자열</dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 문자열</span></dt>
+        <dd>
+            <ul>
+                <li>입력이 문자열인 경우, XML로써 해석하여 JavaScript오브젝트로 변환합니다.</li>
+                <li>입력이 JavaScript오브젝트인 경우, XML문자열로 변환합니다.</li>
+            </ul>
+        </dd>
+        <dt class="optional">options <span class="property-type">오브젝트</span></dt>
+        <dd>내부에서 사용중인 XML로의 변환 라이브러리에 대해 옵션을 전달할 수 있습니다. 자세한 사항은 <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">the xml2js docs</a>를 참조해 주세요.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>XML와 오브젝트의 사이에서의 변환을 수행할 경우, 기본값으로는 XML속성은 <code>$</code>이라는 명칭의 프로퍼티에 추가합니다.
+        텍스트의 내용은 <code>_</code>라는 이름의 프로퍼티에 추가합니다. 이러한 프로퍼티명은 노드의 설정에서 변경가능합니다.</p>
+    <p>예로 아래의 XML의 변환결과를 표시합니다.</p>
+    <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
+</script>

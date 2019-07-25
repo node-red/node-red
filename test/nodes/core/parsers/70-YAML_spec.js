@@ -15,7 +15,7 @@
  **/
 
 var should = require("should");
-var yamlNode = require("../../../../nodes/core/parsers/70-YAML.js");
+var yamlNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-YAML.js");
 var helper = require("node-red-node-test-helper");
 
 describe('YAML node', function() {
@@ -169,7 +169,7 @@ describe('YAML node', function() {
             },150);
             yn1.receive({payload:true});
             yn1.receive({payload:1});
-            yn1.receive({payload:new Buffer("a")});
+            yn1.receive({payload:Buffer.from("a")});
         });
     });
 

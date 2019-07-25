@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="change">
+    <p>メッセージ、フローコンテキスト、グローバルコンテキストのプロパティを変更、削除、移動します。</p>
+    <p>ルールを複数指定した場合、定義した順に適用します。</p>
+    <h3>詳細</h3>
+    <p>利用可能な処理</p>
+    <dl class="message-properties">
+    <dt>代入</dt>
+    <dd>プロパティをセットします。設定値には、さまざまな型の値、メッセージやコンテキストの既存プロパティを利用できます。<dd>
+    <dt>置換</dt>
+    <dd>プロパティに対して検索と置換を行います。正規表現を指定した場合、「置換後の文字列」には<code>$1</code>のようなキャプチャグループが指定できます。置換処理では、ルールが完全マッチの場合のみプロパティの型を変更できます。</dd>
+    <dt>削除</dt>
+    <dd>プロパティを削除します。</dd>
+    <dt>移動</dt>
+    <dd>プロパティの移動または名前の変更を行います。</dd>
+    </dl>
+    <p>「JSONata式」には<a href="http://jsonata.org/" target="_new">JSONata</a>言語を指定できます。</p>
+</script>

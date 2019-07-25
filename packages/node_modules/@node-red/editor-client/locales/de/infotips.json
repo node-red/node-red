@@ -1,0 +1,23 @@
+{
+  "info" : {
+    "tip0" : "Sie können die ausgewählten Nodes oder Verbindungen mit {{ core:delete-selection }} entfernen.",
+    "tip1" : "Suche nach Nodes mit {{ core:search }}",
+    "tip2" : "{{ core:toggle-sidebar }} schaltet die Ansicht dieser Seitenleiste ein.",
+    "tip3" : "Sie können Ihre Palette von Nodes mit {{ core:manage-palette }} verwalten.",
+    "tip4" : "Ihre Flow-Konfigurations-Nodes werden in der Seitenleiste angezeigt. Es kann über das Menü oder mit {{ core:show-config-tab }} aufgerufen werden.",
+    "tip5" : "Aktiviert oder inaktiviert diese Tipps von der Option in den Einstellungen",
+    "tip6" : "Verschieben Sie die ausgewählten Nodes mit Hilfe der [left] [up] [down] und [right] Tasten. Halten Sie [Shift] gedrückt, um das Fenster weiter zu schieben",
+    "tip7" : "Wenn Sie einen Node auf eine Verbindung ziehen, wird er in die Verbindung eingefügt.",
+    "tip8" : "Die ausgewählten Nodes exportieren oder die aktuelle Registerkarte mit {{ core:show-export-dialog }}",
+    "tip9" : "Importieren Sie einen Flow, indem Sie sein JSON in den Editor ziehen oder mit {{ core:show-import-dialog }}.",
+    "tip10" : "[Umschalt] [Klicken] und ziehen Sie auf einen Node-Anschluss, um alle angeschlossenen Verbindungen oder nur die ausgewählte zu verschieben.",
+    "tip11" : "Die Registerkarte \"Info\" mit {{ core:show-info-tab }} oder der Registerkarte \"Debug\" mit {{ core:show-debug-tab }} anzeigen",
+    "tip12" : "[ctrl] [Klicken] in den Arbeitsbereich, um den Schnellhinzufügedialog zu öffnen.",
+    "tip13" : "Halten Sie [ctrl] gedrückt, wenn Sie auf einem Node-Anschluss klicken, um eine Schnellverbindung zu aktivieren.",
+    "tip14" : "Halten Sie [Umschalt] gedrückt, wenn Sie auf einen Node klicken, um auch alle verbundenen Nodes auszuwählen.",
+    "tip15" : "Halten Sie [ctrl] gedrückt, wenn Sie auf einen Node klicken, um ihn aus der aktuellen Auswahl hinzuzufügen oder zu entfernen.",
+    "tip16" : "Indexzungen wechseln mit {{ core:show-previous-tab }} und {{ core:show-next-tab }}",
+    "tip17" : "Sie können die Änderungen im Editierrahmen des Nodes mit {{ core:confirm-edit-tray }} bestätigen oder sie mit {{ core:cancel-edit-tray }} abbrechen.",
+    "tip18" : "Durch Drücken von {{ core:edit-selected-node }} wird der erste Node in der aktuellen Auswahl bearbeitet."
+  }
+}

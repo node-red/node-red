@@ -15,8 +15,8 @@
  **/
 
 var should = require("should");
-var templateNode = require("../../../../nodes/core/core/80-template.js");
-var Context = require("../../../../red/runtime/nodes/context");
+var templateNode = require("nr-test-utils").require("@node-red/nodes/core/core/80-template.js");
+var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
 
 describe('template node', function() {

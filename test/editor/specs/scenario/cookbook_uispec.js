@@ -23,14 +23,12 @@ var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
 
-var nodeWidth = 200;
-var nodeHeight = 100;
 var httpNodeRoot = "/api";
 
 // https://cookbook.nodered.org/
 describe('cookbook', function() {
     beforeEach(function() {
-        workspace.deleteAllNodes();
+        workspace.init();
     });
 
     before(function() {
@@ -44,8 +42,8 @@ describe('cookbook', function() {
     describe('messages', function() {
         it('set a message property to a fixed value', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var changeNode = workspace.addNode("change");
+            var debugNode = workspace.addNode("debug");
 
             changeNode.edit();
             changeNode.ruleSet("payload", "msg", "Hello World!");
@@ -57,15 +55,14 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello World!"');
         });
 
         it('delete a message property', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var changeNode = workspace.addNode("change");
+            var debugNode = workspace.addNode("debug");
 
             changeNode.edit();
             changeNode.ruleDelete();
@@ -77,15 +74,14 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql("undefined");
         });
 
         it('move a message property', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var changeNode = workspace.addNode("change");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setTopic("Hello");
@@ -101,17 +97,16 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello"');
         });
 
         it('map a property between different numeric ranges', function() {
             var injectNode1 = workspace.addNode("inject");
-            var injectNode2 = workspace.addNode("inject", 0, 50);
-            var injectNode3 = workspace.addNode("inject", 0, 100);
-            var rangeNode = workspace.addNode("range", nodeWidth);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var injectNode2 = workspace.addNode("inject", 0, 100);
+            var injectNode3 = workspace.addNode("inject", 0, 200);
+            var rangeNode = workspace.addNode("range", 200, 100);
+            var debugNode = workspace.addNode("debug", 400);
 
             injectNode1.edit();
             injectNode1.setPayload("num", 0);
@@ -136,7 +131,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode1.clickLeftButton();
             debugTab.getMessage(1).should.eql('0');
             injectNode2.clickLeftButton();
@@ -149,7 +143,7 @@ describe('cookbook', function() {
     describe('flow control', function() {
         it('trigger a flow whenever Node-RED starts', function() {
             var injectNode = workspace.addNode("inject");
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("str", "Started!")
@@ -158,14 +152,13 @@ describe('cookbook', function() {
             injectNode.connect(debugNode);
 
             debugTab.open();
-            debugTab.clearMessage();
             workspace.deploy();
             debugTab.getMessage().should.eql('"Started!"');
         });
 
         it('trigger a flow at regular intervals', function() {
             var injectNode = workspace.addNode("inject");
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setRepeat("interval");
@@ -176,12 +169,11 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             specUtil.pause(1000);
             var t1 = Number(debugTab.getMessage(1));
             t1.should.within(1500000000000, 3000000000000);
             specUtil.pause(1000);
-            debugTab.getMessage(2).should.within(t1 + 1000, 3000000000000);
+            debugTab.getMessage(2).should.within(t1 + 900, 3000000000000);
         });
 
         // skip this case since it needs up to one minite.
@@ -191,9 +183,9 @@ describe('cookbook', function() {
     describe('HTTP requests', function() {
         it('simple get request', function() {
             var injectNode = workspace.addNode("inject");
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth);
-            var htmlNode = workspace.addNode("html", nodeWidth * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var htmlNode = workspace.addNode("html");
+            var debugNode = workspace.addNode("debug");
 
             httpRequetNode.edit();
             httpRequetNode.setMethod("GET");
@@ -211,16 +203,15 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Node-RED"');
         });
 
         it('set the URL of a request', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth * 1.5);
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2.5);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3.5);
+            var changeNode = workspace.addNode("change");
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("str", helper.url());
@@ -237,16 +228,15 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.containEql('<title>Node-RED</title>');
         });
 
         it('set the URL of a request using a template', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth * 1.5);
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2.5);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3.5);
+            var changeNode = workspace.addNode("change");
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("str", 'settings');
@@ -267,16 +257,15 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.containEql('httpNodeRoot');
         });
 
         it('set the query string parameters', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNode = workspace.addNode("change", nodeWidth);
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+            var changeNode = workspace.addNode("change");
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("str", 'Nick');
@@ -295,9 +284,9 @@ describe('cookbook', function() {
             httpRequetNode.connect(debugNode);
 
             // The code for confirmation starts from here.
-            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
-            var templateNode = workspace.addNode("template", nodeWidth, nodeHeight);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2, nodeHeight);
+            var httpinNode = workspace.addNode("httpin", 0, 200);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -316,16 +305,15 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello Nick"');
         });
 
         it('get a parsed JSON response', function() {
             var injectNode = workspace.addNode("inject");
-            var changeNodeSetPost = workspace.addNode("change", nodeWidth);
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+            var changeNodeSetPost = workspace.addNode("change");
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             injectNode.edit();
             injectNode.setPayload("str", "json-response");
@@ -351,10 +339,10 @@ describe('cookbook', function() {
             httpRequetNode.connect(debugNode);
 
             // The code for confirmation starts from here.
-            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
-            var templateNode = workspace.addNode("template", nodeWidth * 1.5, nodeHeight);
-            var changeNodeSetHeader = workspace.addNode("change", nodeWidth * 2.5, nodeHeight);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 3.5, nodeHeight);
+            var httpinNode = workspace.addNode("httpin", 0, 200);
+            var templateNode = workspace.addNode("template");
+            var changeNodeSetHeader = workspace.addNode("change");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("get");
@@ -378,15 +366,14 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"Hello"');
         });
 
         it('get a binary response', function() {
             var injectNode = workspace.addNode("inject");
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth);
-            var debugNode = workspace.addNode("debug", nodeWidth * 2);
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             httpRequetNode.edit();
             httpRequetNode.setMethod("GET");
@@ -400,7 +387,6 @@ describe('cookbook', function() {
             workspace.deploy();
 
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
 
             debugTab.getMessage().should.eql(['123', '34', '104', '116', '116', '112', '78', '111', '100', '101']);
@@ -408,9 +394,9 @@ describe('cookbook', function() {
 
         it('set a request header', function() {
             var injectNode = workspace.addNode("inject");
-            var functionNode = workspace.addNode("function", nodeWidth);
-            var httpRequetNode = workspace.addNode("httpRequest", nodeWidth * 2);
-            var debugNode = workspace.addNode("debug", nodeWidth * 3);
+            var functionNode = workspace.addNode("function");
+            var httpRequetNode = workspace.addNode("httpRequest");
+            var debugNode = workspace.addNode("debug");
 
             functionNode.edit();
             functionNode.setFunction('msg.payload = "data to post";\nreturn msg;');
@@ -427,9 +413,9 @@ describe('cookbook', function() {
             httpRequetNode.connect(debugNode);
 
             // The code for confirmation starts from here.
-            var httpinNode = workspace.addNode("httpin", 0, nodeHeight);
-            var templateNode = workspace.addNode("template", nodeWidth * 1.5, nodeHeight);
-            var httpResponseNode = workspace.addNode("httpResponse", nodeWidth * 2.5, nodeHeight);
+            var httpinNode = workspace.addNode("httpin", 0, 200);
+            var templateNode = workspace.addNode("template");
+            var httpResponseNode = workspace.addNode("httpResponse");
 
             httpinNode.edit();
             httpinNode.setMethod("post");
@@ -448,7 +434,6 @@ describe('cookbook', function() {
 
             workspace.deploy();
             debugTab.open();
-            debugTab.clearMessage();
             injectNode.clickLeftButton();
             debugTab.getMessage().should.eql('"data to post"');
         });

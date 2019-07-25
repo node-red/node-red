@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="watch">
+    <p>디렉토리 혹은 파일의 변화를 감지합니다.</p>
+    <p>콤마로 나누어 디렉토리 및 파일 리스트를 지정합니다. 공백을 포함하는 경우, 인용부를 이용해 "..." 형태로 만들어 주세요.</p>
+    <p>Windows에서는, 2중 백슬래쉬\\를 디렉토리 이름으로 사용합니다.</p>
+    <p>실제로 변경된 파일의 풀패스명을 <code>msg.payload</code>으로, 감지대상 리스트의 문자열을 <code>msg.topic</code>으로 반환합니다.</p>
+    <p><code>msg.file</code>은 변경된 파일의 파일명을 나타냅니다. <code>msg.type</code>은 변경된 대상의 종류(<i>file</i> 혹은 <i>directory</i>)를, <code>msg.size</code>는 파일사이즈(바이트 수)를 나타냅니다.</p>
+    <p>Linux에서는 파일로 표현되는 <i>전부</i>를 감지대상으로 할 수 있습니다.</p>
+    <p><b>주: </b>감지대상인 디렉토리 혹은 파일은 존재해야 합니다. 대상 파일 혹은 디렉토리가 삭제된 경우, 다시 작성되어도 감지대상에서 제외됩니다.</p>
+</script>

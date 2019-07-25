@@ -1,0 +1,81 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http in">
+    <p>HTTP 엔드 포인트를 작성하여 Web 서비스를 구성합니다.</p>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>GET리퀘스트의 경우, 쿼리 파라미터로 구성된 오브젝트. 그 이외의 경우, HTTP 리퀘스트의 본체를 가리킵니다.</dd>
+        <dt>req<span class="property-type">오브젝트</span></dt>
+        <dd>HTTP 리퀘스트 오브젝트. 오브젝트는 리퀘스트의 정보에 관한 복수의 속성을 포함합니다.
+            <ul>
+             <li><code>body</code> - リ리퀘스트 본체. 형식은 리퀘스트에 의존합니다</li>
+             <li><code>headers</code> - HTTP 리퀘스트 헤더를 포함한 오브젝트</li>
+             <li><code>query</code> - 쿼리 파라미터를 포함한 오브젝트</li>
+             <li><code>params</code> - 루팅 파라미터를 포함한 오브젝트</li>
+             <li><code>cookies</code> - 리퀘스트 쿠키를 포함한 오브젝트</li>
+             <li><code>files</code> - POST리퀘스트에서 파일의 업로드가 설정으로 유효화 되어 있는 경우, 업로드 대상 파일</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">오브젝트</span></dt>
+        <dd>HTTP 리스폰스 오브젝트. 이 프로퍼티를 직접 이용하는 것은 권장하지 않습니다. 리퀘스트의 처리 방법에 대해서는 <code>HTTP Response</code>ノ노드의 문서를 참조해 주세요.이 프로퍼티는 response노드에 전하는 메세지에 붙인 상태로 두십시오.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>이 노드는 설정으로 지정한 패스와 리퀘스트종류로 리퀘스트를 기다립니다. 패스 지정은 완전하게 지정하는 형식(예: <code>/user</code>), 혹은 임의의 값을 대기하는 이름있는 파라미터를 포함한 형식(예: <code>/user/:name</code>) 어떤 것도 상관없습니다. 이름있는 파라미터를 지정한 경우, 리퀘스트에서 지정한 실제 값은 <code>msg.req.params</code>로 참조할 수 있습니다.</p>
+    <p>POST나 PUT처럼 리퀘스트바디를 포함한 리퀘스트의 경우, 리퀘스트 내용은 <code>msg.payload</code>로 참조할 수 있습니다.</p>
+    <p>리퀘스트의 요소타입이 식별가능한 경우에는, 리퀘스트바디를 적절한 형식으로 변환합니다. 예를 들면, <code>application/json</code>은 JavaScript오브젝트로 변환합니다.</p>
+    <p><b>주:</b> 이 노드는 리퀘스트에 대한 레스폰스 송신을 하지 않습니다. 리퀘스트를 처리하기 위해서는 플로우에 HTTP Response노드를 포함해 주십시오.</p>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>HTTP In노드에서 받은 리퀘스트에 대한 레스폰스를 반환합니다.</p>
+
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">문자열</span></dt>
+        <dd>레스폰스 본체</dd>
+        <dt class="optional">statusCode <span class="property-type">수치</span></dt>
+        <dd>설정하면 레스폰스의 스테이터스 코드로 합니다. 기본값 : 200</dd>
+        <dt class="optional">headers <span class="property-type">오브젝트</span></dt>
+        <dd>설정하면 레스폰스의 HTTP헤더로 합니다.</dd>
+        <dt class="optional">cookies <span class="property-type">오브젝트</span></dt>
+        <dd>설정하면 쿠키를 설정 혹은 삭제하기 위해 사용합니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p><code>statusCode</code>와 <code>headers</code>는 노드의 설정에서 지정할 수도 있습니다. 노드설정에서 프로퍼티를 지정한 경우에는, 대응하는 메세지 프로퍼티는 사용하지 않습니다.</p>
+    <h4>쿠키 처리</h4>
+    <p><code>cookies</code>는 키/값 으로 구성된 오브젝트 입니다. 값에는 기본옵션을 사용하여 쿠키값으로 설장할 문자열, 혹은 옵션을 포함한 오브젝트를 지정할 수 있습니다.</p>
+    <p>아래의 예에서는 2개의 쿠키를 설정하고 있습니다. 1번째는 <code>name</code>으로 그 값은 <code>nick</code>, 2번째는 <code>session</code>으로 값은 <code>1234</code>, 유효기간으로 15분을 지정하고 있습니다.</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>유효한 옵션은 아래와 같습니다.</p>
+    <ul>
+    <li><code>domain</code> - (문자열) 쿠키의 도메인 지정</li>
+    <li><code>expires</code> - (일시) GMT표현으로 된 유효기한. 미지정 혹은 0으로 지정한 경우, 세션종료시 까지 유효</li>
+    <li><code>maxAge</code> - (문자열) 현 시각으로 부터 경과된 밀리초로 표현된 유효기한</li>
+    <li><code>path</code> - (문자열) 쿠키의 패스. 기본값은 '/'</li>
+    <li><code>value</code> - (문자열) 쿠키 값</li>
+    </ul>
+    <p>쿠키를 삭제하려면, <code>value</code>에 <code>null</code>을 설정합니다.</p>
+
+</script>
