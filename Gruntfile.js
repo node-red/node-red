@@ -496,7 +496,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-chmod');
     grunt.loadNpmTasks('grunt-jsonlint');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
-    grunt.loadNpmTasks('grunt-webdriver');
+    if (fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+        grunt.loadNpmTasks('grunt-webdriver');
+    }
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-jsdoc-to-markdown');
     grunt.loadNpmTasks('grunt-npm-command');
@@ -555,8 +557,8 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('verifyUiTestDependencies', function() {
-        if (!fs.existsSync(path.join("node_modules", "chromedriver"))) {
-            grunt.fail.fatal('You need to run "npm install chromedriver@2" before running UI test.');
+        if (!fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+            grunt.fail.fatal('You need to install the UI test dependencies first.\nUse the script in "scripts/install-ui-test-dependencies.sh"');
             return false;
         }
     });
@@ -579,9 +581,15 @@ module.exports = function(grunt) {
         'Runs code style check on editor code',
         ['jshint:editor']);
 
-    grunt.registerTask('test-ui',
-        'Builds editor content then runs unit tests on editor ui',
-        ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
+    if (!fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+        grunt.registerTask('test-ui',
+            'Builds editor content then runs unit tests on editor ui',
+            ['verifyUiTestDependencies']);
+    } else {
+        grunt.registerTask('test-ui',
+            'Builds editor content then runs unit tests on editor ui',
+            ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
+    }
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',

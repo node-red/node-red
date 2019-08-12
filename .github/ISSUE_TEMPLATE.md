@@ -28,7 +28,7 @@ To help us understand the issue, please fill-in as much of the following informa
 ### Please tell us about your environment:
 
 - [ ] Node-RED version:
-- [ ] node.js version:
+- [ ] Node.js version:
 - [ ] npm version:
 - [ ] Platform/OS:
 - [ ] Browser:

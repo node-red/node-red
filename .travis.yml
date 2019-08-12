@@ -9,5 +9,3 @@ matrix:
       before_script:
         - npm install -g istanbul coveralls
     - node_js: "8"
-  allow_failures:
-    - node_js: "12"

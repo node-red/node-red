@@ -725,7 +725,7 @@ Nodes
  - Initial support of sequence rules for SWITCH node (#1545)
  - initial support of SORT node (#1500)
  - Inject node - let once delay be editable (#1541)
- - Introduce `nodeMaxMessageBufferLength` setting for msg sequence nodes
+ - Introduce `nodeMessageBufferMaxLength` setting for msg sequence nodes
  - Let CSV correct parts if we remove header row.
  - let default apply if msg.delay not set in override mode. (#1397)
  - let trigger node be reset by boolean message (#1554)
