@@ -148,10 +148,10 @@ describe('Flow', function() {
         this.stopped = false;
         this.closeDelay = n.closeDelay || 50;
         currentNodes[node.id] = node;
-        this.on('input',function(msg, done) {
+        this.on('input',function(msg, send, done) {
             node.handled++;
             node.messages.push(msg);
-            node.send(msg);
+            send(msg);
             done();
         });
         this.on('close',function(done) {
