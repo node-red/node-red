@@ -1390,6 +1390,72 @@ describe('function node', function() {
                 }
             });
         });
+        it('should catch thrown string', function (done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "throw \"small mistake\";"}];
+            helper.load(functionNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                n1.receive({payload: "foo", topic: "bar"});
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', 'small mistake');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+        it('should catch thrown number', function (done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "throw 99;"}];
+            helper.load(functionNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                n1.receive({payload: "foo", topic: "bar"});
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', '99');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
+        it('should catch thrown object (bad practise)', function (done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "throw {a:1};"}];
+            helper.load(functionNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                n1.receive({payload: "foo", topic: "bar"});
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    msg.should.have.property('msg', '{"a":1}');
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+        });
     });
 
 });
