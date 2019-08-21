@@ -1,0 +1,136 @@
+<script type="text/x-red" data-template-name="complete">
+    <div class="form-row node-input-target-row">
+        <button id="node-input-complete-target-select" class="red-ui-button" data-i18n="common.label.selectNodes"></button>
+    </div>
+    <div class="form-row node-input-target-row node-input-target-list-row" style="min-height: 100px">
+        <div id="node-input-complete-target-container-div"></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+<script type="text/javascript">
+    RED.nodes.registerType('complete',{
+        category: 'common',
+        color:"#c0edc0",
+        defaults: {
+            name: {value:""},
+            scope: {value:[]},
+            uncaught: {value:false}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "alert.svg",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            return this._("complete.completeNodes",{number:this.scope.length});
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var scope = node.scope || [];
+
+            this._resize = function() {
+                var rows = $("#dialog-form>div:not(.node-input-target-list-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.length;i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-target-list-row");
+                editorRow.css("height",height+"px");
+            };
+
+            var dirList = $("#node-input-complete-target-container-div").css({width: "100%", height: "100%"})
+                .treeList({multi:true}).on("treelistitemmouseover", function(e, item) {
+                    item.node.highlighted = true;
+                    item.node.dirty = true;
+                    RED.view.redraw();
+                }).on("treelistitemmouseout", function(e, item) {
+                    item.node.highlighted = false;
+                    item.node.dirty = true;
+                    RED.view.redraw();
+                })
+            var candidateNodes = RED.nodes.filterNodes({z:node.z});
+            var allChecked = true;
+            var items = [];
+            var nodeItemMap = {};
+
+            candidateNodes.forEach(function(n) {
+                if (n.id === node.id) {
+                    return;
+                }
+                var isChecked = scope.indexOf(n.id) !== -1;
+
+                allChecked = allChecked && isChecked;
+
+                var nodeDef = RED.nodes.getType(n.type);
+                var label;
+                var sublabel;
+                if (nodeDef) {
+                    var l = nodeDef.label;
+                    label = (typeof l === "function" ? l.call(n) : l)||"";
+                    sublabel = n.type;
+                    if (sublabel.indexOf("subflow:") === 0) {
+                        var subflowId = sublabel.substring(8);
+                        var subflow = RED.nodes.subflow(subflowId);
+                        sublabel = "subflow : "+subflow.name;
+                    }
+                }
+                if (!nodeDef || !label) {
+                    label = n.type;
+                }
+                nodeItemMap[n.id] = {
+                    node: n,
+                    label: label,
+                    sublabel: sublabel,
+                    selected: isChecked
+                };
+                items.push(nodeItemMap[n.id]);
+            });
+            dirList.treeList('data',items);
+
+            $("#node-input-complete-target-select").on("click", function(e) {
+                e.preventDefault();
+                var preselected = dirList.treeList('selected').map(function(n) {return n.node.id});
+                RED.tray.hide();
+                RED.view.selectNodes({
+                    selected: preselected,
+                    onselect: function(selection) {
+                        RED.tray.show();
+                        var newlySelected = {};
+                        selection.forEach(function(n) {
+                            newlySelected[n.id] = true;
+                            if (nodeItemMap[n.id]) {
+                                nodeItemMap[n.id].treeList.select(true);
+                            }
+                        })
+                        preselected.forEach(function(id) {
+                            if (!newlySelected[id]) {
+                                nodeItemMap[id].treeList.select(false);
+                            }
+                        })
+                    },
+                    oncancel: function() {
+                        RED.tray.show();
+                    },
+                    filter: function(n) {
+                        return n.id !== node.id;
+                    }
+                });
+            })
+
+        },
+        oneditsave: function() {
+            this.scope = $("#node-input-complete-target-container-div").treeList('selected').map(function(i) { return i.node.id})
+        },
+        oneditresize: function(size) {
+            this._resize();
+        }
+    });
+</script>

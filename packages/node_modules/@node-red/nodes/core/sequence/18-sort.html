@@ -1,0 +1,119 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="sort">
+
+    <div class="form-row">
+        <label for="node-input-target"><i class="fa fa-dot-circle-o"></i> <span data-i18n="sort.target"></span></label>
+        <input type="text" id="node-input-target" style="width:70%;">
+        <input type="hidden" id="node-input-targetType">
+    </div>
+
+    <div class="node-row-sort-msg-key">
+        <div class="form-row">
+            <label for="node-input-msgKey"><i class="fa fa-filter"></i> <span data-i18n="sort.key"></span></label>
+            <input type="text" id="node-input-msgKey" style="width:70%;">
+            <input type="hidden" id="node-input-msgKeyType">
+        </div>
+    </div>
+
+    <div class="node-row-sort-seq-key">
+        <div class="form-row">
+            <label for="node-input-seqKey"><i class="fa fa-filter"></i> <span data-i18n="sort.key"></span></label>
+            <input type="text" id="node-input-seqKey" style="width:70%;">
+            <input type="hidden" id="node-input-seqKeyType">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label><i class="fa fa-random"></i>  <span data-i18n="sort.order"></span></label>
+        <select id="node-input-order" style="width:200px;">
+            <option value="ascending" data-i18n="sort.ascending"></option>
+            <option value="descending" data-i18n="sort.descending"></option>
+        </select>
+    </div>
+
+    <div class="form-row" id="node-as_num">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-as_num" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-as_num" style="width: 70%;" data-i18n="sort.as-number"></label>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('sort',{
+        category: 'sequence',
+        color:"#E2D96E",
+        defaults: {
+            name: { value:"" },
+            order: { value:"ascending" },
+            as_num: { value:false },
+            target: { value:"payload" },
+            targetType: { value:"msg" },
+            msgKey: { value:"payload" },
+            msgKeyType: { value:"elem" },
+            seqKey: { value:"payload" },
+            seqKeyType: { value:"msg" }
+        },
+        inputs:1,
+        outputs:1,
+        icon: "sort.svg",
+        label: function() {
+            return this.name||this._("sort.sort");
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            var seq = {
+                value: "seq",
+                label: RED._("node-red:sort.seq"),
+                hasValue: false
+            };
+            var elem = {
+                value: "elem",
+                label: RED._("node-red:sort.elem"),
+                hasValue: false
+            };
+            $("#node-input-target").typedInput({
+                default:'msg',
+                typeField: $("#node-input-targetType"),
+                types:['msg', seq]
+            });
+            $("#node-input-msgKey").typedInput({
+                default:'elem',
+                typeField: $("#node-input-msgKeyType"),
+                types:[elem, 'jsonata']
+            });
+            $("#node-input-seqKey").typedInput({
+                default:'msg',
+                typeField: $("#node-input-seqKeyType"),
+                types:['msg', 'jsonata']
+            });
+            $("#node-input-target").on("change", function(e) {
+                var val = $("#node-input-target").typedInput('type');
+                $(".node-row-sort-msg-key").toggle(val === "msg");
+                $(".node-row-sort-seq-key").toggle(val === "seq");
+            });
+            $("#node-input-target").change();
+        }
+    });
+</script>
