@@ -122,6 +122,7 @@ describe('Flow', function() {
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
             node.handled++;
+            msg.handled = node.handled;
             node.messages.push(msg);
             node.send(msg);
         });
@@ -136,12 +137,42 @@ describe('Flow', function() {
     }
     util.inherits(TestAsyncNode,Node);
 
+    var TestDoneNode = function(n) {
+        Node.call(this,n);
+        var node = this;
+        this.scope = n.scope;
+        this.uncaught = n.uncaught;
+        this.foo = n.foo;
+        this.handled = 0;
+        this.messages = [];
+        this.stopped = false;
+        this.closeDelay = n.closeDelay || 50;
+        currentNodes[node.id] = node;
+        this.on('input',function(msg, send, done) {
+            node.handled++;
+            node.messages.push(msg);
+            send(msg);
+            done();
+        });
+        this.on('close',function(done) {
+            setTimeout(function() {
+                node.stopped = true;
+                stoppedNodes[node.id] = node;
+                delete currentNodes[node.id];
+                done();
+            },node.closeDelay);
+        });
+    }
+    util.inherits(TestDoneNode,Node);
+
     before(function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
             if (type=="test") {
                 return TestNode;
             } else if (type=="testError"){
                 return TestErrorNode;
+            } else if (type=="testDone"){
+                return TestDoneNode;
             } else {
                 return TestAsyncNode;
             }
@@ -189,28 +220,28 @@ describe('Flow', function() {
             currentNodes["2"].should.have.a.property("handled",0);
             currentNodes["3"].should.have.a.property("handled",0);
 
+            currentNodes["3"].on("input", function() {
+                currentNodes["1"].should.have.a.property("handled",1);
+                currentNodes["2"].should.have.a.property("handled",1);
+                currentNodes["3"].should.have.a.property("handled",1);
 
-            currentNodes["1"].receive({payload:"test"});
-
-            currentNodes["1"].should.have.a.property("handled",1);
-            currentNodes["2"].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",1);
-
-            flow.stop().then(function() {
-                try {
-                    currentNodes.should.not.have.a.property("1");
-                    currentNodes.should.not.have.a.property("2");
-                    currentNodes.should.not.have.a.property("3");
-                    currentNodes.should.not.have.a.property("4");
-                    stoppedNodes.should.have.a.property("1");
-                    stoppedNodes.should.have.a.property("2");
-                    stoppedNodes.should.have.a.property("3");
-                    stoppedNodes.should.have.a.property("4");
-                    done();
-                } catch(err) {
-                    done(err);
-                }
+                flow.stop().then(function() {
+                    try {
+                        currentNodes.should.not.have.a.property("1");
+                        currentNodes.should.not.have.a.property("2");
+                        currentNodes.should.not.have.a.property("3");
+                        currentNodes.should.not.have.a.property("4");
+                        stoppedNodes.should.have.a.property("1");
+                        stoppedNodes.should.have.a.property("2");
+                        stoppedNodes.should.have.a.property("3");
+                        stoppedNodes.should.have.a.property("4");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
             });
+            currentNodes["1"].receive({payload:"test"});
         });
 
         it("instantiates config nodes in the right order",function(done) {
@@ -319,6 +350,59 @@ describe('Flow', function() {
             });
         });
 
+        it("ignores disabled nodes",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",d:true,type:"test",foo:"a",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"4",z:"t1",type:"test",foo:"a"},
+                {id:"5",z:"t1",type:"test",d:true,foo:"a"}
+
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(3);
+
+            flow.getNode('1').should.have.a.property('id','1');
+            should.not.exist(flow.getNode('2'));
+            flow.getNode('3').should.have.a.property('id','3');
+            flow.getNode('4').should.have.a.property('id','4');
+            should.not.exist(flow.getNode('5'));
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("4");
+
+            currentNodes["1"].should.have.a.property("handled",0);
+            currentNodes["3"].should.have.a.property("handled",0);
+
+            currentNodes["1"].receive({payload:"test"});
+
+            setTimeout(function() {
+                currentNodes["1"].should.have.a.property("handled",1);
+                // Message doesn't reach 3 as 2 is disabled
+                currentNodes["3"].should.have.a.property("handled",0);
+
+                flow.stop().then(function() {
+                    try {
+                        currentNodes.should.not.have.a.property("1");
+                        currentNodes.should.not.have.a.property("2");
+                        currentNodes.should.not.have.a.property("3");
+                        currentNodes.should.not.have.a.property("4");
+                        stoppedNodes.should.have.a.property("1");
+                        stoppedNodes.should.not.have.a.property("2");
+                        stoppedNodes.should.have.a.property("3");
+                        stoppedNodes.should.have.a.property("4");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            },50);
+        });
 
     });
 
@@ -500,31 +584,34 @@ describe('Flow', function() {
 
             flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status",random:"otherProperty"});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","my-status");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","1");
-            statusMessage.status.source.should.have.a.property("type","test");
-            statusMessage.status.source.should.have.a.property("name","a");
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            currentNodes["sn2"].should.have.a.property("handled",1);
-            statusMessage = currentNodes["sn2"].messages[0];
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","my-status");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","1");
+                statusMessage.status.source.should.have.a.property("type","test");
+                statusMessage.status.source.should.have.a.property("name","a");
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","my-status");
-            statusMessage.status.should.have.a.property("random","otherProperty");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","1");
-            statusMessage.status.source.should.have.a.property("type","test");
-            statusMessage.status.source.should.have.a.property("name","a");
+                currentNodes["sn2"].should.have.a.property("handled",1);
+                statusMessage = currentNodes["sn2"].messages[0];
+
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","my-status");
+                statusMessage.status.should.have.a.property("random","otherProperty");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","1");
+                statusMessage.status.source.should.have.a.property("type","test");
+                statusMessage.status.source.should.have.a.property("name","a");
 
 
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },50)
         });
         it("passes a status event to the adjacent scoped status node ",function(done) {
             var config = flowUtils.parseConfig([
@@ -545,21 +632,23 @@ describe('Flow', function() {
 
             flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
 
-            currentNodes["sn"].should.have.a.property("handled",0);
-            currentNodes["sn2"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn2"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",0);
+                currentNodes["sn2"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn2"].messages[0];
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","my-status");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","1");
-            statusMessage.status.source.should.have.a.property("type","test");
-            statusMessage.status.source.should.have.a.property("name","a");
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","my-status");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","1");
+                statusMessage.status.source.should.have.a.property("type","test");
+                statusMessage.status.source.should.have.a.property("name","a");
 
 
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },50);
         });
 
     });
@@ -585,33 +674,35 @@ describe('Flow', function() {
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","my-error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("id","1");
-            statusMessage.error.source.should.have.a.property("type","test");
-            statusMessage.error.source.should.have.a.property("name","a");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","my-error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("id","1");
+                statusMessage.error.source.should.have.a.property("type","test");
+                statusMessage.error.source.should.have.a.property("name","a");
 
-            currentNodes["sn2"].should.have.a.property("handled",1);
-            statusMessage = currentNodes["sn2"].messages[0];
+                currentNodes["sn2"].should.have.a.property("handled",1);
+                statusMessage = currentNodes["sn2"].messages[0];
 
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","my-error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("id","1");
-            statusMessage.error.source.should.have.a.property("type","test");
-            statusMessage.error.source.should.have.a.property("name","a");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","my-error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("id","1");
+                statusMessage.error.source.should.have.a.property("type","test");
+                statusMessage.error.source.should.have.a.property("name","a");
 
-            // Node sn3 has uncaught:true - so should not get called
-            currentNodes["sn3"].should.have.a.property("handled",0);
+                // Node sn3 has uncaught:true - so should not get called
+                currentNodes["sn3"].should.have.a.property("handled",0);
 
 
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },50);
         });
         it("passes an error event to the adjacent scoped catch node ",function(done) {
             var config = flowUtils.parseConfig([
@@ -633,39 +724,42 @@ describe('Flow', function() {
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
 
-            currentNodes["sn"].should.have.a.property("handled",0);
-            currentNodes["sn2"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn2"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",0);
+                currentNodes["sn2"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn2"].messages[0];
 
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","my-error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("id","1");
-            statusMessage.error.source.should.have.a.property("type","test");
-            statusMessage.error.source.should.have.a.property("name","a");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","my-error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("id","1");
+                statusMessage.error.source.should.have.a.property("type","test");
+                statusMessage.error.source.should.have.a.property("name","a");
 
-            // Node sn3/4 have uncaught:true - so should not get called
-            currentNodes["sn3"].should.have.a.property("handled",0);
-            currentNodes["sn4"].should.have.a.property("handled",0);
+                // Node sn3/4 have uncaught:true - so should not get called
+                currentNodes["sn3"].should.have.a.property("handled",0);
+                currentNodes["sn4"].should.have.a.property("handled",0);
 
-            // Inject error that sn1/2 will ignore - so should get picked up by sn3
-            flow.handleError(config.flows["t1"].nodes["3"],"my-error-2",{a:"foo-2"});
+                // Inject error that sn1/2 will ignore - so should get picked up by sn3
+                flow.handleError(config.flows["t1"].nodes["3"],"my-error-2",{a:"foo-2"});
+                setTimeout(function() {
+                    currentNodes["sn"].should.have.a.property("handled",0);
+                    currentNodes["sn2"].should.have.a.property("handled",1);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    currentNodes["sn4"].should.have.a.property("handled",1);
 
-            currentNodes["sn"].should.have.a.property("handled",0);
-            currentNodes["sn2"].should.have.a.property("handled",1);
-            currentNodes["sn3"].should.have.a.property("handled",1);
-            currentNodes["sn4"].should.have.a.property("handled",1);
+                    statusMessage = currentNodes["sn3"].messages[0];
+                    statusMessage.should.have.a.property("error");
+                    statusMessage.error.should.have.a.property("message","my-error-2");
+                    statusMessage.error.should.have.a.property("source");
+                    statusMessage.error.source.should.have.a.property("id","3");
+                    statusMessage.error.source.should.have.a.property("type","test");
 
-            statusMessage = currentNodes["sn3"].messages[0];
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","my-error-2");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("id","3");
-            statusMessage.error.source.should.have.a.property("type","test");
-
-            flow.stop().then(function() {
-                done();
-            });
+                    flow.stop().then(function() {
+                        done();
+                    });
+                },50);
+            },50);
         });
         it("moves any existing error object sideways",function(done){
             var config = flowUtils.parseConfig([
@@ -682,22 +776,54 @@ describe('Flow', function() {
             var activeNodes = flow.getActiveNodes();
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo",error:"existing"});
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+                statusMessage.should.have.a.property("_error","existing");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","my-error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("id","1");
+                statusMessage.error.source.should.have.a.property("type","test");
+                statusMessage.error.source.should.have.a.property("name","a");
 
-            statusMessage.should.have.a.property("_error","existing");
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","my-error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("id","1");
-            statusMessage.error.source.should.have.a.property("type","test");
-            statusMessage.error.source.should.have.a.property("name","a");
-
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },50);
         });
         it("prevents an error looping more than 10 times",function(){});
     });
+
+    describe("#handleComplete",function() {
+        it("passes a complete event to the adjacent Complete node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"testDone",name:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",wires:["3"]},
+                {id:"3",x:10,y:10,z:"t1",type:"testDone",foo:"a",wires:[]},
+                {id:"cn",x:10,y:10,z:"t1",type:"complete",scope:["1","3"],foo:"a",wires:[]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            Object.keys(activeNodes).should.have.length(4);
+
+            var msg = {payload: "hello world"}
+            var n1 = currentNodes["1"].receive(msg);
+            setTimeout(function() {
+                currentNodes["cn"].should.have.a.property("handled",2);
+                currentNodes["cn"].messages[0].should.have.a.property("handled",1);
+                currentNodes["cn"].messages[1].should.have.a.property("handled",2);
+                flow.stop().then(function() {
+                    done();
+                });
+            },50);
+        });
+    });
+
+
 });

@@ -46,17 +46,17 @@ function addNode(type, x, y) {
     }
     browser.moveToObject(palette.getId(type));
     browser.buttonDown();
-    browser.moveToObject("#palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
+    browser.moveToObject("#red-ui-palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
     browser.buttonUp();
     // Last node is the one that has been created right now.
-    var nodeElement = browser.elements('//*[@class="node nodegroup"][last()]');
+    var nodeElement = browser.elements('//*[contains(concat(" ", normalize-space(@class), " "), " red-ui-flow-node-group ")][last()]');
     var nodeId = nodeElement.getAttribute('id');
     var node = nodeFactory.create(type, nodeId);
     return node;
 }
 
 function deleteAllNodes() {
-    browser.click('.innerCanvas');
+    browser.click('.red-ui-workspace-chart-event-layer');
     browser.keys(['Control', 'a', 'a', 'Control']); // call twice to release the keys.
     browser.keys(['Delete']);
 }
@@ -69,10 +69,10 @@ function deploy() {
                     resolve();
                 }
             });
-            browser.clickWithWait('#btn-deploy');
+            browser.clickWithWait('#red-ui-header-button-deploy');
         });
     });
-    browser.waitForText('#btn-deploy', 2000);
+    browser.waitForText('#red-ui-header-button-deploy', 2000);
     // Need additional wait until buttons becomes clickable.
     browser.pause(50);
 }

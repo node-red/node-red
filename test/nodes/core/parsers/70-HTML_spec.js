@@ -21,7 +21,7 @@ var fs = require('fs-extra');
 var htmlNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-HTML.js");
 var helper = require("node-red-node-test-helper");
 
-describe('html node', function() {
+describe('HTML node', function() {
 
     var resourcesDir = __dirname+ path.sep + ".." + path.sep + ".." + path.sep + ".." + path.sep + "resources" + path.sep;
     var file = path.join(resourcesDir, "70-HTML-test-file.html");
@@ -228,16 +228,20 @@ describe('html node', function() {
                     var n1 = helper.getNode("n1");
                     var n2 = helper.getNode("n2");
                     n1.receive({payload:null,topic: "bar"});
-                    helper.log().called.should.be.true();
-                    var logEvents = helper.log().args.filter(function(evt) {
-                        return evt[0].type == "html";
-                    });
-                    logEvents.should.have.length(1);
-                    // Each logEvent is the array of args passed to the function.
-                    logEvents[0][0].should.have.a.property('msg');
-                    logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
+                    setTimeout(function() {
+                        try {
+                            helper.log().called.should.be.true();
+                            var logEvents = helper.log().args.filter(function(evt) {
+                                return evt[0].type == "html";
+                            });
+                            logEvents.should.have.length(1);
+                            // Each logEvent is the array of args passed to the function.
+                            logEvents[0][0].should.have.a.property('msg');
+                            logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
 
-                    done();
+                            done();
+                        } catch(err) { done(err) }
+                    },50);
                 } catch(err) {
                     done(err);
                 }

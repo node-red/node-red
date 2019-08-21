@@ -1,0 +1,230 @@
+/**
+ * Copyright JS Foundation and other contributors, http://js.foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+RED.actionList = (function() {
+
+    var disabled = false;
+    var dialog = null;
+    var searchInput;
+    var searchResults;
+    var selected = -1;
+    var visible = false;
+
+    var filterTerm = "";
+    var filterTerms = [];
+    var previousActiveElement;
+
+    function ensureSelectedIsVisible() {
+        var selectedEntry = searchResults.find("li.selected");
+        if (selectedEntry.length === 1) {
+            var scrollWindow = searchResults.parent();
+            var scrollHeight = scrollWindow.height();
+            var scrollOffset = scrollWindow.scrollTop();
+            var y = selectedEntry.position().top;
+            var h = selectedEntry.height();
+            if (y+h > scrollHeight) {
+                scrollWindow.animate({scrollTop: '-='+(scrollHeight-(y+h)-10)},50);
+            } else if (y<0) {
+                scrollWindow.animate({scrollTop: '+='+(y-10)},50);
+            }
+        }
+    }
+
+    function createDialog() {
+        dialog = $("<div>",{id:"red-ui-actionList",class:"red-ui-search"}).appendTo("#red-ui-main-container");
+        var searchDiv = $("<div>",{class:"red-ui-search-container"}).appendTo(dialog);
+        searchInput = $('<input type="text" data-i18n="[placeholder]keyboard.filterActions">').appendTo(searchDiv).searchBox({
+            change: function() {
+                filterTerm = $(this).val().trim();
+                filterTerms = filterTerm.split(" ");
+                searchResults.editableList('filter');
+                searchResults.find("li.selected").removeClass("selected");
+                var children = searchResults.children(":visible");
+                if (children.length) {
+                    $(children[0]).addClass('selected');
+                }
+            }
+        });
+
+        searchInput.on('keydown',function(evt) {
+            var selectedChild;
+            if (evt.keyCode === 40) {
+                // Down
+                selectedChild = searchResults.find("li.selected");
+                if (!selectedChild.length) {
+                    var children = searchResults.children(":visible");
+                    if (children.length) {
+                        $(children[0]).addClass('selected');
+                    }
+                } else {
+                    var nextChild = selectedChild.nextAll(":visible").first();
+                    if (nextChild.length) {
+                        selectedChild.removeClass('selected');
+                        nextChild.addClass('selected');
+                    }
+                }
+                ensureSelectedIsVisible();
+                evt.preventDefault();
+            } else if (evt.keyCode === 38) {
+                // Up
+                selectedChild = searchResults.find("li.selected");
+                var nextChild = selectedChild.prevAll(":visible").first();
+                if (nextChild.length) {
+                    selectedChild.removeClass('selected');
+                    nextChild.addClass('selected');
+                }
+                ensureSelectedIsVisible();
+                evt.preventDefault();
+            } else if (evt.keyCode === 13) {
+                // Enter
+                selectedChild = searchResults.find("li.selected");
+                selectCommand(searchResults.editableList('getItem',selectedChild));
+            }
+        });
+        searchInput.i18n();
+
+        var searchResultsDiv = $("<div>",{class:"red-ui-search-results-container"}).appendTo(dialog);
+        searchResults = $('<ol>',{style:"position: absolute;top: 5px;bottom: 5px;left: 5px;right: 5px;"}).appendTo(searchResultsDiv).editableList({
+            addButton: false,
+            addItem: function(container,i,action) {
+                if (action.id === undefined) {
+                    $('<div>',{class:"red-ui-search-empty"}).text(RED._('search.empty')).appendTo(container);
+                } else {
+                    var div = $('<a>',{href:'#',class:"red-ui-search-result"}).appendTo(container);
+                    var contentDiv = $('<div>',{class:"red-ui-search-result-action"}).appendTo(div);
+
+
+                    $('<div>').text(action.label).appendTo(contentDiv);
+                    // $('<div>',{class:"red-ui-search-result-node-type"}).text(node.type).appendTo(contentDiv);
+                    // $('<div>',{class:"red-ui-search-result-node-id"}).text(node.id).appendTo(contentDiv);
+                    if (action.key) {
+                        $('<div>',{class:"red-ui-search-result-action-key"}).html(RED.keyboard.formatKey(action.key)).appendTo(contentDiv);
+                    }
+                    div.on("click", function(evt) {
+                        evt.preventDefault();
+                        selectCommand(action);
+                    });
+                }
+            },
+            scrollOnAdd: false,
+            filter: function(item) {
+                if (filterTerm !== "") {
+                    var pos=0;
+                    for (var i=0;i<filterTerms.length;i++) {
+                        var j = item._label.indexOf(filterTerms[i],pos);
+                        if (j > -1) {
+                            pos = j;
+                        } else {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return true;
+            }
+        });
+
+    }
+
+    function selectCommand(command) {
+        hide();
+        if (command) {
+            RED.actions.invoke(command.id);
+        }
+    }
+
+    function show(v) {
+        if (disabled) {
+            return;
+        }
+        if (!visible) {
+            previousActiveElement = document.activeElement;
+            RED.keyboard.add("*","escape",function(){hide()});
+            $("#red-ui-header-shade").show();
+            $("#red-ui-editor-shade").show();
+            $("#red-ui-palette-shade").show();
+            $("#red-ui-sidebar-shade").show();
+            $("#red-ui-sidebar-separator").hide();
+            if (dialog === null) {
+                createDialog();
+            }
+            dialog.slideDown(300);
+            searchInput.searchBox('value',v)
+            searchResults.editableList('empty');
+            results = [];
+            var actions = RED.actions.list();
+            actions.sort(function(A,B) {
+                return A.id.localeCompare(B.id);
+            });
+            actions.forEach(function(action) {
+                action.label = action.id.replace(/:/,": ").replace(/-/g," ").replace(/(^| )./g,function() { return arguments[0].toUpperCase()});
+                action._label = action.label.toLowerCase();
+                searchResults.editableList('addItem',action)
+            })
+            RED.events.emit("actionList:open");
+            visible = true;
+        }
+        searchInput.trigger("focus");
+        var children = searchResults.children(":visible");
+        if (children.length) {
+            $(children[0]).addClass('selected');
+        }
+    }
+
+    function hide() {
+        if (visible) {
+            RED.keyboard.remove("escape");
+            visible = false;
+            $("#red-ui-header-shade").hide();
+            $("#red-ui-editor-shade").hide();
+            $("#red-ui-palette-shade").hide();
+            $("#red-ui-sidebar-shade").hide();
+            $("#red-ui-sidebar-separator").show();
+            if (dialog !== null) {
+                dialog.slideUp(200,function() {
+                    searchInput.searchBox('value','');
+                });
+            }
+            RED.events.emit("actionList:close");
+            if (previousActiveElement) {
+                $(previousActiveElement).trigger("focus");
+                previousActiveElement = null;
+            }
+        }
+    }
+
+    function init() {
+        RED.actions.add("core:show-action-list",show);
+
+        RED.events.on("editor:open",function() { disabled = true; });
+        RED.events.on("editor:close",function() { disabled = false; });
+        RED.events.on("search:open",function() { disabled = true; });
+        RED.events.on("search:close",function() { disabled = false; });
+        RED.events.on("type-search:open",function() { disabled = true; });
+        RED.events.on("type-search:close",function() { disabled = false; });
+
+        $("#red-ui-header-shade").on('mousedown',hide);
+        $("#red-ui-editor-shade").on('mousedown',hide);
+        $("#red-ui-palette-shade").on('mousedown',hide);
+        $("#red-ui-sidebar-shade").on('mousedown',hide);
+    }
+
+    return {
+        init: init,
+        show: show,
+        hide: hide
+    };
+
+})();

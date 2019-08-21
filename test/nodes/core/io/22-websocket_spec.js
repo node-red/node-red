@@ -179,6 +179,24 @@ describe('websocket Node', function() {
             });
         });
 
+        it('should receive wholemsg when data not object', function(done) {
+            var flow = [
+                { id: "n1", type: "websocket-listener", path: "/ws", wholemsg: "true" },
+                { id: "n2", type: "websocket in", server: "n1", wires: [["n3"]] },
+                { id: "n3", type: "helper" }];
+            helper.load(websocketNode, flow, function() {
+                createClient("n1").then(function(sock) {
+                    helper.getNode("n3").on("input", function(msg) {
+                        msg.should.have.property("payload", 123);
+                        done();
+                    });
+                    sock.send(123);
+                }).catch(function(err) {
+                    done(err);
+                });
+            });
+        });
+
         it('should send', function(done) {
             var flow = [
                 { id: "n1", type: "websocket-listener", path: "/ws" },
