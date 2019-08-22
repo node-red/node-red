@@ -1,3 +1,92 @@
+#### 1.0.0-beta.3: Beta Release
+
+Runtime
+ - [FEATURE] Add Node Done API - make message passing async
+ - Ensure the subflow stop promise is waiting for before restarting
+ - Limit the regex for the /nodes/ api end points
+ - Add error event handler to ssh-keygen child_process Fixes #2255
+ - Fix default value handling on context array access Fixes #2252
+ - Remove all ui test dependencies from package.json
+ - Add req back to audit log events and extend to Projects api
+ - Ensure 2nd arg to node.error is an object Fixes #2228
+ - Use a more atomic process for writing context files Fixes #2271
+
+
+Editor
+ - [FEATURE] Change core node categories
+ - [FEATURE] Subflow Instance property UI (#2236)
+ - [FEATURE] Add visual JSON editor
+ - [FEATURE] Add Action List dialog
+ - [FEATURE] Add new shortcut to clear debug message list - ctrl-alt-l
+ - [FEATURE] Add show-library dialog actions
+ - [FEATURE] Add shift-cursor handling for moving quick-add dialog
+ - [FEATURE] Add enable/disable-flow actions
+ - [FEATURE] Add actions to change deploy type
+ - [FEATURE] Allow config nodes to be disabled, tidy css and add actions
+ - [FEATURE] Add default shortcut (ctrl-d) for deploy
+ - [FEATURE] Initial implementation of redo (un-undo) - ctrl-y
+ - [FEATURE] add support for specifying subflow template color
+ - [FEATURE] Use ctrl-click on wire to splice node in place
+ - [FEATURE] Allow search results to show more than 25 results
+ - [FEATURE] Allow a node to change if it has an input port Closes #2268
+ - Revealing node position needs to account for zoom level Fixes #2172
+ - Fix typedInput option selection Fixes #2174
+ - Fix palette node id handling so search works Fixes #2173
+ - Add popover tooltips to debug sidebar,function and template
+ - Add popovers to context sidebar mini buttons
+ - Ensure node status icon is shown when value set
+ - Revert treeList children function signature change
+ - Restore tray component css for compatibility. Mark as deprecated
+ - fix function name & string compare function
+ - Handle empty list of example flows Fixes #2171
+ - Ensure library list has an item selected when opened
+ - Ensure tooltip popover doesn't replace normal popover
+ - Fix clipboard export download button
+ - Ensure input box has focus on repeated quick add
+ - Fix width calculation of typedInput
+ - Remove some hardcoded css colors
+ - Fix display of node help when clicking in palette Fixes #2194
+ - Ensure node help is loaded in the right language Fixes #2195
+ - Do not allow tab focus on clipboard hidden element
+ - Fix undefined error on typedInput due to valueLabel used before being added
+ - Fix undo of flow disable state change
+ - Fix select-all action in main view
+ - Fix delete-all action on config node sidebar
+ - Update UI tests for new editor css
+ - Add insertItemAt doc to editableList
+ - Ensure focus returns to the right element after dialogs shown
+ - Set autocomplete to disabled in form input elements
+ - Update all node icons to SVG
+ - Handle png/svg fallback for def.icon values. Remove old pngs
+ - Ignore empty examples directories (don't add to import menu)
+ - better handle example file at any depth - #2222
+ - Properly escape node types in palette
+ - Ensure session expiry timeout doesn't exceed limit
+ - Use node/tab map to make filterNodes more efficient
+ - Rearrange contents of subflow template settings tab
+ - Handle undefined node.\_def in edit stack title.
+ - fix converting selection to subflow
+ - Fix inserting new subflow node to existing wire between nodes
+ - Support displaying falsey node status values Fixes #2246
+ - Remove tab menu from node property UI for subflow and config nodes
+ - Mark workspace dirty when shift-click-drag detaches wires Fixes #2260
+ - Fix subflow category change on palette
+
+
+Nodes
+ - Remove pi gpi, twitter, email and feedparser nodes from core
+ - Fix error handling in Websocket broadcast function Fixes #2182
+ - Handle websocket item being parseable but not an object better
+ - stop join tripping up if last message of buffer is blank.
+ - Add support for env var propety in switch node
+ - Improve handling of file upload in request node
+ - Add "has key" rule to  switch node + tests
+ - Optimise generation of switch node edit dialog
+ - Add keep-alive option to HTTP Request - #2261
+
+
+
+
 #### 1.0.0-beta.2: Beta Release
 
 Runtime
