@@ -1,3 +1,8 @@
+#### 0.20.8: Maintenance Release
+
+ - Sanitize tab name in edit dialog
+ - Pass httpServer to runtime even when httpAdmin disabled Fixes #2272
+
 #### 0.20.7: Maintenance Release
 
  - Update jsonata to 1.6.5 which should fix #2183
