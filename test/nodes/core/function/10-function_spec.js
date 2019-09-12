@@ -93,6 +93,56 @@ describe('function node', function() {
         });
     });
 
+    function testSendCloning(args,done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"],["n2"]],func:"node.send("+args+"); msg.payload = 'changed';"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property('topic', 'bar');
+                    msg.should.have.property('payload', 'foo');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            var origMessage = {payload:"foo",topic: "bar"};
+            n1.receive(origMessage);
+        });
+    }
+    it('should clone single message sent using send()', function(done) {
+        testSendCloning("msg",done);
+    });
+    it('should not clone single message sent using send(,false)', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.send(msg,false); msg.payload = 'changed';"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'changed');
+                done();
+            });
+            var origMessage = {payload:"foo",topic: "bar"};
+            n1.receive(origMessage);
+        });
+    });
+    it('should clone first message sent using send() - array 1', function(done) {
+        testSendCloning("[msg]",done);
+    });
+    it('should clone first message sent using send() - array 2', function(done) {
+        testSendCloning("[[msg],[null]]",done);
+    });
+    it('should clone first message sent using send() - array 3', function(done) {
+        testSendCloning("[null,msg]",done);
+    });
+    it('should clone first message sent using send() - array 3', function(done) {
+        testSendCloning("[null,[msg]]",done);
+    });
+
     it('should pass through _topic', function(done) {
         var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"return msg;"},
         {id:"n2", type:"helper"}];
