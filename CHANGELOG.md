@@ -1,3 +1,31 @@
+#### 1.0.0-beta.4: Beta Release
+
+Runtime
+ - Clone the first message passed to node.send in Function node
+
+Editor
+ - Move flow-status button to footer for consistency
+ - Fix node hover effect to prevent jumping position
+ - Filter quick-add properly when splicing a wire
+ - Mark workspace dirty when deleting link node link Fixes #2274
+ - Add red-ui-button class to strategy login button
+ - Fix padding of subflow locale select Closes #2276
+ - Update info text of complete node & add JP text
+ - Add class red-ui-button to cancel button
+ - Add css class to login submit button (#2275)
+ - Realign subflow output port labels
+ - Move context sidebar auto-refresh option to individual sections
+ - Update Japanese message catalogue
+ - Fix subflow UI for select
+ - remove padding before label text for SUBFLOW UI row
+ - Allow SUBFLOW UI label row without variable name
+
+Nodes
+ - Remove old rc option from exec node for 1.0
+ - Add python and SQL to template language options
+ - Fix Switch node display of jsonata_exp type
+ - Remove sentiment from core nodes
+
 #### 1.0.0-beta.3: Beta Release
 
 Runtime
