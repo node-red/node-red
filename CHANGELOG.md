@@ -1,3 +1,29 @@
+#### 1.0.0: Milestone Release
+
+Editor
+ - Add click-on-tooltip to close
+ - Fix node draggable handling
+ - Ensure complete node scope property is remapped on import
+ - Update i18n for project feature
+ - Fix menu hiding function for flow editor
+ - Normalise default subflow color references
+ - Hide header text of very small screens to deploy is visible
+ - Fix tab access on touch screens
+ - Update radialMenu to use standard theme colours
+ - Fix undefined reference loading on mobile
+ - Allow word breaking of node name with long word
+ - Enable wrap mode in Markdown editor
+ - Maximize the size of markdown editor
+
+Nodes
+ - remove legacy error option from file in mode
+ - Change MQTT node default 3.1 compatibility mode to false
+ - Show clear debug shortcut in tooltip
+ - Fix file-in port labels for all 4 options
+ - Add extra comment re Mustache escapes to Template info
+ - Fix typo in complete node
+ - Allow Function node output input to go to 0
+
 #### 1.0.0-beta.4: Beta Release
 
 Runtime
@@ -111,9 +137,6 @@ Nodes
  - Add "has key" rule to  switch node + tests
  - Optimise generation of switch node edit dialog
  - Add keep-alive option to HTTP Request - #2261
-
-
-
 
 #### 1.0.0-beta.2: Beta Release
 
