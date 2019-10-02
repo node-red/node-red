@@ -268,6 +268,10 @@ describe('switch Node', function() {
         twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });
 
+    it('should check if payload is between given values in "wrong" order', function(done) {
+        twoFieldSwitchTest("btwn", "5", "3", true, true, 4, done);
+    });
+
     it('should check if payload is between given string values', function(done) {
         twoFieldSwitchTest("btwn", "c", "e", true, true, "d", done);
     });
@@ -585,7 +589,7 @@ describe('switch Node', function() {
                         done(err);
                     }
                 } else {
-                    done();
+                    //done();
                 }
             });
             switchNode1.receive({payload:0});
