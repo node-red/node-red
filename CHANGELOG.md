@@ -1,3 +1,25 @@
+#### 1.0.1: Maintenance Release
+
+Runtime
+ - #2301 Add env vars to enable safe mode and projects
+   - `NODE_RED_ENABLE_SAFE_MODE`
+   - `NODE_RED_ENABLE_PROJECTS`
+
+Editor
+ - #2308 Fix grid setting
+ - #2306 i18n support in tooltips
+ - Fix error when setting typedInput to boolean true/false
+ - #2299 Fix SVG icons in IE11
+ - #2303 Fix issue where subflow color did not update when not on a flow
+
+Nodes
+ - #2297 TLS: Allow TLS config node to provide just CA cert
+ - #2307 Inject: Fix width on inject node property
+ - #2305 Switch: Let switch node between rule work both ways round
+ - Range: Add example to range node info and make use of target consistent
+ - Join: node must clone group message before sending
+
+
 #### 1.0.0: Milestone Release
 
 Editor
