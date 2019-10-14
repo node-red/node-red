@@ -1,3 +1,25 @@
+#### 1.0.2: Maintenance Release
+
+Runtime
+ - Allow node.status() to be passed number/bool types
+ - Allow node emitted events to have multiple arguments
+ - #2323 Fixed docstrings to have them match the function signature (name of parameters).
+ - #2318 NLS: Unify translations of "boolean"
+
+Editor
+ - Ensure node status is refreshed whenever node is edited
+ - #2315 #2316 Ensure z property included in full message debug payload
+ - #2321 Fixed editor.json (JA nls)
+ - #2313 Fix element to collapse items in visual JSON editor
+ - #2314 Insert divider in menu by calling RED.menu.addItem('id', null);
+
+Nodes
+ - Change: Fixup use of node.done
+ - #2322 Template: Fix invalid JSON data in template node docs
+ - #2320 File: Fixed a typo in 10-file.html (JA nls)
+ - #2312 Template: Remove unnecessary comma in help text
+ - #2319 Inject: Interval of inject node should be 596 hours or less.
+
 #### 1.0.1: Maintenance Release
 
 Runtime
