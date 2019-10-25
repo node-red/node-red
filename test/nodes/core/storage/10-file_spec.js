@@ -1192,6 +1192,43 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should read in a file and output split lines with parts and preserve other properties', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"lines", wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.should.have.property('topic',"dujour");
+                        msg.should.have.property('foo',"bar");
+                        msg.should.have.property('parts');
+                        msg.parts.should.have.property('index',c);
+                        msg.parts.should.have.property('type','string');
+                        msg.parts.should.have.property('ch','\n');
+                        if (c === 0) {
+                            msg.payload.should.equal("File message line 1");
+                        }
+                        if (c === 1) {
+                            msg.payload.should.equal("File message line 2");
+                        }
+                        if (c === 2) {
+                            msg.payload.should.equal("");
+                            done();
+                        }
+                        c++;
+                    }
+                    catch(e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:"",topic:"dujour",foo:"bar"});
+            });
+        });
+
         it('should read in a file and output a buffer with parts', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"stream", wires:[["n2"]]},
                         {id:"n2", type:"helper"}];
@@ -1209,6 +1246,28 @@ describe('file Nodes', function() {
                     done();
                 });
                 n1.receive({payload:""});
+            });
+        });
+
+        it('should read in a file and output a buffer with parts and preserve other properties', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"stream", wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload');
+                    msg.should.have.property('topic',"dujour");
+                    msg.should.have.property('foo',"bar");
+                    Buffer.isBuffer(msg.payload).should.be.true();
+                    msg.payload.should.have.length(40);
+                    msg.should.have.property('parts');
+                    msg.parts.should.have.property('count',1);
+                    msg.parts.should.have.property('type','buffer');
+                    msg.parts.should.have.property('ch','');
+                    done();
+                });
+                n1.receive({payload:"",topic:"dujour",foo:"bar"});
             });
         });
 
