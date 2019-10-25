@@ -93,19 +93,20 @@
         "grunt-mocha-istanbul": "5.0.2",
         "grunt-nodemon": "~0.4.2",
         "grunt-npm-command": "~0.1.2",
-        "grunt-sass": "~2.0.0",
+        "grunt-sass": "~3.1.0",
         "grunt-simple-mocha": "~0.4.1",
         "http-proxy": "^1.16.2",
         "istanbul": "0.4.5",
+        "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
         "minami": "1.2.3",
         "mocha": "^5.2.0",
         "mosca": "^2.8.3",
+        "node-red-node-test-helper": "^0.2.3",
+        "node-sass": "^4.13.0",
         "should": "^8.4.0",
         "sinon": "1.17.7",
         "stoppable": "^1.1.0",
-        "supertest": "3.4.2",
-        "node-red-node-test-helper": "^0.2.3",
-        "jsdoc-nr-template": "node-red/jsdoc-nr-template"
+        "supertest": "3.4.2"
     },
     "engines": {
         "node": ">=8"
