@@ -16,6 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var sass = require("node-sass");
 
 module.exports = function(grunt) {
 
@@ -220,6 +221,7 @@ module.exports = function(grunt) {
         sass: {
             build: {
                 options: {
+                    implementation: sass,
                     outputStyle: 'compressed'
                 },
                 files: [{
