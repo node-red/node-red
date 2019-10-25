@@ -298,7 +298,7 @@ describe('Subflow', function() {
                     // // stoppedNodes.should.have.a.property(sfConfigId);
                     done();
                 });
-            },50);
+            },150);
         });
         it("instantiates a subflow inside a subflow and stops it",function(done) {
             var config = flowUtils.parseConfig([
@@ -331,7 +331,7 @@ describe('Subflow', function() {
                     Object.keys(currentNodes).should.have.length(0);
                     done();
                 });
-            },50);
+            },150);
         });
         it("rewires a subflow node on update/start",function(done){
 
@@ -391,8 +391,8 @@ describe('Subflow', function() {
                     flow.stop().then(function() {
                         done();
                     });
-                },50);
-            },50);
+                },150);
+            },150);
         });
     });
     describe('#stop', function() {
@@ -452,7 +452,7 @@ describe('Subflow', function() {
                 flow.stop().then(function() {
                     done();
                 });
-            },50);
+            },150);
         });
         it("passes a status event to the subflow's parent tab status node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
@@ -491,7 +491,7 @@ describe('Subflow', function() {
 
                     done();
                 });
-            },50);
+            },150);
         });
     });
 
@@ -536,7 +536,7 @@ describe('Subflow', function() {
 
                     done();
                 });
-            },50);
+            },150);
         });
         it("emits a status event when a message is passed to a subflow-status node - msg.payload as status obj", function(done) {
             var config = flowUtils.parseConfig([
@@ -578,7 +578,7 @@ describe('Subflow', function() {
 
                     done();
                 });
-            },50);
+            },150);
         });
         it("emits a status event when a message is passed to a subflow-status node - msg.status", function(done) {
             var config = flowUtils.parseConfig([
@@ -620,7 +620,7 @@ describe('Subflow', function() {
 
                     done();
                 });
-            },50);
+            },150);
         });
         it("does not emit a regular status event if it contains a subflow-status node", function(done) {
             var config = flowUtils.parseConfig([
@@ -690,7 +690,7 @@ describe('Subflow', function() {
                 flow.stop().then(function() {
                     done();
                 });
-            },50);
+            },150);
         });
         it("passes an error event to the subflow's parent tab catch node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
@@ -727,7 +727,7 @@ describe('Subflow', function() {
                 flow.stop().then(function() {
                     done();
                 });
-            },50);
+            },150);
 
         });
     });
@@ -777,7 +777,7 @@ describe('Subflow', function() {
                 flow.stop().then(function() {
                     done();
                 });
-            },50);
+            },150);
         });
 
         it("can access subflow env var", function(done) {
@@ -817,7 +817,7 @@ describe('Subflow', function() {
                 flow.stop().then(function() {
                     done();
                 });
-            },50);
+            },150);
         });
 
         it("can access nested subflow env var", function(done) {
@@ -875,9 +875,9 @@ describe('Subflow', function() {
                         flow.stop().then(function() {
                             done();
                         });
-                    },50);
-                },50);
-            },50);
+                    },150);
+                },150);
+            },150);
         });
 
     });
