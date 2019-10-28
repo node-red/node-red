@@ -585,6 +585,7 @@ describe('trigger node', function() {
             var n2 = helper.getNode("n2");
             var c = 0;
             n2.on("input", function(msg) {
+                console.log(Date.now(),"< got",msg.payload);
                 try {
                     msg.should.have.a.property("payload", true);
                     c += 1;
@@ -592,9 +593,11 @@ describe('trigger node', function() {
                 catch(err) { done(err); }
             });
             setTimeout( function() {
+                console.log(Date.now(),"! checking",c)
                 c.should.equal(1); // should only have had one output.
                 done();
             },90);
+            console.log(Date.now(),"> emit");
             n1.emit("input", {payload:null});
         });
     });
