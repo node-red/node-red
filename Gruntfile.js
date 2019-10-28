@@ -65,7 +65,7 @@ module.exports = function(grunt) {
             all: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js","test/nodes/**/*_spec.js"] },
             core: { src: ["test/unit/_spec.js","test/unit/**/*_spec.js"]},
             nodes: { src: ["test/nodes/**/*_spec.js"]},
-            trouble: {src: ["test/nodes/core/function/89-trigger_spec.js"]}
+            trouble: {src: ["test/nodes/core/function/*_spec.js"]}
         },
         jshint: {
             options: {
