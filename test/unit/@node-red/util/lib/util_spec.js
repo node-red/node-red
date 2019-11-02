@@ -842,7 +842,7 @@ describe("@node-red/util/util", function() {
                 };
                 
                 for (var i = 0; i < 1000; i++) {
-                  msg.msg.obj.big += 'some more string ';
+                    msg.msg.obj.big += 'some more string ';
                 }
                 
                 var result = util.encodeObject(msg);
@@ -855,11 +855,11 @@ describe("@node-red/util/util", function() {
             it('test bad toString', function(done) {
                 var msg = {
                     msg: {
-                      mystrangeobj:"hello",
+                        mystrangeobj:"hello",
                     },
                 };
                 msg.msg.toString = function(){
-                  throw new Error('Exception in toString - should have been caught');
+                    throw new Error('Exception in toString - should have been caught');
                 }
                 msg.msg.constructor = { name: "strangeobj" };
                 
@@ -868,8 +868,21 @@ describe("@node-red/util/util", function() {
                 success.should.eql(true);
                 done();
             });
+            it('test bad object constructor', function(done) {
+                var msg = {
+                    msg: {
+                        mystrangeobj:"hello",
+                        constructor: { 
+                            get name(){
+                                throw new Error('Exception in constructor name');
+                            }
+                        }                      
+                    },
+                };
+                var result = util.encodeObject(msg);
+                done();
+            });
 
-            
         });
     });
 });
