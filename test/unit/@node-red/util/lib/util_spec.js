@@ -772,6 +772,57 @@ describe("@node-red/util/util", function() {
                 var resultJson = JSON.parse(result.msg);
                 resultJson.socket.should.eql('[internal]');
             });
+            it('object which fails to serialise', function(done) {
+                var msg = {
+                    msg: {
+                        obj:{
+                            cantserialise:{
+                                message:'this will not be displayed',
+                                toJSON: function(val) {
+                                    throw 'this exception should have been caught';
+                                    return 'should not display because we threw first';
+                                },
+                            },
+                            canserialise:{
+                                message:'this should be displayed',
+                            }
+                        },
+                    }
+                };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("error");
+                var success = (result.msg.indexOf('cantserialise') > 0);
+                success &= (result.msg.indexOf('this exception should have been caught') > 0);
+                success &= (result.msg.indexOf('canserialise') > 0);
+                success.should.eql(1);
+                done();
+            });
+            it('object which fails to serialise - different error type', function(done) {
+                var msg = {
+                    msg: {
+                        obj:{
+                            cantserialise:{
+                                message:'this will not be displayed',
+                                toJSON: function(val) {
+                                    throw new Error('this exception should have been caught');
+                                    return 'should not display because we threw first';
+                                },
+                            },
+                            canserialise:{
+                                message:'this should be displayed',
+                            }
+                        },
+                    }
+                };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("error");
+                var success = (result.msg.indexOf('cantserialise') > 0);
+                success &= (result.msg.indexOf('this exception should have been caught') > 0);
+                success &= (result.msg.indexOf('canserialise') > 0);
+                success.should.eql(1);
+                done();
+            });
+            
         });
     });
 });
