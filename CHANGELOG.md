@@ -1,3 +1,259 @@
+#### 1.0.2: Maintenance Release
+
+Runtime
+ - Allow node.status() to be passed number/bool types
+ - Allow node emitted events to have multiple arguments
+ - #2323 Fixed docstrings to have them match the function signature (name of parameters).
+ - #2318 NLS: Unify translations of "boolean"
+
+Editor
+ - Ensure node status is refreshed whenever node is edited
+ - #2315 #2316 Ensure z property included in full message debug payload
+ - #2321 Fixed editor.json (JA nls)
+ - #2313 Fix element to collapse items in visual JSON editor
+ - #2314 Insert divider in menu by calling RED.menu.addItem('id', null);
+
+Nodes
+ - Change: Fixup use of node.done
+ - #2322 Template: Fix invalid JSON data in template node docs
+ - #2320 File: Fixed a typo in 10-file.html (JA nls)
+ - #2312 Template: Remove unnecessary comma in help text
+ - #2319 Inject: Interval of inject node should be 596 hours or less.
+
+#### 1.0.1: Maintenance Release
+
+Runtime
+ - #2301 Add env vars to enable safe mode and projects
+   - `NODE_RED_ENABLE_SAFE_MODE`
+   - `NODE_RED_ENABLE_PROJECTS`
+
+Editor
+ - #2308 Fix grid setting
+ - #2306 i18n support in tooltips
+ - Fix error when setting typedInput to boolean true/false
+ - #2299 Fix SVG icons in IE11
+ - #2303 Fix issue where subflow color did not update when not on a flow
+
+Nodes
+ - #2297 TLS: Allow TLS config node to provide just CA cert
+ - #2307 Inject: Fix width on inject node property
+ - #2305 Switch: Let switch node between rule work both ways round
+ - Range: Add example to range node info and make use of target consistent
+ - Join: node must clone group message before sending
+
+
+#### 1.0.0: Milestone Release
+
+Editor
+ - Add click-on-tooltip to close
+ - Fix node draggable handling
+ - Ensure complete node scope property is remapped on import
+ - Update i18n for project feature
+ - Fix menu hiding function for flow editor
+ - Normalise default subflow color references
+ - Hide header text of very small screens to deploy is visible
+ - Fix tab access on touch screens
+ - Update radialMenu to use standard theme colours
+ - Fix undefined reference loading on mobile
+ - Allow word breaking of node name with long word
+ - Enable wrap mode in Markdown editor
+ - Maximize the size of markdown editor
+
+Nodes
+ - remove legacy error option from file in mode
+ - Change MQTT node default 3.1 compatibility mode to false
+ - Show clear debug shortcut in tooltip
+ - Fix file-in port labels for all 4 options
+ - Add extra comment re Mustache escapes to Template info
+ - Fix typo in complete node
+ - Allow Function node output input to go to 0
+
+#### 1.0.0-beta.4: Beta Release
+
+Runtime
+ - Clone the first message passed to node.send in Function node
+
+Editor
+ - Move flow-status button to footer for consistency
+ - Fix node hover effect to prevent jumping position
+ - Filter quick-add properly when splicing a wire
+ - Mark workspace dirty when deleting link node link Fixes #2274
+ - Add red-ui-button class to strategy login button
+ - Fix padding of subflow locale select Closes #2276
+ - Update info text of complete node & add JP text
+ - Add class red-ui-button to cancel button
+ - Add css class to login submit button (#2275)
+ - Realign subflow output port labels
+ - Move context sidebar auto-refresh option to individual sections
+ - Update Japanese message catalogue
+ - Fix subflow UI for select
+ - remove padding before label text for SUBFLOW UI row
+ - Allow SUBFLOW UI label row without variable name
+
+Nodes
+ - Remove old rc option from exec node for 1.0
+ - Add python and SQL to template language options
+ - Fix Switch node display of jsonata_exp type
+ - Remove sentiment from core nodes
+
+#### 1.0.0-beta.3: Beta Release
+
+Runtime
+ - [FEATURE] Add Node Done API - make message passing async
+ - Ensure the subflow stop promise is waiting for before restarting
+ - Limit the regex for the /nodes/ api end points
+ - Add error event handler to ssh-keygen child_process Fixes #2255
+ - Fix default value handling on context array access Fixes #2252
+ - Remove all ui test dependencies from package.json
+ - Add req back to audit log events and extend to Projects api
+ - Ensure 2nd arg to node.error is an object Fixes #2228
+ - Use a more atomic process for writing context files Fixes #2271
+
+
+Editor
+ - [FEATURE] Change core node categories
+ - [FEATURE] Subflow Instance property UI (#2236)
+ - [FEATURE] Add visual JSON editor
+ - [FEATURE] Add Action List dialog
+ - [FEATURE] Add new shortcut to clear debug message list - ctrl-alt-l
+ - [FEATURE] Add show-library dialog actions
+ - [FEATURE] Add shift-cursor handling for moving quick-add dialog
+ - [FEATURE] Add enable/disable-flow actions
+ - [FEATURE] Add actions to change deploy type
+ - [FEATURE] Allow config nodes to be disabled, tidy css and add actions
+ - [FEATURE] Add default shortcut (ctrl-d) for deploy
+ - [FEATURE] Initial implementation of redo (un-undo) - ctrl-y
+ - [FEATURE] add support for specifying subflow template color
+ - [FEATURE] Use ctrl-click on wire to splice node in place
+ - [FEATURE] Allow search results to show more than 25 results
+ - [FEATURE] Allow a node to change if it has an input port Closes #2268
+ - Revealing node position needs to account for zoom level Fixes #2172
+ - Fix typedInput option selection Fixes #2174
+ - Fix palette node id handling so search works Fixes #2173
+ - Add popover tooltips to debug sidebar,function and template
+ - Add popovers to context sidebar mini buttons
+ - Ensure node status icon is shown when value set
+ - Revert treeList children function signature change
+ - Restore tray component css for compatibility. Mark as deprecated
+ - fix function name & string compare function
+ - Handle empty list of example flows Fixes #2171
+ - Ensure library list has an item selected when opened
+ - Ensure tooltip popover doesn't replace normal popover
+ - Fix clipboard export download button
+ - Ensure input box has focus on repeated quick add
+ - Fix width calculation of typedInput
+ - Remove some hardcoded css colors
+ - Fix display of node help when clicking in palette Fixes #2194
+ - Ensure node help is loaded in the right language Fixes #2195
+ - Do not allow tab focus on clipboard hidden element
+ - Fix undefined error on typedInput due to valueLabel used before being added
+ - Fix undo of flow disable state change
+ - Fix select-all action in main view
+ - Fix delete-all action on config node sidebar
+ - Update UI tests for new editor css
+ - Add insertItemAt doc to editableList
+ - Ensure focus returns to the right element after dialogs shown
+ - Set autocomplete to disabled in form input elements
+ - Update all node icons to SVG
+ - Handle png/svg fallback for def.icon values. Remove old pngs
+ - Ignore empty examples directories (don't add to import menu)
+ - better handle example file at any depth - #2222
+ - Properly escape node types in palette
+ - Ensure session expiry timeout doesn't exceed limit
+ - Use node/tab map to make filterNodes more efficient
+ - Rearrange contents of subflow template settings tab
+ - Handle undefined node.\_def in edit stack title.
+ - fix converting selection to subflow
+ - Fix inserting new subflow node to existing wire between nodes
+ - Support displaying falsey node status values Fixes #2246
+ - Remove tab menu from node property UI for subflow and config nodes
+ - Mark workspace dirty when shift-click-drag detaches wires Fixes #2260
+ - Fix subflow category change on palette
+
+
+Nodes
+ - Remove pi gpi, twitter, email and feedparser nodes from core
+ - Fix error handling in Websocket broadcast function Fixes #2182
+ - Handle websocket item being parseable but not an object better
+ - stop join tripping up if last message of buffer is blank.
+ - Add support for env var propety in switch node
+ - Improve handling of file upload in request node
+ - Add "has key" rule to  switch node + tests
+ - Optimise generation of switch node edit dialog
+ - Add keep-alive option to HTTP Request - #2261
+
+#### 1.0.0-beta.2: Beta Release
+
+Runtime
+ - Fix length calculation when loading library file
+
+#### 1.0.0-beta.1: Beta Release
+
+Runtime
+ - Update runtime apis to support multiple libraries
+ - Add Node 12 to travis (allow_failures)
+ - Bump all dependencies Fixes #2152
+
+Editor
+ - [BREAKING] complete overhaul of editor DOM/CSS structure
+ - [BREAKING] Get rid of Bootstrap
+ - Simplify index.mst to a single div to insert the editor
+ - Append node configs to div rather than body
+ - Only redraw node status when it has changed
+ - Minimise work done to calculate node label widths
+ - Allow script tags with src to reference esm modules
+ - Upgrade to jq 3.4.1 / jq-ui 1.12.1
+ - Allow editor language to be chosen in editor settings
+ - Only NLS status text that starts with a letter Fixes #2128
+ - Fix display of link node list within subflow Fixes #2140
+ - Blur the active element when closing edit dialog via action Fixes #2097
+ - Trigger change evnt on typedInput when type changes and options present Fixes #2160
+ - Move library import/export to single dialog
+ - Move type-library dialogs to new style dialog
+ - Fix node drag and drop animation
+ - let status be simple text if wanted
+ - Add workspace statusBar
+ - Complete refresh of German translations
+ - Fix memory leak in Debug sidebar #2163
+ - Introduce toggleButton and move flow-disabled to use it
+ - Allow RED.settings.get/set to use full property desc
+ - Add auto-refresh toggle to context sidebar
+ - Add build-custom-theme script
+ - Add RED.view.selectNodes api for node selection whilst editing
+ - Add node-select to typedInput
+
+Nodes
+ - http request node: warn user if msg.requestTimeout == 0
+ - hide delay node reset label on deploy
+ - Fix CSV regex to treat strings starting e as text
+ - Add "don't parse numbers" option to csv node
+ - Add expand editor button to Template node
+ - Update catch/status nodes to use selectNodes api and treeList
+
+#### 0.20.8: Maintenance Release
+
+ - Sanitize tab name in edit dialog
+ - Pass httpServer to runtime even when httpAdmin disabled Fixes #2272
+
+#### 0.20.7: Maintenance Release
+
+ - Update jsonata to 1.6.5 which should fix #2183
+ - Ensure the subflow stop promise is waiting for before restarting
+ - Properly escape node types in palette
+
+#### 0.20.6: Maintenance Release
+
+ - Revealing node position needs to account for zoom level Fixes #2172
+ - stop join tripping up if last message of buffer is blank.
+ - Improve handling of file upload in request node
+ - Handle subflow internal node wired to a non-existant node Fixes #2202
+ - Do not save subflow env vars with blank names
+ - Don't allow a link node virtual wire to connect to normal port
+ - Clear HTTP Request node authType when auth disabled Fixes #2215
+ - Fix parsing of content-type header Fixes #2216
+ - Fix join node reset issue with merging objects
+ - Copy data-i18n attribute on TypedInput Fixes #2211
+
 #### 0.20.5: Maintenance Release
 
  - Revert error handling in palette manager
@@ -658,7 +914,7 @@ Nodes
  - Initial support of sequence rules for SWITCH node (#1545)
  - initial support of SORT node (#1500)
  - Inject node - let once delay be editable (#1541)
- - Introduce `nodeMaxMessageBufferLength` setting for msg sequence nodes
+ - Introduce `nodeMessageBufferMaxLength` setting for msg sequence nodes
  - Let CSV correct parts if we remove header row.
  - let default apply if msg.delay not set in override mode. (#1397)
  - let trigger node be reset by boolean message (#1554)

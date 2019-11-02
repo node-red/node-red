@@ -31,59 +31,10 @@ describe("api/editor/library", function() {
     before(function() {
         app = express();
         app.use(bodyParser.json());
-
-        app.get("/library/flows",library.getAll);
-        app.post(/library\/([^\/]+)\/(.*)/,library.saveEntry);
-        app.get(/library\/([^\/]+)(?:$|\/(.*))/,library.getEntry);
+        app.get(/library\/([^\/]+)\/([^\/]+)(?:$|\/(.*))/,library.getEntry);
+        app.post(/library\/([^\/]+)\/([^\/]+)\/(.*)/,library.saveEntry);
     });
     after(function() {
-    });
-    it('returns all flows', function(done) {
-        library.init({
-            library: {
-                getEntries: function(opts) {
-                    return Promise.resolve({a:1,b:2});
-                }
-            }
-        });
-        request(app)
-            .get('/library/flows')
-            .expect(200)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                res.body.should.have.property('a',1);
-                res.body.should.have.property('b',2);
-                done();
-            });
-    })
-    it('returns an error on all flows', function(done) {
-        library.init({
-            library: {
-                getEntries: function(opts) {
-                    var err = new Error("message");
-                    err.code = "random_error";
-                    err.status = 400;
-                    var p = Promise.reject(err);
-                    p.catch(()=>{});
-                    return p;
-                }
-            }
-        });
-        request(app)
-            .get('/library/flows')
-            .expect(400)
-            .end(function(err,res) {
-                if (err) {
-                    return done(err);
-                }
-                res.body.should.have.property('code');
-                res.body.code.should.be.equal("random_error");
-                res.body.should.have.property('message');
-                res.body.message.should.be.equal("message");
-                done();
-            });
     });
 
     it('returns an individual entry - flow type', function(done) {
@@ -97,7 +48,7 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .get('/library/flows/abc')
+            .get('/library/local/flows/abc')
             .expect(200)
             .end(function(err,res) {
                 if (err) {
@@ -105,6 +56,7 @@ describe("api/editor/library", function() {
                 }
                 res.body.should.have.property('a',1);
                 res.body.should.have.property('b',2);
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','flows');
                 opts.should.have.property('path','abc');
                 done();
@@ -121,7 +73,7 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .get('/library/flows/abc/def')
+            .get('/library/local/flows/abc/def')
             .expect(200)
             .end(function(err,res) {
                 if (err) {
@@ -129,6 +81,7 @@ describe("api/editor/library", function() {
                 }
                 res.body.should.have.property('a',1);
                 res.body.should.have.property('b',2);
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','flows');
                 opts.should.have.property('path','abc/def');
                 done();
@@ -145,12 +98,13 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .get('/library/non-flow/abc')
+            .get('/library/local/non-flow/abc')
             .expect(200)
             .end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','non-flow');
                 opts.should.have.property('path','abc');
                 res.text.should.eql('{"a":1,"b":2}');
@@ -168,7 +122,7 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .get('/library/non-flow/abc/def')
+            .get('/library/local/non-flow/abc/def')
             .expect(200)
             .end(function(err,res) {
                 if (err) {
@@ -176,6 +130,7 @@ describe("api/editor/library", function() {
                 }
                 res.body.should.have.property('a',1);
                 res.body.should.have.property('b',2);
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','non-flow');
                 opts.should.have.property('path','abc/def');
                 done();
@@ -198,12 +153,13 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .get('/library/flows/123')
+            .get('/library/local/flows/123')
             .expect(400)
             .end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','flows');
                 opts.should.have.property('path','123');
 
@@ -227,13 +183,14 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .post('/library/flows/abc/def')
+            .post('/library/local/flows/abc/def')
             .expect(204)
             .send({a:1,b:2,c:3})
             .end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','flows');
                 opts.should.have.property('path','abc/def');
                 opts.should.have.property('meta',{});
@@ -253,13 +210,14 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .post('/library/non-flow/abc/def')
+            .post('/library/local/non-flow/abc/def')
             .expect(204)
             .send({a:1,b:2,text:"123"})
             .end(function(err,res) {
                 if (err) {
                     return done(err);
                 }
+                opts.should.have.property('library','local');
                 opts.should.have.property('type','non-flow');
                 opts.should.have.property('path','abc/def');
                 opts.should.have.property('meta',{a:1,b:2});
@@ -284,7 +242,7 @@ describe("api/editor/library", function() {
             }
         });
         request(app)
-            .post('/library/non-flow/abc/def')
+            .post('/library/local/non-flow/abc/def')
             .send({a:1,b:2,text:"123"})
             .expect(400)
             .end(function(err,res) {
@@ -292,6 +250,7 @@ describe("api/editor/library", function() {
                     return done(err);
                 }
                 opts.should.have.property('type','non-flow');
+                opts.should.have.property('library','local');
                 opts.should.have.property('path','abc/def');
 
                 res.body.should.have.property('code');

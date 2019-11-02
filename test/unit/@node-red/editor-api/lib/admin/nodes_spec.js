@@ -441,7 +441,7 @@ describe("api/admin/nodes", function() {
             nodes.init({
                 nodes:{
                     getModuleCatalog: function(opts) {
-                        return Promise.resolve(opts);
+                        return Promise.resolve({a:123});
                     }
                 }
             });
@@ -452,7 +452,7 @@ describe("api/admin/nodes", function() {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.eql({ module: 'module/set' });
+                    res.body.should.eql({a:123});
                     done();
                 });
         });

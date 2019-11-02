@@ -19,22 +19,15 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var sinon = require('sinon');
-var when = require('when');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
 var context = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/context");
-// var Context = require("../../../../red/runtime/nodes/context");
-// var Util = require("../../../../red/runtime/util");
 
-describe("api/admin/context", function() {
-    it.skip("NEEDS TESTS WRITING",function() {});
-});
-/*
+describe("api/admin/context", function () {
     var app = undefined;
 
-    before(function (done) {
-        var node_context = undefined;
+    before(function () {
         app = express();
         app.use(bodyParser.json());
         app.get("/context/:scope(global)", context.get);
@@ -42,196 +35,196 @@ describe("api/admin/context", function() {
         app.get("/context/:scope(node|flow)/:id", context.get);
         app.get("/context/:scope(node|flow)/:id/*", context.get);
 
-        context.init({
-            settings: {
-            },
-            log:{warn:function(){},_:function(){},audit:function(){}},
-            nodes: {
-                listContextStores: Context.listStores,
-                getContext: Context.get,
-                getNode: function(id) {
-                    if (id === 'NID') {
-                        return {
-                            id: 'NID',
-                            context: function () {
-                                return node_context;
-                            }
-                        };
-                    }
-                    return null;
-                }
-            },
-            util: Util
-        });
-
-        Context.init({
-            contextStorage: {
-                memory0: {
-                    module: "memory"
-                },
-                memory1: {
-                    module: "memory"
-                }
-            }
-        });
-        Context.load().then(function () {
-            var ctx = Context.get("NID", "FID");
-            node_context = ctx;
-            ctx.set("foo", "n_v00", "memory0");
-            ctx.set("bar", "n_v01", "memory0");
-            ctx.set("baz", "n_v10", "memory1");
-            ctx.set("bar", "n_v11", "memory1");
-            ctx.flow.set("foo", "f_v00", "memory0");
-            ctx.flow.set("bar", "f_v01", "memory0");
-            ctx.flow.set("baz", "f_v10", "memory1");
-            ctx.flow.set("bar", "f_v11", "memory1");
-            ctx.global.set("foo", "g_v00", "memory0");
-            ctx.global.set("bar", "g_v01", "memory0");
-            ctx.global.set("baz", "g_v10", "memory1");
-            ctx.global.set("bar", "g_v11", "memory1");
-            done();
-        });
-
+        app.delete("/context/:scope(global)/*", context.delete);
+        app.delete("/context/:scope(node|flow)/:id/*", context.delete);
     });
 
-    after(function () {
-        Context.clean({allNodes:{}});
-        Context.close();
-    });
+    describe("get", function () {
+        var gContext = {
+            default: { abc: { msg: '111', format: 'number' } },
+            file: { abc: { msg: '222', format: 'number' } }
+        };
+        var fContext = {
+            default: { bool: { msg: 'true', format: 'boolean' } },
+            file: { string: { msg: 'aaaa', format: 'string[7]' } }
+        };
+        var nContext = { msg: "1", format: "number" };
+        var stub = sinon.stub();
 
-    function check_mem(body, mem, name, val) {
-        var mem0 = body[mem];
-        mem0.should.have.property(name);
-        mem0[name].should.deepEqual(val);
-    }
-
-    function check_scope(scope, prefix, id) {
-        describe('# '+scope, function () {
-            var xid = id ? ("/"+id) : "";
-
-            it('should return '+scope+' contexts', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid)
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
-                        var body = res.body;
-                        body.should.have.key('memory0', 'memory1');
-                        check_mem(body, 'memory0',
-                                  'foo', {msg:prefix+'_v00', format:'string[5]'});
-                        check_mem(body, 'memory0',
-                                  'bar', {msg:prefix+'_v01', format:'string[5]'});
-                        check_mem(body, 'memory1',
-                                  'baz', {msg:prefix+'_v10', format:'string[5]'});
-                        check_mem(body, 'memory1',
-                                  'bar', {msg:prefix+'_v11', format:'string[5]'});
-                        done();
-                    });
-            });
-
-            it('should return a value from default '+scope+' context', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid+'/foo')
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
-                        var body = res.body;
-                        body.should.deepEqual({msg: prefix+'_v00', format: 'string[5]'});
-                        done();
-                    });
-            });
-
-            it('should return a value from specified '+scope+' context', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid+'/bar?store=memory1')
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
-                        var body = res.body;
-                        body.should.deepEqual({msg: prefix+'_v11', format: 'string[5]', store: 'memory1'});
-                        done();
-                    });
-            });
-
-            it('should return specified '+scope+' store', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid+'?store=memory1')
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
-                        var body = res.body;
-                        body.should.deepEqual({
-                            memory1: {
-                                baz: { msg: prefix+'_v10', format: 'string[5]' },
-                                bar: { msg: prefix+'_v11', format: 'string[5]' }
-                            }
-                        });
-                        done();
-                    });
-            });
-
-            it('should return undefined for unknown key of default '+scope+' store', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid+'/unknown')
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done(err);
-                        }
-                        var body = res.body;
-                        body.should.deepEqual({msg:'(undefined)', format:'undefined'});
-                        done();
-
-                    });
-            });
-
-            it('should cause error for unknown '+scope+' store', function (done) {
-                request(app)
-                    .get('/context/'+scope+xid+'?store=unknown')
-                    .set('Accept', 'application/json')
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            return done();
-                        }
-                        done("unexpected");
-                    });
+        before(function () {
+            context.init({
+                context: {
+                    getValue: stub
+                }
             });
         });
-    }
 
-    check_scope("global", "g", undefined);
-    check_scope("node", "n", "NID");
-    check_scope("flow", "f", "FID");
+        afterEach(function () {
+            stub.reset();
+        });
 
-    describe("# errors", function () {
-        it('should cause error for unknown scope', function (done) {
+        it('should call context.getValue to get global contexts', function (done) {
+            stub.returns(Promise.resolve(gContext));
             request(app)
-                .get('/context/scope')
+                .get('/context/global')
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function (err, res) {
                     if (err) {
-                        return done();
+                        return done(err);
                     }
-                    done("unexpected");
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'global');
+                    stub.args[0][0].should.have.property('id', undefined);
+                    stub.args[0][0].should.have.property('key', undefined);
+                    stub.args[0][0].should.have.property('store', undefined);
+                    var body = res.body;
+                    body.should.eql(gContext);
+                    done();
                 });
         });
 
+        it('should call context.getValue to get flow contexts', function (done) {
+            stub.returns(Promise.resolve(fContext));
+            request(app)
+                .get('/context/flow/1234/')
+                .set('Accept', 'application/json')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'flow');
+                    stub.args[0][0].should.have.property('id', '1234');
+                    stub.args[0][0].should.have.property('key', undefined);
+                    stub.args[0][0].should.have.property('store', undefined);
+                    var body = res.body;
+                    body.should.eql(fContext);
+                    done();
+                });
+        });
+
+        it('should call context.getValue to get a node context', function (done) {
+            stub.returns(Promise.resolve(nContext));
+            request(app)
+                .get('/context/node/5678/foo?store=file')
+                .set('Accept', 'application/json')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'node');
+                    stub.args[0][0].should.have.property('id', '5678');
+                    stub.args[0][0].should.have.property('key', 'foo');
+                    stub.args[0][0].should.have.property('store', 'file');
+                    var body = res.body;
+                    body.should.eql(nContext);
+                    done();
+                });
+        });
+
+        it('should handle error which context.getValue causes', function (done) {
+            stub.returns(Promise.reject('error'));
+            request(app)
+                .get('/context/global')
+                .set('Accept', 'application/json')
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.has.a.property('code', 'unexpected_error');
+                    res.body.should.has.a.property('message', 'error');
+                    done();
+                });
+        });
     });
 
+    describe("delete", function () {
+        var stub = sinon.stub();
+
+        before(function () {
+            context.init({
+                context: {
+                    delete: stub
+                }
+            });
+        });
+
+        afterEach(function () {
+            stub.reset();
+        });
+
+        it('should call context.delete to delete a global context', function (done) {
+            stub.returns(Promise.resolve());
+            request(app)
+                .delete('/context/global/abc?store=default')
+                .expect(204)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'global');
+                    stub.args[0][0].should.have.property('id', undefined);
+                    stub.args[0][0].should.have.property('key', 'abc');
+                    stub.args[0][0].should.have.property('store', 'default');
+                    done();
+                });
+        });
+
+        it('should call context.delete to delete a flow context', function (done) {
+            stub.returns(Promise.resolve());
+            request(app)
+                .delete('/context/flow/1234/abc?store=file')
+                .expect(204)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'flow');
+                    stub.args[0][0].should.have.property('id', '1234');
+                    stub.args[0][0].should.have.property('key', 'abc');
+                    stub.args[0][0].should.have.property('store', 'file');
+                    done();
+                });
+        });
+
+        it('should call context.delete to delete a node context', function (done) {
+            stub.returns(Promise.resolve());
+            request(app)
+                .delete('/context/node/5678/foo?store=file')
+                .expect(204)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'node');
+                    stub.args[0][0].should.have.property('id', '5678');
+                    stub.args[0][0].should.have.property('key', 'foo');
+                    stub.args[0][0].should.have.property('store', 'file');
+                    done();
+                });
+        });
+
+        it('should handle error which context.delete causes', function (done) {
+            stub.returns(Promise.reject('error'));
+            request(app)
+                .delete('/context/global/abc?store=default')
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.body.should.has.a.property('code', 'unexpected_error');
+                    res.body.should.has.a.property('message', 'error');
+                    done();
+                });
+        });
+    });
 });
-*/
