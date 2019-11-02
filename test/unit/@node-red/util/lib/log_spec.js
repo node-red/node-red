@@ -224,5 +224,19 @@ describe("@node-red/util/log", function() {
 
 
     });
+    it('it can log without exception', function() {
+        var msg = {
+            msg: {
+              mystrangeobj:"hello",
+            },
+        };
+        msg.msg.toString = function(){
+          throw new Error('Exception in toString - should have been caught');
+        }
+        msg.msg.constructor = { name: "strangeobj" };
+        var ret = log.info(msg.msg);
+    });
 
+    
+    
 });
