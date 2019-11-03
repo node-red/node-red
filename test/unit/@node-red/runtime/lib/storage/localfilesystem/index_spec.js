@@ -19,6 +19,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var sinon = require('sinon');
 var NR_TEST_UTILS = require("nr-test-utils");
+var process = require("process");
 
 var localfilesystem = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem");
 var log = NR_TEST_UTILS.require("@node-red/util").log;
@@ -474,4 +475,44 @@ describe('storage/localfilesystem', function() {
             done(err);
         });
     });
+
+    it('should handle flow file in random unc path and non-existent subfolder',function(done) {
+        // only test on win32
+        if (process.platform !== 'win32') {
+          console.log('skipped test as not win32');
+          done();
+          return;
+        }
+        
+        // get a real windows path
+        var flowFile = path.win32.resolve(userDir+'/some/random/path');
+        var rootdir = path.win32.resolve(userDir+'/some');
+        // make it into a local UNC path
+        flowFile = flowFile.replace('C:\\', '\\\\localhost\\c$\\');
+        localfilesystem.init({userDir:userDir, flowFile:flowFile}, mockRuntime).then(function() {
+            fs.existsSync(flowFile).should.be.false();
+            localfilesystem.saveFlows(testFlow).then(function() {
+                fs.existsSync(flowFile).should.be.true();
+                localfilesystem.getFlows().then(function(flows) {
+                    flows.should.eql(testFlow);
+                    // cleanup
+                    fs.removeSync(rootdir);
+                    done();
+                }).catch(function(err) {
+                    // cleanup
+                    fs.removeSync(rootdir);
+                    done(err);
+                });
+            }).catch(function(err) {
+                // cleanup
+                fs.removeSync(rootdir);
+                done(err);
+            });
+        }).catch(function(err) {
+            // cleanup
+            fs.removeSync(rootdir);
+            done(err);
+        });
+    });
+    
 });
