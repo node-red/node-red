@@ -4,4 +4,5 @@ npm install --no-save \
  wdio-mocha-framework@^0.6.4 \
  wdio-spec-reporter@^0.1.5 \
  webdriverio@^4.14.1 \
- chromedriver@2
+ chromedriver@^78.0.1 \
+ @wdio/cli@^5.15.6
