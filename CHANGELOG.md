@@ -8,17 +8,31 @@ Runtime
  - Bump https-proxy-agent version
  - #2332 Fix error handling of nodes with multiple input handlers
  - Add script to generate npm publish script
+ - #2371 Ensure folder is present before write (e.g. flows file not in user folder)
+ - #2371 Handle windows UNC '\\' paths
+ - #2366 Handle logging of non-JSON encodable objects
 
 Editor
  - #2328 Fix language handling in subflow node
  - Use default language if lng param not set in i18n req
  - #2326 Fix palette editor search visualization
+ - #2375 Subflow status not showing i18n version of contained core nodes status
+ - Fix inverse of 'replace' editor event
+ - #2376 Fallback to base language files if present
+ - #2373 Support UI testing on the latest Google Chrome
+ - #2364 Add tooltip to expand button in markdown editor
+ - #2363 Support ctrl key to select tabs for Windows
+ - #2356 Make JSONata help initially shown in expression editor
+ - #2355 Prohibit line break in type menu of typedInput
 
 Nodes
  - Delay: Fix delay to not pass through .reset and .flush props consistently
  - #2352 File: Using the ‘a msg per line’ the last line does not get msg.topic passed
  - #2339 HTTP Request: Check auth type on opening
  - HTTP Request: add units info
+ - #2372 MQTT/WS: Improved proxy support for MQTT and WebSocket nodes
+ - #2370 MQTT: Add clarification that MQTT Out requires payload to send msg
+
 
 #### 1.0.2: Maintenance Release
 
