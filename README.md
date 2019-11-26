@@ -5,9 +5,9 @@ http://nodered.org
 [![Build Status](https://travis-ci.org/node-red/node-red.svg?branch=master)](https://travis-ci.org/node-red/node-red)
 [![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
 
-A visual tool for wiring the Internet of Things.
+Low-code programming for event-driven applications.
 
-![Node-RED: A visual tool for wiring the Internet of Things](http://nodered.org/images/node-red-screenshot.png)
+![Node-RED: Low-code programming for event-driven applications](http://nodered.org/images/node-red-screenshot.png)
 
 ## Quick Start
 
@@ -56,7 +56,7 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a project of the [JS Foundation](http://js.foundation).
+Node-RED is a project of the [OpenJS Foundation](https://openjsf.org).
 
 It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
 
@@ -67,4 +67,4 @@ It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-t
 
 ## Copyright and license
 
-Copyright JS Foundation and other contributors, http://js.foundation under [the Apache 2.0 license](LICENSE).
+Copyright JS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).

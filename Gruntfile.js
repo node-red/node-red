@@ -16,6 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var sass = require("node-sass");
 
 module.exports = function(grunt) {
 
@@ -220,6 +221,7 @@ module.exports = function(grunt) {
         sass: {
             build: {
                 options: {
+                    implementation: sass,
                     outputStyle: 'compressed'
                 },
                 files: [{
@@ -562,7 +564,20 @@ module.exports = function(grunt) {
             return false;
         }
     });
+    grunt.registerTask('generatePublishScript',
+        'Generates a script to publish build output to npm',
+            function () {
+                const done = this.async();
+                const generatePublishScript = require("./scripts/generate-publish-script.js");
+                generatePublishScript().then(function(output) {
+                    grunt.log.writeln(output);
 
+                    const filePath = path.join(grunt.config.get('paths.dist'),"modules","publish.sh");
+                    grunt.file.write(filePath,output);
+
+                    done();
+                });
+            });
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -605,7 +620,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules']);
+        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules','generatePublishScript']);
 
     grunt.registerTask('pack-modules',
         'Create module pack files for release',

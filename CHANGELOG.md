@@ -1,3 +1,109 @@
+#### 1.0.3: Maintenance Release
+
+Runtime
+ - Increase timeouts in Subflow tests to minimise false positives
+ - Update grunt-sass and add node-sass for node12 support
+ - Fix timings of Delay node tests
+ - #2340 Update JSONata to 1.7.0
+ - Bump https-proxy-agent version
+ - #2332 Fix error handling of nodes with multiple input handlers
+ - Add script to generate npm publish script
+ - #2371 Ensure folder is present before write (e.g. flows file not in user folder)
+ - #2371 Handle windows UNC '\\' paths
+ - #2366 Handle logging of non-JSON encodable objects
+
+Editor
+ - #2328 Fix language handling in subflow node
+ - Use default language if lng param not set in i18n req
+ - #2326 Fix palette editor search visualization
+ - #2375 Subflow status not showing i18n version of contained core nodes status
+ - Fix inverse of 'replace' editor event
+ - #2376 Fallback to base language files if present
+ - #2373 Support UI testing on the latest Google Chrome
+ - #2364 Add tooltip to expand button in markdown editor
+ - #2363 Support ctrl key to select tabs for Windows
+ - #2356 Make JSONata help initially shown in expression editor
+ - #2355 Prohibit line break in type menu of typedInput
+
+Nodes
+ - Delay: Fix delay to not pass through .reset and .flush props consistently
+ - #2352 File: Using the ‘a msg per line’ the last line does not get msg.topic passed
+ - #2339 HTTP Request: Check auth type on opening
+ - HTTP Request: add units info
+ - #2372 MQTT/WS: Improved proxy support for MQTT and WebSocket nodes
+ - #2370 MQTT: Add clarification that MQTT Out requires payload to send msg
+
+
+#### 1.0.2: Maintenance Release
+
+Runtime
+ - Allow node.status() to be passed number/bool types
+ - Allow node emitted events to have multiple arguments
+ - #2323 Fixed docstrings to have them match the function signature (name of parameters).
+ - #2318 NLS: Unify translations of "boolean"
+
+Editor
+ - Ensure node status is refreshed whenever node is edited
+ - #2315 #2316 Ensure z property included in full message debug payload
+ - #2321 Fixed editor.json (JA nls)
+ - #2313 Fix element to collapse items in visual JSON editor
+ - #2314 Insert divider in menu by calling RED.menu.addItem('id', null);
+
+Nodes
+ - Change: Fixup use of node.done
+ - #2322 Template: Fix invalid JSON data in template node docs
+ - #2320 File: Fixed a typo in 10-file.html (JA nls)
+ - #2312 Template: Remove unnecessary comma in help text
+ - #2319 Inject: Interval of inject node should be 596 hours or less.
+
+#### 1.0.1: Maintenance Release
+
+Runtime
+ - #2301 Add env vars to enable safe mode and projects
+   - `NODE_RED_ENABLE_SAFE_MODE`
+   - `NODE_RED_ENABLE_PROJECTS`
+
+Editor
+ - #2308 Fix grid setting
+ - #2306 i18n support in tooltips
+ - Fix error when setting typedInput to boolean true/false
+ - #2299 Fix SVG icons in IE11
+ - #2303 Fix issue where subflow color did not update when not on a flow
+
+Nodes
+ - #2297 TLS: Allow TLS config node to provide just CA cert
+ - #2307 Inject: Fix width on inject node property
+ - #2305 Switch: Let switch node between rule work both ways round
+ - Range: Add example to range node info and make use of target consistent
+ - Join: node must clone group message before sending
+
+
+#### 1.0.0: Milestone Release
+
+Editor
+ - Add click-on-tooltip to close
+ - Fix node draggable handling
+ - Ensure complete node scope property is remapped on import
+ - Update i18n for project feature
+ - Fix menu hiding function for flow editor
+ - Normalise default subflow color references
+ - Hide header text of very small screens to deploy is visible
+ - Fix tab access on touch screens
+ - Update radialMenu to use standard theme colours
+ - Fix undefined reference loading on mobile
+ - Allow word breaking of node name with long word
+ - Enable wrap mode in Markdown editor
+ - Maximize the size of markdown editor
+
+Nodes
+ - remove legacy error option from file in mode
+ - Change MQTT node default 3.1 compatibility mode to false
+ - Show clear debug shortcut in tooltip
+ - Fix file-in port labels for all 4 options
+ - Add extra comment re Mustache escapes to Template info
+ - Fix typo in complete node
+ - Allow Function node output input to go to 0
+
 #### 1.0.0-beta.4: Beta Release
 
 Runtime
@@ -111,9 +217,6 @@ Nodes
  - Add "has key" rule to  switch node + tests
  - Optimise generation of switch node edit dialog
  - Add keep-alive option to HTTP Request - #2261
-
-
-
 
 #### 1.0.0-beta.2: Beta Release
 

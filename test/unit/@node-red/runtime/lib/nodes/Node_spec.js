@@ -613,15 +613,39 @@ describe('Node', function() {
             }
             var n = new RedNode({_flow:flow,id:'123',type:'abc'});
             var status = {fill:"green",shape:"dot",text:"connected"};
-            var topic;
-            var message;
-            var retain;
 
             n.status(status);
 
             flow.handleStatus.called.should.be.true();
             flow.handleStatus.args[0][0].should.eql(n);
             flow.handleStatus.args[0][1].should.eql(status);
+            done();
+        });
+        it('publishes status for plain string', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status("text status");
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"text status"});
+            done();
+        });
+        it('publishes status for plain boolean', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status(false);
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"false"});
+            done();
+        });
+        it('publishes status for plain number', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status(123);
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"123"});
             done();
         });
     });

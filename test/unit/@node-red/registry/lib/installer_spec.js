@@ -121,6 +121,17 @@ describe('nodes/registry/installer', function() {
                 done();
             });
         });
+        it("rejects when update requested to existing version and url", function(done) {
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
+            });
+            installer.installModule("this_wont_exist","0.1.1","https://example/foo-0.1.1.tgz").catch(function(err) {
+                err.code.should.be.eql('module_already_loaded');
+                done();
+            });
+        });
         it("rejects with generic error", function(done) {
             var res = {
                 code: 1,
@@ -195,6 +206,29 @@ describe('nodes/registry/installer', function() {
             p.catch((err)=>{});
             initInstaller(p)
             installer.installModule(resourcesDir).then(function(info) {
+                info.should.eql(nodeInfo);
+                done();
+            }).catch(function(err) {
+                done(err);
+            });
+        });
+        it("succeeds when url is valid node-red module", function(done) {
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
+
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            initInstaller(p)
+
+            var addModule = sinon.stub(registry,"addModule",function(md) {
+                return when.resolve(nodeInfo);
+            });
+
+            installer.installModule("this_wont_exist",null,"https://example/foo-0.1.1.tgz").then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
             }).catch(function(err) {
