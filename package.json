@@ -48,6 +48,7 @@
         "js-yaml": "3.13.1",
         "json-stringify-safe": "5.0.1",
         "jsonata": "1.7.0",
+        "lodash.clonedeep": "^4.5.0",
         "media-typer": "1.1.0",
         "memorystore": "1.6.1",
         "mime": "2.4.4",
