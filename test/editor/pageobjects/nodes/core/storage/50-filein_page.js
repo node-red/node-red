@@ -18,11 +18,11 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function fileinNode(id) {
+function fileInNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(fileinNode, nodePage);
+util.inherits(fileInNode, nodePage);
 
 var formatType = {
     "utf8": 1,
@@ -31,14 +31,14 @@ var formatType = {
     "stream": 4
 };
 
-fileinNode.prototype.setFilename = function(filename) {
+fileInNode.prototype.setFilename = function(filename) {
     browser.setValue('#node-input-filename', filename);
 }
 
-fileinNode.prototype.setOutput = function(format) {
+fileInNode.prototype.setOutput = function(format) {
     browser.clickWithWait('#node-input-format');
     var formatTypeXPath = '//*[@id="node-input-format"]/option[' + formatType[format] + ']';
     browser.clickWithWait(formatTypeXPath);
 }
 
-module.exports = fileinNode;
+module.exports = fileInNode;

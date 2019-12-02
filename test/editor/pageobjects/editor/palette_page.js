@@ -17,7 +17,7 @@
 var idMap = {
     // input
     "inject": ".red-ui-palette-node[data-palette-type='inject']",
-    "httpin": ".red-ui-palette-node[data-palette-type='http in']",
+    "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
     "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
     // output
     "debug": ".red-ui-palette-node[data-palette-type='debug']",
@@ -32,7 +32,7 @@ var idMap = {
     "html": ".red-ui-palette-node[data-palette-type='html']",
     "json": ".red-ui-palette-node[data-palette-type='json']",
     // storage
-    "filein": ".red-ui-palette-node[data-palette-type='file in']",
+    "fileIn": ".red-ui-palette-node[data-palette-type='file in']",
 };
 
 function getId(type) {

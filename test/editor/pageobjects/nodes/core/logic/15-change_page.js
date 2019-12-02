@@ -55,7 +55,7 @@ changeNode.prototype.ruleSet = function(p, pt, to, tot, index) {
     if (pt) {
         browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
         var num = 5 * (index - 1) + 1;
-        var ptXPath = '//div[@class="red-ui-typedInput-options"][' + num + ']/a[' + ptType[pt] + ']';
+        var ptXPath = '//div[contains(@class, "red-ui-typedInput-options")][' + num + ']/a[' + ptType[pt] + ']';
         browser.clickWithWait(ptXPath);
     }
     if (p) {
@@ -64,7 +64,7 @@ changeNode.prototype.ruleSet = function(p, pt, to, tot, index) {
     if (tot) {
         browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/button[1]');
         var num = 5 * (index - 1) + 2;
-        var totXPath = '//div[@class="red-ui-typedInput-options"][' + num + ']/a[' + totType[tot] + ']';
+        var totXPath = '//div[contains(@class, "red-ui-typedInput-options")][' + num + ']/a[' + totType[tot] + ']';
         browser.clickWithWait(totXPath);
     }
     if (to) {

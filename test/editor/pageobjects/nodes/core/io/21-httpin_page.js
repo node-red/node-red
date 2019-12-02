@@ -18,18 +18,18 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function httpinNode(id) {
+function httpInNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(httpinNode, nodePage);
+util.inherits(httpInNode, nodePage);
 
-httpinNode.prototype.setMethod = function(method) {
+httpInNode.prototype.setMethod = function(method) {
     browser.selectWithWait('#node-input-method', method);
 }
 
-httpinNode.prototype.setUrl = function(url) {
+httpInNode.prototype.setUrl = function(url) {
     browser.setValue('#node-input-url', url);
 }
 
-module.exports = httpinNode;
+module.exports = httpInNode;
