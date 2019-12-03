@@ -52,8 +52,11 @@ function getFlowFilename() {
 }
 
 function cleanup(flowFile) {
-    deleteFile(homeDir+"/"+flowFile);
-    deleteFile(homeDir+"/."+flowFile+".backup");
+    var credentialFile = flowFile.replace(/\.json$/, '') + '_cred.json';
+    deleteFile(homeDir + "/" + flowFile);
+    deleteFile(homeDir + "/." + flowFile + ".backup");
+    deleteFile(homeDir + "/" + credentialFile);
+    deleteFile(homeDir + "/." + credentialFile + ".backup");
 }
 
 function deleteFile(flowFile) {

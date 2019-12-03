@@ -64,9 +64,9 @@ exports.config = {
         'goog:chromeOptions': {
             args: process.env.NODE_RED_NON_HEADLESS
                 // Runs tests with opening a browser.
-                ? ['--disable-gpu']
+                ? ['--disable-gpu', '--no-sandbox']
                 // Runs tests without opening a browser.
-                : ['--headless', '--disable-gpu', 'window-size=1920,1080']
+                : ['--headless', '--disable-gpu', 'window-size=1920,1080', '--no-sandbox']
         },
     }],
     //
