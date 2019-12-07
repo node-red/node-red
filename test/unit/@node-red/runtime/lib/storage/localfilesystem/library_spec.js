@@ -203,4 +203,35 @@ describe('storage/localfilesystem/library', function() {
             done(err);
         });
     });
+
+    it('should return a newly saved multi-byte character library flow',function(done) {
+        localfilesystemLibrary.init({userDir:userDir}).then(function() {
+            createObjectLibrary("flows");
+            localfilesystemLibrary.getLibraryEntry('flows','B').then(function(flows) {
+                flows.should.eql([ 'C', {fn:'flow.json'} ]);
+                var ft = path.join("B","D","file4");
+                localfilesystemLibrary.saveLibraryEntry('flows',ft,{mno:'pqr'},"こんにちわこんにちわこんにちわ").then(function() {
+                    setTimeout(function() {
+                        localfilesystemLibrary.getLibraryEntry('flows',path.join("B","D")).then(function(flows) {
+                            flows.should.eql([ { mno: 'pqr', fn: 'file4.json' } ]);
+                            localfilesystemLibrary.getLibraryEntry('flows',ft+".json").then(function(body) {
+                                body.should.eql("こんにちわこんにちわこんにちわ");
+                                done();
+                            }).catch(function(err) {
+                                done(err);
+                            });
+                        }).catch(function(err) {
+                            done(err);
+                        })
+                    }, 50);
+                }).catch(function(err) {
+                    done(err);
+                });
+            }).catch(function(err) {
+                done(err);
+            });
+        }).catch(function(err) {
+            done(err);
+        });
+    });
 });
