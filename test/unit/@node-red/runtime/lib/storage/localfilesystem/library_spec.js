@@ -204,7 +204,7 @@ describe('storage/localfilesystem/library', function() {
         });
     });
 
-    it('should return a newly saved multi-byte character library flow',function(done) {
+    it('should return a newly saved library flow (multi-byte character)',function(done) {
         localfilesystemLibrary.init({userDir:userDir}).then(function() {
             createObjectLibrary("flows");
             localfilesystemLibrary.getLibraryEntry('flows','B').then(function(flows) {
