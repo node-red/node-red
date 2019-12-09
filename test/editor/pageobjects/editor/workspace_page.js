@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
- var when = require("when");
+var when = require("when");
 
 var events = require("nr-test-utils").require("@node-red/runtime/lib/events.js");
 
@@ -44,6 +44,7 @@ function addNode(type, x, y) {
             previousY = previousY + flowLayout.heightInterval;
         }
     }
+    browser.waitForVisible(palette.getId(type));
     browser.moveToObject(palette.getId(type));
     browser.buttonDown();
     browser.moveToObject("#red-ui-palette-search", previousX + 300, previousY + 100); // adjust to the top-left corner of workspace.
@@ -56,7 +57,12 @@ function addNode(type, x, y) {
 }
 
 function deleteAllNodes() {
-    browser.click('.red-ui-workspace-chart-event-layer');
+    browser.waitForVisible('.red-ui-workspace-chart-event-layer');
+    try {
+        browser.click('.red-ui-workspace-chart-event-layer');
+    } catch (e) {
+        console.log(e);
+    }
     browser.keys(['Control', 'a', 'a', 'Control']); // call twice to release the keys.
     browser.keys(['Delete']);
 }

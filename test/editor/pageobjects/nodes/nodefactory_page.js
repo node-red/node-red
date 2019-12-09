@@ -20,20 +20,20 @@ var templateNode = require('./core/core/80-template_page');
 var functionNode = require('./core/core/80-function_page');
 var mqttInNode = require('./core/io/10-mqttin_page');
 var mqttOutNode = require('./core/io/10-mqttout_page');
-var httpinNode = require('./core/io/21-httpin_page');
+var httpInNode = require('./core/io/21-httpin_page');
 var httpResponseNode = require('./core/io/21-httpresponse_page');
 var changeNode = require('./core/logic/15-change_page');
 var rangeNode = require('./core/logic/16-range_page');
 var httpRequestNode = require('./core/io/21-httprequest_page');
 var htmlNode = require('./core/parsers/70-HTML_page');
 var jsonNode = require('./core/parsers/70-JSON_page');
-var fileinNode = require('./core/storage/50-filein_page');
+var fileInNode = require('./core/storage/50-filein_page');
 
 
 var nodeCatalog = {
     // input
     "inject": injectNode,
-    "httpin": httpinNode,
+    "httpIn": httpInNode,
     "mqttIn":mqttInNode,
     // output
     "debug": debugNode,
@@ -48,7 +48,7 @@ var nodeCatalog = {
     "html": htmlNode,
     "json":jsonNode,
     // storage
-    "filein": fileinNode,
+    "fileIn": fileInNode,
 }
 
 function create(type, id) {
