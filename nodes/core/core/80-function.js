@@ -217,7 +217,6 @@ module.exports = function(RED) {
             this.on("input", function(msg) {
                 try {
                     var start = process.hrtime();
-                    context.msg = msg;
                     sandbox.msg = msg;
 
                     const vm2Instance = new vm2.VM({ sandbox });
