@@ -11,7 +11,7 @@
   "main": "red/red.js",
   "scripts": {
     "start": "node red.js",
-    "test": "grunt",
+    "test": "grunt test-nodes",
     "build": "grunt build"
   },
   "bin": {
@@ -72,6 +72,7 @@
     "semver": "5.5.0",
     "sentiment": "2.1.0",
     "uglify-js": "3.3.25",
+    "vm2": "^3.8.4",
     "when": "3.7.8",
     "ws": "1.1.5",
     "xml2js": "0.4.19"

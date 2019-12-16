@@ -17,7 +17,7 @@
 module.exports = function(RED) {
     "use strict";
     var util = require("util");
-    var vm = require("vm");
+    var vm2 = require("vm2");
 
     function sendResults(node,_msgid,msgs) {
         if (msgs == null) {
@@ -71,15 +71,24 @@ module.exports = function(RED) {
                                  "status:__node__.status,"+
                                  "send:function(msgs){ __node__.send(__msgid__,msgs);}"+
                               "};\n"+
+                              "var innerFunc = (msg) => {\n" + 
                               this.func+"\n"+
+                              "};\n" +
+                              "let output;\n" +
+                              "try {\n" +
+                              "  const result = innerFunc(msg);\n" +
+                              "  return JSON.stringify({ type: 'msg', result });\n" +
+                              "} catch (e) {\n" +
+                              "  return JSON.stringify({ type: 'error', message: e.message, stack: e.stack });\n" +
+                              "}" +
                            "})(msg);";
         this.topic = n.topic;
         this.outstandingTimers = [];
         this.outstandingIntervals = [];
         var sandbox = {
-            console:console,
+            console: console,
             util:util,
-            Buffer:Buffer,
+            //Buffer:Buffer,
             Date: Date,
             RED: {
                 util: RED.util
@@ -141,17 +150,17 @@ module.exports = function(RED) {
                     return node.context().flow.keys.apply(node,arguments);
                 }
             },
-            global: {
-                set: function() {
-                    node.context().global.set.apply(node,arguments);
-                },
-                get: function() {
-                    return node.context().global.get.apply(node,arguments);
-                },
-                keys: function() {
-                    return node.context().global.keys.apply(node,arguments);
-                }
-            },
+            // global: {
+            //     set: function() {
+            //         node.context().global.set.apply(node,arguments);
+            //     },
+            //     get: function() {
+            //         return node.context().global.get.apply(node,arguments);
+            //     },
+            //     keys: function() {
+            //         return node.context().global.keys.apply(node,arguments);
+            //     }
+            // },
             setTimeout: function () {
                 var func = arguments[0];
                 var timerId;
@@ -196,6 +205,7 @@ module.exports = function(RED) {
                 }
             }
         };
+
         if (util.hasOwnProperty('promisify')) {
             sandbox.setTimeout[util.promisify.custom] = function(after, value) {
                 return new Promise(function(resolve, reject) {
@@ -203,22 +213,22 @@ module.exports = function(RED) {
                 });
             }
         }
-        var context = vm.createContext(sandbox);
         try {
-            this.script = vm.createScript(functionText, {
-                filename: 'Function node:'+this.id+(this.name?' ['+this.name+']':''), // filename for stack traces
-                displayErrors: true
-                // Using the following options causes node 4/6 to not include the line number
-                // in the stack output. So don't use them.
-                // lineOffset: -11, // line number offset to be used for stack traces
-                // columnOffset: 0, // column number offset to be used for stack traces
-            });
             this.on("input", function(msg) {
                 try {
                     var start = process.hrtime();
                     context.msg = msg;
-                    this.script.runInContext(context);
-                    sendResults(this,msg._msgid,context.results);
+                    sandbox.msg = msg;
+
+                    const vm2Instance = new vm2.VM({ sandbox });
+                    const result = JSON.parse(vm2Instance.run(functionText));
+                    if(result.type === 'error') {
+                        const error = new Error(result.message);
+                        error.stack = result.stack;
+                        throw error;
+                    }
+
+                    sendResults(this,msg._msgid, result.result);
 
                     var duration = process.hrtime(start);
                     var converted = Math.floor((duration[0] * 1e9 + duration[1])/10000)/100;
