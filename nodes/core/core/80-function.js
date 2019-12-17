@@ -218,6 +218,7 @@ module.exports = function(RED) {
                 try {
                     var start = process.hrtime();
                     sandbox.msg = msg;
+                    const logger = msg.logger;
 
                     const vm2Instance = new vm2.VM({ sandbox });
                     const result = JSON.parse(vm2Instance.run(functionText));
@@ -227,6 +228,7 @@ module.exports = function(RED) {
                         throw error;
                     }
 
+                    result.result.logger = logger;
                     sendResults(this,msg._msgid, result.result);
 
                     var duration = process.hrtime(start);
