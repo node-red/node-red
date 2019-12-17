@@ -70,17 +70,8 @@ module.exports = function(RED) {
                                  "on:__node__.on,"+
                                  "status:__node__.status,"+
                                  "send:function(msgs){ __node__.send(__msgid__,msgs);}"+
-                              "};\n"+
-                              "var innerFunc = (msg) => {\n" + 
+                              "};\n"+ 
                               this.func+"\n"+
-                              "};\n" +
-                              "let output;\n" +
-                              "try {\n" +
-                              "  const result = innerFunc(msg);\n" +
-                              "  return JSON.stringify({ type: 'msg', result });\n" +
-                              "} catch (e) {\n" +
-                              "  return JSON.stringify({ type: 'error', message: e.message, stack: e.stack });\n" +
-                              "}" +
                            "})(msg);";
         this.topic = n.topic;
         this.outstandingTimers = [];
@@ -89,7 +80,7 @@ module.exports = function(RED) {
             console: console,
             util:util,
             //Buffer:Buffer,
-            Date: Date,
+            //Date: Date,
             RED: {
                 util: RED.util
             },
@@ -218,18 +209,9 @@ module.exports = function(RED) {
                 try {
                     var start = process.hrtime();
                     sandbox.msg = msg;
-                    const logger = msg.logger;
-
                     const vm2Instance = new vm2.VM({ sandbox });
-                    const result = JSON.parse(vm2Instance.run(functionText));
-                    if(result.type === 'error') {
-                        const error = new Error(result.message);
-                        error.stack = result.stack;
-                        throw error;
-                    }
-
-                    result.result.logger = logger;
-                    sendResults(this,msg._msgid, result.result);
+                    const result = vm2Instance.run(functionText);
+                    sendResults(this,msg._msgid, result);
 
                     var duration = process.hrtime(start);
                     var converted = Math.floor((duration[0] * 1e9 + duration[1])/10000)/100;
