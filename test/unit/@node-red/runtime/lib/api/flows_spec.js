@@ -51,6 +51,7 @@ describe("runtime-api/flows", function() {
     describe("setFlows", function() {
         var setFlows;
         var loadFlows;
+        var loadCredentials;
         var reloadError = false;
         beforeEach(function() {
             setFlows = sinon.spy(function(flows,type) {
@@ -73,13 +74,17 @@ describe("runtime-api/flows", function() {
                     p.catch(()=>{});
                     return p;
                 }
-            })
+            });
+            loadCredentials = sinon.spy(function (opt) {
+                return Promise.resolve("loadCredentials");
+            });
             flows.init({
                 log: mockLog(),
                 nodes: {
                     getFlows: function() { return {rev:"currentRev",flows:[]} },
                     setFlows: setFlows,
-                    loadFlows: loadFlows
+                    loadFlows: loadFlows,
+                    loadCredentials: loadCredentials
                 }
             })
 
@@ -92,6 +97,22 @@ describe("runtime-api/flows", function() {
                 setFlows.called.should.be.true();
                 setFlows.lastCall.args[0].should.eql([4,5,6]);
                 setFlows.lastCall.args[1].should.eql("full");
+                done();
+            }).catch(done);
+        });
+        it("full deploy with credentials", function(done) {
+            flows.setFlows({
+                flows: {
+                    flows:[4,5,6],
+                    credentials: {x:1,y:2}
+                }
+            }).then(function(result) {
+                result.should.eql({rev:"newRev"});
+                setFlows.called.should.be.true();
+                setFlows.lastCall.args[0].should.eql([4,5,6]);
+                setFlows.lastCall.args[1].should.eql("full");
+                loadCredentials.called.should.be.true();
+                loadCredentials.lastCall.args[0].should.eql({x:1, y:2});
                 done();
             }).catch(done);
         });
