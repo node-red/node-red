@@ -26,6 +26,11 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var testItem = grunt.option('testItem');
+    if (testItem) {
+        process.env.TEST_ITEM = testItem;
+    }
+
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
         process.env.NODE_RED_NON_HEADLESS = 'true';
@@ -45,7 +50,8 @@ module.exports = function(grunt) {
             },
             all: { src: ['test/**/*_spec.js'] },
             core: { src: ["test/_spec.js","test/unit/**/*_spec.js"]},
-            nodes: { src: ["test/nodes/**/*_spec.js"]}
+            nodes: { src: ["test/nodes/**/*_spec.js"]},
+            flow: { src: ["test/flow/flow-test_spec.js"] }
         },
         webdriver: {
             all: {
@@ -634,4 +640,8 @@ module.exports = function(grunt) {
     grunt.registerTask('docs',
         'Generates API documentation',
         ['jsdoc']);
+
+    grunt.registerTask('flow-test',
+        'Run flow test',
+        ['simplemocha:flow']);
 };
