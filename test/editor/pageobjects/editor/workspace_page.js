@@ -44,6 +44,9 @@ function addNode(type, x, y) {
             previousY = previousY + flowLayout.heightInterval;
         }
     }
+    browser.waitForVisible('#red-ui-palette-search');
+    browser.setValue('//*[@id="red-ui-palette-search"]/div/input', type.replace(/([A-Z])/g,' $1').toLowerCase());
+    browser.pause(300);
     browser.waitForVisible(palette.getId(type));
     browser.moveToObject(palette.getId(type));
     browser.buttonDown();
