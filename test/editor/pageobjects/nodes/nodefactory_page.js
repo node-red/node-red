@@ -14,46 +14,46 @@
  * limitations under the License.
  **/
 
-var injectNode = require('./core/core/20-inject_page');
-var debugNode = require('./core/core/58-debug_page');
-var templateNode = require('./core/core/80-template_page');
-var functionNode = require('./core/core/80-function_page');
-var mqttInNode = require('./core/io/10-mqttin_page');
-var mqttOutNode = require('./core/io/10-mqttout_page');
-var httpInNode = require('./core/io/21-httpin_page');
-var httpResponseNode = require('./core/io/21-httpresponse_page');
-var changeNode = require('./core/logic/15-change_page');
-var rangeNode = require('./core/logic/16-range_page');
-var httpRequestNode = require('./core/io/21-httprequest_page');
+var injectNode = require('./core/common/20-inject_page');
+var debugNode = require('./core/common/21-debug_page');
+var functionNode = require('./core/function/10-function_page');
+var changeNode = require('./core/function/15-change_page');
+var rangeNode = require('./core/function/16-range_page');
+var templateNode = require('./core/function/80-template_page');
+var mqttInNode = require('./core/network/10-mqttin_page');
+var mqttOutNode = require('./core/network/10-mqttout_page');
+var httpInNode = require('./core/network/21-httpin_page');
+var httpResponseNode = require('./core/network/21-httpresponse_page');
+var httpRequestNode = require('./core/network/21-httprequest_page');
 var htmlNode = require('./core/parsers/70-HTML_page');
 var jsonNode = require('./core/parsers/70-JSON_page');
-var fileInNode = require('./core/storage/50-filein_page');
-
+var fileInNode = require('./core/storage/10-filein_page');
 
 var nodeCatalog = {
-    // input
+    // common
     "inject": injectNode,
-    "httpIn": httpInNode,
-    "mqttIn":mqttInNode,
-    // output
     "debug": debugNode,
-    "httpResponse": httpResponseNode,
-    "mqttOut": mqttOutNode,
     // function
     "function": functionNode,
-    "template": templateNode,
     "change": changeNode,
     "range": rangeNode,
+    "template": templateNode,
+    // network
+    "mqttIn": mqttInNode,
+    "mqttOut": mqttOutNode,
+    "httpIn": httpInNode,
+    "httpResponse": httpResponseNode,
     "httpRequest": httpRequestNode,
+    // parser
     "html": htmlNode,
-    "json":jsonNode,
+    "json": jsonNode,
     // storage
-    "fileIn": fileInNode,
-}
+    "fileIn": fileInNode
+};
 
 function create(type, id) {
-    var node = nodeCatalog[type];
-    return new node(id);
+    var Node = nodeCatalog[type];
+    return new Node(id);
 }
 
 module.exports = {
