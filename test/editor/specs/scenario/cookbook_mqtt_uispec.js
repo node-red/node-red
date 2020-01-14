@@ -22,7 +22,7 @@ var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
-var mqttConfig = require('../../pageobjects/nodes/core/io/10-mqttconfig_page.js');
+var mqttConfig = require('../../pageobjects/nodes/core/network/10-mqttconfig_page.js');
 
 var httpNodeRoot = "/api";
 
