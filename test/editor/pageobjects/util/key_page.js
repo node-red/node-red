@@ -17,21 +17,20 @@
 var os = require("os");
 
 var shortCutKeyMap = {
-    "selectAll": ['Control', 'a', 'Control'],
+    "selectAll": ['Control', 'a', 'a', 'Control'],
     "selectToEnd": ['Control', 'Shift', 'End', 'Shift', 'Control'],
 };
 
 var shortCutKeyMapForMac = {
-    "selectAll": ['Command', 'a', 'Command'],
+    "selectAll": ['Command', 'a', 'a', 'Command'],
     "selectToEnd": ['Command', 'Shift', 'ArrowDown', 'Shift', 'Command'],
 };
 
 function getShortCutKey(type) {
-    if (os.type() === "Darwin") {
+    if (os.type() === 'Darwin') {
         return shortCutKeyMapForMac[type];
-    } else {
-        return shortCutKeyMap[type];
     }
+    return shortCutKeyMap[type];
 }
 
 function selectAll() {
