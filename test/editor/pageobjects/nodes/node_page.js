@@ -22,13 +22,13 @@ Node.prototype.edit = function() {
     browser.clickWithWait(this.id);
     browser.clickWithWait(this.id);
     // Wait until an edit dialog opens.
-    browser.waitForVisible('#node-dialog-ok', 4000);
+    browser.waitForVisible('#node-dialog-ok', 10000);
 }
 
 Node.prototype.clickOk = function() {
     browser.clickWithWait('#node-dialog-ok');
     // Wait untile an edit dialog closes.
-    browser.waitForVisible('#node-dialog-ok', 4000, true);
+    browser.waitForVisible('#node-dialog-ok', 10000, true);
     browser.pause(50);
 }
 
