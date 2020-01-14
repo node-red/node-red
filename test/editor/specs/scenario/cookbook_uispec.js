@@ -331,7 +331,7 @@ describe('cookbook', function() {
             httpRequetNode.clickOk();
 
             debugNode.edit();
-            debugNode.setOutput("payload.title");
+            debugNode.setOutput(".title");
             debugNode.clickOk();
 
             injectNode.connect(changeNodeSetPost);
