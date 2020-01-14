@@ -26,21 +26,19 @@ function templateNode(id) {
 
 util.inherits(templateNode, nodePage);
 
-templateNode.prototype.setSyntax = function(syntax) {
+templateNode.prototype.setSyntax = function (syntax) {
     browser.selectWithWait('#node-input-syntax', syntax);
 }
 
-templateNode.prototype.setFormat = function(format) {
+templateNode.prototype.setFormat = function (format) {
     browser.selectWithWait('#node-input-format', format);
 }
 
-templateNode.prototype.setTemplate = function(template) {
+templateNode.prototype.setTemplate = function (template) {
     browser.clickWithWait('#node-input-template-editor');
     browser.keys(keyPage.selectAll());
-    // Need to add a character one by one since some words such as 'Control' are treated as a special word.
-    for (var i = 0; i < template.length; i++) {
-        browser.keys([template.charAt(i)]);
-    }
+    browser.keys(['Delete']);
+    browser.keys(template);
     browser.keys(keyPage.selectToEnd());
     browser.keys(['Delete']);
     // Need to wait until ace editor correctly checks the syntax.

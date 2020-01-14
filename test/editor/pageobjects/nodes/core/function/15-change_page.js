@@ -49,8 +49,8 @@ function setT(t, index) {
 }
 
 // It is better to create a function whose input value is the object type in the future,
-changeNode.prototype.ruleSet = function(p, pt, to, tot, index) {
-    index = index ? index : 1;
+changeNode.prototype.ruleSet = function (p, pt, to, tot, index) {
+    index = index || 1;
     setT("set", index);
     if (pt) {
         browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
@@ -68,23 +68,23 @@ changeNode.prototype.ruleSet = function(p, pt, to, tot, index) {
         browser.clickWithWait(totXPath);
     }
     if (to) {
-        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/div/input' , to);
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/div/input', to);
     }
 }
 
-changeNode.prototype.ruleDelete = function(index) {
-    index = index ? index : 1;
+changeNode.prototype.ruleDelete = function (index) {
+    index = index || 1;
     setT("delete", index);
 }
 
-changeNode.prototype.ruleMove = function(p, to, index) {
-    index = index ? index : 1;
+changeNode.prototype.ruleMove = function (p, to, index) {
+    index = index || 1;
     setT("move", index);
     browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
     browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[4]/div[2]/div/input', to);
 }
 
-changeNode.prototype.addRule = function() {
+changeNode.prototype.addRule = function () {
     browser.clickWithWait('//*[@id="dialog-form"]/div[3]/div/a');
 }
 

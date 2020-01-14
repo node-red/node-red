@@ -23,14 +23,14 @@ function setServer(broker, port) {
 function clickOk() {
     browser.clickWithWait('#node-config-dialog-ok');
     // Wait until an config dialog closes.
-    browser.waitForVisible('#node-config-dialog-ok', 4000, true);
+    browser.waitForVisible('#node-config-dialog-ok', 10000, true);
 }
 
 function edit() {
     browser.waitForVisible('#node-input-lookup-broker');
     browser.click('#node-input-lookup-broker');
     // Wait until a config dialog opens.
-    browser.waitForVisible('#node-config-dialog-ok', 4000);
+    browser.waitForVisible('#node-config-dialog-ok', 10000);
 }
 
 module.exports = {
