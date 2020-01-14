@@ -1,0 +1,40 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="sort">
+    <p>메세지 열 혹은 배열형의 페이로드를 정렬합니다.</p>
+    <p><b>split</b>노드와 조합하여 메세지의 순서를 정렬할 수 있습니다.</p>
+    <p>아래의 정렬순서를 지정할 수 있습니다.</p>
+    <ul>
+        <li><b>오름차순</b></li>
+        <li><b>내림차순</b></li>
+    </ul>
+    <p>수치에 의한 정렬을 선택할 수도 있습니다.</p>
+    <p>메세지의 정렬을 수행하기 위한 정렬키는 <code>payload</code>프로퍼티 혹은 JSONata식을 이용할 수 있습니다. 배열형 페이로드의 정렬키에는, 요소값 혹은 JSONata식을 이용할 수 있습니다.</p>
+    <p>sort노드의 처리에서는 수신한 메세지가 <code>msg.parts</code>프로퍼티를 갖고있는 것을 상정하고 있습니다. split노드로 이 프로퍼티를 생성할 수 있지만, 독자적으로 생성해도 무관합니다. <code>parts</code>프로퍼티는 아래의 프로퍼티를 포함합니다.</p>
+    <p>
+        <ul>
+            <li><code>id</code> -  메세지 그룹의 식별자</li>
+            <li><code>index</code> - 그룹내의 순서</li>
+            <li><code>count</code> - 그룹을 구성하는 메세지의 수</li>
+        </ul>
+    </p>
+    <p><b>주:</b> 이 노드의 처리에서는 메세지를 내부에 축적합니다. 축적할 메세지의 최대값을 지정하여, 예기치 못한 메모리사용량의 증대를 막을수 있습니다. 기본값으로는 메세지 수를 제한하지 않습니다.
+        <ul>
+            <li><b>settings.js</b>의 <code>nodeMessageBufferMaxLength</code>프로퍼티</li>
+        </ul>
+    </p>
+</script>

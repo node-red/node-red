@@ -1,6 +1,6 @@
 {
     "*": {
-        "ctrl-shift-p":"core:manage-palette",
+        "alt-shift-p":"core:manage-palette",
         "ctrl-f": "core:search",
         "ctrl-shift-f": "core:list-flows",
         "ctrl-=": "core:zoom-in",
@@ -8,6 +8,7 @@
         "ctrl-0": "core:zoom-reset",
         "ctrl-enter": "core:confirm-edit-tray",
         "ctrl-escape": "core:cancel-edit-tray",
+        "ctrl-d": "core:deploy-flows",
         "ctrl-g i": "core:show-info-tab",
         "ctrl-g d": "core:show-debug-tab",
         "ctrl-g c": "core:show-config-tab",
@@ -17,19 +18,22 @@
         "ctrl-space": "core:toggle-sidebar",
         "ctrl-p": "core:toggle-palette",
         "ctrl-,": "core:show-user-settings",
+        "ctrl-alt-l": "core:clear-debug-messages",
         "ctrl-alt-r": "core:show-remote-diff",
         "ctrl-alt-n": "core:new-project",
         "ctrl-alt-o": "core:open-project",
         "ctrl-g v": "core:show-version-control-tab",
-        "ctrl-shift-l": "core:show-event-log"
+        "ctrl-shift-l": "core:show-event-log",
+        "ctrl-shift-p":"core:show-action-list"
     },
-    "sidebar-node-config": {
+    "red-ui-sidebar-node-config": {
         "backspace": "core:delete-config-selection",
         "delete": "core:delete-config-selection",
         "ctrl-a": "core:select-all-config-nodes",
-        "ctrl-z": "core:undo"
+        "ctrl-z": "core:undo",
+        "ctrl-y": "core:redo"
     },
-    "workspace": {
+    "red-ui-workspace": {
         "backspace": "core:delete-selection",
         "delete": "core:delete-selection",
         "enter": "core:edit-selected-node",
@@ -37,6 +41,7 @@
         "ctrl-x": "core:cut-selection-to-internal-clipboard",
         "ctrl-v": "core:paste-from-internal-clipboard",
         "ctrl-z": "core:undo",
+        "ctrl-y": "core:redo",
         "ctrl-a": "core:select-all-nodes",
         "shift-?": "core:show-help",
         "up": "core:move-selection-up",

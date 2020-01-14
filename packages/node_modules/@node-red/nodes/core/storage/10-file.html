@@ -1,0 +1,320 @@
+
+<script type="text/x-red" data-template-name="file">
+    <div class="form-row node-input-filename">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input id="node-input-filename" type="text">
+    </div>
+    <div class="form-row">
+        <label for="node-input-overwriteFile"><i class="fa fa-random"></i> <span data-i18n="file.label.action"></span></label>
+        <select type="text" id="node-input-overwriteFile" style="width: 250px;">
+            <option value="false" data-i18n="file.action.append"></option>
+            <option value="true" data-i18n="file.action.overwrite"></option>
+            <option value="delete" data-i18n="file.action.delete"></option>
+        </select>
+    </div>
+    <div class="form-row form-row-file-write-options">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-appendNewline" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-appendNewline" style="width: 70%;"><span data-i18n="file.label.addnewline"></span></label>
+    </div>
+    <div class="form-row form-row-file-write-options">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-createDir" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-createDir" style="width: 70%;"><span data-i18n="file.label.createdir"></span></label>
+    </div>
+    <div class="form-row form-row-file-encoding">
+        <label for="node-input-encoding"><i class="fa fa-flag"></i> <span data-i18n="file.label.encoding"></span></label>
+        <select type="text" id="node-input-encoding" style="width: 250px;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="file.tip"></span></div>
+</script>
+
+<script type="text/x-red" data-template-name="file in">
+    <div class="form-row">
+         <label for="node-input-filename"><i class="fa fa-file"></i> <span data-i18n="file.label.filename"></span></label>
+         <input id="node-input-filename" type="text" data-i18n="[placeholder]file.label.filename">
+    </div>
+    <div class="form-row">
+        <label for="node-input-format"><i class="fa fa-sign-out"></i> <span data-i18n="file.label.outputas"></span></label>
+        <select id="node-input-format" style="width: 250px;">
+            <option value="utf8" data-i18n="file.output.utf8"></option>
+            <option value="lines" data-i18n="file.output.lines"></option>
+            <option value="" data-i18n="file.output.buffer"></option>
+            <option value="stream" data-i18n="file.output.stream"></option>
+        </select>
+    </div>
+    <div class="form-row" id="encoding-spec">
+        <label for="node-input-encoding"><i class="fa fa-flag"></i> <span data-i18n="file.label.encoding"></span></label>
+        <select type="text" id="node-input-encoding" style="width: 250px;">
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="file.tip"></span></div>
+</script>
+
+<script type="text/javascript">
+(function(){
+    var encodings = [
+        [ "file.encoding.native",
+          "utf8",
+          "ucs2",
+          "utf-16le",
+          "ascii",
+          "binary",
+          "base64",
+          "hex"
+        ],
+        [ "file.encoding.unicode",
+          "utf-16be",
+        ],
+        [ "file.encoding.japanese",
+          "Shift_JIS",
+          "Windows-31j",
+          "Windows932",
+          "EUC-JP"
+        ],
+        [ "file.encoding.chinese",
+          "GB2312",
+          "GBK",
+          "GB18030",
+          "Windows936",
+          "EUC-CN"
+        ],
+        [ "file.encoding.korean",
+          "KS_C_5601",
+          "Windows949",
+          "EUC-KR"
+        ],
+        [ "file.encoding.taiwan",
+          "Big5",
+          "Big5-HKSCS",
+          "Windows950"
+        ],
+        [ "file.encoding.windows",
+          "cp874",
+          "cp1250",
+          "cp1251",
+          "cp1252",
+          "cp1253",
+          "cp1254",
+          "cp1255",
+          "cp1256",
+          "cp1257",
+          "cp1258"
+        ],
+        [ "file.encoding.iso",
+          "ISO-8859-1",
+          "ISO-8859-2",
+          "ISO-8859-3",
+          "ISO-8859-4",
+          "ISO-8859-5",
+          "ISO-8859-6",
+          "ISO-8859-7",
+          "ISO-8859-8",
+          "ISO-8859-9",
+          "ISO-8859-10",
+          "ISO-8859-11",
+          "ISO-8859-12",
+          "ISO-8859-13",
+          "ISO-8859-14",
+          "ISO-8859-15",
+          "ISO-8859-16"
+        ],
+        [ "file.encoding.ibm",
+          "cp437",
+          "cp737",
+          "cp775",
+          "cp808",
+          "cp850",
+          "cp852",
+          "cp855",
+          "cp856",
+          "cp857",
+          "cp858",
+          "cp860",
+          "cp861",
+          "cp866",
+          "cp869",
+          "cp922",
+          "cp1046",
+          "cp1124",
+          "cp1125",
+          "cp1129",
+          "cp1133",
+          "cp1161",
+          "cp1162",
+          "cp1163"
+        ],
+        [ "file.encoding.mac",
+          "maccroatian",
+          "maccyrillic",
+          "macgreek",
+          "maciceland",
+          "macroman",
+          "macromania",
+          "macthai",
+          "macturkish",
+          "macukraine",
+          "maccenteuro",
+          "macintosh"
+        ],
+        [ "file.encoding.koi8",
+          "koi8-r",
+          "koi8-u",
+          "koi8-ru",
+          "koi8-t"
+        ],
+        [ "file.encoding.misc",
+          "armscii8",
+          "rk1048",
+          "tcvn",
+          "georgianacademy",
+          "georgianps",
+          "pt154",
+          "viscii",
+          "iso646cn",
+          "iso646jp",
+          "hproman8",
+          "tis620"
+        ]
+    ];
+
+    RED.nodes.registerType('file',{
+        category: 'storage',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            appendNewline: {value:true},
+            createDir: {value:false},
+            overwriteFile: {value:"false"},
+            encoding: {value:"none"}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        icon: "file-out.svg",
+        label: function() {
+            if (this.overwriteFile === "delete") {
+                return this.name||this._("file.label.deletelabel",{file:this.filename});
+            } else {
+                return this.name||this.filename||this._("file.label.filelabel");
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var encSel = $("#node-input-encoding");
+            var label = node._("file.encoding.none");
+            $("<option/>", {
+                value: "none",
+                label: label
+            }).text(label).appendTo(encSel);
+            encodings.forEach(function(item) {
+                if(Array.isArray(item)) {
+                    var group = $("<optgroup/>", {
+                        label: node._(item[0])
+                    }).appendTo(encSel);
+                    for (var i = 1; i < item.length; i++) {
+                        var enc = item[i];
+                        $("<option/>", {
+                            value: enc,
+                            label: enc
+                        }).text(enc).appendTo(group);
+                    }
+                }
+                else {
+                    $("<option/>", {
+                        value: item,
+                        label: item
+                    }).text(item).appendTo(encSel);
+                }
+            });
+            encSel.val(node.encoding);
+            $("#node-input-overwriteFile").on("change",function() {
+                if (this.value === "delete") {
+                    $(".form-row-file-write-options").hide();
+                    $(".form-row-file-encoding").hide();
+                } else {
+                    $(".form-row-file-write-options").show();
+                    $(".form-row-file-encoding").show();
+                }
+            });
+        }
+    });
+
+    RED.nodes.registerType('file in',{
+        category: 'storage',
+        defaults: {
+            name: {value:""},
+            filename: {value:""},
+            format: {value:"utf8"},
+            chunk: {value:false},
+            sendError: {value: false},
+            encoding: {value: "none"}
+        },
+        color:"BurlyWood",
+        inputs:1,
+        outputs:1,
+        outputLabels: function(i) {
+            var l = this._(((this.format === "utf8")||(this.format === "lines")) ? "file.label.utf8String" : "file.label.binaryBuffer");
+            return ( l + (((this.format === "lines")||(this.format === "stream")) ? "s" : "") );
+        },
+        icon: "file-in.svg",
+        label: function() {
+            return this.name||this.filename||this._("file.label.filelabel");
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var encSel = $("#node-input-encoding");
+            var label = node._("file.encoding.none");
+            $("<option/>", {
+                value: "none",
+                label: label
+            }).text(label).appendTo(encSel);
+            encodings.forEach(function(item) {
+                if(Array.isArray(item)) {
+                    var group = $("<optgroup/>", {
+                        label: node._(item[0])
+                    }).appendTo(encSel);
+                    for (var i = 1; i < item.length; i++) {
+                        var enc = item[i];
+                        $("<option/>", {
+                            value: enc,
+                            label: enc
+                        }).text(enc).appendTo(group);
+                    }
+                }
+                else {
+                    $("<option/>", {
+                        value: item,
+                        label: item
+                    }).text(item).appendTo(encSel);
+                }
+            });
+            encSel.val(node.encoding);
+            $("#node-input-format").on("change",function() {
+                var format = $("#node-input-format").val();
+                if ((format === "utf8") || (format === "lines")) {
+                    $("#encoding-spec").show();
+                }
+                else {
+                    $("#encoding-spec").hide();
+                }
+            });
+        }
+    });
+})();
+</script>

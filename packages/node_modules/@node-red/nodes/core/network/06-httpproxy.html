@@ -1,0 +1,129 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="http proxy">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-config-input-name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input type="text" id="node-config-input-url" placeholder="http://hostname:port">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="node-config-input-useAuth" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-config-input-useAuth" style="width: 70%;"><span data-i18n="httpin.use-proxyauth"></span></label>
+        <div style="margin-left: 20px" class="node-config-input-useAuth-row hide">
+            <div class="form-row">
+                <label for="node-config-input-username"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
+                <input type="text" id="node-config-input-username">
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
+                <input type="password" id="node-config-input-password">
+            </div>
+        </div>
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> <span data-i18n="httpin.noproxy-hosts"></span></label>
+    </div>
+    <div class="form-row node-config-input-noproxy-container-row">
+        <ol id="node-config-input-noproxy-container"></ol>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('http proxy', {
+        category: 'config',
+        defaults: {
+            name: {value:''},
+            url: {value:'',validate:function(v) { return (v && (v.indexOf('://') !== -1) && (v.trim().indexOf('http') === 0)); }},
+            noproxy: {value:[]}
+        },
+        credentials: {
+            username: {type:'text'},
+            password: {type:'password'}
+        },
+        label: function() {
+            return this.name || this.url || ('http proxy:' + this.id);
+        },
+        oneditprepare: function() {
+            $('#node-config-input-useAuth').on("change", function() {
+                if ($(this).is(":checked")) {
+                    $('.node-config-input-useAuth-row').show();
+                } else {
+                    $('.node-config-input-useAuth-row').hide();
+                    $('#node-config-input-username').val('');
+                    $('#node-config-input-password').val('');
+                }
+            });
+            if (this.credentials.username || this.credentials.has_password) {
+                $('#node-config-input-useAuth').prop('checked', true);
+            } else {
+                $('#node-config-input-useAuth').prop('checked', false);
+            }
+            $('#node-config-input-useAuth').change();
+
+            var hostList = $('#node-config-input-noproxy-container')
+                .css({'min-height':'150px','min-width':'450px'})
+                .editableList({
+                    addItem: function(container, index, data) {
+                        var row = $('<div/>')
+                            .css({overflow: 'hidden',whiteSpace: 'nowrap'})
+                            .appendTo(container);
+
+                        var hostField = $('<input/>',{class:'node-config-input-host',type:'text',placeholder:'hostname'})
+                            .css({width:'100%'})
+                            .appendTo(row);
+                        if (data.host) {
+                            hostField.val(data.host);
+                        }
+                    },
+                    removable: true
+                });
+            if (this.noproxy) {
+                for (var i in this.noproxy) {
+                    hostList.editableList('addItem', {host:this.noproxy[i]});
+                }
+            }
+            if (hostList.editableList('items').length == 0) {
+                hostList.editableList('addItem', {host:''});
+            }
+        },
+        oneditsave: function() {
+            var hosts = $('#node-config-input-noproxy-container').editableList('items');
+            var node = this;
+            node.noproxy = [];
+            hosts.each(function(i) {
+                var host = $(this).find('.node-config-input-host').val().trim();
+                if (host) {
+                    node.noproxy.push(host);
+                }
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $('#node-config-dialog-edit-form>div:not(.node-config-input-noproxy-container-row)');
+            var height = size.height;
+            for (var i = 0; i < rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+
+            var editorRow = $('#node-config-dialog-edit-form>div.node-config-input-noproxy-container-row');
+            height -= (parseInt(editorRow.css('margin-top')) + parseInt(editorRow.css('margin-bottom')));
+            $('#node-config-input-noproxy-container').editableList('height',height);
+        }
+    });
+</script>

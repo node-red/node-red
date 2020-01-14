@@ -1,0 +1,447 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="mqtt in">
+    <div class="form-row">
+        <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
+        <input type="text" id="node-input-broker">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]common.label.topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-qos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+        <select id="node-input-qos" style="width:125px !important">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-datatype"><i class="fa fa-sign-out"></i> <span data-i18n="mqtt.label.output"></span></label>
+        <select id="node-input-datatype" style="width:70%;">
+            <option value="auto" data-i18n="mqtt.output.auto"></option>
+            <option value="buffer" data-i18n="mqtt.output.buffer"></option>
+            <option value="utf8" data-i18n="mqtt.output.string"></option>
+            <option value="json" data-i18n="mqtt.output.json"></option>
+            <option value="base64" data-i18n="mqtt.output.base64"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt in',{
+        category: 'network',
+        defaults: {
+            name: {value:""},
+            topic: {value:"",required:true,validate: RED.validators.regex(/^(#$|(\+|[^+#]*)(\/(\+|[^+#]*))*(\/(\+|#|[^+#]*))?$)/)},
+            qos: {value: "2"},
+            datatype: {value:"auto",required:true},
+            broker: {type:"mqtt-broker", required:true}
+        },
+        color:"#d8bfd8",
+        inputs:0,
+        outputs:1,
+        icon: "bridge.svg",
+        label: function() {
+            return this.name||this.topic||"mqtt";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.qos === undefined) {
+                $("#node-input-qos").val("2");
+            }
+            if (this.datatype === undefined) {
+                $("#node-input-datatype").val("auto");
+            }
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mqtt out">
+    <div class="form-row">
+        <label for="node-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
+        <input type="text" id="node-input-broker">
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+        <input type="text" id="node-input-topic" data-i18n="[placeholder]common.label.topic">
+    </div>
+    <div class="form-row">
+        <label for="node-input-qos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+        <select id="node-input-qos" style="width:125px !important">
+            <option value=""></option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+        </select>
+        &nbsp;&nbsp;<i class="fa fa-history"></i>&nbsp;<span data-i18n="mqtt.retain"></span> &nbsp;<select id="node-input-retain" style="width:125px !important">
+            <option value=""></option>
+            <option value="false" data-i18n="mqtt.false"></option>
+            <option value="true" data-i18n="mqtt.true"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-tips"><span data-i18n="mqtt.tip"></span></div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt out',{
+        category: 'network',
+        defaults: {
+            name: {value:""},
+            topic: {value:""},
+            qos: {value:""},
+            retain: {value:""},
+            broker: {type:"mqtt-broker", required:true}
+        },
+        color:"#d8bfd8",
+        inputs:1,
+        outputs:0,
+        icon: "bridge.svg",
+        align: "right",
+        label: function() {
+            return this.name||this.topic||"mqtt";
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mqtt-broker">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-config-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row">
+        <ul style="min-width: 600px; margin-bottom: 20px;" id="node-config-mqtt-broker-tabs"></ul>
+    </div>
+    <div id="node-config-mqtt-broker-tabs-content" style="min-height: 170px;">
+        <div id="mqtt-broker-tab-connection" style="display:none">
+            <div class="form-row node-input-broker">
+                <label for="node-config-input-broker"><i class="fa fa-globe"></i> <span data-i18n="mqtt.label.broker"></span></label>
+                <input type="text" id="node-config-input-broker" style="width:40%;" data-i18n="[placeholder]mqtt.label.example">
+                <label for="node-config-input-port" style="margin-left:20px; width:43px; "> <span data-i18n="mqtt.label.port"></span></label>
+                <input type="text" id="node-config-input-port" data-i18n="[placeholder]mqtt.label.port" style="width:55px">
+            </div>
+            <div class="form-row">
+                <input type="checkbox" id="node-config-input-usetls" style="display: inline-block; width: auto; vertical-align: top;">
+                <label for="node-config-input-usetls" style="width: auto" data-i18n="mqtt.label.use-tls"></label>
+                <div id="node-config-row-tls" class="hide">
+                    <label style="width: auto; margin-left: 20px; margin-right: 10px;" for="node-config-input-tls"><span data-i18n="mqtt.label.tls-config"></span></label><input style="width: 300px;" type="text" id="node-config-input-tls">
+                </div>
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-clientid"><i class="fa fa-tag"></i> <span data-i18n="mqtt.label.clientid"></span></label>
+                <input type="text" id="node-config-input-clientid" data-i18n="[placeholder]mqtt.placeholder.clientid">
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-keepalive" style="width: auto"><i class="fa fa-clock-o"></i> <span data-i18n="mqtt.label.keepalive"></span></label>
+                <input type="text" id="node-config-input-keepalive" style="width: 50px">
+                <input type="checkbox" id="node-config-input-cleansession" style="margin-left: 30px; height: 1em;display: inline-block; width: auto; vertical-align: middle;">
+                <label for="node-config-input-cleansession" style="width: auto;" data-i18n="mqtt.label.cleansession"></label>
+            </div>
+            <div class="form-row">
+                <input type="checkbox" id="node-config-input-compatmode" style="display: inline-block; width: auto; vertical-align: top;">
+                <label for="node-config-input-compatmode" style="width: auto;" data-i18n="mqtt.label.compatmode"></label>
+            </div>
+        </div>
+        <div id="mqtt-broker-tab-security" style="display:none">
+            <div class="form-row">
+                <label for="node-config-input-user"><i class="fa fa-user"></i> <span data-i18n="common.label.username"></span></label>
+                <input type="text" id="node-config-input-user">
+            </div>
+            <div class="form-row">
+                <label for="node-config-input-password"><i class="fa fa-lock"></i> <span data-i18n="common.label.password"></span></label>
+                <input type="password" id="node-config-input-password">
+            </div>
+        </div>
+        <div id="mqtt-broker-tab-messages" style="display:none">
+            <div id="mqtt-broker-section-birth">
+                <div class="red-ui-palette-header">
+                    <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.birth-message"></span>
+                </div>
+                <div class="section-content" style="padding:10px 0 0 10px">
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-birthTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-birthTopic" data-i18n="[placeholder]mqtt.placeholder.birth-topic">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-birthRetain"><i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span></label>
+                        <select id="node-config-input-birthRetain" style="width:75px !important">
+                            <option value="false" data-i18n="mqtt.false"></option>
+                            <option value="true" data-i18n="mqtt.true"></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-birthPayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-birthPayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-birthQos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+                        <select id="node-config-input-birthQos" style="width:75px !important">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="mqtt-broker-section-close">
+                <div class="red-ui-palette-header">
+                    <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.close-message"></span>
+                </div>
+                <div class="section-content" style="padding:10px 0 0 10px">
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-closeTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-closeTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.close-topic">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-closeRetain"><i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span></label>
+                        <select id="node-config-input-closeRetain" style="width:75px !important">
+                            <option value="false" data-i18n="mqtt.false"></option>
+                            <option value="true" data-i18n="mqtt.true"></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-closePayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-closePayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-closeQos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+                        <select id="node-config-input-closeQos" style="width:75px !important">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="mqtt-broker-section-will">
+                <div class="red-ui-palette-header">
+                    <i class="fa fa-angle-down"></i><span data-i18n="mqtt.sections-label.will-message"></span>
+                </div>
+                <div class="section-content" style="padding:10px 0 0 10px">
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-willTopic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-willTopic" style="width:300px" data-i18n="[placeholder]mqtt.placeholder.will-topic">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-willRetain"><i class="fa fa-history"></i> <span data-i18n="mqtt.label.retain"></span></label>
+                        <select id="node-config-input-willRetain" style="width:75px !important">
+                            <option value="false" data-i18n="mqtt.false"></option>
+                            <option value="true" data-i18n="mqtt.true"></option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label style="width: 100px !important;" for="node-config-input-willPayload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+                        <input style="width: calc(100% - 300px) !important" type="text" id="node-config-input-willPayload" style="width:300px" data-i18n="[placeholder]common.label.payload">
+                        <label style="margin-left: 10px; width: 90px !important;" for="node-config-input-willQos"><i class="fa fa-empire"></i> <span data-i18n="mqtt.label.qos"></span></label>
+                        <select id="node-config-input-willQos" style="width:75px !important">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('mqtt-broker',{
+        category: 'config',
+        defaults: {
+            name: {value:""},
+            broker: {value:"",required:true},
+            port: {value:1883,required:false,validate:RED.validators.number(true)},
+            tls: {type:"tls-config",required: false},
+            clientid: {value:"", validate: function(v) {
+                if ($("#node-config-input-clientid").length) {
+                    // Currently editing the node
+                    return $("#node-config-input-cleansession").is(":checked") || (v||"").length > 0;
+                } else {
+                    return (this.cleansession===undefined || this.cleansession) || (v||"").length > 0;
+                }
+            }},
+            usetls: {value: false},
+            verifyservercert: { value: false},
+            compatmode: { value: false},
+            keepalive: {value:60,validate:RED.validators.number()},
+            cleansession: {value: true},
+            birthTopic: {value:""},
+            birthQos: {value:"0"},
+            birthRetain: {value:false},
+            birthPayload: {value:""},
+            closeTopic: {value:""},
+            closeQos: {value:"0"},
+            closeRetain: {value:false},
+            closePayload: {value:""},
+            willTopic: {value:""},
+            willQos: {value:"0"},
+            willRetain: {value:false},
+            willPayload: {value:""}
+        },
+        credentials: {
+            user: {type:"text"},
+            password: {type: "password"}
+        },
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            var b = this.broker;
+            if (b === "") { b = "undefined"; }
+            var lab = "";
+            lab = (this.clientid?this.clientid+"@":"")+b;
+            if (b.indexOf("://") === -1){
+                if (!this.port){ lab = lab + ":1883"; }
+                else { lab = lab + ":" + this.port; }
+            }
+            return lab;
+        },
+        oneditprepare: function () {
+            var tabs = RED.tabs.create({
+                id: "node-config-mqtt-broker-tabs",
+                onchange: function(tab) {
+                    $("#node-config-mqtt-broker-tabs-content").children().hide();
+                    $("#" + tab.id).show();
+                }
+            });
+            tabs.addTab({
+                id: "mqtt-broker-tab-connection",
+                label: this._("mqtt.tabs-label.connection")
+            });
+            tabs.addTab({
+                id: "mqtt-broker-tab-security",
+                label: this._("mqtt.tabs-label.security")
+            });
+
+            tabs.addTab({
+                id: "mqtt-broker-tab-messages",
+                label: this._("mqtt.tabs-label.messages")
+            });
+
+            function setUpSection(sectionId, isExpanded) {
+                var birthMessageSection = $(sectionId);
+                var paletteHeader = birthMessageSection.find('.red-ui-palette-header');
+                var twistie = paletteHeader.find('i');
+                var sectionContent = birthMessageSection.find('.section-content');
+
+                function toggleSection(expanded) {
+                    twistie.toggleClass('expanded', expanded);
+                    sectionContent.toggle(expanded);
+                }
+                paletteHeader.on("click", function(e) {
+                    e.preventDefault();
+                    var isExpanded = twistie.hasClass('expanded');
+                    toggleSection(!isExpanded);
+                });
+                toggleSection(isExpanded);
+            }
+
+            // show first section if none are set so the user gets the idea
+            var showBirthSection = this.birthTopic !== ""
+                || this.willTopic === ""
+                && this.birthTopic === ""
+                && this.closeTopic == "";
+            setUpSection('#mqtt-broker-section-birth', showBirthSection);
+            setUpSection('#mqtt-broker-section-close', this.closeTopic !== "");
+            setUpSection('#mqtt-broker-section-will', this.willTopic !== "");
+
+            setTimeout(function() { tabs.resize(); },0);
+            if (typeof this.cleansession === 'undefined') {
+                this.cleansession = true;
+                $("#node-config-input-cleansession").prop("checked",true);
+            }
+            if (typeof this.usetls === 'undefined') {
+                this.usetls = false;
+                $("#node-config-input-usetls").prop("checked",false);
+            }
+            if (typeof this.compatmode === 'undefined') {
+                this.compatmode = false;
+                $("#node-config-input-compatmode").prop('checked', false);
+            }
+            if (typeof this.keepalive === 'undefined') {
+                this.keepalive = 15;
+                $("#node-config-input-keepalive").val(this.keepalive);
+            }
+            if (typeof this.birthQos === 'undefined') {
+                this.birthQos = "0";
+                $("#node-config-input-birthQos").val("0");
+            }
+            if (typeof this.closeQos === 'undefined') {
+                this.willQos = "0";
+                $("#node-config-input-willQos").val("0");
+            }
+            if (typeof this.willQos === 'undefined') {
+                this.willQos = "0";
+                $("#node-config-input-willQos").val("0");
+            }
+
+            function updateTLSOptions() {
+                if ($("#node-config-input-usetls").is(':checked')) {
+                    $("#node-config-row-tls").show();
+                } else {
+                    $("#node-config-row-tls").hide();
+                }
+            }
+            updateTLSOptions();
+            $("#node-config-input-usetls").on("click",function() {
+                updateTLSOptions();
+            });
+            var node = this;
+            function updateClientId() {
+                if ($("#node-config-input-cleansession").is(":checked")) {
+                    $("#node-config-input-clientid").attr("placeholder",node._("mqtt.placeholder.clientid"));
+                } else {
+                    $("#node-config-input-clientid").attr("placeholder",node._("mqtt.placeholder.clientid-nonclean"));
+                }
+                $("#node-config-input-clientid").change();
+            }
+            setTimeout(updateClientId,0);
+            $("#node-config-input-cleansession").on("click",function() {
+                updateClientId();
+            });
+
+            function updatePortEntry(){
+                var disabled = $("#node-config-input-port").prop("disabled");
+                if ($("#node-config-input-broker").val().indexOf("://") === -1){
+                    if (disabled){
+                        $("#node-config-input-port").prop("disabled", false);
+                    }
+                }
+                else {
+                    if (!disabled){
+                        $("#node-config-input-port").prop("disabled", true);
+                    }
+                }
+            }
+            $("#node-config-input-broker").on("change", function() {
+                updatePortEntry();
+            });
+            $("#node-config-input-broker").on( "keyup", function() {
+                updatePortEntry();
+            });
+            setTimeout(updatePortEntry,50);
+
+        },
+        oneditsave: function() {
+            if (!$("#node-config-input-usetls").is(':checked')) {
+                $("#node-config-input-tls").val("");
+            }
+        }
+    });
+</script>

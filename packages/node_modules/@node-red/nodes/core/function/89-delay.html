@@ -1,0 +1,268 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="delay">
+    <div class="form-row">
+        <label for="node-input-delay-action"><i class="fa fa-tasks"></i> <span data-i18n="delay.action"></span></label>
+        <select id="node-input-delay-action" style="width:270px !important">
+            <option value="delay" data-i18n="delay.delaymsg"></option>
+            <option value="rate" data-i18n="delay.limitrate"></option>
+        </select>
+    </div>
+
+    <div id="delay-details">
+        <div class="form-row">
+            <label></label>
+            <select id="node-input-delay-type" style="width:270px !important">
+                <option value="delay" data-i18n="delay.delayfixed"></option>
+                <option value="random" data-i18n="delay.randomdelay"></option>
+                <option value="delayv" data-i18n="delay.delayvarmsg"></option>
+            </select>
+        </div>
+        <div class="form-row" id="delay-details-for">
+            <label for="node-input-timeout"><i class="fa fa-clock-o"></i> <span data-i18n="delay.for"></span></label>
+            <input type="text" id="node-input-timeout" style="text-align:end; width:50px !important">
+            <select id="node-input-timeoutUnits" style="width:200px !important">
+              <option value="milliseconds" data-i18n="delay.milisecs"></option>
+              <option value="seconds" data-i18n="delay.secs"></option>
+              <option value="minutes" data-i18n="delay.mins"></option>
+              <option value="hours" data-i18n="delay.hours"></option>
+              <option value="days" data-i18n="delay.days"></option>
+            </select>
+        </div>
+        <div id="random-details" class="form-row">
+            <label for="node-input-randomFirst"><i class="fa fa-clock-o"></i> <span data-i18n="delay.between"></span></label>
+            <input type="text" id="node-input-randomFirst" placeholder="" style="text-align:end; width:30px !important">
+            <span data-i18n="delay.and"></span>
+            <input type="text" id="node-input-randomLast" placeholder="" style="text-align:end; width:30px !important">
+            <select id="node-input-randomUnits" style="width:140px !important">
+              <option value="milliseconds" data-i18n="delay.milisecs"></option>
+              <option value="seconds" data-i18n="delay.secs"></option>
+              <option value="minutes" data-i18n="delay.mins"></option>
+              <option value="hours" data-i18n="delay.hours"></option>
+              <option value="days" data-i18n="delay.days"></option>
+            </select>
+        </div>
+    </div>
+
+    <div id="rate-details">
+        <div class="form-row">
+            <label></label>
+            <select id="node-input-rate-type" style="width:270px !important">
+                <option value="all" data-i18n="delay.limitall"></option>
+                <option value="topic" data-i18n="delay.limittopic"></option>
+            </select>
+        </div>
+        <div class="form-row">
+            <label for="node-input-rate"><i class="fa fa-clock-o"></i> <span data-i18n="delay.rate"></span></label>
+            <input type="text" id="node-input-rate" placeholder="1" style="text-align:end; width:40px !important">
+            <label for="node-input-rateUnits"><span data-i18n="delay.msgper"></span></label>
+            <input type="text" id="node-input-nbRateUnits" placeholder="1" style="text-align:end; width:40px !important">
+            <select id="node-input-rateUnits" style="width:90px !important">
+              <option value="second" data-i18n="delay.label.units.second.singular"></option>
+              <option value="minute" data-i18n="delay.label.units.minute.singular"></option>
+              <option value="hour" data-i18n="delay.label.units.hour.singular"></option>
+              <option value="day" data-i18n="delay.label.units.day.singular"></option>
+            </select>
+        </div>
+        <div class="form-row" id="rate-details-drop">
+            <label></label><input style="width: 30px;" type="checkbox" id="node-input-drop"><label style="width: 250px;" for="node-input-drop" data-i18n="delay.dropmsg"></label>
+        </div>
+        <div class="form-row" id="rate-details-per-topic">
+            <label></label>
+            <select id="node-input-rate-topic-type" style="width:270px !important">
+                <option value="queue" data-i18n="delay.fairqueue"></option>
+                <option value="timed" data-i18n="delay.timedqueue"></option>
+            </select>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('delay',{
+        category: 'function',
+        color:"#E6E0F8",
+        defaults: {
+            name: {value:""},
+            pauseType: {value:"delay", required:true},
+            timeout: {value:"5", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            timeoutUnits: {value:"seconds"},
+            rate: {value:"1", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            nbRateUnits: {value:"1", required:false, validate:RED.validators.regex(/\d+|/)},
+            rateUnits: {value: "second"},
+            randomFirst: {value:"1", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            randomLast: {value:"5", required:true, validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            randomUnits: {value: "seconds"},
+            drop: {value:false}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "timer.svg",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            if (this.pauseType == "delayv") {
+                return this._("delay.label.variable");
+            } else if (this.pauseType == "delay") {
+                var units = this.timeoutUnits ? this.timeoutUnits.charAt(0) : "s";
+                if (this.timeoutUnits == "milliseconds") { units = "ms"; }
+                return this._("delay.label.delay")+" "+this.timeout+units;
+            } else if (this.pauseType == "random") {
+                return this._("delay.label.random");
+            } else {
+                var rate = this.rate+" msg/"+(this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s");
+                if (this.pauseType == "rate") {
+                    return this._("delay.label.limit")+" "+rate;
+                } else if (this.pauseType == "timed") {
+                    return this._("delay.label.limitTopic")+" "+rate;
+                } else {
+                    return this._("delay.label.limitTopic")+" "+rate;
+                }
+            }
+            //     var units = '';
+            //     if (this.nbRateUnits > 1) {
+            //         units = this.nbRateUnits + ' ' + this._("delay.label.units." + this.rateUnits + ".plural");
+            //     } else {
+            //         units = this._("delay.label.units." + this.rateUnits + ".singular");
+            //     }
+            //     return this.name || this.rate + " " + this._("delay.label.timed") + ' ' + units;
+            // } else {
+            //     var units = this.rateUnits ? (this.nbRateUnits > 1 ? this.nbRateUnits : '') + this.rateUnits.charAt(0) : "s";
+            //     return this.name || this._("delay.label.queue")+" "+this.rate+" msg/"+units;
+            // }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var node = this;
+            $( "#node-input-timeout" ).spinner({min:1});
+            $( "#node-input-rate" ).spinner({min:1});
+            $( "#node-input-nbRateUnits" ).spinner({min:1});
+
+            $( "#node-input-randomFirst" ).spinner({min:0});
+            $( "#node-input-randomLast" ).spinner({min:1});
+
+            $('.ui-spinner-button').on("click", function() {
+                $(this).siblings('input').trigger("change");
+            });
+
+            $( "#node-input-nbRateUnits" ).on('change keyup', function() {
+                var $this = $(this);
+                var val = parseInt($this.val());
+                var type = "singular";
+                if (val > 1) {
+                    type = "plural";
+                }
+                if ($this.attr("data-type") == type) {
+                    return;
+                }
+                $this.attr("data-type", type);
+                $("#node-input-rateUnits option").each(function () {
+                    var $option = $(this);
+                    var key = "delay.label.units." + $option.val() + "." + type;
+                    $option.attr('data-i18n', 'node-red:' + key);
+                    $option.html(node._(key));
+                });
+            });
+
+            if (this.pauseType == "delay") {
+                $("#node-input-delay-action").val('delay');
+                $("#node-input-delay-type").val('delay');
+            } else if (this.pauseType == "delayv") {
+                $("#node-input-delay-action").val('delay');
+                $("#node-input-delay-type").val('delayv');
+            } else if (this.pauseType == "random") {
+                $("#node-input-delay-action").val('delay');
+                $("#node-input-delay-type").val('random');
+            } else if (this.pauseType == "rate") {
+                $("#node-input-delay-action").val('rate');
+                $("#node-input-rate-type").val('all');
+            } else if (this.pauseType == "queue") {
+                $("#node-input-delay-action").val('rate');
+                $("#node-input-rate-type").val('topic');
+                $("#node-input-rate-topic-type").val('queue');
+            } else if (this.pauseType == "timed") {
+                $("#node-input-delay-action").val('rate');
+                $("#node-input-rate-type").val('topic');
+                $("#node-input-rate-topic-type").val('timed');
+            }
+
+            if (!this.timeoutUnits) {
+                $("#node-input-timeoutUnits option").filter(function() {
+                    return $(this).val() == 'seconds';
+                }).attr('selected', true);
+            }
+
+            if (!this.randomUnits) {
+                $("#node-input-randomUnits option").filter(function() {
+                    return $(this).val() == 'seconds';
+                }).attr('selected', true);
+            }
+
+            $("#node-input-delay-action").on("change",function() {
+                if (this.value === "delay") {
+                    $("#delay-details").show();
+                    $("#rate-details").hide();
+                } else if (this.value === "rate") {
+                    $("#delay-details").hide();
+                    $("#rate-details").show();
+                }
+            }).trigger("change");
+
+            $("#node-input-delay-type").on("change", function() {
+                if (this.value === "delay") {
+                    $("#delay-details-for").show();
+                    $("#random-details").hide();
+                } else if (this.value === "delayv") {
+                    $("#delay-details-for").show();
+                    $("#random-details").hide();
+                } else if (this.value === "random") {
+                    $("#delay-details-for").hide();
+                    $("#random-details").show();
+                }
+            }).trigger("change");
+
+            $("#node-input-rate-type").on("change", function() {
+                if (this.value === "all") {
+                    $("#node-input-drop").attr('disabled',false).next().css("opacity",1)
+                    $("#rate-details-per-topic").hide();
+                } else if (this.value === "topic") {
+                    $("#node-input-drop").prop('checked',true).attr('disabled',true).next().css("opacity",0.5)
+                    $("#rate-details-per-topic").show();
+                }
+            }).trigger("change");
+        },
+        oneditsave: function() {
+            var action = $("#node-input-delay-action").val();
+            if (action === "delay") {
+                this.pauseType = $("#node-input-delay-type").val();
+            } else if (action === "rate") {
+                action = $("#node-input-rate-type").val();
+                if (action === "all") {
+                    this.pauseType = "rate";
+                } else {
+                    this.pauseType = $("#node-input-rate-topic-type").val();
+                }
+            }
+        }
+    });
+</script>

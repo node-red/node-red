@@ -1,0 +1,280 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="http in">
+    <div class="form-row">
+        <label for="node-input-method"><i class="fa fa-tasks"></i> <span data-i18n="httpin.label.method"></span></label>
+        <select type="text" id="node-input-method" style="width:70%;">
+        <option value="get">GET</option>
+        <option value="post">POST</option>
+        <option value="put">PUT</option>
+        <option value="delete">DELETE</option>
+        <option value="patch">PATCH</option>
+        </select>
+    </div>
+    <div class="form-row form-row-http-in-upload hide">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-upload" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-upload" style="width: 70%;" data-i18n="httpin.label.upload"></label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-url"><i class="fa fa-globe"></i> <span data-i18n="httpin.label.url"></span></label>
+        <input id="node-input-url" type="text" placeholder="/url">
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row row-swagger-doc">
+        <label for="node-input-swaggerDoc"><i class="fa fa-file-text-o"></i> <span data-i18n="httpin.label.doc"></span></label>
+        <input type="text" id="node-input-swaggerDoc">
+    </div>
+    <div id="node-input-tip" class="form-tips"><span data-i18n="httpin.tip.in"></span><code><span id="node-input-path"></span></code>.</div>
+</script>
+
+<script type="text/x-red" data-template-name="http response">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-statusCode"><i class="fa fa-long-arrow-left"></i> <span data-i18n="httpin.label.status"></span></label>
+        <input type="text" id="node-input-statusCode" placeholder="msg.statusCode">
+    </div>
+    <div class="form-row" style="margin-bottom:0;">
+        <label><i class="fa fa-list"></i> <span data-i18n="httpin.label.headers"></span></label>
+    </div>
+    <div class="form-row node-input-headers-container-row">
+        <ol id="node-input-headers-container"></ol>
+    </div>
+    <div class="form-tips"><span data-i18n="[html]httpin.tip.res"></span></div>
+</script>
+
+<script type="text/javascript">
+(function() {
+    RED.nodes.registerType('http in',{
+        category: 'network',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            url: {value:"",required:true},
+            method: {value:"get",required:true},
+            upload: {value:false},
+            swaggerDoc: {type:"swagger-doc", required:false}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "white-globe.svg",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            } else if (this.url) {
+                var root = RED.settings.httpNodeRoot;
+                if (root.slice(-1) != "/") {
+                    root = root+"/";
+                }
+                if (this.url.charAt(0) == "/") {
+                    root += this.url.slice(1);
+                } else {
+                    root += this.url;
+                }
+                return "["+this.method+"] "+root;
+            } else {
+                return "http";
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var root = RED.settings.httpNodeRoot;
+            if (root.slice(-1) == "/") {
+                root = root.slice(0,-1);
+            }
+            if (root == "") {
+                $("#node-input-tip").hide();
+            } else {
+                $("#node-input-path").html(root);
+                $("#node-input-tip").show();
+            }
+            if(!RED.nodes.getType("swagger-doc")){
+                $('.row-swagger-doc').hide();
+            }
+            $("#node-input-method").on("change", function() {
+                if ($(this).val() === "post") {
+                    $(".form-row-http-in-upload").show();
+                } else {
+                    $(".form-row-http-in-upload").hide();
+                }
+            }).change();
+
+
+        }
+
+    });
+    var headerTypes = [
+        {value:"content-type",label:"Content-Type",hasValue: false},
+        {value:"location",label:"Location",hasValue: false},
+        {value:"other",label:RED._("node-red:httpin.label.other"),icon:"red/images/typedInput/az.png"}
+       ]
+    var contentTypes = [
+        {value:"application/json",label:"application/json",hasValue: false},
+        {value:"application/xml",label:"application/xml",hasValue: false},
+        {value:"text/css",label:"text/css",hasValue: false},
+        {value:"text/html",label:"text/html",hasValue: false},
+        {value:"text/plain",label:"text/plain",hasValue: false},
+        {value:"image/gif",label:"image/gif",hasValue: false},
+        {value:"image/png",label:"image/png",hasValue: false},
+        {value:"other",label:RED._("node-red:httpin.label.other"),icon:"red/images/typedInput/az.png"}
+    ];
+
+    RED.nodes.registerType('http response',{
+        category: 'network',
+        color:"rgb(231, 231, 174)",
+        defaults: {
+            name: {value:""},
+            statusCode: {value:"",validate: RED.validators.number(true)},
+            headers: {value:{}}
+        },
+        inputs:1,
+        outputs:0,
+        align: "right",
+        icon: "white-globe.svg",
+        label: function() {
+            return this.name||("http"+(this.statusCode?" ("+this.statusCode+")":""));
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            function resizeRule(rule) {
+                var newWidth = rule.width();
+                rule.find('.red-ui-typedInput').typedInput("width",(newWidth-15)/2);
+            }
+            var headerList = $("#node-input-headers-container").css('min-height','150px').css('min-width','450px').editableList({
+                addItem: function(container,i,header) {
+                    var row = $('<div/>').css({
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap'
+                    }).appendTo(container);
+
+                    var propertyName = $('<input/>',{class:"node-input-header-name",type:"text"})
+                        .appendTo(row)
+                        .typedInput({types:headerTypes});
+
+                    var propertyValue = $('<input/>',{class:"node-input-header-value",type:"text",style:"margin-left: 10px"})
+                        .appendTo(row)
+                        .typedInput({types:
+                            header.h === 'content-type'?contentTypes:[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]
+                        });
+
+                    var matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                        propertyValue.typedInput('value',header.v);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+
+                        if (header.h === "content-type") {
+                            matchedType = contentTypes.filter(function(ct) {
+                                return ct.value === header.v;
+                            });
+                            if (matchedType.length === 0) {
+                                propertyValue.typedInput('type','other');
+                                propertyValue.typedInput('value',header.v);
+                            } else {
+                                propertyValue.typedInput('type',header.v);
+                            }
+                        } else {
+                            propertyValue.typedInput('value',header.v);
+                        }
+                    }
+
+                    matchedType = headerTypes.filter(function(ht) {
+                        return ht.value === header.h
+                    });
+                    if (matchedType.length === 0) {
+                        propertyName.typedInput('type','other');
+                        propertyName.typedInput('value',header.h);
+                    } else {
+                        propertyName.typedInput('type',header.h);
+                    }
+
+                    propertyName.on('change',function(event) {
+                        var type = propertyName.typedInput('type');
+                        if (type === 'content-type') {
+                            propertyValue.typedInput('types',contentTypes);
+                        } else {
+                            propertyValue.typedInput('types',[{value:"other",label:"other",icon:"red/images/typedInput/az.png"}]);
+                        }
+                    });
+
+
+
+                    resizeRule(container);
+                },
+                resizeItem: resizeRule,
+                removable: true
+            });
+
+            if (this.headers) {
+                for (var key in this.headers) {
+                    if (this.headers.hasOwnProperty(key)) {
+                        headerList.editableList('addItem',{h:key,v:this.headers[key]});
+                    }
+                }
+            }
+        },
+        oneditsave: function() {
+            var headers = $("#node-input-headers-container").editableList('items');
+            var node = this;
+            node.headers = {};
+            headers.each(function(i) {
+                var header = $(this);
+                var keyType = header.find(".node-input-header-name").typedInput('type');
+                var keyValue = header.find(".node-input-header-name").typedInput('value');
+                var valueType = header.find(".node-input-header-value").typedInput('type');
+                var valueValue = header.find(".node-input-header-value").typedInput('value');
+                var key = keyType;
+                var value = valueType;
+                if (keyType === 'other') {
+                    key = keyValue;
+                }
+                if (valueType === 'other') {
+                    value = valueValue;
+                }
+                if (key !== '') {
+                    node.headers[key] = value;
+                }
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-headers-container-row)");
+            var height = size.height;
+            for (var i=0; i<rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-headers-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+
+            $("#node-input-headers-container").editableList('height',height);
+        }
+    });
+})();
+</script>

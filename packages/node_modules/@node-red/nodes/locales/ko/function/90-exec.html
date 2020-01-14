@@ -1,0 +1,74 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="exec">
+    <p>시스템 커맨드를 실행하여 출력을 반환합니다.</p>
+    <p>커맨드 완료까지 기다릴지, 커맨드가 출력을 실행할 때 마다 메세지를 출력할지 지정할 수 있습니다.</p>
+    <p>실행대상의 커맨드는, 노드의 설정 혹은 수신메세지에서 지정합니다.</p>
+
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">문자열</span></dt>
+        <dd>실행할 커맨의 마지막에 추가하도록 설정할 수 있습니다</dd>
+        <dt class="optional">kill <span class="property-type">문자열</span></dt>
+        <dd>exec노드의 프로세스에 보낼 시그널 종류를 지정합니다</dd>
+        <dt class="optional">pid <span class="property-type">수치|문자열</span></dt>
+        <dd>시그널 송신대상의 exec노드의 프로세스 ID를 지정합니다</dd>
+    </dl>
+
+    <h3>출력</h3>
+    <ol class="node-ports">
+        <li>표준출력(stdout)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">문자열</span></dt>
+                <dd>커맨드의 표준출력</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">문자열</span></dt>
+                <dd>반환코드 문자열(3번째 단자에서도 취득가능)의 복사(exec모드에서 만)</dd>
+            </dl>
+        </li>
+        <li>표준에러 출력(stderr)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">문자열</span></dt>
+                <dd>커맨드의 표준에러 출력</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">문자열</span></dt>
+                <dd>반환코드 문자열(3번째 단자에서도 취득가능)의 복사(exec모드에서 만)</dd>
+            </dl>
+        </li>
+        <li>반환코드(return code)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">오브젝트</span></dt>
+                <dd>리턴코드, <code>message</code>, <code>signal</code>프로퍼티를 포함하는 오브젝트(<code>message</code>, <code>signal</code>는 이용가능한 경우)</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>상세</h3>
+    <p>기본값으로는, <code>exec</code>시스템콜을 사용하여 커맨드를 호출하여 완료를 기다리고, 출력을 반환합니다. Ω예를 들면, 커맨드의 실행이 성공한 경우에는, <code>{ code: 0 }</code>라는 반환값을 반환합니다.</p>
+    <p><code>spawn</code>를 사용하여 커맨드를 실행하고, 표준출력 및 표준에러출력을 반환하도록 할 수도 있습니다. 이 경우, 통상 1행 마다 값을 반환합니다. 커맨드의 실행이 완료되면, 3번째 단자에 오브젝트를 출력합니다. 예를 들면, 커맨드의 실행이 성공한 경우에는, <code>{ code: 0 }</code>라는 값을 반환합니다.</p>
+    <p>에러 발생시에는, 3번째 단자의 <code>msg.payload</code>에 <code>message</code>, <code>signal</code>등 부가정보를 반환합니다.</p>
+    <p>실행대상의 커맨드는 노드설정에서 정의합니다. <code>msg.payload</code>나 추가인수를 커맨드에 추가할 수도 있습니다.</p>
+    <p>커맨드 혹은 파라미터가 공백을 포함하는 경우에는, 앞뒤에 인용부를 붙입니다. - <code>"이것은 하나의 파라미터 입니다"</code></p>
+    <p>반환할 <code>payload</code>는 보통 <i>문자열</i>이자만, UTF8문자가 아닌 문자가 존재하면<i>버퍼</i>가 됩니다.</p>
+    <p>노드가 실행중인 경우, 스테이터스 아이콘과 PID를 표시합니다. 이 상태변화는 <code>Status</code>노드에서 감시할 수 있습니다.</p>
+    <h4>프로세스 정지</h4>
+    <p><code>msg.kill</code>을 수신하면, 실행중인 프로세스를 정지할 수 있습니다. <code>msg.kill</code>에는 송출할 시그널 종류를 지정합니다. 예를 들면, <code>SIGINT</code>, <code>SIGQUIT</code>, <code>SIGHUP</code>등 입니다. 빈 문자열을 지정한 경우에는, <code>SIGTERM</code>을 지정한 것으로 간주됩니다.</p>
+    <p>노드가 1개이상의 프로세스를 실행하고 있는 경우, <code>msg.pid</code>에 정지대상의 PID를 지정해야 합니다.</p>
+    <p><code>타임아웃</code>필드에 값을 지정하면, 지정한 초 이내에 커맨드가 완료되지 않는 경우, 프로세스를 자동적으로 정지합니다.</p>
+    <p>힌트: Python어플리케이션을 실행할 경우, <code>-u</code>를 지정하면 출력이 버퍼되는 것을 방지할 수 있습니다.</p>
+</script>

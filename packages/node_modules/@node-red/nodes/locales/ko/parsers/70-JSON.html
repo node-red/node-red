@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="json">
+    <p>JSON문자열과 JavaScript오브젝트과의 사이에서 상호변환을 수행합니다.</p>
+    <h3>입력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 문자열</span></dt>
+        <dd>JavaScript오브젝트 혹은 JSON문자열</dd>
+        <dt>schema<span class="property-type">오브젝트</span></dt>
+        <dd>JSON의 검증에 이용할 JSON스키머. 설정되지 않은 경우에는 검증을 수행하지 않습니다.</dd>
+    </dl>
+    <h3>출력</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">오브젝트 | 문자열</span></dt>
+        <dd>
+            <ul>
+                <li>입력이 문자열인 경우, JSON으로 해석하여, JavaScript오브젝틀로 변환합니다.</li>
+                <li>입력이 JavaScript오브젝트인 경우, JSON문자열로 변환합니다. JSON문자열은 성형하는 것도 가능합니다.</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">배열</span></dt>
+        <dd>JSON의 검증에서 에러가 발생한 경우, Catch노드를 이용하여 에러를 배열로서 <code>schemaError</code>프로퍼티에서 취득할 수 있습니다.</dd>
+    </dl>
+    <h3>상세</h3>
+    <p>기본값의 변환대상은 <code>msg.payload</code>이지만, 다른 메세지 프로퍼티를 변환대상으로 할 수도 있습니다.</p>
+    <p>쌍방향의 변환을 자동선택하는 것이 아닌, 특정한 변환만 수행하도록 설정할 수 있습니다. 예를 들면, <code>HTTP In</code>노드에 대한 리퀘스트가 content-type을 정확하게 설정하고 있지 않는 경우여도, JSON노드에 의한 변환결과가 JavaScript오브젝트인 것을 보증하기위해 이용합니다.</p>
+    <p>JSON문자열로의 변환이 지정되지 않았을 경우, 수신된 문자열에 대해 더 이상의 체크를 하지 않습니다. 즉, 문자열이 JSON으로써 정확한지에 대한 검사나, 성형옵션을 지정하였더라도 성형처리를 실시하지 않습니다.</p>
+    <p>JSON스키머의 자세한 사항은, <a href="http://json-schema.org/latest/json-schema-validation.html">여기</a>를 참조해주세요.</p>
+</script>

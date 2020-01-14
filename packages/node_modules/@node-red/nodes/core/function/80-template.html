@@ -1,0 +1,155 @@
+
+<script type="text/x-red" data-template-name="template">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <div style="display: inline-block; width: calc(100% - 105px)"><input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name"></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-field"><i class="fa fa-ellipsis-h"></i> <span data-i18n="template.label.property"></span></label>
+        <input type="text" id="node-input-field" placeholder="payload" style="width:250px;">
+        <input type="hidden" id="node-input-fieldType">
+    </div>
+    <div class="form-row" style="position: relative; margin-bottom: 0px;">
+        <label for="node-input-template"><i class="fa fa-file-code-o"></i> <span data-i18n="template.label.template"></span></label>
+        <input type="hidden" id="node-input-template" autofocus="autofocus">
+        <div style="position: absolute; right:0;display:inline-block; text-align: right; font-size: 0.8em;">
+            <span data-i18n="template.label.format"></span>:
+            <select id="node-input-format" style="width:110px; font-size: 10px !important;  height: 24px; padding:0;">
+                <option value="handlebars">mustache</option>
+                <option value="html">HTML</option>
+                <option value="json">JSON</option>
+                <option value="javascript">Javascript</option>
+                <option value="css">CSS</option>
+                <option value="markdown">Markdown</option>
+                <option value="python">Python</option>
+                <option value="sql">SQL</option>
+                <option value="yaml">YAML</option>
+                <option value="text" data-i18n="template.label.none"></option>
+            </select>
+            <button id="node-template-expand-editor" class="red-ui-button red-ui-button-small"><i class="fa fa-expand"></i></button>
+        </div>
+    </div>
+    <div class="form-row node-text-editor-row">
+        <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-template-editor" ></div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-syntax"><i class="fa fa-code"></i> <span data-i18n="template.label.syntax"></span></label>
+        <select id="node-input-syntax" style="width:180px;">
+            <option value="mustache" data-i18n="template.label.mustache"></option>
+            <option value="plain" data-i18n="template.label.plain"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-output"><i class="fa fa-long-arrow-right"></i> <span data-i18n="template.label.output"></span></label>
+        <select id="node-input-output" style="width:180px;">
+            <option value="str" data-i18n="template.label.plain"></option>
+            <option value="json" data-i18n="template.label.json"></option>
+            <option value="yaml" data-i18n="template.label.yaml"></option>
+        </select>
+    </div>
+
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('template',{
+        color:"rgb(243, 181, 103)",
+        category: 'function',
+        defaults: {
+            name: {value:""},
+            field: {value:"payload", validate:RED.validators.typedInput("fieldType")},
+            fieldType: {value:"msg"},
+            format: {value:"handlebars"},
+            syntax: {value:"mustache"},
+            template: {value:"This is the payload: {{payload}} !"},
+            output: {value:"str"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "template.svg",
+        label: function() {
+            return this.name||this._("template.template");;
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var that = this;
+            if (!this.field) {
+                this.field = 'payload';
+                $("#node-input-field").val("payload");
+            }
+            if (!this.fieldType) {
+                this.fieldType = 'msg';
+            }
+            if (!this.syntax) {
+                this.syntax = 'mustache';
+                $("#node-input-syntax").val(this.syntax);
+            }
+            $("#node-input-field").typedInput({
+                default: 'msg',
+                types: ['msg','flow','global'],
+                typeField: $("#node-input-fieldType")
+            });
+
+            this.editor = RED.editor.createEditor({
+                id: 'node-input-template-editor',
+                mode: 'ace/mode/html',
+                value: $("#node-input-template").val()
+            });
+            RED.library.create({
+                url:"templates", // where to get the data from
+                type:"template", // the type of object the library is for
+                editor:that.editor, // the field name the main text body goes to
+                fields:['name','format','output','syntax'],
+                ext: "txt"
+            });
+            this.editor.focus();
+
+            $("#node-input-format").on("change", function() {
+                var mod = "ace/mode/"+$("#node-input-format").val();
+                that.editor.getSession().setMode({
+                    path: mod,
+                    v: Date.now()
+                });
+            });
+            RED.popover.tooltip($("#node-template-expand-editor"), RED._("node-red:common.label.expand"));
+            $("#node-template-expand-editor").on("click", function(e) {
+                e.preventDefault();
+                var value = that.editor.getValue();
+                RED.editor.editText({
+                    mode: $("#node-input-format").val(),
+                    value: value,
+                    width: "Infinity",
+                    cursor: that.editor.getCursorPosition(),
+                    complete: function(v,cursor) {
+                        that.editor.setValue(v, -1);
+                        that.editor.gotoLine(cursor.row+1,cursor.column,false);
+                        setTimeout(function() {
+                            that.editor.focus();
+                        },300);
+                    }
+                })
+            })
+        },
+        oneditsave: function() {
+            $("#node-input-template").val(this.editor.getValue());
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditcancel: function() {
+            this.editor.destroy();
+            delete this.editor;
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+            var height = $("#dialog-form").height();
+            for (var i=0; i<rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-text-editor-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $(".node-text-editor").css("height",height+"px");
+            this.editor.resize();
+        }
+    });
+</script>

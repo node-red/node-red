@@ -156,10 +156,50 @@ describe('Node', function() {
                 throw new Error("test error");
             });
             n.receive(message);
-            n.error.called.should.be.true();
-            n.error.firstCall.args[1].should.equal(message);
-            done();
+            setTimeout(function() {
+                n.error.called.should.be.true();
+                n.error.firstCall.args[1].should.equal(message);
+                done();
+            },50);
+        });
 
+        it('calls parent flow handleComplete when callback provided', function(done) {
+            var n = new RedNode({id:'123',type:'abc', _flow: {
+                handleComplete: function(node,msg) {
+                    try {
+                        msg.should.deepEqual(message);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            }});
+
+            var message = {payload:"hello world"};
+            n.on('input',function(msg, nodeSend, nodeDone) {
+                nodeDone();
+            });
+            n.receive(message);
+        });
+        it('logs error if callback provides error', function(done) {
+            var n = new RedNode({id:'123',type:'abc'});
+            sinon.stub(n,"error",function(err,msg) {});
+
+            var message = {payload:"hello world"};
+            n.on('input',function(msg, nodeSend, nodeDone) {
+                nodeDone(new Error("test error"));
+                setTimeout(function() {
+                    try {
+                        n.error.called.should.be.true();
+                        n.error.firstCall.args[0].toString().should.equal("Error: test error");
+                        n.error.firstCall.args[1].should.equal(message);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },50);
+            });
+            n.receive(message);
         });
     });
 
@@ -172,15 +212,69 @@ describe('Node', function() {
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
             var message = {payload:"hello world"};
-
+            var messageReceived = false;
             n2.on('input',function(msg) {
                 // msg equals message, and is not a new copy
+                messageReceived = true;
                 should.deepEqual(msg,message);
                 should.strictEqual(msg,message);
                 done();
             });
-
             n1.send(message);
+            messageReceived.should.be.false();
+        });
+
+        it('emits a single message - synchronous mode', function(done) {
+            var flow = {
+                getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                asyncMessageDelivery: false
+            };
+            var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
+            var message = {payload:"hello world"};
+            var messageReceived = false;
+            var notSyncErr;
+            n2.on('input',function(msg) {
+                try {
+                    // msg equals message, and is not a new copy
+                    messageReceived = true;
+                    should.deepEqual(msg,message);
+                    should.strictEqual(msg,message);
+                    done(notSyncErr);
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.send(message);
+            try {
+                messageReceived.should.be.true();
+            } catch(err) {
+                notSyncErr = err;
+            }
+        });
+
+        it('emits a message with callback provided send', function(done) {
+            var flow = {
+                getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                handleComplete: (node,msg) => {}
+            };
+            var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
+            var message = {payload:"hello world"};
+            var messageReceived = false;
+            n1.on('input',function(msg,nodeSend,nodeDone) {
+                nodeSend(msg);
+                nodeDone();
+            });
+            n2.on('input',function(msg) {
+                // msg equals message, and is not a new copy
+                messageReceived = true;
+                should.deepEqual(msg,message);
+                should.strictEqual(msg,message);
+                done();
+            });
+            n1.receive(message);
+            messageReceived.should.be.false();
         });
 
         it('emits multiple messages on a single output', function(done) {
@@ -356,12 +450,13 @@ describe('Node', function() {
 
          it("logs the uuid for all messages sent", function(done) {
             var logHandler = {
+                msgIds:[],
                 messagesSent: 0,
                 emit: function(event, msg) {
                     if (msg.event == "node.abc.send" && msg.level == Log.METRIC) {
                         this.messagesSent++;
+                        this.msgIds.push(msg.msgid);
                         (typeof msg.msgid).should.not.be.equal("undefined");
-                        done();
                     }
                 }
             };
@@ -375,6 +470,17 @@ describe('Node', function() {
             var receiver1 = new RedNode({_flow:flow,id:'n2',type:'abc'});
             var receiver2 = new RedNode({_flow:flow,id:'n3',type:'abc'});
             sender.send({"some": "message"});
+            setTimeout(function() {
+                try {
+                    logHandler.messagesSent.should.equal(1);
+                    should.exist(logHandler.msgIds[0])
+                    Log.removeHandler(logHandler);
+                    done();
+                } catch(err) {
+                    Log.removeHandler(logHandler);
+                    done(err);
+                }
+            },50)
         })
     });
 
@@ -507,15 +613,39 @@ describe('Node', function() {
             }
             var n = new RedNode({_flow:flow,id:'123',type:'abc'});
             var status = {fill:"green",shape:"dot",text:"connected"};
-            var topic;
-            var message;
-            var retain;
 
             n.status(status);
 
             flow.handleStatus.called.should.be.true();
             flow.handleStatus.args[0][0].should.eql(n);
             flow.handleStatus.args[0][1].should.eql(status);
+            done();
+        });
+        it('publishes status for plain string', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status("text status");
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"text status"});
+            done();
+        });
+        it('publishes status for plain boolean', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status(false);
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"false"});
+            done();
+        });
+        it('publishes status for plain number', function(done) {
+            var flow = { handleStatus: sinon.stub() }
+            var n = new RedNode({_flow:flow,id:'123',type:'abc'});
+            n.status(123);
+            flow.handleStatus.called.should.be.true();
+            flow.handleStatus.args[0][0].should.eql(n);
+            flow.handleStatus.args[0][1].should.eql({text:"123"});
             done();
         });
     });

@@ -1,0 +1,84 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="exec">
+    <div class="form-row">
+        <label for="node-input-command"><i class="fa fa-file"></i> <span data-i18n="exec.label.command"></span></label>
+        <input type="text" id="node-input-command" data-i18n="[placeholder]exec.label.command">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-plus"></i> <span data-i18n="exec.label.append"></span></label>
+        <input type="checkbox" id="node-input-addpay" style="display:inline-block; width:auto; vertical-align:top;">
+        &nbsp;msg.payload
+    </div>
+    <div class="form-row">
+        <label for="node-input-append"> </label>
+        <input type="text" id="node-input-append" data-i18n="[placeholder]exec.placeholder.extraparams">
+    </div>
+    <div class="form-row">
+        <label><i class="fa fa-sign-out"></i> <span data-i18n="exec.label.return"></span></label>
+        <select type="text" id="node-input-useSpawn" style="width:70%">
+            <option value="false" data-i18n="exec.opt.exec"></option>
+            <option value="true" data-i18n="exec.opt.spawn"></option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-timer"><i class="fa fa-clock-o"></i> <span data-i18n="exec.label.timeout"></span></label>
+        <input type="text" id="node-input-timer" style="width:65px;" data-i18n="[placeholder]exec.label.timeoutplace">
+        <span data-i18n="exec.label.seconds"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('exec',{
+        category: 'function',
+        color:"darksalmon",
+        defaults: {
+            command: {value:""},
+            addpay: {value:true},
+            append: {value:""},
+            useSpawn: {value:"false"},
+            timer: {value:""},
+            oldrc: {value:false},
+            name: {value:""}
+        },
+        inputs:1,
+        outputs:3,
+        outputLabels: function(i) {
+            return [
+                this._("exec.label.stdout"),
+                this._("exec.label.stderr"),
+                this._("exec.label.retcode")
+            ][i];
+        },
+        icon: "cog.svg",
+        label: function() {
+            return this.name||this.command||(this.useSpawn=="true"?this._("exec.spawn"):this._("exec.exec"));
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if ($("#node-input-useSpawn").val() === null) {
+                $("#node-input-useSpawn").val(this.useSpawn.toString());
+            }
+        }
+    });
+</script>

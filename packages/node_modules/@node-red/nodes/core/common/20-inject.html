@@ -1,0 +1,520 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="inject">
+    <div class="form-row">
+        <label for="node-input-payload"><i class="fa fa-envelope"></i> <span data-i18n="common.label.payload"></span></label>
+        <input type="text" id="node-input-payload" style="width:70%">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-topic"><i class="fa fa-tasks"></i> <span data-i18n="common.label.topic"></span></label>
+        <input type="text" id="node-input-topic">
+    </div>
+
+    <div class="form-row" id="node-once">
+        <label for="node-input-once">&nbsp;</label>
+        <input type="checkbox" id="node-input-once" style="display:inline-block; width:15px; vertical-align:baseline;">
+        <span data-i18n="inject.onstart"></span>&nbsp;
+        <input type="text" id="node-input-onceDelay" placeholder="0.1" style="width:45px; height:28px;">&nbsp;
+        <span data-i18n="inject.onceDelay"></span>
+    </div>
+
+    <div class="form-row">
+        <label for=""><i class="fa fa-repeat"></i> <span data-i18n="inject.label.repeat"></span></label>
+        <select id="inject-time-type-select">
+            <option value="none" data-i18n="inject.none"></option>
+            <option value="interval" data-i18n="inject.interval"></option>
+            <option value="interval-time" data-i18n="inject.interval-time"></option>
+            <option value="time" data-i18n="inject.time"></option>
+        </select>
+        <input type="hidden" id="node-input-repeat">
+        <input type="hidden" id="node-input-crontab">
+    </div>
+
+    <div class="form-row inject-time-row hidden" id="inject-time-row-interval">
+        <span data-i18n="inject.every"></span>
+        <input id="inject-time-interval-count" class="inject-time-count" value="1"></input>
+        <select style="width:100px" id="inject-time-interval-units">
+            <option value="s" data-i18n="inject.seconds"></option>
+            <option value="m" data-i18n="inject.minutes"></option>
+            <option value="h" data-i18n="inject.hours"></option>
+        </select><br/>
+    </div>
+
+    <div class="form-row inject-time-row hidden" id="inject-time-row-interval-time">
+        <span data-i18n="inject.every"></span> <select style="width:90px; margin-left:20px;" id="inject-time-interval-time-units" class="inject-time-int-count" value="1">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="0">60</option>
+        </select> <span data-i18n="inject.minutes"></span><br/>
+        <span data-i18n="inject.between"></span> <select id="inject-time-interval-time-start" class="inject-time-times"></select>
+        <span data-i18n="inject.and"></span> <select id="inject-time-interval-time-end" class="inject-time-times"></select><br/>
+        <div id="inject-time-interval-time-days" class="inject-time-days" style="margin-top:5px">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="inject.on">on</div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="inject.days.2"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="inject.days.5"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="inject.days.6"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row inject-time-row hidden" id="inject-time-row-time">
+        <span data-i18n="inject.at"></span> <input type="text" id="inject-time-time" value="12:00"></input><br/>
+        <div id="inject-time-time-days" class="inject-time-days">
+            <div style="display:inline-block; vertical-align:top; margin-right:5px;" data-i18n="inject.on"></div>
+            <div style="display:inline-block;">
+                <div>
+                    <label><input type='checkbox' checked value='1'/> <span data-i18n="inject.days.0"></span></label>
+                    <label><input type='checkbox' checked value='2'/> <span data-i18n="inject.days.1"></span></label>
+                    <label><input type='checkbox' checked value='3'/> <span data-i18n="inject.days.2"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='4'/> <span data-i18n="inject.days.3"></span></label>
+                    <label><input type='checkbox' checked value='5'/> <span data-i18n="inject.days.4"></span></label>
+                    <label><input type='checkbox' checked value='6'/> <span data-i18n="inject.days.5"></span></label>
+                </div>
+                <div>
+                    <label><input type='checkbox' checked value='0'/> <span data-i18n="inject.days.6"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+
+    <div class="form-tips" data-i18n="[html]inject.tip"></div>
+</script>
+<style>
+    .inject-time-row {
+        padding-left: 110px;
+    }
+    .inject-time-row select {
+        margin: 3px 0;
+    }
+    .inject-time-days label {
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        vertical-align: baseline;
+        width: 100px;
+    }
+    .inject-time-days input {
+        width: auto !important;
+        vertical-align: baseline !important;
+    }
+    .inject-time-times {
+        width: 90px !important;
+    }
+    #inject-time-time {
+        width: 75px;
+        margin-left: 8px;
+        margin-bottom: 8px;
+    }
+    .inject-time-count {
+        width: 40px !important;
+    }
+</style>
+
+<script type="text/javascript">
+    RED.nodes.registerType('inject',{
+        category: 'common',
+        color:"#a6bbcf",
+        defaults: {
+            name: {value:""},
+            topic: {value:""},
+            payload: {value:"", validate: RED.validators.typedInput("payloadType")},
+            payloadType: {value:"date"},
+            repeat: {value:"", validate:function(v) { return ((v === "") || (RED.validators.number(v) && (v >= 0) && (v <= 2147483))) }},
+            crontab: {value:""},
+            once: {value:false},
+            onceDelay: {value:0.1}
+        },
+        icon: "inject.svg",
+        inputs:0,
+        outputs:1,
+        outputLabels: function(index) {
+            var lab = this.payloadType;
+            if (lab === "json") {
+                try {
+                    lab = typeof JSON.parse(this.payload);
+                    if (lab === "object") {
+                        if (Array.isArray(JSON.parse(this.payload))) { lab = "Array"; }
+                    }
+                } catch(e) {
+                    return this._("inject.label.invalid"); }
+            }
+            var name = "inject.label."+lab;
+            var label = this._(name);
+            if (name !== label) {
+                return label;
+            }
+            return lab;
+        },
+        label: function() {
+            var suffix = "";
+            // if fire once then add small indication
+            if (this.once) {
+                suffix = " ¹";
+            }
+            // but replace with repeat one if set to repeat
+            if ((this.repeat && this.repeat != 0) || this.crontab) {
+                suffix = " ↻";
+            }
+            if (this.name) {
+                return this.name+suffix;
+            } else if (this.payloadType === "string" ||
+                    this.payloadType === "str" ||
+                    this.payloadType === "num" ||
+                    this.payloadType === "bool" ||
+                    this.payloadType === "json") {
+                if ((this.topic !== "") && ((this.topic.length + this.payload.length) <= 32)) {
+                    return this.topic + ":" + this.payload+suffix;
+                } else if (this.payload.length > 0 && this.payload.length < 24) {
+                    return this.payload+suffix;
+                } else {
+                    return this._("inject.inject")+suffix;
+                }
+            } else if (this.payloadType === 'date') {
+                if ((this.topic !== "") && (this.topic.length <= 16)) {
+                    return this.topic + ":" + this._("inject.timestamp")+suffix;
+                } else {
+                    return this._("inject.timestamp")+suffix;
+                }
+            } else if (this.payloadType === 'flow' || this.payloadType === 'global') {
+                var key = RED.utils.parseContextKey(this.payload);
+                return this.payloadType+"."+key.key+suffix;
+            } else {
+                return this._("inject.inject")+suffix;
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            if (this.payloadType == null) {
+                if (this.payload == "") {
+                    this.payloadType = "date";
+                } else {
+                    this.payloadType = "str";
+                }
+            } else if (this.payloadType === 'string' || this.payloadType === 'none') {
+                this.payloadType = "str";
+            }
+            $("#node-input-payloadType").val(this.payloadType);
+
+            $("#node-input-payload").typedInput({
+                default: 'str',
+                typeField: $("#node-input-payloadType"),
+                types:['flow','global','str','num','bool','json','bin','date','env']
+            });
+
+            $("#inject-time-type-select").on("change", function() {
+                $("#node-input-crontab").val('');
+                var id = $("#inject-time-type-select").val();
+                $(".inject-time-row").hide();
+                $("#inject-time-row-"+id).show();
+                if ((id == "none") || (id == "interval") || (id == "interval-time")) {
+                    $("#node-once").show();
+                }
+                else {
+                    $("#node-once").hide();
+                    $("#node-input-once").prop('checked', false);
+                }
+            });
+
+            $("#node-input-once").on("change", function() {
+                $("#node-input-onceDelay").attr('disabled', !$("#node-input-once").prop('checked'));
+            })
+
+            $(".inject-time-times").each(function() {
+                for (var i=0; i<24; i++) {
+                    var l = (i<10?"0":"")+i+":00";
+                    $(this).append($("<option></option>").val(i).text(l));
+                }
+            });
+            $("<option></option>").val(24).text("00:00").appendTo("#inject-time-interval-time-end");
+            $("#inject-time-interval-time-start").on("change", function() {
+                var start = Number($("#inject-time-interval-time-start").val());
+                var end = Number($("#inject-time-interval-time-end").val());
+                $("#inject-time-interval-time-end option").remove();
+                for (var i=start+1; i<25; i++) {
+                    var l = (i<10?"0":"")+i+":00";
+                    if (i==24) {
+                        l = "00:00";
+                    }
+                    var opt = $("<option></option>").val(i).text(l).appendTo("#inject-time-interval-time-end");
+                    if (i === end) {
+                        opt.attr("selected","selected");
+                    }
+                }
+            });
+
+            $(".inject-time-count").spinner({
+                //max:60,
+                min:1
+            });
+
+            var repeattype = "none";
+            if (this.repeat != "" && this.repeat != 0) {
+                repeattype = "interval";
+                var r = "s";
+                var c = this.repeat;
+                if (this.repeat % 60 === 0) { r = "m"; c = c/60; }
+                if (this.repeat % 1440 === 0) { r = "h"; c = c/60; }
+                $("#inject-time-interval-count").val(c);
+                $("#inject-time-interval-units").val(r);
+                $("#inject-time-interval-days").prop("disabled","disabled");
+            } else if (this.crontab) {
+                var cronparts = this.crontab.split(" ");
+                var days = cronparts[4];
+                if (!isNaN(cronparts[0]) && !isNaN(cronparts[1])) {
+                    repeattype = "time";
+                    // Fixed time
+                    var time = cronparts[1]+":"+cronparts[0];
+                    $("#inject-time-time").val(time);
+                    $("#inject-time-type-select").val("s");
+                    if (days == "*") {
+                        $("#inject-time-time-days input[type=checkbox]").prop("checked",true);
+                    } else {
+                        $("#inject-time-time-days input[type=checkbox]").removeAttr("checked");
+                        days.split(",").forEach(function(v) {
+                            $("#inject-time-time-days [value=" + v + "]").prop("checked", true);
+                        });
+                    }
+                } else {
+                    repeattype = "interval-time";
+                    // interval - time period
+                    var minutes = cronparts[0].slice(2);
+                    if (minutes === "") { minutes = "0"; }
+                    $("#inject-time-interval-time-units").val(minutes);
+                    if (days == "*") {
+                        $("#inject-time-interval-time-days input[type=checkbox]").prop("checked",true);
+                    } else {
+                        $("#inject-time-interval-time-days input[type=checkbox]").removeAttr("checked");
+                        days.split(",").forEach(function(v) {
+                            $("#inject-time-interval-time-days [value=" + v + "]").prop("checked", true);
+                        });
+                    }
+                    var time = cronparts[1];
+                    var timeparts = time.split(",");
+                    var start;
+                    var end;
+                    if (timeparts.length == 1) {
+                        // 0 or 0-10
+                        var hours = timeparts[0].split("-");
+                        if (hours.length == 1) {
+                            if (hours[0] === "") {
+                                start = "0";
+                                end = "0";
+                            }
+                            else {
+                                start = hours[0];
+                                end = Number(hours[0])+1;
+                            }
+                        } else {
+                            start = hours[0];
+                            end = Number(hours[1])+1;
+                        }
+                    } else {
+                        // 23,0 or 17-23,0-10 or 23,0-2 or 17-23,0
+                        var startparts = timeparts[0].split("-");
+                        start = startparts[0];
+
+                        var endparts = timeparts[1].split("-");
+                        if (endparts.length == 1) {
+                            end = Number(endparts[0])+1;
+                        } else {
+                            end = Number(endparts[1])+1;
+                        }
+                    }
+                    $("#inject-time-interval-time-end").val(end);
+                    $("#inject-time-interval-time-start").val(start);
+
+                }
+            } else {
+                $("#inject-time-type-select").val("none");
+            }
+
+            $(".inject-time-row").hide();
+            $("#inject-time-type-select").val(repeattype);
+            $("#inject-time-row-"+repeattype).show();
+
+            $("#node-input-payload").typedInput('type',this.payloadType);
+
+            $("#inject-time-type-select").trigger("change");
+            $("#inject-time-interval-time-start").trigger("change");
+
+        },
+        oneditsave: function() {
+            var repeat = "";
+            var crontab = "";
+            var type = $("#inject-time-type-select").val();
+            if (type == "none") {
+                // nothing
+            } else if (type == "interval") {
+                var count = $("#inject-time-interval-count").val();
+                var units = $("#inject-time-interval-units").val();
+                if (units == "s") {
+                    repeat = count;
+                } else {
+                    if (units == "m") {
+                        //crontab = "*/"+count+" * * * "+days;
+                        repeat = count * 60;
+                    } else if (units == "h") {
+                        //crontab = "0 */"+count+" * * "+days;
+                        repeat = count * 60 * 60;
+                    }
+                }
+            } else if (type == "interval-time") {
+                repeat = "";
+                var count = $("#inject-time-interval-time-units").val();
+                var startTime = Number($("#inject-time-interval-time-start").val());
+                var endTime = Number($("#inject-time-interval-time-end").val());
+                var days = $('#inject-time-interval-time-days input[type=checkbox]:checked').map(function(_, el) {
+                    return $(el).val()
+                }).get();
+                if (days.length == 0) {
+                    crontab = "";
+                } else {
+                    if (days.length == 7) {
+                        days="*";
+                    } else {
+                        days = days.join(",");
+                    }
+                    var timerange = "";
+                    if (endTime == 0) {
+                        timerange = startTime+"-23";
+                    } else if (startTime+1 < endTime) {
+                        timerange = startTime+"-"+(endTime-1);
+                    } else if (startTime+1 == endTime) {
+                        timerange = startTime;
+                    } else {
+                        var startpart = "";
+                        var endpart = "";
+                        if (startTime == 23) {
+                            startpart = "23";
+                        } else {
+                            startpart = startTime+"-23";
+                        }
+                        if (endTime == 1) {
+                            endpart = "0";
+                        } else {
+                            endpart = "0-"+(endTime-1);
+                        }
+                        timerange = startpart+","+endpart;
+                    }
+                    if (count === "0") {
+                        crontab = count+" "+timerange+" * * "+days;
+                    } else {
+                        crontab = "*/"+count+" "+timerange+" * * "+days;
+                    }
+                }
+            } else if (type == "time") {
+                var time = $("#inject-time-time").val();
+                var days = $('#inject-time-time-days  input[type=checkbox]:checked').map(function(_, el) {
+                    return $(el).val()
+                }).get();
+                if (days.length == 0) {
+                    crontab = "";
+                } else {
+                    if (days.length == 7) {
+                        days="*";
+                    } else {
+                        days = days.join(",");
+                    }
+                    var parts = time.split(":");
+                    if (parts.length === 2) {
+                        repeat = "";
+                        parts[1] = ("00" + (parseInt(parts[1]) % 60)).substr(-2);
+                        parts[0] = ("00" + (parseInt(parts[0]) % 24)).substr(-2);
+                        crontab = parts[1]+" "+parts[0]+" * * "+days;
+                    }
+                    else { crontab = ""; }
+                }
+            }
+
+            $("#node-input-repeat").val(repeat);
+            $("#node-input-crontab").val(crontab);
+        },
+        button: {
+            enabled: function() {
+                return !this.changed
+            },
+            onclick: function() {
+                if (this.changed) {
+                    return RED.notify(RED._("notification.warning", {message:RED._("notification.warnings.undeployedChanges")}),"warning");
+                }
+                var payload = this.payload;
+                if ((this.payloadType === 'flow') ||
+                    (this.payloadType === 'global')) {
+                    var key = RED.utils.parseContextKey(payload);
+                    payload = this.payloadType+"."+key.key;
+                }
+                var label = this._def.label.call(this);
+                if (label.length > 30) {
+                    label = label.substring(0,50)+"...";
+                }
+                label = label.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                var node = this;
+                $.ajax({
+                    url: "inject/"+this.id,
+                    type:"POST",
+                    success: function(resp) {
+                        RED.notify(node._("inject.success",{label:label}),{type:"success",id:"inject"});
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status == 500) {
+                            RED.notify(node._("common.notification.error",{message:node._("inject.errors.failed")}),"error");
+                        } else if (jqXHR.status == 0) {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:jqXHR.status,message:textStatus})}),"error");
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+</script>

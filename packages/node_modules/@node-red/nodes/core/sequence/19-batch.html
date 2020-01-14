@@ -1,0 +1,170 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-template-name="batch">
+    <div class="form-row">
+        <label for="node-input-mode"><span data-i18n="batch.mode.label"></span></label>
+        <select type="text" id="node-input-mode" style="width: 300px;">
+            <option value="count" data-i18n="batch.mode.num-msgs"></option>
+            <option value="interval" data-i18n="batch.mode.interval"></option>
+            <option value="concat" data-i18n="batch.mode.concat"></option>
+        </select>
+    </div>
+
+    <div class="node-row-msg-count">
+        <div class="form-row node-row-count">
+            <label style="margin-left: 10px; width: 175px;" for="node-input-count" data-i18n="batch.count.label"></label>
+            <input type="text" id="node-input-count" style="width: 50px;">
+        </div>
+    </div>
+
+    <div class="node-row-msg-overlap">
+        <div class="form-row node-row-overlap">
+            <label style="margin-left: 10px; width: 175px;" for="node-input-overlap" data-i18n="batch.count.overlap"></label>
+            <input type="text" id="node-input-overlap" style="width: 50px;">
+        </div>
+    </div>
+
+    <div class="node-row-msg-interval">
+        <div class="form-row node-row-interval">
+            <label style="margin-left: 10px; width: 175px;" for="node-input-interval"> <span data-i18n="batch.interval.label"></span></label>
+            <input type="text" id="node-input-interval" style="width: 50px;">
+            <span data-i18n="batch.interval.seconds"></span>
+        </div>
+        <div class="form-row">
+            <input type="checkbox" id="node-input-allowEmptySequence" style="margin-left:20px; margin-right: 10px; vertical-align:top; width:auto;">
+            <label for="node-input-allowEmptySequence" style="width:auto;" data-i18n="batch.interval.empty"></label>
+	</div>
+    </div>
+
+    <div class="node-row-msg-concat">
+        <div class="form-row">
+            <label data-i18n="batch.concat.topics-label"></label>
+            <div class="form-row node-input-topics-container-row">
+                <ol id="node-input-topics-container"></ol>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="node-red:common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]node-red:common.label.name">
+    </div>
+
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType("batch",{
+        category: "sequence",
+        color:"#E2D96E",
+        defaults: {
+            name: {value:""},
+            mode: {value:"count"},
+            count: {value:10,validate:function(v) { return RED.validators.number(v) && (v >= 1); }},
+            overlap: {value:0,validate:function(v) { return RED.validators.number(v) && (v >= 0); }},
+            interval: {value:10,validate:function(v) { return RED.validators.number(v) && (v >= 1); }},
+            allowEmptySequence: {value:false},
+            topics: {value:[{topic:""}]}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "batch.svg",
+        label: function() {
+            return this.name||this._("batch.batch");;
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var topic_str = node._("batch.concat.topic");
+
+            function resizeTopics(topic) {
+                var newWidth = topic.width();
+                topic.find('.red-ui-typedInput')
+                     .typedInput("width",newWidth-15);
+            }
+
+            $("#node-input-topics-container")
+                .css('min-height','200px').css('min-width','430px')
+                .editableList({
+                    addItem: function(container, i, opt) {
+                        if (!opt.hasOwnProperty('topic')) {
+                            opt.topic = "";
+                        }
+                        var row = $('<div/>').appendTo(container);
+                        var valueField = $('<input/>',{
+                            class:"node-input-topic-value",
+                            type:"text",
+                            style:"margin-left: 5px;"
+                        }).appendTo(row)
+                        .typedInput({default:'str', types:['str']});
+                        valueField.typedInput('value', opt.topic);
+                        valueField.typedInput('type', 'str');
+                        valueField.attr('placeholder', topic_str);
+                        resizeTopics(container);
+                    },
+                    resizeItem: resizeTopics,
+                    sortable: true,
+                    removable: true
+                });
+
+            $("#node-input-count").spinner({min:1});
+            $("#node-input-overlap").spinner({min:0});
+            $("#node-input-interval").spinner({min:1});
+            $("#node-input-mode").on("change", function(e) {
+                var val = $(this).val();
+                $(".node-row-msg-count").toggle(val==="count");
+                $(".node-row-msg-overlap").toggle(val==="count");
+                $(".node-row-msg-interval").toggle(val==="interval");
+                $(".node-row-msg-concat").toggle(val==="concat");
+                if (val==="concat") {
+                    var topics = node.topics;
+                    var container = $("#node-input-topics-container");
+                    container.editableList('empty');
+                    for (var i = 0; i < topics.length; i++) {
+                        var topic = topics[i];
+                        container.editableList('addItem', topic);
+                    }
+                }
+            });
+        },
+        oneditsave: function() {
+            var topics = $("#node-input-topics-container").editableList('items');
+            var node = this;
+            node.topics = [];
+            topics.each(function(i) {
+                var topicData = $(this).data('data');
+                var topic = $(this);
+                var vf = topic.find(".node-input-topic-value");
+                var value = vf.typedInput('value');
+                var type = vf.typedInput('type');
+                var r = {topic:value};
+                node.topics.push(r);
+            });
+        },
+        oneditresize: function(size) {
+            var rows = $("#dialog-form>div:not(.node-input-topics-container-row)");
+            var height = size.height;
+            for (var i = 0; i < rows.length; i++) {
+                height -= $(rows[i]).outerHeight(true);
+            }
+            var editorRow = $("#dialog-form>div.node-input-topics-container-row");
+            height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+            $("#node-input-topics-container").editableList('height',height);
+        }
+    });
+</script>

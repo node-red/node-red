@@ -1,0 +1,174 @@
+
+<script type="text/x-red" data-template-name="catch">
+    <div class="form-row">
+        <label style="width: auto" for="node-input-scope" data-i18n="catch.label.source"></label>
+        <select id="node-input-scope-select">
+            <option value="all" data-i18n="catch.scope.all"></option>
+            <option value="target" data-i18n="catch.scope.selected"></options>
+        </select>
+    </div>
+    <div class="form-row node-input-uncaught-row">
+        <input type="checkbox" id="node-input-uncaught" style="display: inline-block; width: auto; vertical-align: top; margin-left: 30px; margin-right: 5px;">
+        <label for="node-input-uncaught" style="width: auto" data-i18n="catch.label.uncaught"></label>
+    </div>
+    <div class="form-row node-input-target-row">
+        <button id="node-input-catch-target-select" class="red-ui-button" data-i18n="common.label.selectNodes"></button>
+    </div>
+    <div class="form-row node-input-target-row node-input-target-list-row" style="min-height: 100px">
+        <div id="node-input-catch-target-container-div"></div>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+<script type="text/javascript">
+    RED.nodes.registerType('catch',{
+        category: 'common',
+        color:"#e49191",
+        defaults: {
+            name: {value:""},
+            scope: {value:null},
+            uncaught: {value:false}
+        },
+        inputs:0,
+        outputs:1,
+        icon: "alert.svg",
+        label: function() {
+            if (this.name) {
+                return this.name;
+            }
+            if (this.scope) {
+                return this._("catch.catchNodes",{number:this.scope.length});
+            }
+            return this.uncaught?this._("catch.catchUncaught"):this._("catch.catch")
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        oneditprepare: function() {
+            var node = this;
+            var scope = node.scope || [];
+
+            this._resize = function() {
+                var rows = $("#dialog-form>div:not(.node-input-target-list-row)");
+                var height = $("#dialog-form").height();
+                for (var i=0;i<rows.length;i++) {
+                    height -= $(rows[i]).outerHeight(true);
+                }
+                var editorRow = $("#dialog-form>div.node-input-target-list-row");
+                editorRow.css("height",height+"px");
+            };
+
+            var dirList = $("#node-input-catch-target-container-div").css({width: "100%", height: "100%"})
+                .treeList({multi:true}).on("treelistitemmouseover", function(e, item) {
+                    item.node.highlighted = true;
+                    item.node.dirty = true;
+                    RED.view.redraw();
+                }).on("treelistitemmouseout", function(e, item) {
+                    item.node.highlighted = false;
+                    item.node.dirty = true;
+                    RED.view.redraw();
+                })
+            var candidateNodes = RED.nodes.filterNodes({z:node.z});
+            var allChecked = true;
+            var items = [];
+            var nodeItemMap = {};
+
+            candidateNodes.forEach(function(n) {
+                if (n.id === node.id) {
+                    return;
+                }
+                var isChecked = scope.indexOf(n.id) !== -1;
+
+                allChecked = allChecked && isChecked;
+
+                var nodeDef = RED.nodes.getType(n.type);
+                var label;
+                var sublabel;
+                if (nodeDef) {
+                    var l = nodeDef.label;
+                    label = (typeof l === "function" ? l.call(n) : l)||"";
+                    sublabel = n.type;
+                    if (sublabel.indexOf("subflow:") === 0) {
+                        var subflowId = sublabel.substring(8);
+                        var subflow = RED.nodes.subflow(subflowId);
+                        sublabel = "subflow : "+subflow.name;
+                    }
+                }
+                if (!nodeDef || !label) {
+                    label = n.type;
+                }
+                nodeItemMap[n.id] = {
+                    node: n,
+                    label: label,
+                    sublabel: sublabel,
+                    selected: isChecked
+                };
+                items.push(nodeItemMap[n.id]);
+            });
+            dirList.treeList('data',items);
+
+            $("#node-input-catch-target-select").on("click", function(e) {
+                e.preventDefault();
+                var preselected = dirList.treeList('selected').map(function(n) {return n.node.id});
+                RED.tray.hide();
+                RED.view.selectNodes({
+                    selected: preselected,
+                    onselect: function(selection) {
+                        RED.tray.show();
+                        var newlySelected = {};
+                        selection.forEach(function(n) {
+                            newlySelected[n.id] = true;
+                            if (nodeItemMap[n.id]) {
+                                nodeItemMap[n.id].treeList.select(true);
+                            }
+                        })
+                        preselected.forEach(function(id) {
+                            if (!newlySelected[id]) {
+                                nodeItemMap[id].treeList.select(false);
+                            }
+                        })
+                    },
+                    oncancel: function() {
+                        RED.tray.show();
+                    },
+                    filter: function(n) {
+                        return n.id !== node.id;
+                    }
+                });
+            })
+
+            $("#node-input-scope-select").on("change", function(e) {
+                var scope = $(this).val();
+                if (scope === "target") {
+                    $(".node-input-target-row").show();
+                    $(".node-input-uncaught-row").hide();
+                } else {
+                    $(".node-input-target-row").hide();
+                    $(".node-input-uncaught-row").show();
+                }
+                node._resize();
+            });
+            if (this.scope === null) {
+                $("#node-input-scope-select").val("all");
+            } else {
+                $("#node-input-scope-select").val("target");
+            }
+            $("#node-input-scope-select").trigger("change");
+        },
+        oneditsave: function() {
+            var scope = $("#node-input-scope-select").val();
+            if (scope === 'all') {
+                this.scope = null;
+            } else {
+                $("#node-input-uncaught").prop("checked",false);
+                this.scope = $("#node-input-catch-target-container-div").treeList('selected').map(function(i) { return i.node.id})
+            }
+        },
+        oneditresize: function(size) {
+            this._resize();
+        }
+    });
+</script>

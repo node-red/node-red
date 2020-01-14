@@ -227,7 +227,7 @@ describe("api/admin/nodes", function() {
             });
             request(app)
             .post('/nodes')
-            .send({module: 'foo',version:"1.2.3"})
+            .send({module: 'foo',version:"1.2.3",url:"https://example/foo-1.2.3.tgz"})
             .expect(200)
             .end(function(err,res) {
                 if (err) {
@@ -238,6 +238,7 @@ describe("api/admin/nodes", function() {
                 res.body.nodes[0].should.have.property("id","123");
                 opts.should.have.property("module","foo");
                 opts.should.have.property("version","1.2.3");
+                opts.should.have.property("url","https://example/foo-1.2.3.tgz");
                 done();
             });
         });
@@ -256,7 +257,7 @@ describe("api/admin/nodes", function() {
             });
             request(app)
                 .post('/nodes')
-                .send({module: 'foo',version:"1.2.3"})
+                .send({module: 'foo',version:"1.2.3",url:"https://example/foo-1.2.3.tgz"})
                 .expect(400)
                 .end(function(err,res) {
                     if (err) {
@@ -441,7 +442,7 @@ describe("api/admin/nodes", function() {
             nodes.init({
                 nodes:{
                     getModuleCatalog: function(opts) {
-                        return Promise.resolve(opts);
+                        return Promise.resolve({a:123});
                     }
                 }
             });
@@ -452,7 +453,7 @@ describe("api/admin/nodes", function() {
                     if (err) {
                         throw err;
                     }
-                    res.body.should.eql({ module: 'module/set' });
+                    res.body.should.eql({a:123});
                     done();
                 });
         });

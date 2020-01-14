@@ -1,0 +1,322 @@
+
+<script type="text/x-red" data-template-name="debug">
+    <div class="form-row">
+        <label for="node-input-typed-complete"><i class="fa fa-list"></i> <span data-i18n="debug.output"></span></label>
+        <input id="node-input-typed-complete" type="text" style="width: 70%">
+        <input id="node-input-complete" type="hidden">
+        <input id="node-input-targetType" type="hidden">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tosidebar"><i class="fa fa-random"></i> <span data-i18n="debug.to"></span></label>
+        <label for="node-input-tosidebar" style="width:70%">
+        <input type="checkbox" id="node-input-tosidebar" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toSidebar"></span>
+        </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-console"> </label>
+        <label for="node-input-console" style="width:70%">
+        <input type="checkbox" id="node-input-console" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toConsole"></span>
+        </label>
+    </div>
+    <div class="form-row" id="node-tostatus-line">
+    <label for="node-input-tostatus"> </label>
+    <label for="node-input-tostatus" style="width:70%">
+        <input type="checkbox" id="node-input-tostatus" style="display:inline-block; width:22px; vertical-align:baseline;"><span data-i18n="debug.toStatus"></span>
+    </label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> <span data-i18n="common.label.name"></span></label>
+        <input type="text" id="node-input-name" data-i18n="[placeholder]common.label.name">
+    </div>
+</script>
+
+<script src="debug/view/debug-utils.js"></script>
+
+<script type="text/javascript">
+(function() {
+    var subWindow = null;
+    RED.nodes.registerType('debug',{
+        category: 'common',
+        defaults: {
+            name: {value:""},
+            active: {value:true},
+            tosidebar: {value:true},
+            console: {value:false},
+            tostatus: {value:false},
+            complete: {value:"false", required:true},
+            targetType: {value:undefined}
+        },
+        label: function() {
+            var suffix = "";
+            if (this.console === true || this.console === "true") { suffix = " ⇲"; }
+            if (this.targetType === "jsonata") {
+                return (this.name || "JSONata") + suffix;
+            }
+            if (this.complete === true || this.complete === "true") {
+                return (this.name||"msg") + suffix;
+            } else {
+                return (this.name || "msg." + ((!this.complete || this.complete === "false") ? "payload" : this.complete)) + suffix;
+            }
+        },
+        labelStyle: function() {
+            return this.name?"node_label_italic":"";
+        },
+        color:"#87a980",
+        inputs:1,
+        outputs:0,
+        icon: "debug.svg",
+        align: "right",
+        button: {
+            toggle: "active",
+            visible: function() { return this.tosidebar; },
+            onclick: function() {
+                var label = this.name||"debug";
+                var node = this;
+                $.ajax({
+                    url: "debug/"+this.id+"/"+(this.active?"enable":"disable"),
+                    type: "POST",
+                    success: function(resp, textStatus, xhr) {
+                        var historyEvent = {
+                            t:'edit',
+                            node:node,
+                            changes:{
+                                active:!node.active
+                            },
+                            dirty:node.dirty,
+                            changed:node.changed
+                        };
+                        node.changed = true;
+                        node.dirty = true;
+                        RED.nodes.dirty(true);
+                        RED.history.push(historyEvent);
+                        RED.view.redraw();
+                        if (xhr.status == 200) {
+                            RED.notify(node._("debug.notification.activated",{label:label}),"success");
+                        } else if (xhr.status == 201) {
+                            RED.notify(node._("debug.notification.deactivated",{label:label}),"success");
+                        }
+                    },
+                    error: function(jqXHR,textStatus,errorThrown) {
+                        if (jqXHR.status == 404) {
+                            RED.notify(node._("common.notification.error", {message: node._("common.notification.errors.not-deployed")}),"error");
+                        } else if (jqXHR.status === 0) {
+                            RED.notify(node._("common.notification.error", {message: node._("common.notification.errors.no-response")}),"error");
+                        } else {
+                            RED.notify(node._("common.notification.error",{message:node._("common.notification.errors.unexpected",{status:err.status,message:err.response})}),"error");
+                        }
+                    }
+                });
+            }
+        },
+        onpaletteadd: function() {
+            var options = {
+                messageMouseEnter: function(sourceId) {
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = true;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageMouseLeave: function(sourceId) {
+                    if (sourceId) {
+                        var n = RED.nodes.node(sourceId);
+                        if (n) {
+                            n.highlighted = false;
+                            n.dirty = true;
+                        }
+                        RED.view.redraw();
+                    }
+                },
+                messageSourceClick: function(sourceId) {
+                    RED.view.reveal(sourceId);
+                },
+                clear: function() {
+                    RED.nodes.eachNode(function(node) {
+                        node.highlighted = false;
+                        node.dirty = true;
+                    });
+                    RED.view.redraw();
+                }
+            };
+
+            var uiComponents = RED.debug.init(options);
+
+            RED.sidebar.addTab({
+                id: "debug",
+                label: this._("debug.sidebar.label"),
+                name: this._("debug.sidebar.name"),
+                content: uiComponents.content,
+                toolbar: uiComponents.footer,
+                enableOnEdit: true,
+                pinned: true,
+                iconClass: "fa fa-bug",
+                action: "core:show-debug-tab"
+            });
+            RED.actions.add("core:show-debug-tab",function() { RED.sidebar.show('debug'); });
+
+            var that = this;
+            RED._debug = function(msg) {
+                that.handleDebugMessage("", {
+                    name:"debug",
+                    msg:msg
+                });
+            };
+
+            this.refreshMessageList = function() {
+                RED.debug.refreshMessageList(RED.workspaces.active());
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*");
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            };
+            RED.events.on("workspace:change", this.refreshMessageList);
+
+            this.handleDebugMessage = function(t,o) {
+                var sourceNode = RED.nodes.node(o.id) || RED.nodes.node(o.z);
+                if (sourceNode) {
+                    o._source = {id:sourceNode.id,z:sourceNode.z,name:sourceNode.name,type:sourceNode.type,_alias:o._alias};
+                }
+                RED.debug.handleDebugMessage(o);
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"message",msg:o},"*");
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            };
+            RED.comms.subscribe("debug",this.handleDebugMessage);
+
+            this.clearMessageList = function() {
+                RED.debug.clearMessageList(true);
+                if (subWindow) {
+                    try {
+                        subWindow.postMessage({event:"projectChange"},"*");
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            };
+            RED.events.on("project:change", this.clearMessageList);
+            RED.actions.add("core:clear-debug-messages", function() { RED.debug.clearMessageList(true) });
+
+            $("#red-ui-sidebar-debug-open").on("click", function(e) {
+                e.preventDefault();
+                subWindow = window.open(document.location.toString().replace(/[?#].*$/,"")+"debug/view/view.html"+document.location.search,"nodeREDDebugView","menubar=no,location=no,toolbar=no,chrome,height=500,width=600");
+                subWindow.onload = function() {
+                    subWindow.postMessage({event:"workspaceChange",activeWorkspace:RED.workspaces.active()},"*");
+                };
+            });
+            RED.popover.tooltip($("#red-ui-sidebar-debug-open"),RED._('node-red:debug.sidebar.openWindow'));
+
+
+
+            $(window).on('beforeunload',function() {
+                if (subWindow) {
+                    try {
+                        subWindow.close();
+                    } catch(err) {
+                        console.log(err);
+                    }
+                }
+            });
+
+            this.handleWindowMessage = function(evt) {
+                var msg = evt.data;
+                if (msg.event === "mouseEnter") {
+                    options.messageMouseEnter(msg.id);
+                } else if (msg.event === "mouseLeave") {
+                    options.messageMouseLeave(msg.id);
+                } else if (msg.event === "mouseClick") {
+                    options.messageSourceClick(msg.id);
+                } else if (msg.event === "clear") {
+                    options.clear();
+                }
+            };
+            window.addEventListener('message',this.handleWindowMessage);
+        },
+        onpaletteremove: function() {
+            RED.comms.unsubscribe("debug",this.handleDebugMessage);
+            RED.sidebar.removeTab("debug");
+            RED.events.off("workspace:change", this.refreshMessageList);
+            window.removeEventListener("message",this.handleWindowMessage);
+            RED.actions.remove("core:show-debug-tab");
+            RED.actions.remove("core:clear-debug-messages");
+
+            delete RED._debug;
+        },
+        oneditprepare: function() {
+            var none = {
+                value: "none",
+                label: RED._("node-red:debug.none"),
+                hasValue: false
+            };
+            if (this.tosidebar === undefined) {
+                this.tosidebar = true;
+                $("#node-input-tosidebar").prop('checked', true);
+            }
+            if (typeof this.console === "string") {
+                this.console = (this.console == 'true');
+                $("#node-input-console").prop('checked', this.console);
+                $("#node-input-tosidebar").prop('checked', true);
+            }
+            var fullType = {
+                value: "full",
+                label: RED._("node-red:debug.msgobj"),
+                hasValue: false
+            };
+            $("#node-input-typed-complete").typedInput({
+                default: "msg",
+                types:['msg', fullType, "jsonata"],
+                typeField: $("#node-input-targetType")
+            });
+            if (this.targetType === "jsonata") {
+                var property = this.complete || "";
+                $("#node-input-typed-complete").typedInput('type','jsonata');
+                $("#node-input-typed-complete").typedInput('value',property);
+            } else if ((this.targetType === "full") || this.complete === "true" || this.complete === true) {
+                // show complete message object
+                $("#node-input-typed-complete").typedInput('type','full');
+            } else {
+                var property = (!this.complete||(this.complete === "false")) ? "payload" : this.complete+"";
+                $("#node-input-typed-complete").typedInput('type','msg');
+                $("#node-input-typed-complete").typedInput('value',property);
+            }
+            $("#node-input-typed-complete").on('change',function() {
+                if ($("#node-input-typed-complete").typedInput('type') === 'msg' &&
+                    $("#node-input-typed-complete").typedInput('value') === ''
+                ) {
+                    $("#node-input-typed-complete").typedInput('value','payload');
+                }
+                if ($("#node-input-typed-complete").typedInput('type') === 'full') {
+                    $("#node-tostatus-line").hide();
+                } else {
+                    $("#node-tostatus-line").show();
+                }
+            });
+            $("#node-input-complete").on('change',function() {
+                if ($("#node-input-typed-complete").typedInput('type') === 'full') {
+                    $("#node-tostatus-line").hide();
+                } else {
+                    $("#node-tostatus-line").show();
+                }
+            });
+        },
+        oneditsave: function() {
+            var type = $("#node-input-typed-complete").typedInput('type');
+            if (type === 'full') {
+                $("#node-input-complete").val("true");
+            } else {
+                $("#node-input-complete").val($("#node-input-typed-complete").typedInput('value'));
+            }
+        }
+    });
+})();
+</script>

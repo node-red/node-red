@@ -53,7 +53,7 @@
   },
   "$now" : {
     "args" : "",
-    "desc" : "Generiert eine Zeitmarke im ISO-8601-kompatiblen Format und gibt sie als Zeichenfolge zurück."
+    "desc" : "Generiert einen Zeitstempel im ISO-8601-kompatiblen Format und gibt sie als Zeichenfolge zurück."
   },
   "$base64encode" : {
     "args" : "Zeichenfolge",
@@ -201,7 +201,7 @@
   },
   "$fromMillis" : {
     "args" : "Anzahl",
-    "desc" : "Konvertieren Sie eine Zahl, die Millisekunden seit der Unix-Epoche (1. Januar 1970 (UTC)) in eine Zeitmarkenzeichenfolge im ISO 8601-Format darstellt."
+    "desc" : "Konvertieren Sie eine Zahl, die Millisekunden seit der Unix-Epoche (1. Januar 1970 (UTC)) enthält in eine Zeitangabe im ISO 8601-Format."
   },
   "$formatNumber" : {
     "args" : "Zahl, Bild [, Optionen]",
@@ -212,8 +212,8 @@
     "desc" : "Transformiere die `Zahl` in eine Zeichenfolge und formatiert sie in eine ganze Zahl, die in der durch das `radix` -Argument angegebenen Zahlenbasis dargestellt wird. Wenn 'radix' nicht angegeben wird, wird standardmäßig die Basis 10 verwendet. 'radix` kann zwischen 2 und 36 liegen, andernfalls wird ein Fehler ausgelöst."
   },
   "$toMillis" : {
-    "args" : "Zeitmarke",
-    "desc" : "Konvertieren Sie eine Zeichenfolge `Zeitmarke' im ISO 8601-Format in die Anzahl der Millisekunden seit der Unix-Epoche (1. Januar 1970 (UTC)) als Zahl. Es wird ein Fehler ausgelöst, wenn die Zeichenfolge nicht das richtige Format hat."
+    "args" : "timestamp",
+    "desc" : "Konvertieren Sie eine Zeitangabe im ISO 8601-Format in die Anzahl der Millisekunden seit der Unix-Epoche (1. Januar 1970 (UTC)) als Zahl. Es wird ein Fehler ausgelöst, wenn die Zeichenfolge nicht das richtige Format hat."
   },
   "$env" : {
     "args" : "arg",
