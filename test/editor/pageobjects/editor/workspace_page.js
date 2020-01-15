@@ -15,18 +15,15 @@
  **/
 
 var when = require("when");
-
 var events = require("nr-test-utils").require("@node-red/runtime/lib/events.js");
-
 var palette = require("./palette_page");
 var nodeFactory = require("../nodes/nodefactory_page");
-
+var keyPage = require("../util/key_page");
 var flowLayout = {
     flowRightEnd : 600,
     widthInterval : 300,
     heightInterval : 80
 };
-
 var previousX = -flowLayout.widthInterval;
 var previousY = 0;
 
@@ -60,13 +57,10 @@ function addNode(type, x, y) {
 }
 
 function deleteAllNodes() {
-    browser.waitForVisible('.red-ui-workspace-chart-event-layer');
-    try {
-        browser.click('.red-ui-workspace-chart-event-layer');
-    } catch (e) {
-        console.log(e);
-    }
-    browser.keys(['Control', 'a', 'a', 'Control']); // call twice to release the keys.
+    browser.waitForVisible('//*[contains(@class, "active")]/a[@class="red-ui-tab-label"]');
+    browser.click('//*[contains(@class, "active")]/a[@class="red-ui-tab-label"]');
+    browser.pause(1000);
+    browser.keys(keyPage.selectAll());
     browser.keys(['Delete']);
 }
 
@@ -81,7 +75,7 @@ function deploy() {
             browser.clickWithWait('#red-ui-header-button-deploy');
         });
     });
-    browser.waitForText('#red-ui-header-button-deploy', 2000);
+    browser.waitForText('#red-ui-header-button-deploy', 10000);
     // Need additional wait until buttons becomes clickable.
     browser.pause(50);
 }
