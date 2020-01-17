@@ -69,6 +69,7 @@ function deploy() {
         return when.promise(function(resolve, reject) {
             events.on("runtime-event", function(event) {
                 if (event.id === 'runtime-deploy') {
+                    events.removeListener("runtime-event", arguments.callee);
                     resolve();
                 }
             });
