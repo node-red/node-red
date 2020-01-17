@@ -26,12 +26,11 @@ function functionNode(id) {
 
 util.inherits(functionNode, nodePage);
 
-functionNode.prototype.setFunction = function(func) {
+functionNode.prototype.setFunction = function (func) {
     browser.clickWithWait('#node-input-func-editor');
     browser.keys(keyPage.selectAll());
-    for (var i = 0; i < func.length; i++) {
-        browser.keys([func.charAt(i)]);
-    }
+    browser.keys(['Delete']);
+    browser.keys(func);
     // Delete the unnecessary code that ace editor does the autocompletion.
     browser.keys(keyPage.selectToEnd());
     browser.keys(['Delete']);
