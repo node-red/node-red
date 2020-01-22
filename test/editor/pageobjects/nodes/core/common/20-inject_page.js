@@ -47,11 +47,11 @@ injectNode.prototype.setPayload = function(payloadType, payload) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
     // Select a payload type.
-    var payloadTypeXPath = '//*[@class="red-ui-typedInput-options"]/a[' + payloadTypeList[payloadType] + ']';
+    var payloadTypeXPath = '//*[contains(@class, "red-ui-typedInput-options")]/a[' + payloadTypeList[payloadType] + ']';
     browser.clickWithWait(payloadTypeXPath);
     if (payload) {
         // Input a value.
-        browser.setValue('//*[@class="red-ui-typedInput-input"]/input', payload);
+        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', payload);
     }
 }
 

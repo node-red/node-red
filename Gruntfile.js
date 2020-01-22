@@ -28,7 +28,7 @@ module.exports = function(grunt) {
 
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
-        process.env.NODE_RED_NON_HEADLESS = 'true';
+        process.env.NODE_RED_NON_HEADLESS = true;
     }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -80,20 +80,20 @@ module.exports = function(grunt) {
                 //"loopfunc": true, // allow functions to be defined in loops
                 //"sub": true       // don't warn that foo['bar'] should be written as foo.bar
             },
-            all: [
-                'Gruntfile.js',
-                'red.js',
-                'packages/**/*.js'
-            ],
-            core: {
-                files: {
-                    src: [
-                        'Gruntfile.js',
-                        'red.js',
-                        'packages/**/*.js',
-                    ]
-                }
-            },
+            // all: [
+            //     'Gruntfile.js',
+            //     'red.js',
+            //     'packages/**/*.js'
+            // ],
+            // core: {
+            //     files: {
+            //         src: [
+            //             'Gruntfile.js',
+            //             'red.js',
+            //             'packages/**/*.js',
+            //         ]
+            //     }
+            // },
             nodes: {
                 files: {
                     src: [ 'nodes/core/*/*.js' ]
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
             },
             editor: {
                 files: {
-                    src: [ 'editor/js/**/*.js' ]
+                    src: [ 'packages/node_modules/@node-red/editor-client/src/js/**/*.js' ]
                 }
             },
             tests: {

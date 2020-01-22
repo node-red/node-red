@@ -26,16 +26,13 @@ function debugNode(id) {
 
 util.inherits(debugNode, nodePage);
 
-debugNode.prototype.setOutput = function(complete) {
+debugNode.prototype.setOutput = function (complete) {
     // Open a payload type list.
     browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]/button');
     if (complete !== 'true') {
         // Select the "msg" type.
-        browser.clickWithWait('//div[@class="red-ui-typedInput-options"][1]/a[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options")][1]/a[1]');
         // Input the path in msg.
-        browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
-        browser.keys(keyPage.selectAll());
-        browser.keys(['Delete']);
         browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', complete);
     } else {
         // Select the "complete msg object" type.

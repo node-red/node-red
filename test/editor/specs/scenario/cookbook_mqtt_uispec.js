@@ -22,42 +22,45 @@ var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
-var mqttConfig = require('../../pageobjects/nodes/core/io/10-mqttconfig_page.js');
+var mqttConfig = require('../../pageobjects/nodes/core/network/10-mqttconfig_page.js');
 
 var httpNodeRoot = "/api";
 
 var mqttServer;
 var mosca = require('mosca');
 var moscaSettings = {
-    port: 1883,
+    port: parseInt(Math.random() * 16383 + 49152),
     persistence: {
         // Needs for retaining messages.
         factory: mosca.persistence.Memory
     }
 };
 
-
 // https://cookbook.nodered.org/
-describe('cookbook', function() {
-    beforeEach(function() {
+describe('cookbook', function () {
+    beforeEach(function () {
         workspace.init();
     });
 
-    before(function() {
-        browser.call(function() {
-            return new Promise(function(resolve, reject) {
-                mqttServer = new mosca.Server(moscaSettings, function() {
-                    resolve();
+    before(function () {
+        browser.call(function () {
+            return new Promise(function (resolve, reject) {
+                mqttServer = new mosca.Server(moscaSettings, function (err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
                 });
             });
         });
         helper.startServer();
     });
 
-    after(function() {
-        browser.call(function() {
-            return new Promise(function(resolve, reject) {
-                mqttServer.close(function() {
+    after(function () {
+        browser.call(function () {
+            return new Promise(function (resolve, reject) {
+                mqttServer.close(function () {
                     resolve();
                 });
             });
@@ -65,20 +68,20 @@ describe('cookbook', function() {
         helper.stopServer();
     });
 
-    describe('MQTT', function() {
-        it('Add an MQTT broker to prepare for UI test', function() {
+    describe('MQTT', function () {
+        it('Add an MQTT broker to prepare for UI test', function () {
             var mqttOutNode = workspace.addNode("mqttOut");
 
             mqttOutNode.edit();
             mqttConfig.edit();
-            mqttConfig.setServer("localhost");
+            mqttConfig.setServer("localhost", moscaSettings.port);
             mqttConfig.clickOk();
             mqttOutNode.clickOk();
 
             workspace.deploy();
         });
 
-        it('Connect to an MQTT broker', function() {
+        it('Connect to an MQTT broker', function () {
             var injectNode = workspace.addNode("inject");
             var mqttOutNode = workspace.addNode("mqttOut");
 
@@ -112,7 +115,7 @@ describe('cookbook', function() {
         // skip this case since it is same as other cases.
         it.skip('Publish messages to a topic');
 
-        it('Set the topic of a published message', function() {
+        it('Set the topic of a published message', function () {
             var injectNode = workspace.addNode("inject");
             var mqttOutNode = workspace.addNode("mqttOut");
 
@@ -144,7 +147,7 @@ describe('cookbook', function() {
             debugTab.getMessage().should.eql('"22"');
         });
 
-        it('Publish a retained message to a topic', function() {
+        it('Publish a retained message to a topic', function () {
             var injectNode = workspace.addNode("inject");
             var mqttOutNode = workspace.addNode("mqttOut");
 
@@ -182,7 +185,7 @@ describe('cookbook', function() {
         // skip this case since it is same as other cases.
         it.skip('Subscribe to a topic');
 
-        it('Receive a parsed JSON message', function() {
+        it('Receive a parsed JSON message', function () {
             var injectNode = workspace.addNode("inject");
             var mqttOutNode = workspace.addNode("mqttOut");
 
