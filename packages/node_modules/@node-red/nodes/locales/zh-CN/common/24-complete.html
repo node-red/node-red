@@ -1,0 +1,24 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="complete">
+    <p>当另一个节点完成对消息的处理时触发流。</p>
+    <h3>详细</h3>
+    <p>如果一个节点通知运行时它已完成消息的处理，该节点可用于触发第二个流。</p>
+    <p>这个节点可以与没有输出端口的节点一起使用，例如在使用电子邮件发送节点来发送邮件后触发一个流。</p>
+    <p>此节点只能被设置为处理流中某个所选节点的事件。与Catch节点不同，您不能指定“所有节点”模式并以流中的所有节点为目标。</p>
+    <p>并非所有节点都会触发此事件。这取决于它们是否支持于Node-RED 1.0中引入的此功能。</p>
+</script>
