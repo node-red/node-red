@@ -379,7 +379,7 @@ describe('trigger node', function() {
     });
 
     it('should handle multiple other properties individually if asked to do so', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", property:"foo", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", topic:"foo", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
