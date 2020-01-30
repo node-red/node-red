@@ -378,6 +378,51 @@ describe('trigger node', function() {
         });
     });
 
+    it('should handle multiple other properties individually if asked to do so', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", property:"foo", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "A");
+                    }
+                    else if (c === 2) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "B");
+                    }
+                    else if (c === 3) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "C");
+                    }
+                    else if (c === 4) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "A");
+                    }
+                    else if (c === 5) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "B");
+                    }
+                    else if (c === 6) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "C");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:1,foo:"A"});
+            n1.emit("input", {payload:2,foo:"B"});
+            n1.emit("input", {payload:3,foo:"C"});
+        });
+    });
+
     it('should be able to return things from flow and global context variables', function(done) {
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
             function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
