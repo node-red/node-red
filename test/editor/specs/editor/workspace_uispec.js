@@ -37,7 +37,7 @@ describe('Workspace', function() {
     });
 
     it('should have a right title', function () {
-        browser.getTitle().should.equal('Node-RED');
+        browser.getTitle().should.startWith('Node-RED');
     });
 
     it('should output a timestamp', function() {

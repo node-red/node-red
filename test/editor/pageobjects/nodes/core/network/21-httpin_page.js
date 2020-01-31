@@ -14,26 +14,22 @@
  * limitations under the License.
  **/
 
-function setServer(broker, port) {
-    browser.setValue('#node-config-input-broker', broker);
-    port = port ? port : 1883;
-    browser.setValue('#node-config-input-port', port);
+var util = require("util");
+
+var nodePage = require("../../node_page");
+
+function httpInNode(id) {
+    nodePage.call(this, id);
 }
 
-function clickOk() {
-    browser.clickWithWait('#node-config-dialog-ok');
-    // Wait until an config dialog closes.
-    browser.waitForVisible('#node-config-dialog-ok', 2000, true);
+util.inherits(httpInNode, nodePage);
+
+httpInNode.prototype.setMethod = function(method) {
+    browser.selectWithWait('#node-input-method', method);
 }
 
-function edit() {
-    browser.clickWithWait('#node-input-lookup-broker');
-    // Wait until a config dialog opens.
-    browser.waitForVisible('#node-config-dialog-ok', 2000);
+httpInNode.prototype.setUrl = function(url) {
+    browser.setValue('#node-input-url', url);
 }
 
-module.exports = {
-    setServer: setServer,
-    clickOk: clickOk,
-    edit: edit
-};
+module.exports = httpInNode;
