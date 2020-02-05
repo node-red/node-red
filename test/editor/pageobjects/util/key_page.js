@@ -27,6 +27,12 @@ var shortCutKeyMapForMac = {
 };
 
 function getShortCutKey(type) {
+    if (process.env.BROWSERSTACK) {
+        if (browser.desiredCapabilities.os === 'OS X') {
+            return shortCutKeyMapForMac[type];
+        }
+        return shortCutKeyMap[type];
+    }
     if (os.type() === 'Darwin') {
         return shortCutKeyMapForMac[type];
     }

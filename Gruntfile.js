@@ -26,6 +26,10 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var browserstack = grunt.option('browserstack');
+    if (browserstack) {
+        process.env.BROWSERSTACK = true;
+    }
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
         process.env.NODE_RED_NON_HEADLESS = true;
