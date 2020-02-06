@@ -143,6 +143,10 @@ describe("@node-red/util/util", function() {
             cloned.req.should.equal(msg.req);
             cloned.res.should.equal(msg.res);
         });
+        it('handles undefined values without throwing an error', function() {
+            var result = util.cloneMessage(undefined);
+            should.not.exist(result);
+        })
     });
     describe('getObjectProperty', function() {
         it('gets a property beginning with "msg."', function() {
@@ -840,11 +844,11 @@ describe("@node-red/util/util", function() {
                         },
                     }
                 };
-                
+
                 for (var i = 0; i < 1000; i++) {
                     msg.msg.obj.big += 'some more string ';
                 }
-                
+
                 var result = util.encodeObject(msg);
                 result.format.should.eql("error");
                 var resultJson = JSON.parse(result.msg);
@@ -862,7 +866,7 @@ describe("@node-red/util/util", function() {
                     throw new Error('Exception in toString - should have been caught');
                 }
                 msg.msg.constructor = { name: "strangeobj" };
-                
+
                 var result = util.encodeObject(msg);
                 var success = (result.msg.indexOf('[Type not printable]') >= 0);
                 success.should.eql(true);
@@ -872,11 +876,11 @@ describe("@node-red/util/util", function() {
                 var msg = {
                     msg: {
                         mystrangeobj:"hello",
-                        constructor: { 
+                        constructor: {
                             get name(){
                                 throw new Error('Exception in constructor name');
                             }
-                        }                      
+                        }
                     },
                 };
                 var result = util.encodeObject(msg);
