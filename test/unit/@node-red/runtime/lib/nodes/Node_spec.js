@@ -208,6 +208,7 @@ describe('Node', function() {
         it('emits a single message', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                incrPendingMsgId: (_msgid) => {}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -227,7 +228,8 @@ describe('Node', function() {
         it('emits a single message - synchronous mode', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
-                asyncMessageDelivery: false
+                asyncMessageDelivery: false,
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -256,7 +258,8 @@ describe('Node', function() {
         it('emits a message with callback provided send', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
-                handleComplete: (node,msg) => {}
+                handleComplete: (node,msg) => {},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -280,6 +283,7 @@ describe('Node', function() {
         it('emits multiple messages on a single output', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -310,6 +314,7 @@ describe('Node', function() {
         it('emits messages to multiple outputs', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2,'n3':n3,'n4':n4,'n5':n5}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow, id:'n1',type:'abc',wires:[['n2'],['n3'],['n4','n5']]});
             var n2 = new RedNode({_flow:flow, id:'n2',type:'abc'});
@@ -368,6 +373,7 @@ describe('Node', function() {
         it('emits no messages', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -386,6 +392,7 @@ describe('Node', function() {
         it('emits messages ignoring non-existent nodes', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n9'],['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -408,6 +415,7 @@ describe('Node', function() {
         it('emits messages without cloning req or res', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2,'n3':n3}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[[['n2'],['n3']]]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -464,6 +472,7 @@ describe('Node', function() {
             Log.addHandler(logHandler);
             var flow = {
                 getNode: (id) => { return {'n1':sender,'n2':receiver1,'n3':receiver2}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
 
             var sender = new RedNode({_flow:flow,id:'n1',type:'abc', wires:[['n2', 'n3']]});
