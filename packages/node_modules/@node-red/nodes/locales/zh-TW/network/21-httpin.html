@@ -1,0 +1,81 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http in">
+    <p>創建用于創建Web服務的HTTP端點。</p>
+    <h3>輸出</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>GET請求包含任何查詢字符串參數的對象。或者包含HTTP請求正文。</dd>
+        <dt>req<span class="property-type">object</span></dt>
+        <dd>HTTP請求對象。該對象包含有關請求信息的多個屬性。
+            <ul>
+             <li><code>body</code> - 傳入請求的正文。格式將取決于請求。</li>
+             <li><code>headers</code> - 包含HTTP請求標頭的對象。</li>
+             <li><code>query</code> - 包含任何查詢字符串參數的對象。</li>
+             <li><code>params</code> - 包含任何路由參數的對象。</li>
+             <li><code>cookies</code> - 包含請求cookie的對象。</li>
+             <li><code>files</code> - 如果節點啓用了文件上傳，則爲包含了上傳的文件的對象。</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">object</span></dt>
+        <dd>HTTP響應對象。此屬性不應直接使用；<code>HTTP Response</code>節點記錄了如何響應請求。該屬性必須保留在傳遞給響應節點的消息上。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>節點將在配置的路徑上監聽特定類型的請求。路徑可以完全指定，例如<code>/user</code>，或包括可以接受任何值的命名參數，例如<code>/user/:name</code>。 使用命名參數時，可以在<code>msg.req.params</code>下訪問其在請求中的實際值。</p>
+    <p>對于包含正文的請求（例如POST或PUT），請求的內容將作爲<code>msg.payload</code>提供。</p>
+    <p>如果可以確定請求的內容類型，則正文將被解析爲任何適當的類型。例如，<code>application/json</code>將被解析爲其JavaScript對象表示。</p>
+    <p><b>注意：</b>該節點不發送對請求的任何響應。該流程必須包含HTTP響應節點才能完成請求。</p>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>將響應發送回從HTTP輸入節點接收的請求。</p>
+
+    <h3>輸入</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>響應的正文。</dd>
+        <dt class="optional">statusCode <span class="property-type">數值</span></dt>
+        <dd>如果設置，則用作響應狀態代碼。默認值：200。</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>如果設置，則提供HTTP頭以包含在響應中。</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>如果設置，則可用于設置或刪除cookie。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>還可以在節點本身內設置<code>statusCode</code>和<code>headers</code>。如果在節點內設置了屬性，則不能被相應的message屬性覆蓋。</p>
+    <h4>Cookie處理</h4>
+    <p><code>cookies</code>屬性必須是名稱/值對的對象。該值可以是使用默認選項設置cookie值的字符串，也可以是options對象。<p>
+    <p>下面的示例設置兩個cookie-一個名爲<code>name</code>的值爲<code>nick</code>，另一個名爲<code>session</code>的值爲<code>1234</code>，並且有效期設置爲15分鍾。</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>有效選項包括：</p>
+    <ul>
+    <li><code>domain</code> - (字符串) Cookie的域名</li>
+    <li><code>expires</code> - (日期) GMT標准時間的到期日。如果未指定或設置爲0，則創建會話cookie</li>
+    <li><code>maxAge</code> - (字符串) 相對于當前時間的到期日期（以毫秒爲單位）</li>
+    <li><code>path</code> - (字符串) Cookie的路徑。默認爲/</li>
+    <li><code>value</code> - (字符串) Cookie使用的值</li>
+    </ul>
+    <p>要刪除Cookie，請將其<code>value</code>設置爲<code>null</code>。</p>
+
+</script>
