@@ -1,0 +1,32 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="delay">
+  <p>對通過節點的消息進行延遲發送或限制。</p>
+  <h3>輸入</h3>
+  <dl class="message-properties">
+      <dt class="optional">delay <span class="property-type">數值</span></dt>
+      <dd>設置要應用于消息的延遲（以毫秒爲單位）。僅當節點配置爲允許消息去覆蓋配置的默認延遲間隔時，此選項才適用。</dd>
+      <dt class="optional">reset</dt>
+      <dd>如果接收到的消息將此屬性設置爲任何值，則將清空該節點保留的所有的未發送消息。</dd>
+      <dt class="optional">flush</dt>
+      <dd>如果接收到的消息的此屬性設置爲任何值，則將立即發送該節點保留的所有未發送消息。</dd>
+  </dl>
+  <h3>詳細</h3>
+  <p>當配置爲延遲發送消息時，延遲間隔可以是一個固定值，一個範圍內的隨機值或爲每個消息動態設置。</p>
+  <p>當配置爲對消息進行限制時，它們的傳遞將分散在配置的時間段內。狀態顯示隊列中當前的消息數。可以選擇在中間消息到達時丟棄它們。</p>
+  <p>速率限制可以應用于所有消息，也可以根據<code>msg.topic</code>的值來進行分組。分組時，中間消息將會被自動刪除。在每個時間間隔，節點可以釋放所有主題的最新消息，或釋放下一個主題的最新消息。</p>
+</script>
