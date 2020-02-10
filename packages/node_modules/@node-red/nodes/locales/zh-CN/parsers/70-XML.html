@@ -1,0 +1,48 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="xml">
+    <p>在XML字符串及其JavaScript对象表示形式之间进行相互转换。</p>
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 字符串</span></dt>
+        <dd>JavaScript对象或XML字符串。</dd>
+    </dl>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 字符串</span></dt>
+        <dd>
+            <ul>
+                <li>如果输入是字符串，它将尝试将其解析为XML并创建一个JavaScript对象。</li>
+                <li>如果输入是JavaScript对象，它将尝试构建XML字符串。</li>
+            </ul>
+        </dd>
+        <dt class="optional">options <span class="property-type">object</span></dt>
+        <dd>可以将选项传递给内部使用的XML转换库。请参见<a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank"> xml2js文档</a> 来获取更多信息。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>在XML和对象之间进行转换时，默认情况下XML属性会添加到名为<code>$</code>的属性中。将文本内容添加到名为<code>_</code>的属性中。这些属性名称可以在节点设置中更改。</p>
+    <p>例如，将如下所示转换以下XML：</p>
+    <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
+</script>

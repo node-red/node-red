@@ -1,0 +1,35 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="tcp in">
+    <p>提供TCP输入选择。可以连接到远程TCP端口，或接受传入连接。</p>
+    <p><b>注意：</b>在某些系统上，您可能需要root或管理员权限来访问低于1024的端口。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp out">
+    <p>提供TCP输出的选择。可以连接到远程TCP端口，接受传入的连接，或回复从TCP In节点收到的消息。</p>
+    <p>仅发送<code>msg.payload</code>。</p>
+    <p>如果<code>msg.payload</code>是包含二进制数据的Base64编码的字符串，则Base64解码选项将导致它在发送之前先转换回二进制。</p>
+    <p>如果不存在<code>msg._session</code>，则有效负载将发送到<b>所有</b>连接的客户端。</p>
+    <p><b>注意：</b>在某些系统上，您可能需要root或管理员权限来访问低于1024的端口。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>一个简单的TCP请求节点。将<code>msg.payload</code>发送到服务器tcp端口，并期望得到响应。</p>
+    <p>连接到服务器，发送“请求”并接收“响应”。 可以从固定数量的字符，与指定字符匹配的字符中选择操作，从第一个答复到达起等待指定的时间，等待数据到达，发送数据并立即取消连接而无需等待答复等操作中进行选择。</p>
+    <p>响应将在<code>msg.payload</code>中作为buffer输出，因此您可能需要对它进行<code>.toString()</code>操作。</p>
+    <p>如果将tcp主机或端口留空，则必须使用<code>msg.host</code>和<code>msg.port</code>属性进行设置。</p>
+</script>
