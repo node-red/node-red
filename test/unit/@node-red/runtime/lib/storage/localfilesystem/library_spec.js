@@ -72,45 +72,52 @@ describe('storage/localfilesystem/library', function() {
     });
 
     function createObjectLibrary(type) {
-        type = type ||"object";
-        var objLib = path.join(userDir,"lib",type);
+        type = type || "object";
+        var objLib = path.join(userDir, "lib", type);
         try {
             fs.mkdirSync(objLib);
-        } catch(err) {
+        } catch (err) {
         }
-        fs.mkdirSync(path.join(objLib,"A"));
-        fs.mkdirSync(path.join(objLib,"B"));
-        fs.mkdirSync(path.join(objLib,"B","C"));
+        fs.mkdirSync(path.join(objLib, "A"));
+        fs.mkdirSync(path.join(objLib, "B"));
+        fs.mkdirSync(path.join(objLib, "B", "C"));
+        fs.mkdirSync(path.join(objLib, "D"));
         if (type === "functions" || type === "object") {
-            fs.writeFileSync(path.join(objLib,"file1.js"),"// abc: def\n// not a metaline \n\n Hi",'utf8');
-            fs.writeFileSync(path.join(objLib,"B","file2.js"),"// ghi: jkl\n// not a metaline \n\n Hi",'utf8');
+            fs.writeFileSync(path.join(objLib, "file1.js"), "// abc: def\n// not a metaline \n\n Hi", 'utf8');
+            fs.writeFileSync(path.join(objLib, "B", "file2.js"), "// ghi: jkl\n// not a metaline \n\n Hi", 'utf8');
+            fs.writeFileSync(path.join(objLib, "D", "file3.js"), "// mno: 日本語テスト\n\nこんにちわ", 'utf8');
         }
         if (type === "flows" || type === "object") {
-            fs.writeFileSync(path.join(objLib,"B","flow.json"),"Hi",'utf8');
+            fs.writeFileSync(path.join(objLib, "B", "flow.json"), "Hi", 'utf8');
         }
     }
 
-    it('should return a directory listing of library objects',function(done) {
-        localfilesystemLibrary.init({userDir:userDir}).then(function() {
+    it('should return a directory listing of library objects', function (done) {
+        localfilesystemLibrary.init({userDir: userDir}).then(function () {
             createObjectLibrary();
 
-            localfilesystemLibrary.getLibraryEntry('object','').then(function(flows) {
-                flows.should.eql([ 'A', 'B', { abc: 'def', fn: 'file1.js' } ]);
-                localfilesystemLibrary.getLibraryEntry('object','B').then(function(flows) {
-                    flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, { fn: 'flow.json' } ]);
-                    localfilesystemLibrary.getLibraryEntry('object','B/C').then(function(flows) {
+            localfilesystemLibrary.getLibraryEntry('object', '').then(function (flows) {
+                flows.should.eql([ 'A', 'B', 'D', { abc: 'def', fn: 'file1.js' }]);
+                localfilesystemLibrary.getLibraryEntry('object', 'B').then(function (flows) {
+                    flows.should.eql([ 'C', { ghi: 'jkl', fn: 'file2.js' }, { fn: 'flow.json' }]);
+                    localfilesystemLibrary.getLibraryEntry('object', 'B/C').then(function (flows) {
                         flows.should.eql([]);
-                        done();
-                    }).catch(function(err) {
+                        localfilesystemLibrary.getLibraryEntry('object', 'D').then(function (flows) {
+                            flows.should.eql([{ mno: '日本語テスト', fn: 'file3.js' }]);
+                            done();
+                        }).catch(function (err) {
+                            done(err);
+                        });
+                    }).catch(function (err) {
                         done(err);
                     });
-                }).catch(function(err) {
+                }).catch(function (err) {
                     done(err);
                 });
-            }).catch(function(err) {
+            }).catch(function (err) {
                 done(err);
             });
-        }).catch(function(err) {
+        }).catch(function (err) {
             done(err);
         });
     });
