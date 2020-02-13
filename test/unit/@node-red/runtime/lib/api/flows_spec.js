@@ -54,15 +54,18 @@ describe("runtime-api/flows", function() {
         var loadCredentials;
         var reloadError = false;
         beforeEach(function() {
-            setFlows = sinon.spy(function(flows,type) {
-                if (flows[0] === "error") {
-                    var err = new Error("error");
-                    err.code = "error";
-                    var p = Promise.reject(err);
-                    p.catch(()=>{});
-                    return p;
-                }
-                return Promise.resolve("newRev");
+            setFlows = sinon.spy(function(flows,type,muteLog,forceStart,opt) {
+                var credPromise = (opt && opt.credentials) ? loadCredentials(opt.credentials) : Promise.resolve();
+                return credPromise.then(() => {
+                    if (flows[0] === "error") {
+                        var err = new Error("error");
+                        err.code = "error";
+                        var p = Promise.reject(err);
+                        p.catch(()=>{});
+                        return p;
+                    }
+                    return Promise.resolve("newRev");
+                });
             });
             loadFlows = sinon.spy(function() {
                 if (!reloadError) {
