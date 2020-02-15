@@ -827,7 +827,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to send 2nd message to a 2nd output', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"hello",  op2:"world", duration:"50", second:true, wires:[["n2"],["n3"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"hello",  op2:"world", duration:"50", outputs:2, wires:[["n2"],["n3"]] },
             {id:"n2", type:"helper"}, {id:"n3", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
