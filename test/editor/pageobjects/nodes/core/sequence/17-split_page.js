@@ -25,3 +25,11 @@ function joinNode(id) {
 util.inherits(joinNode, nodePage);
 
 module.exports = joinNode;
+
+function joinNode(id) {
+    nodePage.call(this, id);
+}
+
+util.inherits(joinNode, nodePage);
+
+module.exports = joinNode;
