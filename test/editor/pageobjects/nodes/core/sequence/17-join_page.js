@@ -18,14 +18,10 @@ var util = require('util');
 
 var nodePage = require('../../node_page');
 
-function htmlNode(id) {
+function joinNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(htmlNode, nodePage);
+util.inherits(joinNode, nodePage);
 
-htmlNode.prototype.setSelector = function (tag) {
-    browser.setValue('#node-input-tag', tag);
-}
-
-module.exports = htmlNode;
+module.exports = joinNode;

@@ -18,14 +18,18 @@ var util = require('util');
 
 var nodePage = require('../../node_page');
 
-function htmlNode(id) {
+function yamlNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(htmlNode, nodePage);
+util.inherits(yamlNode, nodePage);
 
-htmlNode.prototype.setSelector = function (tag) {
-    browser.setValue('#node-input-tag', tag);
+yamlNode.prototype.setAction = function (action) {
+    browser.setValue('node-input-action', action);
 }
 
-module.exports = htmlNode;
+yamlNode.prototype.setProperty = function (property) {
+    browser.setValue('//*[@id="dialog-form"]/div[3]/div/div[1]/input', property);
+}
+
+module.exports = yamlNode;

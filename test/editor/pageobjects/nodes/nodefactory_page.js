@@ -25,8 +25,13 @@ var mqttOutNode = require('./core/network/10-mqttout_page');
 var httpInNode = require('./core/network/21-httpin_page');
 var httpResponseNode = require('./core/network/21-httpresponse_page');
 var httpRequestNode = require('./core/network/21-httprequest_page');
+var splitNode = require('./core/sequence/17-split_page');
+var joinNode = require('./core/sequence/17-join_page');
+var csvNode = require('./core/parsers/70-CSV_page');
 var htmlNode = require('./core/parsers/70-HTML_page');
 var jsonNode = require('./core/parsers/70-JSON_page');
+var xmlNode = require('./core/parsers/70-XML_page');
+var yamlNode = require('./core/parsers/70-YAML_page');
 var fileInNode = require('./core/storage/10-filein_page');
 
 var nodeCatalog = {
@@ -44,9 +49,15 @@ var nodeCatalog = {
     "httpIn": httpInNode,
     "httpResponse": httpResponseNode,
     "httpRequest": httpRequestNode,
+    // sequence
+    "split": splitNode,
+    "join": joinNode,
     // parser
+    "csv": csvNode,
     "html": htmlNode,
     "json": jsonNode,
+    "xml": xmlNode,
+    "yaml": yamlNode,
     // storage
     "fileIn": fileInNode
 };
