@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var util = require("util");
+var util = require('util');
 
-var nodePage = require("../../node_page");
+var nodePage = require('../../node_page');
 
 function changeNode(id) {
     nodePage.call(this, id);
@@ -85,7 +85,7 @@ changeNode.prototype.ruleMove = function (p, to, index) {
 }
 
 changeNode.prototype.addRule = function () {
-    browser.clickWithWait('//*[@id="dialog-form"]/div[3]/div/a');
+    browser.clickWithWait('//*[@id="dialog-form"]/div[5]/div/a');
 }
 
 module.exports = changeNode;
