@@ -75,6 +75,8 @@
         "bcrypt": "3.0.6"
     },
     "devDependencies": {
+        "marked": "0.8.0",
+        "dompurify": "2.0.8",
         "grunt": "~1.0.4",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.3.2",
