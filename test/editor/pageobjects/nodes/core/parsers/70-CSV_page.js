@@ -18,18 +18,34 @@ var util = require('util');
 
 var nodePage = require('../../node_page');
 
-function jsonNode(id) {
+function csvNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(jsonNode, nodePage);
+util.inherits(csvNode, nodePage);
 
-jsonNode.prototype.setAction = function (action) {
-    browser.setValue('node-input-action', action);
+csvNode.prototype.setColumns = function (columns) {
+    browser.setValue('#node-input-temp', columns);
 }
 
-jsonNode.prototype.setProperty = function (property) {
-    browser.setValue('//*[@id="dialog-form"]/div[4]/div/div[1]/input', property);
+csvNode.prototype.setSkipLines = function (skip) {
+    browser.setValue('#node-input-skip', skip);
 }
 
-module.exports = jsonNode;
+csvNode.prototype.setFirstRow4Names = function (checkbox) {
+    if (browser.isSelected('#node-input-hdrin') !== checkbox) {
+        browser.click('#node-input-hdrin');
+    }
+}
+
+csvNode.prototype.setOutput = function (output) {
+    browser.selectWithWait('#node-input-multi', output);
+}
+
+csvNode.prototype.setIncludeRow = function (checkbox) {
+    if (browser.isSelected('#node-input-hdrout') !== checkbox) {
+        browser.click('#node-input-hdrout');
+    }
+}
+
+module.exports = csvNode;

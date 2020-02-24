@@ -15,22 +15,29 @@
  **/
 
 var idMap = {
-    // input
+    // common
     "inject": ".red-ui-palette-node[data-palette-type='inject']",
-    "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
-    "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
-    // output
     "debug": ".red-ui-palette-node[data-palette-type='debug']",
-    "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
-    "mqttOut": ".red-ui-palette-node[data-palette-type='mqtt out']",
     // function
     "function": ".red-ui-palette-node[data-palette-type='function']",
-    "template": ".red-ui-palette-node[data-palette-type='template']",
     "change": ".red-ui-palette-node[data-palette-type='change']",
     "range": ".red-ui-palette-node[data-palette-type='range']",
+    "template": ".red-ui-palette-node[data-palette-type='template']",
+    // network
+    "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
+    "mqttOut": ".red-ui-palette-node[data-palette-type='mqtt out']",
+    "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
+    "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
     "httpRequest": ".red-ui-palette-node[data-palette-type='http request']",
+    // sequence
+    "join": ".red-ui-palette-node[data-palette-type='join']",
+    "split": ".red-ui-palette-node[data-palette-type='split']",
+    // parser
+    "csv": ".red-ui-palette-node[data-palette-type='csv']",
     "html": ".red-ui-palette-node[data-palette-type='html']",
     "json": ".red-ui-palette-node[data-palette-type='json']",
+    "xml": ".red-ui-palette-node[data-palette-type='xml']",
+    "yaml": ".red-ui-palette-node[data-palette-type='yaml']",
     // storage
     "fileIn": ".red-ui-palette-node[data-palette-type='file in']",
 };
