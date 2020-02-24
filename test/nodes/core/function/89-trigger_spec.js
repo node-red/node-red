@@ -736,10 +736,12 @@ describe('trigger node', function() {
                 try {
                     if (c === 0) {
                         msg.should.have.a.property("payload", "Goodbye");
+                        msg.should.have.a.property("topic", "test2");
                         c += 1;
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
+                        msg.should.have.a.property("topic", "test3");
                         (Date.now() - ss).should.be.greaterThan(70);
                         done();
                     }
@@ -747,12 +749,12 @@ describe('trigger node', function() {
                 catch(err) { done(err); }
             });
             var ss = Date.now();
-            n1.emit("input", {payload:"Hello"});
+            n1.emit("input", {payload:"Hello", topic:"test1"});
             setTimeout( function() {
-                n1.emit("input", {payload:"Goodbye"});
+                n1.emit("input", {payload:"Goodbye", topic:"test2"});
             },20);
             setTimeout( function() {
-                n1.emit("input", {payload:"World"});
+                n1.emit("input", {payload:"World", topic:"test3"});
             },80);
         });
     });
