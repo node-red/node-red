@@ -16,6 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var sass = require("node-sass");
 
 module.exports = function(grunt) {
 
@@ -25,9 +26,13 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var browserstack = grunt.option('browserstack');
+    if (browserstack) {
+        process.env.BROWSERSTACK = true;
+    }
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
-        process.env.NODE_RED_NON_HEADLESS = 'true';
+        process.env.NODE_RED_NON_HEADLESS = true;
     }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -79,20 +84,20 @@ module.exports = function(grunt) {
                 //"loopfunc": true, // allow functions to be defined in loops
                 //"sub": true       // don't warn that foo['bar'] should be written as foo.bar
             },
-            all: [
-                'Gruntfile.js',
-                'red.js',
-                'packages/**/*.js'
-            ],
-            core: {
-                files: {
-                    src: [
-                        'Gruntfile.js',
-                        'red.js',
-                        'packages/**/*.js',
-                    ]
-                }
-            },
+            // all: [
+            //     'Gruntfile.js',
+            //     'red.js',
+            //     'packages/**/*.js'
+            // ],
+            // core: {
+            //     files: {
+            //         src: [
+            //             'Gruntfile.js',
+            //             'red.js',
+            //             'packages/**/*.js',
+            //         ]
+            //     }
+            // },
             nodes: {
                 files: {
                     src: [ 'nodes/core/*/*.js' ]
@@ -100,7 +105,7 @@ module.exports = function(grunt) {
             },
             editor: {
                 files: {
-                    src: [ 'editor/js/**/*.js' ]
+                    src: [ 'packages/node_modules/@node-red/editor-client/src/js/**/*.js' ]
                 }
             },
             tests: {
@@ -220,6 +225,7 @@ module.exports = function(grunt) {
         sass: {
             build: {
                 options: {
+                    implementation: sass,
                     outputStyle: 'compressed'
                 },
                 files: [{
@@ -276,7 +282,7 @@ module.exports = function(grunt) {
                 files: [
                     'packages/node_modules/@node-red/editor-client/src/js/**/*.js'
                 ],
-                tasks: ['copy:build','concat','uglify','attachCopyright:js']
+                tasks: ['copy:build','concat',/*'uglify',*/ 'attachCopyright:js']
             },
             sass: {
                 files: [
@@ -496,7 +502,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-chmod');
     grunt.loadNpmTasks('grunt-jsonlint');
     grunt.loadNpmTasks('grunt-mocha-istanbul');
-    grunt.loadNpmTasks('grunt-webdriver');
+    if (fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+        grunt.loadNpmTasks('grunt-webdriver');
+    }
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-jsdoc-to-markdown');
     grunt.loadNpmTasks('grunt-npm-command');
@@ -555,12 +563,25 @@ module.exports = function(grunt) {
     });
 
     grunt.registerTask('verifyUiTestDependencies', function() {
-        if (!fs.existsSync(path.join("node_modules", "chromedriver"))) {
-            grunt.fail.fatal('You need to run "npm install chromedriver@2" before running UI test.');
+        if (!fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+            grunt.fail.fatal('You need to install the UI test dependencies first.\nUse the script in "scripts/install-ui-test-dependencies.sh"');
             return false;
         }
     });
+    grunt.registerTask('generatePublishScript',
+        'Generates a script to publish build output to npm',
+            function () {
+                const done = this.async();
+                const generatePublishScript = require("./scripts/generate-publish-script.js");
+                generatePublishScript().then(function(output) {
+                    grunt.log.writeln(output);
 
+                    const filePath = path.join(grunt.config.get('paths.dist'),"modules","publish.sh");
+                    grunt.file.write(filePath,output);
+
+                    done();
+                });
+            });
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -579,9 +600,15 @@ module.exports = function(grunt) {
         'Runs code style check on editor code',
         ['jshint:editor']);
 
-    grunt.registerTask('test-ui',
-        'Builds editor content then runs unit tests on editor ui',
-        ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
+    if (!fs.existsSync(path.join("node_modules", "grunt-webdriver"))) {
+        grunt.registerTask('test-ui',
+            'Builds editor content then runs unit tests on editor ui',
+            ['verifyUiTestDependencies']);
+    } else {
+        grunt.registerTask('test-ui',
+            'Builds editor content then runs unit tests on editor ui',
+            ['verifyUiTestDependencies','build','jshint:editor','webdriver:all']);
+    }
 
     grunt.registerTask('test-nodes',
         'Runs unit tests on core nodes',
@@ -597,7 +624,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules']);
+        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules','generatePublishScript']);
 
     grunt.registerTask('pack-modules',
         'Create module pack files for release',

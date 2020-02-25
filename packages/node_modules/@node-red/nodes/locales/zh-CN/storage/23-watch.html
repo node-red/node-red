@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="watch">
+    <p>监视目录或文件中的更改。</p>
+    <p>您可以输入用逗号分隔的目录和/或文件的列表。您需要在所有带有空格的地方加上引号“...”。</p>
+    <p>在Windows上，必须在任何目录名称中使用双反斜杠<code>\\</code>。</p>
+    <p>实际更改的文件的完整文件名将放入<code>msg.payload</code>和<code>msg.filename</code>中，而监视列表的字符串化版本将在<code>msg.topic</code>中返回。</p>
+    <p><code>msg.file</code>仅包含已更改文件的短文件名。<code>msg.type</code>更改了事物的类型，通常是<i>file</i>或<i>directory</i>，而<code>msg.size</code>保留了文件的大小（以字节为单位）。</p>
+    <p>当然，在Linux中，<i>everything</i>也是一个文件，因此可以监视</p>
+    <p><b>注意：</b>该目录或文件必须存在才能被监视。如果文件或目录被删除，即使重新创建它也可能不再被监视。</p>
+</script>

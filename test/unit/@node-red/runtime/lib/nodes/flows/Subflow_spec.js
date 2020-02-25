@@ -271,32 +271,34 @@ describe('Subflow', function() {
 
             currentNodes["1"].receive({payload:"test"});
 
-            currentNodes["1"].should.have.a.property("handled",1);
-            // currentNodes[sfInstanceId].should.have.a.property("handled",1);
-            // currentNodes[sfInstanceId2].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",1);
-            currentNodes["4"].should.have.a.property("handled",1);
+            setTimeout(function() {
+                currentNodes["1"].should.have.a.property("handled",1);
+                // currentNodes[sfInstanceId].should.have.a.property("handled",1);
+                // currentNodes[sfInstanceId2].should.have.a.property("handled",1);
+                currentNodes["3"].should.have.a.property("handled",1);
+                currentNodes["4"].should.have.a.property("handled",1);
 
 
 
-            flow.stop().then(function() {
-                Object.keys(currentNodes).should.have.length(0);
-                Object.keys(stoppedNodes).should.have.length(6);
+                flow.stop().then(function() {
+                    Object.keys(currentNodes).should.have.length(0);
+                    Object.keys(stoppedNodes).should.have.length(6);
 
-                // currentNodes.should.not.have.a.property("1");
-                // currentNodes.should.not.have.a.property("3");
-                // currentNodes.should.not.have.a.property("4");
-                // // currentNodes.should.not.have.a.property(sfInstanceId);
-                // // currentNodes.should.not.have.a.property(sfInstanceId2);
-                // // currentNodes.should.not.have.a.property(sfConfigId);
-                // stoppedNodes.should.have.a.property("1");
-                // stoppedNodes.should.have.a.property("3");
-                // stoppedNodes.should.have.a.property("4");
-                // // stoppedNodes.should.have.a.property(sfInstanceId);
-                // // stoppedNodes.should.have.a.property(sfInstanceId2);
-                // // stoppedNodes.should.have.a.property(sfConfigId);
-                done();
-            });
+                    // currentNodes.should.not.have.a.property("1");
+                    // currentNodes.should.not.have.a.property("3");
+                    // currentNodes.should.not.have.a.property("4");
+                    // // currentNodes.should.not.have.a.property(sfInstanceId);
+                    // // currentNodes.should.not.have.a.property(sfInstanceId2);
+                    // // currentNodes.should.not.have.a.property(sfConfigId);
+                    // stoppedNodes.should.have.a.property("1");
+                    // stoppedNodes.should.have.a.property("3");
+                    // stoppedNodes.should.have.a.property("4");
+                    // // stoppedNodes.should.have.a.property(sfInstanceId);
+                    // // stoppedNodes.should.have.a.property(sfInstanceId2);
+                    // // stoppedNodes.should.have.a.property(sfConfigId);
+                    done();
+                });
+            },150);
         });
         it("instantiates a subflow inside a subflow and stops it",function(done) {
             var config = flowUtils.parseConfig([
@@ -322,17 +324,14 @@ describe('Subflow', function() {
 
             currentNodes["1"].receive({payload:"test"});
 
-            currentNodes["1"].should.have.a.property("handled",1);
-
-
-            currentNodes["3"].should.have.a.property("handled",1);
-
-
-
-            flow.stop().then(function() {
-                Object.keys(currentNodes).should.have.length(0);
-                done();
-            });
+            setTimeout(function() {
+                currentNodes["1"].should.have.a.property("handled",1);
+                currentNodes["3"].should.have.a.property("handled",1);
+                flow.stop().then(function() {
+                    Object.keys(currentNodes).should.have.length(0);
+                    done();
+                });
+            },150);
         });
         it("rewires a subflow node on update/start",function(done){
 
@@ -369,27 +368,31 @@ describe('Subflow', function() {
 
             currentNodes["1"].receive({payload:"test"});
 
-            currentNodes["1"].should.have.a.property("handled",1);
-            // currentNodes[sfInstanceId].should.have.a.property("handled",1);
-            // currentNodes[sfInstanceId2].should.have.a.property("handled",1);
-            currentNodes["3"].should.have.a.property("handled",1);
-            currentNodes["4"].should.have.a.property("handled",0);
+            setTimeout(function() {
+                currentNodes["1"].should.have.a.property("handled",1);
+                // currentNodes[sfInstanceId].should.have.a.property("handled",1);
+                // currentNodes[sfInstanceId2].should.have.a.property("handled",1);
+                currentNodes["3"].should.have.a.property("handled",1);
+                currentNodes["4"].should.have.a.property("handled",0);
 
-            flow.update(newConfig,newConfig.flows["t1"]);
-            flow.start(diff)
+                flow.update(newConfig,newConfig.flows["t1"]);
+                flow.start(diff)
 
-            currentNodes["1"].receive({payload:"test2"});
+                currentNodes["1"].receive({payload:"test2"});
+                setTimeout(function() {
 
-            currentNodes["1"].should.have.a.property("handled",2);
-            // currentNodes[sfInstanceId].should.have.a.property("handled",2);
-            // currentNodes[sfInstanceId2].should.have.a.property("handled",2);
-            currentNodes["3"].should.have.a.property("handled",1);
-            currentNodes["4"].should.have.a.property("handled",1);
+                    currentNodes["1"].should.have.a.property("handled",2);
+                    // currentNodes[sfInstanceId].should.have.a.property("handled",2);
+                    // currentNodes[sfInstanceId2].should.have.a.property("handled",2);
+                    currentNodes["3"].should.have.a.property("handled",1);
+                    currentNodes["4"].should.have.a.property("handled",1);
 
 
-            flow.stop().then(function() {
-                done();
-            });
+                    flow.stop().then(function() {
+                        done();
+                    });
+                },150);
+            },150);
         });
     });
     describe('#stop', function() {
@@ -436,20 +439,20 @@ describe('Subflow', function() {
             var activeNodes = flow.getActiveNodes();
 
             activeNodes["1"].receive({payload:"test"});
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","test status");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("type","testStatus");
+                statusMessage.status.source.should.have.a.property("name","test-status-node");
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","test status");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("type","testStatus");
-            statusMessage.status.source.should.have.a.property("name","test-status-node");
-
-            flow.stop().then(function() {
-
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },150);
         });
         it("passes a status event to the subflow's parent tab status node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
@@ -472,21 +475,23 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({payload:"test"});
 
-            parentFlowStatusCalled.should.be.false();
+            setTimeout(function() {
+                parentFlowStatusCalled.should.be.false();
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","test status");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("type","testStatus");
-            statusMessage.status.source.should.have.a.property("name","test-status-node");
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","test status");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("type","testStatus");
+                statusMessage.status.source.should.have.a.property("name","test-status-node");
 
-            flow.stop().then(function() {
+                flow.stop().then(function() {
 
-                done();
-            });
+                    done();
+                });
+            },150);
         });
     });
 
@@ -517,19 +522,21 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({payload:"test-payload"});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","test-payload");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","2");
-            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","test-payload");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","2");
+                statusMessage.status.source.should.have.a.property("type","subflow:sf1");
 
-            flow.stop().then(function() {
+                flow.stop().then(function() {
 
-                done();
-            });
+                    done();
+                });
+            },150);
         });
         it("emits a status event when a message is passed to a subflow-status node - msg.payload as status obj", function(done) {
             var config = flowUtils.parseConfig([
@@ -557,19 +564,21 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({payload:{text:"payload-obj"}});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","payload-obj");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","2");
-            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","payload-obj");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","2");
+                statusMessage.status.source.should.have.a.property("type","subflow:sf1");
 
-            flow.stop().then(function() {
+                flow.stop().then(function() {
 
-                done();
-            });
+                    done();
+                });
+            },150);
         });
         it("emits a status event when a message is passed to a subflow-status node - msg.status", function(done) {
             var config = flowUtils.parseConfig([
@@ -597,19 +606,21 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({status:{text:"status-obj"}});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("status");
-            statusMessage.status.should.have.a.property("text","status-obj");
-            statusMessage.status.should.have.a.property("source");
-            statusMessage.status.source.should.have.a.property("id","2");
-            statusMessage.status.source.should.have.a.property("type","subflow:sf1");
+                statusMessage.should.have.a.property("status");
+                statusMessage.status.should.have.a.property("text","status-obj");
+                statusMessage.status.should.have.a.property("source");
+                statusMessage.status.source.should.have.a.property("id","2");
+                statusMessage.status.source.should.have.a.property("type","subflow:sf1");
 
-            flow.stop().then(function() {
+                flow.stop().then(function() {
 
-                done();
-            });
+                    done();
+                });
+            },150);
         });
         it("does not emit a regular status event if it contains a subflow-status node", function(done) {
             var config = flowUtils.parseConfig([
@@ -666,18 +677,20 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({payload:"test"});
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+            setTimeout(function() {
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","test error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("type","testError");
-            statusMessage.error.source.should.have.a.property("name","test-error-node");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","test error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("type","testError");
+                statusMessage.error.source.should.have.a.property("name","test-error-node");
 
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },150);
         });
         it("passes an error event to the subflow's parent tab catch node - targetted scope",function(done) {
             var config = flowUtils.parseConfig([
@@ -699,20 +712,22 @@ describe('Subflow', function() {
 
             activeNodes["1"].receive({payload:"test"});
 
-            parentFlowErrorCalled.should.be.false();
+            setTimeout(function() {
+                parentFlowErrorCalled.should.be.false();
 
-            currentNodes["sn"].should.have.a.property("handled",1);
-            var statusMessage = currentNodes["sn"].messages[0];
+                currentNodes["sn"].should.have.a.property("handled",1);
+                var statusMessage = currentNodes["sn"].messages[0];
 
-            statusMessage.should.have.a.property("error");
-            statusMessage.error.should.have.a.property("message","test error");
-            statusMessage.error.should.have.a.property("source");
-            statusMessage.error.source.should.have.a.property("type","testError");
-            statusMessage.error.source.should.have.a.property("name","test-error-node");
+                statusMessage.should.have.a.property("error");
+                statusMessage.error.should.have.a.property("message","test error");
+                statusMessage.error.should.have.a.property("source");
+                statusMessage.error.source.should.have.a.property("type","testError");
+                statusMessage.error.source.should.have.a.property("name","test-error-node");
 
-            flow.stop().then(function() {
-                done();
-            });
+                flow.stop().then(function() {
+                    done();
+                });
+            },150);
 
         });
     });
@@ -756,11 +771,13 @@ describe('Subflow', function() {
             process.env["__KEY__"] = "__VAL__";
 
             currentNodes["1"].receive({payload: "test"});
-            currentNodes["3"].should.have.a.property("received", "__VAL__");
-            
-            flow.stop().then(function() {
-                done();
-            });
+            setTimeout(function() {
+                currentNodes["3"].should.have.a.property("received", "__VAL__");
+
+                flow.stop().then(function() {
+                    done();
+                });
+            },150);
         });
 
         it("can access subflow env var", function(done) {
@@ -792,13 +809,15 @@ describe('Subflow', function() {
             }
             process.env["__KEY__"] = "__VAL0__";
             setEnv(testenv_node, "__KEY__", "__VAL1__");
-            
-            currentNodes["1"].receive({payload: "test"});
-            currentNodes["3"].should.have.a.property("received", "__VAL1__");
 
-            flow.stop().then(function() {
-                done();
-            });
+            currentNodes["1"].receive({payload: "test"});
+            setTimeout(function() {
+                currentNodes["3"].should.have.a.property("received", "__VAL1__");
+
+                flow.stop().then(function() {
+                    done();
+                });
+            },150);
         });
 
         it("can access nested subflow env var", function(done) {
@@ -840,21 +859,27 @@ describe('Subflow', function() {
 
             process.env["__KEY__"] = "__VAL0__";
             currentNodes["1"].receive({payload: "test"});
-            currentNodes["3"].should.have.a.property("received", "__VAL0__");
+            setTimeout(function() {
+                currentNodes["3"].should.have.a.property("received", "__VAL0__");
 
-            setEnv(node_sf1_1, "__KEY__", "__VAL1__");
-            currentNodes["1"].receive({payload: "test"});
-            currentNodes["3"].should.have.a.property("received", "__VAL1__");
+                setEnv(node_sf1_1, "__KEY__", "__VAL1__");
+                currentNodes["1"].receive({payload: "test"});
+                setTimeout(function() {
+                    currentNodes["3"].should.have.a.property("received", "__VAL1__");
 
-            setEnv(node_sf2_1, "__KEY__", "__VAL2__");
-            currentNodes["1"].receive({payload: "test"});
-            currentNodes["3"].should.have.a.property("received", "__VAL2__");
+                    setEnv(node_sf2_1, "__KEY__", "__VAL2__");
+                    currentNodes["1"].receive({payload: "test"});
+                    setTimeout(function() {
+                        currentNodes["3"].should.have.a.property("received", "__VAL2__");
 
-            flow.stop().then(function() {
-                done();
-            });
+                        flow.stop().then(function() {
+                            done();
+                        });
+                    },150);
+                },150);
+            },150);
         });
-        
+
     });
-    
+
 });

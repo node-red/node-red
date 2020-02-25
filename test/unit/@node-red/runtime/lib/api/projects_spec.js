@@ -57,7 +57,9 @@ describe("runtime-api/settings", function() {
 
     });
     describe("listProjects", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+            log: mockLog(),
+            storage: {projects: {
             listProjects: sinon.spy(function(user) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -105,7 +107,9 @@ describe("runtime-api/settings", function() {
 
     });
     describe("createProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             createProject: sinon.spy(function(user,project) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -138,7 +142,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("initialiseProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             initialiseProject: sinon.spy(function(user,id,project) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -172,7 +178,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getActiveProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getActiveProject: sinon.spy(function(user) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -209,7 +217,9 @@ describe("runtime-api/settings", function() {
         var activeProject;
         var runtime;
         beforeEach(function() {
-            runtime = {storage: {projects: {
+            runtime = {
+        log: mockLog(),
+        storage: {projects: {
                 getActiveProject: sinon.spy(function() { return activeProject;}),
                 setActiveProject: sinon.spy(function(user,id) {
                     if (user === "error") {
@@ -258,7 +268,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getProject: sinon.spy(function(user,id) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -291,7 +303,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("updateProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             updateProject: sinon.spy(function(user,id,project) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -325,7 +339,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("deleteProject", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             deleteProject: sinon.spy(function(user,id) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -359,7 +375,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getStatus", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getStatus: sinon.spy(function(user,id,remote) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -392,7 +410,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("getBranches", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getBranches: sinon.spy(function(user,id,remote) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -425,7 +445,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("getBranchStatus", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getBranchStatus: sinon.spy(function(user,id,branch) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -459,7 +481,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("setBranch", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             setBranch: sinon.spy(function(user,id,branch,create) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -493,7 +517,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("deleteBranch", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             deleteBranch: sinon.spy(function(user,id,branch,something,force) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -527,7 +553,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("commit", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             commit: sinon.spy(function(user,id,message) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -560,7 +588,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("getCommit", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getCommit: sinon.spy(function(user,id,sha) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -594,7 +624,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getCommits", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getCommits: sinon.spy(function(user,id,options) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -634,7 +666,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("abortMerge", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             abortMerge: sinon.spy(function(user,id) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -668,7 +702,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("resolveMerge", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             resolveMerge: sinon.spy(function(user,id,path,resolution) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -702,7 +738,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getFiles", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getFiles: sinon.spy(function(user,id) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -736,7 +774,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getFile", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getFile: sinon.spy(function(user,id,path,tree) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -770,7 +810,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("stageFile", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             stageFile: sinon.spy(function(user,id,path) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -803,7 +845,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("unstageFile", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             unstageFile: sinon.spy(function(user,id,path) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -837,7 +881,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("revertFile", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             revertFile: sinon.spy(function(user,id,path) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -871,7 +917,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getFileDiff", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getFileDiff: sinon.spy(function(user,id,path,type) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -905,7 +953,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("getRemotes", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             getRemotes: sinon.spy(function(user,id) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -939,7 +989,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("addRemote", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             addRemote: sinon.spy(function(user,id,remote) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -973,7 +1025,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("removeRemote", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             removeRemote: sinon.spy(function(user,id,remote) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -1007,7 +1061,9 @@ describe("runtime-api/settings", function() {
     });
 
     describe("updateRemote", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             updateRemote: sinon.spy(function(user,id,name,remote) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -1040,7 +1096,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("pull", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             pull: sinon.spy(function(user,id,remote,track,allowUnrelatedHistories) {
                 if (user === "error") {
                     var err = new Error("error");
@@ -1073,7 +1131,9 @@ describe("runtime-api/settings", function() {
         });
     });
     describe("push", function() {
-        var runtime = {storage: {projects: {
+        var runtime = {
+        log: mockLog(),
+        storage: {projects: {
             push: sinon.spy(function(user,id,remote,track) {
                 if (user === "error") {
                     var err = new Error("error");
