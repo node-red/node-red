@@ -18,11 +18,16 @@ var idMap = {
     // common
     "inject": ".red-ui-palette-node[data-palette-type='inject']",
     "debug": ".red-ui-palette-node[data-palette-type='debug']",
+    "complete": ".red-ui-palette-node[data-palette-type='complete']",
+    "catch": ".red-ui-palette-node[data-palette-type='catch']",
+    "status": ".red-ui-palette-node[data-palette-type='status']",
+    "comment": ".red-ui-palette-node[data-palette-type='comment']",
     // function
     "function": ".red-ui-palette-node[data-palette-type='function']",
     "change": ".red-ui-palette-node[data-palette-type='change']",
     "range": ".red-ui-palette-node[data-palette-type='range']",
     "template": ".red-ui-palette-node[data-palette-type='template']",
+    "delay": ".red-ui-palette-node[data-palette-type='delay']",
     // network
     "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
     "mqttOut": ".red-ui-palette-node[data-palette-type='mqtt out']",
@@ -30,8 +35,9 @@ var idMap = {
     "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
     "httpRequest": ".red-ui-palette-node[data-palette-type='http request']",
     // sequence
-    "join": ".red-ui-palette-node[data-palette-type='join']",
     "split": ".red-ui-palette-node[data-palette-type='split']",
+    "join": ".red-ui-palette-node[data-palette-type='join']",
+    "batch": ".red-ui-palette-node[data-palette-type='batch']",
     // parser
     "csv": ".red-ui-palette-node[data-palette-type='csv']",
     "html": ".red-ui-palette-node[data-palette-type='html']",
