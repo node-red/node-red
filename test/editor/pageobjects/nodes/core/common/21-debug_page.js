@@ -33,6 +33,8 @@ debugNode.prototype.setOutput = function (complete) {
         // Select the "msg" type.
         browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options")][1]/a[1]');
         // Input the path in msg.
+        browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-input")]/input');
+        browser.keys(Array('payload'.length).fill('Backspace'));
         browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', complete);
     } else {
         // Select the "complete msg object" type.

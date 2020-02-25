@@ -190,7 +190,7 @@ describe('cookbook', function () {
             httpRequestNode.clickOk();
 
             debugNode.edit();
-            debugNode.setOutput('.title');
+            debugNode.setOutput('payload.title');
             debugNode.clickOk();
 
             injectNode.connect(changeNodeSetPost);

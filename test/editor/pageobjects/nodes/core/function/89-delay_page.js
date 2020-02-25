@@ -14,22 +14,20 @@
  * limitations under the License.
  **/
 
-var util = require('util');
+var util = require("util");
 
-var nodePage = require('../../node_page');
+var nodePage = require("../../node_page");
 
-function splitNode(id) {
+var keyPage = require("../../../util/key_page");
+
+function delayNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(splitNode, nodePage);
+util.inherits(delayNode, nodePage);
 
-module.exports = splitNode;
-
-function joinNode(id) {
-    nodePage.call(this, id);
+delayNode.prototype.setTimeout = function (timeout) {
+    browser.setValue('//*[@id="node-input-timeout"]', timeout);
 }
 
-util.inherits(joinNode, nodePage);
-
-module.exports = joinNode;
+module.exports = delayNode;

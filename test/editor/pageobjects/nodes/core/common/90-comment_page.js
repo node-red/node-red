@@ -18,18 +18,10 @@ var util = require('util');
 
 var nodePage = require('../../node_page');
 
-function splitNode(id) {
+function commentNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(splitNode, nodePage);
+util.inherits(commentNode, nodePage);
 
-module.exports = splitNode;
-
-function joinNode(id) {
-    nodePage.call(this, id);
-}
-
-util.inherits(joinNode, nodePage);
-
-module.exports = joinNode;
+module.exports = commentNode;
