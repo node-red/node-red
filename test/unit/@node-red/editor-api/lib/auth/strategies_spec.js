@@ -129,6 +129,38 @@ describe("api/auth/strategies", function() {
         })
     });
 
+    describe("Tokens Strategy", function() {
+        it('Succeeds if tokens user enabled',function(done) {
+            var userDefault = sinon.stub(Users,"tokens",function(token) {
+                return when.resolve("tokens-"+token);
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-1234");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"1234"}});
+        });
+        it('Fails if tokens user not enabled',function(done) {
+            var userDefault = sinon.stub(Users,"tokens",function() {
+                return when.resolve(null);
+            });
+            strategies.tokensStrategy._fail = strategies.tokensStrategy.fail;
+            strategies.tokensStrategy.fail = function(err) {
+                err.should.equal(401);
+                strategies.tokensStrategy.fail = strategies.tokensStrategy._fail;
+                delete strategies.tokensStrategy._fail;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"1234"}});
+        });
+        afterEach(function() {
+            Users.tokens.restore();
+        })
+    });
+
     describe("Bearer Strategy", function() {
         it('Rejects invalid token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
