@@ -29,7 +29,7 @@ xmlNode.prototype.setAction = function (action) {
 }
 
 xmlNode.prototype.setProperty = function (property) {
-    browser.setValue('//*[@id="dialog-form"]/div[3]/div/div[1]/input', property);
+    browser.setValue('//*[contains(@class, "red-ui-typedInput-container")]/div[1]/input', property);
 }
 
 module.exports = xmlNode;
