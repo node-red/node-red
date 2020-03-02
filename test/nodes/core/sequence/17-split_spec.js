@@ -517,6 +517,49 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should join things into an array after a count with a buffer join set', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joinerType:"bin", joiner:"" ,mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.equal(1);
+                    msg.payload[1].should.equal(true);
+                    //msg.payload[2].a.should.equal(1);
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({payload:1});
+            n1.receive({payload:true});
+            n1.receive({payload:{a:1}});
+        });
+    });
+
+    it('should join strings into a buffer after a count', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:2, build:"buffer", joinerType:"bin", joiner:"", mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.length.should.equal(10);
+                    msg.payload.toString().should.equal("helloworld");
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({payload:"hello"});
+            n1.receive({payload:"world"});
+        });
+    });
+
     it('should join things into an object after a count', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, build:"object", mode:"custom"},
                     {id:"n2", type:"helper"}];
