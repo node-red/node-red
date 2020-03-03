@@ -251,7 +251,8 @@ describe('delay Node', function() {
             var helperNode1 = helper.getNode("helperNode1");
             var receivedMessagesStack = [];
 
-            var rate = 1000/aLimit;
+            // Add a small grace to the calculated delay
+            var rate = 1000/aLimit + 10;
 
             var receiveTimestamp;
 

@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="catch">
+    <p>捕获由同一标签页上的节点引发的错误。</p>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>error.message <span class="property-type">字符串</span></dt>
+        <dd>错误消息。</dd>
+        <dt>error.source.id <span class="property-type">字符串</span></dt>
+        <dd>引发错误的节点的ID。</dd>
+        <dt>error.source.type <span class="property-type">字符串</span></dt>
+        <dd>引发错误的节点的类型。</dd>
+        <dt>error.source.name <span class="property-type">字符串</span></dt>
+        <dd>引发错误的节点的名称。（如果已设置）</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>如果节点在处理消息时抛出错误，则流程通常会停止。该节点可用于捕获那些错误并通过专用流程进行处理。</p>
+    <p>默认情况下，该节点将捕获同一标签页上任何节点抛出的错误。或者，它可以针对特定节点，或配置为仅捕获另一个“目标”捕获节点尚未捕获的错误。</p>
+    <p>当错误发生时，所有匹配的catch节点都会收到错误消息。</p>
+    <p>如果在子流中发送了错误，则该错误将由子流中的任意捕获节点处理。如果子流中不存在捕获节点，则那错误将被传播到子流实例所在的标签页。</p>
+    <p>如果消息已经具有<code>error</code>属性，则将该<code>error</code>复制为<code>_error</code>。</p>
+</script>

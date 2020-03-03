@@ -143,6 +143,10 @@ describe("@node-red/util/util", function() {
             cloned.req.should.equal(msg.req);
             cloned.res.should.equal(msg.res);
         });
+        it('handles undefined values without throwing an error', function() {
+            var result = util.cloneMessage(undefined);
+            should.not.exist(result);
+        })
     });
     describe('getObjectProperty', function() {
         it('gets a property beginning with "msg."', function() {
@@ -772,6 +776,117 @@ describe("@node-red/util/util", function() {
                 var resultJson = JSON.parse(result.msg);
                 resultJson.socket.should.eql('[internal]');
             });
+            it('object which fails to serialise', function(done) {
+                var msg = {
+                    msg: {
+                        obj:{
+                            cantserialise:{
+                                message:'this will not be displayed',
+                                toJSON: function(val) {
+                                    throw 'this exception should have been caught';
+                                    return 'should not display because we threw first';
+                                },
+                            },
+                            canserialise:{
+                                message:'this should be displayed',
+                            }
+                        },
+                    }
+                };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("error");
+                var success = (result.msg.indexOf('cantserialise') > 0);
+                success &= (result.msg.indexOf('this exception should have been caught') > 0);
+                success &= (result.msg.indexOf('canserialise') > 0);
+                success.should.eql(1);
+                done();
+            });
+            it('object which fails to serialise - different error type', function(done) {
+                var msg = {
+                    msg: {
+                        obj:{
+                            cantserialise:{
+                                message:'this will not be displayed',
+                                toJSON: function(val) {
+                                    throw new Error('this exception should have been caught');
+                                    return 'should not display because we threw first';
+                                },
+                            },
+                            canserialise:{
+                                message:'this should be displayed',
+                            }
+                        },
+                    }
+                };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("error");
+                var success = (result.msg.indexOf('cantserialise') > 0);
+                success &= (result.msg.indexOf('this exception should have been caught') > 0);
+                success &= (result.msg.indexOf('canserialise') > 0);
+                success.should.eql(1);
+                done();
+            });
+            it('very large object which fails to serialise should be truncated', function(done) {
+                var msg = {
+                    msg: {
+                        obj:{
+                            big:"",
+                            cantserialise:{
+                                message:'this will not be displayed',
+                                toJSON: function(val) {
+                                    throw new Error('this exception should have been caught');
+                                    return 'should not display because we threw first';
+                                },
+                            },
+                            canserialise:{
+                                message:'this should be displayed',
+                            }
+                        },
+                    }
+                };
+
+                for (var i = 0; i < 1000; i++) {
+                    msg.msg.obj.big += 'some more string ';
+                }
+
+                var result = util.encodeObject(msg);
+                result.format.should.eql("error");
+                var resultJson = JSON.parse(result.msg);
+                var success = (resultJson.message.length <= 1000);
+                success.should.eql(true);
+                done();
+            });
+            it('test bad toString', function(done) {
+                var msg = {
+                    msg: {
+                        mystrangeobj:"hello",
+                    },
+                };
+                msg.msg.toString = function(){
+                    throw new Error('Exception in toString - should have been caught');
+                }
+                msg.msg.constructor = { name: "strangeobj" };
+
+                var result = util.encodeObject(msg);
+                var success = (result.msg.indexOf('[Type not printable]') >= 0);
+                success.should.eql(true);
+                done();
+            });
+            it('test bad object constructor', function(done) {
+                var msg = {
+                    msg: {
+                        mystrangeobj:"hello",
+                        constructor: {
+                            get name(){
+                                throw new Error('Exception in constructor name');
+                            }
+                        }
+                    },
+                };
+                var result = util.encodeObject(msg);
+                done();
+            });
+
         });
     });
 });

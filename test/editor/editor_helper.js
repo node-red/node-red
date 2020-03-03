@@ -52,8 +52,14 @@ function getFlowFilename() {
 }
 
 function cleanup(flowFile) {
-    deleteFile(homeDir+"/"+flowFile);
-    deleteFile(homeDir+"/."+flowFile+".backup");
+    var credentialFile = flowFile.replace(/\.json$/, '') + '_cred.json';
+    deleteFile(homeDir + "/" + flowFile);
+    deleteFile(homeDir + "/." + flowFile + ".backup");
+    deleteFile(homeDir + "/" + credentialFile);
+    deleteFile(homeDir + "/." + credentialFile + ".backup");
+    deleteFile(homeDir + "/package.json");
+    deleteFile(homeDir + "/lib/flows");
+    deleteFile(homeDir + "/lib");
 }
 
 function deleteFile(flowFile) {
@@ -63,7 +69,7 @@ function deleteFile(flowFile) {
             fs.unlinkSync(flowFile);
         }
     } catch (e) {}
-};
+}
 
 module.exports = {
     startServer: function() {
@@ -101,7 +107,7 @@ module.exports = {
                 });
             });
             browser.url(url);
-            browser.waitForExist(".red-ui-palette-node[data-palette-type='inject']")
+            browser.waitForExist(".red-ui-palette-node[data-palette-type='inject']");
         } catch (err) {
             console.log(err);
             throw err;

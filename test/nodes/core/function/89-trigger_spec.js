@@ -736,10 +736,12 @@ describe('trigger node', function() {
                 try {
                     if (c === 0) {
                         msg.should.have.a.property("payload", "Goodbye");
+                        msg.should.have.a.property("topic", "test2");
                         c += 1;
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
+                        msg.should.have.a.property("topic", "test3");
                         (Date.now() - ss).should.be.greaterThan(70);
                         done();
                     }
@@ -747,13 +749,48 @@ describe('trigger node', function() {
                 catch(err) { done(err); }
             });
             var ss = Date.now();
-            n1.emit("input", {payload:"Hello"});
+            n1.emit("input", {payload:"Hello", topic:"test1"});
             setTimeout( function() {
-                n1.emit("input", {payload:"Goodbye"});
+                n1.emit("input", {payload:"Goodbye", topic:"test2"});
             },20);
             setTimeout( function() {
-                n1.emit("input", {payload:"World"});
+                n1.emit("input", {payload:"World", topic:"test3"});
             },80);
+        });
+    });
+
+    it('should be able output the 2nd payload and handle multiple topics', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"false", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:"80", bytopic:"topic", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Goodbye1");
+                        msg.should.have.a.property("topic", "test1");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "Goodbye2");
+                        msg.should.have.a.property("topic", "test2");
+                        done();
+                    }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"Hello1", topic:"test1"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Hello2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye1", topic:"test1"});
+            },20);
         });
     });
 

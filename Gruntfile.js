@@ -16,6 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var sass = require("node-sass");
 
 module.exports = function(grunt) {
 
@@ -25,9 +26,13 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var browserstack = grunt.option('browserstack');
+    if (browserstack) {
+        process.env.BROWSERSTACK = true;
+    }
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
-        process.env.NODE_RED_NON_HEADLESS = 'true';
+        process.env.NODE_RED_NON_HEADLESS = true;
     }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -79,20 +84,20 @@ module.exports = function(grunt) {
                 //"loopfunc": true, // allow functions to be defined in loops
                 //"sub": true       // don't warn that foo['bar'] should be written as foo.bar
             },
-            all: [
-                'Gruntfile.js',
-                'red.js',
-                'packages/**/*.js'
-            ],
-            core: {
-                files: {
-                    src: [
-                        'Gruntfile.js',
-                        'red.js',
-                        'packages/**/*.js',
-                    ]
-                }
-            },
+            // all: [
+            //     'Gruntfile.js',
+            //     'red.js',
+            //     'packages/**/*.js'
+            // ],
+            // core: {
+            //     files: {
+            //         src: [
+            //             'Gruntfile.js',
+            //             'red.js',
+            //             'packages/**/*.js',
+            //         ]
+            //     }
+            // },
             nodes: {
                 files: {
                     src: [ 'nodes/core/*/*.js' ]
@@ -100,7 +105,7 @@ module.exports = function(grunt) {
             },
             editor: {
                 files: {
-                    src: [ 'editor/js/**/*.js' ]
+                    src: [ 'packages/node_modules/@node-red/editor-client/src/js/**/*.js' ]
                 }
             },
             tests: {
@@ -188,7 +193,8 @@ module.exports = function(grunt) {
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
+                        "node_modules/marked/marked.min.js",
+                        "node_modules/dompurify/dist/purify.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js",
                         "node_modules/jsonata/jsonata-es5.min.js",
@@ -220,6 +226,7 @@ module.exports = function(grunt) {
         sass: {
             build: {
                 options: {
+                    implementation: sass,
                     outputStyle: 'compressed'
                 },
                 files: [{
@@ -562,7 +569,20 @@ module.exports = function(grunt) {
             return false;
         }
     });
+    grunt.registerTask('generatePublishScript',
+        'Generates a script to publish build output to npm',
+            function () {
+                const done = this.async();
+                const generatePublishScript = require("./scripts/generate-publish-script.js");
+                generatePublishScript().then(function(output) {
+                    grunt.log.writeln(output);
 
+                    const filePath = path.join(grunt.config.get('paths.dist'),"modules","publish.sh");
+                    grunt.file.write(filePath,output);
+
+                    done();
+                });
+            });
     grunt.registerTask('setDevEnv',
         'Sets NODE_ENV=development so non-minified assets are used',
             function () {
@@ -605,7 +625,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask('release',
         'Create distribution zip file',
-        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules']);
+        ['build','verifyPackageDependencies','clean:release','mkdir:release','chmod:release','compress:release','pack-modules','generatePublishScript']);
 
     grunt.registerTask('pack-modules',
         'Create module pack files for release',

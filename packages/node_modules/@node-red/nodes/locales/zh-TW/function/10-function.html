@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="function">
+  <p>定義對接收到的消息進行處理的JavaScript代碼（函數的主體）。</p>
+  <p>輸入消息在名爲<code>msg</code>的JavaScript對象中傳遞。</p>
+  <p>通常，<code>msg</code>對象將消息正文保留在<code>msg.payload</code>屬性中。</p>
+  <p>該函數一般會返回一個消息對象（或多個消息對象），但也可以爲了停止流程而什麽都不返回。</p>
+  <h3>詳細</h3>
+  <p>請參見<a target="_blank" href="http://nodered.org/docs/writing-functions.html">在線文檔</a>來獲得更多有關編寫函數的信息。</p>
+  <h4>傳送消息</h4>
+  <p>要將消息傳遞到流程中的下一個節點，請返回消息或調用<code>node.send(messages)</code>。</p>
+  <p>它將返回/send:</p>
+  <ul>
+    <li>單個消息對象 - 傳遞給連接到第一個輸出的節點</li>
+    <li>消息對象數組，傳遞給連接到相應輸出的節點</li>
+  </ul>
+  <p>如果數組元素是數組，則將多個消息發送到相應的輸出。</p>
+  <p>無論return方法是單個值還是數組元素，如果返回值爲null，則不會發送任何消息。</p>
+  <h4>日志輸出和錯誤處理</h4>
+  <p>使用以下功能輸出日志信息和輸出錯誤：</p>
+    <ul>
+        <li><code>node.log("Log message")</code></li>
+        <li><code>node.warn("Warning")</code></li>
+        <li><code>node.error("Error")</code></li>
+    </ul>
+  </p>
+  <p>使用catch節點可以進行錯誤處理。 要由catch節點處理，請將<code>msg</code>作爲<code>node.error</code>的第二個參數傳遞：</p>
+  <pre>node.error("Error",msg);</pre>
+  <h4>訪問節點信息</h4>
+  <p>您可以使用以下屬性來在代碼中引用節點ID和名稱：</p>
+  <ul>
+      <li><code>node.id</code> - 節點的ID</li>
+      <li><code>node.name</code> - 節點的名稱</li>
+  </ul>
+  <h4>使用環境變量</h4>
+  <p>環境變量可以通過<code>env.get("MY_ENV_VAR")</code>來進行訪問。</p>
+</script>
