@@ -53,7 +53,6 @@ describe('function node', function() {
         });
     });
 
-
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"function", name: "function" }];
         helper.load(functionNode, flow, function() {
@@ -1333,6 +1332,32 @@ describe('function node', function() {
                 }
             });
             n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should execute initialization', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = global.get('X'); return msg;",initialize:"global.set('X','bar');"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property("payload", "bar");
+                done();
+            });
+            n1.receive({payload: "foo"});
+        });
+    });
+
+    it('should execute finalization', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[],func:"return msg;",finalize:"global.set('X','bar');"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var ctx = n1.context().global;
+            helper.unload().then(function () {
+                ctx.get('X').should.equal("bar");
+                done();
+            });
         });
     });
 
