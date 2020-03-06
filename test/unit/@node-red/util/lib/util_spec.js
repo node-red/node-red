@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 var should = require("should");
+var spawn = require("child_process").spawn;
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -146,7 +147,12 @@ describe("@node-red/util/util", function() {
         it('handles undefined values without throwing an error', function() {
             var result = util.cloneMessage(undefined);
             should.not.exist(result);
-        })
+        });
+        it('handles wrapped object', function() {
+            var msg = spawn("ls", []);;
+            var result = util.cloneMessage(msg);
+            msg.should.equal(msg);
+        });
     });
     describe('getObjectProperty', function() {
         it('gets a property beginning with "msg."', function() {
