@@ -29,7 +29,7 @@ jsonNode.prototype.setAction = function (action) {
 }
 
 jsonNode.prototype.setProperty = function (property) {
-    browser.setValue('//*[@id="dialog-form"]/div[4]/div/div[1]/input', property);
+    browser.setValue('//*[contains(@class, "red-ui-typedInput-container")]/div[1]/input', property);
 }
 
 module.exports = jsonNode;

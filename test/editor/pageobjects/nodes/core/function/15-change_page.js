@@ -85,7 +85,7 @@ changeNode.prototype.ruleMove = function (p, to, index) {
 }
 
 changeNode.prototype.addRule = function () {
-    browser.clickWithWait('//*[@id="dialog-form"]/div[5]/div/a');
+    browser.clickWithWait('//div[contains(@class, "red-ui-editableList")]/a');
 }
 
 module.exports = changeNode;
