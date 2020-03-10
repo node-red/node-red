@@ -24,6 +24,7 @@ var idMap = {
     "comment": ".red-ui-palette-node[data-palette-type='comment']",
     // function
     "function": ".red-ui-palette-node[data-palette-type='function']",
+    "switch": ".red-ui-palette-node[data-palette-type='switch']",
     "change": ".red-ui-palette-node[data-palette-type='change']",
     "range": ".red-ui-palette-node[data-palette-type='range']",
     "template": ".red-ui-palette-node[data-palette-type='template']",

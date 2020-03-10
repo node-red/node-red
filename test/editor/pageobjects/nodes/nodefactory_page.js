@@ -21,6 +21,7 @@ var catchNode = require('./core/common/25-catch_page');
 var statusNode = require('./core/common/25-status_page');
 var commentNode = require('./core/common/90-comment_page');
 var functionNode = require('./core/function/10-function_page');
+var switchNode = require('./core/function/10-switch_page');
 var changeNode = require('./core/function/15-change_page');
 var rangeNode = require('./core/function/16-range_page');
 var templateNode = require('./core/function/80-template_page');
@@ -50,6 +51,7 @@ var nodeCatalog = {
     "comment": commentNode,
     // function
     "function": functionNode,
+    "switch": switchNode,
     "change": changeNode,
     "range": rangeNode,
     "template": templateNode,
