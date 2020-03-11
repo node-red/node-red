@@ -48,8 +48,11 @@ triggerNode.prototype.setSend = function (send, sendt) {
     }
 }
 
-triggerNode.prototype.setDuration = function (duration) {
+triggerNode.prototype.setDuration = function (duration, units) {
     browser.setValue('//*[@id="node-input-duration"]', duration);
+    if (units) {
+        browser.selectWithWait('//*[@id="node-input-units"]', units);
+    }
 }
 
 triggerNode.prototype.setThenSend = function (thenSend, thenSendt) {
