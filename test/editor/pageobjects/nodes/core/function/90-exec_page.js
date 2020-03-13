@@ -18,18 +18,20 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-function mqttInNode(id) {
+function execNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(mqttInNode, nodePage);
+util.inherits(execNode, nodePage);
 
-mqttInNode.prototype.setTopic = function (topic) {
-    browser.setValue('#node-input-topic', topic);
+execNode.prototype.setCommand = function (command) {
+    browser.setValue('//*[@id="node-input-command"]', command);
 }
 
-mqttInNode.prototype.setQoS = function (qos) {
-    browser.selectWithWait('#node-input-qos', qos);
+execNode.prototype.setAppend = function (checkbox) {
+    if (browser.isSelected('#node-input-addpay') !== checkbox) {
+        browser.click('#node-input-addpay');
+    }
 }
 
-module.exports = mqttInNode;
+module.exports = execNode;

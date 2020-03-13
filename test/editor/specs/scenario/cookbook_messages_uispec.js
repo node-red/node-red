@@ -88,7 +88,7 @@ describe('cookbook', function () {
             injectNode.clickOk();
 
             changeNode.edit();
-            changeNode.ruleMove('topic', 'payload');
+            changeNode.ruleMove('topic', 'msg', 'payload', 'msg');
             changeNode.clickOk();
 
             injectNode.connect(changeNode);
