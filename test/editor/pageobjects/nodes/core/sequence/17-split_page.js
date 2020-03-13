@@ -24,7 +24,19 @@ function splitNode(id) {
 
 util.inherits(splitNode, nodePage);
 
-module.exports = splitNode;
+splitNode.prototype.setSplitUsing = function (splt, spltt) {
+    var spltType = {
+        "str": 1,
+        "bin": 2,
+        "len": 3
+    };
+
+    browser.clickWithWait('//*[@id="dialog-form"]/div[3]/div/button[1]');
+    browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + spltType[spltt] + ']');
+    browser.setValue('//*[@id="dialog-form"]/div[3]/div/div[1]/input', splt);
+};
+
+module.exports.splitNode = splitNode;
 
 function joinNode(id) {
     nodePage.call(this, id);
@@ -32,4 +44,4 @@ function joinNode(id) {
 
 util.inherits(joinNode, nodePage);
 
-module.exports = joinNode;
+module.exports.joinNode = joinNode;
