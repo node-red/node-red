@@ -37,6 +37,8 @@ var idMap = {
     "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
     "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
     "httpRequest": ".red-ui-palette-node[data-palette-type='http request']",
+    "websocketIn": ".red-ui-palette-node[data-palette-type='websocket in']",
+    "websocketOut": ".red-ui-palette-node[data-palette-type='websocket out']",
     // sequence
     "split": ".red-ui-palette-node[data-palette-type='split']",
     "join": ".red-ui-palette-node[data-palette-type='join']",

@@ -33,6 +33,8 @@ var mqttOutNode = require('./core/network/10-mqttout_page');
 var httpInNode = require('./core/network/21-httpin_page');
 var httpResponseNode = require('./core/network/21-httpresponse_page');
 var httpRequestNode = require('./core/network/21-httprequest_page');
+var websocketInNode = require('./core/network/22-websocket_page').websocketInNode;
+var websocketOutNode = require('./core/network/22-websocket_page').websocketOutNode;
 var splitNode = require('./core/sequence/17-split_page');
 var joinNode = require('./core/sequence/17-split_page');
 var batchNode = require('./core/sequence/19-batch_page');
@@ -66,6 +68,8 @@ var nodeCatalog = {
     "httpIn": httpInNode,
     "httpResponse": httpResponseNode,
     "httpRequest": httpRequestNode,
+    "websocketIn": websocketInNode,
+    "websocketOut": websocketOutNode,
     // sequence
     "split": splitNode,
     "join": joinNode,
