@@ -1,0 +1,40 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="html">
+  <p>
+    Извлекает элементы из HTML-документа, хранящегося в <code>msg.payload</code>, с помощью CSS-селектора.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">строка</span></dt>
+    <dd>HTML-строка, из которой извлекать элементы.</dd>
+    <dt class="optional">select <span class="property-type">строка</span></dt>
+    <dd>если селектор не настроен на панели редактирования узла, то он может быть установлен как свойство msg.</dd>
+  </dl>
+
+  <h3>Выход</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">массив | строка</span></dt>
+    <dd>Результатом может быть либо одно сообщение, в котором payload содержит массив найденных элементов, либо несколько сообщений, каждое из которых содержит найденный элемент. Если отправлено несколько сообщений, у них также будет установлен <code>parts</code>.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    Этот узел поддерживает комбинацию селекторов CSS и jQuery. См. <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">документацию css-select</a> для получения дополнительной информации о поддерживаемом синтаксисе.
+  </p>
+</script>
