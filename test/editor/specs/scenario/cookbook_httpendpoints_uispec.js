@@ -23,16 +23,16 @@ var workspace = require('../../pageobjects/editor/workspace_page');
 var httpNodeRoot = "/api";
 
 // https://cookbook.nodered.org/
-describe('cookbook', function() {
-    beforeEach(function() {
+describe('cookbook', function () {
+    beforeEach(function () {
         workspace.init();
     });
 
-    before(function() {
+    before(function () {
         helper.startServer();
     });
 
-    after(function() {
+    after(function () {
         helper.stopServer();
     });
 
@@ -359,7 +359,7 @@ describe('cookbook', function() {
             debugTab.getMessage().indexOf('Text file').should.not.eql(-1);
         });
 
-        it('post raw data to a flow', function() {
+        it('post raw data to a flow', function () {
             var httpInNode = workspace.addNode("httpIn");
             var templateNode = workspace.addNode("template");
             var httpResponseNode = workspace.addNode("httpResponse");
@@ -383,7 +383,7 @@ describe('cookbook', function() {
             var httpRequestNode = workspace.addNode("httpRequest");
             var debugNode = workspace.addNode("debug");
 
-            injectNode.edit()
+            injectNode.edit();
             injectNode.setPayload("str", "Nick");
             injectNode.clickOk();
 
@@ -427,7 +427,7 @@ describe('cookbook', function() {
             var httpRequestNode = workspace.addNode("httpRequest");
             var debugNode = workspace.addNode("debug");
 
-            injectNode.edit()
+            injectNode.edit();
             injectNode.setPayload("str", "name=Nick");
             injectNode.clickOk();
 
@@ -451,7 +451,7 @@ describe('cookbook', function() {
             debugTab.getMessage().indexOf('Hello Nick!').should.not.eql(-1);
         });
 
-        it('post JSON data to a flow', function() {
+        it('post JSON data to a flow', function () {
             var httpInNode = workspace.addNode("httpIn");
             var templateNode = workspace.addNode("template");
             var httpResponseNode = workspace.addNode("httpResponse");
@@ -476,7 +476,7 @@ describe('cookbook', function() {
             var httpRequestNode = workspace.addNode("httpRequest");
             var debugNode = workspace.addNode("debug");
 
-            injectNode.edit()
+            injectNode.edit();
             injectNode.setPayload("json", '{"name":"Nick"}');
             injectNode.clickOk();
 

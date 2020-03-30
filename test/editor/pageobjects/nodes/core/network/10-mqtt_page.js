@@ -14,27 +14,61 @@
  * limitations under the License.
  **/
 
-function setServer(broker, port) {
+var util = require("util");
+
+var nodePage = require("../../node_page");
+
+var mqttBrokerNode = {};
+
+mqttBrokerNode.setServer = function (broker, port) {
     browser.setValue('#node-config-input-broker', broker);
     port = port ? port : 1883;
     browser.setValue('#node-config-input-port', port);
-}
+};
 
-function clickOk() {
+mqttBrokerNode.clickOk = function () {
     browser.clickWithWait('#node-config-dialog-ok');
     // Wait until an config dialog closes.
     browser.waitForVisible('#node-config-dialog-ok', 10000, true);
-}
+};
 
-function edit() {
+mqttBrokerNode.edit = function () {
     browser.waitForVisible('#node-input-lookup-broker');
     browser.click('#node-input-lookup-broker');
     // Wait until a config dialog opens.
     browser.waitForVisible('#node-config-dialog-ok', 10000);
+};
+
+function mqttInNode(id) {
+    nodePage.call(this, id);
 }
 
-module.exports = {
-    setServer: setServer,
-    clickOk: clickOk,
-    edit: edit
+util.inherits(mqttInNode, nodePage);
+
+mqttInNode.prototype.setTopic = function (topic) {
+    browser.setValue('#node-input-topic', topic);
 };
+
+mqttInNode.prototype.setQoS = function (qos) {
+    browser.selectWithWait('#node-input-qos', qos);
+};
+
+mqttInNode.prototype.mqttBrokerNode = mqttBrokerNode;
+module.exports.mqttInNode = mqttInNode;
+
+function mqttOutNode(id) {
+    nodePage.call(this, id);
+}
+
+util.inherits(mqttOutNode, nodePage);
+
+mqttOutNode.prototype.setTopic = function (topic) {
+    browser.setValue('#node-input-topic', topic);
+};
+
+mqttOutNode.prototype.setRetain = function (retain) {
+    browser.selectWithWait('#node-input-retain', retain);
+};
+
+mqttOutNode.prototype.mqttBrokerNode = mqttBrokerNode;
+module.exports.mqttOutNode = mqttOutNode;
