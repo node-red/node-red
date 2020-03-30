@@ -1,0 +1,78 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http request">
+    <p>發送HTTP請求並返回響應。</p>
+
+    <h3>輸入</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">字符串</span></dt>
+        <dd>如果未在節點中配置，則此可選屬性設置請求的url。</dd>
+        <dt class="optional">method <span class="property-type">字符串</span></dt>
+        <dd>如果未在節點中配置，則此可選屬性設置請求的HTTP方法。必須是<code>GET</code>,<code>PUT</code>,<code>POST</code>,<code>PATCH</code>或<code>DELETE</code>之一。</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>設置請求的HTTP頭。</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>如果設置，則可用于發送帶有請求的cookie。</dd>
+        <dt class="optional">payload</dt>
+        <dd>發送爲請求的正文。</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>如果設置爲<code>false</code>，則允許對使用自簽名證書的https站點進行請求。</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>如果設置爲<code>false</code>，則阻止遵循重定向（HTTP 301）。默認情況下爲<code>true</code></dd>
+        <dt class="optional">requestTimeout</dt>
+        <dd>如果設置爲正數毫秒，將覆蓋全局設置的<code>httpRequestTimeout</code>參數。</dd>
+    </dl>
+    <h3>輸出</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">字符串 | object | buffer</span></dt>
+        <dd>響應的正文。可以將節點配置爲以字符串形式返回主體，嘗試將其解析爲JSON字符串或將其保留爲二進制buffer。</dd>
+        <dt>statusCode <span class="property-type">數值</span></dt>
+        <dd>響應的狀態碼，如果請求無法完成，則返回錯誤碼。</dd>
+        <dt>headers <span class="property-type">object</span></dt>
+        <dd>包含響應頭的對象。</dd>
+        <dt>responseUrl <span class="property-type">字符串</span></dt>
+        <dd>如果在處理請求時發生任何重定向，則此屬性爲最終重定向的URL。否則則爲原始請求的URL。</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>如果響應包含cookie，則此屬性是每個cookie的‘名稱/值’鍵值對的對象。</dd>
+        <dt>redirectList <span class="property-type">數組</span></dt>
+        <dd>如果請求被重定向了一次或多次，則累積的信息將被添加到此屬性。“location”是下一個重定向目標。cookie是從重定向源返回的cookie。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>在節點內配置後，URL屬性可以包含<a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache樣式</a>標簽。 這些標簽允許使用傳入消息的值來構造url。例如，如果url設置爲<code>example.com/{{{{topic}}}</code>，它將自動插入<code>msg.topic</code>的值。使用{{{...}}}可以防止mustache轉義/ &等字符。</p>
+    <p>節點可以選擇自動將<code>msg.payload</code>編碼爲GET請求的查詢字符串參數，在這種情況下，<code>msg.payload</code>必須是一個對象。</p>
+    <p><b>注意：</b>如果使用了代理，則應設置<code>http_proxy=...</code>環境變量並重新啓動Node-RED，或使用“代理配置”。如果設置了代理配置，則配置優先于環境變量。</p>
+    <h4>使用多個HTTP請求節點</h4>
+    <p>爲了在一個流程中多次使用該節點，必須要注意<code>msg.headers</code>屬性的處理。通常在第一個節點在響應頭中設置此屬性，而不期望在下一個節點的請求頭中使用此屬性。如果節點之間的<code>msg.headers</code>屬性保持不變，則第二個節點將忽略它。要設置自定義標題，首先應刪除<code>msg.headers</code>或將其重置爲空對象：<code>{}</code>。</p>
+    <h4>Cookie處理</h4>
+    <p>傳遞給節點的<code>cookies</code>屬性必須是‘名稱/值’鍵值對的對象。該值可以是設置cookie值的字符串，也可以是具有單個<code>value</code>屬性的對象。</p>
+    <p>請求返回的所有cookie都將在<code>responseCookies</code>屬性下傳遞回去。</p>
+    <h4>內容類型處理</h4>
+    <p>如果<code>msg.payload</code>是一個對象，則節點將自動將請求的內容類型設置爲<code>application/json</code>並對其進行編碼。</p>
+    <p>要將請求編碼爲表單數據，應將<code>msg.headers[“content-type”]</code>設置爲<code>application/x-www-form-urlencoded</code>。</p>
+    <h4>文件上傳</h4>
+    <p>要執行文件上傳，應將<code>msg.headers["content-type"]</code>設置爲<code>multipart/form-data</code>和<code>msg.payload</code>傳遞給節點的必須是具有以下結構的對象：</p>
+    <pre><code>{
+    "KEY": {
+        "value": FILE_CONTENTS,
+        "options": {
+            "filename": "FILENAME"
+        }
+    }
+}</code></pre>
+    <p><code>KEY</code>,<code>FILE_CONTENTS</code>和<code>FILENAME</code>的值應設置爲適當的值。</p>
+    
+</script>

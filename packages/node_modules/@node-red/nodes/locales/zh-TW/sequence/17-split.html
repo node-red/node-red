@@ -1,0 +1,133 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="split">
+    <p>將一條消息拆分爲一系列消息。</p>
+
+    <h3>輸入</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 字符串 | 數組 | buffer</span></dt>
+        <dd>節點的行爲由<code>msg.payload</code>的類型決定:
+            <ul>
+                <li><b>字符串</b>/<b>buffer</b> - 使用指定的字符（默認值：<code>\n</code>），緩衝區序列或固定長度將消息拆分。</li>
+                <li><b>數組</b> - 消息被拆分爲單個數組元素或固定長度的數組。</li>
+                <li><b>object</b> - 將爲對象的每個鍵/值對發送一條消息。</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>輸出</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">object</span></dt>
+        <dd>此屬性包含有關如何將消息與原始消息分開的信息。如果傳遞給<b>join</b>節點，則可以將序列重組爲單個消息。該屬性具有以下屬性：
+        <ul>
+            <li><code>id</code> - 一組消息的標識符</li>
+            <li><code>index</code> - 組中的位置</li>
+            <li><code>count</code> - 如果已知組中的郵件總數。請參閱下面的“流媒體模式”</li>
+            <li><code>type</code> - 消息的類型-字符串/數組/對象/buffer</li>
+            <li><code>ch</code> - 對于字符串或buffer，用于將消息拆分爲字符串或字節數組的數據</li>
+            <li><code>key</code> - 對于對象，創建此消息的屬性的鍵。可以將節點配置爲也將此值複制到另一個消息屬性，例如<code>msg.topic</code></li>
+            <li><code>len</code> - 使用固定長度值拆分消息時，每段子消息的長度</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>在使用<b>join</b>節點將序列重新組合爲單個消息之前，推薦使用此節點來輕松地創建跨消息序列，執行通用操作的流。</p>
+    <p>它使用<code>msg.parts</code>屬性跟蹤序列的各個部分。</p>
+    <h4>流媒體模式</h4>
+    <p>該節點還可以用于重排消息流。例如，發送換行符終止命令的串行設備可能會傳遞一條消息，並在其末尾帶有部分命令。 在“流模式”下，此節點將拆分一條消息並發送每個完整的段。如果末尾有部分片段，則該節點將保留該片段，並將其添加到收到的下一條消息之前。</p>
+    <p>在此模式下運行時，該節點將不會設置<code>msg.parts.count</code>屬性，因爲流中期望的消息數還是未知的。這意味著它不能在自動模式下與<b>join</b>節點一起使用。</p>
+</script>
+
+<script type="text/x-red" data-help-name="join">
+    <p>將消息序列合並爲一條消息.</p>
+    <p>共有三種模式：</p>
+    <dl>
+        <dt>自動模式</dt>
+        <dd>與<b>split</b>節點配對時，它將自動將已被拆分的消息進行合並。</dd>
+        <dt>手動模式</dt>
+        <dd>手動地以各種方式合並消息序列。</dd>
+        <dt>列聚合模式</dt>
+        <dd>對消息列中的所有消息應用表達式以將其簡化爲單個消息。</dd>
+    </dl>
+    <h3>輸入</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">object</span></dt>
+        <dd>使用自動模式時，所有的消息都應包含此屬性。<b>split</b>節點會生成此屬性，但也可以手動進行設置。該屬性具有以下屬性：
+        <ul>
+            <li><code>id</code> - 消息組的標識符</li>
+            <li><code>index</code> - 組中的位置</li>
+            <li><code>count</code> - 如果已知組中的郵件總數。請參閱下面的“流媒體模式”</li>
+            <li><code>type</code> - 消息的類型-字符串/數組/對象/buffer</li>
+            <li><code>ch</code> - 對于字符串或buffer，用于將消息拆分爲字符串或字節數組的數據</li>
+            <li><code>key</code> - 對于對象，創建此消息的屬性的鍵。可以將節點配置爲也將此值複制到另一個消息屬性，例如<code>msg.topic</code>/li>
+            <li><code>len</code> - 使用固定長度值拆分消息時，每段子消息的長度</li>
+        </ul>
+        </dd>
+        <dt class="optional">complete</dt>
+        <dd>如果設置，則節點將以其當前狀態發送其輸出消息。</dd>
+    </dl>
+    <h3>詳細</h3>
+
+    <h4>自動模式</h4>
+    <p>自動模式使用傳入消息的<code>parts</code>屬性來確定應如何連接序列。這使它可以自動逆轉<b>split</b>節點的操作。</p>
+
+    <h4>手動模式</h4>
+    <p>設置爲以手動模式時，該節點能以各種不同的方法來處理消息：</p>
+    <ul>
+        <li><b>字符串</b>或<b>緩衝區</b>-通過將每條消息的選定屬性與指定的連接字符或緩衝區連接起來。</li>
+        <li><b>數組</b> - 通過將每個選定的屬性或整個消息添加到輸出數組</li>
+        <li><b>鍵/值對象</b> - 通過使用每個消息的屬性來確定存儲所需值的鍵。</li>
+        <li><b>merged object</b> - 通過將每個消息的屬性合並到一個對象下。</li>
+    </ul>
+    <p>輸出消息的其他屬性都取自發送結果前的最後一條消息。</p>
+    <p>可以用<i>計數</i>來確定應接收多少條消息來進行合並。對于對象輸出，可以設置爲達到此計數後的每條後續消息都發送一條輸出。</p>
+    <p>可以用<i>超時</i>來設置發送新消息之前的等待時間。</p>
+    <p>如果收到設置了<b>msg.complete</b>屬性的消息時發送輸出消息並重置消息列數。</p>
+    <p>如果收到設置了<b>msg.reset</b>屬性的消息，則部分收到的消息將被刪除而不發送，同時重置消息列數。</p>
+
+    <h4>列聚合模式</h4>
+    <p>選擇列聚合模式時，將表達式應用于組成消息列的每條消息，並使用聚合值組成一條消息。</p>
+
+    <dl class="message-properties">
+        <dt>初始值</dt>
+        <dd>累積值的初始值(<code>$A</code>)。</dd>
+        <dt>聚合表達式</dt>
+        <dd>序列中的每個消息調用的JSONata表達式。結果將作爲累加值傳遞到表達式的下一個調用。在表達式中，可以使用以下特殊變量：
+            <ul>
+                <li><code>$A</code>: 累計值 </li>
+                <li><code>$I</code>: 消息在序列中的索引</li>
+                <li><code>$N</code>: 序列中的消息數</li>
+            </ul>
+        </dd>
+        <dt>最終調整式子</dt>
+        <dd>可選的JSONata表達式，在將聚合表達式應用于序列中的所有消息之後應用。在表達式中，可以使用以下特殊變量：
+            <ul>
+                <li><code>$A</code>: 累計值</li>
+                <li><code>$N</code>: 消息在序列中的索引</li>
+            </ul>
+        </dd>
+        <p>默認情況下，按順序從序列的第一條消息到最後一條消息應用聚合表達式。也可以選擇以相反的順序應用聚合表達式。</p>
+    </dl>
+    <p><b>例子：</b>給定一系列數字值，以下設置將計算平均值：
+        <ul>
+            <li><b>聚合表達式</b>: <code>$A+payload</code></li>
+            <li><b>初始值</b>: <code>0</code></li>
+            <li><b>最終調整式</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+    <h4>儲存訊息</h4>
+    <p>該節點將在內部緩存消息，以便跨序列工作。運行時設置<code>nodeMessageBufferMaxLength</code>可用于設定緩存的消息數。</p>
+</script>
