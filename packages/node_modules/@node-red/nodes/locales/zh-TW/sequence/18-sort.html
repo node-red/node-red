@@ -1,0 +1,41 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="sort">
+    <p>對消息屬性或消息序列進行排序的函數。</p>
+    <p>當配置爲對消息屬性進行排序時，節點將對指定消息屬性所指向的數組數據進行排序。</p>
+    <p>當配置爲對消息序列排序時，它將對消息重新排序。</p>
+    <p>排序順序可以是：</p>
+    <ul>
+        <li><b>升序</b></li>
+        <li><b>降序</b></li>
+    </ul>
+    <p>對于數字，可以通過複選框指定數字順序。</p>
+    <p>排序鍵可以是元素值，也可以是JSONata表達式來對屬性值進行排序，還可以是message屬性或JSONata表達式來對消息序列進行排序。<p>
+    <p>在對消息序列進行排序時，排序節點依賴于接收到的消息來設置<code>msg.parts</code>。拆分節點將生成此屬性，但也可以手動創建。它具有以下屬性：</p>
+    <p>
+        <ul>
+            <li><code>id</code> - 消息組的標識符</li>
+            <li><code>index</code> - 組中的位置</li>
+            <li><code>count</code> - 群組中的郵件總數</li>
+        </ul>
+    </p>
+    <p><b>注意：</b>在此節點的處理中，消息在內部存儲。通過指定要累積的最大消息數，可以防止意外的高內存使用。默認設置是不限制消息數量。
+        <ul>
+            <li><code>nodeMessageBufferMaxLength</code>屬性在<b>settings.js</b>中設置。</li>
+        </ul>
+    </p>
+</script>

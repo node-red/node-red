@@ -35,10 +35,11 @@ Node.prototype.clickOk = function () {
     browser.pause(50);
 }
 
-Node.prototype.connect = function (targetNode) {
-    var outputPort = this.id + '/*[@class="red-ui-flow-port-output"]';
+Node.prototype.connect = function (targetNode, port) {
+    port = port || 1;
+    var outputPort = this.id + '/*[@class="red-ui-flow-port-output"][' + port + ']';
     var inputPort = targetNode.id + '/*[@class="red-ui-flow-port-input"]';
-    browser.dragAndDrop(outputPort, inputPort)
+    browser.dragAndDrop(outputPort, inputPort);
 }
 
 Node.prototype.clickLeftButton = function () {

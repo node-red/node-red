@@ -70,7 +70,7 @@ function init() {
 
             var ret = repeatUntilSuccess(function(args) {
                 return browser.selectByValue(args[0], args[1]);
-            }, [selector, value]);
+            }, [selector, value.toString()]);
             return ret;
         } catch (e) {
             console.trace();

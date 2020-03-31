@@ -759,6 +759,41 @@ describe('trigger node', function() {
         });
     });
 
+    it('should be able output the 2nd payload and handle multiple topics', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"false", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:"80", bytopic:"topic", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Goodbye1");
+                        msg.should.have.a.property("topic", "test1");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "Goodbye2");
+                        msg.should.have.a.property("topic", "test2");
+                        done();
+                    }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"Hello1", topic:"test1"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Hello2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye1", topic:"test1"});
+            },20);
+        });
+    });
+
     it('should be able to apply mustache templates to payloads', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"{{payload}}",  op2:"{{topic}}", duration:"50", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
