@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var util = require("util");
+var util = require('util');
 
-var nodePage = require("../../node_page");
+var nodePage = require('../../node_page');
 
 function jsonNode(id) {
     nodePage.call(this, id);
@@ -28,8 +28,8 @@ jsonNode.prototype.setAction = function (action) {
     browser.setValue('node-input-action', action);
 }
 
-jsonNode.prototype.setProperty = function(property) {
-    browser.setValue('//*[@id="dialog-form"]/div[2]/div/div/input', property);
+jsonNode.prototype.setProperty = function (property) {
+    browser.setValue('//*[contains(@class, "red-ui-typedInput-container")]/div[1]/input', property);
 }
 
 module.exports = jsonNode;

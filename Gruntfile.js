@@ -26,9 +26,13 @@ module.exports = function(grunt) {
         nodemonArgs.push(flowFile);
     }
 
+    var browserstack = grunt.option('browserstack');
+    if (browserstack) {
+        process.env.BROWSERSTACK = true;
+    }
     var nonHeadless = grunt.option('non-headless');
     if (nonHeadless) {
-        process.env.NODE_RED_NON_HEADLESS = 'true';
+        process.env.NODE_RED_NON_HEADLESS = true;
     }
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
@@ -80,20 +84,20 @@ module.exports = function(grunt) {
                 //"loopfunc": true, // allow functions to be defined in loops
                 //"sub": true       // don't warn that foo['bar'] should be written as foo.bar
             },
-            all: [
-                'Gruntfile.js',
-                'red.js',
-                'packages/**/*.js'
-            ],
-            core: {
-                files: {
-                    src: [
-                        'Gruntfile.js',
-                        'red.js',
-                        'packages/**/*.js',
-                    ]
-                }
-            },
+            // all: [
+            //     'Gruntfile.js',
+            //     'red.js',
+            //     'packages/**/*.js'
+            // ],
+            // core: {
+            //     files: {
+            //         src: [
+            //             'Gruntfile.js',
+            //             'red.js',
+            //             'packages/**/*.js',
+            //         ]
+            //     }
+            // },
             nodes: {
                 files: {
                     src: [ 'nodes/core/*/*.js' ]
@@ -101,7 +105,7 @@ module.exports = function(grunt) {
             },
             editor: {
                 files: {
-                    src: [ 'editor/js/**/*.js' ]
+                    src: [ 'packages/node_modules/@node-red/editor-client/src/js/**/*.js' ]
                 }
             },
             tests: {
@@ -147,6 +151,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/stack.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/colorPicker.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actions.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/deploy.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
@@ -173,6 +178,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actionList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/typeSearch.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/subflow.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/group.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/userSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projects.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectSettings.js",
@@ -189,7 +195,8 @@ module.exports = function(grunt) {
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
+                        "node_modules/marked/marked.min.js",
+                        "node_modules/dompurify/dist/purify.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js",
                         "node_modules/jsonata/jsonata-es5.min.js",

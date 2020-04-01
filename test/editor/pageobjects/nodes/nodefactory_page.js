@@ -14,46 +14,79 @@
  * limitations under the License.
  **/
 
-var injectNode = require('./core/core/20-inject_page');
-var debugNode = require('./core/core/58-debug_page');
-var templateNode = require('./core/core/80-template_page');
-var functionNode = require('./core/core/80-function_page');
-var mqttInNode = require('./core/io/10-mqttin_page');
-var mqttOutNode = require('./core/io/10-mqttout_page');
-var httpInNode = require('./core/io/21-httpin_page');
-var httpResponseNode = require('./core/io/21-httpresponse_page');
-var changeNode = require('./core/logic/15-change_page');
-var rangeNode = require('./core/logic/16-range_page');
-var httpRequestNode = require('./core/io/21-httprequest_page');
+var injectNode = require('./core/common/20-inject_page');
+var debugNode = require('./core/common/21-debug_page');
+var completeNode = require('./core/common/24-complete_page');
+var catchNode = require('./core/common/25-catch_page');
+var statusNode = require('./core/common/25-status_page');
+var commentNode = require('./core/common/90-comment_page');
+var functionNode = require('./core/function/10-function_page');
+var switchNode = require('./core/function/10-switch_page');
+var changeNode = require('./core/function/15-change_page');
+var rangeNode = require('./core/function/16-range_page');
+var templateNode = require('./core/function/80-template_page');
+var delayNode = require('./core/function/89-delay_page');
+var triggerNode = require('./core/function/89-trigger_page');
+var execNode = require('./core/function/90-exec_page');
+var mqttInNode = require('./core/network/10-mqtt_page').mqttInNode;
+var mqttOutNode = require('./core/network/10-mqtt_page').mqttOutNode;
+var httpInNode = require('./core/network/21-httpin_page');
+var httpResponseNode = require('./core/network/21-httpresponse_page');
+var httpRequestNode = require('./core/network/21-httprequest_page');
+var websocketInNode = require('./core/network/22-websocket_page').websocketInNode;
+var websocketOutNode = require('./core/network/22-websocket_page').websocketOutNode;
+var splitNode = require('./core/sequence/17-split_page').splitNode;
+var joinNode = require('./core/sequence/17-split_page').joinNode;
+var batchNode = require('./core/sequence/19-batch_page');
+var csvNode = require('./core/parsers/70-CSV_page');
 var htmlNode = require('./core/parsers/70-HTML_page');
 var jsonNode = require('./core/parsers/70-JSON_page');
-var fileInNode = require('./core/storage/50-filein_page');
-
+var xmlNode = require('./core/parsers/70-XML_page');
+var yamlNode = require('./core/parsers/70-YAML_page');
+var fileInNode = require('./core/storage/10-filein_page');
 
 var nodeCatalog = {
-    // input
+    // common
     "inject": injectNode,
-    "httpIn": httpInNode,
-    "mqttIn":mqttInNode,
-    // output
     "debug": debugNode,
-    "httpResponse": httpResponseNode,
-    "mqttOut": mqttOutNode,
+    "complete": completeNode,
+    "catch": catchNode,
+    "status": statusNode,
+    "comment": commentNode,
     // function
     "function": functionNode,
-    "template": templateNode,
+    "switch": switchNode,
     "change": changeNode,
     "range": rangeNode,
+    "template": templateNode,
+    "delay": delayNode,
+    "trigger": triggerNode,
+    "exec": execNode,
+    // network
+    "mqttIn": mqttInNode,
+    "mqttOut": mqttOutNode,
+    "httpIn": httpInNode,
+    "httpResponse": httpResponseNode,
     "httpRequest": httpRequestNode,
+    "websocketIn": websocketInNode,
+    "websocketOut": websocketOutNode,
+    // sequence
+    "split": splitNode,
+    "join": joinNode,
+    "batch": batchNode,
+    // parser
+    "csv": csvNode,
     "html": htmlNode,
-    "json":jsonNode,
+    "json": jsonNode,
+    "xml": xmlNode,
+    "yaml": yamlNode,
     // storage
-    "fileIn": fileInNode,
-}
+    "fileIn": fileInNode
+};
 
 function create(type, id) {
-    var node = nodeCatalog[type];
-    return new node(id);
+    var Node = nodeCatalog[type];
+    return new Node(id);
 }
 
 module.exports = {

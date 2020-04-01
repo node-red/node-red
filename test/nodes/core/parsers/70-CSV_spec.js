@@ -181,19 +181,53 @@ describe('CSV node', function() {
         });
 
 
-        it('should allow quotes in the input', function(done) {
-            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+        it('should allow quotes in the input (but drop blank strings)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g,h", wires:[["n2"]] },
                     {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: '04', e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a:1, b:-2, c:'+3', d:'04', f:'-05', g:'ab"cd', h:'with,a,comma' });
                     check_parts(msg, 0, 1);
                     done();
                 });
-                var testString = '"1","-2","+3","04","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                var testString = '"1","-2","+3","04","","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow blank strings in the input if selected', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", include_empty_strings:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: 1, b: '', c: '', d: '', e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    //check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '"1","","","","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow missing columns (nulls) in the input if selected', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", include_null_values:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: 1, b: null, c: '+3', d: null, e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    //check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '"1",,"+3",,"-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -218,7 +252,7 @@ describe('CSV node', function() {
 
         it('should be able to use the first line as a template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrin:true, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");

@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="change">
+  <p>設置，更改，刪除或移動消息，流程上下文或全局上下文的屬性。</p>
+  <p>如果指定了多個規則，則將按定義的順序來應用它們。</p>
+  <h3>詳細</h3>
+  <p>可用的操作有：</p>
+  <dl class="message-properties">
+  <dt>設置</dt>
+  <dd>設置一個屬性。該值可以是多種不同類型，也可以從現有消息或上下文屬性中獲取。</dd>
+  <dt>置換</dt>
+  <dd>搜索並替換屬性。 如果啓用了正則表達式，則可以爲“replace with”屬性指定捕獲組，例如<code>$1</code>。 在替換過程中，僅當規則完全匹配時才能更改屬性類型。</dd>
+  <dt>刪除</dt>
+  <dd>刪除一個屬性</dd>
+  <dt>移動</dt>
+  <dd>移動或者重命名一個屬性</dd>
+  </dl>
+  <p>類型"expression"使用<a href="http://jsonata.org/" target="_new">JSONata</a>語言。</p>
+</script>

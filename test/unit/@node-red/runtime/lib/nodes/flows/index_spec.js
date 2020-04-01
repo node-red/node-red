@@ -67,7 +67,10 @@ describe('flows/index', function() {
             });
             return when.resolve();
         });
-        credentialsLoad = sinon.stub(credentials,"load",function() {
+        credentialsLoad = sinon.stub(credentials,"load",function(creds) {
+            if (creds && creds.hasOwnProperty("$") && creds['$'] === "fail") {
+                return when.reject("creds error");
+            }
             return when.resolve();
         });
         flowCreate = sinon.stub(Flow,"create",function(parent, global, flow) {
@@ -177,6 +180,23 @@ describe('flows/index', function() {
             });
         });
 
+        it('sets the full flow including credentials', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            var credentials = {"t1-1":{"a":1}};
+
+            flows.init({log:mockLog, settings:{},storage:storage});
+            flows.setFlows(originalConfig,credentials).then(function() {
+                credentialsClean.called.should.be.false();
+                credentialsLoad.called.should.be.true();
+                credentialsLoad.lastCall.args[0].should.eql(credentials);
+                flows.getFlows().flows.should.eql(originalConfig);
+                done();
+            });
+        });
+
         it('updates existing flows with partial deployment - nodes', function(done) {
             var originalConfig = [
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
@@ -235,6 +255,20 @@ describe('flows/index', function() {
             });
         });
 
+        it('returns error if it cannot decrypt credentials', function(done) {
+            var originalConfig = [
+                {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
+            var credentials = {"$":"fail"};
+
+            flows.init({log:mockLog, settings:{},storage:storage});
+            flows.setFlows(originalConfig,credentials).then(function() {
+                done("Unexpected success when credentials couldn't be decrypted")
+            }).catch(function(err) {
+                done();
+            });
+        });
     });
 
     describe('#load', function() {

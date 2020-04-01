@@ -1,0 +1,174 @@
+{
+    "runtime": {
+        "welcome": "欢迎使用Node-RED",
+        "version": "__component__ 版本： __version__",
+        "unsupported_version": "__component__的不受支持的版本。要求: __requires__ 找到: __version__",
+        "paths": {
+            "settings": "设置文件  : __path__",
+            "httpStatic": "HTTP Static    : __path__"
+        }
+    },
+
+    "server": {
+        "loading": "加载控制板节点",
+        "palette-editor": {
+            "disabled": "控制板编辑器已禁用：用户设置",
+            "npm-not-found": "控制板编辑器已禁用：找不到npm命令",
+            "npm-too-old": "控制板编辑器已禁用： npm版本太旧。需要版本npm >= 3.x"
+        },
+        "errors": "无法注册__count__节点类型",
+        "errors_plural": "无法注册__count__个节点类型",
+        "errors-help": "使用-v运行以获取详细信息",
+        "missing-modules": "缺少节点模块：",
+        "node-version-mismatch": "无法在此版本上加载节点模块。要求：__ version__",
+        "type-already-registered": "'__type__'已由模块__module__注册",
+        "removing-modules": "从配置中删除模块",
+        "added-types": "添加的节点类型：",
+        "removed-types": "删除的节点类型：",
+        "install": {
+            "invalid": "无效的模块名称",
+            "installing": "安装模块：__ name__，版本：__ version__",
+            "installed": "已安装的模块：__ name__",
+            "install-failed": "安装失败",
+            "install-failed-long": "模块__name__安装失败：",
+            "install-failed-not-found": "$t(server.install.install-failed-long) 模块未发现",
+            "upgrading": "更新模块: __name__ 至版本: __version__",
+            "upgraded": "更新模块: __name__。 重新启动Node-RED以使用新版本",
+            "upgrade-failed-not-found": "$t(server.install.install-failed-long) 未发现版本",
+            "uninstalling": "卸载模块: __name__",
+            "uninstall-failed": "卸载失败",
+            "uninstall-failed-long": "卸载模块__name__失败:",
+            "uninstalled": "卸载模块: __name__"
+        },
+        "unable-to-listen": "无法在__listenpath__上收听",
+        "port-in-use": "错误: 端口正在使用中",
+        "uncaught-exception": "未捕获的异常：",
+        "admin-ui-disabled": "管理员界面已禁用",
+        "now-running": "服务器现在在__listenpath__上运行",
+        "failed-to-start": "无法启动服务器：",
+        "headless-mode": "在headless模式下运行",
+        "httpadminauth-deprecated": "不建议使用httpAdminAuth。请改用adminAuth"
+    },
+
+    "api": {
+        "flows": {
+            "error-save": "保存流程错误: __message__",
+            "error-reload": "重载流程错误: __message__"
+        },
+        "library": {
+            "error-load-entry": "加载库条目'__path__'时出错：__message__",
+            "error-save-entry": "保存库条目'__path__'时出错：__ message__",
+            "error-load-flow": "加载流程'__path__'时出错：__ message__",
+            "error-save-flow": "保存流'__path__'时出错：__ message__"
+        },
+        "nodes": {
+            "enabled": "启用的节点类型:",
+            "disabled": "禁用的节点类型:",
+            "error-enable": "无法启用节点:"
+        }
+    },
+
+    "comms": {
+        "error": "通讯渠道错误：__ message__",
+        "error-server": "通信服务器错误：__ message__",
+        "error-send": "通讯发送错误：__ message__"
+    },
+
+    "settings": {
+        "user-not-available": "无法保存用户设置：__ message__",
+        "not-available": "设置不可用",
+        "property-read-only": "属性“ __prop__”是只读的"
+    },
+
+    "nodes": {
+        "credentials": {
+            "error":"加载证书时出错：__ message__",
+            "error-saving":"保存证书时出错：__ message__",
+            "not-registered": "证书类型'__type__'未注册",
+            "system-key-warning": "\n\n---------------------------------------------------------------------\n您的流程证书文件是使用系统生成的密钥加密的。\n\n如果系统生成的密钥由于任何原因丢失，则您的证书文件将无法恢复，您将必须删除它并重新输入您的证书。\n\n您应该使用您的设置文件中的'credentialSecret'选项设置自己的密钥。然后，下次部署更改时，Node-RED将使用选择的密钥重新加密您的证书文件。\n---------------------------------------------------------------------\n"
+        },
+        "flows": {
+            "safe-mode": "流程在安全模式下停止。部署开始。",
+            "registered-missing": "缺少注册的类型：__ type__",
+            "error": "错误加载流程：__ message__",
+            "starting-modified-nodes": "启动修改的节点",
+            "starting-modified-flows": "启动修改的流程",
+            "starting-flows": "启动流程",
+            "started-modified-nodes": "修改的节点已启动",
+            "started-modified-flows": "修改的流程已启动",
+            "started-flows": "流程已启动",
+            "stopping-modified-nodes": "停止修改的节点",
+            "stopping-modified-flows": "停止修改的流程",
+            "stopping-flows": "停止流程",
+            "stopped-modified-nodes": "修改的节点已停止",
+            "stopped-modified-flows": "修改的流程已停止",
+            "stopped-flows": "流程已停止",
+            "stopped": "已停止",
+            "stopping-error": "错误停止节点：__ message__",
+            "added-flow": "流程已添加: __label__",
+            "updated-flow": "流程已更新: __label__",
+            "removed-flow": "流程已移除: __label__",
+            "missing-types": "等待缺少的类型被注册：",
+            "missing-type-provided": " - __type__ (由npm模块__module__提供)",
+            "missing-type-install-1": "要安装所有缺少的模块，请运行：",
+            "missing-type-install-2": "在目录中："
+        },
+        "flow": {
+            "unknown-type": "未知类型: __type__",
+            "missing-types": "缺少类型",
+            "error-loop": "邮件已超过最大捕获数"
+        },
+        "index": {
+            "unrecognised-id": "无法识别的ID: __id__",
+            "type-in-use": "使用中的类型: __msg__",
+            "unrecognised-module": "无法识别的模块: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "找不到模块:'__module__'"
+            }
+        }
+    },
+
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "禁止流程名称"
+        },
+        "localfilesystem": {
+            "user-dir": "用户目录: __path__",
+            "flows-file": "流程文件: __path__",
+            "create": "创建新__type__文件",
+            "empty": "现有__type__文件为空",
+            "invalid": "现有__type__文件为无效json",
+            "restore": "恢复__type__文件备份：__path__",
+            "restore-fail": "恢复__type__文件备份失败：__ message__",
+            "fsync-fail": "将文件__path__刷新到磁盘失败：__message__",
+            "projects": {
+                "changing-project": "设置活动项目：__ project__",
+                "active-project": "活动项目：__ project__",
+                "project-not-found": "找不到项目：__ project__",
+                "no-active-project": "没有活动的项目：使用默认流文件",
+                "disabled": "项目已禁用：editorTheme.projects.enabled = false",
+                "disabledNoFlag": "项目已禁用：设置editorTheme.projects.enabled = true来启用",
+                "git-not-found": "项目已禁用：找不到git命令",
+                "git-version-old": "项目已禁用：不支持的git __version__。 需要的git版本为2.x",
+                "summary": "一个Node-RED项目",
+                "readme": "### 关于\n\n这是您项目的README.md文件。它可以帮助用户了解您的项目，如何使用它以及他们可能需要知道的其他任何信息。"
+            }
+        }
+    },
+
+    "context": {
+        "log-store-init": "上下文储存: '__name__' [__info__]",
+        "error-loading-module": "加载上下文存储时出错： __message__",
+        "error-loading-module2": "加载上下文存储时出错 '__module__': __message__",
+        "error-module-not-defined": "上下文存储库'__storage__'缺少“模块”选项",
+        "error-invalid-module-name": "无效的上下文存储名称：'__ name__'",
+        "error-invalid-default-module": "无效的默认的上下文存储库： '__storage__'",
+        "unknown-store": "指定了未知的上下文存储库'__name__'。 使用默认存储库。",
+        "localfilesystem": {
+            "error-circular": "上下文__scope__包含无法保留的循环引用",
+            "error-write": "编写上下文时出错：__ message__"
+        }
+    }
+}
