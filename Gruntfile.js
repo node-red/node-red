@@ -125,6 +125,7 @@ module.exports = function(grunt) {
                 src: [
                     // Ensure editor source files are concatenated in
                     // the right order
+                    "packages/node_modules/@node-red/editor-client/src/js/polyfills.js",
                     "packages/node_modules/@node-red/editor-client/src/js/jquery-addons.js",
                     "packages/node_modules/@node-red/editor-client/src/js/red.js",
                     "packages/node_modules/@node-red/editor-client/src/js/events.js",
