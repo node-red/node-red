@@ -209,7 +209,7 @@ module.exports = function(RED) {
                 try {
                     var start = process.hrtime();
                     sandbox.msg = msg;
-                    const vm2Instance = new vm2.VM({ sandbox });
+                    const vm2Instance = new vm2.VM({ sandbox, timeout: 5000 });
                     const result = vm2Instance.run(functionText);
                     sendResults(this,msg._msgid, result);
 
