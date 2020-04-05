@@ -249,6 +249,13 @@ module.exports = function(RED) {
                     if (!errorMessage) {
                         errorMessage = err.toString();
                     }
+
+                    // gives access to the msg object in custom logger
+                    const temp = errorMessage;
+                    errorMessage = msg;
+                    errorMessage.toString = () => temp; // preserve original error message in logs
+                    msg.errorMessage = temp;
+
                     this.error(errorMessage, msg);
                 }
             });
