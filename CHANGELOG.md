@@ -1,3 +1,42 @@
+#### 1.0.5: Maintenance Release
+
+Runtime
+
+ - #2500 Support for context stores using JSONata and evaluateNodeProperty()
+ - Add better handling of host-key-verify error with projects
+ - #2517 Handle false values in $env() properly
+ - #2514 Ensure complete node scope is remapped in subflows
+ - #2513 Flows/subflows must preinitialise their context objects
+ - Clear node.close timeout to avoid unnecessary work on restart
+ - #2532 Set flow.disabled when disabled property is false
+ - #2522 Ensure file context does not write 'undefined' to store
+
+Editor
+
+ - #2489 Fix XPath in UI tests
+ - #2504 Fix paletteCategories order
+ - #2501 Add page objects for UI testing
+ - #2494 Check node props when deciding if pasted node can splice links
+ - #2521 Don't double-sanitize node name in debug sidebar
+ - #2519 German i18n updates
+ - #2523 Update nodeTabMap when replacing unknown nodes
+ - Update TypedInput to use flexbox and remove resizing code
+ - Handle nodes with no wires array
+ - Do not collapse whitespace in Debug string messages
+
+Nodes
+
+ - File: Remove old legacy wording from file node info to stop confusing users.
+ - Join: Ensure join node handles missing buffer joiner when not in string mode
+ - Exec: make exec node logging consistent with itself. (only be verbose when in verbose mode)
+ - Trigger: reset default timeout value when switching away from wait for reset
+ - Join: Fix join to not crash on appending invalid types to buffer.
+ - MQTT out: Add warning if topic contains + or #
+ - #2502 WebSocket i18n update
+ - #2508 Add Japanese translation for join node
+ - TCP out: tidy up select of which rows to display
+
+
 #### 1.0.4: Maintenance Release
 
 Runtime
