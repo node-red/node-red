@@ -51,41 +51,82 @@ function setT(t, index) {
 // It is better to create a function whose input value is the object type in the future,
 changeNode.prototype.ruleSet = function (p, pt, to, tot, index) {
     index = index || 1;
-    setT("set", index);
+    setT('set', index);
     if (pt) {
         browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
-        var num = 5 * (index - 1) + 1;
-        var ptXPath = '//div[contains(@class, "red-ui-typedInput-options")][' + num + ']/a[' + ptType[pt] + ']';
-        browser.clickWithWait(ptXPath);
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + ptType[pt] + ']');
     }
     if (p) {
         browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
     }
     if (tot) {
         browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/button[1]');
-        var num = 5 * (index - 1) + 2;
-        var totXPath = '//div[contains(@class, "red-ui-typedInput-options")][' + num + ']/a[' + totType[tot] + ']';
-        browser.clickWithWait(totXPath);
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + totType[tot] + ']');
     }
     if (to) {
         browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[2]/div[2]/div/input', to);
     }
 }
 
-changeNode.prototype.ruleDelete = function (index) {
+changeNode.prototype.ruleChange = function (p, pt, from, fromt, to, tot, index) {
     index = index || 1;
-    setT("delete", index);
+    setT('change', index);
+    if (pt) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + ptType[pt] + ']');
+    }
+    if (p) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
+    }
+    if (fromt) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[3]/div[1]/div[2]/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + totType[pt] + ']');
+    }
+    if (from) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[3]/div[1]/div[2]/div[1]/input', from);
+    }
+    if (tot) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[3]/div[2]/div[2]/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + totType[pt] + ']');
+    }
+    if (to) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[3]/div[2]/div[2]/div[1]/input', to);
+    }
 }
 
-changeNode.prototype.ruleMove = function (p, to, index) {
+changeNode.prototype.ruleDelete = function (p, pt, index) {
     index = index || 1;
-    setT("move", index);
-    browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
-    browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[4]/div[2]/div/input', to);
+    setT('delete', index);
+    if (pt) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + ptType[pt] + ']');
+    }
+    if (p) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
+    }
+}
+
+changeNode.prototype.ruleMove = function (p, pt, to, tot, index) {
+    index = index || 1;
+    setT('move', index);
+    if (pt) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + ptType[pt] + ']');
+    }
+    if (p) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[1]/div/div/input', p);
+    }
+    if (tot) {
+        browser.clickWithWait('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[4]/div[2]/button[1]');
+        browser.clickWithWait('//div[contains(@class, "red-ui-typedInput-options") and not(contains(@style, "display: none"))]/a[' + totType[pt] + ']');
+    }
+    if (to) {
+        browser.setValue('//*[@id="node-input-rule-container"]/li[' + index + ']/div/div[4]/div[2]/div/input', to);
+    }
 }
 
 changeNode.prototype.addRule = function () {
-    browser.clickWithWait('//*[@id="dialog-form"]/div[5]/div/a');
+    browser.clickWithWait('//div[contains(@class, "red-ui-editableList")]/a');
 }
 
 module.exports = changeNode;

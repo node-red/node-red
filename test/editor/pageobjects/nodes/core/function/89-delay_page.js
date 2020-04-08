@@ -18,8 +18,6 @@ var util = require("util");
 
 var nodePage = require("../../node_page");
 
-var keyPage = require("../../../util/key_page");
-
 function delayNode(id) {
     nodePage.call(this, id);
 }
