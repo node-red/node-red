@@ -199,7 +199,7 @@ describe('cookbook', function () {
             debugTab.getMessage().should.eql([ '1', 'array[3]' ]);
             debugTab.clearMessage();
             injectNode2.clickLeftButton();
-            debugTab.getMessage().should.eql('"a: 1↵b:↵ - 1↵ - 2↵ - 3↵"');
+            debugTab.getMessage().should.eql('"a: 1↵b:↵  - 1↵  - 2↵  - 3↵"');
         });
 
         it('generate CSV output', function () {
