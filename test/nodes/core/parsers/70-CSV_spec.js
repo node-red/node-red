@@ -232,21 +232,71 @@ describe('CSV node', function() {
             });
         });
 
-        it('should recover from an odd number of quotes in the input', function(done) {
+        it('should handle cr and lf in the input', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes" });
-                    //msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a: "with a\nnew line", b: "and a\rcarriage return", c: "and why\r\nnot both"});
                     check_parts(msg, 0, 1);
                     done();
                 });
+                var testString = '"with a'+String.fromCharCode(10)+'new line","and a'+String.fromCharCode(13)+'carriage return","and why\r\nnot both"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should recover from an odd number of quotes in the input', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    if (c == 0) { 
+                        c = 1;
+                        msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\n" });
+                        check_parts(msg, 0, 1);
+                    }
+                    else { 
+                        msg.should.have.property('payload', { a: "this is", b: "a normal", c: "line" });
+                        check_parts(msg, 0, 1);
+                        done(); 
+                    }
+                });
                 var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
+                n1.emit("input", {payload:'"this is","a normal","line"'});
+            });
+        });
+
+        it('should recover from an odd number of quotes in the input (2)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    //console.log(msg)
+                    if (c == 0) { 
+                        c = 1;
+                        msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\nthis is,a normal,line" });
+                        check_parts(msg, 0, 1);
+                    }
+                    else { 
+                        msg.should.have.property('payload', { a: "this is", b: "another", c: "line" });
+                        check_parts(msg, 0, 1);
+                        done(); 
+                    }
+                });
+                var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10)+'"this is","a normal","line"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+                n1.emit("input", {payload:'"this is","another","line"'});
             });
         });
 
