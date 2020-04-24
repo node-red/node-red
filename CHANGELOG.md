@@ -1,3 +1,20 @@
+#### 1.0.6: Maintenance Release
+
+Runtime
+
+ - Update to JSONata 1.8.3
+ - #2536 Handle clone of null in utils
+
+Editor
+
+ - Prevent button label wrapping in typedInput
+ - Handle error objects when reporting in palette manager
+
+Nodes
+
+ - Inject: Revert to cron 1.7.2
+ - UDP: when reusing input socket honour the broadcast mode.
+
 #### 1.0.5: Maintenance Release
 
 Runtime
