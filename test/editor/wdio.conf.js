@@ -14,6 +14,7 @@
  * limitations under the License.
  **/
 
+var browserstack = require('browserstack-local');
 exports.config = {
     
     //
@@ -48,27 +49,20 @@ exports.config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 10,
+    // maxInstances: 10,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://docs.saucelabs.com/reference/platforms-configurator
     //
-    capabilities: [{
+    // capabilities: [{
         // maxInstances can get overwritten per capability. So if you have an in-house Selenium
         // grid with only 5 firefox instances available you can make sure that not more than
         // 5 instances get started at a time.
-        maxInstances: 2,
+        // maxInstances: 5,
         //
-        browserName: 'chrome',
-        'goog:chromeOptions': {
-            args: process.env.NODE_RED_NON_HEADLESS
-                // Runs tests with opening a browser.
-                ? ['--disable-gpu', '--no-sandbox']
-                // Runs tests without opening a browser.
-                : ['--headless', '--disable-gpu', 'window-size=1920,1080', '--no-sandbox']
-        },
-    }],
+        // browserName: 'firefox'
+    // }],
     //
     // ===================
     // Test Configurations
@@ -103,7 +97,7 @@ exports.config = {
     baseUrl: 'http://localhost',
     //
     // Default timeout for all waitFor* commands.
-    waitforTimeout: 10000,
+    waitforTimeout: 20000,
     //
     // Default timeout in milliseconds for request
     // if Selenium Grid doesn't send response
@@ -134,9 +128,7 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    port: 9515,
-    path: '/',
-    services: ['chromedriver'],
+    //services: ['chromedriver'],
     //
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -155,7 +147,7 @@ exports.config = {
     // Options to be passed to Mocha.
     // See the full list at http://mochajs.org/
     mochaOpts: {
-        timeout: 100000,
+        timeout: 1000000,
         ui: 'bdd'
     },
     //
@@ -171,8 +163,44 @@ exports.config = {
      * @param {Object} config wdio configuration object
      * @param {Array.<Object>} capabilities list of capabilities details
      */
-    // onPrepare: function (config, capabilities) {
-    // },
+    onPrepare: function (config, capabilities) {
+        if (process.env.BROWSERSTACK) {
+            return new Promise(function (resolve, reject) {
+                var options = { key: exports.config.key };
+                var proxy = process.env.http_proxy || process.env.HTTP_PROXY;
+                if (proxy) {
+                    var proxyConfigs = proxy.match(/^(https?):\/\/(([^:@\/]+):([^:@\/]+)@)?([^:@\/]+)(:([^:@\/]+))?\/?$/);
+                    if (proxyConfigs) {
+                        var protocol = proxyConfigs[1];
+                        var user = proxyConfigs[3];
+                        var pass = proxyConfigs[4];
+                        var host = proxyConfigs[5];
+                        var port = proxyConfigs[7];
+                        if (!port) {
+                            if (protocol === 'http') {
+                                port = 80;
+                            } else if (protocol === 'https') {
+                                port = 443;
+                            }
+                        }
+                        if (host) { options.proxyHost = host; }
+                        if (port) { options.proxyPort = port; }
+                        if (user) { options.proxyUser = user; }
+                        if (pass) { options.proxyPass = pass; }
+                    } else {
+                        reject('error in parsing the environment variable, http_proxy');
+                    }
+                }
+                exports.bs_local = new browserstack.Local();
+                exports.bs_local.start(options, function (error) {
+                    if (error) {
+                        return reject(error);
+                    }
+                    resolve();
+                });
+            });
+        }
+    },
     /**
      * Gets executed just before initialising the webdriver session and test framework. It allows you
      * to manipulate configurations depending on the capability or spec.
@@ -267,6 +295,44 @@ exports.config = {
      * @param {Object} config wdio configuration object
      * @param {Array.<Object>} capabilities list of capabilities details
      */
-    // onComplete: function(exitCode, config, capabilities) {
-    // }
+    onComplete: function(exitCode, config, capabilities) { 
+        if (process.env.BROWSERSTACK) {
+            exports.bs_local.stop(function () {});
+        }
+    }
+};
+
+if (process.env.BROWSERSTACK) {
+    exports.config.maxInstances = 1;
+    if (process.env.BROWSERSTACK_USERNAME && process.env.BROWSERSTACK_ACCESS_KEY) {
+        exports.config.user = process.env.BROWSERSTACK_USERNAME;
+        exports.config.key = process.env.BROWSERSTACK_ACCESS_KEY;
+    } else {
+        console.log('You need to set the following environment variables.');
+        console.log('BROWSERSTACK_USERNAME=<BrowserStack user name>');
+        console.log('BROWSERSTACK_ACCESS_KEY=<BrowserStack access key>');
+    }
+    exports.config.services = ['browserstack'];
+    var capabilities = [];
+    capabilities.push({ os: 'Windows', os_version: '10', browser: 'Chrome', resolution: '1920x1080', 'browserstack.local': true });
+    capabilities.push({ os: 'Windows', os_version: '10', browser: 'Firefox', resolution: '1920x1080', 'browserstack.local': true });
+    capabilities.push({ os: 'OS X', os_version: 'Catalina', browser: 'Chrome', resolution: '1920x1080', 'browserstack.local': true });
+    capabilities.push({ os: 'OS X', os_version: 'Catalina', browser: 'Firefox', resolution: '1920x1080', 'browserstack.local': true });
+    exports.config.capabilities = capabilities;
+} else {
+    exports.config.maxInstances = 10;
+    exports.config.port = 9515;
+    exports.config.path = '/';
+    exports.config.services = ['chromedriver'];
+    exports.config.capabilities = [{
+        maxInstances: 2,
+        browserName: 'chrome',
+        'goog:chromeOptions': {
+            args: process.env.NODE_RED_NON_HEADLESS
+                // Runs tests with opening a browser.
+                ? ['--disable-gpu', '--no-sandbox']
+                // Runs tests without opening a browser.
+                : ['--headless', '--disable-gpu', 'window-size=1920,1080', '--no-sandbox']
+        }
+    }];
 }

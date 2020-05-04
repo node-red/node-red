@@ -1,0 +1,34 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="inject">
+<p>手动或定期得将消息注入流中。消息的有效荷载可以为多种类型，包括字符串，JavaScript对象或当前时间。</p>
+<h3>输出</h3>
+<dl class="message-properties">
+    <dt>payload<span class="property-type">various</span></dt>
+    <dd>指定的消息的有效荷载。</dd>
+    <dt class="optional">topic <span class="property-type">字符串</span></dt>
+    <dd>可以在节点中配置的可选属性。</dd>
+</dl>
+<h3>详细</h3>
+<p>通过使用特定的有效荷载，注入节点可以启动流。默认有效荷载是当前时间的时间戳（以毫秒为单位，自1970年1月1日起）。</p>
+<p>该节点还支持注入字符串，数字，布尔值，JavaScript对象或流/全局上下文值。</p>
+<p>默认情况下，节点可以通过在编辑器中单击节点按钮来手动触发。同时也可以被设置为定期或按计划注入。</p>
+<p>另一个可选的设置是在每次启动流时注入一次。</p>
+<p>可以指定的最大<i>间隔</i>约为596小时/24天。 但是，如果对于间隔超过一天的那些间隔，建议您使用scheduler节点来应对断电或重启。</p>
+<p><b>注意</b>：选项<i>“时间间隔” </i>和<i>“特定时间” </i>使用了标准cron系统。这意味着因此“20分钟”并不表示在此之后20分钟，而是每小时的20分钟，40分钟。如果您希望设定为从现在开始的每20分钟，那么请使用<i>“间隔” </i>选项。</p>
+<p><b>注意</b>: 如果您想在字符串中包含换行符，必须使用“功能”节点创建有效荷载。</p>
+</script>

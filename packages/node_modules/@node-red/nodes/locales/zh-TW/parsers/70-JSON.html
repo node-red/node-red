@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="json">
+    <p>在JSON字符串及其JavaScript對象表示形式之間相互轉換。</p>
+    <h3>輸入</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 字符串</span></dt>
+        <dd>JavaScript對象或JSON字符串。</dd>
+        <dt>schema<span class="property-type">object</span></dt>
+        <dd>可選的JSON Schema對象用于驗證有效負載。在將<code>msg</code>發送到下一個節點之前，將刪除該屬性。</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 字符串</span></dt>
+        <dd>
+            <ul>
+                <li>如果輸入是JSON字符串，它將嘗試將其解析爲JavaScript對象。</li>
+                <li>如果輸入是JavaScript對象，它將創建一個JSON字符串。並可以選擇對此JSON字符串進行整形。</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">數組</span></dt>
+        <dd>如果JSON模式驗證失敗，則catch節點將具有包含錯誤數組的<code>schemaError</code>屬性。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>默認的轉換目標是<code>msg.payload</code>，但是也可以轉換消息的其它屬性。</p>
+    <p>您可以將其設置爲僅執行特定的轉換，而不是自動選擇雙向轉換。例如，即使對<code>HTTP In</code>節點的請求未正確設置‘content-type’，也可以使用它來確保JSON節點的轉換結果是JavaScript對象</p>
+    <p>如果指定了轉換爲JSON字符串，則不會對收到的字符串進行進一步的檢查。也就是說，即使指定了格式化選項，它也不會檢查字符串是否正確爲JSON或對JSON執行整形。</p>
+    <p>有關JSON模式的更多詳細信息，請查閱<a href="http://json-schema.org/latest/json-schema-validation.html">規範</a>.</p>
+</script>

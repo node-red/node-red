@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="status">
+    <p>获取在同一标签页上的其他节点的状态消息。</p>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>status.text <span class="property-type">字符串</span></dt>
+        <dd>状态文本。</dd>
+        <dt>status.source.type <span class="property-type">字符串</span></dt>
+        <dd>报告状态的节点的类型。</dd>
+        <dt>status.source.id <span class="property-type">字符串</span></dt>
+        <dd>报告状态的节点的ID。</dd>
+        <dt>status.source.name <span class="property-type">字符串</span></dt>
+        <dd>报告状态的节点的名称（如果已设置）。</dd>
+    </dl>
+    <h3>详细</h3>
+   <p>该节点不包含<code>有效荷载</code>。</p>
+   <p>默认情况下，节点会获取同一工作空间标签页上报告所有节点的状态。可以通过配置来设定目标节点。</p>
+</script>

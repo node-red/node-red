@@ -1,0 +1,28 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="udp in">
+    <p>UDP输入节点。在<code>msg.payload</code>中生成Buffer，字符串或Base64编码的字符串。支持组播。</p>
+    <p>在<code>msg.ip</code>和<code>msg.port</code>中设置接收到的消息的IP地址和端口。</p>
+    <p><b>注意：</b>在某些系统上，您可能需要root或管理员权限才能使用低于1024的端口或广播。</p>
+</script>
+
+<script type="text/x-red" data-help-name="udp out">
+    <p>该节点将<code>msg.payload</code>发送到指定的UDP主机和端口。支持组播。</p>
+    <p>您也可以使用<code>msg.ip</code>和<code>msg.port</code>设置目标值，但是静态配置的值具有优先权。</p>
+    <p>如果选择广播，则将地址设置为本地广播IP地址。或者也可以尝试使用全局广播地址255.255.255.255。</p>
+    <p><b>注意：</b>在某些系统上，您可能需要root或管理员权限才能使用低于1024的端口或广播。</p>
+</script>

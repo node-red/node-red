@@ -1,0 +1,34 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="batch">
+    <p>根据各种规则创建消息序列。</p>
+    <h3>详细</h3>
+    <p>有三种创建消息序列的模式：</p>
+    <dl>
+        <dt>讯息数</dt>
+        <dd>将消息分组为给定长度的序列。 <b>overlap</b>（重叠）选项指定在一个序列的末尾应重复多少消息。</dd>
+
+        <dt>时间间隔</dt>
+        <dd>对在指定时间间隔内到达的邮件进行分组。如果在该时间间隔内没有消息到达，则该节点可以选择发送空消息。</dd>
+
+        <dt>串联序列</dt>
+        <dd>通过串联输入序列来创建消息序列。每条消息必须具有<code>msg.topic</code>属性和标识其序列的<code>msg.parts</code>属性。该节点配置有<code>topic</code>值列表，以标识所连接的顺序序列。
+        </dd>
+    </dl>
+    <h4>储存讯息</h4>
+    <p>该节点将在内部缓冲消息，以便跨序列工作。运行时设置<code>nodeMessageBufferMaxLength</code>可用于限制节点将缓存多少消息。</p>
+</script>

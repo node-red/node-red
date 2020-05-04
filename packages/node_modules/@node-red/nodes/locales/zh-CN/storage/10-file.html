@@ -1,0 +1,55 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="file">
+    <p>将<code>msg.payload</code>写入文件，添加到末尾或替换现有内容。或者，它也可以删除文件。</p>
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename<span class="property-type">字符串</span></dt>
+        <dd>如果未在节点中配置，则此可选属性可以设置文件名。</dd>
+    </dl>
+    <h3>输出</h3>
+    <p>写入完成后，输入消息将发送到输出端口。</p>
+    <h3>详细</h3>
+    <p>每个消息的有效荷载将添加到文件的末尾，可以选择在每个消息之间添加一个换行符（\n）。</p>
+    <p>如果使用<code>msg.filename</code>，则每次写入后文件都会关闭。为了获得最佳体验，请使用固定的文件名。</p>
+    <p>可以将其配置为覆盖整个文件，而不是在文件后添加段落。例如，在将二进制数据写入文件（例如图像）时，应使用此选项，并且应禁用添加换行符的选项。</p>
+    <p>可以从编码列表中指定写入文件的数据的编码。</p>
+    <p>您可以将此节点配置为删除文件。</p>
+</script>
+
+<script type="text/html" data-help-name="file in">
+    <p>以字符串或二进制缓冲区的形式读取文件的内容。</p>
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt class="optional">filename<span class="property-type">字符串</span></dt>
+        <dd>如果未在节点配置中设置，该属性可以选择要读取的文件名。</dd>
+    </dl>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">字符串 | buffer</span></dt>
+        <dd>文件的内容可以是字符串，也可以是二进制的buffer。</dd>
+        <dt class="optional">filename <span class="property-type">字符串</span></dt>
+        <dd>如果未在节点配置中设置，该属性可以选择要读取的文件名。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>文件名应该是绝对路径，否则将相对于Node-RED进程的工作目录。</p>
+    <p>在Windows上，可能需要使用转义路径分隔符，例如：<code>\\Users\\myUser</code>。</p>
+    <p>可以选择将文本文件拆分为几行，每行输出一条消息，或者将二进制文件拆分为较小的buffer块-块大小取决于操作系统，但通常为64k（Linux/Mac）或41k（Windows）。</p>
+    <p>当拆分为多条消息时，每条消息将具有<code>parts</code>属性集，从而形成完整的消息序列。</p>
+    <p>如果输出格式为字符串，则可以从编码列表中指定输入数据的编码。</p>
+    <p>应该使用Catch节点来捕获并处理错误。</p>
+</script>

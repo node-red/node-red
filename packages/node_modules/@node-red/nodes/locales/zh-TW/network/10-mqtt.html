@@ -1,0 +1,70 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="mqtt in">
+    <p>連接到MQTT代理並訂閱來自指定主題的消息。</p>
+    <h3>輸出</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">字符串 | buffer</span></dt>
+       <dd>如果不是二進制buffer的話就是字符串</dd>
+       <dt>topic <span class="property-type">字符串</span></dt>
+       <dd>MQTT主題，使用<code>/</code>作爲層次結構分隔符。</dd>
+       <dt>qos <span class="property-type">數值</span> </dt>
+       <dd>QoS服務質量：0, 最多一次； 1, 最少一次； 2, 只一次。</dd>
+       <dt>retain <span class="property-type">布爾值</span></dt>
+       <dd>值爲true時表示消息已保留且可能是舊的。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>訂閱主題可以包括MQTT通配符（+：一個級別，＃：多個級別）。</p>
+    <p>使用該節點您首先需要建立與MQTT代理的連接。通過單擊鉛筆圖標來進行配置。</p>
+    <p>如有需要，幾個MQTT節點（輸入或輸出）可以共享相同的代理連接。</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt out">
+    <p>連接到MQTT代理並發布消息。</p>
+    <h3>輸入</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">字符串 | buffer</span></dt>
+       <dd>要發布的有效負載。如果未設置此屬性，則不會發送任何消息。要發送空白消息，請將此屬性設置爲空字符串。</dd>
+
+       <dt class="optional">topic <span class="property-type">字符串</span></dt>
+       <dd>要發布的MQTT主題。</dd>
+
+       <dt class="optional">qos <span class="property-type">number</span></dt>
+       <dd>QoS服務質量：0, 最多一次； 1, 最少一次； 2, 只一次。默認值爲0。</dd>
+
+       <dt class="optional">retain <span class="property-type">布爾值</span></dt>
+       <dd>設置爲<code>true</code>來將消息保留在代理上。默認值爲<code>false</code>。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p><code>msg.payload</code>用作已發布消息的有效載荷。如果包含Object，則會在發送之前將其轉換爲JSON字符串。如果它包含二進制buffer，則消息將按原樣發布。</p>
+    <p>可以在節點中配置所使用的主題，或者如果留爲空白，則可以通過<code>msg.topic</code>進行設置。</p>
+    <p>同樣，可以在節點中配置QoS和保留值，或者如果保留空白，則分別由<code>msg.qos</code>和<code>msg.retain</code>設置。要清除先前存儲在代理中的主題，請設置保留標志並向該主題發布空消息。</p>
+    <p>該節點需要與要配置的MQTT代理的連接。通過單擊鉛筆圖標進行配置。</p>
+    <p>如果需要，幾個MQTT節點（輸入或輸出）可以共享相同的代理連接。</p>
+</script>
+
+<script type="text/x-red" data-help-name="mqtt-broker">
+    <p>與MQTT代理的連接設置。</p>
+    <p>創建與代理的連接設置。可以在<code>MQTT In</code>和<code>MQTT Out</code>節點中重複利用這些設置。</p>
+    <p>如果未爲該節點設置客戶端ID，並且設置了會話初始化，則將生成一個隨機客戶端ID。設置客戶端ID時，請確保它對于連接目標處的代理是唯一的。</p>
+    <h4>Birth Message</h4>
+    <p>建立連接後發布在以配置主題中的消息。</p>
+    <h4>Close Message</h4>
+    <p>在連接正常結束之前重新部署或者關閉了節點時，發布在以配置主題中的消息。</p>
+    <h4>Will Message</h4>
+    <p>當節點意外丟失連接時由代理發布的消息</p>
+    <h4>WebSockets</h4>
+    <p>可以將節點配置成使用WebSocket連接。使用WebSocket時，請在服務器字段中以完整格式描述連接目標的URI。 例如：</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+</script>

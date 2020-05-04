@@ -1,0 +1,46 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="template">
+    <p>根据提供的模板设置属性。</p>
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">object</span></dt>
+        <dd>一个msg对象，其中包含着用于填充模板的信息。</dd>
+        <dt class="optional">template <span class="property-type">string</span></dt>
+        <dd>由<code>msg.payload</code>填充的模板。如果未在编辑面板中配置，则可以将设为msg的属性。</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">object</span></dt>
+        <dd>由来自传入msg的属性来填充已配置的模板后输出的带有属性的msg。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>默认情况下使用<i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>格式。如有需要也可以切换其他格式。</p>
+    <p>例如:
+    <pre>Hello {{payload.name}}. Today is {{date}}</pre>
+    <p>receives a message containing:
+    <pre>{
+  date: "Monday",
+  payload: {
+    name: "Fred"
+  }
+}</pre>
+    <p>输出的消息将会是:
+    <pre>Hello Fred. Today is Monday</pre>
+    <p>也可以使用流上下文或全局上下文中的属性：<code>{{flow.name}}</code>或者<code>{{global.name}}</code>，或者为了持久储存<code>store</code>，可以使用<code>{{flow[store].name}}</code>或<code>{{global[store].name}}</code>。
+    <p><b>注意：</b>默认情况下，<i>mustache</i>将在其替换的值中转义任何非字母数字或HTML实体。为了防止这种情况，请使用<code>{{{triple}}}</code>大括号。
+</script>

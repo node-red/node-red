@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var util = require("util");
+var util = require('util');
 
-var nodePage = require("../../node_page");
+var nodePage = require('../../node_page');
 
 function htmlNode(id) {
     nodePage.call(this, id);
@@ -24,7 +24,7 @@ function htmlNode(id) {
 
 util.inherits(htmlNode, nodePage);
 
-htmlNode.prototype.setSelector = function(tag) {
+htmlNode.prototype.setSelector = function (tag) {
     browser.setValue('#node-input-tag', tag);
 }
 
