@@ -165,6 +165,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/sidebar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-info.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-info-outliner.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-help.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-config.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-context.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette-editor.js",
