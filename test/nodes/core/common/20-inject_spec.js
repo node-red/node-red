@@ -510,6 +510,26 @@ describe('inject node', function() {
         });
     });
 
+    it('should inject multiple properties using legacy props if needed', function (done) {
+        var flow = [{id: "n1", type: "inject", payload:"123", payloadType:"num", topic:"foo", props: [{p:"topic", vt:"str"}, {p:"payload"}], wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "foo");
+                    msg.should.have.property("payload", 123);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+
     it('should report invalid JSONata expression', function (done) {
         var flow = [{id: "n1", type: "inject", props: [{p:"topic", v:"t1", vt:"str"}, {p:"payload", v:"@", vt:"jsonata"}], wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
