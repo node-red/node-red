@@ -488,6 +488,57 @@ describe('inject node', function() {
                   });
     });
 
+
+    it('should inject multiple properties ', function (done) {
+        var flow = [{id: "n1", type: "inject", props: [{p:"topic", v:"t1", vt:"str"}, {p:"payload", v:"foo", vt:"str"}, {p:"x", v: 10, "vt":"num"}, {p:"y", v: "x+2", "vt":"jsonata"}], wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.have.property("payload", "foo");
+                    msg.should.have.property("x", 10);
+                    msg.should.have.property("y", 12);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('should report invalid JSONata expression', function (done) {
+        var flow = [{id: "n1", type: "inject", props: [{p:"topic", v:"t1", vt:"str"}, {p:"payload", v:"@", vt:"jsonata"}], wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var count = 0;
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("topic", "t1");
+                    msg.should.not.have.property("payload");
+                    count++;
+                    if (count == 2) {
+                        done();
+                    }
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.on("call:error", function(err) {
+                count++;
+                if (count == 2) {
+                    done();
+                }
+            });
+            n1.receive({});
+        });
+    });
+
     describe('post', function() {
         it('should inject message', function(done) {
             helper.load(injectNode,
