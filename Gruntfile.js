@@ -125,6 +125,7 @@ module.exports = function(grunt) {
                 src: [
                     // Ensure editor source files are concatenated in
                     // the right order
+                    "packages/node_modules/@node-red/editor-client/src/js/polyfills.js",
                     "packages/node_modules/@node-red/editor-client/src/js/jquery-addons.js",
                     "packages/node_modules/@node-red/editor-client/src/js/red.js",
                     "packages/node_modules/@node-red/editor-client/src/js/events.js",
@@ -151,6 +152,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/stack.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/colorPicker.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actions.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/deploy.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
@@ -163,6 +165,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/sidebar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-info.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-info-outliner.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tab-help.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-config.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-context.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette-editor.js",
@@ -177,6 +181,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actionList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/typeSearch.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/subflow.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/group.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/userSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projects.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectSettings.js",
@@ -193,7 +198,8 @@ module.exports = function(grunt) {
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.0.1.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/marked/marked.min.js",
+                        "node_modules/marked/marked.min.js",
+                        "node_modules/dompurify/dist/purify.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/i18next/i18next.min.js",
                         "node_modules/jsonata/jsonata-es5.min.js",

@@ -1,0 +1,24 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="complete">
+  <p>當另一個節點完成對消息的處理時觸發流程。</p>
+  <h3>詳細</h3>
+  <p>如果一個節點通知運行時它已完成消息的處理，該節點可用于觸發第二個流程。</p>
+  <p>這個節點可以與沒有輸出端口的節點一起使用，例如在使用電子郵件發送節點來發送郵件後觸發一個流程。</p>
+  <p>此節點只能被設置爲處理流程中某個所選節點的事件。與Catch節點不同，您不能指定“所有節點”模式並以流程中的所有節點爲目標。</p>
+  <p>並非所有節點都會觸發此事件。這取決于它們是否支持于Node-RED 1.0中引入的此功能。</p>
+</script>

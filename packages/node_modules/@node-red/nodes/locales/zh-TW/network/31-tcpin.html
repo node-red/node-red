@@ -1,0 +1,35 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="tcp in">
+    <p>提供TCP輸入選擇。可以連接到遠程TCP端口，或接受傳入連接。</p>
+    <p><b>注意：</b>在某些系統上，您可能需要root或管理員權限來訪問低于1024的端口。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp out">
+    <p>提供TCP輸出的選擇。可以連接到遠程TCP端口，接受傳入的連接，或回複從TCP In節點收到的消息。</p>
+    <p>僅發送<code>msg.payload</code>。</p>
+    <p>如果<code>msg.payload</code>是包含二進制數據的Base64編碼的字符串，則Base64解碼選項將導致它在發送之前先轉換回二進制。</p>
+    <p>如果不存在<code>msg._session</code>，則有效負載將發送到<b>所有</b>連接的客戶端。</p>
+    <p><b>注意：</b>在某些系統上，您可能需要root或管理員權限來訪問低于1024的端口。</p>
+</script>
+
+<script type="text/x-red" data-help-name="tcp request">
+    <p>一個簡單的TCP請求節點。將<code>msg.payload</code>發送到服務器tcp端口，並期望得到響應。</p>
+    <p>連接到服務器，發送“請求”並接收“響應”。 可以從固定數量的字符，與指定字符匹配的字符中選擇操作，從第一個答複到達起等待指定的時間，等待數據到達，發送數據並立即取消連接而無需等待答複等操作中進行選擇。</p>
+    <p>響應將在<code>msg.payload</code>中作爲buffer輸出，因此您可能需要對它進行<code>.toString()</code>操作。</p>
+    <p>如果將tcp主機或端口留空，則必須使用<code>msg.host</code>和<code>msg.port</code>屬性進行設置。</p>
+</script>

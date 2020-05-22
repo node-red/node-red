@@ -14,22 +14,22 @@
  * limitations under the License.
  **/
 
-var util = require("util");
+var util = require('util');
 
-var nodePage = require("../../node_page");
+var nodePage = require('../../node_page');
 
-function mqttOutNode(id) {
+function yamlNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(mqttOutNode, nodePage);
+util.inherits(yamlNode, nodePage);
 
-mqttOutNode.prototype.setTopic = function(topic) {
-    browser.setValue('#node-input-topic', topic);
+yamlNode.prototype.setAction = function (action) {
+    browser.setValue('node-input-action', action);
 }
 
-mqttOutNode.prototype.setRetain = function (retain) {
-    browser.selectWithWait('#node-input-retain', retain);
+yamlNode.prototype.setProperty = function (property) {
+    browser.setValue('//*[contains(@class, "red-ui-typedInput-container")]/div[1]/input', property);
 }
 
-module.exports = mqttOutNode;
+module.exports = yamlNode;
