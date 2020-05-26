@@ -10,7 +10,9 @@
     },
     "private": "true",
     "scripts": {
-        "start": "node packages/node_modules/node-red/red.js",
+        "start": "pm2 start packages/node_modules/node-red/red.js",
+        "stop": "pm2 stop packages/node_modules/node-red/red.js",
+        "logs": "pm2 logs",
         "test": "grunt",
         "build": "grunt build",
         "docs": "grunt docs"
@@ -63,6 +65,7 @@
         "passport": "0.4.1",
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
+        "pm2": "^4.4.0",
         "raw-body": "2.4.1",
         "request": "2.88.0",
         "semver": "6.3.0",
