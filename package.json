@@ -104,7 +104,7 @@
         "minami": "1.2.3",
         "mocha": "^5.2.0",
         "mosca": "^2.8.3",
-        "node-red-node-test-helper": "^0.2.3",
+        "node-red-node-test-helper": "^0.2.5",
         "node-sass": "^4.13.1",
         "should": "^8.4.0",
         "sinon": "1.17.7",
