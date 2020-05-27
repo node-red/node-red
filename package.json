@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "1.0.6",
+    "version": "1.1.0",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -48,6 +48,7 @@
         "js-yaml": "3.13.1",
         "json-stringify-safe": "5.0.1",
         "jsonata": "1.8.3",
+        "lodash.clonedeep": "^4.5.0",
         "media-typer": "1.1.0",
         "memorystore": "1.6.2",
         "mime": "2.4.4",
