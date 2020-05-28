@@ -505,6 +505,11 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{});
               result.should.eql('foo');
           });
+          it('accesses moment from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add("days", 7).add("months", 1).format("YYYY-MM-DD")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2020-07-03');
+          });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
