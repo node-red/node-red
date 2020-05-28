@@ -499,6 +499,11 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("bar");
           });
+          it('accesses undefined environment variable from an expression', function() {
+              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('');
+          });
           it('accesses environment variable from an expression', function() {
               process.env.UTIL_ENV = 'foo';
               var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
