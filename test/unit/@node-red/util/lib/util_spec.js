@@ -515,6 +515,11 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{});
               result.should.eql('2020-07-03');
           });
+          it('accesses moment-timezone from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2013-11-18T19:55:00+08:00');
+          });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
