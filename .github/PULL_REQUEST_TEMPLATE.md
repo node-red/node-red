@@ -29,6 +29,6 @@ the [forum](https://discourse.nodered.org) or
 <!-- Put an `x` in the boxes that apply -->
 
 - [ ] I have read the [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
-- [ ] For non-bugfix PRs, I have discussed this change on the mailing list/slack team.
+- [ ] For non-bugfix PRs, I have discussed this change on the forum/slack team.
 - [ ] I have run `grunt` to verify the unit tests pass
 - [ ] I have added suitable unit tests to cover the new/changed functionality

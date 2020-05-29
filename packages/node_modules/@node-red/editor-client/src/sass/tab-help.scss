@@ -1,0 +1,27 @@
+.red-ui-sidebar-help-stack {
+    // height: calc(100% - 39px);
+}
+.red-ui-help-search {
+    border-bottom: 1px solid $secondary-border-color;
+}
+
+.red-ui-sidebar-help-toc {
+    .red-ui-treeList-label {
+        font-size: 13px;
+        padding: 2px 0;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+}
+#red-ui-sidebar-help-show-toc {
+    i.fa-angle-right {
+        transition: all 0.2s ease-in-out;
+    }
+    &.selected {
+        i.fa-angle-right {
+            transform: rotate(90deg);
+        }
+    }
+
+}
