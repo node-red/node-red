@@ -14,22 +14,26 @@
  * limitations under the License.
  **/
 
-var util = require("util");
+var util = require('util');
 
-var nodePage = require("../../node_page");
+var nodePage = require('../../node_page');
 
-function mqttInNode(id) {
+function batchNode(id) {
     nodePage.call(this, id);
 }
 
-util.inherits(mqttInNode, nodePage);
-
-mqttInNode.prototype.setTopic = function (topic) {
-    browser.setValue('#node-input-topic', topic);
+batchNode.prototype.setMode = function (mode) {
+    browser.selectWithWait('#node-input-mode', mode);
 }
 
-mqttInNode.prototype.setQoS = function (qos) {
-    browser.selectWithWait('#node-input-qos', qos);
+batchNode.prototype.setCount = function (count) {
+    browser.setValue('#node-input-count', count);
 }
 
-module.exports = mqttInNode;
+batchNode.prototype.setOverlap = function (overlap) {
+    browser.setValue('#node-input-overlap', overlap);
+}
+
+util.inherits(batchNode, nodePage);
+
+module.exports = batchNode;

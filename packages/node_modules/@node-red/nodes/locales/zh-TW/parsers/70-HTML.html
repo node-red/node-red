@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="html">
+    <p>使用CSS選擇器從<code>msg.payload</code>中保存的html文檔中提取元素。</p>
+    <h3>輸入</h3>
+    <dl class="message-properties">
+    <dt>payload <span class="property-type">字符串</span></dt>
+    <dd>從中提取元素的html字符串。</dd>
+    <dt class="optional">select <span class="property-type">字符串</span></dt>
+    <dd>如果未在編輯面板中配置，則可以將選擇器設置爲msg的屬性。</dd>
+</dl>
+    <h3>Output</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">數組 | 字符串</span></dt>
+        <dd>結果可以是有效載荷中包含匹配元素的數組的單個消息；也可以是多條消息，每條消息都包含匹配元素。發送多條消息時，需要爲消息設置<code>parts</code>。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>該節點支持CSS和jQuery選擇器的組合。查看<a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">css-select documentation</a> 來獲得更多信息。</p>
+</script>

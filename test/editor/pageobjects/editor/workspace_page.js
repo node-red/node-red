@@ -42,7 +42,7 @@ function addNode(type, x, y) {
         }
     }
     browser.waitForVisible('#red-ui-palette-search');
-    browser.setValue('//*[@id="red-ui-palette-search"]/div/input', type.replace(/([A-Z])/g,' $1').toLowerCase());
+    browser.setValue('//*[@id="red-ui-palette-search"]/div/form/input', type.replace(/([A-Z])/g, ' $1').toLowerCase());
     browser.pause(300);
     browser.waitForVisible(palette.getId(type));
     browser.moveToObject(palette.getId(type));
@@ -66,8 +66,8 @@ function deleteAllNodes() {
 
 function deploy() {
     browser.call(function () {
-        return when.promise(function(resolve, reject) {
-            events.on("runtime-event", function(event) {
+        return when.promise(function (resolve, reject) {
+            events.on("runtime-event", function (event) {
                 if (event.id === 'runtime-deploy') {
                     events.removeListener("runtime-event", arguments.callee);
                     resolve();
