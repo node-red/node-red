@@ -1,3 +1,89 @@
+#### 1.1.0-beta.1: Beta Release
+
+Runtime
+
+ - #2551 (@bartbutenaers) Allow HTTPS settings to be refreshed
+ - #2583 (@dxdc) Add support for moment in JSONata expressions
+ - #2555 Add httpAdminMiddleware for admin routes
+ - #2479 (@KazuhiroItoh) Add admin api authentication function
+ - #2463 (@HiroyasuNishiyama) Add option support for overwriting settiings.js
+ - #2368 Add support for credential-stored env var in subflow
+ - #2378 (@KazuhiroItoh) Add node installation from other than public site
+
+ - #2396 (@amodelbello) Move to `lodash.clonedeep`
+ - Tidy up unhandledRejection warning from context unit tests
+ - Add test cases for setMessageProperty with non-object properties
+ - #2584 (@sammachin) Fix for settings.set subsequent updates
+ - Turn off installer funding messages
+ - Remove unused \_info/\_type subflow env var magic values
+ - #2548 Add #! lines to project shell scripts
+ - Add nodejs14 to Travis test matrix
+ - #2516 (@alexk111) Remove duplicate NLS message
+ - #2439 Let setMessageProperty return success flag
+
+Editor
+
+ - #2493 Add ability to group nodes
+ - #2558 Add loading progress bar
+ - #2556 Add Outliner to Info sidebar and add help sidebar
+ - #2569 Add action to toggle node label visibility
+ - Add show-examples-import-dialog action
+ - #2543 Add more consistent events in the editor
+ - #2490 (@kazuhitoyokoi) Save the node description property to the library
+ - #2367 Add credential type to TypedInput
+ - #2381 Scroll the view with WASD/Cursor keys when nothing selected
+
+ - Bump jquery/migrate to latest versions
+ - #2579 (@ristomatti) Fix editor underscore visibility on Linux systems
+ - #2586 (@Steve-Mcl) Support setting title on typedInput multi-option
+ - Projects: Allow remote branch dialog to create non-default remote branches
+ - #2545 Ensure auth failure on project fetch identifies the remote
+ - Make all dialogs handle smaller height screens better
+ - Add basic Array.from polyfill for IE11
+ - Add some more trap form elements to workaround Chrome autofill
+ - [info-sidebar] Handle node/group/flows with \n in their name
+ - [popover] Allow hover-type popovers to contain buttons
+ - Modify RED.panels to use flexbox position
+ - Allow node edit dialog to be opened on a non-default tab
+ - Add createNodeIcon and getDarkerColor to RED.utils
+ - [search] Refactor search to use editor events to generate index
+ - Allow RED.notify.popover to have a position offset
+ - Make selected list item more distinct
+ - Allow node button to be clicked via api call
+ - Reorder initial load so projects:load event emits before any nodes:add
+ - Add polyfills for IE11
+ - #2547 (@HiroyasuNishiyama) Activate project menu after initial clone
+ - #2524 (@HiroyasuNishiyama) Fix replacement of unknown node in workspace when module installed
+ - #2506 (@HiroyasuNishiyama) Fix appearance of subflow template panel
+ - #2487 (@bonanitech) Fix workspace CSS properties syntax
+ - #2488 (@bonanitech) Consolidate duplicate selectors
+ - #2466 (@HiroyasuNishiyama) Update message catalogue for subflow UI
+
+Nodes
+
+ - Batch: #2553 (@HiroyasuNishiyama) Add reset feature to batch node
+ - CSV: Add warn when unpaired quotes detected on input.
+ - CSV: allow node to only send headers once
+ - CSV: #2526 (@tmdoit) Allow CR and LF control chars to be a part of the value
+ - CSV: #2510 (@tmdoit) Add support for parsing empty strings and null values
+ - CSV: #2562 (@kazuhitoyokoi) Update Japanese translations for CSV node
+ - Debug: #2570 (@cinhcet) Add bulk-activate/deactive actions for debug node
+ - Debug: #2564 Show status independently of main output
+ - Delay: Ensure delay node rate limit timer is cleared on reset
+ - Function: Make the function node top-level async
+ - Function: #2498 (@HiroyasuNishiyama) Add support of initialization & finalization to function node
+ - HTTP In: #2540 (@vladimir-kazan) Remove nodejs deprecation warning
+ - HTTP Request: #2478 (@hardillb) Support sending body in GET requests
+ - Inject: #2435 (@PaulWieland) Adding user definable properties to inject node
+ - TCP: #2413 (@dvv) Allow to know particular session from status node
+ - Trigger: Add optional second output
+ - Trigger: Ensure trigger sends complete 2nd msg if set to send latest msg
+ - Trigger: Allow trigger node to use other than msg.topic to separate streams
+ - XML: #2572 (@jeancarl) Moved XML options documentation property from Outputs to Inputs section
+ - #2455 (@HiroyasuNishiyama) Add some core node example flows
+ - #2425 (@kazuhitoyokoi) Change types from text/x-red to text/html in node html files
+
+
 #### 1.0.6: Maintenance Release
 
 Runtime
@@ -119,7 +205,7 @@ Runtime
  - #2332 Fix error handling of nodes with multiple input handlers
  - Add script to generate npm publish script
  - #2371 Ensure folder is present before write (e.g. flows file not in user folder)
- - #2371 Handle windows UNC '\\' paths
+ - #2371 Handle windows UNC '\' paths
  - #2366 Handle logging of non-JSON encodable objects
 
 Editor
