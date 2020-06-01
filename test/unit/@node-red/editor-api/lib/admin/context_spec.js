@@ -127,7 +127,9 @@ describe("api/admin/context", function () {
         });
 
         it('should handle error which context.getValue causes', function (done) {
-            stub.returns(Promise.reject('error'));
+            var stubbedResult = Promise.reject('error');
+            stubbedResult.catch(function() {});
+            stub.returns(stubbedResult);
             request(app)
                 .get('/context/global')
                 .set('Accept', 'application/json')
@@ -213,7 +215,9 @@ describe("api/admin/context", function () {
         });
 
         it('should handle error which context.delete causes', function (done) {
-            stub.returns(Promise.reject('error'));
+            var stubbedResult = Promise.reject('error');
+            stubbedResult.catch(function() {});
+            stub.returns(stubbedResult);
             request(app)
                 .delete('/context/global/abc?store=default')
                 .expect(400)
