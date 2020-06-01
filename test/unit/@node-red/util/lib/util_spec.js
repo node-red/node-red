@@ -143,6 +143,10 @@ describe("@node-red/util/util", function() {
             cloned.req.should.equal(msg.req);
             cloned.res.should.equal(msg.res);
         });
+        it('handles undefined values without throwing an error', function() {
+            var result = util.cloneMessage(undefined);
+            should.not.exist(result);
+        })
     });
     describe('getObjectProperty', function() {
         it('gets a property beginning with "msg."', function() {
@@ -495,11 +499,26 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("bar");
           });
+          it('accesses undefined environment variable from an expression', function() {
+              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('');
+          });
           it('accesses environment variable from an expression', function() {
               process.env.UTIL_ENV = 'foo';
               var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
               var result = util.evaluateJSONataExpression(expr,{});
               result.should.eql('foo');
+          });
+          it('accesses moment from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add("days", 7).add("months", 1).format("YYYY-MM-DD")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2020-07-03');
+          });
+          it('accesses moment-timezone from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2013-11-18T19:55:00+08:00');
           });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
@@ -840,11 +859,11 @@ describe("@node-red/util/util", function() {
                         },
                     }
                 };
-                
+
                 for (var i = 0; i < 1000; i++) {
                     msg.msg.obj.big += 'some more string ';
                 }
-                
+
                 var result = util.encodeObject(msg);
                 result.format.should.eql("error");
                 var resultJson = JSON.parse(result.msg);
@@ -862,7 +881,7 @@ describe("@node-red/util/util", function() {
                     throw new Error('Exception in toString - should have been caught');
                 }
                 msg.msg.constructor = { name: "strangeobj" };
-                
+
                 var result = util.encodeObject(msg);
                 var success = (result.msg.indexOf('[Type not printable]') >= 0);
                 success.should.eql(true);
@@ -872,11 +891,11 @@ describe("@node-red/util/util", function() {
                 var msg = {
                     msg: {
                         mystrangeobj:"hello",
-                        constructor: { 
+                        constructor: {
                             get name(){
                                 throw new Error('Exception in constructor name');
                             }
-                        }                      
+                        }
                     },
                 };
                 var result = util.encodeObject(msg);

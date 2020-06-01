@@ -1,0 +1,74 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="exec">
+    <p>运行系统命令并返回其输出。</p>
+    <p>可以将节点配置为等待命令完成，或者在命令生成时发送其输出。</p>
+    <p>运行的命令可以在节点中配置，也可以由收到的消息提供。</p>
+
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">字符串</span></dt>
+        <dd>如果这样配置，则将被附加到执行命令中。</dd>
+        <dt class="optional">kill <span class="property-type">字符串</span></dt>
+        <dd>指定发送到现有的exec节点进程的kill信号类型。</dd>
+        <dt class="optional">pid <span class="property-type">数值|字符串</span></dt>
+        <dd>要杀死的现有exec节点进程的进程ID</dd>
+    </dl>
+
+    <h3>输出</h3>
+    <ol class="node-ports">
+        <li>标准输出(stdout)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">字符串</span></dt>
+                <dd>命令的标准输出。</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">object</span></dt>
+                <dd>（仅执行模式）一个返回代码对象的副本（在端口3上也可用）</dd>
+            </dl>
+        </li>
+        <li>标准error输出(stderr)
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">字符串</span></dt>
+                <dd>命令的标准错误输出。</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">object</span></dt>
+                <dd>（仅执行模式）一个返回代码对象的副本（在端口3上也可用）</dd>
+            </dl>
+        </li>
+        <li>返回代码
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">object</span></dt>
+                <dd>一个包含返回代码以及<code>message</code>，<code>signal</code>属性的对象。</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>详细</h3>
+    <p>默认情况下，使用<code>exec</code>系统调用来调用命令，等待命令完成，然后返回输出。例如，成功的命令的返回码应为<code>{code：0}</code>。</p>
+    <p>（可选）可以选择使用<code>spawn</code>代替，它会在命令运行时从stdout和stderr返回输出，通常一次一行。完成后，它将在第三个端口上返回一个对象。例如，成功的命令应返回<code>{code：0}</code>。</p>
+    <p>错误可能会在第三个端口<code>msg.payload</code>上返回额外的信息，例如<code>message</code>字符串，<code>signal</code>字符串。</p>
+    <p>运行的命令是在节点内定义的，带有附加<code>msg.payload</code>的选项和另外一组参数。</p>
+    <p>带空格的命令或参数应该用引号引起来：<code>“这是一个参数”</code></p>
+    <p>返回的<code>有效荷载</code>通常是<i>字符串</i>类型，除非检测到非UTF8字符，在这种情况下，它会是<i>buffer</i>类型。</p>
+    <p>节点处于活动状态时，该节点的状态图标和PID将可见。对此更改可以通过<code>Status</code>节点读取。</p>
+    <h4>杀死进程</h4>
+    <p>发送<code>msg.kill</code>将杀死一个活动进程。<code>msg.kill</code>应该是包含要发送的信号类型的字符串，例如<code>SIGINT</code>，<code>SIGQUIT</code>或<code>SIGHUP</code>。如果设置为空字符串，则默认为<code>SIGTERM</code>。</p>
+    <p>如果节点有多个进程在运行，则还必须设置<code>msg.pid</code>并设置要杀死的PID的值。</p>
+    <p>如果<code>超时</code>字段提供了一个值，则如果在指定的秒数过去后进程尚未完成，则该进程将自动终止。</p>
+    <p>提示：如果运行Python应用程序，则可能需要使用<code>-u</code>参数来停止对输出进行缓存。</p>
+</script>

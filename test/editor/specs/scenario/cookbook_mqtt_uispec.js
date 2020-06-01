@@ -22,7 +22,6 @@ var helper = require("../../editor_helper");
 var debugTab = require('../../pageobjects/editor/debugTab_page');
 var workspace = require('../../pageobjects/editor/workspace_page');
 var specUtil = require('../../pageobjects/util/spec_util_page');
-var mqttConfig = require('../../pageobjects/nodes/core/network/10-mqttconfig_page.js');
 
 var httpNodeRoot = "/api";
 
@@ -73,9 +72,9 @@ describe('cookbook', function () {
             var mqttOutNode = workspace.addNode("mqttOut");
 
             mqttOutNode.edit();
-            mqttConfig.edit();
-            mqttConfig.setServer("localhost", moscaSettings.port);
-            mqttConfig.clickOk();
+            mqttOutNode.mqttBrokerNode.edit();
+            mqttOutNode.mqttBrokerNode.setServer("localhost", moscaSettings.port);
+            mqttOutNode.mqttBrokerNode.clickOk();
             mqttOutNode.clickOk();
 
             workspace.deploy();

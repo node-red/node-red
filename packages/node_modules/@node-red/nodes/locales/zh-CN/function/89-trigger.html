@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="trigger">
+    <p>触发后，将会发送一条消息。如果被拓展或重置，则可以选择发送第二条消息。</p>
+
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt class="optional">reset</dt>
+        <dd>如果收到带有此属性的消息，则将清除当前正在进行的任何超时或重复，且不会触发任何消息。</dd>
+    </dl>
+
+    <h3>详细</h3>
+    <p>该节点可用于在流中创建一个超时。 默认情况下，当它收到一条消息时，它将发送一条带有<code>1</code>的有效荷载的消息。然后它将等待250毫秒，再发送第二条消息，其有效荷载为<code>0</code>。这可以用于使连接到Raspberry Pi GPIO引脚的LED闪烁等例子上。</p>
+    <p>可以将发送的每个消息的有效荷载配置为各种值，包括不发送任何内容的选项。例如，将初始消息设置为<i>nothing</i>，然后选择将计时器与每个收到的消息一起扩展的选项，则该节点将充当看门狗计时器；仅在设置的间隔内未收到任何消息时才发送消息。</p>
+    <p>如果设置为<i>字符串</i>类型，则该节点支持<i>mustache</i>模板语法。</p>
+    <p>如果节点收到具有<code>reset</code>属性或与节点中配置的匹配的<code>有效荷载</code>的消息，则将清除当前正在进行的任何超时或重复，并且不会触发任何消息。</p>
+    <p>可以将节点配置为以固定的时间间隔重新发送消息，直到被收到的消息重置为止。</p>
+    <p>（可选）可以将节点配置为将带有<code>msg.topic</code>的消息视为独立的流。</p>
+</script>

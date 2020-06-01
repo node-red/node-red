@@ -129,6 +129,61 @@ describe("api/auth/strategies", function() {
         })
     });
 
+    describe("Tokens Strategy", function() {
+        it('Succeeds if tokens user enabled custom header',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function(token) {
+                return when.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "x-test-token";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-1234");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"x-test-token":"1234"}});
+        });
+        it('Succeeds if tokens user enabled default header',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function(token) {
+                return when.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-1234");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
+        });
+        it('Fails if tokens user not enabled',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function() {
+                return when.resolve(null);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._fail = strategies.tokensStrategy.fail;
+            strategies.tokensStrategy.fail = function(err) {
+                err.should.equal(401);
+                strategies.tokensStrategy.fail = strategies.tokensStrategy._fail;
+                delete strategies.tokensStrategy._fail;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
+        });
+        afterEach(function() {
+            Users.tokens.restore();
+            Users.tokenHeader.restore();
+        })
+    });
+
     describe("Bearer Strategy", function() {
         it('Rejects invalid token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
