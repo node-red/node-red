@@ -1,0 +1,41 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="sort">
+    <p>对消息属性或消息序列进行排序的函数。</p>
+    <p>当配置为对消息属性进行排序时，节点将对指定消息属性所指向的数组数据进行排序。</p>
+    <p>当配置为对消息序列排序时，它将对消息重新排序。</p>
+    <p>排序顺序可以是：</p>
+    <ul>
+        <li><b>升序</b></li>
+        <li><b>降序</b></li>
+    </ul>
+    <p>对于数字，可以通过复选框指定数字顺序。</p>
+    <p>排序键可以是元素值，也可以是JSONata表达式来对属性值进行排序，还可以是message属性或JSONata表达式来对消息序列进行排序。<p>
+    <p>在对消息序列进行排序时，排序节点依赖于接收到的消息来设置<code>msg.parts</code>。拆分节点将生成此属性，但也可以手动创建。它具有以下属性：</p>
+    <p>
+        <ul>
+            <li><code>id</code> - 消息组的标识符</li>
+            <li><code>index</code> - 组中的位置</li>
+            <li><code>count</code> - 群组中的邮件总数</li>
+        </ul>
+    </p>
+    <p><b>注意：</b>在此节点的处理中，消息在内部存储。通过指定要累积的最大消息数，可以防止意外的高内存使用。默认设置是不限制消息数量。
+        <ul>
+            <li><code>nodeMessageBufferMaxLength</code>属性在<b>settings.js</b>中设置。</li>
+        </ul>
+    </p>
+</script>

@@ -1,3 +1,199 @@
+#### 1.1.0-beta.1: Beta Release
+
+Runtime
+
+ - #2551 (@bartbutenaers) Allow HTTPS settings to be refreshed
+ - #2583 (@dxdc) Add support for moment in JSONata expressions
+ - #2555 Add httpAdminMiddleware for admin routes
+ - #2479 (@KazuhiroItoh) Add admin api authentication function
+ - #2463 (@HiroyasuNishiyama) Add option support for overwriting settiings.js
+ - #2368 Add support for credential-stored env var in subflow
+ - #2378 (@KazuhiroItoh) Add node installation from other than public site
+
+ - #2396 (@amodelbello) Move to `lodash.clonedeep`
+ - Tidy up unhandledRejection warning from context unit tests
+ - Add test cases for setMessageProperty with non-object properties
+ - #2584 (@sammachin) Fix for settings.set subsequent updates
+ - Turn off installer funding messages
+ - Remove unused \_info/\_type subflow env var magic values
+ - #2548 Add #! lines to project shell scripts
+ - Add nodejs14 to Travis test matrix
+ - #2516 (@alexk111) Remove duplicate NLS message
+ - #2439 Let setMessageProperty return success flag
+
+Editor
+
+ - #2493 Add ability to group nodes
+ - #2558 Add loading progress bar
+ - #2556 Add Outliner to Info sidebar and add help sidebar
+ - #2569 Add action to toggle node label visibility
+ - Add show-examples-import-dialog action
+ - #2543 Add more consistent events in the editor
+ - #2490 (@kazuhitoyokoi) Save the node description property to the library
+ - #2367 Add credential type to TypedInput
+ - #2381 Scroll the view with WASD/Cursor keys when nothing selected
+
+ - Bump jquery/migrate to latest versions
+ - #2579 (@ristomatti) Fix editor underscore visibility on Linux systems
+ - #2586 (@Steve-Mcl) Support setting title on typedInput multi-option
+ - Projects: Allow remote branch dialog to create non-default remote branches
+ - #2545 Ensure auth failure on project fetch identifies the remote
+ - Make all dialogs handle smaller height screens better
+ - Add basic Array.from polyfill for IE11
+ - Add some more trap form elements to workaround Chrome autofill
+ - [info-sidebar] Handle node/group/flows with \n in their name
+ - [popover] Allow hover-type popovers to contain buttons
+ - Modify RED.panels to use flexbox position
+ - Allow node edit dialog to be opened on a non-default tab
+ - Add createNodeIcon and getDarkerColor to RED.utils
+ - [search] Refactor search to use editor events to generate index
+ - Allow RED.notify.popover to have a position offset
+ - Make selected list item more distinct
+ - Allow node button to be clicked via api call
+ - Reorder initial load so projects:load event emits before any nodes:add
+ - Add polyfills for IE11
+ - #2547 (@HiroyasuNishiyama) Activate project menu after initial clone
+ - #2524 (@HiroyasuNishiyama) Fix replacement of unknown node in workspace when module installed
+ - #2506 (@HiroyasuNishiyama) Fix appearance of subflow template panel
+ - #2487 (@bonanitech) Fix workspace CSS properties syntax
+ - #2488 (@bonanitech) Consolidate duplicate selectors
+ - #2466 (@HiroyasuNishiyama) Update message catalogue for subflow UI
+
+Nodes
+
+ - Batch: #2553 (@HiroyasuNishiyama) Add reset feature to batch node
+ - CSV: Add warn when unpaired quotes detected on input.
+ - CSV: allow node to only send headers once
+ - CSV: #2526 (@tmdoit) Allow CR and LF control chars to be a part of the value
+ - CSV: #2510 (@tmdoit) Add support for parsing empty strings and null values
+ - CSV: #2562 (@kazuhitoyokoi) Update Japanese translations for CSV node
+ - Debug: #2570 (@cinhcet) Add bulk-activate/deactive actions for debug node
+ - Debug: #2564 Show status independently of main output
+ - Delay: Ensure delay node rate limit timer is cleared on reset
+ - Function: Make the function node top-level async
+ - Function: #2498 (@HiroyasuNishiyama) Add support of initialization & finalization to function node
+ - HTTP In: #2540 (@vladimir-kazan) Remove nodejs deprecation warning
+ - HTTP Request: #2478 (@hardillb) Support sending body in GET requests
+ - Inject: #2435 (@PaulWieland) Adding user definable properties to inject node
+ - TCP: #2413 (@dvv) Allow to know particular session from status node
+ - Trigger: Add optional second output
+ - Trigger: Ensure trigger sends complete 2nd msg if set to send latest msg
+ - Trigger: Allow trigger node to use other than msg.topic to separate streams
+ - XML: #2572 (@jeancarl) Moved XML options documentation property from Outputs to Inputs section
+ - #2455 (@HiroyasuNishiyama) Add some core node example flows
+ - #2425 (@kazuhitoyokoi) Change types from text/x-red to text/html in node html files
+
+
+#### 1.0.6: Maintenance Release
+
+Runtime
+
+ - Update to JSONata 1.8.3
+ - #2536 Handle clone of null in utils
+
+Editor
+
+ - Prevent button label wrapping in typedInput
+ - Handle error objects when reporting in palette manager
+
+Nodes
+
+ - Inject: Revert to cron 1.7.2
+ - UDP: when reusing input socket honour the broadcast mode.
+
+#### 1.0.5: Maintenance Release
+
+Runtime
+
+ - #2500 Support for context stores using JSONata and evaluateNodeProperty()
+ - Add better handling of host-key-verify error with projects
+ - #2517 Handle false values in $env() properly
+ - #2514 Ensure complete node scope is remapped in subflows
+ - #2513 Flows/subflows must preinitialise their context objects
+ - Clear node.close timeout to avoid unnecessary work on restart
+ - #2532 Set flow.disabled when disabled property is false
+ - #2522 Ensure file context does not write 'undefined' to store
+
+Editor
+
+ - #2489 Fix XPath in UI tests
+ - #2504 Fix paletteCategories order
+ - #2501 Add page objects for UI testing
+ - #2494 Check node props when deciding if pasted node can splice links
+ - #2521 Don't double-sanitize node name in debug sidebar
+ - #2519 German i18n updates
+ - #2523 Update nodeTabMap when replacing unknown nodes
+ - Update TypedInput to use flexbox and remove resizing code
+ - Handle nodes with no wires array
+ - Do not collapse whitespace in Debug string messages
+
+Nodes
+
+ - File: Remove old legacy wording from file node info to stop confusing users.
+ - Join: Ensure join node handles missing buffer joiner when not in string mode
+ - Exec: make exec node logging consistent with itself. (only be verbose when in verbose mode)
+ - Trigger: reset default timeout value when switching away from wait for reset
+ - Join: Fix join to not crash on appending invalid types to buffer.
+ - MQTT out: Add warning if topic contains + or #
+ - #2502 WebSocket i18n update
+ - #2508 Add Japanese translation for join node
+ - TCP out: tidy up select of which rows to display
+
+
+#### 1.0.4: Maintenance Release
+
+Runtime
+
+ - Update all dependencies to latest fix versions
+ - Update JSONata to 1.8.1
+ - #2473 Handle httpAdminRoot missing ending slash with login strategy Fixes
+ - #2470 Update https-proxy-agent
+ - #2461 Allow credentials to be provided as part of /flows api
+ - #2444 Move receive metric position to better reflect async changes Fixes
+ - #2406 Improve file store error when cache disabled and sync api used Closes
+ - #2399 cloneMessage should handle undefined without throwing err Fixes
+ - #2418 Fix the library api routes to prevent too broad matching of regex URLs
+ - #2417 Remove undefined loadFlowLibrary call
+
+Editor
+
+ - #2465 Add better regex highlighting in jsonata edit mode Fixes
+ - Add regex awareness to jsonata formatter
+ - #2472 Avoid adding extra newlines when formating jsonata Fixes
+ - #2475 Add UI test case for error handling
+ - Avoid adding extra divs to edit form to avoid size miscalculation
+ - Upgrade to latest marked and dompurify libs
+ - Ensure catalog load errors are logged to the console
+ - #2460 Track context sidebar element paths to track formatting changes Fixes
+ - Battling Chrome Autocomplete, part 31: Wrap search input with form
+ - #2445 Trick chrome into autofilling dummy username/password inputs Fixes
+ - #2457 Fix garbled characters in library
+ - #2409 Filter palette using raw label not html formatted label Fixes
+ - #2400 Wrap long context values when displaying in sidebar Fixes
+ - Fix duplicating array item in visual json editor
+ - #2338 Modify history sidebar button positioning to handle long labels Fixes
+ - #2438 Add some auto-complete snippets to the nrjavascript mode Close
+ - #2430 Ignore disabled nodes when checking for invalid configs on deploy Closes
+ - #2442 #2458 #2453 Update zh-CN translations
+ - #2235 Add initial zh-TW translation
+ - Re-enable jshint on editor and fixup issues
+ - #2431 Remove unnecessary namespaces for i18n
+ - #2440 Support BrowserStack in UI testing
+ - #2358 Add path property to debug messages Fixes
+ - Fix false change detection when no config node selected
+ - Fix IME bug in text editor
+ - Make node highlighting a bit more obvious for busy flows
+ - #2392 Add icons and support i18n in typedInput of JSON editor
+
+Nodes
+ - #2462 MQTT: Ensure IPv6 broker names are wrapped in brackets Fixes
+ - Join node - check existance before clearing timeout
+ - Trigger: Complete 2nd msg when set to send latest
+ - TCP: clarify text regarding blank parameters.
+ - #2449 HTTP Request: Add HEAD as Method
+ - Make min-height for change, switch, batch and mqtt consistent
+
+
 #### 1.0.3: Maintenance Release
 
 Runtime
@@ -9,7 +205,7 @@ Runtime
  - #2332 Fix error handling of nodes with multiple input handlers
  - Add script to generate npm publish script
  - #2371 Ensure folder is present before write (e.g. flows file not in user folder)
- - #2371 Handle windows UNC '\\' paths
+ - #2371 Handle windows UNC '\' paths
  - #2366 Handle logging of non-JSON encodable objects
 
 Editor
@@ -44,7 +240,7 @@ Runtime
 
 Editor
  - Ensure node status is refreshed whenever node is edited
- - #2315 #2316 Ensure z property included in full message debug payload
+ - #2316 Ensure z property included in full message debug payload #2315
  - #2321 Fixed editor.json (JA nls)
  - #2313 Fix element to collapse items in visual JSON editor
  - #2314 Insert divider in menu by calling RED.menu.addItem('id', null);
@@ -113,9 +309,9 @@ Editor
  - Move flow-status button to footer for consistency
  - Fix node hover effect to prevent jumping position
  - Filter quick-add properly when splicing a wire
- - Mark workspace dirty when deleting link node link Fixes #2274
+ - #2274 Mark workspace dirty when deleting link node link Fixes
  - Add red-ui-button class to strategy login button
- - Fix padding of subflow locale select Closes #2276
+ - #2276 Fix padding of subflow locale select Closes
  - Update info text of complete node & add JP text
  - Add class red-ui-button to cancel button
  - Add css class to login submit button (#2275)
@@ -138,12 +334,12 @@ Runtime
  - [FEATURE] Add Node Done API - make message passing async
  - Ensure the subflow stop promise is waiting for before restarting
  - Limit the regex for the /nodes/ api end points
- - Add error event handler to ssh-keygen child_process Fixes #2255
- - Fix default value handling on context array access Fixes #2252
+ - #2255 Add error event handler to ssh-keygen child_process Fixes
+ - #2252 Fix default value handling on context array access Fixes
  - Remove all ui test dependencies from package.json
  - Add req back to audit log events and extend to Projects api
- - Ensure 2nd arg to node.error is an object Fixes #2228
- - Use a more atomic process for writing context files Fixes #2271
+ - #2228 Ensure 2nd arg to node.error is an object Fixes
+ - #2271 Use a more atomic process for writing context files Fixes
 
 
 Editor
@@ -162,25 +358,25 @@ Editor
  - [FEATURE] add support for specifying subflow template color
  - [FEATURE] Use ctrl-click on wire to splice node in place
  - [FEATURE] Allow search results to show more than 25 results
- - [FEATURE] Allow a node to change if it has an input port Closes #2268
- - Revealing node position needs to account for zoom level Fixes #2172
- - Fix typedInput option selection Fixes #2174
- - Fix palette node id handling so search works Fixes #2173
+ - #2268 [FEATURE] Allow a node to change if it has an input port Closes
+ - #2172 Revealing node position needs to account for zoom level Fixes
+ - #2174 Fix typedInput option selection Fixes
+ - #2173 Fix palette node id handling so search works Fixes
  - Add popover tooltips to debug sidebar,function and template
  - Add popovers to context sidebar mini buttons
  - Ensure node status icon is shown when value set
  - Revert treeList children function signature change
  - Restore tray component css for compatibility. Mark as deprecated
  - fix function name & string compare function
- - Handle empty list of example flows Fixes #2171
+ - #2171 Handle empty list of example flows Fixes
  - Ensure library list has an item selected when opened
  - Ensure tooltip popover doesn't replace normal popover
  - Fix clipboard export download button
  - Ensure input box has focus on repeated quick add
  - Fix width calculation of typedInput
  - Remove some hardcoded css colors
- - Fix display of node help when clicking in palette Fixes #2194
- - Ensure node help is loaded in the right language Fixes #2195
+ - #2194 Fix display of node help when clicking in palette Fixes
+ - #2195 Ensure node help is loaded in the right language Fixes
  - Do not allow tab focus on clipboard hidden element
  - Fix undefined error on typedInput due to valueLabel used before being added
  - Fix undo of flow disable state change
@@ -193,7 +389,7 @@ Editor
  - Update all node icons to SVG
  - Handle png/svg fallback for def.icon values. Remove old pngs
  - Ignore empty examples directories (don't add to import menu)
- - better handle example file at any depth - #2222
+ - #2222 better handle example file at any depth -
  - Properly escape node types in palette
  - Ensure session expiry timeout doesn't exceed limit
  - Use node/tab map to make filterNodes more efficient
@@ -201,22 +397,22 @@ Editor
  - Handle undefined node.\_def in edit stack title.
  - fix converting selection to subflow
  - Fix inserting new subflow node to existing wire between nodes
- - Support displaying falsey node status values Fixes #2246
+ - #2246 Support displaying falsey node status values Fixes
  - Remove tab menu from node property UI for subflow and config nodes
- - Mark workspace dirty when shift-click-drag detaches wires Fixes #2260
+ - #2260 Mark workspace dirty when shift-click-drag detaches wires Fixes
  - Fix subflow category change on palette
 
 
 Nodes
  - Remove pi gpi, twitter, email and feedparser nodes from core
- - Fix error handling in Websocket broadcast function Fixes #2182
+ - #2182 Fix error handling in Websocket broadcast function Fixes
  - Handle websocket item being parseable but not an object better
  - stop join tripping up if last message of buffer is blank.
  - Add support for env var propety in switch node
  - Improve handling of file upload in request node
  - Add "has key" rule to  switch node + tests
  - Optimise generation of switch node edit dialog
- - Add keep-alive option to HTTP Request - #2261
+ - #2261 Add keep-alive option to HTTP Request -
 
 #### 1.0.0-beta.2: Beta Release
 
@@ -228,7 +424,7 @@ Runtime
 Runtime
  - Update runtime apis to support multiple libraries
  - Add Node 12 to travis (allow_failures)
- - Bump all dependencies Fixes #2152
+ - #2152 Bump all dependencies Fixes
 
 Editor
  - [BREAKING] complete overhaul of editor DOM/CSS structure
@@ -240,17 +436,17 @@ Editor
  - Allow script tags with src to reference esm modules
  - Upgrade to jq 3.4.1 / jq-ui 1.12.1
  - Allow editor language to be chosen in editor settings
- - Only NLS status text that starts with a letter Fixes #2128
- - Fix display of link node list within subflow Fixes #2140
- - Blur the active element when closing edit dialog via action Fixes #2097
- - Trigger change evnt on typedInput when type changes and options present Fixes #2160
+ - #2128 Only NLS status text that starts with a letter Fixes
+ - #2140 Fix display of link node list within subflow Fixes
+ - #2097 Blur the active element when closing edit dialog via action Fixes
+ - #2160 Trigger change evnt on typedInput when type changes and options present Fixes
  - Move library import/export to single dialog
  - Move type-library dialogs to new style dialog
  - Fix node drag and drop animation
  - let status be simple text if wanted
  - Add workspace statusBar
  - Complete refresh of German translations
- - Fix memory leak in Debug sidebar #2163
+ - #2163 Fix memory leak in Debug sidebar
  - Introduce toggleButton and move flow-disabled to use it
  - Allow RED.settings.get/set to use full property desc
  - Add auto-refresh toggle to context sidebar
@@ -269,26 +465,26 @@ Nodes
 #### 0.20.8: Maintenance Release
 
  - Sanitize tab name in edit dialog
- - Pass httpServer to runtime even when httpAdmin disabled Fixes #2272
+ - #2272 Pass httpServer to runtime even when httpAdmin disabled Fixes
 
 #### 0.20.7: Maintenance Release
 
- - Update jsonata to 1.6.5 which should fix #2183
+ - #2183 Update jsonata to 1.6.5 which should fix
  - Ensure the subflow stop promise is waiting for before restarting
  - Properly escape node types in palette
 
 #### 0.20.6: Maintenance Release
 
- - Revealing node position needs to account for zoom level Fixes #2172
+ - #2172 Revealing node position needs to account for zoom level Fixes
  - stop join tripping up if last message of buffer is blank.
  - Improve handling of file upload in request node
- - Handle subflow internal node wired to a non-existant node Fixes #2202
+ - #2202 Handle subflow internal node wired to a non-existant node Fixes
  - Do not save subflow env vars with blank names
  - Don't allow a link node virtual wire to connect to normal port
- - Clear HTTP Request node authType when auth disabled Fixes #2215
- - Fix parsing of content-type header Fixes #2216
+ - #2215 Clear HTTP Request node authType when auth disabled Fixes
+ - #2216 Fix parsing of content-type header Fixes
  - Fix join node reset issue with merging objects
- - Copy data-i18n attribute on TypedInput Fixes #2211
+ - #2211 Copy data-i18n attribute on TypedInput Fixes
 
 #### 0.20.5: Maintenance Release
 
@@ -325,27 +521,27 @@ Nodes
 
 #### 0.20.1: Maintenance Release
 
- - Ensure all subflow instances are stopped when flow stopping Fixes #2095
- - modify name of korean locale forders #2091
+ - #2095 Ensure all subflow instances are stopped when flow stopping Fixes
+ - #2091 modify name of korean locale forders
  - Ensure node names are sanitized before being presented
- - Subflow status node must pass status to parent flow Fixes #2087
- - fix problem on displaying option label on Firefox #2090
+ - #2087 Subflow status node must pass status to parent flow Fixes
+ - #2090 fix problem on displaying option label on Firefox
 
 #### 0.20.0: Milestone Release
 
 Runtime
  - Pass complete status to Status node and filter to editor
- - Ensure flows wait for all nodes to close before restarting Fixes #2067
+ - #2067 Ensure flows wait for all nodes to close before restarting Fixes
  - Fix git clone with password protected key
  - Allow a project to be located below the root of repo
  - Detect the cloning of an empty git repo properly
  - Fix use of custom auth strategy plugins
- - Remove remnants of when library in git/index Fixes #2057
+ - #2057 Remove remnants of when library in git/index Fixes
  - Clear subflow status on close
  - Add exportGlobalContextKeys to prevent exposing functionGlobalContext keys
  - Add --no-audit and --no-update-notifier flags to npm commands to reduce workload
  - Add envVarExcludes setting to block named env vars
- - Update settings.js docs on userDir to match reality Fixes #2082
+ - #2082 Update settings.js docs on userDir to match reality Fixes
  - Add Korean Language
 
 
@@ -389,16 +585,16 @@ Editor
  - Add env type to subflow env var types
  - Display parent subflow properties in edit dialog
  - Fix direction value of subflow output
- - Add Status Node to Subflow to allow subflow-specific status Closes #597
- - Better handling of multiple flow merges Fixes #2039
+ - #597 Add Status Node to Subflow to allow subflow-specific status Closes
+ - #2039 Better handling of multiple flow merges Fixes
 
 Nodes
 
  - Various translation updates
- - Catch: Add 'catch uncaught only' mode. Closes #1747
+ - #1747 Catch: Add 'catch uncaught only' mode. Closes
  - Link: scroll to current flow in node list
  - HTTPRequest: add option to urlencode cookies
- - HTTPRequest: option to use msg.payload as query params on GET. #1981
+ - #1981 HTTPRequest: option to use msg.payload as query params on GET.
  - Debug: Add local time display option to numerics in debug window
  - MQTT: Add parsed JSON output option
 
@@ -416,9 +612,9 @@ Editor
 
  - German translation
  - Change default dropdown appearance and sidebar tab menu handling
- - Handle multiple-select box when nothing selected Fixes #2021
- - Handle i18n properly when key is a valid sub-identifier Fixes #2028
- - Avoid duplicate links when missing node type installed Fixes #2032
+ - #2021 Handle multiple-select box when nothing selected Fixes
+ - #2028 Handle i18n properly when key is a valid sub-identifier Fixes
+ - #2032 Avoid duplicate links when missing node type installed Fixes
  - Add View Tools
  - Don't collapse version control header when clicking refresh
  - Add fast entry via keyboard for string of nodes
@@ -438,15 +634,15 @@ Editor
 
  - Update palette manager view properly when module updated
  - Add TreeList common widget
- - Fix visual jump when opening Comment editor on Safari Part of #2008
- - Fix vertical align of markdown editor in Safari Fixes #2008
- - Avoid marking node as changed if label state is default Fixes #2009
+ - #2008 Fix visual jump when opening Comment editor on Safari Part of
+ - #2008 Fix vertical align of markdown editor in Safari Fixes
+ - #2009 Avoid marking node as changed if label state is default Fixes
  - Highlight port on node hover while joining
  - Support drag-wiring of link nodes
  - Allow TypeSearch to include a filter option
  - Improve diff colouring
  - Allow sections to toggle in 2-element stack
- - Add support for ${} env var syntax when skipping validation Closes #1980
+ - #1980 Add support for ${} env var syntax when skipping validation Closes
  - i18 support for markdown editor tooltip
  - Add RED.editor.registerTypeEditor for custom type editors
  - Tidy up markdown toolbar handling across all editors
@@ -456,15 +652,15 @@ Editor
 
 Runtime
 
- - Bump JSONata to 1.6.4 Fixes #2023
+ - #2023 Bump JSONata to 1.6.4 Fixes
  - Add audit logging to admin api
- - Fix failure of RED.require #2010
- - Allow oauth strategy callback method to be customised Closes #1998
- - Ensure fs context cache is flushed on close Fixes #2001
+ - #2010 Fix failure of RED.require
+ - #1998 Allow oauth strategy callback method to be customised Closes
+ - #2001 Ensure fs context cache is flushed on close Fixes
  - Fix library Buffer( to Buffer.alloc( for node 10
  - Catch file-not-found on startup when non-existant flow file specified
  - Actively expire login sesssions and notify user
- - Add quotation marks for basic auth challenge #1976
+ - #1976 Add quotation marks for basic auth challenge
 
 Nodes
 
@@ -482,7 +678,7 @@ Nodes
 Editor
 
  - Allow the editor to use a custom admin api url root
- - Improve performance of Flow Diff dialog - @TothiViseo #1989
+ - #1989 Improve performance of Flow Diff dialog - @TothiViseo
  - Add 'open project' option to Projects Welcome dialog
  - Add 'type already registered' check in palette editor
  - Handle missing tab.disabled property
@@ -500,11 +696,11 @@ Editor
  - Allow left-hand node button to act as toggle
  - Support dbl-click in tab bar to add new flow in position
  - Fix duplicate subflow detection on import
- - Add import notification with info on what has been imported Closes #1862
+ - #1862 Add import notification with info on what has been imported Closes
  - Show error details when trying to import invalid json
  - Show default icon when non-existent font-awesome icon was specified
  - Add configurable option for showing node label
- - Avoid http redirects as Safari doesn't reuse Auth header Fixes #1903
+ - #1903 Avoid http redirects as Safari doesn't reuse Auth header Fixes
  - Tidy up ace tooltip styling
  - Add event log to editor
  - Add tooltips to multiple editor elements
@@ -532,30 +728,30 @@ Editor
 Runtime
 
  - Allow a project to be loaded from cmdline
- - Handle lookup of undefined property in Global context Fixes #1978
+ - #1978 Handle lookup of undefined property in Global context Fixes
  - Refuse to enable Manage Palette if npm too old
  - Remove restriction on upgrading non-local modules
- - Remove deprecated Buffer constructor usage Fixes #1709
+ - #1709 Remove deprecated Buffer constructor usage Fixes
  - Update httpServerOptions doc in settings.js
  - Exclude non-testable .js files from the unit tests
  - Add --safe mode flag to allow starting without flows running
- - Add setting-defined accessToken for automated access to the adminAPI - #1789
+ - #1789 Add setting-defined accessToken for automated access to the adminAPI -
 
 Nodes
 
- - Move all core node EN help to their own locale files - #1990
+ - #1990 Move all core node EN help to their own locale files -
  - CSV: better regex for number detection
  - Debug: hide button if not configured to send to sidebar
  - Delay: report queue activity when in by-topic mode
  - Delay: add msg.flush mode
  - Exec: Preserve existing properties on msg object
  - File: remove CR/LF from incoming filename
- - Function: create custom ace javascript mode to handle ES6 Fixes #1911
+ - #1911 Function: create custom ace javascript mode to handle ES6 Fixes
  - Function: add env.get
- - HTTP Request: Add http-proxy config #1913
+ - #1913 HTTP Request: Add http-proxy config
  - HTTP Request: add msg.redirectList to output
- - HTTP Request: add msg.requestTimeout option for per-message setting - @natcl #1959
- - MQTT: add auto-detect and base64 output to mqtt node Fixes #1912 - @DurandA
+ - #1959 HTTP Request: add msg.requestTimeout option for per-message setting - @natcl
+ - #1912 - @DurandA MQTT: add auto-detect and base64 output to mqtt node Fixes
  - MQTT: only unsubscribe node that is being removed
  - Sentiment: move to node-red-node-sentiment
  - Switch: add missing edit dialog icon
@@ -570,48 +766,48 @@ Nodes
 
 #### 0.19.6: Maintenance Release
 
- - Fix encoding of file node from binary to utf8 - #2051
+ - #2051 Fix encoding of file node from binary to utf8 -
 
 #### 0.19.5: Maintenance Release
 
  - Recognize pip installs of RPi.GPIO (#1934)
- - Merge pull request #1941 from node-red-hitachi/master-batch
- - Merge pull request #1931 from node-red-hitachi/master-typedinput
+ - #1941 from node-red-hitachi/master-batch Merge pull request
+ - #1931 from node-red-hitachi/master-typedinput Merge pull request
  - Set min value of properties and spinners for batch
  - Fix that unnecessary optionMenu remains
- - Merge pull request #1894 from node-red-hitachi/fix-overlapping-file-node-execution
- - Merge pull request #1924 from imZack/patch-1
+ - #1894 from node-red-hitachi/fix-overlapping-file-node-execution Merge pull request
+ - #1924 from imZack/patch-1 Merge pull request
  - Add missing comma
- - Do not disable context sidebar during node edit Fixes #1921
- - Don't allow virtual links to be spliced Fixes #1920
+ - #1921 Do not disable context sidebar during node edit Fixes
+ - #1920 Don't allow virtual links to be spliced Fixes
  - Merge project package changes to avoid overwritten changes
- - Handle manually added project deps that are unused Fixes #1908
+ - #1908 Handle manually added project deps that are unused Fixes
  - update close & input handling of File node
  - make close handler argument only one
- - Merge pull request #1907 from amilajack/patch-2
+ - #1907 from amilajack/patch-2 Merge pull request
  - Change repo badge to point to master branch
  - invoke callbacks if async handler is specified
- - Merge pull request #1891 from camlow325/resolve-example-path-for-windows-support
- - Merge pull request #1900 from kazuhitoyokoi/master-addtestcases4settings.js
+ - #1891 from camlow325/resolve-example-path-for-windows-support Merge pull request
+ - #1900 from kazuhitoyokoi/master-addtestcases4settings.js Merge pull request
  - wait closing while pending messages exist
  - Add test cases for red/api/editor/settings.js
- - Ensure all palette categories are opened properly Closes #1893
+ - #1893 Ensure all palette categories are opened properly Closes
  - Resolve path when sending example file for Windows support
  - fix multiple input message processing of file node
 
 #### 0.19.4: Maintenance Release
 
- - Fix race condition in non-cache lfs context Fixes #1888
+ - #1888 Fix race condition in non-cache lfs context Fixes
  - LocalFileSystem Context: Remove extra flush code
  - Prevent race condition in caching mode of lfs context (#1889)
  - Allow context store name to be provided in the key
  - Switch node: only use promises when absolutely necessary
  - Fix dbl-click handling on webkit-based browsers
  - Ensure context.flow/global cannot be deleted or enumerated
- - Handle context.get with multiple levels of unknown key Fixes #1883
+ - #1883 Handle context.get with multiple levels of unknown key Fixes
  - Fix global.get("foo.bar") for functionGlobalContext set values
  - Fix node color bug (#1877)
- - Merge pull request #1857 from cclauss/patch-1
+ - #1857 from cclauss/patch-1 Merge pull request
  - Define raw_input() in Python 3 & fix time.sleep()
 
 #### 0.19.3: Maintenance Release
@@ -626,14 +822,14 @@ Nodes
  - TCP-request node - only write payload
  - JSON schema: perform validation when obj -> obj or str -> str
  - JSON schema: add draft-06 support (via $schema keyword)
- - Mqtt proxy configuration for websocket connection, #1651.
+ - #1651. Mqtt proxy configuration for websocket connection,
  - Allows MQTT Shared Subscriptions for MQTT-In core node
  - Fix use of HTML tag or CSS class specification as icon of typedInput
 
 #### 0.19.2: Maintenance Release
 
  - Ensure node default colour is used if palette.theme has no match
- - fix lost messages / properties in TCPRequest Node; closes #1863 (#1864)
+ - #1863 (#1864) fix lost messages / properties in TCPRequest Node; closes
  - Fix typo in template.html
  - Improve error reporting from context plugin loading
  - Prevent no-op edit of node marking as changed due to icon
@@ -653,8 +849,8 @@ Nodes
 Editor
 
  - Add editorTheme.palette.theme to allow overriding colours
- - Index all node properties when searching Fixes #1446
- - Handle NaN and Infinity properly in debug sidebar Fixes #1778 #1779
+ - #1446 Index all node properties when searching Fixes
+ - #1779 Handle NaN and Infinity properly in debug sidebar Fixes #1778
  - Prevent horizontal scroll when palette name cannot wrap
  - Ignore middle-click on node/ports to enable panning
  - Better wire layout when looping back
@@ -668,7 +864,7 @@ Editor
  - Only edit nodes on dbl click on primary button with no modifiers
  - Allow subflows to be put in any palette category
  - Add flow navigator widget
- - Cache flow library result to improve response time Fixes #1753
+ - #1753 Cache flow library result to improve response time Fixes
  - Add middle-button-drag to pan the workspace
  - allow multi-line category name in editor
  - Redesign sidebar tabs
@@ -676,20 +872,20 @@ Editor
 
 Nodes
 
- - Change: Ensure runtime errors in Change node can be caught Fixes #1769
+ - #1769 Change: Ensure runtime errors in Change node can be caught Fixes
  - File: Add output to File Out node
  - Function: add expandable JavaScript editor pane
  - Function: allow id and name reference in function node code (#1731)
  - HTTP Request: Move to request module
- - HTTP: Ensure apiMaxLength applies to HTTP Nodes Fixes #1278
+ - #1278 HTTP: Ensure apiMaxLength applies to HTTP Nodes Fixes
  - Join: accumulate top level properties
  - Join: allow environment variable as reduce init value
  - JSON: add JSON schema validation via msg.schema
  - Pi: Let nrgpio code work with python 3
  - Pi: let Pi nodes be visible/editable on all platforms
  - Switch: add isEmpty rule
- - TCP: queue messages while connecting; closes #1414
- - TLS: Add servername option to TLS config node for SNI Fixes #1805
+ - #1414 TCP: queue messages while connecting; closes
+ - #1805 TLS: Add servername option to TLS config node for SNI Fixes
  - UDP: Don't accidentally re-use udp port when set to not do so
 
 Persistent Context
@@ -704,8 +900,8 @@ Persistent Context
 Runtime
 
  - Support flow.disabled and .info in /flow API
- - Node errors should be Strings not Errors Fixes #1781
- - Add detection of connection timeout in git communication Fixes #1770
+ - #1781 Node errors should be Strings not Errors Fixes
+ - #1770 Add detection of connection timeout in git communication Fixes
  - Handle loading empty nodesDir
  - Add 'private' property to userDir generated package.json
  - Add RED.require to allow nodes to access other modules
@@ -715,7 +911,7 @@ Runtime
 
 Editor Fixes
 
- - Do not trim wires if node declares outputs in defaults but misses value Fixes #1737
+ - #1737 Do not trim wires if node declares outputs in defaults but misses value Fixes
 
 Node Fixes
 
@@ -725,16 +921,16 @@ Node Fixes
  - typo fix in node help (#1735)
 
 Other Fixes
- - Tidy up default grunt task and fixup test break due to reorder Fixes #1738
+ - #1738 Tidy up default grunt task and fixup test break due to reorder Fixes
  - Bump jsonata version
 
 #### 0.18.6: Maintenance Release
 
 Editor Fixes
 
- - Handle a node having wires in the editor on ports it no longer has Fixes #1724
+ - #1724 Handle a node having wires in the editor on ports it no longer has Fixes
  - Add missing ACE snippet files
- - Fix wireClippedNodes is not defined Fixes #1726
+ - #1726 Fix wireClippedNodes is not defined Fixes
  - Split node html to isolate bad nodes when loading
  - Avoid unnecessary use of .html() where .text() will do
 
@@ -761,32 +957,32 @@ New Features
 
 Editor Fixes
 
- - Highlight subflow node when log msg comes from inside Fixes #1698
- - Ensure node wires array is not longer than outputs value Fixes #1678
- - Allow importing an unknown config node to be undone Fixes #1681
- - Ensure keyboard shortcuts get saved in runtime settings Fixes #1696
+ - #1698 Highlight subflow node when log msg comes from inside Fixes
+ - #1678 Ensure node wires array is not longer than outputs value Fixes
+ - #1681 Allow importing an unknown config node to be undone Fixes
+ - #1696 Ensure keyboard shortcuts get saved in runtime settings Fixes
  - Don't mark a subflow changed when actually modified nothing (#1665)
 
 Node Fixes
 
  - bind to correct port when doing udp broadcast/multicast (#1686)
  - Provide full error stack in Function node log message (#1700)
- - Fix http request doc type Fixes #1690
+ - #1690 Fix http request doc type Fixes
  - Make debug slightly larger to pass WCAG AA rating
- - Make core nodes labels more consistent, to close #1673
- - Allow template node to be updated more than once Fixes #1671
+ - #1673 Make core nodes labels more consistent, to close
+ - #1671 Allow template node to be updated more than once Fixes
  - Fix the problem that output labels of switch node sometimes disappear (#1664)
  - Chinese translations for core nodes (#1607)
 
 Runtime Fixes
 
- - Handle and display for invalid flow credentials when project is disabled #1689 (#1694)
+ - #1689 (#1694) Handle and display for invalid flow credentials when project is disabled
  - node-red-pi: fix behavior with old bash version (#1713)
  - Fix ENOENT error on first start when no user dir (#1711)
- - Handle null error object in Flow.handleError Fixes #1721
+ - #1721 Handle null error object in Flow.handleError Fixes
  - update settings comments to describe how to setup for ipv6 (#1675)
- - Remove credential props after diffing flow to prevent future false positives Fixes #1359
- - Log error if settings unavailable when saving user settings Fixes #1645
+ - #1359 Remove credential props after diffing flow to prevent future false positives Fixes
+ - #1645 Log error if settings unavailable when saving user settings Fixes
  - Keep backup of .config.json
  - Add warning if using \_credentialSecret from .config.json
  - Filter req.user in /settings to prevent potentially leaking info
@@ -812,7 +1008,7 @@ Editor Fixes
  - Fix merging a remote diff
  - Fixed the problems when using a node without defaults
  - Disable user defined icon for subflow
- - getDefaultNodeIcon should handle subflow instance nodes Fixes #1635
+ - #1635 getDefaultNodeIcon should handle subflow instance nodes Fixes
  - Add Japanese info text for core nodes
  - Fix message lookup for core nodes in case of i18 locales directory exists
  - Prevent the last tab from being deleted
@@ -843,7 +1039,7 @@ Editor Fixes
 
  - Fix offset calculation when dragging node from palette
  - Allow a library entry to use non-default node-input- prefixes
- - Change remote-diff shortcut and add it to keymap Fixes #1628
+ - #1628 Change remote-diff shortcut and add it to keymap Fixes
 
 #### 0.18.2: Maintenance Release
 
@@ -882,7 +1078,7 @@ Projects
  - Handle more repo clone error cases
  - Relax validation of git urls
  - Revalidate project name on return to project-details view
- - Avoid unnecessary project refresh on branch-switch Fixes #1597
+ - #1597 Avoid unnecessary project refresh on branch-switch Fixes
  - Add support for file:// git urls
  - Handle project first-run without existing flow file
  - Handle delete of last remote in project settings
@@ -893,9 +1089,9 @@ Projects
 Node Fixes
 
  - Trigger node migration - ensure bytopic not blank
- - Add HEAD to list of methods with no body in http req node #1598
- - Do not include payload in GET requests Fixes #1598
- - Update sort/batch docs Fixes #1601
+ - #1598 Add HEAD to list of methods with no body in http req node
+ - #1598 Do not include payload in GET requests Fixes
+ - #1601 Update sort/batch docs Fixes
  - Don't assume node has defaults when exporting icon property
 
 
@@ -908,11 +1104,11 @@ Runtime
  - Better error reporting when module provides duplicate type
  - Update jsonata to 1.5.0
  - add express-session memorystore without leaks (#1435)
- - Allow adminAuth.user to be a Function Fixes #1461
+ - #1461 Allow adminAuth.user to be a Function Fixes
  - Ensure RED.server is set even if admin api disabled
- - Ensure strategy login button uses relative URL Fixes #1481
+ - #1481 Ensure strategy login button uses relative URL Fixes
  - ignore `_msgid` when merging full objects
- - Move node install to spawn to allow for big stdout Fixes #1488
+ - #1488 Move node install to spawn to allow for big stdout Fixes
  - SIGINT handler should wait for stop to complete before exit
 
 Editor
@@ -920,12 +1116,12 @@ Editor
  - allow a node's icon to be set dynamically (#1490)
  - Batch messages sent over comms to increase throughput
  - Migrate deploy confirmations to notifications
- - `oneditdelete` should be available to all node types Closes #1346
+ - #1346 `oneditdelete` should be available to all node types Closes
  - Sort typeSearch results based on position of match
  - Update ACE to test and add python highlighter (#1373)
- - Clear mouse state when typeSearch cancelled Fixes #1517
+ - #1517 Clear mouse state when typeSearch cancelled Fixes
  - Handle scoped modules via palette editor
- - TypedInput: handle user defined value/labels options Fixes #1549
+ - #1549 TypedInput: handle user defined value/labels options Fixes
 
 Nodes
 
@@ -940,7 +1136,7 @@ Nodes
  - Add support for rejectUnauthorized msg property
  - Add TLS options to WebSocket client
  - Added parsed YAML support for template node (#1443)
- - Allow delay node in rate-limit mode to be reset Fixes #1360
+ - #1360 Allow delay node in rate-limit mode to be reset Fixes
  - Allow setTimeout in Function node to be promisified in node 8
  - Debug to status option (#1499)
  - enable template config via msg.template for stored or generated templates (#1503)
@@ -959,13 +1155,13 @@ Nodes
  - MQTT node - if Server/URL config contains '//' use it as a complete url; enabled ws:// and wss://
  - clone messages before delayed send (#1474)
  - Decrement connected client count rather than show disconnected
- - Don't end mqtt client on first error Fixes #1566
- - File out - create dirs synchronously to ensure they exist Fixes #1489
+ - #1566 Don't end mqtt client on first error Fixes
+ - #1489 File out - create dirs synchronously to ensure they exist Fixes
  - Fix debug message format for Buffer (#1444)
  - Fix global.keys() bug in function node (#1417)
  - Handle escape characters in template node which uses Mustache format and JSON output mode (#1377)
- - Move all node.send to end of timer functions in trigger node (issue #1527) (#1539)
- - Publish null/undefined to mqtt as blank not toString Fixes #1521
+ - #1527) (#1539) Move all node.send to end of timer functions in trigger node (issue
+ - #1521 Publish null/undefined to mqtt as blank not toString Fixes
  - remove inject node at specific time spinner
  - restrict inject interval to less that 2^31 millisecs
  - tag UDP ports in use properly so they get closed correctly (#1508)
@@ -974,10 +1170,10 @@ Nodes
 
  - Add express-session missing dependency for oauth
  - Fix improper type tests is core test cases
- - File node: recreate write stream when file deleted Fixes #1351
+ - #1351 File node: recreate write stream when file deleted Fixes
  - Add flow stopping trace messages
  - Fix userDir test case when .config.json exists (#1350)
- - Do not try to send msg after http request error handled Fixes #1344
+ - #1344 Do not try to send msg after http request error handled Fixes
  - Fix boundary problem in range node (#1338)
  - Modify messages in node properties to refer messages.json (#1339)
  - Fix settings.js replacing webSocketVerifyClient by webSocketNodeVerifyClient (#1343)
@@ -988,16 +1184,16 @@ Nodes
  - Add request node test case for POSTing 0
  - Allow false and 0 in payload for httprequest (#1334)
  - Add file extension into flow name of library automatically (#1331)
- - Fix accessing global context from jsonata expressions Fixes #1335
- - Disable editor whilst a deploy is inflight Fixes #1332
+ - #1335 Fix accessing global context from jsonata expressions Fixes
+ - #1332 Disable editor whilst a deploy is inflight Fixes
  - Replace Unknown nodes with their real versions when node loaded
  - Retry auto-install of modules that fail
  - Fix column name in link nodes to refer language file (#1330)
- - Use namespaces with link node title attributes i18n name Fixes #1329
- - Tidy up GPIO pin table presentation Fixes #1328
+ - #1329 Use namespaces with link node title attributes i18n name Fixes
+ - #1328 Tidy up GPIO pin table presentation Fixes
  - Join: count of 0 should not send on every msg
  - Handle importing only one end of a link node pair
- - Make sending to Debug synchronous again Fixes #1323
+ - #1323 Make sending to Debug synchronous again Fixes
  - Make send-error behaviour optional in file node
  - Restore File In node behaviour of sending msg on error
  - Expose context.keys within Function node
@@ -1011,10 +1207,10 @@ Nodes
  - Fix missing icons for some nodes (#1321)
  - Add reformat button to JSONata test data editor
  - Update delay node status without spawning unnecessary intervals
- - Avoid stringify ServerResponse and Socket in Debug node Fixes #1311
+ - #1311 Avoid stringify ServerResponse and Socket in Debug node Fixes
  - Fix creating userDir other than system drive on Windows (#1317)
- - Trigger node not handling a duration of 0 as block mode Fixes #1316
- - Unable to config GPIO Pin 13 Fixes #1314
+ - #1316 Trigger node not handling a duration of 0 as block mode Fixes
+ - #1314 Unable to config GPIO Pin 13 Fixes
 
 #### 0.17.2: Maintenance Release
 
@@ -1023,7 +1219,7 @@ Nodes
 #### 0.17.1: Maintenance Release
 
  - Fix PI gpio to use BCM
- - Prevent event thread contention when sending to Debug node Closes #1311
+ - #1311 Prevent event thread contention when sending to Debug node Closes
  - Fix Bug: Can not display node icon when npm package has scope (#1305) (#1309)
  - Clear moved flag when nodes are deployed
 
@@ -1031,7 +1227,7 @@ Nodes
 
 Runtime
 
- - Return flow rev on reload api when api v2 enabled Closes #1273
+ - #1273 Return flow rev on reload api when api v2 enabled Closes
  - Provide single endpoint to load all node message catalogs
  - Add .trace and .debug to Node prototype
  - Rename oauth auth scheme to strategy as it works for openid
@@ -1039,16 +1235,16 @@ Runtime
  - Add support for oauth adminAuth configs
  - Cache auth details to save needlessly recalculating hashes
  - Add context.keys function to list top-level keys
- - Strip BOM character from JSON files if present Fixes #1239
+ - #1239 Strip BOM character from JSON files if present Fixes
  - Version check no meta (#1243)
- - Ensure all nodes have access to global context Fixes #1230
- - Don't process subscription for unauthenticated comms link Fixes #851
- - Clone credentials when passing to node Fixes #1198
+ - #1230 Ensure all nodes have access to global context Fixes
+ - #851 Don't process subscription for unauthenticated comms link Fixes
+ - #1198 Clone credentials when passing to node Fixes
  - Resolve dir argument of getLocalNodeFiles function (#1216)
  - Add wait for writing a library entry into a file. (#1186)
  - Use correct Buffer.from method rather than constructor
  - update core nodes to use newer Buffer syntax
- - Treat missing msg properties as undefined rather than throw error Fixes #1167
+ - #1167 Treat missing msg properties as undefined rather than throw error Fixes
  - Allows flows to be enabled/disabled in the runtime
  - add off option to logging settings comment
  - Log error stack traces if verbose flag is set
@@ -1081,8 +1277,8 @@ Nodes
  - Fix wrong number of double quotes in CSV parsing
  - let csv node handle ip addresses without trying to parse
  - Update debug node to register the settings it uses
- - Handle IncomingMessage/ServerResponse object types in debug Fixes #1202
- - Toggling debug node enabled/disabled state should set state dirty Fixes #1203
+ - #1202 Handle IncomingMessage/ServerResponse object types in debug Fixes
+ - #1203 Toggling debug node enabled/disabled state should set state dirty Fixes
  - redo delay node status messages to be interval based
  - Update delay node ui
  - Add new msg.delay option to delay node
@@ -1118,16 +1314,16 @@ Nodes
  - First pass of new node-info style
  - MQTT new style info
  - Fix empty extra node help content issue
- - Handle HTTP In url that is missing its leading / Fixes #1218
+ - #1218 Handle HTTP In url that is missing its leading / Fixes
  - Add file upload support to HTTP In node
  - HTTP Request node: add info on how to do form encoding
- - Prevent unmodified msg.headers from breaking HTTP Request flows Closed #1015
+ - #1015 Prevent unmodified msg.headers from breaking HTTP Request flows Closed
  - Add cookie handling to HTTP Request node
  - Add guard against the http-request buffer fix being reverted
  - Multipart streaming
  - Add http-request node unit tests
  - http request node add transport validity check and warn.
- - Update follow_redirects to fix http_proxy handling Fixes #1172
+ - #1172 Update follow_redirects to fix http_proxy handling Fixes
  - Allow statusCode/headers to be set directly within HTTP Response node
  - let inject "between time" also fire at start - Plus new info
  - remove repeat symbol from inject if repeat is 0
@@ -1176,7 +1372,7 @@ Nodes
  - Move udp sock error listener to only be instantiated once.
  - Let watch node recurse into subdirectories
  - Misconfigured WebSocket nodes should not register msg handlers
- - Add websocketVerifyClient option to enable custom websocket auth Fixes #1127
+ - #1127 Add websocketVerifyClient option to enable custom websocket auth Fixes
 
 Editor
 
@@ -1198,11 +1394,11 @@ Editor
  - Remove unused modified flag on debug messages
  - Add copy path/value buttons to debug messages
  - dont match only part of the node type (#1242)
- - Add editorTheme.logout.redirect to allow redirect on logout Closes #1213
- - Handle logging out and already logged-out editor Fixes #1288
+ - #1213 Add editorTheme.logout.redirect to allow redirect on logout Closes
+ - #1288 Handle logging out and already logged-out editor Fixes
  - Fix bug: Export Subflows (#1282)
  - destroy editor to ensure fully removed on close (function, template, comment)
- - Don't try to nls status text starting with '.' Fixes #1258
+ - #1258 Don't try to nls status text starting with '.' Fixes
  - Add note of removed flows in diffConfig (#1253)
  - Add description to flow same as subflow
  - Allow tabs to be enabled/disabled in the editor
@@ -1274,7 +1470,7 @@ Editor
  - Allow RED.validators.number to allow blank values as valid
  - Support dropping json files into the editor
  - NLS Expression/JSON editor and fix their height calculation
- - Update JSONata to 1.2.4 Closes #1275
+ - #1275 Update JSONata to 1.2.4 Closes
  - Remember test expression data on a per-node basis
  - NLS jsonata test messages
  - Add JSONata expr tester and improved feedback
@@ -1291,13 +1487,13 @@ Other
 
 #### 0.16.2: Maintenance Release
 
- - Ensure custom mustache context parent set in Template node fixes #1126
+ - #1126 Ensure custom mustache context parent set in Template node fixes
  - Display debug node name in debug panel if its known
  - Ensure auth-tokens are removed when no user is specified in settings
  - Ensure all a tags have blank target in info sidebar
  - Ensure links do not span tabs in the editor
  - Avoid creating multiple reconnect timers in websocket node
- - Fix inner reference in install fail message catalog entry Fixes #1120
+ - #1120 Fix inner reference in install fail message catalog entry Fixes
  - Display buffer data properly for truncated buffers under Object property
 
 #### 0.16.1: Maintenance Release
@@ -1305,9 +1501,9 @@ Other
  - Add colour swatches to debug when hex colour matched
  - Nodes with hasUsers set to false should not appear unused
  - Change hard error to verbose warning if using old node.js level
- - Don't filter debug properties starting with _ Fixes #1117
- - Node logged errors not displayed properly in debug pane Fixes #1116
- - Do not look for existing nodes when checking for wires on paste Fixes #1114
+ - #1117 Don't filter debug properties starting with _ Fixes
+ - #1116 Node logged errors not displayed properly in debug pane Fixes
+ - #1114 Do not look for existing nodes when checking for wires on paste Fixes
  - -v option not enabling verbose mode properly
  - Add node.js version check on startup
 
@@ -1319,10 +1515,10 @@ Runtime
 
 Nodes
 
- - Add option to colourise debug console output Closes #1103
+ - #1103 Add option to colourise debug console output Closes
  - Add property validation to nodes using typedInput
- - Add common validator for typedInput fields Closes #1104
- - Update debug node console logging indicator icon Closes #1094
+ - #1104 Add common validator for typedInput fields Closes
+ - #1094 Update debug node console logging indicator icon Closes
  - Let exec node (spawn) handle commands with spaces in path
  - Add symbol to debug node to indicate debugging also to console.log
  - Change file node to use node 4 syntax (drops support for 0.8)
@@ -1334,9 +1530,9 @@ Nodes
 
 Editor
 
- - Add install/remove dialog to increase friction Closes #1109
- - Report node catalogue load errors Closes #1009
- - Properly report module remove errors in palette editor Fixes #1043
+ - #1109 Add install/remove dialog to increase friction Closes
+ - #1009 Report node catalogue load errors Closes
+ - #1043 Properly report module remove errors in palette editor Fixes
  - Update rather than hide install button after success install
  - Tweak search box styling
  - Display info tips slightly longer
@@ -1357,36 +1553,36 @@ Editor
  - Focus tray body when edit dialog opened
  - Hit enter to edit first node in selection
  - Add node delete button to edit dialog
- - Add notification when runtime stopped due to missing types Part of #832
+ - #832 Add notification when runtime stopped due to missing types Part of
 
 Fixes
 
- - Do not tie debug src loading to needsPermission Fixes #1111
- - Initialise nodeApp regardless of httpAdmin setting Closes #1096 #1095
+ - #1111 Do not tie debug src loading to needsPermission Fixes
+ - #1095 Initialise nodeApp regardless of httpAdmin setting Closes #1096
  - Speed up reveal of search dialogs
- - Ensure flows exist before delegating status/error events Fixes #1069
+ - #1069 Ensure flows exist before delegating status/error events Fixes
  - Update package dependencies
  - Update MQTT to latest 2.2.1
  - Node status not being refreshed properly in the editor
- - Try to prevent auto-fill of password fields in node edit tray Fixes #1081
+ - #1081 Try to prevent auto-fill of password fields in node edit tray Fixes
  - Fix whitespace in localfilesystem
  - fix bug where savesettings did not honor local settings variables (#1073)
- - Tidy up unused/duplicate editor messages Closes #922
+ - #922 Tidy up unused/duplicate editor messages Closes
  - Property expressions must not be blank
  - Tidy up merge commit of validatePropertyExpression
  - add port if wires array > number of ports declared.
- - Allow quoted property expressions Fixes #1101
+ - #1101 Allow quoted property expressions Fixes
  - Index all node properties for node search
  - Remove node 0.10 from travis config
  - update welcome message to use logger so it can be turned off/on if required (#1083)
  - Fix dynamically loading multiple node-sets from palette editor
- - Allow a node to reorder its outputs and maintain links Fixes #1031
+ - #1031 Allow a node to reorder its outputs and maintain links Fixes
 
 #### 0.15.3: Maintenance Release
 
  - Tcpgetfix: Another small check (#1070)
  - TCPGet: Ensure done() is called only once (#1068)
- - Allow $ and _ at start of property identifiers Fixes #1063
+ - #1063 Allow $ and _ at start of property identifiers Fixes
  - TCPGet: Separated the node.connected property for each instance (#1062)
  - Corrected 'overide' typo in XML node help (#1061)
  - TCPGet: Last property check (hopefully) (#1059)
@@ -1419,11 +1615,11 @@ Fixes
 
 #### 0.15.2: Maintenance Release
 
- - Revert bidi changes to nodes and hide menu option until fixed Fixes #1024
+ - #1024 Revert bidi changes to nodes and hide menu option until fixed Fixes
  - Let xml node set options both ways
  - Bump serialport to use version 4
  - gpio node handle multiple bits of data returned in one go
- - HTTP In should pass application/octet-stream as buffer not string Fixes #1023
+ - #1023 HTTP In should pass application/octet-stream as buffer not string Fixes
  - Handle missing httpNodeRoot setting properly
  - Config sidebar not handling node definition error properly
  - Add minimum show time to deploy spinner to avoid flicker
@@ -1431,24 +1627,24 @@ Fixes
  - Add log.removeHandler function
  - Add Crtl/Shift/p shortcut for manage palette
  - Add spinner to deploy button
- - Status messages from nodes in subflows not delegated properly Fixes #1016
+ - #1016 Status messages from nodes in subflows not delegated properly Fixes
  - fix spelling in join node info
  - Speed up tab scrolling
- - Update delay burst test to be more tolerant of timing Fixes #1013
+ - #1013 Update delay burst test to be more tolerant of timing Fixes
 
 #### 0.15.1: Maintenance Release
 
  - Update default palette catalogue to use https
  - Disable palette editor if npm not found - and fix for Windows
- - Searching package catalogue should be case-insensitive Fixes #1010
- - contenteditable fields not handled in config nodes Fixes #1011
+ - #1010 Searching package catalogue should be case-insensitive Fixes
+ - #1011 contenteditable fields not handled in config nodes Fixes
  - Change html link refs from `_new` to `_blank` to be standards compliant
 
 #### 0.15.0: Milestone Release
 
 Runtime
 
- - Increase default apiMaxLength to 5mb and add to default settings Closes #1001
+ - #1001 Increase default apiMaxLength to 5mb and add to default settings Closes
  - Add v2 /flows api and deploy-overwrite protection
  - Encrypt credentials by default
  - Ensure errors thrown by RED.events handlers don't percolate up
@@ -1457,7 +1653,7 @@ Editor
 
  - Mark nodes as changed when they are moved
  - Added parent containment option for draggable. (#1006)
- - Ignore bidi event handling on non-existent and non-Input elements Closes #999
+ - #999 Ignore bidi event handling on non-existent and non-Input elements Closes
  - Remove list of flows from menu
  - Allow nodes to be imported with their credentials
  - Add workspace search option
@@ -1469,7 +1665,7 @@ Editor
  - Add import-to-new-tab option
  - Add new options to export-nodes dialog
  - Stop nodes being added beyond the outer bounds of the workspace
- - Default config nodes to global scope unless in a subflow Closes #972
+ - #972 Default config nodes to global scope unless in a subflow Closes
  - Bidi support for Text Direction and Structured Text (#961)
  - Fix jQuery selector, selecting more than one help pane/popover and displaying incorrectly. (#970)
  - Fixes removeItem not passing row data to callback. (#965)
@@ -1483,7 +1679,7 @@ Nodes
  - Clean up status on close for several core nodes.
  - Change node: re-parse JSON set value each time to avoid pass-by-ref
  - Better handle HTTP Request header capitalisation
- - Enable ES6 parsing in Function editor by default Fixes #985
+ - #985 Enable ES6 parsing in Function editor by default Fixes
  - Update debug sidebar to use RED.view.reveal to show debug nodes
  - Add full path tip to file node, And tidy up Pi node tips
  - Remove WebSocket node maxlistener warning
@@ -1502,7 +1698,7 @@ Nodes
 
 Other
 
- - Add npm build/test scripts Closes #946 #660
+ - #660 Add npm build/test scripts Closes #946
  - Move travis to node 6 and 7 - drop 5 and 0.12
 
 
@@ -1510,15 +1706,15 @@ Other
 
 Fixes
 
- - Tell ace about Function node globals. Closes #927
- - Tidy up mqtt nodes - linting and done handling. Closes #935
+ - #927 Tell ace about Function node globals. Closes
+ - #935 Tidy up mqtt nodes - linting and done handling. Closes
  - Fix invalid html in TCP and HTML node edit templates
  - Add proper help text to link nodes
  - Handle importing old mqtt-broker configs that lack properties
  - Update ace to 1.2.4
  - Allow config nodes to provide a sort function for their select list
  - Add log warning if node module required version cannot be satisfied
- - Handle empty credentials file. Closes #937
+ - #937 Handle empty credentials file. Closes
  - Add RPi.GPIO lib test for ArchLinux
 
 #### 0.14.5: Maintenance Release
@@ -1528,8 +1724,8 @@ Fixes
  - Cannot clear cookies with http nodes
  - let HTML parse node allow msg.select set select
  - Validate nodes on import after any references have been remapped
- - Debug node handles objects without constructor property Fixes #933
- - Ensure 'false' property values are displayed in info panel Fixes #940
+ - #933 Debug node handles objects without constructor property Fixes
+ - #940 Ensure 'false' property values are displayed in info panel Fixes
  - Fix node enable/disable over restart - load configs after settings init
 
 #### 0.14.4: Maintenance Release
@@ -1538,20 +1734,20 @@ Nodes
 
  - Update trigger node ui to use typedInputs
  - Better handling of quotes in CSV node
- - Clarify the MQTT node sends msg.payload - closes #929
- - Inject node should reuse the message it is triggered with Closes #914
+ - #929 Clarify the MQTT node sends msg.payload - closes
+ - #914 Inject node should reuse the message it is triggered with Closes
  - Stop trigger node re-using old message
  - Allow node.status text to be 'falsey' values
 
 Fixes
 
- - Handle DOMException when embedded in an iframe of different origin Fixes #932
+ - #932 Handle DOMException when embedded in an iframe of different origin Fixes
  - Fix double firing of menu actions
- - Fix select box handling in Safari - fixes #928
- - Clear context in node test helper Fixes #858
- - Allow node properties to be same as existing object functions Fixes #880
+ - #928 Fix select box handling in Safari - fixes
+ - #858 Clear context in node test helper Fixes
+ - #880 Allow node properties to be same as existing object functions Fixes
  - Handle comms link closing whilst completing the initial connect
- - Protect against node type names that clash with Object property names Fixes #917
+ - #917 Protect against node type names that clash with Object property names Fixes
  - Clone default node properties to avoid reference leakage
  - Strip tab node definition when exporting
  - Check for null config properties in editor before over-writing them
@@ -1561,16 +1757,16 @@ Editor
 
  - Add sql mode to ace editor
  - Keyboard shortcuts dialog update (#923)
- - Ensure importing link nodes to a subflow doesn't add outbound links Fixes #921
+ - #921 Ensure importing link nodes to a subflow doesn't add outbound links Fixes
  - Add updateConfigNodeUsers function to editor
  - Scroll to bottom when item added to editableList
- - Form input widths behave more consistently when resizing Fixes #919 #920
+ - #920 Form input widths behave more consistently when resizing Fixes #919
 
 #### 0.14.3: Maintenance Release
 
 Fixes
 
- - Create default setting.js in user-specified directory. Fixes #908
+ - #908 Create default setting.js in user-specified directory. Fixes
  - MQTT In subscription qos not defaulting properly
  - Let exec node handle 0 as well as "0"
 
@@ -1578,7 +1774,7 @@ Fixes
 
 Fixes
 
- - Cannot add new twitter credentials. Fixes #913
+ - #913 Cannot add new twitter credentials. Fixes
  - Support array references in Debug property field
 
 #### 0.14.1: Maintenance Release
@@ -1586,8 +1782,8 @@ Fixes
 Fixes
 
  - Handle undefined property that led to missing wires in the editor
- - Remove duplicate 'Delete' entry in keyboard shortcut window. Closes #911
- - Add 'exec' to node-red-pi launch script. Closes #910
+ - #911 Remove duplicate 'Delete' entry in keyboard shortcut window. Closes
+ - #910 Add 'exec' to node-red-pi launch script. Closes
 
 #### 0.14.0: Milestone Release
 
@@ -1609,9 +1805,9 @@ Editor
 Runtime
 
  - Always log node warnings on start without requiring -v
- - Add support for loading scoped node modules. Closes #885
+ - #885 Add support for loading scoped node modules. Closes
  - Add process.env.PORT to settings.js
- - Clear node context on deploy. Closes #870
+ - #870 Clear node context on deploy. Closes
  - Enable finer grained permissions in adminAuth
 
 Nodes
@@ -1619,9 +1815,9 @@ Nodes
  - Enable config nodes to reference other config nodes
  - Add Split/Join nodes
  - Add Link nodes
- - Add support to HTTP In node for PATCH requests. Closes #904
+ - #904 Add support to HTTP In node for PATCH requests. Closes
  - Add cookie handling to HTTP In and HTTP Response nodes
- - Add repeat indicator to inject node label. Closes #887
+ - #887 Add repeat indicator to inject node label. Closes
  - Add javascript highlighter to template node
  - Add optional timeout to exec node
  - Add TLS node and update MQTT/HTTP nodes to use it
@@ -1633,19 +1829,19 @@ Nodes
  - Update Serial node to support custom baud rates
  - Add support for array-syntax in typedInput msg properties
  - Add RED.util to Function node sandbox
- - Capture error stack on node.error. Closes #879
+ - #879 Capture error stack on node.error. Closes
 
 
 Fixes
 
  - Add error handling to all node definition api calls
  - Handle null return from Function node in array of messages
- - Defer loading of token sessions until they are accessed. Fixes #895
+ - #895 Defer loading of token sessions until they are accessed. Fixes
  - set pi gpio pin status correctly if set on start
- - Prevent parent window scrolling when view is focused. Fixes #635
+ - #635 Prevent parent window scrolling when view is focused. Fixes
  - Handle missing tab nodes in a loaded flow config
  - Ensure typedInput dropdown doesn't fall off the page
- - Protect against node types with reserved names such as toString. Fixes #880
+ - #880 Protect against node types with reserved names such as toString. Fixes
  - Do not rely on the HTML file to identify where nodes are registered from
  - Preserve node properties on import
  - Fix regression in delay node. topic based queue was emptying all the time instead of spreading out messages.
@@ -1661,22 +1857,22 @@ Fixes
 #### 0.13.4: Maintenance Release
 
  - Add timed release mode to delay node
- - Enable link splicing for when import_dragging nodes. Closes #811
+ - #811 Enable link splicing for when import_dragging nodes. Closes
  - Fix uncaught exception on deploy whilst node sending messages
  - Deprecate old mqtt client and connection pool modules
- - Change node: add bool/num types to change mode Closes #835
- - Validate fields that are `$(env-vars)` Closes #825
+ - #835 Change node: add bool/num types to change mode Closes
+ - #825 Validate fields that are `$(env-vars)` Closes
  - Handle missing config nodes when validating node properties
  - Pi node - don't try to send data if closing
  - Load node message catalog when added dynamically
  - Split palette labels on spaces and hyphens when laying out
- - Warn if editor routes are accessed but runtime not started Closes #816
- - Better handling of zero-length flow files Closes #819
+ - #816 Warn if editor routes are accessed but runtime not started Closes
+ - #819 Better handling of zero-length flow files Closes
  - Allow runtime calls to RED._ to specify other namespace
  - Better right alignment of numerics in delay and trigger nodes
  - Allow node modules to include example flows
  - Create node_modules in userDir
- - Ensure errors in node def functions don't break view rendering Fixes #815
+ - #815 Ensure errors in node def functions don't break view rendering Fixes
  - Updated Inject node info with instructions for flow and global options
 
 
@@ -1700,13 +1896,13 @@ Fixes
  - Make jquery spinner element css consistent with other inputs
  - tcp node add reply (to all) capability
  - Allow the template node to be treated as plain text
- - Validate MQTT In topics Fixes #792
- - httpNodeAuth should not block http options requests Fixes #793
+ - #792 Validate MQTT In topics Fixes
+ - #793 httpNodeAuth should not block http options requests Fixes
  - Disable perMessageDeflate on WS servers - fixes 'zlib binding closed' error
  - Clear trigger status icon on re-deploy
  - Don't default inject payload to blank string
  - Trigger node, add configurable reset
- - Allow function properties in settings Fixes #790 - fixes use of httpNodeMiddleware
+ - #790 - fixes use of httpNodeMiddleware Allow function properties in settings Fixes
  - Fix order of config dialog calls to save/creds/validate
  - Add debounce to Pi GPIO node
 
@@ -1722,7 +1918,7 @@ Fixes
 
  - Add 'previous value' option to Switch node
  - Allow existing nodes to splice into links on drag
- - CORS not properly configured on multiple http routes Fixes #783
+ - #783 CORS not properly configured on multiple http routes Fixes
  - Restore shift-drag to snap/unsnap to grid
  - Moving nodes with keyboard should flag workspace dirty
  - Notifications flagged as fixed should not be click-closable

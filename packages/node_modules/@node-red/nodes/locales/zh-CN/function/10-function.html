@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="function">
+    <p>定义对接收到的消息进行处理的JavaScript代码（函数的主体）。</p>
+    <p>输入消息在名为<code>msg</code>的JavaScript对象中传递。</p>
+    <p>通常，<code>msg</code>对象将消息正文保留在<code>msg.payload</code>属性中。</p>
+    <p>该函数一般会返回一个消息对象（或多个消息对象），但也可以为了停止流而什么都不返回。</p>
+    <h3>详细</h3>
+    <p>请参见<a target="_blank" href="http://nodered.org/docs/writing-functions.html">在线文档</a>来获得更多有关编写函数的信息。</p>
+    <h4>传送消息</h4>
+    <p>要将消息传递到流中的下一个节点，请返回消息或调用<code>node.send(messages)</code>。</p>
+    <p>它将返回/send:</p>
+    <ul>
+      <li>单个消息对象 - 传递给连接到第一个输出的节点</li>
+      <li>消息对象数组，传递给连接到相应输出的节点</li>
+    </ul>
+    <p>如果数组元素是数组，则将多个消息发送到相应的输出。</p>
+    <p>无论return方法是单个值还是数组元素，如果返回值为null，则不会发送任何消息。</p>
+    <h4>日志输出和错误处理</h4>
+    <p>使用以下功能输出日志信息和输出错误：</p>
+      <ul>
+          <li><code>node.log("Log message")</code></li>
+          <li><code>node.warn("Warning")</code></li>
+          <li><code>node.error("Error")</code></li>
+      </ul>
+    </p>
+    <p>使用catch节点可以进行错误处理。 要由catch节点处理，请将<code>msg</code>作为<code>node.error</code>的第二个参数传递：</p>
+    <pre>node.error("Error",msg);</pre>
+    <h4>访问节点信息</h4>
+    <p>您可以使用以下属性来在代码中引用节点ID和名称：</p>
+    <ul>
+        <li><code>node.id</code> - 节点的ID</li>
+        <li><code>node.name</code> - 节点的名称</li>
+    </ul>
+    <h4>使用环境变量</h4>
+    <p>环境变量可以通过<code>env.get("MY_ENV_VAR")</code>来进行访问。</p>
+</script>

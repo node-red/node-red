@@ -227,4 +227,47 @@ describe("api/auth/users", function() {
             });
         });
     });
+
+    describe('Initialised with tokens set as function',function() {
+        before(function() {
+            Users.init({
+                type:"strategy",
+                tokens: function(token) { return("Done-"+token); }
+            });
+        });
+        after(function() {
+            Users.init({});
+        });
+        describe('#tokens',function() {
+            it('handles api.tokens being a function',function(done) {
+                Users.should.have.property('tokens').which.is.a.Function();
+                (Users.tokens("1234")).should.equal("Done-1234");
+                (Users.tokenHeader()).should.equal("authorization");
+                done();
+            });
+        });
+    });
+
+    describe('Initialised with tokens set as function and tokenHeader set as token header name',function() {
+        before(function() {
+            Users.init({
+                type:"strategy",
+                tokens: function(token) { return("Done-"+token); },
+                tokenHeader: "X-TEST-TOKEN"
+            });
+        });
+        after(function() {
+            Users.init({});
+        });
+        describe('#tokens',function() {
+            it('handles api.tokens being a function and api.tokenHeader being a header name',function(done) {
+                Users.should.have.property('tokens').which.is.a.Function();
+                (Users.tokens("1234")).should.equal("Done-1234");
+                Users.should.have.property('tokenHeader').which.is.a.Function();
+                (Users.tokenHeader()).should.equal("x-test-token");
+                done();
+            });
+        });
+    });
+
 });

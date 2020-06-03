@@ -15,22 +15,40 @@
  **/
 
 var idMap = {
-    // input
+    // common
     "inject": ".red-ui-palette-node[data-palette-type='inject']",
-    "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
-    "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
-    // output
     "debug": ".red-ui-palette-node[data-palette-type='debug']",
-    "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
-    "mqttOut": ".red-ui-palette-node[data-palette-type='mqtt out']",
+    "complete": ".red-ui-palette-node[data-palette-type='complete']",
+    "catch": ".red-ui-palette-node[data-palette-type='catch']",
+    "status": ".red-ui-palette-node[data-palette-type='status']",
+    "comment": ".red-ui-palette-node[data-palette-type='comment']",
     // function
     "function": ".red-ui-palette-node[data-palette-type='function']",
-    "template": ".red-ui-palette-node[data-palette-type='template']",
+    "switch": ".red-ui-palette-node[data-palette-type='switch']",
     "change": ".red-ui-palette-node[data-palette-type='change']",
     "range": ".red-ui-palette-node[data-palette-type='range']",
+    "template": ".red-ui-palette-node[data-palette-type='template']",
+    "delay": ".red-ui-palette-node[data-palette-type='delay']",
+    "trigger": ".red-ui-palette-node[data-palette-type='trigger']",
+    "exec": ".red-ui-palette-node[data-palette-type='exec']",
+    // network
+    "mqttIn": ".red-ui-palette-node[data-palette-type='mqtt in']",
+    "mqttOut": ".red-ui-palette-node[data-palette-type='mqtt out']",
+    "httpIn": ".red-ui-palette-node[data-palette-type='http in']",
+    "httpResponse": ".red-ui-palette-node[data-palette-type='http response']",
     "httpRequest": ".red-ui-palette-node[data-palette-type='http request']",
+    "websocketIn": ".red-ui-palette-node[data-palette-type='websocket in']",
+    "websocketOut": ".red-ui-palette-node[data-palette-type='websocket out']",
+    // sequence
+    "split": ".red-ui-palette-node[data-palette-type='split']",
+    "join": ".red-ui-palette-node[data-palette-type='join']",
+    "batch": ".red-ui-palette-node[data-palette-type='batch']",
+    // parser
+    "csv": ".red-ui-palette-node[data-palette-type='csv']",
     "html": ".red-ui-palette-node[data-palette-type='html']",
     "json": ".red-ui-palette-node[data-palette-type='json']",
+    "xml": ".red-ui-palette-node[data-palette-type='xml']",
+    "yaml": ".red-ui-palette-node[data-palette-type='yaml']",
     // storage
     "fileIn": ".red-ui-palette-node[data-palette-type='file in']",
 };

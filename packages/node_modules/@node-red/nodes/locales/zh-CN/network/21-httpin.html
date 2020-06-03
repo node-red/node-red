@@ -1,0 +1,81 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http in">
+    <p>创建用于创建Web服务的HTTP端点。</p>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>GET请求包含任何查询字符串参数的对象。或者包含HTTP请求正文。</dd>
+        <dt>req<span class="property-type">object</span></dt>
+        <dd>HTTP请求对象。该对象包含有关请求信息的多个属性。
+            <ul>
+             <li><code>body</code> - 传入请求的正文。格式将取决于请求。</li>
+             <li><code>headers</code> - 包含HTTP请求标头的对象。</li>
+             <li><code>query</code> - 包含任何查询字符串参数的对象。</li>
+             <li><code>params</code> - 包含任何路由参数的对象。</li>
+             <li><code>cookies</code> - 包含请求cookie的对象。</li>
+             <li><code>files</code> - 如果节点启用了文件上传，则为包含了上传的文件的对象。</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">object</span></dt>
+        <dd>HTTP响应对象。此属性不应直接使用；<code>HTTP Response</code>节点记录了如何响应请求。该属性必须保留在传递给响应节点的消息上。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>节点将在配置的路径上监听特定类型的请求。路径可以完全指定，例如<code>/user</code>，或包括可以接受任何值的命名参数，例如<code>/user/:name</code>。 使用命名参数时，可以在<code>msg.req.params</code>下访问其在请求中的实际值。</p>
+    <p>对于包含正文的请求（例如POST或PUT），请求的内容将作为<code>msg.payload</code>提供。</p>
+    <p>如果可以确定请求的内容类型，则正文将被解析为任何适当的类型。例如，<code>application/json</code>将被解析为其JavaScript对象表示。</p>
+    <p><b>注意：</b>该节点不发送对请求的任何响应。该流必须包含HTTP响应节点才能完成请求。</p>
+</script>
+
+<script type="text/x-red" data-help-name="http response">
+    <p>将响应发送回从HTTP输入节点接收的请求。</p>
+
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>响应的正文。</dd>
+        <dt class="optional">statusCode <span class="property-type">数值</span></dt>
+        <dd>如果设置，则用作响应状态代码。默认值：200。</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>如果设置，则提供HTTP头以包含在响应中。</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>如果设置，则可用于设置或删除cookie。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>还可以在节点本身内设置<code>statusCode</code>和<code>headers</code>。如果在节点内设置了属性，则不能被相应的message属性覆盖。</p>
+    <h4>Cookie处理</h4>
+    <p><code>cookies</code>属性必须是名称/值对的对象。该值可以是使用默认选项设置cookie值的字符串，也可以是options对象。<p>
+    <p>下面的示例设置两个cookie-一个名为<code>name</code>的值为<code>nick</code>，另一个名为<code>session</code>的值为<code>1234</code>，并且有效期设置为15分钟。</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>有效选项包括：</p>
+    <ul>
+    <li><code>domain</code> - (字符串) Cookie的域名</li>
+    <li><code>expires</code> - (日期) GMT标准时间的到期日。如果未指定或设置为0，则创建会话cookie</li>
+    <li><code>maxAge</code> - (字符串) 相对于当前时间的到期日期（以毫秒为单位）</li>
+    <li><code>path</code> - (字符串) Cookie的路径。默认为/</li>
+    <li><code>value</code> - (字符串) Cookie使用的值</li>
+    </ul>
+    <p>要删除Cookie，请将其<code>value</code>设置为<code>null</code>。</p>
+
+</script>

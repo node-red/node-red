@@ -603,6 +603,30 @@ describe('debug node', function() {
                 .post('/debug/n99/enable')
                 .expect(404).end(done);
         });
+
+        it('should return 400 for invalid bulk disable', function(done) {
+            var flow = [{id:"n1", type:"debug", active: true }];
+            helper.load(debugNode, flow, function() {
+                helper.request()
+                    .post('/debug/disable')
+                    .send({})
+                    .set('Content-type', 'application/json')
+                    .expect(400).end(done);
+            });
+
+        })
+
+        it('should return success for bulk disable', function(done) {
+            var flow = [{id:"n1", type:"debug", active: true }];
+            helper.load(debugNode, flow, function() {
+                helper.request()
+                    .post('/debug/disable')
+                    .send({nodes:['n1']})
+                    .set('Content-type', 'application/json')
+                    .expect(201).end(done);
+            });
+
+        })
     });
 
     describe('get', function() {

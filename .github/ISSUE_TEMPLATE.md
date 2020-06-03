@@ -32,3 +32,4 @@ To help us understand the issue, please fill-in as much of the following informa
 - [ ] npm version:
 - [ ] Platform/OS:
 - [ ] Browser:
+- [ ] running in Docker:
