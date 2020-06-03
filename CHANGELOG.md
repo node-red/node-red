@@ -6,7 +6,7 @@ Runtime
  - Add support for moment in JSONata expressions #2583 (@dxdc)
  - Add httpAdminMiddleware for admin routes #2555
  - Add admin api authentication function #2479 (@KazuhiroItoh)
- - Add option support for overwriting settiings.js #2463 (@HiroyasuNishiyama)
+ - Add option support for overwriting settings.js #2463 (@HiroyasuNishiyama)
  - Add support for credential-stored env var in subflow #2368
  - Add node installation from other than public site #2378 (@KazuhiroItoh)
  - Catch more signals to allow clean context flush on shutdown #2447
