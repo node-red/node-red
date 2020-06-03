@@ -2,42 +2,42 @@
 
 Runtime
 
- - #2551 (@bartbutenaers) Allow HTTPS settings to be refreshed
- - #2583 (@dxdc) Add support for moment in JSONata expressions
- - #2555 Add httpAdminMiddleware for admin routes
- - #2479 (@KazuhiroItoh) Add admin api authentication function
- - #2463 (@HiroyasuNishiyama) Add option support for overwriting settiings.js
- - #2368 Add support for credential-stored env var in subflow
- - #2378 (@KazuhiroItoh) Add node installation from other than public site
-
- - #2396 (@amodelbello) Move to `lodash.clonedeep`
+ - Allow HTTPS settings to be refreshed #2551 (@bartbutenaers)
+ - Add support for moment in JSONata expressions #2583 (@dxdc)
+ - Add httpAdminMiddleware for admin routes #2555
+ - Add admin api authentication function #2479 (@KazuhiroItoh)
+ - Add option support for overwriting settiings.js #2463 (@HiroyasuNishiyama)
+ - Add support for credential-stored env var in subflow #2368
+ - Add node installation from other than public site #2378 (@KazuhiroItoh)
+ - Catch more signals to allow clean context flush on shutdown #2447
+ - Add `node-red admin` command #2592
+ - Move to `lodash.clonedeep` #2396 (@amodelbello)
  - Tidy up unhandledRejection warning from context unit tests
  - Add test cases for setMessageProperty with non-object properties
- - #2584 (@sammachin) Fix for settings.set subsequent updates
+ - Fix for settings.set subsequent updates #2584 (@sammachin)
  - Turn off installer funding messages
  - Remove unused \_info/\_type subflow env var magic values
- - #2548 Add #! lines to project shell scripts
+ - Add #! lines to project shell scripts #2548
  - Add nodejs14 to Travis test matrix
- - #2516 (@alexk111) Remove duplicate NLS message
- - #2439 Let setMessageProperty return success flag
+ - Remove duplicate NLS message #2516 (@alexk111)
+ - Let setMessageProperty return success flag #2439
 
 Editor
 
- - #2493 Add ability to group nodes
- - #2558 Add loading progress bar
- - #2556 Add Outliner to Info sidebar and add help sidebar
- - #2569 Add action to toggle node label visibility
+ - Add ability to group nodes #2493
+ - Add loading progress bar #2558
+ - Add Outliner to Info sidebar and add help sidebar #2556
+ - Add action to toggle node label visibility #2569
  - Add show-examples-import-dialog action
- - #2543 Add more consistent events in the editor
- - #2490 (@kazuhitoyokoi) Save the node description property to the library
- - #2367 Add credential type to TypedInput
- - #2381 Scroll the view with WASD/Cursor keys when nothing selected
-
+ - Add more consistent events in the editor #2543
+ - Save the node description property to the library #2490 (@kazuhitoyokoi)
+ - Add credential type to TypedInput #2367
+ - Scroll the view with WASD/Cursor keys when nothing selected #2381
  - Bump jquery/migrate to latest versions
- - #2579 (@ristomatti) Fix editor underscore visibility on Linux systems
- - #2586 (@Steve-Mcl) Support setting title on typedInput multi-option
+ - Fix editor underscore visibility on Linux systems #2579 (@ristomatti)
+ - Support setting title on typedInput multi-option #2586 (@Steve-Mcl)
  - Projects: Allow remote branch dialog to create non-default remote branches
- - #2545 Ensure auth failure on project fetch identifies the remote
+ - Ensure auth failure on project fetch identifies the remote #2545
  - Make all dialogs handle smaller height screens better
  - Add basic Array.from polyfill for IE11
  - Add some more trap form elements to workaround Chrome autofill
@@ -52,36 +52,38 @@ Editor
  - Allow node button to be clicked via api call
  - Reorder initial load so projects:load event emits before any nodes:add
  - Add polyfills for IE11
- - #2547 (@HiroyasuNishiyama) Activate project menu after initial clone
- - #2524 (@HiroyasuNishiyama) Fix replacement of unknown node in workspace when module installed
- - #2506 (@HiroyasuNishiyama) Fix appearance of subflow template panel
- - #2487 (@bonanitech) Fix workspace CSS properties syntax
- - #2488 (@bonanitech) Consolidate duplicate selectors
- - #2466 (@HiroyasuNishiyama) Update message catalogue for subflow UI
+ - Activate project menu after initial clone #2547 (@HiroyasuNishiyama)
+ - Fix replacement of unknown node in workspace when module installed #2524 (@HiroyasuNishiyama)
+ - Fix appearance of subflow template panel #2506 (@HiroyasuNishiyama)
+ - Fix workspace CSS properties syntax #2487 (@bonanitech)
+ - Consolidate duplicate selectors #2488 (@bonanitech)
+ - Update message catalogue for subflow UI #2466 (@HiroyasuNishiyama)
 
 Nodes
 
- - Batch: #2553 (@HiroyasuNishiyama) Add reset feature to batch node
+ - Batch: Add reset feature to batch node #2553 (@HiroyasuNishiyama)
+ - Catch/Complete/Link/Status: #2588 Add compact searchBox to filter node lists
+ - Catch/Complete/Link/Status: Allow searchBox filter to filter on node type #2595 (@jeancarl)
  - CSV: Add warn when unpaired quotes detected on input.
  - CSV: allow node to only send headers once
- - CSV: #2526 (@tmdoit) Allow CR and LF control chars to be a part of the value
- - CSV: #2510 (@tmdoit) Add support for parsing empty strings and null values
- - CSV: #2562 (@kazuhitoyokoi) Update Japanese translations for CSV node
- - Debug: #2570 (@cinhcet) Add bulk-activate/deactive actions for debug node
- - Debug: #2564 Show status independently of main output
+ - CSV: Allow CR and LF control chars to be a part of the value #2526 (@tmdoit)
+ - CSV: Add support for parsing empty strings and null values #2510 (@tmdoit)
+ - CSV: Update Japanese translations for CSV node #2562 (@kazuhitoyokoi)
+ - Debug: Add bulk-activate/deactive actions for debug node #2570 (@cinhcet)
+ - Debug: Show status independently of main output #2564
  - Delay: Ensure delay node rate limit timer is cleared on reset
  - Function: Make the function node top-level async
- - Function: #2498 (@HiroyasuNishiyama) Add support of initialization & finalization to function node
- - HTTP In: #2540 (@vladimir-kazan) Remove nodejs deprecation warning
- - HTTP Request: #2478 (@hardillb) Support sending body in GET requests
- - Inject: #2435 (@PaulWieland) Adding user definable properties to inject node
- - TCP: #2413 (@dvv) Allow to know particular session from status node
+ - Function: Add support of initialization & finalization to function node #2498 (@HiroyasuNishiyama)
+ - HTTP In: Remove nodejs deprecation warning #2540 (@vladimir-kazan)
+ - HTTP Request: Support sending body in GET requests #2478 (@hardillb)
+ - Inject: Adding user definable properties to inject node #2435 (@PaulWieland)
+ - TCP: Allow to know particular session from status node #2413 (@dvv)
  - Trigger: Add optional second output
  - Trigger: Ensure trigger sends complete 2nd msg if set to send latest msg
  - Trigger: Allow trigger node to use other than msg.topic to separate streams
- - XML: #2572 (@jeancarl) Moved XML options documentation property from Outputs to Inputs section
- - #2455 (@HiroyasuNishiyama) Add some core node example flows
- - #2425 (@kazuhitoyokoi) Change types from text/x-red to text/html in node html files
+ - XML: Moved XML options documentation property from Outputs to Inputs section #2572 (@jeancarl)
+ - Add some core node example flows #2455 (@HiroyasuNishiyama)
+ - Change types from text/x-red to text/html in node html files #2425 (@kazuhitoyokoi)
 
 
 #### 1.0.6: Maintenance Release
