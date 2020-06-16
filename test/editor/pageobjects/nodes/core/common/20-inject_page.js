@@ -58,7 +58,7 @@ injectNode.prototype.setPayload = function(payloadType, payload) {
 }
 
 injectNode.prototype.setTopic = function(topic) {
-    browser.setValue('#node-input-topic', topic);
+    browser.setValue('//*[@id="node-input-property-container"]/li[2]/div/div/div[3]/div[1]/input', topic);
 }
 
 injectNode.prototype.setOnce = function(once) {
