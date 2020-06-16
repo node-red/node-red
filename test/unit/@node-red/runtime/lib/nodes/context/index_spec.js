@@ -32,17 +32,20 @@ describe('context', function() {
             return Context.close();
         });
         it('stores local property',function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.get("foo"));
             context1.set("foo","test");
             context1.get("foo").should.equal("test");
         });
         it('stores local property - creates parent properties',function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             context1.set("foo.bar","test");
             context1.get("foo").should.eql({bar:"test"});
         });
         it('deletes local property',function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             context1.set("foo.abc.bar1","test1");
             context1.set("foo.abc.bar2","test2");
@@ -55,12 +58,14 @@ describe('context', function() {
             should.not.exist(context1.get("foo"));
         });
         it('stores flow property',function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.flow.get("foo"));
             context1.flow.set("foo","test");
             context1.flow.get("foo").should.equal("test");
         });
         it('stores global property',function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             should.not.exist(context1.global.get("foo"));
             context1.global.set("foo","test");
@@ -68,6 +73,7 @@ describe('context', function() {
         });
 
         it('keeps local context local', function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             var context2 = Context.get("2","flowA");
 
@@ -79,6 +85,7 @@ describe('context', function() {
             should.not.exist(context2.get("foo"));
         });
         it('flow context accessible to all flow nodes', function() {
+            var flowContext = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             var context2 = Context.get("2","flowA");
 
@@ -91,6 +98,8 @@ describe('context', function() {
         });
 
         it('flow context not shared to nodes on other flows', function() {
+            var flowContextA = Context.getFlowContext("flowA")
+            var flowContextB = Context.getFlowContext("flowB")
             var context1 = Context.get("1","flowA");
             var context2 = Context.get("2","flowB");
 
@@ -103,6 +112,9 @@ describe('context', function() {
         });
 
         it('global context shared to all nodes', function() {
+            var flowContextA = Context.getFlowContext("flowA")
+            var flowContextB = Context.getFlowContext("flowB")
+
             var context1 = Context.get("1","flowA");
             var context2 = Context.get("2","flowB");
 
@@ -115,6 +127,7 @@ describe('context', function() {
         });
 
         it('context.flow/global are not enumerable', function() {
+            var flowContextA = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             Object.keys(context1).length.should.equal(0);
             Object.keys(context1.flow).length.should.equal(0);
@@ -122,6 +135,7 @@ describe('context', function() {
         })
 
         it('context.flow/global cannot be deleted', function() {
+            var flowContextA = Context.getFlowContext("flowA")
             var context1 = Context.get("1","flowA");
             delete context1.flow;
             should.exist(context1.flow);
@@ -130,6 +144,7 @@ describe('context', function() {
         })
 
         it('deletes context',function() {
+            var flowContextA = Context.getFlowContext("flowA")
             var context = Context.get("1","flowA");
             should.not.exist(context.get("foo"));
             context.set("foo","abc");
@@ -142,6 +157,7 @@ describe('context', function() {
         });
 
         it('enumerates context keys - sync', function() {
+            var flowContextA = Context.getFlowContext("flowA")
             var context = Context.get("1","flowA");
 
             var keys = context.keys();
@@ -160,6 +176,7 @@ describe('context', function() {
         });
 
         it('enumerates context keys - async', function(done) {
+            var flowContextA = Context.getFlowContext("flowA")
             var context = Context.get("1","flowA");
 
             var keys = context.keys(function(err,keys) {
@@ -183,6 +200,7 @@ describe('context', function() {
         it('should enumerate only context keys when GlobalContext was given - sync', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
             Context.load().then(function(){
+                var flowContextA = Context.getFlowContext("flowA")
                 var context = Context.get("1","flowA");
                 context.global.set("foo2","bar2");
                 var keys = context.global.keys();
@@ -195,6 +213,7 @@ describe('context', function() {
         it('should enumerate only context keys when GlobalContext was given - async', function(done) {
             Context.init({functionGlobalContext: {foo:"bar"}});
             Context.load().then(function(){
+                var flowContextA = Context.getFlowContext("flowA")
                 var context = Context.get("1","flowA");
                 context.global.set("foo2","bar2");
                 context.global.keys(function(err,keys) {
@@ -210,6 +229,7 @@ describe('context', function() {
         it('returns functionGlobalContext value if store value undefined', function() {
             Context.init({functionGlobalContext: {foo:"bar"}});
             return Context.load().then(function(){
+                var flowContextA = Context.getFlowContext("flowA")
                 var context = Context.get("1","flowA");
                 var v = context.global.get('foo');
                 v.should.equal('bar');
@@ -219,6 +239,7 @@ describe('context', function() {
         it('returns functionGlobalContext sub-value if store value undefined', function() {
             Context.init({functionGlobalContext: {foo:{bar:123}}});
             return Context.load().then(function(){
+                var flowContextA = Context.getFlowContext("flowA")
                 var context = Context.get("1","flowA");
                 var v = context.global.get('foo.bar');
                 should.equal(v,123);
@@ -227,40 +248,67 @@ describe('context', function() {
 
         describe("$parent", function() {
             it('should get undefined for $parent without key', function() {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
                 var context0 = Context.get("0","flowA");
-                var context1 = Context.get("1","flowB", context0);
+                var context1 = Context.get("1","flowB");
                 var parent = context1.get("$parent");
                 should.equal(parent, undefined);
             });
 
             it('should get undefined for $parent of root', function() {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
                 var context0 = Context.get("0","flowA");
-                var context1 = Context.get("1","flowB", context0);
-                var parent = context1.get("$parent.$parent.K");
+                var context1 = Context.get("1","flowB");
+                var parent = context1.flow.get("$parent.$parent.K");
                 should.equal(parent, undefined);
             });
 
-            it('should get value in $parent', function() {
+            it('should get undefined for $parent of root - callback', function(done) {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
                 var context0 = Context.get("0","flowA");
-                var context1 = Context.get("1","flowB", context0);
-                context0.set("K", "v");
-                var v = context1.get("$parent.K");
+                var context1 = Context.get("1","flowB");
+                context1.flow.get("$parent.$parent.K", function(err, result) {
+                    try {
+                        should.equal(err, undefined);
+                        should.equal(result, undefined);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+
+            });
+
+            it('should get value in $parent', function() {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
+                var context0 = Context.get("0","flowA");
+                var context1 = Context.get("1","flowB");
+                flowContextA.set("K", "v");
+                var v = context1.flow.get("$parent.K");
                 should.equal(v, "v");
             });
 
             it('should set value in $parent', function() {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
                 var context0 = Context.get("0","flowA");
-                var context1 = Context.get("1","flowB", context0);
-                context1.set("$parent.K", "v");
-                var v = context0.get("K");
+                var context1 = Context.get("1","flowB");
+                context1.flow.set("$parent.K", "v");
+                var v = flowContextA.get("K");
                 should.equal(v, "v");
             });
 
             it('should not contain $parent in keys', function() {
+                var flowContextA = Context.getFlowContext("flowA")
+                var flowContextB = Context.getFlowContext("flowB","flowA")
                 var context0 = Context.get("0","flowA");
-                var context1 = Context.get("1","flowB", context0);
+                var context1 = Context.get("1","flowB");
                 var parent = context1.get("$parent");
-                context0.set("K0", "v0");
+                flowContextA.set("K0", "v0");
                 context1.set("K1", "v1");
                 var keys = context1.keys();
                 keys.should.have.length(1);
@@ -366,6 +414,7 @@ describe('context', function() {
             it('should ignore reserved storage name `_`', function(done) {
                 Context.init({contextStorage:{_:{module:testPlugin}}});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow")
                     var context = Context.get("1","flow");
                     var cb = function(){}
                     context.set("foo","bar","_",cb);
@@ -452,6 +501,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 var cb = function(){done("An error occurred")}
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set("foo","bar","test",cb);
                     context.get("foo","test",cb);
@@ -465,6 +515,7 @@ describe('context', function() {
             it('should store flow property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.flow.set("foo","bar","test",cb);
@@ -479,6 +530,7 @@ describe('context', function() {
             it('should store global property to external context storage',function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.global.set("foo","bar","test",cb);
@@ -493,6 +545,7 @@ describe('context', function() {
             it('should store data to the default context when non-existent context storage was specified', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.set("foo","bar","nonexist",cb);
@@ -510,6 +563,7 @@ describe('context', function() {
             it('should use the default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.set("foo","bar","default",cb);
@@ -527,6 +581,7 @@ describe('context', function() {
             it('should use the alias of default context', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.set("foo","alias",cb);
@@ -541,10 +596,11 @@ describe('context', function() {
                     done();
                 }).catch(done);
             });
-            
+
             it('should allow the store name to be provide in the key', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.set("#:(test)::foo","bar");
@@ -561,6 +617,7 @@ describe('context', function() {
             it('should use default as the alias of other context', function(done) {
                 Context.init({contextStorage:contextAlias});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.set("foo","alias",cb);
@@ -575,6 +632,7 @@ describe('context', function() {
             it('should not throw an error using undefined storage for local context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.get("local","nonexist",cb);
@@ -584,6 +642,7 @@ describe('context', function() {
             it('should throw an error using undefined storage for flow context', function(done) {
                 Context.init({contextStorage:contextStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     var cb = function(){done("An error occurred")}
                     context.flow.get("flow","nonexist",cb);
@@ -595,6 +654,7 @@ describe('context', function() {
                 var fGC = { "foo": 456 };
                 Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
                 Context.load().then(function() {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1","flow");
                     // Get foo - should be value from fGC
                     var v = context.global.get("foo");
@@ -615,6 +675,7 @@ describe('context', function() {
                 var fGC = { "foo": 456 };
                 Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
                 Context.load().then(function() {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1","flow");
                     // Get foo - should be value from fGC
                     context.global.get("foo", function(err, v) {
@@ -647,6 +708,7 @@ describe('context', function() {
             it('should return multiple values if key is an array', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set("foo1","bar1","memory");
                     context.set("foo2","bar2","memory");
@@ -667,6 +729,7 @@ describe('context', function() {
                 var fGC = { "foo1": 456, "foo2": {"bar":789} };
                 Context.init({contextStorage:memoryStorage, functionGlobalContext:fGC });
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.global.get(["foo1","foo2.bar","foo3"], "memory", function(err,foo1,foo2,foo3){
                         if (err) {
@@ -685,6 +748,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 stubGet.onFirstCall().callsArgWith(2, "error2", "bar1");
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow")
                     var context =  Context.get("1","flow");
                     context.global.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
                         if (err === "error2") {
@@ -702,6 +766,7 @@ describe('context', function() {
                 stubGet.onSecondCall().callsArgWith(2, null, "bar2");
                 stubGet.onThirdCall().callsArgWith(2, "error3");
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.get(["foo1","foo2","foo3"], "memory", function(err,foo1,foo2,foo3){
                         if (err === "error1") {
@@ -716,6 +781,7 @@ describe('context', function() {
             it('should store multiple properties if key and value are arrays', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
                         if (err) {
@@ -739,6 +805,7 @@ describe('context', function() {
             it('should deletes multiple properties', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
                         if (err) {
@@ -777,6 +844,7 @@ describe('context', function() {
             it('should use null for missing values if the value array is shorter than the key array', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2"], "memory", function(err){
                         if (err) {
@@ -804,6 +872,7 @@ describe('context', function() {
             it('should use null for missing values if the value is not array', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], "bar1", "memory", function(err){
                         if (err) {
@@ -831,6 +900,7 @@ describe('context', function() {
             it('should ignore the extra values if the value array is longer than the key array', function(done) {
                 Context.init({contextStorage:memoryStorage});
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3","ignored"], "memory", function(err){
                         if (err) {
@@ -859,6 +929,7 @@ describe('context', function() {
                 Context.init({contextStorage:contextStorage});
                 stubSet.onFirstCall().callsArgWith(3, "error2");
                 Context.load().then(function(){
+                    var flowContext = Context.getFlowContext("flow");
                     var context =  Context.get("1","flow");
                     context.set(["foo1","foo2","foo3"], ["bar1","bar2","bar3"], "memory", function(err){
                         if (err === "error2") {
@@ -873,6 +944,7 @@ describe('context', function() {
             it('should throw an error if callback of context.get is not a function', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.get("foo", "memory", "callback");
                     done("should throw an error.");
@@ -884,6 +956,7 @@ describe('context', function() {
             it('should not throw an error if callback of context.get is not specified', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.get("foo", "memory");
                     done();
@@ -893,6 +966,7 @@ describe('context', function() {
             it('should throw an error if callback of context.set is not a function', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.set("foo", "bar", "memory", "callback");
                     done("should throw an error.");
@@ -904,6 +978,7 @@ describe('context', function() {
             it('should not throw an error if callback of context.set is not specified', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.set("foo", "bar", "memory");
                     done();
@@ -913,6 +988,7 @@ describe('context', function() {
             it('should throw an error if callback of context.keys is not a function', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.keys("memory", "callback");
                     done("should throw an error.");
@@ -924,6 +1000,7 @@ describe('context', function() {
             it('should not throw an error if callback of context.keys is not specified', function (done) {
                 Context.init({ contextStorage: memoryStorage });
                 Context.load().then(function () {
+                    var flowContext = Context.getFlowContext("flow");
                     var context = Context.get("1", "flow");
                     context.keys("memory");
                     done();
@@ -953,7 +1030,6 @@ describe('context', function() {
                 }).catch(done);
             });
         });
-
         describe('delete context',function(){
             it('should not call delete() when external context storage is used', function(done) {
                 Context.init({contextStorage:contextDefaultStorage});

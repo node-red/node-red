@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="debug">
+    <p>在“调试”侧边栏选项卡和运行时日志中显示选定的消息属性。 默认情况下，它会显示<code>msg.payload</code>的值，但您也可以将其设置成显示任意属性，完整消息或JSONata表达式的结果。</p>
+    <h3>详细</h3>
+    <p>调试侧边栏会提供已发消息的结构化视图，方便您查询消息的结构。</p>
+    <p>JavaScript对象和数组可以根据需要来折叠或扩展。缓冲区对象可以显示为原始数据，也可以显示为字符串。</p>
+    <p>对任意条消息，调试侧边栏还会显示接收消息的时间，发送消息的节点以及消息类型等信息。单击源节点ID将在工作区中显示该节点。</p>
+    <p>节点上的按钮可用于启用或禁用其输出。建议禁用或删除所有未使用的调试节点。</p>
+    <p>还可以通过配置节点，将所有消息发送到运行时的日志，或将简短的数据（32个字符内）在调试节点下的状态文本上显示。</p>
+</script>

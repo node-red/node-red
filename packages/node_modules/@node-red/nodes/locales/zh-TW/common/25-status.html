@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="status">
+  <p>獲取在同一標簽頁上的其他節點的狀態消息。</p>
+  <h3>輸出</h3>
+  <dl class="message-properties">
+      <dt>status.text <span class="property-type">字符串</span></dt>
+      <dd>狀態文本。</dd>
+      <dt>status.source.type <span class="property-type">字符串</span></dt>
+      <dd>報告狀態的節點的類型。</dd>
+      <dt>status.source.id <span class="property-type">字符串</span></dt>
+      <dd>報告狀態的節點的ID。</dd>
+      <dt>status.source.name <span class="property-type">字符串</span></dt>
+      <dd>報告狀態的節點的名稱（如果已設置）。</dd>
+  </dl>
+  <h3>詳細</h3>
+ <p>該節點不包含<code>有效荷載</code>。</p>
+ <p>默認情況下，節點會獲取同一工作空間標簽頁上報告所有節點的狀態。可以通過配置來設定目標節點。</p>
+</script>

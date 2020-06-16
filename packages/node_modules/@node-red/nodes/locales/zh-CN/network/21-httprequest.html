@@ -1,0 +1,78 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="http request">
+    <p>发送HTTP请求并返回响应。</p>
+
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">字符串</span></dt>
+        <dd>如果未在节点中配置，则此可选属性设置请求的url。</dd>
+        <dt class="optional">method <span class="property-type">字符串</span></dt>
+        <dd>如果未在节点中配置，则此可选属性设置请求的HTTP方法。必须是<code>GET</code>,<code>PUT</code>,<code>POST</code>,<code>PATCH</code>或<code>DELETE</code>之一。</dd>
+        <dt class="optional">headers <span class="property-type">object</span></dt>
+        <dd>设置请求的HTTP头。</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>如果设置，则可用于发送带有请求的cookie。</dd>
+        <dt class="optional">payload</dt>
+        <dd>发送为请求的正文。</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>如果设置为<code>false</code>，则允许对使用自签名证书的https站点进行请求。</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>如果设置为<code>false</code>，则阻止遵循重定向（HTTP 301）。默认情况下为<code>true</code></dd>
+        <dt class="optional">requestTimeout</dt>
+        <dd>如果设置为正数毫秒，将覆盖全局设置的<code>httpRequestTimeout</code>参数。</dd>
+    </dl>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">字符串 | object | buffer</span></dt>
+        <dd>响应的正文。可以将节点配置为以字符串形式返回主体，尝试将其解析为JSON字符串或将其保留为二进制buffer。</dd>
+        <dt>statusCode <span class="property-type">数值</span></dt>
+        <dd>响应的状态码，如果请求无法完成，则返回错误码。</dd>
+        <dt>headers <span class="property-type">object</span></dt>
+        <dd>包含响应头的对象。</dd>
+        <dt>responseUrl <span class="property-type">字符串</span></dt>
+        <dd>如果在处理请求时发生任何重定向，则此属性为最终重定向的URL。否则则为原始请求的URL。</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>如果响应包含cookie，则此属性是每个cookie的‘名称/值’键值对的对象。</dd>
+        <dt>redirectList <span class="property-type">数组</span></dt>
+        <dd>如果请求被重定向了一次或多次，则累积的信息将被添加到此属性。“location”是下一个重定向目标。cookie是从重定向源返回的cookie。</dd>
+    </dl>
+    <h3>详细</h3>
+    <p>在节点内配置后，URL属性可以包含<a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache样式</a>标签。 这些标签允许使用传入消息的值来构造url。例如，如果url设置为<code>example.com/{{{{topic}}}</code>，它将自动插入<code>msg.topic</code>的值。使用{{{...}}}可以防止mustache转义/ &等字符。</p>
+    <p>节点可以选择自动将<code>msg.payload</code>编码为GET请求的查询字符串参数，在这种情况下，<code>msg.payload</code>必须是一个对象。</p>
+    <p><b>注意：</b>如果使用了代理，则应设置<code>http_proxy=...</code>环境变量并重新启动Node-RED，或使用“代理配置”。如果设置了代理配置，则配置优先于环境变量。</p>
+    <h4>使用多个HTTP请求节点</h4>
+    <p>为了在一个流程中多次使用该节点，必须要注意<code>msg.headers</code>属性的处理。通常在第一个节点在响应头中设置此属性，而不期望在下一个节点的请求头中使用此属性。如果节点之间的<code>msg.headers</code>属性保持不变，则第二个节点将忽略它。要设置自定义标题，首先应删除<code>msg.headers</code>或将其重置为空对象：<code>{}</code>。</p>
+    <h4>Cookie处理</h4>
+    <p>传递给节点的<code>cookies</code>属性必须是‘名称/值’键值对的对象。该值可以是设置cookie值的字符串，也可以是具有单个<code>value</code>属性的对象。</p>
+    <p>请求返回的所有cookie都将在<code>responseCookies</code>属性下传递回去。</p>
+    <h4>内容类型处理</h4>
+    <p>如果<code>msg.payload</code>是一个对象，则节点将自动将请求的内容类型设置为<code>application/json</code>并对其进行编码。</p>
+    <p>要将请求编码为表单数据，应将<code>msg.headers[“content-type”]</code>设置为<code>application/x-www-form-urlencoded</code>。</p>
+    <h4>文件上传</h4>
+    <p>要执行文件上传，应将<code>msg.headers["content-type"]</code>设置为<code>multipart/form-data</code>和<code>msg.payload</code>传递给节点的必须是具有以下结构的对象：</p>
+    <pre><code>{
+    "KEY": {
+        "value": FILE_CONTENTS,
+        "options": {
+            "filename": "FILENAME"
+        }
+    }
+}</code></pre>
+    <p><code>KEY</code>,<code>FILE_CONTENTS</code>和<code>FILENAME</code>的值应设置为适当的值。</p>
+    
+</script>

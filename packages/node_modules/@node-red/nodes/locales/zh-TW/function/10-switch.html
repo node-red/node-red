@@ -1,0 +1,37 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="switch">
+  <p>按屬性值來分配消息的傳送路線。</p>
+  <h3>詳細</h3>
+  <p>根據接收到的消息評估指定的規則，然後將消息發送到與匹配的規則相對應的輸出端口。</p>
+  <p>可以將節點設置爲一旦發現一個匹配的規則，則停止後續的匹配。</p>
+  <p>對于評估規則，可以使用消息屬性，流程上下文/全局上下文屬性，環境變量和JSONata表達式的評估結果。</p>
+  <h4>規則</h4>
+  <p>有四種規則：</p>
+  <ol>
+      <li><b>值</b>根據配置的屬性評估規則</li>
+      <li><b>順序</b>可用于消息序列的規則，例如由“拆分”節點生成的規則</li>
+      <li><b>JSONata表達式</b>評估整個消息，如果結果爲真，則匹配。</li>
+      <li><b>其他</b>上述規則都不匹配時適用</li>
+  </ol>
+  <h4>注釋</h4>
+  <p><code>is true/false</code>與<code>is null</code> 規則將對類型進行嚴格的匹配。匹配之前的類型轉化不會發生。</p>
+  <p><code>is empty</code>規則與零字節的字符串，數組，緩衝區或沒有屬性的對象相匹配。與<code>null</code>或者<code>undefined</code>等不匹配。</p>
+  <h4>處理消息序列</h4>
+  <p>默認情況下，節點不會修改<code>msg.parts</code>屬性。</p>
+  <p>可以啓用<b>重建消息序列</b>選項來爲每條匹配的規則生成新的消息序列。在這種模式下，節點將在發送新序列之前對整個傳入序列進行緩存。運行時的設定<code>nodeMessageBufferMaxLength</code>可以用來限制可緩存的消息數目。</p>
+</script>
