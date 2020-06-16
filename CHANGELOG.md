@@ -1,3 +1,63 @@
+#### 1.1.0-beta.2: Beta Release
+
+Editor
+
+ - Add UI tests to travis build #2593 #2616 #2617 #2619 (@kazuhitoyokoi)
+ - Add Japanese translations for outliner, jsonata and runtime #2618 (@kazuhitoyokoi)
+ - Fix deleting node in group after changing selection
+ - Fixup padding of quick-add search box
+ - Move config nodes under type-level hierarchy in outline
+ - Emit nodes:change event for config node users list modified
+ - Increase group margin to avoid clash with status text
+ - Fix event order when quick-adding node to group
+ - Switch RED.events.DEBUG messages to warn to get stacktraces
+ - Fix empty item handling for subflows/config in outliner
+ - Fix search indexing of group nodes
+ - Avoid regenerating every node label on redraw
+ - Fix handling of multi-line node label
+ - Disable merge group menu for single item or non-group item #2611 (@HiroyasuNishiyama)
+ - Merge pull request #2609 from node-red-hitachi/fix-remove-from-group
+ - Fix position of empty group with multi-line label #2612 (@HiroyasuNishiyama)
+ - Make treelist of subflow/config nodes initially have empty placeholder
+ - Fix empty placeholder not shown on remove from group #2609 (@HiroyasuNishiyama)
+ - Prevent conversion of circular structure #2607 (@HiroyasuNishiyama)
+ - Handle null status text in the editor Fixes #2606
+ - Massively reduce our dependency on d3 to render the view
+ - EditableList/TreeList - defer adding elements to DOM
+ - Prevent RED.stop being called multiple times if >1 signal received
+ - Flag a node as removed when it is disabled
+ - Some performance improvements for TreeList
+ - Resize info/help sidebars whenever sidebar is opened
+ - Add search defaults to outliner searchBox
+ - Add search presets option to searchBox widget
+ - Add RED.popover.menu as a new type of menu widget
+ - Add support for is:XYZ search flags
+ - Track subflow instances on the subflow node itself
+ - Refresh outline filter whenever something changes Fixes #2601
+ - Fix Help tab search box appearance
+ - Rename Node Information to Information in sidebar
+ - Do a sync-redraw after clearing to ensure clean state
+ - Make catch/status/complete/link filter case-insensitive
+ - Add 'add' option to touch radialMenu for quick-add dialog
+ - Merge branch 'dev' of https://github.com/node-red/node-red into dev
+ - ensure trigger node detects changes to number of outputs
+ - Ignore whitespace when checking function setup/close code
+ - Preserve event handlers when moving outliner items
+ - Add tooltips to outliner buttons
+ - Only validate nodes once they have all been imported
+ - Ensure configNode.users is updated properly on import
+
+Runtime
+
+ - Bump node-red-admin 0.2.6
+
+Nodes
+
+ - WebSocket: Prevent charAt call on websocket listener #2610 ()
+ - Debug: fix status to migrate old nodes to correct default mode.
+ - Link: Fix Link node filter Fixes #2600
+
+
 #### 1.1.0-beta.1: Beta Release
 
 Runtime
