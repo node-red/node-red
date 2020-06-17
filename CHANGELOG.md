@@ -1,3 +1,13 @@
+#### 1.1.0-beta.3: Beta Release
+
+Editor
+
+ - Fix wiring nodes from input back to output
+ - Fix sometimes unable to keyboard-move group to left/up
+ - Fix group position in outliner
+ - Handle unknown nodes with no icon
+ - Prevent node creep when switching tabs
+
 #### 1.1.0-beta.2: Beta Release
 
 Editor
