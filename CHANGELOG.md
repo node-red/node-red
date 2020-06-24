@@ -1,3 +1,27 @@
+### 1.1.0: Milestone Release
+
+Editor
+
+ - Align node labels on FF
+ - Fix node toggle button initial opacity
+ - Make color/icon/label-pos pickers keyboard navigable
+ - Default group label to be shown and improve toggle button
+ - Fix clearing group label
+ - Remove hardcoded css Fixes #2603
+ - Fix node button mouse pointer css
+ - Change node linebreak handling to use "\n "
+ - Handle import of node with non-default number of outputs
+ - Improve display of focussed form element
+ - Fix typedInput error on empty subflow input types #2624 (@HiroyasuNishiyama)
+ - Update JP message catalogue for subflow input type #2471 (@HiroyasuNishiyama)
+ - Outliner - add empty item when last config node moved
+
+Nodes
+ - Add example flows for lots of core nodes #2585 #2550 #2549 (@HiroyasuNishiyama)
+ - TCP: Fix tcp in node finishing packets when in streaming base64 receive mode.
+ - Join: Clear timeout when msg.reset received Fixes #2471
+
+
 #### 1.1.0-beta.3: Beta Release
 
 Editor
