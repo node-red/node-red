@@ -15,6 +15,8 @@ Editor
  - Fix typedInput error on empty subflow input types #2624 (@HiroyasuNishiyama)
  - Update JP message catalogue for subflow input type #2471 (@HiroyasuNishiyama)
  - Outliner - add empty item when last config node moved
+ - Update zh-CN/zh-TW translations #2626 (@JiyeYu)
+ - Add default shortcut for `core:show-help-tab`
 
 Nodes
  - Add example flows for lots of core nodes #2585 #2550 #2549 (@HiroyasuNishiyama)
