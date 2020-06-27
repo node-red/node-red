@@ -623,6 +623,10 @@ module.exports = function(grunt) {
     grunt.registerTask('build',
         'Builds editor content',
         ['clean:build','jsonlint','concat:build','concat:vendor','copy:build','uglify:build','sass:build','attachCopyright']);
+        
+    grunt.registerTask('build-dev',
+        'Developer mode: build dev version',
+        ['clean:build','concat:build','concat:vendor','copy:build','sass:build','setDevEnv']);
 
     grunt.registerTask('dev',
         'Developer mode: run node-red, watch for source changes and build/restart',
