@@ -17,12 +17,20 @@ Editor
  - Outliner - add empty item when last config node moved
  - Update zh-CN/zh-TW translations #2626 (@JiyeYu)
  - Add default shortcut for `core:show-help-tab`
+ - Clear outline focus on config node sidebar panel
+ - Tweak group margin to fit node status and look better
+ - Fix reparenting nodes in outliner when they change
+
+Runtime
+
+ - Add developer options - permits npm run build-dev #2628 (@Steve-Mcl)
 
 Nodes
  - Add example flows for lots of core nodes #2585 #2550 #2549 (@HiroyasuNishiyama)
  - TCP: Fix tcp in node finishing packets when in streaming base64 receive mode.
  - Join: Clear timeout when msg.reset received Fixes #2471
-
+ - Switch: JSONata expr does not require msg.parts.count
+ - Inject: fix backwards migration of inject without topic
 
 #### 1.1.0-beta.3: Beta Release
 
