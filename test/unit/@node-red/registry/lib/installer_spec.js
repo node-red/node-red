@@ -77,6 +77,30 @@ describe('nodes/registry/installer', function() {
     });
 
     describe("installs module", function() {
+        it("rejects module name that includes version", function(done) {
+            installer.installModule("module@version",null,null).catch(function(err) {
+                err.code.should.be.eql('invalid_module_name');
+                done();
+            }).catch(done);
+        });
+        it("rejects missing module name", function(done) {
+            installer.installModule("",null,null).catch(function(err) {
+                err.code.should.be.eql('invalid_module_name');
+                done();
+            }).catch(done);
+        });
+        it("rejects null module name", function(done) {
+            installer.installModule(null,null,null).catch(function(err) {
+                err.code.should.be.eql('invalid_module_name');
+                done();
+            }).catch(done);
+        });
+        it("rejects invalid url", function(done) {
+            installer.installModule("module",null,"abc").catch(function(err) {
+                err.code.should.be.eql('invalid_module_url');
+                done();
+            });
+        });
         it("rejects when npm returns a 404", function(done) {
             var res = {
                 code: 1,
@@ -89,7 +113,7 @@ describe('nodes/registry/installer', function() {
             installer.installModule("this_wont_exist").catch(function(err) {
                 err.should.have.property("code",404);
                 done();
-            });
+            }).catch(done);
         });
         it("rejects when npm does not find specified version", function(done) {
             var res = {
@@ -108,7 +132,7 @@ describe('nodes/registry/installer', function() {
             installer.installModule("this_wont_exist","0.1.2").catch(function(err) {
                 err.code.should.be.eql(404);
                 done();
-            });
+            }).catch(done);
         });
         it("rejects when update requested to existing version", function(done) {
             sinon.stub(typeRegistry,"getModuleInfo", function() {
@@ -119,7 +143,18 @@ describe('nodes/registry/installer', function() {
             installer.installModule("this_wont_exist","0.1.1").catch(function(err) {
                 err.code.should.be.eql('module_already_loaded');
                 done();
+            }).catch(done);
+        });
+        it("rejects when update requested to existing version and url", function(done) {
+            sinon.stub(typeRegistry,"getModuleInfo", function() {
+                return {
+                    version: "0.1.1"
+                }
             });
+            installer.installModule("this_wont_exist","0.1.1","https://example/foo-0.1.1.tgz").catch(function(err) {
+                err.code.should.be.eql('module_already_loaded');
+                done();
+            }).catch(done);
         });
         it("rejects with generic error", function(done) {
             var res = {
@@ -132,8 +167,9 @@ describe('nodes/registry/installer', function() {
             initInstaller(p)
             installer.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
-            }).catch(function(err) {
-                done();
+            }).catch(err => {
+                // Expected result
+                done()
             });
         });
         it("succeeds when module is found", function(done) {
@@ -158,9 +194,7 @@ describe('nodes/registry/installer', function() {
                 // commsMessages[0].topic.should.equal("node/added");
                 // commsMessages[0].msg.should.eql(nodeInfo.nodes);
                 done();
-            }).catch(function(err) {
-                done(err);
-            });
+            }).catch(done);
         });
         it("rejects when non-existant path is provided", function(done) {
             this.timeout(20000);
@@ -197,9 +231,28 @@ describe('nodes/registry/installer', function() {
             installer.installModule(resourcesDir).then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
-            }).catch(function(err) {
-                done(err);
+            }).catch(done);
+        });
+        it("succeeds when url is valid node-red module", function(done) {
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
+
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            initInstaller(p)
+
+            var addModule = sinon.stub(registry,"addModule",function(md) {
+                return when.resolve(nodeInfo);
             });
+
+            installer.installModule("this_wont_exist",null,"https://example/foo-0.1.1.tgz").then(function(info) {
+                info.should.eql(nodeInfo);
+                done();
+            }).catch(done);
         });
 
     });
@@ -231,8 +284,9 @@ describe('nodes/registry/installer', function() {
 
             installer.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
-            }).catch(function(err) {
-                done();
+            }).catch(err => {
+                // Expected result
+                done()
             });
         });
         it("succeeds when module is found", function(done) {
@@ -260,9 +314,7 @@ describe('nodes/registry/installer', function() {
                 // commsMessages[0].topic.should.equal("node/removed");
                 // commsMessages[0].msg.should.eql(nodeInfo);
                 done();
-            }).catch(function(err) {
-                done(err);
-            });
+            }).catch(done);
         });
     });
 });

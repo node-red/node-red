@@ -10,6 +10,7 @@
         "ctrl-escape": "core:cancel-edit-tray",
         "ctrl-d": "core:deploy-flows",
         "ctrl-g i": "core:show-info-tab",
+        "ctrl-g h": "core:show-help-tab",
         "ctrl-g d": "core:show-debug-tab",
         "ctrl-g c": "core:show-config-tab",
         "ctrl-g x": "core:show-context-tab",
@@ -44,6 +45,14 @@
         "ctrl-y": "core:redo",
         "ctrl-a": "core:select-all-nodes",
         "shift-?": "core:show-help",
+        "w": "core:scroll-view-up",
+        "d": "core:scroll-view-right",
+        "s": "core:scroll-view-down",
+        "a": "core:scroll-view-left",
+        "shift-w": "core:step-view-up",
+        "shift-d": "core:step-view-right",
+        "shift-s": "core:step-view-down",
+        "shift-a": "core:step-view-left",
         "up": "core:move-selection-up",
         "right": "core:move-selection-right",
         "down": "core:move-selection-down",
@@ -53,6 +62,10 @@
         "shift-down": "core:step-selection-down",
         "shift-left": "core:step-selection-left",
         "ctrl-shift-j": "core:show-previous-tab",
-        "ctrl-shift-k": "core:show-next-tab"
+        "ctrl-shift-k": "core:show-next-tab",
+        "ctrl-shift-g": "core:group-selection",
+        "ctrl-shift-u": "core:ungroup-selection",
+        "ctrl-shift-c": "core:copy-group-style",
+        "ctrl-shift-v": "core:paste-group-style"
      }
 }

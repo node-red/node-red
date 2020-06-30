@@ -1,3 +1,195 @@
+### 1.1.0: Milestone Release
+
+Editor
+
+ - Align node labels on FF
+ - Fix node toggle button initial opacity
+ - Make color/icon/label-pos pickers keyboard navigable
+ - Default group label to be shown and improve toggle button
+ - Fix clearing group label
+ - Remove hardcoded css Fixes #2603
+ - Fix node button mouse pointer css
+ - Change node linebreak handling to use "\n "
+ - Handle import of node with non-default number of outputs
+ - Improve display of focussed form element
+ - Fix typedInput error on empty subflow input types #2624 (@HiroyasuNishiyama)
+ - Update JP message catalogue for subflow input type #2471 (@HiroyasuNishiyama)
+ - Outliner - add empty item when last config node moved
+ - Update zh-CN/zh-TW translations #2626 (@JiyeYu)
+ - Add default shortcut for `core:show-help-tab`
+ - Clear outline focus on config node sidebar panel
+ - Tweak group margin to fit node status and look better
+ - Fix reparenting nodes in outliner when they change
+
+Runtime
+
+ - Add developer options - permits npm run build-dev #2628 (@Steve-Mcl)
+
+Nodes
+ - Add example flows for lots of core nodes #2585 #2550 #2549 (@HiroyasuNishiyama)
+ - TCP: Fix tcp in node finishing packets when in streaming base64 receive mode.
+ - Join: Clear timeout when msg.reset received Fixes #2471
+ - Switch: JSONata expr does not require msg.parts.count
+ - Inject: fix backwards migration of inject without topic
+
+#### 1.1.0-beta.3: Beta Release
+
+Editor
+
+ - Fix wiring nodes from input back to output
+ - Fix sometimes unable to keyboard-move group to left/up
+ - Fix group position in outliner
+ - Handle unknown nodes with no icon
+ - Prevent node creep when switching tabs
+
+#### 1.1.0-beta.2: Beta Release
+
+Editor
+
+ - Add UI tests to travis build #2593 #2616 #2617 #2619 (@kazuhitoyokoi)
+ - Add Japanese translations for outliner, jsonata and runtime #2618 (@kazuhitoyokoi)
+ - Fix deleting node in group after changing selection
+ - Fixup padding of quick-add search box
+ - Move config nodes under type-level hierarchy in outline
+ - Emit nodes:change event for config node users list modified
+ - Increase group margin to avoid clash with status text
+ - Fix event order when quick-adding node to group
+ - Switch RED.events.DEBUG messages to warn to get stacktraces
+ - Fix empty item handling for subflows/config in outliner
+ - Fix search indexing of group nodes
+ - Avoid regenerating every node label on redraw
+ - Fix handling of multi-line node label
+ - Disable merge group menu for single item or non-group item #2611 (@HiroyasuNishiyama)
+ - Merge pull request #2609 from node-red-hitachi/fix-remove-from-group
+ - Fix position of empty group with multi-line label #2612 (@HiroyasuNishiyama)
+ - Make treelist of subflow/config nodes initially have empty placeholder
+ - Fix empty placeholder not shown on remove from group #2609 (@HiroyasuNishiyama)
+ - Prevent conversion of circular structure #2607 (@HiroyasuNishiyama)
+ - Handle null status text in the editor Fixes #2606
+ - Massively reduce our dependency on d3 to render the view
+ - EditableList/TreeList - defer adding elements to DOM
+ - Prevent RED.stop being called multiple times if >1 signal received
+ - Flag a node as removed when it is disabled
+ - Some performance improvements for TreeList
+ - Resize info/help sidebars whenever sidebar is opened
+ - Add search defaults to outliner searchBox
+ - Add search presets option to searchBox widget
+ - Add RED.popover.menu as a new type of menu widget
+ - Add support for is:XYZ search flags
+ - Track subflow instances on the subflow node itself
+ - Refresh outline filter whenever something changes Fixes #2601
+ - Fix Help tab search box appearance
+ - Rename Node Information to Information in sidebar
+ - Do a sync-redraw after clearing to ensure clean state
+ - Make catch/status/complete/link filter case-insensitive
+ - Add 'add' option to touch radialMenu for quick-add dialog
+ - Merge branch 'dev' of https://github.com/node-red/node-red into dev
+ - ensure trigger node detects changes to number of outputs
+ - Ignore whitespace when checking function setup/close code
+ - Preserve event handlers when moving outliner items
+ - Add tooltips to outliner buttons
+ - Only validate nodes once they have all been imported
+ - Ensure configNode.users is updated properly on import
+
+Runtime
+
+ - Bump node-red-admin 0.2.6
+
+Nodes
+
+ - WebSocket: Prevent charAt call on websocket listener #2610 ()
+ - Debug: fix status to migrate old nodes to correct default mode.
+ - Link: Fix Link node filter Fixes #2600
+
+
+#### 1.1.0-beta.1: Beta Release
+
+Runtime
+
+ - Allow HTTPS settings to be refreshed #2551 (@bartbutenaers)
+ - Add support for moment in JSONata expressions #2583 (@dxdc)
+ - Add httpAdminMiddleware for admin routes #2555
+ - Add admin api authentication function #2479 (@KazuhiroItoh)
+ - Add option support for overwriting settings.js #2463 (@HiroyasuNishiyama)
+ - Add support for credential-stored env var in subflow #2368
+ - Add node installation from other than public site #2378 (@KazuhiroItoh)
+ - Catch more signals to allow clean context flush on shutdown #2447
+ - Add `node-red admin` command #2592
+ - Move to `lodash.clonedeep` #2396 (@amodelbello)
+ - Tidy up unhandledRejection warning from context unit tests
+ - Add test cases for setMessageProperty with non-object properties
+ - Fix for settings.set subsequent updates #2584 (@sammachin)
+ - Turn off installer funding messages
+ - Remove unused \_info/\_type subflow env var magic values
+ - Add #! lines to project shell scripts #2548
+ - Add nodejs14 to Travis test matrix
+ - Remove duplicate NLS message #2516 (@alexk111)
+ - Let setMessageProperty return success flag #2439
+
+Editor
+
+ - Add ability to group nodes #2493
+ - Add loading progress bar #2558
+ - Add Outliner to Info sidebar and add help sidebar #2556
+ - Add action to toggle node label visibility #2569
+ - Add show-examples-import-dialog action
+ - Add more consistent events in the editor #2543
+ - Save the node description property to the library #2490 (@kazuhitoyokoi)
+ - Add credential type to TypedInput #2367
+ - Scroll the view with WASD/Cursor keys when nothing selected #2381
+ - Bump jquery/migrate to latest versions
+ - Fix editor underscore visibility on Linux systems #2579 (@ristomatti)
+ - Support setting title on typedInput multi-option #2586 (@Steve-Mcl)
+ - Projects: Allow remote branch dialog to create non-default remote branches
+ - Ensure auth failure on project fetch identifies the remote #2545
+ - Make all dialogs handle smaller height screens better
+ - Add basic Array.from polyfill for IE11
+ - Add some more trap form elements to workaround Chrome autofill
+ - [info-sidebar] Handle node/group/flows with \n in their name
+ - [popover] Allow hover-type popovers to contain buttons
+ - Modify RED.panels to use flexbox position
+ - Allow node edit dialog to be opened on a non-default tab
+ - Add createNodeIcon and getDarkerColor to RED.utils
+ - [search] Refactor search to use editor events to generate index
+ - Allow RED.notify.popover to have a position offset
+ - Make selected list item more distinct
+ - Allow node button to be clicked via api call
+ - Reorder initial load so projects:load event emits before any nodes:add
+ - Add polyfills for IE11
+ - Activate project menu after initial clone #2547 (@HiroyasuNishiyama)
+ - Fix replacement of unknown node in workspace when module installed #2524 (@HiroyasuNishiyama)
+ - Fix appearance of subflow template panel #2506 (@HiroyasuNishiyama)
+ - Fix workspace CSS properties syntax #2487 (@bonanitech)
+ - Consolidate duplicate selectors #2488 (@bonanitech)
+ - Update message catalogue for subflow UI #2466 (@HiroyasuNishiyama)
+
+Nodes
+
+ - Batch: Add reset feature to batch node #2553 (@HiroyasuNishiyama)
+ - Catch/Complete/Link/Status: #2588 Add compact searchBox to filter node lists
+ - Catch/Complete/Link/Status: Allow searchBox filter to filter on node type #2595 (@jeancarl)
+ - CSV: Add warn when unpaired quotes detected on input.
+ - CSV: allow node to only send headers once
+ - CSV: Allow CR and LF control chars to be a part of the value #2526 (@tmdoit)
+ - CSV: Add support for parsing empty strings and null values #2510 (@tmdoit)
+ - CSV: Update Japanese translations for CSV node #2562 (@kazuhitoyokoi)
+ - Debug: Add bulk-activate/deactive actions for debug node #2570 (@cinhcet)
+ - Debug: Show status independently of main output #2564
+ - Delay: Ensure delay node rate limit timer is cleared on reset
+ - Function: Make the function node top-level async
+ - Function: Add support of initialization & finalization to function node #2498 (@HiroyasuNishiyama)
+ - HTTP In: Remove nodejs deprecation warning #2540 (@vladimir-kazan)
+ - HTTP Request: Support sending body in GET requests #2478 (@hardillb)
+ - Inject: Adding user definable properties to inject node #2435 (@PaulWieland)
+ - TCP: Allow to know particular session from status node #2413 (@dvv)
+ - Trigger: Add optional second output
+ - Trigger: Ensure trigger sends complete 2nd msg if set to send latest msg
+ - Trigger: Allow trigger node to use other than msg.topic to separate streams
+ - XML: Moved XML options documentation property from Outputs to Inputs section #2572 (@jeancarl)
+ - Add some core node example flows #2455 (@HiroyasuNishiyama)
+ - Change types from text/x-red to text/html in node html files #2425 (@kazuhitoyokoi)
+
+
 #### 1.0.6: Maintenance Release
 
 Runtime
@@ -119,7 +311,7 @@ Runtime
  - #2332 Fix error handling of nodes with multiple input handlers
  - Add script to generate npm publish script
  - #2371 Ensure folder is present before write (e.g. flows file not in user folder)
- - #2371 Handle windows UNC '\\' paths
+ - #2371 Handle windows UNC '\' paths
  - #2366 Handle logging of non-JSON encodable objects
 
 Editor

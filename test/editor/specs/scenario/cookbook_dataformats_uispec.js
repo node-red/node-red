@@ -267,7 +267,7 @@ describe('cookbook', function () {
             debugTab.getMessage().should.match(/^"([1-9]?[0-9],){2}[1-9]?[0-9]↵"$/);
             debugTab.clearMessage();
             injectNode2.clickLeftButton();
-            debugTab.getMessage().should.match(/^"a,b,c↵(([1-9]?[0-9],){2}[1-9]?[0-9]↵){4}"$/);
+            debugTab.getMessage().should.match(/^"(([1-9]?[0-9],){2}[1-9]?[0-9]↵){4}"$/);
         });
 
         it('parse CSV input', function () {

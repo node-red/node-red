@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /**
  * Copyright JS Foundation and other contributors, http://js.foundation
  *
@@ -70,12 +71,13 @@ describe('CSV node', function() {
 
         it('should convert a simple csv string to a javascript object', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: 1, b: 2, c: 3, d: 4 });
+                    msg.should.have.property('columns', "a,b,c,d");
                     check_parts(msg, 0, 1);
                     done();
                 });
@@ -86,7 +88,7 @@ describe('CSV node', function() {
 
         it('should remove quotes and whitespace from template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:'"a",  "b" , " c "," d  " ', wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -102,12 +104,13 @@ describe('CSV node', function() {
 
         it('should create column names if no template provided', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:'', wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { col1: 1, col2: 2, col3: 3, col4: 4 });
+                    msg.should.have.property('columns', "col1,col2,col3,col4");
                     check_parts(msg, 0, 1);
                     done();
                 });
@@ -118,12 +121,13 @@ describe('CSV node', function() {
 
         it('should allow dropping of fields from the template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,,,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', { a: 1, d: 4 });
+                    msg.should.have.property('columns', 'a,d');
                     check_parts(msg, 0, 1);
                     done();
                 });
@@ -134,7 +138,7 @@ describe('CSV node', function() {
 
         it('should leave numbers starting with 0, e and + as strings (except 0.)', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -150,7 +154,7 @@ describe('CSV node', function() {
 
         it('should not parse numbers when told not to do so', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", strings:false, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -166,7 +170,7 @@ describe('CSV node', function() {
 
         it('should leave handle strings with scientific notation as numbers', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -181,44 +185,128 @@ describe('CSV node', function() {
         });
 
 
-        it('should allow quotes in the input', function(done) {
-            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+        it('should allow quotes in the input (but drop blank strings)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g,h", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     //console.log(msg);
-                    msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: '04', e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    msg.should.have.property('payload', { a:1, b:-2, c:'+3', d:'04', f:'-05', g:'ab"cd', h:'with,a,comma' });
                     check_parts(msg, 0, 1);
                     done();
                 });
-                var testString = '"1","-2","+3","04","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                var testString = '"1","-2","+3","04","","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow blank strings in the input if selected', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", include_empty_strings:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: 1, b: '', c: '', d: '', e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    //check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '"1","","","","-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow missing columns (nulls) in the input if selected', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", include_null_values:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: 1, b: null, c: '+3', d: null, e: '-05', f: 'ab"cd', g: 'with,a,comma' });
+                    //check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '"1",,"+3",,"-05","ab""cd","with,a,comma"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should handle cr and lf in the input', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    //console.log(msg);
+                    msg.should.have.property('payload', { a: "with a\nnew line", b: "and a\rcarriage return", c: "and why\r\nnot both"});
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = '"with a'+String.fromCharCode(10)+'new line","and a'+String.fromCharCode(13)+'carriage return","and why\r\nnot both"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
 
         it('should recover from an odd number of quotes in the input', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
+                var c = 0;
                 n2.on("input", function(msg) {
-                    //console.log(msg);
-                    msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes" });
-                    //msg.should.have.property('payload', { a: 1, b: -2, c: '+3', d: 4, e: -5, f: 'ab"cd', g: 'with,a,comma' });
-                    check_parts(msg, 0, 1);
-                    done();
+                    if (c == 0) { 
+                        c = 1;
+                        msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\n" });
+                        check_parts(msg, 0, 1);
+                    }
+                    else { 
+                        msg.should.have.property('payload', { a: "this is", b: "a normal", c: "line" });
+                        check_parts(msg, 0, 1);
+                        done(); 
+                    }
                 });
                 var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
+                n1.emit("input", {payload:'"this is","a normal","line"'});
+            });
+        });
+
+        it('should recover from an odd number of quotes in the input (2)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    //console.log(msg)
+                    if (c == 0) { 
+                        c = 1;
+                        msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\nthis is,a normal,line" });
+                        check_parts(msg, 0, 1);
+                    }
+                    else { 
+                        msg.should.have.property('payload', { a: "this is", b: "another", c: "line" });
+                        check_parts(msg, 0, 1);
+                        done(); 
+                    }
+                });
+                var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10)+'"this is","a normal","line"'+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+                n1.emit("input", {payload:'"this is","another","line"'});
             });
         });
 
         it('should be able to use the first line as a template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrin:true, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -243,12 +331,13 @@ describe('CSV node', function() {
 
         it('should be able to output multiple lines as one array', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", multi:"yes", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     msg.should.have.property('payload', [ { a: 1, b: 2, c: 3, d: 4 },{ a: 5, b: -6, c: '07', d: '+8' },{ a: 9, b: 0, c: 'a', d: 'b' },{ a: 'c', b: 'd', c: 'e', d: 'f' } ]);
+                    msg.should.have.property('columns','a,b,c,d');
                     msg.should.not.have.property('parts');
                     done();
                 });
@@ -259,7 +348,7 @@ describe('CSV node', function() {
 
         it('should handle numbers in strings but not IP addresses', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -275,7 +364,7 @@ describe('CSV node', function() {
 
         it('should preserve parts property', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -319,7 +408,7 @@ describe('CSV node', function() {
 
         it('should skip several lines from start if requested', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", skip: 2, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -333,9 +422,9 @@ describe('CSV node', function() {
             });
         });
 
-        it('should skip several lines from start then use next line as a tempate', function(done) {
+        it('should skip several lines from start then use next line as a template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrin:true, skip: 2, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -351,7 +440,7 @@ describe('CSV node', function() {
 
         it('should skip several lines from start and correct parts', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", skip: 2, wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -383,11 +472,13 @@ describe('CSV node', function() {
                 n2.on("input", function(msg) {
                     if (c === 0) {
                         msg.should.have.property('payload', { w: 1, x: 2, y: 3, z: 4 });
+                        msg.should.have.property('columns', 'w,x,y,z');
                         check_parts(msg, 0, 2);
                         c += 1;
                     }
                     else {
                         msg.should.have.property('payload', { w: 5, x: 6, y: 7, z: 8 });
+                        msg.should.have.property('columns', 'w,x,y,z');
                         check_parts(msg, 1, 2);
                         done();
                     }
@@ -411,7 +502,7 @@ describe('CSV node', function() {
 
         it('should convert a simple object back to a csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,,e", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -429,7 +520,7 @@ describe('CSV node', function() {
 
         it('should convert a simple object back to a csv with no template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:" ", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -447,7 +538,7 @@ describe('CSV node', function() {
 
         it('should handle a template with spaces in the property names', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b o,c p,,e", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -465,7 +556,7 @@ describe('CSV node', function() {
 
         it('should convert an array of objects to a multi-line csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -483,7 +574,7 @@ describe('CSV node', function() {
 
         it('should convert a simple array back to a csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -501,7 +592,7 @@ describe('CSV node', function() {
 
         it('should convert an array of arrays back to a multi-line csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -519,7 +610,7 @@ describe('CSV node', function() {
 
         it('should be able to include column names as first row', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrout:true, ret:"\r\n", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -535,9 +626,36 @@ describe('CSV node', function() {
             });
         });
 
+        it('should be able to pass in column names', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrout:"once", ret:"\r\n", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var count = 0;
+                n2.on("input", function(msg) {
+                    count += 1;
+                    try {
+                        if (count === 1) {
+                            msg.should.have.property('payload', 'a,,b,a\r\n4,,3,4\r\n');
+                        }
+                        if (count === 3) {
+                            msg.should.have.property('payload', '4,,3,4\r\n');
+                            done()
+                        }
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 }];
+                n1.emit("input", {payload:testJson, columns:"a,,b,a"});
+                n1.emit("input", {payload:testJson});
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
         it('should handle quotes and sub-properties', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                    {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -557,7 +675,7 @@ describe('CSV node', function() {
 
     it('should just pass through if no payload provided', function(done) {
         var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                {id:"n2", type:"helper"} ];
+            {id:"n2", type:"helper"} ];
         helper.load(csvNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
@@ -577,7 +695,7 @@ describe('CSV node', function() {
 
     it('should warn if provided a number or boolean', function(done) {
         var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
-                {id:"n2", type:"helper"} ];
+            {id:"n2", type:"helper"} ];
         helper.load(csvNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");

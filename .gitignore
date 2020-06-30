@@ -22,3 +22,4 @@ packages/node_modules/@node-red/editor-client/public
 !test/**/node_modules
 docs
 !packages/node_modules/**/docs
+.vscode
