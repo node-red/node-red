@@ -1,3 +1,27 @@
+### 1.1.1: Maintenance Release
+
+Editor
+
+ - Set apiRootUrl for debug pop-out to load locales properly Fixes #2629, #2630
+ - Update build-custom-theme to handle keyframes properly Fixes #2636
+ - Remove hardcoded css and allow group to default from theme Fixes #2633
+ - Add RED.view.DEBUG_SYNC_REDRAW to disable requestAnimationFrame References #2631
+ - Fix up subflow port wiring
+ - Ensure groups are removed when deleting subflows
+ - Get group order right in history events to ensure proper handling
+ - Prevent wiring to node with no corresponding port Fixes #2641
+ - Avoid copying duplicate nodes to internal clipboard
+
+Runtime
+
+ - Authenticate websocket comms using user-provided token if present Fixes #2642
+
+Nodes
+
+ - Delay: add words about independence of messages being delayed.
+ - Debug: fix debug status to not loop, make migration more seamless, detect status type objects #2638
+ - Debug: Update Japanese message for debug node #2645 (@kazuhitoyokoi)
+
 ### 1.1.0: Milestone Release
 
 Editor

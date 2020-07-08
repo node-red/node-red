@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -26,7 +26,7 @@
         }
     ],
     "dependencies": {
-        "ajv": "6.12.2",
+        "ajv": "6.12.3",
         "basic-auth": "2.0.1",
         "bcryptjs": "2.4.3",
         "body-parser": "1.19.0",
@@ -45,7 +45,7 @@
         "hash-sum": "2.0.0",
         "https-proxy-agent": "5.0.0",
         "i18next": "15.1.2",
-        "iconv-lite": "0.5.1",
+        "iconv-lite": "0.6.2",
         "is-utf8": "0.2.1",
         "js-yaml": "3.14.0",
         "json-stringify-safe": "5.0.1",
@@ -71,7 +71,7 @@
         "raw-body": "2.4.1",
         "request": "2.88.0",
         "semver": "6.3.0",
-        "uglify-js": "3.9.4",
+        "uglify-js": "3.10.0",
         "when": "3.7.8",
         "ws": "6.2.1",
         "xml2js": "0.4.23"
@@ -81,7 +81,7 @@
     },
     "devDependencies": {
         "marked": "0.8.2",
-        "dompurify": "2.0.11",
+        "dompurify": "2.0.12",
         "grunt": "~1.0.4",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.3.2",
