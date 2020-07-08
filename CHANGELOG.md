@@ -11,6 +11,7 @@ Editor
  - Get group order right in history events to ensure proper handling
  - Prevent wiring to node with no corresponding port Fixes #2641
  - Avoid copying duplicate nodes to internal clipboard
+ - Fix connecting wires to subflow status or io ports on touchscreen Fixes #2637
 
 Runtime
 
