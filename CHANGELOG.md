@@ -1,3 +1,17 @@
+### 1.1.2: Maintenance Release
+
+Editor
+
+ - Fix all the touch screen issues Fixes #2647
+ - Add RED.view.redrawStatus to avoid full redraw on update
+ - Ensure node/group xrefs are consistent on import
+ - Disable keyboard handler when dialogs are open
+ - Ensure unknown nodes removed from outliner when node registers Fixes #2646
+
+Runtime
+
+ - Allow Comms websocket auth to be done via token header Fixes #2642
+
 ### 1.1.1: Maintenance Release
 
 Editor
