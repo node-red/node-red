@@ -20,13 +20,13 @@ var when = require("when");
 var clone = require("clone");
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var RedNode = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 var RED = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes");
 var events = NR_TEST_UTILS.require("@node-red/runtime/lib/events");
 var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry")
-var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/Flow");
+var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 
 describe('flows/index', function() {
 

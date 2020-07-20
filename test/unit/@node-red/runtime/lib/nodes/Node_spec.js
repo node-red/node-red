@@ -19,7 +19,7 @@ var sinon = require('sinon');
 var NR_TEST_UTILS = require("nr-test-utils");
 var RedNode = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 var Log = NR_TEST_UTILS.require("@node-red/util").log;
-var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 
 describe('Node', function() {
     describe('#constructor',function() {
@@ -208,6 +208,7 @@ describe('Node', function() {
         it('emits a single message', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { n2.receive(msg) ;})}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -255,7 +256,9 @@ describe('Node', function() {
 
         it('emits a single message - synchronous mode', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                send: (node,dst,msg) => { n2.receive(msg) ;},
                 asyncMessageDelivery: false
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
@@ -284,8 +287,10 @@ describe('Node', function() {
 
         it('emits a message with callback provided send', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
-                handleComplete: (node,msg) => {}
+                handleComplete: (node,msg) => {},
+                send: (node,dst,msg) => { setImmediate(function() { n2.receive(msg) ;})}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -308,7 +313,9 @@ describe('Node', function() {
 
         it('emits multiple messages on a single output', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { n2.receive(msg) ;})}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -338,14 +345,15 @@ describe('Node', function() {
 
         it('emits messages to multiple outputs', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2,'n3':n3,'n4':n4,'n5':n5}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { flow.getNode(dst).receive(msg) })}
             };
             var n1 = new RedNode({_flow:flow, id:'n1',type:'abc',wires:[['n2'],['n3'],['n4','n5']]});
             var n2 = new RedNode({_flow:flow, id:'n2',type:'abc'});
             var n3 = new RedNode({_flow:flow, id:'n3',type:'abc'});
             var n4 = new RedNode({_flow:flow, id:'n4',type:'abc'});
             var n5 = new RedNode({_flow:flow, id:'n5',type:'abc'});
-
             var messages = [
                 {payload:"hello world"},
                 null,
@@ -396,6 +404,7 @@ describe('Node', function() {
 
         it('emits no messages', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
@@ -414,20 +423,20 @@ describe('Node', function() {
 
         it('emits messages ignoring non-existent nodes', function(done) {
             var flow = {
+                handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { var n = flow.getNode(dst); n && n.receive(msg) })}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n9'],['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
 
             var messages = [
-                {payload:"hello world"},
-                {payload:"hello world again"}
+                {_msgid:"123", payload:"hello world"},
+                {_msgid:"234", payload:"hello world again"}
             ];
 
-            // only one message sent, so no copy needed
             n2.on('input',function(msg) {
                 should.deepEqual(msg,messages[1]);
-                should.strictEqual(msg,messages[1]);
                 done();
             });
 
@@ -437,6 +446,7 @@ describe('Node', function() {
         it('emits messages without cloning req or res', function(done) {
             var flow = {
                 getNode: (id) => { return {'n1':n1,'n2':n2,'n3':n3}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { flow.getNode(dst).receive(msg) })}
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[[['n2'],['n3']]]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
@@ -493,6 +503,7 @@ describe('Node', function() {
             Log.addHandler(logHandler);
             var flow = {
                 getNode: (id) => { return {'n1':sender,'n2':receiver1,'n3':receiver2}[id]},
+                send: (node,dst,msg) => { setImmediate(function() { flow.getNode(dst).receive(msg) })}
             };
 
             var sender = new RedNode({_flow:flow,id:'n1',type:'abc', wires:[['n2', 'n3']]});

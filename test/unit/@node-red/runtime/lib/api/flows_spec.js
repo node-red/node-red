@@ -37,7 +37,7 @@ describe("runtime-api/flows", function() {
         it("returns the current flow configuration", function(done) {
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return [1,2,3] }
                 }
             });
@@ -76,7 +76,7 @@ describe("runtime-api/flows", function() {
             })
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return {rev:"currentRev",flows:[]} },
                     setFlows: setFlows,
                     loadFlows: loadFlows
@@ -192,7 +192,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     addFlow: addFlow
                 }
             });
@@ -225,7 +225,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlow: getFlow
                 }
             });
@@ -268,7 +268,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     updateFlow: updateFlow
                 }
             });
@@ -324,7 +324,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     removeFlow: removeFlow
                 }
             });

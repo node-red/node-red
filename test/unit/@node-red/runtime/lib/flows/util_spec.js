@@ -19,7 +19,7 @@ var sinon = require("sinon");
 var when = require("when");
 var clone = require("clone");
 var NR_TEST_UTILS = require("nr-test-utils");
-var flowUtil = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/util");
+var flowUtil = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
 var redUtil = NR_TEST_UTILS.require("@node-red/util").util;
 
