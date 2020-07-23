@@ -189,7 +189,8 @@ describe("@node-red/util/util", function() {
             // setMessageProperty strips off `msg.` prefixes.
             // setObjectProperty does not
             var obj = {};
-            util.setObjectProperty(obj,"msg.a","bar");
+            var result = util.setObjectProperty(obj,"msg.a","bar");
+            result.should.be.true();
             obj.should.have.property("msg");
             obj.msg.should.have.property("a","bar");
         })
@@ -197,59 +198,111 @@ describe("@node-red/util/util", function() {
     describe('setMessageProperty', function() {
         it('sets a property', function() {
             var msg = {a:"foo"};
-            util.setMessageProperty(msg,"msg.a","bar");
+            var result = util.setMessageProperty(msg,"msg.a","bar");
+            result.should.be.true();
             msg.a.should.eql('bar');
         });
         it('sets a deep level property', function() {
             var msg = {a:{b:{c:"foo"}}};
-            util.setMessageProperty(msg,"msg.a.b.c","bar");
+            var result = util.setMessageProperty(msg,"msg.a.b.c","bar");
+            result.should.be.true();
             msg.a.b.c.should.eql('bar');
         });
         it('creates missing parent properties by default', function() {
             var msg = {a:{}};
-            util.setMessageProperty(msg,"msg.a.b.c","bar");
+            var result = util.setMessageProperty(msg,"msg.a.b.c","bar");
+            result.should.be.true();
             msg.a.b.c.should.eql('bar');
         })
         it('does not create missing parent properties', function() {
             var msg = {a:{}};
-            util.setMessageProperty(msg,"msg.a.b.c","bar",false);
+            var result = util.setMessageProperty(msg,"msg.a.b.c","bar",false);
+            result.should.be.false();
             should.not.exist(msg.a.b);
         })
-        it('does not create missing parent properties with array', function () {
+        it('does not create missing parent properties of array', function () {
             var msg = {a:{}};
-            util.setMessageProperty(msg, "msg.a.b[1].c", "bar", false);
+            var result = util.setMessageProperty(msg, "msg.a.b[1].c", "bar", false);
+            result.should.be.false();
             should.not.exist(msg.a.b);
         })
+
+        it('does not create missing parent properties of string', function() {
+            var msg = {a:"foo"};
+            var result = util.setMessageProperty(msg, "msg.a.b.c", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+        it('does not set property of existing string property', function() {
+            var msg = {a:"foo"};
+            var result = util.setMessageProperty(msg, "msg.a.b", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+
+        it('does not set property of existing number property', function() {
+            var msg = {a:123};
+            var result = util.setMessageProperty(msg, "msg.a.b", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+        it('does not create missing parent properties of number', function() {
+            var msg = {a:123};
+            var result = util.setMessageProperty(msg, "msg.a.b.c", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+
+        it('does not set property of existing boolean property', function() {
+            var msg = {a:true};
+            var result = util.setMessageProperty(msg, "msg.a.b", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+        it('does not create missing parent properties of boolean', function() {
+            var msg = {a:true};
+            var result = util.setMessageProperty(msg, "msg.a.b.c", "bar", false);
+            result.should.be.false();
+            should.not.exist(msg.a.b);
+        })
+
+
         it('deletes property if value is undefined', function() {
             var msg = {a:{b:{c:"foo"}}};
-            util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            var result = util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            result.should.be.true();
             should.not.exist(msg.a.b.c);
         })
         it('does not create missing parent properties if value is undefined', function() {
             var msg = {a:{}};
-            util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            var result = util.setMessageProperty(msg,"msg.a.b.c",undefined);
+            result.should.be.false();
             should.not.exist(msg.a.b);
         });
         it('sets a property with array syntax', function() {
             var msg = {a:{b:["foo",{c:["",""]}]}};
-            util.setMessageProperty(msg,"msg.a.b[1].c[1]","bar");
+            var result = util.setMessageProperty(msg,"msg.a.b[1].c[1]","bar");
+            result.should.be.true();
             msg.a.b[1].c[1].should.eql('bar');
         });
         it('creates missing array elements - final property', function() {
             var msg = {a:[]};
-            util.setMessageProperty(msg,"msg.a[2]","bar");
+            var result = util.setMessageProperty(msg,"msg.a[2]","bar");
+            result.should.be.true();
             msg.a.should.have.length(3);
             msg.a[2].should.eql("bar");
         });
         it('creates missing array elements - mid property', function() {
             var msg = {};
-            util.setMessageProperty(msg,"msg.a[2].b","bar");
+            var result = util.setMessageProperty(msg,"msg.a[2].b","bar");
+            result.should.be.true();
             msg.a.should.have.length(3);
             msg.a[2].b.should.eql("bar");
         });
         it('creates missing array elements - multi-arrays', function() {
             var msg = {};
-            util.setMessageProperty(msg,"msg.a[2][2]","bar");
+            var result = util.setMessageProperty(msg,"msg.a[2][2]","bar");
+            result.should.be.true();
             msg.a.should.have.length(3);
             msg.a.should.be.instanceOf(Array);
             msg.a[2].should.have.length(3);
@@ -258,19 +311,22 @@ describe("@node-red/util/util", function() {
         });
         it('does not create missing array elements - mid property', function () {
             var msg = {a:[]};
-            util.setMessageProperty(msg, "msg.a[1][1]", "bar", false);
+            var result = util.setMessageProperty(msg, "msg.a[1][1]", "bar", false);
+            result.should.be.false();
             msg.a.should.empty();
         });
         it('does not create missing array elements - final property', function() {
             var msg = {a:{}};
-            util.setMessageProperty(msg,"msg.a.b[2]","bar",false);
+            var result = util.setMessageProperty(msg,"msg.a.b[2]","bar",false);
+            result.should.be.false();
             should.not.exist(msg.a.b);
             // check it has not been misinterpreted
             msg.a.should.not.have.property("b[2]");
         });
         it('deletes property inside array if value is undefined', function() {
             var msg = {a:[1,2,3]};
-            util.setMessageProperty(msg,"msg.a[1]",undefined);
+            var result = util.setMessageProperty(msg,"msg.a[1]",undefined);
+            result.should.be.true();
             msg.a.should.have.length(2);
             msg.a[0].should.eql(1);
             msg.a[1].should.eql(3);
@@ -499,11 +555,26 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               result.should.eql("bar");
           });
+          it('accesses undefined environment variable from an expression', function() {
+              var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('');
+          });
           it('accesses environment variable from an expression', function() {
               process.env.UTIL_ENV = 'foo';
               var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
               var result = util.evaluateJSONataExpression(expr,{});
               result.should.eql('foo');
+          });
+          it('accesses moment from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add(7, "days").add(1, "months").format("YYYY-MM-DD")',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2020-07-03');
+          });
+          it('accesses moment-timezone from an expression', function() {
+              var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
+              var result = util.evaluateJSONataExpression(expr,{});
+              result.should.eql('2013-11-18T19:55:00+08:00');
           });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
