@@ -266,5 +266,9 @@
     "$type": {
         "args": "value",
         "desc": "Returns the type of `value` as a string. If `value` is undefined, this will return `undefined`"
+    },
+    "$moment": {
+        "args": "[str]",
+        "desc": "Gets a date object using the Moment library."
     }
 }

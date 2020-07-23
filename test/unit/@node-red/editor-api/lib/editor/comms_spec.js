@@ -343,11 +343,19 @@ describe("api/editor/comms", function() {
         var getDefaultUser;
         var getUser;
         var getToken;
+        var getUserToken;
         before(function(done) {
             getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve(null);});
             getUser = sinon.stub(Users,"get", function(username) {
                 if (username == "fred") {
                     return when.resolve({permissions:"read"});
+                } else {
+                    return when.resolve(null);
+                }
+            });
+            getUserToken = sinon.stub(Users,"tokens", function(token) {
+                if (token == "abcde") {
+                    return when.resolve({user:"wilma", permissions:"*"})
                 } else {
                     return when.resolve(null);
                 }
@@ -377,6 +385,7 @@ describe("api/editor/comms", function() {
             getDefaultUser.restore();
             getUser.restore();
             getToken.restore();
+            getUserToken.restore();
             comms.stop();
             server.stop(done);
         });
@@ -420,7 +429,33 @@ describe("api/editor/comms", function() {
                 }
             });
         });
+        it('allows connections that do authenticate - user-provided-token',function(done) {
+            var ws = new WebSocket(url);
+            var received = 0;
+            ws.on('open', function() {
+                ws.send('{"auth":"abcde"}');
+            });
+            ws.on('message', function(msg) {
+                received++;
+                if (received == 1) {
+                    msg.should.equal('{"auth":"ok"}');
+                    ws.send('{"subscribe":"foo"}');
+                    connections[0].send('foo', 'correct');
+                } else {
+                    msg.should.equal('[{"topic":"foo","data":"correct"}]');
+                    ws.close();
+                }
+            });
 
+            ws.on('close', function() {
+                try {
+                    received.should.equal(2);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+        });
         it('rejects connections for non-existant token',function(done) {
             var ws = new WebSocket(url);
             var received = 0;
