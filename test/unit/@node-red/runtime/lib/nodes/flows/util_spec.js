@@ -777,5 +777,26 @@ describe('flows/util', function() {
             diffResult.removed.sort().should.eql(["1","2"]);
             diffResult.rewired.should.have.length(0);
         });
+
+        it('marks a node as removed when its state changes enabled to disabled', function() {
+            var config = [{id:"1",type:"tab",disabled:false,label:"fred"},{id:"2",type:"test",bar:"b",wires:[["1"]],z:"1"},{id:"3",type:"test"}];
+            var newConfig = clone(config);
+            newConfig[1].d = true;
+
+            var originalConfig = flowUtil.parseConfig(config);
+            var changedConfig = flowUtil.parseConfig(newConfig);
+
+            originalConfig.missingTypes.should.have.length(0);
+
+            var diffResult = flowUtil.diffConfigs(originalConfig,changedConfig);
+
+            diffResult.added.should.have.length(0);
+            diffResult.changed.should.have.length(2);
+            diffResult.changed.sort().should.eql(["1","2"]);
+            diffResult.removed.should.have.length(1);
+            diffResult.removed.sort().should.eql(["2"]);
+            diffResult.rewired.should.have.length(0);
+        });
+
     });
 });
