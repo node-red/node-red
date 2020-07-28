@@ -25,15 +25,17 @@ function injectNode(id) {
 util.inherits(injectNode, nodePage);
 
 var payloadTypeList = {
-    "flow": 1,
-    "global": 2,
-    "str": 3,
-    "num": 4,
-    "bool": 5,
-    "json": 6,
-    "bin": 7,
-    "date": 8,
-    "env": 9,
+    "msg": 1,
+    "flow": 2,
+    "global": 3,
+    "str": 4,
+    "num": 5,
+    "bool": 6,
+    "json": 7,
+    "bin": 8,
+    "date": 9,
+    "jsonata": 10,
+    "env": 11,
 };
 
 var repeatTypeList = {
@@ -45,18 +47,18 @@ var repeatTypeList = {
 
 injectNode.prototype.setPayload = function(payloadType, payload) {
     // Open a payload type list.
-    browser.clickWithWait('//*[contains(@class, "red-ui-typedInput-container")]');
+    browser.clickWithWait('//*[@id="node-input-property-container"]/li[1]/div/div/div[3]');
     // Select a payload type.
     var payloadTypeXPath = '//*[contains(@class, "red-ui-typedInput-options")]/a[' + payloadTypeList[payloadType] + ']';
     browser.clickWithWait(payloadTypeXPath);
     if (payload) {
         // Input a value.
-        browser.setValue('//*[contains(@class, "red-ui-typedInput-input")]/input', payload);
+        browser.setValue('//*[@id="node-input-property-container"]/li[1]/div/div/div[3]/div[1]/input', payload);
     }
 }
 
 injectNode.prototype.setTopic = function(topic) {
-    browser.setValue('#node-input-topic', topic);
+    browser.setValue('//*[@id="node-input-property-container"]/li[2]/div/div/div[3]/div[1]/input', topic);
 }
 
 injectNode.prototype.setOnce = function(once) {
