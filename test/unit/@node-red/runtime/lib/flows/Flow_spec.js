@@ -26,6 +26,7 @@ var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
 var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
+var hooks = NR_TEST_UTILS.require("@node-red/runtime/lib/hooks");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
 
 
@@ -825,5 +826,372 @@ describe('Flow', function() {
         });
     });
 
+
+    describe("#send", function() {
+        it("sends a message - no cloning", function(done) {
+            var shutdownTest = function(err) {
+                hooks.clear();
+                flow.stop().then(() => { done(err) });
+            }
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+            var messageReceived = false;
+            n2.receive = function(msg) {
+                messageReceived = true;
+                try {
+                    msg.should.be.exactly(message);
+                    shutdownTest();
+                } catch(err) {
+                    shutdownTest(err);
+                }
+            }
+
+            var message = {payload:"hello"}
+            flow.send([{
+                msg: message,
+                source: { id:"1", node: n1 },
+                destination: { id:"2", node: undefined },
+                cloneMessage: false
+            }])
+            messageReceived.should.be.false()
+        })
+        it("sends a message - cloning", function(done) {
+            var shutdownTest = function(err) {
+                hooks.clear();
+                flow.stop().then(() => { done(err) });
+            }
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+
+            n2.receive = function(msg) {
+                try {
+                    // Message should be cloned
+                    msg.should.be.eql(message);
+                    msg.should.not.be.exactly(message);
+                    shutdownTest();
+                } catch(err) {
+                    shutdownTest(err);
+                }
+            }
+
+            var message = {payload:"hello"}
+            flow.send([{
+                msg: message,
+                source: { id:"1", node: n1 },
+                destination: { id:"2", node: undefined },
+                cloneMessage: true
+            }])
+        })
+        it("sends multiple messages", function(done) {
+            var shutdownTest = function(err) {
+                hooks.clear();
+                flow.stop().then(() => { done(err) });
+            }
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+
+            var messageCount = 0;
+            n2.receive = function(msg) {
+                try {
+                    msg.should.be.exactly(messages[messageCount++]);
+                    if (messageCount === 2) {
+                        shutdownTest();
+                    }
+                } catch(err) {
+                    shutdownTest(err);
+                }
+            }
+
+            var messages = [{payload:"hello"},{payload:"world"}];
+
+            flow.send([{
+                msg: messages[0],
+                source: { id:"1", node: n1 },
+                destination: { id:"2", node: undefined }
+            },{
+                msg: messages[1],
+                source: { id:"1", node: n1 },
+                destination: { id:"2", node: undefined }
+            }])
+        })
+        it("sends a message - triggers hooks", function(done) {
+            var hookErrors = [];
+            var messageReceived = false;
+            var hooksCalled = [];
+            hooks.add("onSend", function(sendEvents) {
+                hooksCalled.push("onSend")
+                try {
+                    messageReceived.should.be.false()
+                    sendEvents.should.have.length(1);
+                    sendEvents[0].msg.should.be.exactly(message);
+                } catch(err) {
+                    hookErrors.push(err);
+                }
+            })
+            hooks.add("preRoute", function(sendEvent) {
+                hooksCalled.push("preRoute")
+                try {
+                    messageReceived.should.be.false()
+                    sendEvent.msg.should.be.exactly(message);
+                    should.not.exist(sendEvent.destination.node)
+                } catch(err) {
+                    hookErrors.push(err);
+                }
+
+            })
+            hooks.add("preDeliver", function(sendEvent) {
+                hooksCalled.push("preDeliver")
+                try {
+                    messageReceived.should.be.false()
+                    // Cloning should have happened
+                    sendEvent.msg.should.not.be.exactly(message);
+                    // Destinatino node populated
+                    should.exist(sendEvent.destination.node)
+                } catch(err) {
+                    hookErrors.push(err);
+                }
+
+            })
+            hooks.add("postDeliver", function(sendEvent) {
+                hooksCalled.push("postDeliver")
+                try {
+                    messageReceived.should.be.false()
+
+                } catch(err) {
+                    hookErrors.push(err);
+                }
+
+            })
+            var shutdownTest = function(err) {
+                hooks.clear();
+                flow.stop().then(() => { done(err) });
+            }
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+            n2.receive = function(msg) {
+                messageReceived = true;
+                try {
+                    msg.should.be.eql(message);
+                    msg.should.not.be.exactly(message);
+                    hooksCalled.should.eql(["onSend","preRoute","preDeliver","postDeliver"])
+                    if (hookErrors.length > 0) {
+                        shutdownTest(hookErrors[0])
+                    } else {
+                        shutdownTest();
+                    }
+                } catch(err) {
+                    shutdownTest(err);
+                }
+            }
+
+            var message = {payload:"hello"}
+            flow.send([{
+                msg: message,
+                source: { id:"1", node: n1 },
+                destination: { id:"2", node: undefined },
+                cloneMessage: true
+            }])
+        })
+
+        describe("errors thrown by hooks are reported to the sending node", function() {
+            var flow;
+            var n1,n2;
+            var messageReceived = false;
+            var errorReceived = null;
+            before(function() {
+                hooks.add("onSend", function(sendEvents) {
+                    if (sendEvents[0].msg.payload === "trigger-onSend") {
+                        throw new Error("onSend Error");
+                    }
+                })
+                hooks.add("preRoute", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-preRoute") {
+                        throw new Error("preRoute Error");
+                    }
+                })
+                hooks.add("preDeliver", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-preDeliver") {
+                        throw new Error("preDeliver Error");
+                    }
+                })
+                hooks.add("postDeliver", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-postDeliver") {
+                        throw new Error("postDeliver Error");
+                    }
+                })
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab"},
+                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                ]);
+                flow = Flow.create({},config,config.flows["t1"]);
+                flow.start();
+                n1 = flow.getNode('1');
+                n2 = flow.getNode('2');
+                n2.receive = function(msg) {
+                    messageReceived = true;
+                }
+                n1.error = function(err) {
+                    errorReceived = err;
+                }
+
+            })
+            after(function(done) {
+                hooks.clear();
+                flow.stop().then(() => { done() });
+            })
+            beforeEach(function() {
+                messageReceived = false;
+                errorReceived = null;
+            })
+            function testHook(hook, msgExpected, done) {
+                var message = {payload:"trigger-"+hook}
+                flow.send([{
+                    msg: message,
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined },
+                    cloneMessage: true
+                }])
+                setTimeout(function() {
+                    try {
+                        messageReceived.should.equal(msgExpected);
+                        should.exist(errorReceived)
+                        errorReceived.toString().should.containEql(hook);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },10)
+            }
+
+            it("onSend",  function(done) { testHook("onSend", false, done) })
+            it("preRoute", function(done) { testHook("preRoute", false, done) })
+            it("preDeliver",   function(done) { testHook("preDeliver", false, done) })
+            it("postDeliver", function(done) { testHook("postDeliver", true, done) })
+        })
+
+        describe("hooks can stop the sending of messages", function() {
+            var flow;
+            var n1,n2;
+            var messageReceived = false;
+            var errorReceived = false;
+            before(function() {
+                hooks.add("onSend", function(sendEvents) {
+                    if (sendEvents[0].msg.payload === "trigger-onSend") {
+                        return false
+                    }
+                })
+                hooks.add("preRoute", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-preRoute") {
+                        return false
+                    }
+                })
+                hooks.add("preDeliver", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-preDeliver") {
+                        return false
+                    }
+                })
+                hooks.add("postDeliver", function(sendEvent) {
+                    if (sendEvent.msg.payload === "trigger-postDeliver") {
+                        return false
+                    }
+                })
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab"},
+                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                    {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+                ]);
+                flow = Flow.create({},config,config.flows["t1"]);
+                flow.start();
+                n1 = flow.getNode('1');
+                n2 = flow.getNode('2');
+                n2.receive = function(msg) {
+                    messageReceived = true;
+                }
+                n1.error = function(err) {
+                    errorReceived = true;
+                }
+
+            })
+            after(function(done) {
+                hooks.clear();
+                flow.stop().then(() => { done() });
+            })
+            function testSend(payload,messageReceivedExpected,errorReceivedExpected,done) {
+                messageReceived = false;
+                errorReceived = false;
+                flow.send([{
+                    msg: {payload: payload},
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined },
+                    cloneMessage: true
+                }])
+                setTimeout(function() {
+                    try {
+                        messageReceived.should.eql(messageReceivedExpected)
+                        errorReceived.should.eql(errorReceivedExpected)
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },10)
+            }
+            function testHook(hook, done) {
+                testSend("pass",true,false,err => {
+                    if (err) {
+                        done(err)
+                    } else {
+                        testSend("trigger-"+hook,false,false,done);
+                    }
+                })
+            }
+
+            it("onSend",  function(done) { testHook("onSend", done) })
+            it("preRoute", function(done) { testHook("preRoute", done) })
+            it("preDeliver",   function(done) { testHook("preDeliver", done) })
+            // postDeliver happens after delivery is scheduled so cannot stop it
+            // it("postDeliver", function(done) { testHook("postDeliver", done) })
+        })
+    })
 
 });
