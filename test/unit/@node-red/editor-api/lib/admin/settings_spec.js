@@ -24,7 +24,7 @@ var app;
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var info = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/settings");
+var info = NR_TEST_UTILS.require("@node-red/editor-api/lib/admin/settings");
 var theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
 
 describe("api/editor/settings", function() {
@@ -32,64 +32,60 @@ describe("api/editor/settings", function() {
         sinon.stub(theme,"settings",function() { return { existing: 123, test: 456 };});
         app = express();
         app.use(bodyParser.json());
-        app.get("/settings/user",function(req,res,next) {req.user = "fred"; next()}, info.userSettings);
-        app.post("/settings/user",function(req,res,next) {req.user = "fred"; next()},info.updateUserSettings);
+        app.get("/settings",info.runtimeSettings);
     });
 
     after(function() {
         theme.settings.restore();
     });
 
-    it('returns the user settings', function(done) {
-        info.init({
+    it('returns the runtime settings', function(done) {
+        info.init({},{
             settings: {
-                getUserSettings: function(opts) {
-                    if (opts.user !== "fred") {
-                        return Promise.reject(new Error("Unknown user"));
-                    }
+                getRuntimeSettings: function(opts) {
                     return Promise.resolve({
-                        c:3,
-                        d:4
+                        a:1,
+                        b:2,
+                        editorTheme: { existing: 789 }
                     })
                 }
             }
         });
         request(app)
-        .get("/settings/user")
+        .get("/settings")
         .expect(200)
         .end(function(err,res) {
             if (err) {
                 return done(err);
             }
-            res.body.should.eql({c:3,d:4});
+            res.body.should.have.property("a",1);
+            res.body.should.have.property("b",2);
+            res.body.should.have.property("editorTheme",{existing: 789, test:456});
             done();
         });
     });
-    it('updates the user settings', function(done) {
-        var update;
-        info.init({
+    it('returns the runtime settings - disableEditor true', function(done) {
+        info.init({disableEditor: true},{
             settings: {
-                updateUserSettings: function(opts) {
-                    if (opts.user !== "fred") {
-                        return Promise.reject(new Error("Unknown user"));
-                    }
-                    update = opts.settings;
-                    return Promise.resolve()
+                getRuntimeSettings: function(opts) {
+                    return Promise.resolve({
+                        a:1,
+                        b:2
+                    })
                 }
             }
         });
         request(app)
-        .post("/settings/user")
-        .send({
-            e:4,
-            f:5
-        })
-        .expect(204)
+        .get("/settings")
+        .expect(200)
         .end(function(err,res) {
             if (err) {
                 return done(err);
             }
-            update.should.eql({e:4,f:5});
+            res.body.should.have.property("a",1);
+            res.body.should.have.property("b",2);
+            // no editorTheme if disabledEditor true
+            res.body.should.not.have.property("editorTheme");
             done();
         });
     });
