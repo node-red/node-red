@@ -1,3 +1,27 @@
+### 1.1.3: Maintenance Release
+
+Editor
+ - Fix vertical align of fa node icons Fixes #2670
+ - Allow lasso selection to be restricted to active group
+ - Make ctrl-click on nested group more intuitive
+ - Fix copy/paste of nested groups
+ - Add Set(iterable) polyfill for IE11
+ - Support select-all inside active group
+ - Improve performance of moving groups
+ - Add additional check for git auth failure response Fixes #2656
+ - german translation, wording (#2660) (#2666)
+ - Remove filtering of duplicate fa icons
+ - Show node help when switching node edit dialogs Fixes #2652
+ - Ensure group theme picks up theme defaults properly Fixes #2651
+
+Nodes
+ - Clarify Switch node isEmpty help
+ - HTTP In: handle application/cbor as binary
+
+Runtime
+ - Move runtime settings back to adminApi from editorApi Fixes #2662
+ - Update Chinese message for debug node
+
 ### 1.1.2: Maintenance Release
 
 Editor
