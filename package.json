@@ -11,6 +11,7 @@
     "private": "true",
     "scripts": {
         "start": "node packages/node_modules/node-red/red.js",
+        "debug": "node --inspect-brk packages/node_modules/node-red/red.js",
         "test": "grunt",
         "build": "grunt build",
         "dev": "grunt dev",
