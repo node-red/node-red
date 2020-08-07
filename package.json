@@ -27,6 +27,7 @@
     ],
     "dependencies": {
         "ajv": "6.12.3",
+        "async-mutex": "0.2.4",
         "basic-auth": "2.0.1",
         "bcryptjs": "2.4.3",
         "body-parser": "1.19.0",
