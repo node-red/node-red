@@ -155,6 +155,10 @@ describe("api/auth/users", function() {
        });
 
         describe('#get',function() {
+            it("returns null for tokenHeader", function() {
+                should.not.exist(Users.tokenHeader());
+            });
+
             it('delegates get user',function(done) {
                 Users.get('dave').then(function(user) {
                     try {
