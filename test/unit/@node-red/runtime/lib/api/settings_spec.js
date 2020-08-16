@@ -101,7 +101,58 @@ describe("runtime-api/settings", function() {
                 result.user.should.not.have.property("private");
             })
         });
+        it("gets the filtered settings when editor disabled ", function() {
+            settings.init({
+                settings: {
+                    disableEditor: true,
+                    foo: 123,
+                    httpNodeRoot: "testHttpNodeRoot",
+                    version: "testVersion",
+                    paletteCategories :["red","blue","green"],
+                    exportNodeSettings: (obj) => {
+                        obj.testNodeSetting = "helloWorld";
+                    }
+                },
+                nodes: {
+                    listContextStores: () => { return {stores:["file","memory"], default: "file"} },
+                    paletteEditorEnabled: () => false,
+                    getCredentialKeyType: () => "test-key-type"
+                },
+                storage: {
+                    projects: {
+                        getActiveProject: () => 'test-active-project',
+                        getFlowFilename:  () => 'test-flow-file',
+                        getCredentialsFilename:  () => 'test-creds-file',
+                        getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
+                    }
+                }
+            })
+            return settings.getRuntimeSettings({
+                user: {
+                    username: "nick",
+                    anonymous: false,
+                    image: "http://example.com",
+                    permissions: "*",
+                    private: "secret"
+                }
+            }).then(result => {
+                result.should.have.property("user");
+                result.user.should.have.property("username","nick");
+                result.user.should.have.property("permissions","*");
+                result.user.should.have.property("image","http://example.com");
+                result.user.should.have.property("anonymous",false);
+                result.user.should.not.have.property("private");
 
+                // Filtered out when disableEditor is true
+                result.should.not.have.property("paletteCategories",["red","blue","green"]);
+                result.should.not.have.property("testNodeSetting","helloWorld");
+                result.should.not.have.property("foo",123);
+                result.should.not.have.property("flowEncryptionType","test-key-type");
+                result.should.not.have.property("project");
+                result.should.not.have.property("git");
+
+            })
+        });
         it('includes project settings if projects available', function() {
             settings.init({
                 settings: {
