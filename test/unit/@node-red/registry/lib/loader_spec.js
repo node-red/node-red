@@ -415,60 +415,61 @@ describe("red/nodes/registry/loader",function() {
             });
         });
 
-        it("load core node files scanned by lfs - missing html file", function(done) {
-            stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){
-                var result = {};
-                result["node-red"] = {
-                    "name": "node-red",
-                    "version": "1.2.3",
-                    "nodes": {
-                        "DuffNode": {
-                            "file": path.join(resourcesDir,"DuffNode","DuffNode.js"),
-                            "module": "node-red",
-                            "name": "DuffNode"
-                        }
-                    }
-                };
-                return result;
-            }));
-
-            stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
-            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
-            // This module isn't already loaded
-            stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
-
-            stubs.push(sinon.stub(nodes,"registerType"));
-            loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
-            loader.load().then(function(result) {
-
-                registry.addModule.called.should.be.true();
-                var module = registry.addModule.lastCall.args[0];
-                module.should.have.property("name","node-red");
-                module.should.have.property("version","1.2.3");
-                module.should.have.property("nodes");
-                module.nodes.should.have.property("DuffNode");
-                module.nodes.DuffNode.should.have.property("id","node-red/DuffNode");
-                module.nodes.DuffNode.should.have.property("module","node-red");
-                module.nodes.DuffNode.should.have.property("name","DuffNode");
-                module.nodes.DuffNode.should.have.property("file");
-                module.nodes.DuffNode.should.have.property("template");
-                module.nodes.DuffNode.should.have.property("enabled",true);
-                module.nodes.DuffNode.should.have.property("loaded",false);
-                module.nodes.DuffNode.should.have.property("types");
-                module.nodes.DuffNode.types.should.have.a.length(0);
-                module.nodes.DuffNode.should.have.property("config","");
-                module.nodes.DuffNode.should.have.property("help",{});
-                module.nodes.DuffNode.should.have.property("namespace","node-red");
-                module.nodes.DuffNode.should.have.property('err');
-                module.nodes.DuffNode.err.should.endWith("DuffNode.html does not exist");
-
-                nodes.registerType.called.should.be.false();
-
-                done();
-            }).catch(function(err) {
-                done(err);
-            });
-        });
+        // it("load core node files scanned by lfs - missing html file", function(done) {
+        //     // This is now an okay situation
+        //     stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){
+        //         var result = {};
+        //         result["node-red"] = {
+        //             "name": "node-red",
+        //             "version": "1.2.3",
+        //             "nodes": {
+        //                 "DuffNode": {
+        //                     "file": path.join(resourcesDir,"DuffNode","DuffNode.js"),
+        //                     "module": "node-red",
+        //                     "name": "DuffNode"
+        //                 }
+        //             }
+        //         };
+        //         return result;
+        //     }));
+        //
+        //     stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
+        //     stubs.push(sinon.stub(registry,"addModule", function(){ return }));
+        //     // This module isn't already loaded
+        //     stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
+        //
+        //     stubs.push(sinon.stub(nodes,"registerType"));
+        //     loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
+        //     loader.load().then(function(result) {
+        //
+        //         registry.addModule.called.should.be.true();
+        //         var module = registry.addModule.lastCall.args[0];
+        //         module.should.have.property("name","node-red");
+        //         module.should.have.property("version","1.2.3");
+        //         module.should.have.property("nodes");
+        //         module.nodes.should.have.property("DuffNode");
+        //         module.nodes.DuffNode.should.have.property("id","node-red/DuffNode");
+        //         module.nodes.DuffNode.should.have.property("module","node-red");
+        //         module.nodes.DuffNode.should.have.property("name","DuffNode");
+        //         module.nodes.DuffNode.should.have.property("file");
+        //         module.nodes.DuffNode.should.have.property("template");
+        //         module.nodes.DuffNode.should.have.property("enabled",true);
+        //         module.nodes.DuffNode.should.have.property("loaded",false);
+        //         module.nodes.DuffNode.should.have.property("types");
+        //         module.nodes.DuffNode.types.should.have.a.length(0);
+        //         module.nodes.DuffNode.should.have.property("config","");
+        //         module.nodes.DuffNode.should.have.property("help",{});
+        //         module.nodes.DuffNode.should.have.property("namespace","node-red");
+        //         module.nodes.DuffNode.should.have.property('err');
+        //         module.nodes.DuffNode.err.should.endWith("DuffNode.html does not exist");
+        //
+        //         nodes.registerType.called.should.be.false();
+        //
+        //         done();
+        //     }).catch(function(err) {
+        //         done(err);
+        //     });
+        // });
     });
 
     describe("#addModule",function() {
