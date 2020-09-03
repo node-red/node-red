@@ -18,7 +18,7 @@ var should = require("should");
 var sinon = require("sinon");
 var when = require("when");
 var path = require("path");
-var fs = require('fs');
+var fs = require('fs-extra');
 var EventEmitter = require('events');
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -36,7 +36,7 @@ describe('nodes/registry/installer', function() {
         warn: sinon.stub(),
         info: sinon.stub(),
         metric: sinon.stub(),
-        _: function() { return "abc"}
+        _: function(msg) { return msg }
     }
 
     beforeEach(function() {
@@ -70,8 +70,8 @@ describe('nodes/registry/installer', function() {
             typeRegistry.getModuleInfo.restore();
         }
 
-        if (require('fs').statSync.restore) {
-            require('fs').statSync.restore();
+        if (fs.statSync.restore) {
+            fs.statSync.restore();
         }
 
     });
