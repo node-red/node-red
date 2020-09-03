@@ -25,6 +25,11 @@ module.exports = function(grunt) {
     if (flowFile) {
         nodemonArgs.push(flowFile);
     }
+    var userDir = grunt.option('userDir');
+    if (userDir) {
+        nodemonArgs.push("-u");
+        nodemonArgs.push(userDir);
+    }
 
     var browserstack = grunt.option('browserstack');
     if (browserstack) {
@@ -623,7 +628,7 @@ module.exports = function(grunt) {
     grunt.registerTask('build',
         'Builds editor content',
         ['clean:build','jsonlint','concat:build','concat:vendor','copy:build','uglify:build','sass:build','attachCopyright']);
-        
+
     grunt.registerTask('build-dev',
         'Developer mode: build dev version',
         ['clean:build','concat:build','concat:vendor','copy:build','sass:build','setDevEnv']);
