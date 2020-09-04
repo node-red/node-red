@@ -216,12 +216,41 @@ describe('Node', function() {
             n2.on('input',function(msg) {
                 // msg equals message, and is not a new copy
                 messageReceived = true;
+                should.strictEqual(this,n2);
                 should.deepEqual(msg,message);
                 should.strictEqual(msg,message);
                 done();
             });
             n1.send(message);
             messageReceived.should.be.false();
+        });
+
+        it('emits a single message - multiple input event listeners', function(done) {
+            var flow = {
+                getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+            };
+            var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
+            var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
+            var message = {payload:"hello world"};
+            var messageReceived = 0;
+            n2.on('input',function(msg) {
+                // msg equals message, and is not a new copy
+                messageReceived++;
+                messageReceived.should.be.exactly(1);
+                should.strictEqual(this,n2);
+                should.deepEqual(msg,message);
+                should.strictEqual(msg,message);
+            });
+            n2.on('input',function() {
+                messageReceived++;
+                messageReceived.should.be.exactly(2);
+                should.strictEqual(this,n2);
+                should.deepEqual(msg,message);
+                should.strictEqual(msg,message);
+                done();
+            });
+            n1.send(message);
+            messageReceived.should.be.exactly(0);
         });
 
         it('emits a single message - synchronous mode', function(done) {
