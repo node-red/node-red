@@ -241,7 +241,7 @@ describe('Node', function() {
                 should.deepEqual(msg,message);
                 should.strictEqual(msg,message);
             });
-            n2.on('input',function() {
+            n2.on('input',function(msg) {
                 messageReceived++;
                 messageReceived.should.be.exactly(2);
                 should.strictEqual(this,n2);
