@@ -740,6 +740,19 @@ describe("@node-red/util/util", function() {
                 resultJson.name.should.eql('my error obj');
                 resultJson.message.should.eql('my error message');
             });
+
+            it('object with undefined property', function() {
+                var msg = { msg:{a:1,b:undefined,c:3 } };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("a",1);
+                resultJson.should.have.property("c",3);
+                resultJson.should.have.property("b");
+                resultJson.b.should.have.property("__enc__", true);
+                resultJson.b.should.have.property("type", "undefined");
+            });
+
             it('constructor of IncomingMessage', function() {
                 function IncomingMessage(){};
                 var msg = { msg:new IncomingMessage() };
@@ -790,6 +803,16 @@ describe("@node-red/util/util", function() {
                 var resultJson = JSON.parse(result.msg);
                 resultJson[0].should.eql('abc...');
                 resultJson[1].should.eql('123...');
+            });
+            it('array containing undefined', function() {
+                var msg = { msg:[1,undefined,3]};
+                var result = util.encodeObject(msg);
+                result.format.should.eql("array[3]");
+                var resultJson = JSON.parse(result.msg);
+                resultJson[0].should.eql(1);
+                resultJson[2].should.eql(3);
+                resultJson[1].__enc__.should.be.true();
+                resultJson[1].type.should.eql("undefined");
             });
             it('array of function', function() {
                 var msg = { msg:[function(){}] };
