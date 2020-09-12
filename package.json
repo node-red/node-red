@@ -27,6 +27,7 @@
     ],
     "dependencies": {
         "ajv": "6.12.3",
+        "async-mutex": "0.2.4",
         "basic-auth": "2.0.1",
         "bcryptjs": "2.4.3",
         "body-parser": "1.19.0",
@@ -71,6 +72,7 @@
         "raw-body": "2.4.1",
         "request": "2.88.0",
         "semver": "6.3.0",
+        "tar": "6.0.2",
         "uglify-js": "3.10.0",
         "when": "3.7.8",
         "ws": "6.2.1",

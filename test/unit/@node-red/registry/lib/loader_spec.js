@@ -18,7 +18,7 @@ var should = require("should");
 var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
-var fs = require("fs");
+var fs = require("fs-extra");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -111,7 +111,73 @@ describe("red/nodes/registry/loader",function() {
                 module.nodes.TestNode1.types.should.have.a.length(1);
                 module.nodes.TestNode1.types[0].should.eql('test-node-1');
                 module.nodes.TestNode1.should.have.property("config");
+                module.nodes.TestNode1.config.should.not.eql("");
                 module.nodes.TestNode1.should.have.property("help");
+                module.nodes.TestNode1.help.should.have.property("en-US");
+                module.nodes.TestNode1.should.have.property("namespace","node-red");
+
+                nodes.registerType.calledOnce.should.be.true();
+                nodes.registerType.lastCall.args[0].should.eql('node-red/TestNode1');
+                nodes.registerType.lastCall.args[1].should.eql('test-node-1');
+
+                done();
+            }).catch(function(err) {
+                done(err);
+            });
+        });
+
+        it("load core node files scanned by lfs - ignore html if disableEditor true", function(done) {
+            stubs.push(sinon.stub(localfilesystem,"getNodeFiles", function(){
+                var result = {};
+                result["node-red"] = {
+                    "name": "node-red",
+                    "version": "1.2.3",
+                    "nodes": {
+                        "TestNode1": {
+                            "file": path.join(resourcesDir,"TestNode1","TestNode1.js"),
+                            "module": "node-red",
+                            "name": "TestNode1"
+                        }
+                    }
+                };
+                return result;
+            }));
+
+            stubs.push(sinon.stub(registry,"saveNodeList", function(){ return }));
+            stubs.push(sinon.stub(registry,"addModule", function(){ return }));
+            // This module isn't already loaded
+            stubs.push(sinon.stub(registry,"getNodeInfo", function(){ return null; }));
+
+            stubs.push(sinon.stub(nodes,"registerType"));
+            loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{disableEditor: true, available:function(){return true;}}});
+            loader.load().then(function(result) {
+                registry.addModule.called.should.be.true();
+                var module = registry.addModule.lastCall.args[0];
+                module.should.have.property("name","node-red");
+                module.should.have.property("version","1.2.3");
+                module.should.have.property("nodes");
+                module.nodes.should.have.property("TestNode1");
+                module.nodes.TestNode1.should.have.property("id","node-red/TestNode1");
+                module.nodes.TestNode1.should.have.property("module","node-red");
+                module.nodes.TestNode1.should.have.property("name","TestNode1");
+                module.nodes.TestNode1.should.have.property("file");
+                module.nodes.TestNode1.should.have.property("template");
+                module.nodes.TestNode1.should.have.property("enabled",true);
+                module.nodes.TestNode1.should.have.property("loaded",true);
+                // With disableEditor true, the types property is not populated by the
+                // html file - but instead is populated as nodes register themselves.
+                // But for this test, we have stubbed out registerType, so we won't get any types
+                // module.nodes.TestNode1.should.have.property("types");
+                // module.nodes.TestNode1.types.should.have.a.length(1);
+                // module.nodes.TestNode1.types[0].should.eql('test-node-1');
+
+                // With disableEditor set, config should be blank
+                module.nodes.TestNode1.should.have.property("config");
+                module.nodes.TestNode1.config.should.eql("");
+
+                // help should be an empty object
+                module.nodes.TestNode1.should.have.property("help");
+                module.nodes.TestNode1.help.should.eql({})
                 module.nodes.TestNode1.should.have.property("namespace","node-red");
 
                 nodes.registerType.calledOnce.should.be.true();
@@ -336,9 +402,9 @@ describe("red/nodes/registry/loader",function() {
                 module.nodes.DoesNotExist.should.have.property("loaded",false);
                 module.nodes.DoesNotExist.should.have.property("types");
                 module.nodes.DoesNotExist.types.should.have.a.length(0);
-                module.nodes.DoesNotExist.should.not.have.property("config");
-                module.nodes.DoesNotExist.should.not.have.property("help");
-                module.nodes.DoesNotExist.should.not.have.property("namespace","node-red");
+                module.nodes.DoesNotExist.should.have.property("config","");
+                module.nodes.DoesNotExist.should.have.property("help",{});
+                module.nodes.DoesNotExist.should.have.property("namespace","node-red");
                 module.nodes.DoesNotExist.should.have.property('err');
 
                 nodes.registerType.called.should.be.false();
@@ -390,9 +456,9 @@ describe("red/nodes/registry/loader",function() {
                 module.nodes.DuffNode.should.have.property("loaded",false);
                 module.nodes.DuffNode.should.have.property("types");
                 module.nodes.DuffNode.types.should.have.a.length(0);
-                module.nodes.DuffNode.should.not.have.property("config");
-                module.nodes.DuffNode.should.not.have.property("help");
-                module.nodes.DuffNode.should.not.have.property("namespace","node-red");
+                module.nodes.DuffNode.should.have.property("config","");
+                module.nodes.DuffNode.should.have.property("help",{});
+                module.nodes.DuffNode.should.have.property("namespace","node-red");
                 module.nodes.DuffNode.should.have.property('err');
                 module.nodes.DuffNode.err.should.endWith("DuffNode.html does not exist");
 
