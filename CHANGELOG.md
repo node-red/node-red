@@ -1,3 +1,100 @@
+### 1.1.3: Maintenance Release
+
+Editor
+ - Fix vertical align of fa node icons Fixes #2670
+ - Allow lasso selection to be restricted to active group
+ - Make ctrl-click on nested group more intuitive
+ - Fix copy/paste of nested groups
+ - Add Set(iterable) polyfill for IE11
+ - Support select-all inside active group
+ - Improve performance of moving groups
+ - Add additional check for git auth failure response Fixes #2656
+ - german translation, wording (#2660) (#2666)
+ - Remove filtering of duplicate fa icons
+ - Show node help when switching node edit dialogs Fixes #2652
+ - Ensure group theme picks up theme defaults properly Fixes #2651
+
+Nodes
+ - Clarify Switch node isEmpty help
+ - HTTP In: handle application/cbor as binary
+
+Runtime
+ - Move runtime settings back to adminApi from editorApi Fixes #2662
+ - Update Chinese message for debug node
+
+### 1.1.2: Maintenance Release
+
+Editor
+
+ - Fix all the touch screen issues Fixes #2647
+ - Add RED.view.redrawStatus to avoid full redraw on update
+ - Ensure node/group xrefs are consistent on import
+ - Disable keyboard handler when dialogs are open
+ - Ensure unknown nodes removed from outliner when node registers Fixes #2646
+
+Runtime
+
+ - Allow Comms websocket auth to be done via token header Fixes #2642
+
+### 1.1.1: Maintenance Release
+
+Editor
+
+ - Set apiRootUrl for debug pop-out to load locales properly Fixes #2629, #2630
+ - Update build-custom-theme to handle keyframes properly Fixes #2636
+ - Remove hardcoded css and allow group to default from theme Fixes #2633
+ - Add RED.view.DEBUG_SYNC_REDRAW to disable requestAnimationFrame References #2631
+ - Fix up subflow port wiring
+ - Ensure groups are removed when deleting subflows
+ - Get group order right in history events to ensure proper handling
+ - Prevent wiring to node with no corresponding port Fixes #2641
+ - Avoid copying duplicate nodes to internal clipboard
+ - Fix connecting wires to subflow status or io ports on touchscreen Fixes #2637
+
+Runtime
+
+ - Authenticate websocket comms using user-provided token if present Fixes #2642
+
+Nodes
+
+ - Delay: add words about independence of messages being delayed.
+ - Debug: fix debug status to not loop, make migration more seamless, detect status type objects #2638
+ - Debug: Update Japanese message for debug node #2645 (@kazuhitoyokoi)
+
+### 1.1.0: Milestone Release
+
+Editor
+
+ - Align node labels on FF
+ - Fix node toggle button initial opacity
+ - Make color/icon/label-pos pickers keyboard navigable
+ - Default group label to be shown and improve toggle button
+ - Fix clearing group label
+ - Remove hardcoded css Fixes #2603
+ - Fix node button mouse pointer css
+ - Change node linebreak handling to use "\n "
+ - Handle import of node with non-default number of outputs
+ - Improve display of focussed form element
+ - Fix typedInput error on empty subflow input types #2624 (@HiroyasuNishiyama)
+ - Update JP message catalogue for subflow input type #2471 (@HiroyasuNishiyama)
+ - Outliner - add empty item when last config node moved
+ - Update zh-CN/zh-TW translations #2626 (@JiyeYu)
+ - Add default shortcut for `core:show-help-tab`
+ - Clear outline focus on config node sidebar panel
+ - Tweak group margin to fit node status and look better
+ - Fix reparenting nodes in outliner when they change
+
+Runtime
+
+ - Add developer options - permits npm run build-dev #2628 (@Steve-Mcl)
+
+Nodes
+ - Add example flows for lots of core nodes #2585 #2550 #2549 (@HiroyasuNishiyama)
+ - TCP: Fix tcp in node finishing packets when in streaming base64 receive mode.
+ - Join: Clear timeout when msg.reset received Fixes #2471
+ - Switch: JSONata expr does not require msg.parts.count
+ - Inject: fix backwards migration of inject without topic
+
 #### 1.1.0-beta.3: Beta Release
 
 Editor

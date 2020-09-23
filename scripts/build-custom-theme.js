@@ -29,6 +29,7 @@ const sass = require("node-sass");
 
 const knownOpts = {
     "help": Boolean,
+    "long": Boolean,
     "in": [path],
     "out": [path]
 };
@@ -45,7 +46,8 @@ if (parsedArgs.help) {
     console.log("Options:");
     console.log("  --in  FILE  Custom colors sass file");
     console.log("  --out FILE  Where you write the result");
-    console.log("  -?, --help  show this help");
+    console.log("  --long      Do not compress the output");
+    console.log("  -?, --help  Show this help");
     console.log("");
     process.exit();
 }
@@ -64,7 +66,6 @@ if (parsedArgs.in && fs.existsSync(parsedArgs.in)) {
 }
 
 // Load base colours
-
 let colorsFile = fs.readFileSync(path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/colors.scss"),"utf-8")
 let updatedColors = [];
 
@@ -81,7 +82,7 @@ const result = sass.renderSync({
                 contents: updatedColors.join("\n")
             }
         }
-        return {file:"../packages/node_modules/@node-red/editor-client/src/sass/"+url+".scss"}
+        return {file:path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/"+url+".scss")}
     }
 });
 
@@ -90,8 +91,18 @@ const lines = css.split("\n");
 const colorCSS = []
 const nonColorCSS = [];
 
+let inKeyFrameBlock = false;
+
 lines.forEach(l => {
-    if (!/^  /.test(l)) {
+    if (inKeyFrameBlock) {
+        nonColorCSS.push(l);
+        if (/^}/.test(l)) {
+            inKeyFrameBlock = false;
+        }
+    } else if (/^@keyframes/.test(l)) {
+        nonColorCSS.push(l);
+        inKeyFrameBlock = true;
+    } else if (!/^  /.test(l)) {
         colorCSS.push(l);
         nonColorCSS.push(l);
     } else if (/color|border|background|fill|stroke|outline|box-shadow/.test(l)) {
@@ -101,9 +112,19 @@ lines.forEach(l => {
     }
 });
 
-var output = sass.renderSync({outputStyle: "compressed",data:colorCSS.join("\n")});
+
+const nrPkg = require("../package.json");
+const now = new Date().toISOString();
+
+const header = `/*
+ * Theme generated with Node-RED ${nrPkg.version} on ${now}
+ */`;
+
+var output = sass.renderSync({outputStyle: parsedArgs.long?"expanded":"compressed",data:colorCSS.join("\n")});
 if (parsedArgs.out) {
-    fs.writeFileSync(parsedArgs.out,output.css);
+
+    fs.writeFileSync(parsedArgs.out,header+"\n"+output.css);
 } else {
+    console.log(header);
     console.log(output.css.toString());
 }
