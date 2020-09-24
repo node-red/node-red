@@ -100,8 +100,13 @@ describe('storage/localfilesystem/settings', function() {
         const fsStatProjects = await fs.stat(path.join(userDir,".config.projects.json"))
         const fsStatRuntime = await fs.stat(path.join(userDir,".config.runtime.json"))
 
-        return localfilesystemSettings.init({userDir:userDir}).then(() => {
-
+        return localfilesystemSettings.init({userDir:userDir}).then(function() {
+            return new Promise(res => {
+                setTimeout(function() {
+                    res();
+                },10)
+            });
+        }).then(() => {
             return localfilesystemSettings.saveSettings({
                 nodes:{d:4},
                 _credentialSecret: "bar",
@@ -109,6 +114,7 @@ describe('storage/localfilesystem/settings', function() {
                 projects: {c:3}
             })
         }).then(async function() {
+
             const newFsStatNodes = await fs.stat(path.join(userDir,".config.nodes.json"))
             const newFsStatUsers = await fs.stat(path.join(userDir,".config.users.json"))
             const newFsStatProjects = await fs.stat(path.join(userDir,".config.projects.json"))
