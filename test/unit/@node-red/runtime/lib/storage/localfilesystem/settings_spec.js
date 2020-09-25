@@ -62,7 +62,8 @@ describe('storage/localfilesystem/settings', function() {
         }
 
         localfilesystemSettings.init({userDir:userDir}).then(async function() {
-            fs.existsSync(settingsFile).should.be.false();
+            // (For now) leave the old settings file in place
+            fs.existsSync(settingsFile).should.be.true();
             await checkFile("nodes",{a:1})
             await checkFile("users",{b:2})
             await checkFile("projects",{c:3})
