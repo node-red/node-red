@@ -3,10 +3,11 @@
 
 Editor
 
+ - Detect importing duplicate nodes and help user resolve #2698
  - Allow sidebar tabs to be reordered #2655
+ - Add tgz upload button to palette manager (#2682)
  - Sanitize unknown node type when displaying
  - Handle nodes with invalid z property Closes #2170
- - Detect importing duplicate nodes and help user resolve #2698
  - Outline: Ensure sf instance nodes update in outliner when import-replace sf
  - Outline: Ensure recovered nodes tab is added to outliner properly
  - Groups: Only recalculate group label offsets when needed
@@ -18,14 +19,13 @@ Editor
  - Prevent Enter on search box from reloading page Fixes #2678
  - Allow toggleButton icons to be optional
  - Allow treeList to have a header component
- - Add tgz upload button to palette manager (#2682)
  - Disable selection of FA icons when dbl clicking node
 
 Runtime
 
  - Split .config.json into separate files #2794
- - Add 'done' metric log for message tracing #2685 (@k-toumura)
  - Add support for file upload in /nodes api #2682
+ - Add 'done' metric log for message tracing #2685 (@k-toumura)
  - Add mutex locking around /flow apis #2679
  - Default flowFilePretty to true if projects enabled
  - Replace Math.random with crypto.getBytes for session tokens
@@ -37,6 +37,7 @@ Runtime
 
 Nodes
 
+ - Function: allow to send & log in its initialize code #2644 (@cinhcet)
  - MQTT: Update to MQTT 4.2.1 Closes #2694
  - Debug: Handle undefined value in Debug view of Array and Object Fixes #2696
  - Switch: Clarify empty rules in switch node documentation #2649 (@natcl) #2669 (@kazuhitoyokoi)
