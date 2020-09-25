@@ -144,16 +144,20 @@ describe("red/nodes/registry/localfilesystem",function() {
             var nodeList = localfilesystem.getNodeFiles();
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
+            // The `node-red` module is loaded differently to those scanned for
+            // It doesn't get the `path` property set. Maybe it should.
             nm.should.have.a.property('name','node-red');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,[],['TestNode1']);
 
             nm = nodeList['TestNodeModule'];
+            nm.should.have.a.property('path')
             nm.should.have.a.property('name','TestNodeModule');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,['TestNodeMod1','TestNodeMod2'],[],'TestNodeModule');
 
             nm = nodeList['VersionMismatchModule'];
+            nm.should.have.a.property('path')
             nm.should.have.a.property('name','VersionMismatchModule');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,['VersionMismatchMod1','VersionMismatchMod2'],[],'VersionMismatchModule');
@@ -243,6 +247,8 @@ describe("red/nodes/registry/localfilesystem",function() {
             nodeModule['TestNodeModule'].should.have.a.property('name','TestNodeModule');
             nodeModule['TestNodeModule'].should.have.a.property('version','0.0.1');
             nodeModule['TestNodeModule'].should.have.a.property('nodes');
+            nodeModule['TestNodeModule'].should.have.a.property('path');
+
             checkNodes(nodeModule['TestNodeModule'].nodes,['TestNodeMod1','TestNodeMod2'],[],'TestNodeModule');
 
             nodeModule = localfilesystem.getModuleFiles('VersionMismatchModule');
