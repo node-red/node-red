@@ -14,9 +14,9 @@
  * limitations under the License.
  **/
 
-var should = require("should");
-var fs = require('fs-extra');
-var path = require('path');
+const should = require("should");
+const fs = require('fs-extra');
+const path = require('path');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -34,49 +34,100 @@ describe('storage/localfilesystem/settings', function() {
     });
 
     it('should handle non-existent settings', function(done) {
-        var settingsFile = path.join(userDir,".settings.json");
-
-        localfilesystemSettings.init({userDir:userDir});
-        fs.existsSync(settingsFile).should.be.false();
-        localfilesystemSettings.getSettings().then(function(settings) {
+        var settingsFile = path.join(userDir,".config.json");
+        localfilesystemSettings.init({userDir:userDir}).then(function() {
+            fs.existsSync(settingsFile).should.be.false();
+            return localfilesystemSettings.getSettings();
+        }).then(function(settings) {
             settings.should.eql({});
             done();
-        }).catch(function(err) {
-            done(err);
-        });
+        }).catch(err => { done(err)});
     });
 
-    it('should handle corrupt settings', function(done) {
+    it('should migrate single config.json to multiple files', function(done) {
         var settingsFile = path.join(userDir,".config.json");
-        fs.writeFileSync(settingsFile,"[This is not json","utf8");
-        localfilesystemSettings.init({userDir:userDir});
-        fs.existsSync(settingsFile).should.be.true();
-        localfilesystemSettings.getSettings().then(function(settings) {
-            settings.should.eql({});
+        fs.writeFileSync(settingsFile,JSON.stringify({
+            nodes:{a:1},
+            _credentialSecret: "foo",
+            users:{b:2},
+            projects: {c:3}
+        }),"utf8");
+
+        async function checkFile(sectionName, expectedContents) {
+            const file = path.join(userDir,".config."+sectionName+".json");
+            fs.existsSync(file).should.be.true();
+            var contents = await fs.readFile(file,'utf8');
+            var data = JSON.parse(contents);
+            data.should.eql(expectedContents)
+        }
+
+        localfilesystemSettings.init({userDir:userDir}).then(async function() {
+            fs.existsSync(settingsFile).should.be.false();
+            await checkFile("nodes",{a:1})
+            await checkFile("users",{b:2})
+            await checkFile("projects",{c:3})
+            await checkFile("runtime",{_credentialSecret:"foo"})
             done();
-        }).catch(function(err) {
-            done(err);
-        });
+        }).catch(err => { done(err)});
     });
 
-    it('should handle settings', function(done) {
-        var settingsFile = path.join(userDir,".config.json");
+    it('should load separate settings file', async function() {
+        await fs.writeFile( path.join(userDir,".config.nodes.json"),JSON.stringify({a:1}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.users.json"),JSON.stringify({b:2}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.projects.json"),JSON.stringify({c:3}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.runtime.json"),JSON.stringify({_credentialSecret:"foo"}),"utf8");
 
-        localfilesystemSettings.init({userDir:userDir});
-        fs.existsSync(settingsFile).should.be.false();
+        return localfilesystemSettings.init({userDir:userDir})
+            .then(localfilesystemSettings.getSettings)
+            .then(settings => {
+                settings.should.eql({
+                    nodes:{a:1},
+                    _credentialSecret: "foo",
+                    users:{b:2},
+                    projects: {c:3}
+                })
+        })
+    });
 
-        var settings = {"abc":{"type":"creds"}};
+    it('should write only the files that need writing', async function() {
+        await fs.writeFile( path.join(userDir,".config.nodes.json"),JSON.stringify({a:1}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.users.json"),JSON.stringify({b:2}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.projects.json"),JSON.stringify({c:3}),"utf8");
+        await fs.writeFile( path.join(userDir,".config.runtime.json"),JSON.stringify({_credentialSecret:"foo"}),"utf8");
 
-        localfilesystemSettings.saveSettings(settings).then(function() {
-            fs.existsSync(settingsFile).should.be.true();
-            localfilesystemSettings.getSettings().then(function(_settings) {
-                _settings.should.eql(settings);
-                done();
-            }).catch(function(err) {
-                done(err);
+        const fsStatNodes = await fs.stat(path.join(userDir,".config.nodes.json"))
+        const fsStatUsers = await fs.stat(path.join(userDir,".config.users.json"))
+        const fsStatProjects = await fs.stat(path.join(userDir,".config.projects.json"))
+        const fsStatRuntime = await fs.stat(path.join(userDir,".config.runtime.json"))
+
+        return localfilesystemSettings.init({userDir:userDir}).then(function() {
+            return new Promise(res => {
+                setTimeout(function() {
+                    res();
+                },10)
             });
-        }).catch(function(err) {
-            done(err);
-        });
+        }).then(() => {
+            return localfilesystemSettings.saveSettings({
+                nodes:{d:4},
+                _credentialSecret: "bar",
+                users:{b:2},
+                projects: {c:3}
+            })
+        }).then(async function() {
+
+            const newFsStatNodes = await fs.stat(path.join(userDir,".config.nodes.json"))
+            const newFsStatUsers = await fs.stat(path.join(userDir,".config.users.json"))
+            const newFsStatProjects = await fs.stat(path.join(userDir,".config.projects.json"))
+            const newFsStatRuntime = await fs.stat(path.join(userDir,".config.runtime.json"))
+
+            // Not changed
+            newFsStatUsers.mtimeMs.should.eql(fsStatUsers.mtimeMs);
+            newFsStatProjects.mtimeMs.should.eql(fsStatProjects.mtimeMs);
+
+            // Changed
+            newFsStatNodes.mtimeMs.should.not.eql(fsStatNodes.mtimeMs);
+            newFsStatRuntime.mtimeMs.should.not.eql(fsStatRuntime.mtimeMs);
+
+        })
     });
 });
