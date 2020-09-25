@@ -360,7 +360,7 @@ describe('function node', function() {
                         done(err);
                     }
                 });
-            },1500);
+            },100);
         });
     });
 
@@ -1201,9 +1201,8 @@ describe('function node', function() {
         });
     });
 
-
     it('should handle setTimeout()', function(done) {
-        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"setTimeout(function(){node.send(msg);},1000);"},
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"setTimeout(function(){node.send(msg);},700);"},
         {id:"n2", type:"helper"}];
         helper.load(functionNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -1213,7 +1212,7 @@ describe('function node', function() {
                 var nanoTime = endTime[0] * 1000000000 + endTime[1];
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'foo');
-                if (900000000 < nanoTime && nanoTime < 1100000000) {
+                if (600000000 < nanoTime && nanoTime < 800000000) {
                     done();
                 } else {
                     try {
@@ -1248,7 +1247,7 @@ describe('function node', function() {
     });
 
     it('should handle clearInterval()', function(done) {
-        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"var id=setInterval(null,100);setTimeout(function(){clearInterval(id);node.send(msg);},1000);"},
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"var id=setInterval(null,100);setTimeout(function(){clearInterval(id);node.send(msg);},500);"},
         {id:"n2", type:"helper"}];
         helper.load(functionNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -1376,8 +1375,9 @@ describe('function node', function() {
     });
 
     describe('Logger', function () {
-        it('should log an Info Message', function (done) {
-            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.log('test');"}];
+
+        function testLog(initCode,funcCode,expectedLevel, done) {
+            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: funcCode, initialize: initCode}];
             helper.load(functionNode, flow, function () {
                 var n1 = helper.getNode("n1");
                 n1.receive({payload: "foo", topic: "bar"});
@@ -1389,7 +1389,7 @@ describe('function node', function() {
                         });
                         logEvents.should.have.length(1);
                         var msg = logEvents[0][0];
-                        msg.should.have.property('level', helper.log().INFO);
+                        msg.should.have.property('level', helper.log()[expectedLevel]);
                         msg.should.have.property('id', 'n1');
                         msg.should.have.property('type', 'function');
                         msg.should.have.property('msg', 'test');
@@ -1397,105 +1397,42 @@ describe('function node', function() {
                     } catch (err) {
                         done(err);
                     }
-                },50);
+                },10);
             });
+        }
+
+        it('should log an Info Message', function (done) {
+            testLog("","node.log('test');","INFO",done);
         });
         it('should log a Debug Message', function (done) {
-            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.debug('test');"}];
-            helper.load(functionNode, flow, function () {
-                var n1 = helper.getNode("n1");
-                n1.receive({payload: "foo", topic: "bar"});
-                setTimeout(function() {
-                    try {
-                        helper.log().called.should.be.true();
-                        var logEvents = helper.log().args.filter(function (evt) {
-                            return evt[0].type == "function";
-                        });
-                        logEvents.should.have.length(1);
-                        var msg = logEvents[0][0];
-                        msg.should.have.property('level', helper.log().DEBUG);
-                        msg.should.have.property('id', 'n1');
-                        msg.should.have.property('type', 'function');
-                        msg.should.have.property('msg', 'test');
-                        done();
-                    } catch (err) {
-                        done(err);
-                    }
-                },50);
-            });
+            testLog("","node.debug('test');","DEBUG",done);
         });
         it('should log a Trace Message', function (done) {
-            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.trace('test');"}];
-            helper.load(functionNode, flow, function () {
-                var n1 = helper.getNode("n1");
-                n1.receive({payload: "foo", topic: "bar"});
-                setTimeout(function() {
-                    try {
-                        helper.log().called.should.be.true();
-                        var logEvents = helper.log().args.filter(function (evt) {
-                            return evt[0].type == "function";
-                        });
-                        logEvents.should.have.length(1);
-                        var msg = logEvents[0][0];
-                        msg.should.have.property('level', helper.log().TRACE);
-                        msg.should.have.property('id', 'n1');
-                        msg.should.have.property('type', 'function');
-                        msg.should.have.property('msg', 'test');
-                        done();
-                    } catch (err) {
-                        done(err);
-                    }
-                },50);
-            });
+            testLog("","node.trace('test');","TRACE",done);
         });
         it('should log a Warning Message', function (done) {
-            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.warn('test');"}];
-            helper.load(functionNode, flow, function () {
-                var n1 = helper.getNode("n1");
-                n1.receive({payload: "foo", topic: "bar"});
-                setTimeout(function() {
-                    try {
-                        helper.log().called.should.be.true();
-                        var logEvents = helper.log().args.filter(function (evt) {
-                            return evt[0].type == "function";
-                        });
-                        logEvents.should.have.length(1);
-                        var msg = logEvents[0][0];
-                        msg.should.have.property('level', helper.log().WARN);
-                        msg.should.have.property('id', 'n1');
-                        msg.should.have.property('type', 'function');
-                        msg.should.have.property('msg', 'test');
-                        done();
-                    } catch (err) {
-                        done(err);
-                    }
-                },50);
-            });
+            testLog("","node.warn('test');","WARN",done);
         });
         it('should log an Error Message', function (done) {
-            var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "node.error('test');"}];
-            helper.load(functionNode, flow, function () {
-                var n1 = helper.getNode("n1");
-                n1.receive({payload: "foo", topic: "bar"});
-                setTimeout(function() {
-                    try {
-                        helper.log().called.should.be.true();
-                        var logEvents = helper.log().args.filter(function (evt) {
-                            return evt[0].type == "function";
-                        });
-                        logEvents.should.have.length(1);
-                        var msg = logEvents[0][0];
-                        msg.should.have.property('level', helper.log().ERROR);
-                        msg.should.have.property('id', 'n1');
-                        msg.should.have.property('type', 'function');
-                        msg.should.have.property('msg', 'test');
-                        done();
-                    } catch (err) {
-                        done(err);
-                    }
-                },50);
-            });
+            testLog("","node.error('test');","ERROR",done);
         });
+
+        it('should log an Info Message - initialise', function (done) {
+            testLog("node.log('test');","","INFO",done);
+        });
+        it('should log a Debug Message - initialise', function (done) {
+            testLog("node.debug('test');","","DEBUG",done);
+        });
+        it('should log a Trace Message - initialise', function (done) {
+            testLog("node.trace('test');","","TRACE",done);
+        });
+        it('should log a Warning Message - initialise', function (done) {
+            testLog("node.warn('test');","","WARN",done);
+        });
+        it('should log an Error Message - initialise', function (done) {
+            testLog("node.error('test');","","ERROR",done);
+        });
+
         it('should catch thrown string', function (done) {
             var flow = [{id: "n1", type: "function", wires: [["n2"]], func: "throw \"small mistake\";"}];
             helper.load(functionNode, flow, function () {
@@ -1570,4 +1507,57 @@ describe('function node', function() {
         });
     });
 
+    describe("init function", function() {
+
+        it('should delay handling messages until init completes', function(done) {
+            var flow = [{id:"n1",type:"function",wires:[["n2"]],initialize: `
+                return new Promise((resolve,reject) => {
+                    setTimeout(resolve,200)
+                })`,
+                func:"return msg;"
+            },
+            {id:"n2", type:"helper"}];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var receivedMsgs = [];
+                n2.on("input", function(msg) {
+                    msg.delta = Date.now() - msg.payload;
+                    receivedMsgs.push(msg)
+                    if (receivedMsgs.length === 5) {
+                        var errors = receivedMsgs.filter(msg => msg.delta < 200)
+                        if (errors.length > 0) {
+                            done(new Error(`Message received before init completed - was ${msg.delta} expected >300`))
+                        } else {
+                            done();
+                        }
+                    }
+                });
+                for (var i=0;i<5;i++) {
+                    n1.receive({payload: Date.now(),topic: "msg"+i});
+                }
+            });
+        });
+
+        it('should allow accessing node.id and node.name and sending message', function(done) {
+            var flow = [{id:"n1",name:"test-function", type:"function",wires:[["n2"]],initialize:"setTimeout(function() { node.send({ topic: node.name, payload:node.id})},10)", func: ""},
+            {id:"n2", type:"helper"}];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        // Use this form of assert as `msg` is created inside
+                        // the sandbox and doesn't get all the should.js monkey patching
+                        should.equal(msg.payload, n1.id);
+                        should.equal(msg.topic, n1.name);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+            });
+        });
+
+    })
 });
