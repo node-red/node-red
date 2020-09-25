@@ -645,30 +645,39 @@ describe('trigger node', function() {
     });
 
     it('should be able to reset correctly having not output anything on second edge', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"nul", op1:"true",op1type:"val", op2:"false", duration:"35", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"nul", op1:"true",op1type:"val", op2:"false", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
+            var errors = [];
             n2.on("input", function(msg) {
                 try {
+                    msg.should.have.a.property("topic", "pass")
                     msg.should.have.a.property("payload", true);
                     c += 1;
                 }
-                catch(err) { done(err); }
+                catch(err) { errors.push(err) }
             });
             setTimeout( function() {
-                c.should.equal(3); // should only have had one output.
-                done();
-            },300);
-            n1.emit("input", {payload:1});
+                if (errors.length > 0) {
+                    done(errors[0])
+                } else {
+                    c.should.equal(2);
+                    done();
+                }
+            },350);
+            n1.emit("input", {payload:1, topic:"pass"});
             setTimeout( function() {
-                n1.emit("input", {payload:2});
-            },100);
+                n1.emit("input", {payload:2, topic:"should-block"});
+            },50);
             setTimeout( function() {
-                n1.emit("input", {payload:3});
+                n1.emit("input", {payload:3, topic:"pass"});
             },200);
+            setTimeout( function() {
+                n1.emit("input", {payload:2, topic:"should-block"});
+            },250);
         });
     });
 
