@@ -22,6 +22,7 @@ Editor
 
 Runtime
 
+ - Split .config.json into separate files #2794
  - Add 'done' metric log for message tracing #2685 (@k-toumura)
  - Add support for file upload in /nodes api #2682
  - Add mutex locking around /flow apis #2679
@@ -31,6 +32,7 @@ Runtime
  - Add --userDir=/tmp/foo support to grunt dev
  - Skip loading node html if disableEditor set #2684
  - Update util.writeFile to write to tmp file before rename #2683
+ - Fix getModuleFiles function to include path property #2705 (@t-kawamorita)
 
 Nodes
 
