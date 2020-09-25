@@ -19,6 +19,7 @@ Editor
  - Allow toggleButton icons to be optional
  - Allow treeList to have a header component
  - Add tgz upload button to palette manager (#2682)
+ - Disable selection of FA icons when dbl clicking node
 
 Runtime
 
