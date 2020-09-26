@@ -1,3 +1,49 @@
+### 1.2.0-beta.1: Beta Release
+
+
+Editor
+
+ - Detect importing duplicate nodes and help user resolve #2698
+ - Allow sidebar tabs to be reordered #2655
+ - Add tgz upload button to palette manager (#2682)
+ - Sanitize unknown node type when displaying
+ - Handle nodes with invalid z property Closes #2170
+ - Outline: Ensure sf instance nodes update in outliner when import-replace sf
+ - Outline: Ensure recovered nodes tab is added to outliner properly
+ - Groups: Only recalculate group label offsets when needed
+ - Groups: Reuse first group name/style when merging elements Fixes #2680
+ - Groups: Fix copy/paste of node into active group Fixes #2686
+ - ACE: Update ACE to 1.4.12-src-min-noconflict Fixes #1988
+ - ACE: Add comment highlighting to JSONata and fix regex handling Closes #2701
+ - ACE: Ensure errors in ACE NRJavaScript mode are on valid lines
+ - Prevent Enter on search box from reloading page Fixes #2678
+ - Allow toggleButton icons to be optional
+ - Allow treeList to have a header component
+ - Disable selection of FA icons when dbl clicking node
+
+Runtime
+
+ - Split .config.json into separate files #2794
+ - Add support for file upload in /nodes api #2682
+ - Add 'done' metric log for message tracing #2685 (@k-toumura)
+ - Add mutex locking around /flow apis #2679
+ - Default flowFilePretty to true if projects enabled
+ - Replace Math.random with crypto.getBytes for session tokens
+ - Fix `this` context when calling multiple event listeners Fixes #2692. #2693 (@mgroenhoff)
+ - Add --userDir=/tmp/foo support to grunt dev
+ - Skip loading node html if disableEditor set #2684
+ - Update util.writeFile to write to tmp file before rename #2683
+ - Fix getModuleFiles function to include path property #2705 (@t-kawamorita)
+
+Nodes
+
+ - Function: allow to send & log in its initialize code #2644 (@cinhcet)
+ - MQTT: Update to MQTT 4.2.1 Closes #2694
+ - Debug: Handle undefined value in Debug view of Array and Object Fixes #2696
+ - Switch: Clarify empty rules in switch node documentation #2649 (@natcl) #2669 (@kazuhitoyokoi)
+ - Updated core nodes to use Done callback #2653 (@k-toumura)
+     - yaml,  xml, json, html, http, template, range, link, status, catch, complete, inject
+
 ### 1.1.3: Maintenance Release
 
 Editor
