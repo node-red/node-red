@@ -7,9 +7,9 @@ matrix:
     - node_js: "14"
     - node_js: "12"
     - node_js: "10"
-      script:
-        - ./node_modules/.bin/grunt && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
-        - scripts/install-ui-test-dependencies.sh && grunt test-ui
-      before_script:
-        - npm install -g istanbul coveralls
+    #  script:
+    #    - ./node_modules/.bin/grunt && istanbul report text && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
+    #    - scripts/install-ui-test-dependencies.sh && grunt test-ui
+    #  before_script:
+    #    - npm install -g istanbul coveralls
     - node_js: "8"
