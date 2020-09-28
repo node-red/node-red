@@ -5,7 +5,9 @@ Editor
 
  - Detect importing duplicate nodes and help user resolve #2698
  - Allow sidebar tabs to be reordered #2655
- - Add tgz upload button to palette manager (#2682)
+ - Add tgz upload button to palette manager #2682
+ - Add 'automatic' git workflow for projects #2035
+ - Allow project version string to be edited
  - Sanitize unknown node type when displaying
  - Handle nodes with invalid z property Closes #2170
  - Outline: Ensure sf instance nodes update in outliner when import-replace sf

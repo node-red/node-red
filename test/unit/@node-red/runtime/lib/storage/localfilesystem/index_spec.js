@@ -45,7 +45,7 @@ describe('storage/localfilesystem', function() {
     });
 
     it('should initialise the user directory',function(done) {
-        localfilesystem.init({userDir:userDir}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             fs.existsSync(path.join(userDir,"lib")).should.be.true();
             fs.existsSync(path.join(userDir,"lib",'flows')).should.be.true();
             done();
@@ -60,7 +60,7 @@ describe('storage/localfilesystem', function() {
         process.env.NODE_RED_HOME = path.join(userDir,"NRH");
         fs.mkdirSync(process.env.NODE_RED_HOME);
         fs.writeFileSync(path.join(process.env.NODE_RED_HOME,".config.json"),"{}","utf8");
-        var settings = {};
+        var settings = {getUserSettings: () => {{}}};
         localfilesystem.init(settings, mockRuntime).then(function() {
             try {
                 fs.existsSync(path.join(process.env.NODE_RED_HOME,"lib")).should.be.true();
@@ -85,7 +85,7 @@ describe('storage/localfilesystem', function() {
         fs.mkdirSync(process.env.HOMEPATH);
         fs.mkdirSync(path.join(process.env.HOMEPATH,".node-red"));
         fs.writeFileSync(path.join(process.env.HOMEPATH,".node-red",".config.json"),"{}","utf8");
-        var settings = {};
+        var settings = {getUserSettings: () => {{}}};
         localfilesystem.init(settings, mockRuntime).then(function() {
             try {
                 fs.existsSync(path.join(process.env.HOMEPATH,".node-red","lib")).should.be.true();
@@ -112,7 +112,7 @@ describe('storage/localfilesystem', function() {
         process.env.HOMEPATH = path.join(userDir,"HOMEPATH");
 
         fs.mkdirSync(process.env.HOME);
-        var settings = {};
+        var settings = {getUserSettings: () => {{}}};
         localfilesystem.init(settings, mockRuntime).then(function() {
             try {
                 fs.existsSync(path.join(process.env.HOME,".node-red","lib")).should.be.true();
@@ -142,7 +142,7 @@ describe('storage/localfilesystem', function() {
         process.env.USERPROFILE = path.join(userDir,"USERPROFILE");
 
         fs.mkdirSync(process.env.USERPROFILE);
-        var settings = {};
+        var settings = {getUserSettings: () => {{}}};
         localfilesystem.init(settings, mockRuntime).then(function() {
             try {
                 fs.existsSync(path.join(process.env.USERPROFILE,".node-red","lib")).should.be.true();
@@ -163,7 +163,7 @@ describe('storage/localfilesystem', function() {
     });
 
     it('should handle missing flow file',function(done) {
-        localfilesystem.init({userDir:userDir}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
             fs.existsSync(flowFilePath).should.be.false();
@@ -179,7 +179,7 @@ describe('storage/localfilesystem', function() {
     });
 
     it('should handle empty flow file, no backup',function(done) {
-        localfilesystem.init({userDir:userDir}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
             var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
@@ -197,7 +197,7 @@ describe('storage/localfilesystem', function() {
     });
 
     it('should handle empty flow file, restores backup',function(done) {
-        localfilesystem.init({userDir:userDir}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
             var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
@@ -220,7 +220,7 @@ describe('storage/localfilesystem', function() {
     });
 
     it('should save flows to the default file',function(done) {
-        localfilesystem.init({userDir:userDir}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             var flowFile = 'flows_'+require('os').hostname()+'.json';
             var flowFilePath = path.join(userDir,flowFile);
             var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
@@ -249,7 +249,7 @@ describe('storage/localfilesystem', function() {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
 
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             fs.existsSync(defaultFlowFilePath).should.be.false();
             fs.existsSync(flowFilePath).should.be.false();
 
@@ -273,7 +273,7 @@ describe('storage/localfilesystem', function() {
     it('should format the flows file when flowFilePretty specified',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,flowFilePretty:true}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,flowFilePretty:true,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             localfilesystem.saveFlows(testFlow).then(function() {
                 var content = fs.readFileSync(flowFilePath,"utf8");
                 content.split("\n").length.should.be.above(1);
@@ -294,7 +294,7 @@ describe('storage/localfilesystem', function() {
     it('should fsync the flows file',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({editorTheme:{projects:{enabled:false}},userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({editorTheme:{projects:{enabled:false}},userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             sinon.spy(fs,"fsync");
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.fsync.callCount.should.be.greaterThan(0);
@@ -312,7 +312,7 @@ describe('storage/localfilesystem', function() {
     it('should log fsync errors and continue',function(done) {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             sinon.stub(fs,"fsync", function(fd, cb) {
                 cb(new Error());
             });
@@ -338,7 +338,7 @@ describe('storage/localfilesystem', function() {
         var flowFilePath = path.join(userDir,flowFile);
         var flowFileBackupPath = path.join(userDir,"."+flowFile+".backup");
 
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             fs.existsSync(defaultFlowFilePath).should.be.false();
             fs.existsSync(flowFilePath).should.be.false();
             fs.existsSync(flowFileBackupPath).should.be.false();
@@ -378,7 +378,7 @@ describe('storage/localfilesystem', function() {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
         var credFile = path.join(userDir,"test_cred.json");
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
             fs.existsSync(credFile).should.be.false();
 
             localfilesystem.getCredentials().then(function(creds) {
@@ -397,7 +397,7 @@ describe('storage/localfilesystem', function() {
         var flowFilePath = path.join(userDir,flowFile);
         var credFile = path.join(userDir,"test_cred.json");
 
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
 
             fs.existsSync(credFile).should.be.false();
 
@@ -426,7 +426,7 @@ describe('storage/localfilesystem', function() {
         var credFile = path.join(userDir,"test_cred.json");
         var credFileBackup = path.join(userDir,".test_cred.json.backup");
 
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
 
             fs.writeFileSync(credFile,"{}","utf8");
 
@@ -452,7 +452,7 @@ describe('storage/localfilesystem', function() {
         var flowFilePath = path.join(userDir,flowFile);
         var credFile = path.join(userDir,"test_cred.json");
 
-        localfilesystem.init({userDir:userDir, flowFile:flowFilePath, flowFilePretty:true}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFilePath, flowFilePretty:true,getUserSettings: () => {{}}}, mockRuntime).then(function() {
 
             fs.existsSync(credFile).should.be.false();
 

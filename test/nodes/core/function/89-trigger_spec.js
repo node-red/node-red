@@ -996,18 +996,18 @@ describe('trigger node', function() {
                 }
                 catch(err) { done(err); }
             });
-            setTimeout( function() {
-                if (c === 2) { done(); }
-                else {
-                    done(new Error("Too many messages received"));
-                }
-            },20);
             n1.emit("input", {payload:null});   // trigger
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:"foo"});  // don't clear the blockage
             n1.emit("input", {payload:"boo"});  // clear the blockage
             n1.emit("input", {payload:null});   // trigger
+            setTimeout( function() {
+                if (c === 2) { done(); }
+                else {
+                    done(new Error("Too many messages received"));
+                }
+            },50);
         });
     });
 
