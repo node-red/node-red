@@ -209,8 +209,7 @@ describe('flows/index', function() {
             storage.getFlows = function() {
                 return when.resolve({flows:originalConfig});
             }
-
-            events.once('nodes-started',function() {
+            events.once('flows:started',function() {
                 flows.setFlows(newConfig,"nodes").then(function() {
                     flows.getFlows().flows.should.eql(newConfig);
                     flowCreate.flows['t1'].update.called.should.be.true();
@@ -239,7 +238,7 @@ describe('flows/index', function() {
                 return when.resolve({flows:originalConfig});
             }
 
-            events.once('nodes-started',function() {
+            events.once('flows:started',function() {
                 flows.setFlows(newConfig,"nodes").then(function() {
                     flows.getFlows().flows.should.eql(newConfig);
                     flowCreate.flows['t1'].update.called.should.be.true();
@@ -301,7 +300,7 @@ describe('flows/index', function() {
                 return when.resolve({flows:originalConfig});
             }
 
-            events.once('nodes-started',function() {
+            events.once('flows:started',function() {
                 Object.keys(flowCreate.flows).should.eql(['_GLOBAL_','t1']);
                 done();
             });
@@ -398,7 +397,7 @@ describe('flows/index', function() {
     //             return when.resolve({flows:originalConfig});
     //         }
     //
-    //         events.once('nodes-started',function() {
+    //         events.once('flows:started',function() {
     //             flows.handleError(originalConfig[0],"message",{});
     //             flowCreate.flows['t1'].handleError.called.should.be.true();
     //             done();
@@ -423,7 +422,7 @@ describe('flows/index', function() {
     //             return when.resolve({flows:originalConfig});
     //         }
     //
-    //         events.once('nodes-started',function() {
+    //         events.once('flows:started',function() {
     //             flows.handleError(originalConfig[0],"message",{});
     //             try {
     //                 flowCreate.flows['t1'].handleError.called.should.be.true();
@@ -451,7 +450,7 @@ describe('flows/index', function() {
     //             return when.resolve({flows:originalConfig});
     //         }
     //
-    //         events.once('nodes-started',function() {
+    //         events.once('flows:started',function() {
     //             flows.handleStatus(originalConfig[0],"message");
     //             flowCreate.flows['t1'].handleStatus.called.should.be.true();
     //             done();
@@ -477,7 +476,7 @@ describe('flows/index', function() {
     //             return when.resolve({flows:originalConfig});
     //         }
     //
-    //         events.once('nodes-started',function() {
+    //         events.once('flows:started',function() {
     //             flows.handleStatus(originalConfig[0],"message");
     //             try {
     //                 flowCreate.flows['t1'].handleStatus.called.should.be.true();
