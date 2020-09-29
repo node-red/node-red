@@ -255,7 +255,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (id === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
@@ -311,7 +313,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (flow === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
