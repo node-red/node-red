@@ -20,7 +20,7 @@ var sass = require("node-sass");
 
 module.exports = function(grunt) {
 
-    var nodemonArgs = ["-v"];
+    var nodemonArgs = ["-V"];
     var flowFile = grunt.option('flowFile');
     if (flowFile) {
         nodemonArgs.push(flowFile);
@@ -507,7 +507,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-concurrent');
     grunt.loadNpmTasks('grunt-sass');
-    grunt.loadNpmTasks('grunt-nodemon');
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-chmod');
@@ -520,6 +519,25 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-jsdoc-to-markdown');
     grunt.loadNpmTasks('grunt-npm-command');
     grunt.loadNpmTasks('grunt-mkdir');
+
+    grunt.registerMultiTask('nodemon', 'Runs a nodemon monitor of your node.js server.', function () {
+        const nodemon = require('nodemon');
+        this.async();
+        const options = this.options();
+        options.script = this.data.script;
+        let callback;
+        if (options.callback) {
+            callback = options.callback;
+            delete options.callback;
+        } else {
+            callback = function(nodemonApp) {
+                nodemonApp.on('log', function (event) {
+                    console.log(event.colour);
+                });
+            };
+        }
+        callback(nodemon(options));
+    });
 
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;

@@ -36,6 +36,7 @@ Runtime
  - Skip loading node html if disableEditor set #2684
  - Update util.writeFile to write to tmp file before rename #2683
  - Fix getModuleFiles function to include path property #2705 (@t-kawamorita)
+ - Update nodemon to latest so grunt dev task behaves
 
 Nodes
 
