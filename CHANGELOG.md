@@ -1,6 +1,5 @@
 ### 1.2.0-beta.1: Beta Release
 
-
 Editor
 
  - Detect importing duplicate nodes and help user resolve #2698
@@ -25,6 +24,8 @@ Editor
 
 Runtime
 
+ - Add RED.hooks API for pluggable routing #2665
+ - Add flows:* events and deprecate nodes-* events
  - Split .config.json into separate files #2794
  - Add support for file upload in /nodes api #2682
  - Add 'done' metric log for message tracing #2685 (@k-toumura)
@@ -37,9 +38,11 @@ Runtime
  - Update util.writeFile to write to tmp file before rename #2683
  - Fix getModuleFiles function to include path property #2705 (@t-kawamorita)
  - Update nodemon to latest so grunt dev task behaves
+ - Improve jsdoc of util.getObjectProperty to clarify thrown error See #2703
 
 Nodes
 
+ - Trigger: allow msg.delay to be used to set delay/loop interval #2707
  - Function: allow to send & log in its initialize code #2644 (@cinhcet)
  - MQTT: Update to MQTT 4.2.1 Closes #2694
  - Debug: Handle undefined value in Debug view of Array and Object Fixes #2696
