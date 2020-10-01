@@ -233,6 +233,65 @@ describe('trigger node', function() {
         });
     });
 
+    it('should ignore msg.delay if overrideDelay not set', function(done) {
+        var flow = [
+            {"id":"n1", "type":"trigger", "name":"triggerNode", duration:"50",wires:[["n2"]] },
+            {id:"n2", type:"helper"}
+        ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            var firstTime;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    firstTime = Date.now();
+                } else if (c === 1) {
+                    try {
+                        var delta = Date.now() - firstTime;
+                        delta.should.be.greaterThan(30);
+                        delta.should.be.lessThan(100);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+                c++;
+            });
+            n1.emit("input", {payload:null, delay: 300});
+        });
+    });
+
+    it('should use msg.delay if overrideDelay is set', function(done) {
+        var flow = [
+            {"id":"n1", "type":"trigger", "name":"triggerNode", overrideDelay: true, duration:"50",wires:[["n2"]] },
+            {id:"n2", type:"helper"}
+        ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            var firstTime;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    firstTime = Date.now();
+                } else if (c === 1) {
+                    try {
+                        var delta = Date.now() - firstTime;
+                        delta.should.be.greaterThan(270);
+                        delta.should.be.lessThan(380);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+                c++;
+            });
+            n1.emit("input", {payload:null, delay: 300});
+        });
+    });
+
+
     it('should handle true and false as strings and delay of 0', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"true",op1type:"val",op2:"false",op2type:"val",duration:"30", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];

@@ -22,11 +22,11 @@ var util = require("util");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var Subflow = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/Subflow");
-var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/Flow");
+var Subflow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Subflow");
+var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 
-var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows/util");
-var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
 

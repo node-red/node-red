@@ -23,7 +23,7 @@ var inherits = require("util").inherits;
 
 var NR_TEST_UTILS = require("nr-test-utils");
 var index = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/index");
-var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var registry = NR_TEST_UTILS.require("@node-red/registry")
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 

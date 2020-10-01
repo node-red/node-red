@@ -67,4 +67,4 @@ It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-t
 
 ## Copyright and license
 
-Copyright JS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
+Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
