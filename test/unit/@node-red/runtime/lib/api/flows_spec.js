@@ -37,7 +37,7 @@ describe("runtime-api/flows", function() {
         it("returns the current flow configuration", function(done) {
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return [1,2,3] }
                 }
             });
@@ -76,7 +76,7 @@ describe("runtime-api/flows", function() {
             })
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return {rev:"currentRev",flows:[]} },
                     setFlows: setFlows,
                     loadFlows: loadFlows
@@ -192,7 +192,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     addFlow: addFlow
                 }
             });
@@ -225,7 +225,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlow: getFlow
                 }
             });
@@ -255,7 +255,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (id === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
@@ -268,7 +270,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     updateFlow: updateFlow
                 }
             });
@@ -311,7 +313,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (flow === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
@@ -324,7 +328,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     removeFlow: removeFlow
                 }
             });
