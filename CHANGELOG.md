@@ -1,3 +1,10 @@
+### 1.2.1: Maintenance Release
+
+Runtime
+
+ - Fix race condition in .config file migration Fixes #2724
+
+
 ### 1.2.0: Milestone Release
 
 Editor
