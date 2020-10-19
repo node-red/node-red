@@ -1,3 +1,12 @@
+### 1.2.2: Maintenance Release
+
+Editor
+
+ - Prevent node z property getting set to 0 or ""
+ - Only apply z-recovery logic to flow nodes
+ - Fix api call to reload flows Fixes #2726
+ - Remove bad z property from import config nodes
+
 ### 1.2.1: Maintenance Release
 
 Runtime
