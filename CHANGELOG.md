@@ -1,3 +1,19 @@
+### 1.2.0: Milestone Release
+
+Editor
+
+ - Fix selection of link node not existing within active workspace #2722 (@HiroyasuNishiyama)
+ - Fix import of merged flow
+ - Fix width of upload button in Safari #2718 (@HiroyasuNishiyama)
+ - Update Chinese translations #2719 (@JiyeYu)
+ - Update Japanese translations needed for 1.2 #2710 (@kazuhitoyokoi)
+ - Fix unexpected line break of sidebar tab name popover #2716 (@HiroyasuNishiyama)
+ - i18n module refresh tooltip #2717 (@HiroyasuNishiyama)
+ - Add better error message if context file gets corrupted
+ - Update info text of function node #2714 (@HiroyasuNishiyama)
+ - Use markdown editor if editText called with md mode
+ - Prevent group actions when in non-default mouse mode
+
 ### 1.2.0-beta.1: Beta Release
 
 Editor
