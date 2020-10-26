@@ -719,4 +719,43 @@ describe('CSV node', function() {
         });
     });
 
+    it('should call done when message processing is completed', function(done) {
+        const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        const flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[[]]},
+                       { id:"c1", type:"complete", scope: ["n1"], uncaught:false, wires:[["h1"]]},
+                       { id:"h1", type:"helper", wires:[[]]} ];
+        helper.load([csvNode,completeNode], flow, function() {
+            const n1 = helper.getNode("n1");
+            const h1 = helper.getNode("h1");
+            h1.on("input", function(msg) {
+                try {
+                    msg.should.have.a.property('payload', "1,2,3,4");
+                    done();
+                } catch (e) {
+                    done(e);
+                }
+            });
+            n1.receive({payload:"1,2,3,4"});
+        });
+    });
+
+    it('should call done when input causes an error', function(done) {
+        const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        const flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[[]]},
+                       { id:"c1", type:"complete", scope: ["n1"], uncaught:false, wires:[["h1"]]},
+                       { id:"h1", type:"helper", wires:[[]]} ];
+        helper.load([csvNode,completeNode], flow, function() {
+            const n1 = helper.getNode("n1");
+            const h1 = helper.getNode("h1");
+            h1.on("input", function(msg) {
+                try {
+                    msg.should.have.a.property('payload', 1);
+                    done();
+                } catch (e) {
+                    done(e);
+                }
+            });
+            n1.receive({payload:1}); // neither object nor string
+        });
+    });
 });
