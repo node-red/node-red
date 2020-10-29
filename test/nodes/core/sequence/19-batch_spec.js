@@ -451,4 +451,92 @@ describe('BATCH node', function() {
         });
     });
 
+    describe('messaging API', function() {
+        function mapiDoneTestHelper(done, mode, count, overlap, interval, allowEmptySequence, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [{id:"batchNode1", type:"batch", name: "BatchNode", mode, count, overlap, interval, 
+                           allowEmptySequence, topics: [{topic: "TA"}], wires:[[]]},
+                          {id:"completeNode1",type:"complete",scope: ["batchNode1"],uncaught:false,wires:[["helperNode1"]]},
+                          {id:"catchNode1", type:"catch",scope: ["batchNode1"],uncaught:false,wires:[["helperNode1"]]},
+                          {id:"helperNode1",type:"helper", wires:[[]]}];
+            const numMsgs = msgAndTimings.length;
+            helper.load([batchNode, completeNode, catchNode], flow, function () {
+                const batchNode1 = helper.getNode("batchNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 2;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.payload].avr, msgAndTimings[msg.payload].var);
+                    c += 1;
+                    if ( c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout( function() { batchNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+
+        it('should call done() when message is sent (mode: count)', function(done) {
+            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [ 
+                { msg: {payload: 0}, delay: 0, avr: 0, var: 100},
+                { msg: {payload: 1}, delay: 0, avr: 0, var: 100}
+            ]);
+        });
+        it('should call done() when reset (mode: count)', function(done) {
+            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [ 
+                { msg: {payload: 0}, delay: 0, avr: 200, var: 100},
+                { msg: {payload: 1, reset:true}, delay: 200, avr: 200, var: 100}
+            ]);
+        });
+        it('should call done() regardless of buffer overflow (mode: count)', function(done) {
+            mapiDoneTestHelper(done, "count", 10, 0, 2, false, [
+                { msg: {payload: 0}, delay: 0, avr: 500, var: 100},
+                { msg: {payload: 1}, delay: 100, avr: 500, var: 100},
+                { msg: {payload: 2}, delay: 500, avr: 500, var: 100}
+            ]);
+        });
+        it('should call done() when message is sent (mode: interval)', function(done) {
+            mapiDoneTestHelper(done, "interval", 2, 0, 2, false, [
+                { msg: {payload: 0}, delay: 0, avr: 2000, var: 100},
+                { msg: {payload: 1}, delay: 500, avr: 2000, var: 100}
+            ]);
+        });
+        it('should call done() when reset (mode: interval)', function(done) {
+            mapiDoneTestHelper(done, "interval", 2, 0, 2, false, [
+                { msg: {payload: 0}, delay: 0, avr: 200, var: 100},
+                { msg: {payload: 1, reset:true}, delay: 200, avr: 200, var: 100}
+            ]);
+        });
+        it('should call done() regardless of buffer overflow (mode: interval)', function(done) {
+            mapiDoneTestHelper(done, "interval", 2, 0, 2, false, [
+                { msg: {payload: 0}, delay: 0, avr: 500, var: 100},
+                { msg: {payload: 1}, delay: 100, avr: 500, var: 100},
+                { msg: {payload: 2}, delay: 500, avr: 500, var: 100}
+            ]);
+        });
+        it('should call done() when message is sent (mode: concat)', function(done) {
+            mapiDoneTestHelper(done, "concat", 2, 0, 2, false, [
+                { msg: {topic:"TA", payload: 0, parts: {id: "TA", index: 0, count: 2}}, delay: 0, avr: 1000, var: 100},
+                { msg: {topic:"TA", payload: 1, parts: {id: "TA", index: 1, count: 2}}, delay: 1000, avr: 1000, var: 100},
+            ]);
+        });
+        it('should call done() when reset (mode: concat)', function(done) {
+            mapiDoneTestHelper(done, "concat", 2, 0, 2, false, [
+                { msg: {topic:"TA", payload: 0, parts: {id: "TA", index: 0, count: 2}}, delay: 0, avr: 1000, var: 100},
+                { msg: {payload: 1, reset:true}, delay: 1000, avr: 1000, var: 100},
+            ]);
+        });
+        it('should call done() regardless of buffer overflow (mode: concat)', function(done) {
+            mapiDoneTestHelper(done, "concat", 2, 0, 2, false, [
+                { msg: {topic:"TA", payload: 0, parts: {id: "TA", index: 0, count: 3}}, delay: 0, avr: 1000, var: 100},
+                { msg: {topic:"TA", payload: 0, parts: {id: "TA", index: 1, count: 3}}, delay: 500, avr: 1000, var: 100},
+                { msg: {topic:"TA", payload: 0, parts: {id: "TA", index: 2, count: 3}}, delay: 1000, avr: 1000, var: 100}
+            ]);
+        });
+    });
 });
