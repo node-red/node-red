@@ -493,4 +493,62 @@ describe('SORT node', function() {
         });
     });
 
+    describe('messaging API', function() {
+        function mapiDoneTestHelper(done, targetType, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [
+                {id: "sortNode1", type: "sort", order: "ascending", as_num: false, target: "payload", targetType,
+                 seqKey: "payload", seqKeyType: "msg", wires: [[]]},
+                { id: "completeNode1", type: "complete", scope: ["sortNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "catchNode1", type: "catch", scope: ["sortNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "helperNode1", type: "helper", wires: [[]] }];
+            const numMsgs = msgAndTimings.length;
+            helper.load([sortNode, completeNode, catchNode], flow, function () {
+                const sortNode1 = helper.getNode("sortNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 2;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.seq].avr, msgAndTimings[msg.seq].var);
+                    c += 1;
+                    if (c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout(function () { sortNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+        it('should call done() when message is sent (payload)', function (done) {
+            mapiDoneTestHelper(done, "msg", [
+                { msg: { seq: 0, payload: [1, 3, 2] }, delay: 0, avr: 0, var: 100 },
+            ]);
+        });
+        it('should call done() when message is sent (sequence)', function (done) {
+            mapiDoneTestHelper(done, "seq", [
+                { msg: { seq: 0, payload: 3, parts: {id:"A", index: 0, count: 2}}, delay: 0, avr: 500, var: 100 },
+                { msg: { seq: 1, payload: 2, parts: {id:"A", index: 1, count: 2}}, delay: 500, avr: 500, var: 100}
+            ]);
+        });
+        it('should call done() regardless of buffer overflow (same group)', function (done) {
+            mapiDoneTestHelper(done, "seq", [
+                { msg: { seq: 0, payload: 1, parts: {id:"A", index: 0, count: 3}}, delay: 0, avr: 1000, var: 100 },
+                { msg: { seq: 1, payload: 3, parts: {id:"A", index: 1, count: 3}}, delay: 500, avr: 1000, var: 100 },
+                { msg: { seq: 2, payload: 2, parts: {id:"A", index: 2, count: 3}}, delay: 1000, avr: 1000, var: 100 },
+            ]);
+        });
+        it('should call done() regardless of buffer overflow (different group)', function (done) {
+            mapiDoneTestHelper(done, "seq", [
+                { msg: { seq: 0, payload: 1, parts: {id:"A", index: 0, count: 2}}, delay: 0, avr: 1000, var: 100 },
+                { msg: { seq: 1, payload: 3, parts: {id:"B", index: 0, count: 2}}, delay: 500, avr: 1200, var: 100 },
+                { msg: { seq: 2, payload: 5, parts: {id:"C", index: 0, count: 2}}, delay: 1000, avr: 1500, var: 100 },
+                { msg: { seq: 3, payload: 2, parts: {id:"B", index: 1, count: 2}}, delay: 1200, avr: 1200, var: 100 },
+                { msg: { seq: 4, payload: 4, parts: {id:"C", index: 1, count: 2}}, delay: 1500, avr: 1500, var: 100 },                
+            ]);
+        });        
+    });
 });
