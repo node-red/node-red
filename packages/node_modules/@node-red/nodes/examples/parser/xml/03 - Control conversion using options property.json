@@ -1,0 +1,119 @@
+[
+    {
+        "id": "581bd648.636628",
+        "type": "xml",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 710,
+        "y": 540,
+        "wires": [
+            [
+                "b74237dc.1e5028"
+            ]
+        ]
+    },
+    {
+        "id": "d0899f9b.f1ac6",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 540,
+        "wires": [
+            [
+                "f04ffb9a.68edb8"
+            ]
+        ]
+    },
+    {
+        "id": "8a214c05.dc61f",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Control conversion using options property",
+        "info": "XML node can control conversion by setting `options` property (defined by [xml2js](https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options)) in input message.",
+        "x": 260,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "b74237dc.1e5028",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 870,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "f04ffb9a.68edb8",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "XML string",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "plain",
+        "template": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<fruit id=\"100\">\n    <kind>Apple</kind>\n    <price>100</price>\n    <origin>Canada</origin>\n</fruit>",
+        "output": "str",
+        "x": 370,
+        "y": 540,
+        "wires": [
+            [
+                "fedf79.5889c088"
+            ]
+        ]
+    },
+    {
+        "id": "fedf79.5889c088",
+        "type": "change",
+        "z": "4b63452d.672afc",
+        "name": "set options",
+        "rules": [
+            {
+                "t": "set",
+                "p": "options",
+                "pt": "msg",
+                "to": "{\"explicitArray\":false}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 550,
+        "y": 540,
+        "wires": [
+            [
+                "581bd648.636628"
+            ]
+        ]
+    }
+]
