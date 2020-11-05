@@ -2,9 +2,12 @@
 
 Editor
 
+ - Disable 'use strict' checking in Function node Fixes #2743
+ - Add gray/grey alternate options for status
  - Handle import errors on initial load and report to user
  - Only apply recovery tab on initial load Fixes #2731
  - Reinstate coveralls reporting to travis build
+ - Update Japanese message catalogue for 1.2.3 release #2747 (@HiroyasuNishiyama)
 
 Runtime
 
@@ -12,6 +15,7 @@ Runtime
  - Add mutex lock to saveSettings storage call Fixes #2736 (#2737)
  - Migrate to nyc instead of istanbul for code coverage
  - Move mosca to ui-test-dependencies
+ - Remove " from npm install prefix option
 
 ### 1.2.2: Maintenance Release
 
