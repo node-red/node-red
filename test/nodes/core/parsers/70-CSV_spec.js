@@ -261,15 +261,15 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 var c = 0;
                 n2.on("input", function(msg) {
-                    if (c == 0) { 
+                    if (c == 0) {
                         c = 1;
                         msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\n" });
                         check_parts(msg, 0, 1);
                     }
-                    else { 
+                    else {
                         msg.should.have.property('payload', { a: "this is", b: "a normal", c: "line" });
                         check_parts(msg, 0, 1);
-                        done(); 
+                        done();
                     }
                 });
                 var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10);
@@ -287,15 +287,15 @@ describe('CSV node', function() {
                 var c = 0;
                 n2.on("input", function(msg) {
                     //console.log(msg)
-                    if (c == 0) { 
+                    if (c == 0) {
                         c = 1;
                         msg.should.have.property('payload', { a: "with,an", b: "odd,number", c: "ofquotes\nthis is,a normal,line" });
                         check_parts(msg, 0, 1);
                     }
-                    else { 
+                    else {
                         msg.should.have.property('payload', { a: "this is", b: "another", c: "line" });
                         check_parts(msg, 0, 1);
-                        done(); 
+                        done();
                     }
                 });
                 var testString = '"with,a"n,odd","num"ber","of"qu"ot"es"'+String.fromCharCode(10)+'"this is","a normal","line"'+String.fromCharCode(10);
@@ -555,14 +555,68 @@ describe('CSV node', function() {
         });
 
         it('should convert an array of objects to a multi-line csv', function(done) {
-            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[["n2"]] },
+            var flow = [ { id:"n1", type:"csv", temp:"a,d,c,b", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '4,3,2,1\n1,2,3,4\n');
+                        msg.should.have.property('payload', '4,1,2,3\n1,4,3,2\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert an array of objects to a multi-line csv and add a header', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", hdrout:"all", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 'a,b,c,d\n4,3,2,1\n1,2,3,4\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert an array of objects to a multi-line csv without a template', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '1,3,2,4\n4,2,3,1\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert an array of objects to a multi-line csv without a template and with a header', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrout:"all", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 'd,b,c,a\n1,3,2,4\n4,2,3,1\n');
                         done();
                     }
                     catch(e) { done(e); }
