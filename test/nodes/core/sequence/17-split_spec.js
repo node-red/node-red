@@ -1647,7 +1647,7 @@ describe('JOIN node', function() {
     });
 
     it('should handle msg.parts even if messages are out of order in auto mode if exactly one message has count set', function (done) {
-        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "string", mode: "auto" },
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], mode: "auto" },
                 { id: "n2", type: "helper" }];
         helper.load(joinNode, flow, function () {
             var n1 = helper.getNode("n1");
