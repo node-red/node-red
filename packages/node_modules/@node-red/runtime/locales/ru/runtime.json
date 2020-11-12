@@ -1,0 +1,186 @@
+{
+    "runtime": {
+        "welcome": "Добро пожаловать в Node-RED",
+        "version": "Версия __component__: __version__",
+        "unsupported_version": "Неподдерживаемая версия __component__. Требуется: __requires__ Найдено: __version__",
+        "paths": {
+            "settings":   "Файл настроек        : __path__",
+            "httpStatic": "HTTP статика         : __path__"
+        }
+    },
+
+    "server": {
+        "loading": "Загрузка узлов палитры",
+        "palette-editor": {
+            "disabled": "Редактор палитры отключен : пользовательские настройки",
+            "npm-not-found": "Редактор палитры отключен : команда npm не найдена",
+            "npm-too-old": "Редактор палитры отключен : устаревшая версия npm. Требуется npm >= 3.x"
+        },
+        "errors": "Не удалось зарегистрировать __count__ тип узла",
+        "errors_plural_2": "Не удалось зарегистрировать __count__ типа узла",
+        "errors_plural_5": "Не удалось зарегистрировать __count__ типов узла",
+        "errors-help": "Запустите с -v для деталей",
+        "missing-modules": "Недостающие модули узлов:",
+        "node-version-mismatch": "Модуль узла не может быть загружен в этой версии. Требуется: __version__ ",
+        "type-already-registered": "'__type__' уже зарегистрирован модулем __module__",
+        "removing-modules": "Удаление модулей из конфига",
+        "added-types": "Добавлены типы узлов:",
+        "removed-types": "Удалены типы узлов:",
+        "install": {
+            "invalid": "Неверное имя модуля",
+            "installing": "Установка модуля: __name__, версия: __version__",
+            "installed": "Установлен модуль: __name__",
+            "install-failed": "Установка не удалась",
+            "install-failed-long": "Установка модуля __name__ не удалась:",
+            "install-failed-not-found": "Модуль $t(server.install.install-failed-long) не найден",
+            "install-failed-name": "$t(server.install.install-failed-long) неверное имя модуля: __name__",
+            "install-failed-url": "$t(server.install.install-failed-long) неверный url: __url__",
+            "upgrading": "Обновление модуля: __name__ до версии: __version__",
+            "upgraded": "Обновлен модуль: __name__. Перезапустите Node-RED, чтобы использовать новую версию",
+            "upgrade-failed-not-found": "Версия $t(server.install.install-failed-long) не найдена",
+            "uninstalling": "Удаление модуля: __name__",
+            "uninstall-failed": "Удаление не удалось",
+            "uninstall-failed-long": "Удаление модуля __name__ не удалось:",
+            "uninstalled": "Удален модуль: __name__"
+        },
+        "unable-to-listen": "Невозможно прослушивать __listenpath__",
+        "port-in-use": "Ошибка: порт используется",
+        "uncaught-exception": "Непойманное исключение:",
+        "admin-ui-disabled": "Пользовательский интерфейс администратора отключен",
+        "now-running": "Сервер теперь работает на __listenpath__",
+        "failed-to-start": "Не удалось запустить сервер:",
+        "headless-mode": "Работает в безголовом (headless) режиме",
+        "httpadminauth-deprecated": "использование httpAdminAuth устарело. Используйте adminAuth вместо этого",
+        "https": {
+            "refresh-interval": "Обновление настроек https каждые __interval__ часов",
+            "settings-refreshed": "Настройки сервера https обновлены",
+            "refresh-failed": "Не удалось обновить настройки https: __message__",
+            "nodejs-version": "httpsRefreshInterval требует Node.js 11 или выше",
+            "function-required": "httpsRefreshInterval требует, чтобы свойство https было функцией"
+        }
+    },
+
+    "api": {
+        "flows": {
+            "error-save": "Ошибка сохранения потоков: __message__",
+            "error-reload": "Ошибка перезагрузки потоков: __message__"
+        },
+        "library": {
+            "error-load-entry": "Ошибка загрузки записи библиотеки '__path__': __message__",
+            "error-save-entry": "Ошибка сохранения записи библиотеки '__path__': __message__",
+            "error-load-flow": "Ошибка загрузки потока '__path__': __message__",
+            "error-save-flow": "Ошибка сохранения потока '__path__': __message__"
+        },
+        "nodes": {
+            "enabled": "Включены типы узлов:",
+            "disabled": "Отлючены типы узлов:",
+            "error-enable": "Не удалось включить узел:"
+        }
+    },
+
+    "comms": {
+        "error": "Ошибка канала связи: __message__",
+        "error-server": "Ошибка сервера связи: __message__",
+        "error-send": "Ошибка связи при отправке: __message__"
+    },
+
+    "settings": {
+        "user-not-available": "Не удается сохранить настройки пользователя: __message__",
+        "not-available": "Настройки недоступны",
+        "property-read-only": "Свойство '__prop__' доступно только для чтения"
+    },
+
+    "nodes": {
+        "credentials": {
+            "error":"Ошибка при загрузке учетных данных: __message__",
+            "error-saving":"Ошибка при сохранении учетных данных: __message__",
+            "not-registered": "Тип учетных данных '__type__' не зарегистрирован",
+            "system-key-warning": "\n\n---------------------------------------------------------------------\nВаш файл учетных данных потока зашифрован с использованием\nсгенерированного системой ключа.\n\nЕсли сгенерированный системой ключ по какой-либо причине утерян, файл\nс Вашими учетными данными не подлежит восстановлению. Вам придется\nудалить его и повторно ввести свои учетные данные.\n\nВы должны установить свой собственный ключ, используя опцию\n'credentialSecret' в Вашем файле настроек. После этого Node-RED\nповторно зашифрует Ваш файл учетных данных, используя выбранный Вами\nключ, при следующем развертывании изменений.\n---------------------------------------------------------------------\n"
+        },
+        "flows": {
+            "safe-mode": "Потоки остановлены в безопасном режиме. Разверните, чтобы запустить.",
+            "registered-missing": "Отсутствует зарегистрированный тип: __type__",
+            "error": "Ошибка загрузки потоков: __message__",
+            "starting-modified-nodes": "Запуск измененных узлов",
+            "starting-modified-flows": "Запуск измененных потоков",
+            "starting-flows": "Запуск потоков",
+            "started-modified-nodes": "Запущены измененные узлы",
+            "started-modified-flows": "Запущены измененные потоки",
+            "started-flows": "Запущены потоки",
+            "stopping-modified-nodes": "Остановка измененных узлов",
+            "stopping-modified-flows": "Остановка измененных потоков",
+            "stopping-flows": "Остановка потоков",
+            "stopped-modified-nodes": "Остановлены измененные узлы",
+            "stopped-modified-flows": "Остановлены измененные потоки",
+            "stopped-flows": "Остановлены потоки",
+            "stopped": "Остановлен",
+            "stopping-error": "Ошибка остановки узла: __message__",
+            "added-flow": "Добавление потока: __label__",
+            "updated-flow": "Обновлен поток: __label__",
+            "removed-flow": "Удален поток: __label__",
+            "missing-types": "Ожидание регистрации отсутствующих типов:",
+            "missing-type-provided": " - __type__ (предоставлен npm-модулем __module__)",
+            "missing-type-install-1": "Чтобы установить любой из этих отсутствующих модулей, запустите:",
+            "missing-type-install-2": "в каталоге:"
+        },
+        "flow": {
+            "unknown-type": "Неизвестный тип: __type__",
+            "missing-types": "недостающие типы",
+            "error-loop": "Сообщение превысило максимальное количество уловов"
+        },
+        "index": {
+            "unrecognised-id": "Нераспознанный идентификатор: __id__",
+            "type-in-use": "Тип используется: __msg__",
+            "unrecognised-module": "Нераспознанный модуль: __module__"
+        },
+        "registry": {
+            "localfilesystem": {
+                "module-not-found": "Не удается найти модуль '__module__'"
+            }
+        }
+    },
+
+    "storage": {
+        "index": {
+            "forbidden-flow-name": "запрещенное имя потока"
+        },
+        "localfilesystem": {
+            "user-dir":   "Каталог пользователя : __path__",
+            "flows-file": "Файл потоков         : __path__",
+            "create": "Создание нового файла __type__",
+            "empty": "Существующий файл __type__ пуст",
+            "invalid": "Существующий файл __type__ не является допустимым json",
+            "restore": "Восстановление резервной копии файла __type__ : __path__",
+            "restore-fail": "Восстановление резервной копии файла __type__ не удалось : __message__",
+            "fsync-fail": "Запись данных файла __path__ на диск не удалась : __message__",
+            "projects": {
+                "changing-project": "Установка активного проекта : __project__",
+                "active-project": "Активный проект : __project__",
+                "project-not-found": "Проект не найден : __project__",
+                "no-active-project": "Нет активного проекта : используется файл потоков по умолчанию",
+                "disabled": "Проекты отключены    : editorTheme.projects.enabled=false",
+                "disabledNoFlag": "Проекты отключены    : установите editorTheme.projects.enabled=true , чтобы включить",
+                "git-not-found": "Проекты отключены    : команда git не найдена",
+                "git-version-old": "Проекты отключены    : git __version__ не поддерживается. Требуется 2.x",
+                "summary": "Node-RED проект",
+                "readme": "### О проекте\n\nЭто README.md файл Вашего проекта. Он помогает пользователям понять, что\nделает Ваш проект, как его использовать и все остальное, что им может\nпонадобиться знать."
+            }
+        }
+    },
+
+    "context": {
+        "log-store-init": "Хранилище контекста  : '__name__' [__info__]",
+        "error-loading-module": "Ошибка загрузки хранилища контекста: __message__",
+        "error-loading-module2": "Ошибка загрузки хранилища контекста '__module__': __message__",
+        "error-module-not-defined": "У хранилища контекста '__storage__' отсутствует опция 'module'",
+        "error-invalid-module-name": "Неверное имя хранилища контекста: '__name__'",
+        "error-invalid-default-module": "Хранилище контекста по умолчанию неизвестно: '__storage__'",
+        "unknown-store": "Задано неизвестное хранилище контекста '__name__'. Используется хранилище по умолчанию.",
+        "localfilesystem": {
+            "invalid-json": "Неверный JSON в файле контекста '__file__'",
+            "error-circular": "Контекст __scope__ содержит циклическую ссылку, которая не может быть сохранена",
+            "error-write": "Ошибка записи контекста: __message__"
+        }
+    }
+
+}
