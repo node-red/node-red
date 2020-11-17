@@ -211,6 +211,82 @@ describe("runtime-api/comms", function() {
                 });
             }).catch(done);
         })
+        it('retains non-blank status message',function(done){
+            eventHandlers['node-status']({
+                id: "node1234",
+                status: {text:"hello"}
+            })
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
+                    messages.should.have.length(1);
+                    messages[0].should.have.property("topic","status/node1234");
+                    messages[0].should.have.property("data",{text:"hello", fill: undefined, shape: undefined});
+                    done();
+                });
+            }).catch(done);
+        })
+        it('does not retain blank status message',function(done){
+            eventHandlers['node-status']({
+                id: "node1234",
+                status: {}
+            })
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
+                    messages.should.have.length(0);
+                    done();
+                });
+            }).catch(done);
+        })
+        it('does not send blank status if first status',function(done){
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
+                    eventHandlers['node-status']({
+                        id: "node5678",
+                        status: {}
+                    })
+                    messages.should.have.length(0);
+                    done()
+                })
+            }).catch(done);
+        });
+        it('sends blank status if replacing retained',function(done){
+            eventHandlers['node-status']({
+                id: "node5678",
+                status: {text:"hello"}
+            })
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "status/#"}).then(function() {
+                    messages.should.have.length(1);
+                    eventHandlers['node-status']({
+                        id: "node5678",
+                        status: {}
+                    })
+                    messages.should.have.length(2);
+                    done()
+                })
+            }).catch(done);
+        });
+
+        it('does not retain initial status blank message',function(done){
+            eventHandlers['node-status']({
+                id: "my-event",
+                status: {}
+            })
+            messages.should.have.length(0);
+            comms.addConnection({client: clientConnection}).then(function() {
+                return comms.subscribe({client: clientConnection, topic: "my-event"}).then(function() {
+                    messages.should.have.length(1);
+                    messages[0].should.have.property("topic","my-event");
+                    messages[0].should.have.property("data","my-payload");
+                    done();
+                });
+            }).catch(done);
+        })
+
         it('retained messages get cleared',function(done) {
             eventHandlers['comms']({
                 topic: "my-event",
