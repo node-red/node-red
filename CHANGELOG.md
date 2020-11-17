@@ -1,3 +1,13 @@
+### 1.2.5: Maintenance Release
+
+Editor
+
+ - Fix import of config nodes with unknown z property
+
+Runtime
+
+ - Set ACTIONS_ALLOW_UNSECURE_COMMANDS in GH Action
+
 ### 1.2.4: Maintenance Release
 
 Editor
