@@ -1,3 +1,35 @@
+### 1.2.5: Maintenance Release
+
+Editor
+
+ - Fix import of config nodes with unknown z property
+
+Runtime
+
+ - Set ACTIONS_ALLOW_UNSECURE_COMMANDS in GH Action
+
+### 1.2.4: Maintenance Release
+
+Editor
+
+ - Support bigint types in Debug sidebar
+ - Clear retained status of deleted nodes
+ - Prevent needless retention of node status messages
+ - Update projects dialogs to use TypedInput-cred input
+ - Restore cursor position in TypedInput cred-mode
+ - Ensure config nodes with invalid z are imported somewhere
+ - Ensure user keyboard shortcuts override defaults Fixes #2753
+
+Runtime
+
+ - Disable projects when flowFile passed into grunt dev
+ - Add Russian Locale (#2761) (#2531) (@alexk111)
+ - Add Japanese translation for http-in node (#2758) (@kazuhitoyokoi)
+
+Nodes
+
+ - CSV: Fix CSV node repeating array output
+
 ### 1.2.3: Maintenance Release
 
 Editor

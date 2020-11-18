@@ -24,6 +24,7 @@ module.exports = function(grunt) {
     var flowFile = grunt.option('flowFile');
     if (flowFile) {
         nodemonArgs.push(flowFile);
+        process.env.NODE_RED_ENABLE_PROJECTS=false;
     }
     var userDir = grunt.option('userDir');
     if (userDir) {
