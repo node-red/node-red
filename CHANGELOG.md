@@ -1,3 +1,70 @@
+### 1.2.5: Maintenance Release
+
+Editor
+
+ - Fix import of config nodes with unknown z property
+
+Runtime
+
+ - Set ACTIONS_ALLOW_UNSECURE_COMMANDS in GH Action
+
+### 1.2.4: Maintenance Release
+
+Editor
+
+ - Support bigint types in Debug sidebar
+ - Clear retained status of deleted nodes
+ - Prevent needless retention of node status messages
+ - Update projects dialogs to use TypedInput-cred input
+ - Restore cursor position in TypedInput cred-mode
+ - Ensure config nodes with invalid z are imported somewhere
+ - Ensure user keyboard shortcuts override defaults Fixes #2753
+
+Runtime
+
+ - Disable projects when flowFile passed into grunt dev
+ - Add Russian Locale (#2761) (#2531) (@alexk111)
+ - Add Japanese translation for http-in node (#2758) (@kazuhitoyokoi)
+
+Nodes
+
+ - CSV: Fix CSV node repeating array output
+
+### 1.2.3: Maintenance Release
+
+Editor
+
+ - Disable 'use strict' checking in Function node Fixes #2743
+ - Add gray/grey alternate options for status
+ - Handle import errors on initial load and report to user
+ - Only apply recovery tab on initial load Fixes #2731
+ - Reinstate coveralls reporting to travis build
+ - Update Japanese message catalogue for 1.2.3 release #2747 (@HiroyasuNishiyama)
+
+Runtime
+
+ - Modify default settings comment (#2739)
+ - Add mutex lock to saveSettings storage call Fixes #2736 (#2737)
+ - Migrate to nyc instead of istanbul for code coverage
+ - Move mosca to ui-test-dependencies
+ - Remove " from npm install prefix option
+
+### 1.2.2: Maintenance Release
+
+Editor
+
+ - Prevent node z property getting set to 0 or ""
+ - Only apply z-recovery logic to flow nodes
+ - Fix api call to reload flows Fixes #2726
+ - Remove bad z property from import config nodes
+
+### 1.2.1: Maintenance Release
+
+Runtime
+
+ - Fix race condition in .config file migration Fixes #2724
+
+
 ### 1.2.0: Milestone Release
 
 Editor

@@ -1,0 +1,39 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="debug">
+  <p>
+    Отображает выбранные свойства сообщения на боковой панели во вкладке отладки и, при необходимости, журнале выполнения. По умолчанию отображается содержимое <code>msg.payload</code>, но его можно настроить для отображения любого свойства, полного сообщения или результата выражения JSONata.
+  </p>
+
+  <h3>Подробности</h3>
+  <p>
+    Вкладка отладки на боковой панели обеспечивает структурированное представление отправляемых сообщений, что упрощает понимание их структуры.
+  </p>
+  <p>
+    Объекты и массивы JavaScript могут быть свернуты и развернуты по мере необходимости. Буферные объекты могут отображаться в виде сырых данных или как строка, когда это возможно.
+  </p>
+  <p>
+    Рядом с каждым сообщением отладочная панель содержит информацию о времени получения сообщения, узле, который его отправил, и типе сообщения.
+    Нажатие на идентификатор узла-источника, показывает этот узел в рабочей области.
+  </p>
+  <p>
+    Кнопка на узле может использоваться для включения или отключения его вывода. Рекомендуется отключать или удалять любые отладочные узлы, которые не используются.
+  </p>
+  <p>
+    Узел также может быть сконфигурирован для отправки всех сообщений в журнал выполнения или для отправки короткого (32 символа) текста в статус под узлом отладки.
+  </p>
+</script>
