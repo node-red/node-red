@@ -1,17 +1,14 @@
 /**
- * Copyright JS Foundation and other contributors, http://js.foundation
+ * This is the default settings file provided by Node-RED.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * It can contain any valid JavaScript code that will get run when Node-RED
+ * is started.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * Lines that start with // are commented out.
+ * Each entry should be separated from the entries above and below by a comma ','
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * For more information about individual settings, refer to the documentation:
+ *    https://nodered.org/docs/user-guide/runtime/configuration
  **/
 
 module.exports = {
