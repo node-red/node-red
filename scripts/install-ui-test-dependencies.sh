@@ -6,4 +6,5 @@ npm install --no-save \
  webdriverio@^4.14.4 \
  chromedriver \
  wdio-browserstack-service@^0.1.19 \
- browserstack-local@^1.4.4
+ browserstack-local@^1.4.4 \
+ mosca@^2.8.3
