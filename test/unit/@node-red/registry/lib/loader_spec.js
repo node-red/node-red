@@ -528,7 +528,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({nodes:nodes,log:{info:function(){},_:function(){}},settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
-                result.should.eql("a node list");
+                result.should.eql("TestNodeModule");
 
                 registry.addModule.called.should.be.true();
                 var module = registry.addModule.lastCall.args[0];
@@ -585,7 +585,7 @@ describe("red/nodes/registry/loader",function() {
             stubs.push(sinon.stub(nodes,"registerType"));
             loader.init({log:{"_":function(){},warn:function(){}},nodes:nodes,version: function() { return "0.12.0"}, settings:{available:function(){return true;}}});
             loader.addModule("TestNodeModule").then(function(result) {
-                result.should.eql("a node list");
+                result.should.eql("TestNodeModule");
                 registry.addModule.called.should.be.false();
                 nodes.registerType.called.should.be.false();
                 done();
