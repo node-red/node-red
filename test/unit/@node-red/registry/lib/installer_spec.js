@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var when = require("when");
 var path = require("path");
 var fs = require('fs-extra');
 var EventEmitter = require('events');
@@ -185,7 +184,7 @@ describe('nodes/registry/installer', function() {
             initInstaller(p)
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
 
             installer.installModule("this_wont_exist").then(function(info) {
@@ -216,7 +215,7 @@ describe('nodes/registry/installer', function() {
         it("succeeds when path is valid node-red module", function(done) {
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
             var resourcesDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule","node_modules","TestNodeModule"));
 
@@ -246,7 +245,7 @@ describe('nodes/registry/installer', function() {
             initInstaller(p)
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
 
             installer.installModule("this_wont_exist",null,"https://example/foo-0.1.1.tgz").then(function(info) {
@@ -259,19 +258,20 @@ describe('nodes/registry/installer', function() {
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
             var promises = [];
-            promises.push(installer.uninstallModule("this_wont_exist "));
-            promises.push(installer.uninstallModule("this_wont_exist;no_it_really_wont"));
-            when.settle(promises).then(function(results) {
-                results[0].state.should.be.eql("rejected");
-                results[1].state.should.be.eql("rejected");
+            var rejectedCount = 0;
+
+            promises.push(installer.uninstallModule("this_wont_exist ").catch(() => {rejectedCount++}));
+            promises.push(installer.uninstallModule("this_wont_exist;no_it_really_wont").catch(() => {rejectedCount++}));
+            Promise.all(promises).then(function() {
+                rejectedCount.should.eql(2);
                 done();
-            });
+            }).catch(done);
         });
 
         it("rejects with generic error", function(done) {
             var nodeInfo = [{module:"foo",types:["a"]}];
             var removeModule = sinon.stub(registry,"removeModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
             var res = {
                 code: 1,

@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
@@ -34,7 +33,7 @@ describe("red/nodes/registry/registry",function() {
 
     function stubSettings(s,available,initialConfig) {
         s.available =  function() {return available;};
-        s.set = sinon.spy(function(s,v) { return when.resolve();});
+        s.set = sinon.spy(function(s,v) { return Promise.resolve();});
         s.get = function(s) { return initialConfig;};
         return s;
     }
@@ -95,7 +94,7 @@ describe("red/nodes/registry/registry",function() {
         it('migrates legacy format', function(done) {
             var legacySettings = {
                 available: function() { return true; },
-                set: sinon.stub().returns(when.resolve()),
+                set: sinon.stub().returns(Promise.resolve()),
                 get: function() { return {
                     "123": {
                         "name": "72-sentiment.js",

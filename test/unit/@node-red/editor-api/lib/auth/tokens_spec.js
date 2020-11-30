@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -35,7 +34,7 @@ describe("api/auth/tokens", function() {
         it('returns a valid token', function(done) {
             Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
+                    return Promise.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
                 }
             }).then(function() {
                 Tokens.get("1234").then(function(token) {
@@ -52,7 +51,7 @@ describe("api/auth/tokens", function() {
         it('returns null for an invalid token', function(done) {
             Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({});
+                    return Promise.resolve({});
                 }
             }).then(function() {
                 Tokens.get("1234").then(function(token) {
@@ -66,11 +65,11 @@ describe("api/auth/tokens", function() {
             });
         });
         it('returns null for an expired token', function(done) {
-            var saveSessions = sinon.stub().returns(when.resolve());
+            var saveSessions = sinon.stub().returns(Promise.resolve());
             var expiryTime = Date.now()+50;
             Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({"1234":{"user":"fred","expires":expiryTime}});
+                    return Promise.resolve({"1234":{"user":"fred","expires":expiryTime}});
                 },
                 saveSessions: saveSessions
             }).then(function() {
@@ -100,10 +99,10 @@ describe("api/auth/tokens", function() {
                 tokens: [{
                     token: "1234",
                     user: "fred",
-                }]    
+                }]
             },{
                 getSessions:function() {
-                    return when.resolve({});
+                    return Promise.resolve({});
                 }
             }).then(function() {
                 Tokens.get("1234").then(function(token) {
@@ -124,11 +123,11 @@ describe("api/auth/tokens", function() {
             var savedSession;
             Tokens.init({sessionExpiryTime: 10},{
                 getSessions:function() {
-                    return when.resolve({});
+                    return Promise.resolve({});
                 },
                 saveSessions:function(sess) {
                     savedSession = sess;
-                    return when.resolve();
+                    return Promise.resolve();
                 }
             });
             var expectedExpiryTime = Date.now()+10000;
@@ -159,11 +158,11 @@ describe("api/auth/tokens", function() {
             var savedSession;
             Tokens.init({},{
                 getSessions:function() {
-                    return when.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
+                    return Promise.resolve({"1234":{"user":"fred","expires":Date.now()+1000}});
                 },
                 saveSessions:function(sess) {
                     savedSession = sess;
-                    return when.resolve();
+                    return Promise.resolve();
                 }
             }).then(function() {
                 Tokens.revoke("1234").then(function() {

@@ -588,7 +588,6 @@ var comms = require("../../../../red/api/editor/comms");
 var info = require("../../../../red/api/editor/settings");
 var auth = require("../../../../red/api/auth");
 var sshkeys = require("../../../../red/api/editor/sshkeys");
-var when = require("when");
 var bodyParser = require("body-parser");
 var fs = require("fs-extra");
 var fspath = require("path");
@@ -611,11 +610,11 @@ describe("api/editor/sshkeys", function() {
             exportNodeSettings:function(){},
             storage: {
                 getSessions: function(){
-                    return when.resolve(session_data);
+                    return Promise.resolve(session_data);
                 },
                 setSessions: function(_session) {
                     session_data = _session;
-                    return when.resolve();
+                    return Promise.resolve();
                 }
             }
         },

@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var when = require("when");
 var http = require("http");
 var https = require("https");
 var should = require("should");
