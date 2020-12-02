@@ -25,6 +25,7 @@ var NR_TEST_UTILS = require("nr-test-utils");
 var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
 var registry = NR_TEST_UTILS.require("@node-red/registry/lib/index");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
+const { events, exec, log } =  NR_TEST_UTILS.require("@node-red/util");
 
 describe('nodes/registry/installer', function() {
 
@@ -38,21 +39,15 @@ describe('nodes/registry/installer', function() {
         _: function(msg) { return msg }
     }
 
+    var execResponse;
+
     beforeEach(function() {
-        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
-            run: function() {
-                return Promise.resolve("");
-            }
-        }});
+        sinon.stub(exec,"run", () => execResponse || Promise.resolve(""))
+        installer.init({})
     });
-    function initInstaller(execResult) {
-        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
-            run: function() {
-                return execResult;
-            }
-        }});
-    }
+
     afterEach(function() {
+        execResponse = null;
         if (registry.addModule.restore) {
             registry.addModule.restore();
         }
@@ -72,7 +67,7 @@ describe('nodes/registry/installer', function() {
         if (fs.statSync.restore) {
             fs.statSync.restore();
         }
-
+        exec.run.restore();
     });
 
     describe("installs module", function() {
@@ -108,7 +103,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule("this_wont_exist").catch(function(err) {
                 err.should.have.property("code",404);
                 done();
@@ -122,7 +117,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
                     version: "0.1.1"
@@ -163,7 +158,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
             }).catch(err => {
@@ -181,7 +176,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
                 return Promise.resolve(nodeInfo);
@@ -226,7 +221,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule(resourcesDir).then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
@@ -242,7 +237,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
                 return Promise.resolve(nodeInfo);
@@ -280,7 +275,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             installer.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
@@ -304,7 +299,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             sinon.stub(fs,"statSync", function(fn) { return {}; });
 

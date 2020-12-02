@@ -461,7 +461,8 @@ module.exports = function(grunt) {
                     'packages/node_modules/@node-red/runtime/lib/hooks.js',
                     'packages/node_modules/@node-red/util/**/*.js',
                     'packages/node_modules/@node-red/editor-api/lib/index.js',
-                    'packages/node_modules/@node-red/editor-api/lib/auth/index.js'
+                    'packages/node_modules/@node-red/editor-api/lib/auth/index.js',
+                    'packages/node_modules/@node-red/registry/lib/index.js'
                 ],
                 options: {
                     destination: 'docs',
