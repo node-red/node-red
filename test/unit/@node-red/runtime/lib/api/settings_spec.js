@@ -48,7 +48,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {}
@@ -79,7 +79,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {}
@@ -115,7 +115,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {
@@ -166,7 +166,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {
@@ -207,7 +207,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {
@@ -252,7 +252,7 @@ describe("runtime-api/settings", function() {
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
                 storage: {
@@ -632,7 +632,7 @@ describe("api/editor/sshkeys", function() {
         },
         events:{on:function(){},removeListener:function(){}},
         isStarted: function() { return isStarted; },
-        nodes: {paletteEditorEnabled: function() { return false }}
+        nodes: {installerEnabled: function() { return false }}
     };
 
     before(function() {
