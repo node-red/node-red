@@ -96,4 +96,21 @@ describe("api/index", function() {
             request(api.httpAdmin).get("/auth/login").expect(200).end(done)
         })
     });
+
+    describe('initialises api with admin middleware', function(done) {
+        it('ignores non-function values',function(done) {
+            api.init({ httpAdminRoot: true, httpAdminMiddleware: undefined },{},{},{});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            should(middlewareFound).be.empty();
+            done();
+        });
+
+        it('only accepts functions as middleware',function(done) {
+            const testMiddleware = function(req, res, next){ next(); };
+            api.init({ httpAdminRoot: true, httpAdminMiddleware: testMiddleware },{},{},{});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            should(middlewareFound).be.length(1);
+            done();
+        });
+    });
 });
