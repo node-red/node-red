@@ -20,6 +20,7 @@ var request = require("supertest");
 var express = require("express");
 
 var NR_TEST_UTILS = require("nr-test-utils");
+const auth = require("basic-auth");
 
 var api = NR_TEST_UTILS.require("@node-red/editor-api");
 
@@ -110,4 +111,37 @@ describe("api/index", function() {
             done();
         });
     });
+
+    //adminAuth: {
+    //    type: "credentials",
+    //    users: [{
+    //        username: "admin",
+    //        password: "$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN.",
+    //        permissions: "*"
+    //    }]
+    //},
+
+    describe('initialises api with authentication enabled', function(done) {
+
+        it('enables an oauth/openID based authentication mechanism',function(done) {
+            const stub = sinon.stub(apiAuth, 'genericStrategy', function(){});
+            const adminAuth = { type: 'strategy', strategy: {} }
+            api.init({ httpAdminRoot: true, adminAuth },{},{},{});
+            should(stub.called).be.ok();
+            stub.restore();
+            done();
+        });
+
+        it('enables password protection',function(done) {
+            const adminAuth = { type: 'credentials' }
+            api.init({ httpAdminRoot: true, adminAuth },{},{},{});
+            
+            // is the name ("initialize") of the passport middleware present
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'initialize')
+            should(middlewareFound).be.length(1);
+            done();
+        });
+
+    });
+
 });
