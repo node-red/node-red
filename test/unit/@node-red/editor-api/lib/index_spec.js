@@ -18,9 +18,6 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
-var when = require("when");
-var fs = require("fs");
-var path = require("path");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
