@@ -112,15 +112,6 @@ describe("api/index", function() {
         });
     });
 
-    //adminAuth: {
-    //    type: "credentials",
-    //    users: [{
-    //        username: "admin",
-    //        password: "$2a$08$zZWtXTja0fB1pzD4sHCMyOCMYz2Z6dNbM6tl8sJogENOMcxWV9DN.",
-    //        permissions: "*"
-    //    }]
-    //},
-
     describe('initialises api with authentication enabled', function(done) {
 
         it('enables an oauth/openID based authentication mechanism',function(done) {
@@ -142,6 +133,27 @@ describe("api/index", function() {
             done();
         });
 
+    });
+
+    describe('initialises api with custom cors config', function (done) {
+        const httpAdminCors = {
+            origin: "*",
+            methods: "GET,PUT,POST,DELETE"
+        };
+
+        it('uses default cors middleware when user settings absent', function(done){
+            api.init({ httpAdminRoot: true }, {}, {}, {});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            should(middlewareFound).be.length(1);
+            done();
+        })
+
+        it('enables custom cors middleware when settings present', function(done){
+            api.init({ httpAdminRoot: true, httpAdminCors }, {}, {}, {});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            should(middlewareFound).be.length(2);
+            done();
+        })
     });
 
 });
