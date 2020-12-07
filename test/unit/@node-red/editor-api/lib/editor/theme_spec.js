@@ -17,7 +17,6 @@
 var should = require("should");
 var express = require('express');
 var sinon = require('sinon');
-var when = require('when');
 var fs = require("fs");
 
 var app = express();

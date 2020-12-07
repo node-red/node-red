@@ -18,7 +18,6 @@ var should = require("should");
 var sinon = require("sinon");
 const stoppable = require('stoppable');
 
-var when = require("when");
 var http = require('http');
 var express = require('express');
 var app = express();
@@ -59,7 +58,7 @@ describe("api/editor/comms", function() {
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {}, {comms: mockComms});
             server.listen(listenPort, address);
@@ -165,7 +164,7 @@ describe("api/editor/comms", function() {
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {httpAdminRoot:"/adminPath"}, {comms: mockComms});
             server.listen(listenPort, address);
@@ -203,7 +202,7 @@ describe("api/editor/comms", function() {
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {httpAdminRoot:"/adminPath/"}, {comms: mockComms});
             server.listen(listenPort, address);
@@ -241,7 +240,7 @@ describe("api/editor/comms", function() {
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {httpAdminRoot:"adminPath"}, {comms: mockComms});
             server.listen(listenPort, address);
@@ -279,7 +278,7 @@ describe("api/editor/comms", function() {
         var url;
         var port;
         before(function(done) {
-            sinon.stub(Users,"default",function() { return when.resolve(null);});
+            sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {webSocketKeepAliveTime: 100}, {comms: mockComms});
             server.listen(listenPort, address);
@@ -345,28 +344,28 @@ describe("api/editor/comms", function() {
         var getToken;
         var getUserToken;
         before(function(done) {
-            getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve(null);});
+            getDefaultUser = sinon.stub(Users,"default",function() { return Promise.resolve(null);});
             getUser = sinon.stub(Users,"get", function(username) {
                 if (username == "fred") {
-                    return when.resolve({permissions:"read"});
+                    return Promise.resolve({permissions:"read"});
                 } else {
-                    return when.resolve(null);
+                    return Promise.resolve(null);
                 }
             });
             getUserToken = sinon.stub(Users,"tokens", function(token) {
                 if (token == "abcde") {
-                    return when.resolve({user:"wilma", permissions:"*"})
+                    return Promise.resolve({user:"wilma", permissions:"*"})
                 } else {
-                    return when.resolve(null);
+                    return Promise.resolve(null);
                 }
             });
             getToken = sinon.stub(Tokens,"get",function(token) {
                 if (token == "1234") {
-                    return when.resolve({user:"fred",scope:["*"]});
+                    return Promise.resolve({user:"fred",scope:["*"]});
                 } else if (token == "5678") {
-                    return when.resolve({user:"barney",scope:["*"]});
+                    return Promise.resolve({user:"barney",scope:["*"]});
                 } else {
-                    return when.resolve(null);
+                    return Promise.resolve(null);
                 }
             });
 
@@ -484,7 +483,7 @@ describe("api/editor/comms", function() {
         var port;
         var getDefaultUser;
         before(function(done) {
-            getDefaultUser = sinon.stub(Users,"default",function() { return when.resolve({permissions:"read"});});
+            getDefaultUser = sinon.stub(Users,"default",function() { return Promise.resolve({permissions:"read"});});
             server = stoppable(http.createServer(function(req,res){app(req,res)}));
             comms.init(server, {adminAuth:{}}, {comms: mockComms});
             server.listen(listenPort, address);

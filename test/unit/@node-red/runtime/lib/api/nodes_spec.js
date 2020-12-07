@@ -185,7 +185,6 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var sinon = require('sinon');
-var when = require('when');
 
 var nodes = require("../../../../red/api/admin/nodes");
 var apiUtil = require("../../../../red/api/util");
@@ -418,7 +417,7 @@ describe("api/admin/nodes", function() {
                     nodes:{
                         getModuleInfo: function(id) { return null; },
                         installModule: function() {
-                            return when.resolve({
+                            return Promise.resolve({
                                 name:"foo",
                                 nodes:[{id:"123"}]
                             });
@@ -446,7 +445,7 @@ describe("api/admin/nodes", function() {
                     nodes:{
                         getModuleInfo: function(id) { return {nodes:{id:"123"}}; },
                         installModule: function() {
-                            return when.resolve({id:"123"});
+                            return Promise.resolve({id:"123"});
                         }
                     }
                 });
@@ -468,7 +467,7 @@ describe("api/admin/nodes", function() {
                     nodes:{
                         getModuleInfo: function(id) { return null },
                         installModule: function() {
-                            return when.reject(new Error("test error"));
+                            return Promise.reject(new Error("test error"));
                         }
                     }
                 });
@@ -492,7 +491,7 @@ describe("api/admin/nodes", function() {
                         installModule: function() {
                             var err = new Error("test error");
                             err.code = 404;
-                            return when.reject(err);
+                            return Promise.reject(err);
                         }
                     }
                 });
@@ -533,7 +532,7 @@ describe("api/admin/nodes", function() {
                     nodes:{
                         getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
                         getNodeInfo: function() { return null },
-                        uninstallModule: function() { return when.resolve({id:"123"});}
+                        uninstallModule: function() { return Promise.resolve({id:"123"});}
                     }
                 });
                 request(app)
@@ -572,7 +571,7 @@ describe("api/admin/nodes", function() {
                     nodes:{
                         getModuleInfo: function(id) { return {nodes:[{id:"123"}]} },
                         getNodeInfo: function() { return null },
-                        uninstallModule: function() { return when.reject(new Error("test error"));}
+                        uninstallModule: function() { return Promise.reject(new Error("test error"));}
                     }
                 });
                 request(app)
@@ -686,7 +685,7 @@ describe("api/admin/nodes", function() {
                 settings:{available:function(){return true}},
                 nodes:{
                     getNodeInfo: function() { return {id:"123",enabled: false} },
-                    enableNode: function() { return when.resolve({id:"123",enabled: true,types:['a']}); }
+                    enableNode: function() { return Promise.resolve({id:"123",enabled: true,types:['a']}); }
                 }
             });
             request(app)
@@ -709,7 +708,7 @@ describe("api/admin/nodes", function() {
                 settings:{available:function(){return true}},
                 nodes:{
                     getNodeInfo: function() { return {id:"123",enabled: true} },
-                    disableNode: function() { return when.resolve({id:"123",enabled: false,types:['a']}); }
+                    disableNode: function() { return Promise.resolve({id:"123",enabled: false,types:['a']}); }
                 }
             });
             request(app)
@@ -729,8 +728,8 @@ describe("api/admin/nodes", function() {
 
         describe('no-ops if already in the right state', function() {
             function run(state,done) {
-                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
-                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
+                var enableNode = sinon.spy(function() { return Promise.resolve({id:"123",enabled: true,types:['a']}) });
+                var disableNode = sinon.spy(function() { return Promise.resolve({id:"123",enabled: false,types:['a']}) });
 
                 initNodes({
                     settings:{available:function(){return true}},
@@ -768,8 +767,8 @@ describe("api/admin/nodes", function() {
 
         describe('does not no-op if err on node', function() {
             function run(state,done) {
-                var enableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: true,types:['a']}) });
-                var disableNode = sinon.spy(function() { return when.resolve({id:"123",enabled: false,types:['a']}) });
+                var enableNode = sinon.spy(function() { return Promise.resolve({id:"123",enabled: true,types:['a']}) });
+                var disableNode = sinon.spy(function() { return Promise.resolve({id:"123",enabled: false,types:['a']}) });
 
                 initNodes({
                     settings:{available:function(){return true}},
@@ -811,11 +810,11 @@ describe("api/admin/nodes", function() {
             var enableNode = sinon.stub();
             enableNode.onFirstCall().returns((function() {
                 n1.enabled = true;
-                return when.resolve(n1);
+                return Promise.resolve(n1);
             })());
             enableNode.onSecondCall().returns((function() {
                 n2.enabled = true;
-                return when.resolve(n2);
+                return Promise.resolve(n2);
             })());
             enableNode.returns(null);
             initNodes({
@@ -849,11 +848,11 @@ describe("api/admin/nodes", function() {
             var disableNode = sinon.stub();
             disableNode.onFirstCall().returns((function() {
                 n1.enabled = false;
-                return when.resolve(n1);
+                return Promise.resolve(n1);
             })());
             disableNode.onSecondCall().returns((function() {
                 n2.enabled = false;
-                return when.resolve(n2);
+                return Promise.resolve(n2);
             })());
             disableNode.returns(null);
             initNodes({
@@ -886,11 +885,11 @@ describe("api/admin/nodes", function() {
                 var node = {id:"123",enabled:state,types:['a']};
                 var enableNode = sinon.spy(function(id) {
                     node.enabled = true;
-                    return when.resolve(node);
+                    return Promise.resolve(node);
                 });
                 var disableNode = sinon.spy(function(id) {
                     node.enabled = false;
-                    return when.resolve(node);
+                    return Promise.resolve(node);
                 });
 
                 initNodes({
@@ -933,11 +932,11 @@ describe("api/admin/nodes", function() {
                 var node = {id:"123",enabled:state,types:['a'],err:"foo"};
                 var enableNode = sinon.spy(function(id) {
                     node.enabled = true;
-                    return when.resolve(node);
+                    return Promise.resolve(node);
                 });
                 var disableNode = sinon.spy(function(id) {
                     node.enabled = false;
-                    return when.resolve(node);
+                    return Promise.resolve(node);
                 });
 
                 initNodes({

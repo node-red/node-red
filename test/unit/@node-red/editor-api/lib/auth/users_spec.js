@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require('when');
 var sinon = require('sinon');
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -144,12 +143,12 @@ describe("api/auth/users", function() {
            Users.init({
                type:"credentials",
                users:function(username) {
-                   return when.resolve({'username':'dave','permissions':'read'});
+                   return Promise.resolve({'username':'dave','permissions':'read'});
                },
                authenticate: function(username,password) {
                    authUsername = username;
                    authPassword = password;
-                   return when.resolve({'username':'pete','permissions':'write'});
+                   return Promise.resolve({'username':'pete','permissions':'write'});
                }
            });
        });
