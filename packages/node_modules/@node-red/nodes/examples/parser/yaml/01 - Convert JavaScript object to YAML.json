@@ -1,0 +1,90 @@
+[
+    {
+        "id": "84222b92.d65d18",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "cdd1c154.3a655"
+            ]
+        ]
+    },
+    {
+        "id": "7b014430.dfd94c",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Convert JavaScript object to YAML",
+        "info": "YAML node can convert JavaScript object to YAML string.",
+        "x": 240,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "1cd4ad02.9a5423",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 670,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "cdd1c154.3a655",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"fruits\" : {\n        \"kind\": \"Apple\",\n        \"price\": 100,\n        \"origin\": \"Canada\"\n    }\n}",
+        "output": "json",
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "aaf0100b.16628"
+            ]
+        ]
+    },
+    {
+        "id": "aaf0100b.16628",
+        "type": "yaml",
+        "z": "4b63452d.672afc",
+        "property": "payload",
+        "name": "",
+        "x": 510,
+        "y": 180,
+        "wires": [
+            [
+                "1cd4ad02.9a5423"
+            ]
+        ]
+    }
+]

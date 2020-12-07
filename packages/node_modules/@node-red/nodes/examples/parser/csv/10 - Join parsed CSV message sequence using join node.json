@@ -1,0 +1,150 @@
+[
+    {
+        "id": "195c168c.44f149",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 1900,
+        "wires": [
+            [
+                "b270564c.171908"
+            ]
+        ]
+    },
+    {
+        "id": "8ec8cf9e.103fa",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 600,
+        "y": 1900,
+        "wires": [
+            [
+                "5c5254a8.bc562c"
+            ]
+        ]
+    },
+    {
+        "id": "b270564c.171908",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "CSV data",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "mustache",
+        "template": "kind,price,origin\nApple,100,Canada\nOrange,120,USA\nBanana,80,Philippines",
+        "output": "str",
+        "x": 430,
+        "y": 1900,
+        "wires": [
+            [
+                "8ec8cf9e.103fa"
+            ]
+        ]
+    },
+    {
+        "id": "1c7be442.6a4bdc",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1090,
+        "y": 1900,
+        "wires": []
+    },
+    {
+        "id": "d3da7cfb.cf596",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Join parsed CSV message sequence using join node",
+        "info": "Parset CSV message sequence can be joined by join node.",
+        "x": 330,
+        "y": 1840,
+        "wires": []
+    },
+    {
+        "id": "a07c9e26.c84fd",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "kind,price",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 910,
+        "y": 1900,
+        "wires": [
+            [
+                "1c7be442.6a4bdc"
+            ]
+        ]
+    },
+    {
+        "id": "5c5254a8.bc562c",
+        "type": "join",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "mode": "auto",
+        "build": "string",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 750,
+        "y": 1900,
+        "wires": [
+            [
+                "a07c9e26.c84fd"
+            ]
+        ]
+    }
+]
