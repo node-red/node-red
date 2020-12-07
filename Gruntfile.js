@@ -623,6 +623,11 @@ module.exports = function(grunt) {
         'Builds editor content then runs code style checks and unit tests on all components',
         ['build','verifyPackageDependencies','jshint:editor','nyc:all']);
 
+    grunt.registerTask('no-coverage',
+        'Builds editor content then runs code style checks and unit tests on all components without code coverage',
+        ['build','verifyPackageDependencies','jshint:editor','simplemocha:all']);
+
+
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
         ['build','nyc:core']);
