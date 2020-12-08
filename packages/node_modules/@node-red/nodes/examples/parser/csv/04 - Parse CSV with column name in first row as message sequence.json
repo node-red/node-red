@@ -1,0 +1,99 @@
+[
+    {
+        "id": "24093558.0315aa",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 740,
+        "wires": [
+            [
+                "80abaee1.5fa7f"
+            ]
+        ]
+    },
+    {
+        "id": "d4d2ca3f.1d9488",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 600,
+        "y": 740,
+        "wires": [
+            [
+                "b52791c3.08967"
+            ]
+        ]
+    },
+    {
+        "id": "80abaee1.5fa7f",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "CSV data",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "mustache",
+        "template": "kind,price,origin\nApple,100,Canada\nOrange,120,USA\nBanana,80,Philippines",
+        "output": "str",
+        "x": 430,
+        "y": 740,
+        "wires": [
+            [
+                "d4d2ca3f.1d9488"
+            ]
+        ]
+    },
+    {
+        "id": "b52791c3.08967",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "85091361.85644",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Parse CSV with column name in first row as messages",
+        "info": "CSV node can use first row of input CSV text as a column name of each record object.\n",
+        "x": 340,
+        "y": 680,
+        "wires": []
+    }
+]

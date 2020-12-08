@@ -1,0 +1,92 @@
+[
+    {
+        "id": "93e423a9.a407d",
+        "type": "xml",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 530,
+        "y": 360,
+        "wires": [
+            [
+                "2d0dde7e.a50082"
+            ]
+        ]
+    },
+    {
+        "id": "ba1dab90.8d1da8",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 360,
+        "wires": [
+            [
+                "16617f26.14ced1"
+            ]
+        ]
+    },
+    {
+        "id": "a9f97b00.57d658",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Convert XML to JavaScript object",
+        "info": "XML node can convert XML string to JavaScript object.",
+        "x": 240,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "2d0dde7e.a50082",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "16617f26.14ced1",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "XML string",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "plain",
+        "template": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<fruit id=\"100\">\n    <kind>Apple</kind>\n    <price>100</price>\n    <origin>Canada</origin>\n</fruit>",
+        "output": "str",
+        "x": 370,
+        "y": 360,
+        "wires": [
+            [
+                "93e423a9.a407d"
+            ]
+        ]
+    }
+]

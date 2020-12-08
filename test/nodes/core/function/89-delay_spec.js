@@ -719,4 +719,95 @@ describe('delay Node', function() {
             setImmediate( function() { delayNode1.receive({reset:true});  });          // reset the queue
         });
     });
+    
+    /* Messaging API support */
+    function mapiDoneTestHelper(done, pauseType, drop, msgAndTimings) {
+        const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        const flow = [{id:"delayNode1",type:"delay",name:"delayNode", pauseType:pauseType, timeout:"1", timeoutUnits: "seconds",
+                       rate: "1", nbRateUnits: "1", rateUnits: "second", randomFirst:"950", randomLast:"1050",randomUnits:"milliseconds",
+                       drop: drop, wires: [[]]},
+                      {id:"completeNode1",type:"complete",scope: ["delayNode1"],uncaught:false,wires:[["helperNode1"]]},
+                      {id:"helperNode1",type:"helper", wires:[[]]}];
+        const numMsgs = msgAndTimings.length;
+        helper.load([delayNode, completeNode], flow, function () {
+            const delayNode1 = helper.getNode("delayNode1");
+            const helperNode1 = helper.getNode("helperNode1");
+            const t = Date.now();
+            let c = 0;
+            helperNode1.on("input", function (msg) {
+                msg.should.have.a.property('payload', msgAndTimings[c].msg.payload);
+                (Date.now() - t).should.be.approximately(msgAndTimings[c].avr, msgAndTimings[c].var);
+                c += 1;
+                if ( c === numMsgs) {
+                    done();
+                }
+            });
+            for (let i = 0; i < numMsgs; i++) {
+                setImmediate( function() { delayNode1.receive(msgAndTimings[i].msg); } );
+            }
+        });
+    }
+    
+    it('calls done when queued message is emitted (type: delay)', function(done) {
+        mapiDoneTestHelper(done, "delay", false, [{msg:{payload:1}, avr:1000, var:100}]);
+    });
+    it('calls done when queued message is emitted (type: delayv)', function(done) {
+        mapiDoneTestHelper(done, "delayv", false, [{msg:{payload:1, delay:1000}, avr:1000, var:100}]);
+    });
+    it('calls done when queued message is emitted (type: delay)', function(done) {
+        mapiDoneTestHelper(done, "random", false, [{msg:{payload:1}, avr:1000, var:100}]);
+    });
+    it('calls done when queued message is cleared (type: delay)', function(done) {
+        mapiDoneTestHelper(done, "delay", false, [{msg:{payload:1}, avr:100, var:100},
+                                                  {msg:{payload:2,reset:true}, avr:100, var:100}]);
+    });
+    it('calls done when queued message is cleared (type: delayv)', function(done) {
+        mapiDoneTestHelper(done, "delayv", false, [{msg:{payload:1, delay:1000}, avr:100, var:100},
+                                                   {msg:{payload:2, reset:true}, avr:100, var:100}]);
+    });
+    it('calls done when queued message is cleared (type: random)', function(done) {
+        mapiDoneTestHelper(done, "random", false, [{msg:{payload:1}, avr:100, var:100},
+                                                   {msg:{payload:2,reset:true}, avr:100, var:100}]);
+    });
+    it('calls done when queued message is flushed (type: delay)', function(done) {
+        mapiDoneTestHelper(done, "delay", false, [{msg:{payload:1}, avr:100, var:100},
+                                                  {msg:{payload:2,flush:true}, avr:100, var:100}]);
+    });
+    it('calls done when queued message is flushed (type: delayv)', function(done) {
+        mapiDoneTestHelper(done, "delayv", false, [{msg:{payload:1, delay:1000}, avr:100, var:100},
+                                                   {msg:{payload:2, flush:true}, avr:100, var:100}]);
+    });
+    it('calls done when queued message is flushed (type: random)', function(done) {
+        mapiDoneTestHelper(done, "random", false, [{msg:{payload:1}, avr:100, var:100},
+                                                  {msg:{payload:2,flush:true}, avr:100, var:100}]);
+    });
+    it('calls done when rated message is emitted (drop: false)', function(done) {
+        mapiDoneTestHelper(done, "rate", false, [{msg:{payload:1}, avr:0, var:100},
+                                                 {msg:{payload:2}, avr:1000, var:100}]);
+    });
+    it('calls done when rated message is emitted (drop: true)', function(done) {
+        mapiDoneTestHelper(done, "rate", true, [{msg:{payload:1}, avr:0, var:100},
+                                                {msg:{payload:2}, avr:0, var:100}]);
+    });
+    it('calls done when rated message is flushed', function(done) {
+        mapiDoneTestHelper(done, "rate", false, [{msg:{payload:1}, avr:0, var:100},
+                                                 {msg:{payload:2}, avr:0, var:100},
+                                                 {msg:{payload:3,flush:true}, avr:0, var:100}]);
+    });
+    it('calls done when queued messages are sent (queue)', function(done) {
+        mapiDoneTestHelper(done, "queue", false, [{msg:{payload:1,topic:"a"}, avr:500, var:700},
+                                                  {msg:{payload:2, topic:"b"}, avr:1500, var:700}]);
+    });
+    it('calls done when queued messages are sent (timed)', function(done) {
+        mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:500, var:700},
+                                                  {msg:{payload:2,topic:"b"}, avr:500, var:700}]);
+    });
+    it('calls done when queue is reset (queue/timed)', function(done) {
+        mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:0, var:500},
+                                                  {msg:{payload:2,reset:true}, avr:0, var:500}]);
+    });   
+    it('calls done when queue is flushed (queue/timed)', function(done) {
+        mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:0, var:500},
+                                                  {msg:{payload:2,flush:true}, avr:0, var:500}]);
+    });
 });
