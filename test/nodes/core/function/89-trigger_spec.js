@@ -1154,5 +1154,45 @@ describe('trigger node', function() {
             },180);
         });
     });
-
+    describe('messaging API', function () {
+        function mapiDoneTriggerTestHelper(done, nodeSetting, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [
+                { ...nodeSetting, id: "triggerNode1", type: "trigger", wires: [[]] },
+                { id: "completeNode1", type: "complete", scope: ["triggerNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "catchNode1", type: "catch", scope: ["triggerNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "helperNode1", type: "helper", wires: [[]] }];
+            const numMsgs = msgAndTimings.length;
+            helper.load([triggerNode, completeNode, catchNode], flow, function () {
+                const triggerNode1 = helper.getNode("triggerNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 3;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.seq].avr, msgAndTimings[msg.seq].var);
+                    c += 1;
+                    if (c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout(function () { triggerNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+        it('should call done() when first message has been processed', function (done) {
+            // not when second and more messages are emitted.
+            mapiDoneTriggerTestHelper(done, { units:"s", duration:"1" }, [
+                { msg: { seq: 0, payload: "A"}, delay: 0, avr: 0, var: 100}
+            ]);
+        });
+        it('should call done() when it receives reset message', function (done) {
+            mapiDoneTriggerTestHelper(done, {units:"s", duration:"1"}, [
+                {msg: { seq: 0, payload: "A", reset:true}, delay: 0, avr: 0, var:100}
+            ]);
+        })
+    });
 });

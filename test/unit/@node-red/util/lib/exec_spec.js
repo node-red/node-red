@@ -16,30 +16,31 @@
 var should = require("should");
 var sinon = require("sinon");
 var path = require("path");
-var events = require("events");
+var EventEmitter = require("events").EventEmitter;
 
 
 var child_process = require('child_process');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var exec = NR_TEST_UTILS.require("@node-red/runtime/lib/exec");
+var events = NR_TEST_UTILS.require("@node-red/util/lib/events");
+var exec = NR_TEST_UTILS.require("@node-red/util/lib/exec");
 
 describe("runtime/exec", function() {
     var logEvents;
     var mockProcess;
+    const eventLogHandler = function(ev) {
+        logEvents.push(ev);
+    }
 
     beforeEach(function() {
-        var logEventHandler = new events.EventEmitter();
-        logEvents = [];
-        logEventHandler.on('event-log', function(ev) {
-            logEvents.push(ev);
-        });
-        exec.init({events:logEventHandler});
 
-        mockProcess = new events.EventEmitter();
-        mockProcess.stdout = new events.EventEmitter();
-        mockProcess.stderr = new events.EventEmitter();
+        logEvents = [];
+        events.on("event-log", eventLogHandler);
+
+        mockProcess = new EventEmitter();
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
         sinon.stub(child_process,'spawn',function(command,args,options) {
             mockProcess._args = {command,args,options};
             return mockProcess;
@@ -47,6 +48,7 @@ describe("runtime/exec", function() {
     });
 
     afterEach(function() {
+        events.removeListener("event-log", eventLogHandler);
         if (child_process.spawn.restore) {
             child_process.spawn.restore();
         }

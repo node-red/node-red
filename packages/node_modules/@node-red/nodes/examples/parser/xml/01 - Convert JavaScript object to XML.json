@@ -1,0 +1,92 @@
+[
+    {
+        "id": "82f1bd0b.43474",
+        "type": "xml",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "attr": "",
+        "chr": "",
+        "x": 530,
+        "y": 180,
+        "wires": [
+            [
+                "1cd4ad02.9a5423"
+            ]
+        ]
+    },
+    {
+        "id": "84222b92.d65d18",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 200,
+        "y": 180,
+        "wires": [
+            [
+                "cdd1c154.3a655"
+            ]
+        ]
+    },
+    {
+        "id": "7b014430.dfd94c",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Convert JavaScript object to XML",
+        "info": "XML node can convert JavaScript object to XML string.",
+        "x": 240,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "1cd4ad02.9a5423",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "cdd1c154.3a655",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Apple\",\n    \"price\": 100,\n    \"origin\": \"Canada\"\n}",
+        "output": "json",
+        "x": 360,
+        "y": 180,
+        "wires": [
+            [
+                "82f1bd0b.43474"
+            ]
+        ]
+    }
+]

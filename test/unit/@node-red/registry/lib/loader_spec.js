@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 var fs = require("fs-extra");

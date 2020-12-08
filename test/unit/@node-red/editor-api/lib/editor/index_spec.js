@@ -28,10 +28,6 @@ var auth = NR_TEST_UTILS.require("@node-red/editor-api/lib/auth");
 
 var log = NR_TEST_UTILS.require("@node-red/util").log;
 
-
-var when = require("when");
-
-
 describe("api/editor/index", function() {
     var app;
     describe("disabled the editor", function() {

@@ -1,0 +1,94 @@
+[
+    {
+        "id": "a44973e8.6319b",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 360,
+        "wires": [
+            [
+                "de1b012e.96ec3"
+            ]
+        ]
+    },
+    {
+        "id": "de1b012e.96ec3",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "HTML text",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "plain",
+        "template": "<html>\n    <head>\n        <title>List of Fruits</title>\n    </head>\n    <body>\n        <ul>\n            <li class=\"Item\">Apple</li>\n            <li class=\"Item\">Orange</li>\n            <li class=\"Item\">Banana</li>\n        </ul>\n    </body>\n</html>\n",
+        "output": "str",
+        "x": 390,
+        "y": 360,
+        "wires": [
+            [
+                "cee70712.6f3538"
+            ]
+        ]
+    },
+    {
+        "id": "99e32bc7.c8e508",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Extract sequence of HTML element by CSS selector",
+        "info": "HTML node can be used to extract elements in HTML document as a messege sequence using CSS selector.",
+        "x": 290,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "cee70712.6f3538",
+        "type": "html",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": ".Item",
+        "ret": "html",
+        "as": "multi",
+        "x": 550,
+        "y": 360,
+        "wires": [
+            [
+                "17f25482.d4b56b"
+            ]
+        ]
+    },
+    {
+        "id": "17f25482.d4b56b",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 360,
+        "wires": []
+    }
+]

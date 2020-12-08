@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 
 var passport = require("passport");
@@ -60,7 +59,7 @@ describe("api/auth/index",function() {
     describe("revoke", function() {
         it("revokes a token", function(done) {
             var revokeToken = sinon.stub(Tokens,"revoke",function() {
-                return when.resolve();
+                return Promise.resolve();
             });
 
             var req = { body: { token: "abcdef" } };
