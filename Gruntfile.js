@@ -220,6 +220,11 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
+                    ],
+                    "packages/node_modules/@node-red/editor-client/public/vendor/monaco/dist/node-red-extra.d.ts": [
+                        "types/node-globals.d.ts",
+                        "types/node-red-func.d.ts",
+                        "types/util.d.ts"
                     ]
                 }
             }
@@ -231,6 +236,7 @@ module.exports = function(grunt) {
                     'packages/node_modules/@node-red/editor-client/public/red/main.min.js': 'packages/node_modules/@node-red/editor-client/public/red/main.js',
                     'packages/node_modules/@node-red/editor-client/public/vendor/ace/mode-jsonata.js': 'packages/node_modules/@node-red/editor-client/src/vendor/jsonata/mode-jsonata.js',
                     'packages/node_modules/@node-red/editor-client/public/vendor/ace/snippets/jsonata.js': 'packages/node_modules/@node-red/editor-client/src/vendor/jsonata/snippets-jsonata.js'
+                    //'packages/node_modules/@node-red/editor-client/public/vendor/monaco/dist/node-red-extra.d.ts': 'packages/node_modules/@node-red/editor-client/public/vendor/monaco/dist/node-red-extra.d.ts'
                 }
             }
         },
