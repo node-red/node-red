@@ -156,4 +156,27 @@ describe("api/index", function() {
         })
     });
 
+    describe('editor start', function (done) {
+
+        it('cannot be started when editor is disabled', function (done) {
+            const stub = sinon.stub(apiEditor, 'start', function () {
+                return Promise.resolve(true);
+            });
+            api.init({ httpAdminRoot: true, disableEditor: true }, {}, {}, {});
+            should(api.start()).resolvedWith(true);
+            stub.restore();
+            done();
+        });
+
+        it('can be started when editor enabled', function (done) {
+            const stub = sinon.stub(apiEditor, 'start');
+            api.init({ httpAdminRoot: true, disableEditor: false }, {}, {}, {});
+            api.start();
+            should(stub.called).be.true();
+            stub.restore();
+            done();
+        });
+
+    });
+
 });
