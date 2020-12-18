@@ -1,8 +1,8 @@
 
 interface NodeMessage {
-    topic?: String;
+    topic?: string;
     payload?: any;
-    _msgid?: String;
+    _msgid?: string;
     [other: any]: any; //permit other properties
 }
 
