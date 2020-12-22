@@ -223,6 +223,7 @@ module.exports = function(grunt) {
                     ],
                     "packages/node_modules/@node-red/editor-client/public/vendor/monaco/dist/node-red-extra.d.ts": [
                         "types/node-globals.d.ts",
+                        "types/console.d.ts",
                         "types/red-func.d.ts",
                         "types/red-util.d.ts"
                     ]
