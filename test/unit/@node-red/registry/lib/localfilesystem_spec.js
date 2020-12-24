@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require("when");
 var sinon = require("sinon");
 var path = require("path");
 
@@ -54,7 +53,7 @@ describe("red/nodes/registry/localfilesystem",function() {
     }
     describe("#getNodeFiles",function() {
         it("Finds all the node files in the resources tree",function(done) {
-            localfilesystem.init({settings:{coreNodesDir:resourcesDir}});
+            localfilesystem.init({coreNodesDir:resourcesDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -69,7 +68,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Includes node files from settings",function(done) {
-            localfilesystem.init({settings:{nodesIncludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
+            localfilesystem.init({nodesIncludes:['TestNode1.js'],coreNodesDir:resourcesDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -79,7 +78,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Excludes node files from settings",function(done) {
-            localfilesystem.init({settings:{nodesExcludes:['TestNode1.js'],coreNodesDir:resourcesDir}});
+            localfilesystem.init({nodesExcludes:['TestNode1.js'],coreNodesDir:resourcesDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -89,7 +88,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in userDir/nodes",function(done) {
-            localfilesystem.init({settings:{userDir:userDir}});
+            localfilesystem.init({userDir:userDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -100,7 +99,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
 
         it("Finds nodes in settings.nodesDir (string)",function(done) {
-            localfilesystem.init({settings:{nodesDir:userDir}});
+            localfilesystem.init({nodesDir:userDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -111,7 +110,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
         it("Finds nodes in settings.nodesDir (string,relative path)",function(done) {
             var relativeUserDir = path.join("test","unit","@node-red","registry","lib","resources","userDir");
-            localfilesystem.init({settings:{nodesDir:relativeUserDir}});
+            localfilesystem.init({nodesDir:relativeUserDir});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -121,7 +120,7 @@ describe("red/nodes/registry/localfilesystem",function() {
             done();
         });
         it("Finds nodes in settings.nodesDir (array)",function(done) {
-            localfilesystem.init({settings:{nodesDir:[userDir]}});
+            localfilesystem.init({nodesDir:[userDir]});
             var nodeList = localfilesystem.getNodeFiles(true);
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
@@ -140,20 +139,24 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({coreNodesDir:moduleDir});
             var nodeList = localfilesystem.getNodeFiles();
             nodeList.should.have.a.property("node-red");
             var nm = nodeList['node-red'];
+            // The `node-red` module is loaded differently to those scanned for
+            // It doesn't get the `path` property set. Maybe it should.
             nm.should.have.a.property('name','node-red');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,[],['TestNode1']);
 
             nm = nodeList['TestNodeModule'];
+            nm.should.have.a.property('path')
             nm.should.have.a.property('name','TestNodeModule');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,['TestNodeMod1','TestNodeMod2'],[],'TestNodeModule');
 
             nm = nodeList['VersionMismatchModule'];
+            nm.should.have.a.property('path')
             nm.should.have.a.property('name','VersionMismatchModule');
             nm.should.have.a.property("nodes");
             checkNodes(nm.nodes,['VersionMismatchMod1','VersionMismatchMod2'],[],'VersionMismatchModule');
@@ -172,18 +175,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         it("scans icon files in the resources tree",function(done) {
             var count = 0;
             localfilesystem.init({
-
-                // events:{emit:function(eventName,dir){
-                //     if (count === 0) {
-                //         eventName.should.equal("node-icon-dir");
-                //         dir.name.should.equal("node-red");
-                //         dir.icons.should.be.an.Array();
-                //         count = 1;
-                //     } else if (count === 1) {
-                //         done();
-                //     }
-                // }},
-                settings:{coreNodesDir:resourcesDir}
+                coreNodesDir: resourcesDir
             });
             var list = localfilesystem.getNodeFiles(true);
             list.should.have.property("node-red");
@@ -198,22 +190,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         it("scans icons dir in library",function(done) {
             var count = 0;
             localfilesystem.init({
-                //
-                // events:{emit:function(eventName,dir){
-                //     eventName.should.equal("node-icon-dir");
-                //     if (count === 0) {
-                //         dir.name.should.equal("node-red");
-                //         dir.icons.should.be.an.Array();
-                //         count = 1;
-                //     } else if (count === 1) {
-                //         dir.name.should.equal("Library");
-                //         dir.icons.should.be.an.Array();
-                //         dir.icons.length.should.equal(1);
-                //         dir.icons[0].should.be.equal("test_icon.png");
-                //         done();
-                //     }
-                // }},
-                settings:{userDir:userDir}
+                userDir: userDir
             });
             var list = localfilesystem.getNodeFiles(true);
             list.should.have.property("node-red");
@@ -237,12 +214,14 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({coreNodesDir:moduleDir});
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
             nodeModule.should.have.a.property('TestNodeModule');
             nodeModule['TestNodeModule'].should.have.a.property('name','TestNodeModule');
             nodeModule['TestNodeModule'].should.have.a.property('version','0.0.1');
             nodeModule['TestNodeModule'].should.have.a.property('nodes');
+            nodeModule['TestNodeModule'].should.have.a.property('path');
+
             checkNodes(nodeModule['TestNodeModule'].nodes,['TestNodeMod1','TestNodeMod2'],[],'TestNodeModule');
 
             nodeModule = localfilesystem.getModuleFiles('VersionMismatchModule');
@@ -261,7 +240,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 }
                 return _join.apply(null,arguments);
             }));
-            localfilesystem.init({settings:{coreNodesDir:moduleDir}});
+            localfilesystem.init({coreNodesDir:moduleDir});
             /*jshint immed: false */
             (function(){
                 localfilesystem.getModuleFiles('WontExistModule');
@@ -281,14 +260,7 @@ describe("red/nodes/registry/localfilesystem",function() {
                 return _join.apply(null,arguments);
             }));
             localfilesystem.init({
-
-                // events:{emit:function(eventName,dir){
-                //     eventName.should.equal("node-icon-dir");
-                //     dir.name.should.equal("TestNodeModule");
-                //     dir.icons.should.be.an.Array();
-                //     done();
-                // }},
-                settings:{coreNodesDir:moduleDir}
+                coreNodesDir: moduleDir
             });
             var nodeModule = localfilesystem.getModuleFiles('TestNodeModule');
             nodeModule.should.have.property("TestNodeModule");

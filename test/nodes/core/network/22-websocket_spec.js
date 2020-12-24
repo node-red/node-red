@@ -15,7 +15,6 @@
  **/
 
 var ws = require("ws");
-var when = require("when");
 var should = require("should");
 var helper = require("node-red-node-test-helper");
 var websocketNode = require("nr-test-utils").require("@node-red/nodes/core/network/22-websocket.js");
@@ -27,7 +26,7 @@ function getWsUrl(path) {
 }
 
 function createClient(listenerid) {
-    return when.promise(function(resolve, reject) {
+    return new Promise(function(resolve, reject) {
         var node = helper.getNode(listenerid);
         var url = getWsUrl(node.path);
         var sock = new ws(url);
@@ -300,23 +299,33 @@ describe('websocket Node', function() {
                 { id: "n2", type: "websocket out", server: "n1" },
                 { id: "n3", type: "helper", wires: [["n2"]] }];
             helper.load(websocketNode, flow, function() {
-                var def1 = when.defer(),
-                    def2 = when.defer();
-                when.all([createClient("n1"), createClient("n1")]).then(function(socks) {
-                    socks[0].on("message", function(msg, flags) {
-                        msg.should.equal("hello");
-                        def1.resolve();
-                    });
-                    socks[1].on("message", function(msg, flags) {
-                        msg.should.equal("hello");
-                        def2.resolve();
-                    });
+                Promise.all([createClient("n1"), createClient("n1")]).then(function(socks) {
+                    var promises = [
+                        new Promise((resolve,reject) => {
+                            socks[0].on("message", function(msg, flags) {
+                                try {
+                                    msg.should.equal("hello");
+                                    resolve();
+                                } catch(err) {
+                                    reject(err);
+                                }
+                            });
+                        }),
+                        new Promise((resolve,reject) => {
+                            socks[1].on("message", function(msg, flags) {
+                                try {
+                                    msg.should.equal("hello");
+                                    resolve();
+                                } catch(err) {
+                                    reject(err);
+                                }
+                            });
+                        })
+                    ];
                     helper.getNode("n3").send({
                         payload: "hello"
                     });
-                    return when.all([def1.promise, def2.promise]).then(function() {
-                        done();
-                    });
+                    return Promise.all(promises).then(() => {done()});
                 }).catch(function(err) {
                     done(err);
                 });

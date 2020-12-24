@@ -19,7 +19,6 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var sinon = require('sinon');
-var when = require('when');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
@@ -53,6 +52,7 @@ describe("api/admin/nodes", function() {
     describe('get nodes', function() {
         it('returns node list', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getNodeList: function() {
                         return Promise.resolve([1,2,3]);
@@ -75,6 +75,7 @@ describe("api/admin/nodes", function() {
 
         it('returns node configs', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getNodeConfigs: function() {
                         return Promise.resolve("<script></script>");
@@ -99,6 +100,7 @@ describe("api/admin/nodes", function() {
 
         it('returns node module info', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getModuleInfo: function(opts) {
                         return Promise.resolve({"node-red":{name:"node-red"}}[opts.module]);
@@ -119,6 +121,7 @@ describe("api/admin/nodes", function() {
 
         it('returns 404 for unknown module', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getModuleInfo: function(opts) {
                         var errInstance = new Error("Not Found");
@@ -143,6 +146,7 @@ describe("api/admin/nodes", function() {
 
         it('returns individual node info', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getNodeInfo: function(opts) {
                         return Promise.resolve({"node-red/123":{id:"node-red/123"}}[opts.id]);
@@ -164,6 +168,7 @@ describe("api/admin/nodes", function() {
 
         it('returns individual node configs', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getNodeConfig: function(opts) {
                         return Promise.resolve({"node-red/123":"<script></script>"}[opts.id]);
@@ -187,6 +192,7 @@ describe("api/admin/nodes", function() {
         });
         it('returns 404 for unknown node', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getNodeInfo: function(opts) {
                         var errInstance = new Error("Not Found");
@@ -215,6 +221,7 @@ describe("api/admin/nodes", function() {
         it('installs the module and returns module info', function(done) {
             var opts;
             nodes.init({
+                settings: {},
                 nodes:{
                     addModule: function(_opts) {
                         opts = _opts;
@@ -244,6 +251,7 @@ describe("api/admin/nodes", function() {
         });
         it('returns error', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     addModule: function(opts) {
                         var errInstance = new Error("Message");
@@ -272,6 +280,7 @@ describe("api/admin/nodes", function() {
         it('uninstalls the module', function(done) {
             var opts;
             nodes.init({
+                settings: {},
                 nodes:{
                     removeModule: function(_opts) {
                         opts = _opts;
@@ -292,6 +301,7 @@ describe("api/admin/nodes", function() {
         });
         it('returns error', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     removeModule: function(opts) {
                         var errInstance = new Error("Message");
@@ -319,6 +329,7 @@ describe("api/admin/nodes", function() {
     describe('enable/disable node set', function() {
         it('returns 400 for invalid request payload', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     setNodeSetState: function(opts) {return Promise.resolve()}
                 }
@@ -340,6 +351,7 @@ describe("api/admin/nodes", function() {
         it('sets node state and returns node info', function(done) {
             var opts;
             nodes.init({
+                settings: {},
                 nodes:{
                     setNodeSetState: function(_opts) {
                         opts = _opts;
@@ -368,6 +380,7 @@ describe("api/admin/nodes", function() {
     describe('enable/disable module' ,function() {
         it('returns 400 for invalid request payload', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     setModuleState: function(opts) {return Promise.resolve()}
                 }
@@ -388,6 +401,7 @@ describe("api/admin/nodes", function() {
         it('sets module state and returns module info', function(done) {
             var opts;
             nodes.init({
+                settings: {},
                 nodes:{
                     setModuleState: function(_opts) {
                         opts = _opts;
@@ -416,6 +430,7 @@ describe("api/admin/nodes", function() {
     describe('get icons', function() {
         it('returns icon list', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getIconList: function() {
                         return Promise.resolve({module:[1,2,3]});
@@ -440,6 +455,7 @@ describe("api/admin/nodes", function() {
     describe('get module messages', function() {
         it('returns message catalog', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getModuleCatalog: function(opts) {
                         return Promise.resolve({a:123});
@@ -459,6 +475,7 @@ describe("api/admin/nodes", function() {
         });
         it('returns all node catalogs', function(done) {
             nodes.init({
+                settings: {},
                 nodes:{
                     getModuleCatalogs: function(opts) {
                         return Promise.resolve({a:1});

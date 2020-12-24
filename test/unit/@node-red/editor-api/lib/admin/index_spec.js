@@ -102,7 +102,7 @@ describe("api/admin/index", function() {
         });
 
         before(function() {
-            app = adminApi.init({});
+            app = adminApi.init({},{});
         });
 
         beforeEach(function() {

@@ -17,13 +17,12 @@
 var should = require("should");
 var fs = require('fs-extra');
 var path = require('path');
-var when = require("when");
 var sinon = require('sinon');
 var inherits = require("util").inherits;
 
 var NR_TEST_UTILS = require("nr-test-utils");
 var index = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/index");
-var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/flows");
+var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var registry = NR_TEST_UTILS.require("@node-red/registry")
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 
@@ -47,11 +46,11 @@ describe("red/nodes/index", function() {
     var testCredentials = {"tab1":{"b":1, "c":"2", "d":"$(foo)"}};
     var storage = {
         getFlows: function() {
-            return when({red:123,flows:testFlows,credentials:testCredentials});
+            return Promise.resolve({red:123,flows:testFlows,credentials:testCredentials});
         },
         saveFlows: function(conf) {
             should.deepEqual(testFlows, conf.flows);
-            return when.resolve(123);
+            return Promise.resolve(123);
         }
     };
 
@@ -182,12 +181,12 @@ describe("red/nodes/index", function() {
                 fs.remove(userDir,function(err) {
                     fs.mkdir(userDir,function() {
                         sinon.stub(index, 'load', function() {
-                            return when.promise(function(resolve,reject){
+                            return new Promise(function(resolve,reject){
                                 resolve([]);
                             });
                         });
                         sinon.stub(localfilesystem, 'getCredentials', function() {
-                            return when.promise(function(resolve,reject) {
+                            return new Promise(function(resolve,reject) {
                                 resolve({"tab1":{"b":1,"c":2}});
                             });
                         }) ;
@@ -282,7 +281,7 @@ describe("red/nodes/index", function() {
                 }
             });
             sinon.stub(registry,"disableNode",function(id) {
-                return when.resolve(randomNodeInfo);
+                return Promise.resolve(randomNodeInfo);
             });
         });
         afterEach(function() {

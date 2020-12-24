@@ -1,0 +1,35 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="websocket in">
+  <p>WebSocket輸入節點。</p>
+  <p>默認情況下，從WebSocket接收的數據將位于<code>msg.payload</code>中。可以將套接字配置爲期望格式正確的JSON字符串，在這種情況下，它將解析JSON並將結果對象作爲整個消息發送。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket out">
+  <p>WebSocket輸出節點。</p>
+  <p>默認情況下，<code>msg.payload</code>將通過WebSocket發送。可以將套接字配置爲將整個<code>msg</code>對象編碼爲JSON字符串，然後通過WebSocket發送。</p>
+  <p>如果到達此節點的消息是從WebSocket In節點開始的，則該消息將發送回觸發流程的客戶端。否則，消息將廣播給所有連接的客戶端。</p>
+  <p>如果要廣播從“WebSocket輸入”節點開始的消息，則可以應該刪除流中的<code>msg._session</code>屬性。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-listener">
+ <p>此配置節點使用指定的路徑創建WebSocket服務器端點。</p>
+</script>
+
+<script type="text/x-red" data-help-name="websocket-client">
+ <p>此配置節點將WebSocket客戶端連接到指定的URL。</p>
+</script>

@@ -1,0 +1,25 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="debug">
+  <p>在“調試”側邊欄選項卡和運行時日志中顯示選定的消息屬性。 默認情況下，它會顯示<code>msg.payload</code>的值，但您也可以將其設置成顯示任意屬性，完整消息或JSONata表達式的結果。</p>
+  <h3>詳細</h3>
+  <p>調試側邊欄會提供已發消息的結構化視圖，方便您查詢消息的結構。</p>
+  <p>JavaScript對象和數組可以根據需要來折疊或擴展。緩衝區對象可以顯示爲原始數據，也可以顯示爲字符串。</p>
+  <p>對任意條消息，調試側邊欄還會顯示接收消息的時間，發送消息的節點以及消息類型等信息。單擊源節點ID將在工作區中顯示該節點。</p>
+  <p>節點上的按鈕可用于啓用或禁用其輸出。建議禁用或刪除所有未使用的調試節點。</p>
+  <p>還可以通過配置節點，將所有消息發送到運行時的日志，或將簡短的數據（32個字符內）在調試節點下的狀態文本上顯示。</p>
+</script>

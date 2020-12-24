@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var when = require("when");
 var util = require("util");
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -228,11 +227,11 @@ describe('red/runtime/nodes/credentials', function() {
                 },
                 set: function(key,value) {
                     settings[key] = value;
-                    return when.resolve();
+                    return Promise.resolve();
                 },
                 delete: function(key) {
                     delete settings[key];
-                    return when.resolve();
+                    return Promise.resolve();
                 }
             }
         }

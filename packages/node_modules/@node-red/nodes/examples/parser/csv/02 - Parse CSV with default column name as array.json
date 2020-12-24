@@ -1,0 +1,99 @@
+[
+    {
+        "id": "98c9d44d.4457b8",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 360,
+        "wires": [
+            [
+                "65476517.3d760c"
+            ]
+        ]
+    },
+    {
+        "id": "76df98f7.0dcd08",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "mult",
+        "ret": "\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 600,
+        "y": 360,
+        "wires": [
+            [
+                "557979e0.e6b588"
+            ]
+        ]
+    },
+    {
+        "id": "65476517.3d760c",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "CSV data",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "mustache",
+        "template": "Apple,100,Canada\nOrange,120,USA\nBanana,80,Philippines",
+        "output": "str",
+        "x": 430,
+        "y": 360,
+        "wires": [
+            [
+                "76df98f7.0dcd08"
+            ]
+        ]
+    },
+    {
+        "id": "557979e0.e6b588",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "187f4ab3.4c9ab5",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Parse CSV with default column name as array",
+        "info": "CSV node can send a single message with array of parsed CSV records.\nEach element of the array consists of objects with key-value pair.",
+        "x": 320,
+        "y": 300,
+        "wires": []
+    }
+]
