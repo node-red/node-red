@@ -47,10 +47,12 @@ declare class node {
     static send(msg:object, clone:Boolean=true);
     /** Inform runtime this instance has completed its operation */
     static done();
-    /** Send an error to the debug side bar */
+    /** Send an error to the console and debug side bar. Include `msg` in the 2nd parameter to trigger the catch node.  */
     static error(err:string|Error, msg:object=null);
-    /** Send an warning to the debug side bar */
+    /** Log a warn message to the console and debug sidebar */
     static warn(warning:string|Object);
+    /** Log an info message to the console (not sent to sidebar)' */
+    static log(info:string|Object);
     /** Set the status icon and text underneath the node.
     * @param {NodeStatus} status - The status object `{fill, shape, text}`
     * @example clear node status
