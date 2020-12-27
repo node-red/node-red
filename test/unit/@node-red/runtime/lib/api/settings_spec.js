@@ -61,8 +61,8 @@ describe("runtime-api/settings", function() {
                 result.should.not.have.property("foo",123);
                 result.should.have.property("flowEncryptionType","test-key-type");
                 result.should.not.have.property("user");
-                result.should.have.property("editorTheme");
-                result.editorTheme.should.eql({palette:{editable:false}});
+                result.should.have.property("externalModules");
+                result.externalModules.should.eql({palette:{allowInstall:false, allowUpload: false}});
 
             })
         });
