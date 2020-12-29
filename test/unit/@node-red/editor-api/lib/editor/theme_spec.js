@@ -143,4 +143,19 @@ describe("api/editor/theme", function () {
         settings.projects.should.have.a.property("enabled", false);
     });
 
+    it("test explicit userMenu set to true in theme setting", function () {
+      theme.init({
+          editorTheme: {
+              userMenu: true,
+          }
+      });
+
+      theme.app();
+
+      var settings = theme.settings();
+      settings.should.have.a.property("userMenu");
+      settings.userMenu.should.be.eql(true);
+
+    });
+
 });
