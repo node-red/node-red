@@ -1,3 +1,25 @@
+### 1.2.7: Maintenance Release
+
+Editor
+
+ - Ensure subflow-scoped config nodes do not get moved on import Fixes #2789
+ - Allow TypedInput to be disabled (#2752) @bartbutenaers
+ - Allow userMenu to be explicitly enabled (#2805) @tfmf
+ - Improvements to DE translation (#2192) @ketzu
+
+
+Runtime
+
+ - Handle `undefined` error passed to node.error (#2781) @johnwang71
+ - Disable nyc coverage reporting on older node versions
+ - Improve Editor API unit test coverage (#2777) @aaronmyatt
+
+
+Nodes
+
+ - Trigger: ensure timestamp option sends .now() at point of sending
+
+
 ### 1.2.6: Maintenance Release
 
 
