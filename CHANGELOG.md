@@ -1,3 +1,45 @@
+### 1.2.7: Maintenance Release
+
+Editor
+
+ - Ensure subflow-scoped config nodes do not get moved on import Fixes #2789
+ - Allow TypedInput to be disabled (#2752) @bartbutenaers
+ - Allow userMenu to be explicitly enabled (#2805) @tfmf
+ - Improvements to DE translation (#2192) @ketzu
+
+
+Runtime
+
+ - Handle `undefined` error passed to node.error (#2781) @johnwang71
+ - Disable nyc coverage reporting on older node versions
+ - Improve Editor API unit test coverage (#2777) @aaronmyatt
+
+
+Nodes
+
+ - Trigger: ensure timestamp option sends .now() at point of sending
+
+
+### 1.2.6: Maintenance Release
+
+
+Editor
+
+ - Update Japanese translations for 1.2.5 (#2764) @kazuhitoyokoi
+ - Library: properly handle symlinked folders (#2768) @natcl
+
+Runtime
+
+ - Support Windows paths when installing tarball by path name Fixes #2769
+ - Fix unsecure command usage in GH Action
+
+Nodes
+
+ - Update MQTT to latest to fix Node 8 URL breakage
+
+
+
+
 ### 1.2.5: Maintenance Release
 
 Editor
