@@ -1,0 +1,54 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="inject">
+<p>
+  Запускает сообщение в поток вручную или через равные промежутки времени. Данные сообщения могут быть различных типов, включая строку, объект JavaScript или текущее время.
+</p>
+
+<h3>Выводит</h3>
+<dl class="message-properties">
+  <dt>payload<span class="property-type">разные</span></dt>
+  <dd>Настроенные данные сообщения.</dd>
+  <dt class="optional">topic <span class="property-type">строка</span></dt>
+  <dd>Необязательное свойство темы сообщения, которое можно настроить в узле.</dd>
+</dl>
+
+<h3>Подробности</h3>
+<p>
+  Узел Inject может инициировать поток с определенными данными (значение payload). Данные по умолчанию - это отметка текущего времени в миллисекундах с 1 января 1970 года.
+</p>
+<p>
+  Узел также поддерживает вывод строк, чисел, логических значений, объектов JavaScript или значений потоковых/глобальных контекстов.
+</p>
+<p>
+  По умолчанию узел запускается вручную при нажатии на его кнопку в редакторе. Его также можно настроить для автоматического запуска через равные промежутки времени или по расписанию.
+</p>
+<p>
+  Он также может быть настроен так, чтобы делать вывод один раз при каждом запуске потоков.
+</p>
+<p>
+  Максимальный <i>интервал</i>, который можно указать, составляет около 596 часов / 24 дней. Однако если Вам нужны интервалы, превышающие один день, Вам следует рассмотреть возможность использования узла планировщика, который может работать с перебоями электроэнергии и перезапусками.
+</p>
+<p>
+  <b>Примечание</b>: В параметрах <i>"с интервалом в промежутке"</i> и <i>"в определенное время"</i> используется стандартная система cron.
+  Это означает, что 20 минут будут в следующем часу, 20 минут спустя и 40 минут спустя - а не через 20 минут.
+  Если нужно каждые 20 минут - используйте параметр <i>"с интервалом"</i>.
+</p>
+<p>
+  <b>Примечание</b>: Чтобы включить многострочный текст в строковое значение, необходимо использовать узел Function для создания данных.
+</p>
+</script>

@@ -1,10 +1,87 @@
+### 1.2.7: Maintenance Release
+
+Editor
+
+ - Ensure subflow-scoped config nodes do not get moved on import Fixes #2789
+ - Allow TypedInput to be disabled (#2752) @bartbutenaers
+ - Allow userMenu to be explicitly enabled (#2805) @tfmf
+ - Improvements to DE translation (#2192) @ketzu
+
+
+Runtime
+
+ - Handle `undefined` error passed to node.error (#2781) @johnwang71
+ - Disable nyc coverage reporting on older node versions
+ - Improve Editor API unit test coverage (#2777) @aaronmyatt
+
+
+Nodes
+
+ - Trigger: ensure timestamp option sends .now() at point of sending
+
+
+### 1.2.6: Maintenance Release
+
+
+Editor
+
+ - Update Japanese translations for 1.2.5 (#2764) @kazuhitoyokoi
+ - Library: properly handle symlinked folders (#2768) @natcl
+
+Runtime
+
+ - Support Windows paths when installing tarball by path name Fixes #2769
+ - Fix unsecure command usage in GH Action
+
+Nodes
+
+ - Update MQTT to latest to fix Node 8 URL breakage
+
+
+
+
+### 1.2.5: Maintenance Release
+
+Editor
+
+ - Fix import of config nodes with unknown z property
+
+Runtime
+
+ - Set ACTIONS_ALLOW_UNSECURE_COMMANDS in GH Action
+
+### 1.2.4: Maintenance Release
+
+Editor
+
+ - Support bigint types in Debug sidebar
+ - Clear retained status of deleted nodes
+ - Prevent needless retention of node status messages
+ - Update projects dialogs to use TypedInput-cred input
+ - Restore cursor position in TypedInput cred-mode
+ - Ensure config nodes with invalid z are imported somewhere
+ - Ensure user keyboard shortcuts override defaults Fixes #2753
+
+Runtime
+
+ - Disable projects when flowFile passed into grunt dev
+ - Add Russian Locale (#2761) (#2531) (@alexk111)
+ - Add Japanese translation for http-in node (#2758) (@kazuhitoyokoi)
+
+Nodes
+
+ - CSV: Fix CSV node repeating array output
+
 ### 1.2.3: Maintenance Release
 
 Editor
 
+ - Disable 'use strict' checking in Function node Fixes #2743
+ - Add gray/grey alternate options for status
  - Handle import errors on initial load and report to user
  - Only apply recovery tab on initial load Fixes #2731
  - Reinstate coveralls reporting to travis build
+ - Update Japanese message catalogue for 1.2.3 release #2747 (@HiroyasuNishiyama)
 
 Runtime
 
@@ -12,6 +89,7 @@ Runtime
  - Add mutex lock to saveSettings storage call Fixes #2736 (#2737)
  - Migrate to nyc instead of istanbul for code coverage
  - Move mosca to ui-test-dependencies
+ - Remove " from npm install prefix option
 
 ### 1.2.2: Maintenance Release
 

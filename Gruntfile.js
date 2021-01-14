@@ -24,6 +24,7 @@ module.exports = function(grunt) {
     var flowFile = grunt.option('flowFile');
     if (flowFile) {
         nodemonArgs.push(flowFile);
+        process.env.NODE_RED_ENABLE_PROJECTS=false;
     }
     var userDir = grunt.option('userDir');
     if (userDir) {
@@ -621,6 +622,11 @@ module.exports = function(grunt) {
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
         ['build','verifyPackageDependencies','jshint:editor','nyc:all']);
+
+    grunt.registerTask('no-coverage',
+        'Builds editor content then runs code style checks and unit tests on all components without code coverage',
+        ['build','verifyPackageDependencies','jshint:editor','simplemocha:all']);
+
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',
