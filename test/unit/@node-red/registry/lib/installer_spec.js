@@ -131,6 +131,7 @@ describe('nodes/registry/installer', function() {
         it("rejects when update requested to existing version", function(done) {
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
+                    user: true,
                     version: "0.1.1"
                 }
             });
@@ -142,6 +143,7 @@ describe('nodes/registry/installer', function() {
         it("rejects when update requested to existing version and url", function(done) {
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
+                    user: true,
                     version: "0.1.1"
                 }
             });
