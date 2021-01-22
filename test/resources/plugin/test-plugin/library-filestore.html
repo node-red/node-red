@@ -4,8 +4,19 @@
         name: "Local File-System Library",
         icon: "font-awesome/fa-hdd-o",
         defaults: {
-            name: { value: "" },
-            path: { value: ""}
+            path: { value: ""},
+            // secret: { type: "password" }
+        }
+    })
+
+
+
+    RED.plugins.registerPlugin("node-red-library-dbstore", {
+        type: "node-red-library-source",
+        name: "Database Library",
+        icon: "font-awesome/fa-database",
+        defaults: {
+            connection: { value: ""}
         }
     })
 </script>
