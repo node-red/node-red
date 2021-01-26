@@ -120,6 +120,7 @@ test-module-config`)
                         "id": "test-module/test-set",
                         "enabled": true,
                         "local": false,
+                        "user": false,
                         "plugins": [
                             {
                                 "type": "foo",
@@ -142,6 +143,7 @@ test-module-config`)
                         "id": "test-module/test-disabled-set",
                         "enabled": false,
                         "local": false,
+                        "user": false,
                         "plugins": []
                     }
                 ]
