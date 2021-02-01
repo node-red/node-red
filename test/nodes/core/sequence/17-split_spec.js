@@ -1646,4 +1646,40 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should handle msg.parts even if messages are out of order in auto mode if exactly one message has count set', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], mode: "auto" },
+                { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+
+            n2.on("input", function (msg) {
+                msg.payload.length.should.be.eql(5);
+                msg.payload.should.be.eql([0,1,2,3,4]);
+                done();
+            });
+
+            var msg = {};
+            msg.parts = {
+                id: RED.util.generateId()
+            };
+            for(var elem = 1; elem < 5; ++elem) {
+                var _msg = RED.util.cloneMessage(msg);
+                _msg.parts.index = elem;
+                if(elem == 4) {
+                    _msg.parts.count = 5;
+                }
+                _msg.payload = elem;
+                n1.receive(_msg);
+            }
+
+            var _msg = RED.util.cloneMessage(msg);
+            delete _msg.parts.count;
+            _msg.parts.index = 0;
+            _msg.payload = 0;
+            n1.receive(_msg);
+        });
+        
+    })
+
 });
