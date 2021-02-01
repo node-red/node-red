@@ -1759,13 +1759,13 @@ describe('JOIN node', function() {
                 { msg: {seq:0, payload:"A", parts:{id:1, type:"string", ch:",", index:0, count:3}}, delay:0, avr:500, var:100},
                 { msg: {seq:1, payload:"B", parts:{id:1, type:"string", ch:",", index:1, count:3}}, delay:200, avr:500, var:100},
                 { msg: {seq:2, payload:"dummy", reset: true, parts:{id:1}}, delay:500, avr:500, var:100}
-            ]);        
+            ]);
         });
         it('should call done() when timed out', function (done) {
             mapiDoneJoinTestHelper(done, {mode:"custom", joiner:",", build:"string", timeout:0.5}, [
                 { msg: {seq:0, payload:"A"}, delay:0, avr:500, var:100},
                 { msg: {seq:1, payload:"B"}, delay:200, avr:500, var:100},
-            ]); 
+            ]);
         });
         it('should call done() when all messages are reduced', function (done) {
             mapiDoneJoinTestHelper(done, {mode:"reduce", reduceRight:false, reduceExp:"$A+payload", reduceInit:"0",
@@ -1785,4 +1785,40 @@ describe('JOIN node', function() {
             ]);
         });
     });
+
+    it('should handle msg.parts even if messages are out of order in auto mode if exactly one message has count set', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], mode: "auto" },
+                { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+
+            n2.on("input", function (msg) {
+                msg.payload.length.should.be.eql(5);
+                msg.payload.should.be.eql([0,1,2,3,4]);
+                done();
+            });
+
+            var msg = {};
+            msg.parts = {
+                id: RED.util.generateId()
+            };
+            for(var elem = 1; elem < 5; ++elem) {
+                var _msg = RED.util.cloneMessage(msg);
+                _msg.parts.index = elem;
+                if(elem == 4) {
+                    _msg.parts.count = 5;
+                }
+                _msg.payload = elem;
+                n1.receive(_msg);
+            }
+
+            var _msg = RED.util.cloneMessage(msg);
+            delete _msg.parts.count;
+            _msg.parts.index = 0;
+            _msg.payload = 0;
+            n1.receive(_msg);
+        });
+
+    })
 });
