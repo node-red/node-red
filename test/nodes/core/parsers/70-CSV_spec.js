@@ -680,6 +680,24 @@ describe('CSV node', function() {
             });
         });
 
+        it('should be able to include column names as first row, and missing properties', function(done) {
+            var flow = [ { id:"n1", type:"csv", hdrout:true, ret:"\r\n", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 'col1,col2,col3,col4\r\nH1,H2,H3,H4\r\nA,B,,\r\nA,,C,\r\nA,,,D\r\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [{"col1":"H1","col2":"H2","col3":"H3","col4":"H4"},{"col1":"A","col2":"B"},{"col1":"A","col3":"C"},{"col1":"A","col4":"D"}];
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
         it('should be able to pass in column names', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"", hdrout:"once", ret:"\r\n", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
@@ -701,9 +719,27 @@ describe('CSV node', function() {
                     catch(e) { done(e); }
                 });
                 var testJson = [{ d: 1, b: 3, c: 2, a: 4 }];
-                n1.emit("input", {payload:testJson, columns:"a,,b,a"});
-                n1.emit("input", {payload:testJson});
-                n1.emit("input", {payload:testJson});
+                n1.emit("input", {payload:testJson, columns:"a,,b,a", parts:{index:0}});
+                n1.emit("input", {payload:testJson, parts:{index:1}});
+                n1.emit("input", {payload:testJson, parts:{index:2}});
+            });
+        });
+
+        it('should be able to pass in column names - with payload as an array', function(done) {
+            var flow = [ { id:"n1", type:"csv", hdrout:"once", ret:"\r\n", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 'a,,b,a\r\n4,,3,4\r\n4,,3,4\r\n4,,3,4\r\n');
+                        done()
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = { d: 1, b: 3, c: 2, a: 4 };
+                n1.emit("input", {payload:[testJson,testJson,testJson], columns:"a,,b,a"});
             });
         });
 
