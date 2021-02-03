@@ -1,3 +1,14 @@
+### 1.2.9: Maintenance Release
+
+Editor
+
+ - Sanitize node type names when displaying in notifications
+ - Sanitize branch name before displaying in notification message
+
+Runtime
+
+ - Handle more valid language codes when validating lang params Fixes #2856
+
 ### 1.2.8: Maintenance Release
 
 Editor
