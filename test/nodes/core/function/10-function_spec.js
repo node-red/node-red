@@ -53,6 +53,49 @@ describe('function node', function() {
         });
     });
 
+    it('should send returned message using send()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.send(msg);"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should do something with the catch node', function(done) {
+        var flow = [{"id":"funcNode","type":"function","wires":[["goodNode"]],"func":"node.error('This is an error', msg);"},{"id":"goodNode","type":"helper"},{"id":"badNode","type":"helper"},{"id":"catchNode","type":"catch","scope":null,"uncaught":false,"wires":[["badNode"]]}];
+        var catchNodeModule = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js")
+        helper.load([catchNodeModule, functionNode], flow, function() {
+            var funcNode = helper.getNode("funcNode");
+            var catchNode = helper.getNode("catchNode");
+            var goodNode = helper.getNode("goodNode");
+            var badNode = helper.getNode("badNode");
+
+            badNode.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                msg.should.have.property('error');
+                msg.error.should.have.property('message',"This is an error");
+                msg.error.should.have.property('source');
+                msg.error.source.should.have.property('id', "funcNode");
+                done();
+            });
+            funcNode.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+
+
+
+
+/*
+
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"function", name: "function" }];
         helper.load(functionNode, flow, function() {
@@ -1560,4 +1603,5 @@ describe('function node', function() {
         });
 
     })
+    */
 });

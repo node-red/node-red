@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "1.2.7",
+    "version": "1.2.9",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -107,7 +107,7 @@
         "marked": "1.2.7",
         "minami": "1.2.3",
         "mocha": "^5.2.0",
-        "node-red-node-test-helper": "^0.2.5",
+        "node-red-node-test-helper": "^0.2.6",
         "node-sass": "^4.14.1",
         "nodemon": "2.0.6",
         "should": "13.2.3",
