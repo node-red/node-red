@@ -1,0 +1,163 @@
+[
+    {
+        "id": "acec9dcc.eca82",
+        "type": "inject",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Hello, World!",
+        "payloadType": "str",
+        "x": 230,
+        "y": 460,
+        "wires": [
+            [
+                "137d60e2.0e267f"
+            ]
+        ]
+    },
+    {
+        "id": "cf011d1e.8afa6",
+        "type": "comment",
+        "z": "a7ac8a68.0f7218",
+        "name": "Watch changes in a directory",
+        "info": "Watch node can watch and report changes in a directory",
+        "x": 220,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "137d60e2.0e267f",
+        "type": "file",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "filename": "/tmp/HG/hello.txt",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 430,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9dfce283.63e5a",
+        "type": "comment",
+        "z": "a7ac8a68.0f7218",
+        "name": "↓write to /tmp/HG/*",
+        "info": "",
+        "x": 430,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "cbfb788b.297f98",
+        "type": "watch",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "files": "/tmp/HG",
+        "recursive": false,
+        "x": 400,
+        "y": 540,
+        "wires": [
+            [
+                "3c691cd5.a0f2b4"
+            ]
+        ]
+    },
+    {
+        "id": "3c691cd5.a0f2b4",
+        "type": "debug",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "c0d7ca6e.cad418",
+        "type": "comment",
+        "z": "a7ac8a68.0f7218",
+        "name": "↑watch changes in /tmp/HG",
+        "info": "",
+        "x": 460,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "a04e5231.5a2e1",
+        "type": "inject",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Goodbye, World!",
+        "payloadType": "str",
+        "x": 240,
+        "y": 500,
+        "wires": [
+            [
+                "655d7bab.cda6f4"
+            ]
+        ]
+    },
+    {
+        "id": "655d7bab.cda6f4",
+        "type": "file",
+        "z": "a7ac8a68.0f7218",
+        "name": "",
+        "filename": "/tmp/HG/goodbye.txt",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 440,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f3b42209.a7673",
+        "type": "comment",
+        "z": "a7ac8a68.0f7218",
+        "name": "Notice: Create /tmp/HG directory before deploying this example",
+        "info": "",
+        "x": 330,
+        "y": 380,
+        "wires": []
+    }
+]
