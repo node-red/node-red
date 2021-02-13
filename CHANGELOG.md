@@ -1,3 +1,23 @@
+### 1.2.8: Maintenance Release
+
+Editor
+
+ - Ensure subflow help is picked up for palette tooltip Fixes #2834
+ - Improve Ru locale (#2826) @alexk111
+ - Fix scrollbars (#2825) @alexk111
+
+Runtime
+
+ - Restrict project file access to inside the project directory
+ - Validate user-provided language parameter before passing to i18n
+ - Fix grunt release mkdir issue on Node.js 14 (#2827) @alexk111
+ - Prevent crash when coreNodesDir is empty (#2831) @hardillb
+
+Nodes
+
+ - Batch node: Fixing minor typo in node's documentation (#2848) @matthiasradde
+ - Split node: Handle out of order messages as long as one of the messages has msg.parts.count set to the proper value (#2748) @s4ke
+
 ### 1.2.7: Maintenance Release
 
 Editor

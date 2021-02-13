@@ -98,7 +98,7 @@ describe('change Node', function() {
     });
 
     describe('#set' , function() {
-
+        
         it('sets the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"changed","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -671,6 +671,111 @@ describe('change Node', function() {
                 });
             });
         });
+
+        it('sets the value of a message property using a nested property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","name":"","rules":[{"t":"set","p":"payload","pt":"msg","to":"lookup[msg.topic]","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.equal(2);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload:"",lookup:{a:1,b:2},topic:"b"});
+            });
+        });
+
+        it('sets the value of a nested message property using a message property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","name":"","rules":[{"t":"set","p":"lookup[msg.topic]","pt":"msg","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.lookup.b.should.equal("newValue");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                var msg = {
+                    payload: "newValue",
+                    lookup:{a:1,b:2},
+                    topic:"b"
+                }
+                changeNode1.receive(msg);
+            });
+        });
+
+        it('sets the value of a message property using a nested property in flow context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","name":"","rules":[{"t":"set","p":"payload","pt":"msg","to":"lookup[msg.topic]","tot":"flow"}],"action":"","property":"","from":"","to":"","reg":false,"wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql(2);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("lookup",{a:1, b:2});
+                changeNode1.receive({payload: "", topic: "b"});
+            });
+        })
+
+        it('sets the value of a message property using a nested property in flow context', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","name":"","rules":[{"t":"set","p":"payload","pt":"msg","to":"lookup[msg.topic]","tot":"flow"}],"action":"","property":"","from":"","to":"","reg":false,"wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql(2);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("lookup",{a:1, b:2});
+                changeNode1.receive({payload: "", topic: "b"});
+            });
+        })
+
+        it('sets the value of a nested flow context property using a message property', function(done) {
+            var flow = [{"id":"changeNode1","type":"change","name":"","rules":[{"t":"set","p":"lookup[msg.topic]","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"wires":[["helperNode1"]],"z":"flow"},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.should.eql("newValue");
+                        changeNode1.context().flow.get("lookup.b").should.eql("newValue");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.context().flow.set("lookup",{a:1, b:2});
+                changeNode1.receive({payload: "newValue", topic: "b"});
+            });
+        })
+
 
     });
     describe('#change', function() {
