@@ -104,7 +104,7 @@
         "grunt-simple-nyc": "^3.0.1",
         "http-proxy": "1.18.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
-        "marked": "1.2.7",
+        "marked": "2.0.0",
         "minami": "1.2.3",
         "mocha": "^5.2.0",
         "node-red-node-test-helper": "^0.2.6",
