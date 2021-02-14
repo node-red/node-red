@@ -189,6 +189,7 @@
             "noerr": 0,
             "initialize": "",
             "finalize": "",
+            "libs": [ {"var":"cowsay2","module":"cowsay2"}],
             "x": 240,
             "y": 100,
             "wires": [
