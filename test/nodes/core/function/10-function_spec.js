@@ -93,9 +93,6 @@ describe('function node', function() {
 
 
 
-
-/*
-
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"function", name: "function" }];
         helper.load(functionNode, flow, function() {
@@ -1417,6 +1414,57 @@ describe('function node', function() {
         });
     });
 
+    describe('externalModules', function() {
+
+        it('should fail if using OS module without it listed in libs', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;"},
+                {id:"n2", type:"helper"}
+            ];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var messageReceived = false;
+                n2.on("input", function(msg) {
+                    messageReceived = true;
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+                setTimeout(function() {
+                    try {
+                        messageReceived.should.be.false();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },20);
+            }).catch(err => done(err));
+
+        })
+        it('should require the OS module', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"os", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', require('os').type());
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            }).catch(err => done(err));
+
+        })
+
+    })
+
+
     describe('Logger', function () {
 
         function testLog(initCode,funcCode,expectedLevel, done) {
@@ -1603,5 +1651,4 @@ describe('function node', function() {
         });
 
     })
-    */
 });
