@@ -94,7 +94,7 @@ describe("externalModules api", function() {
         it("installs missing modules", async function() {
             externalModules.init({userDir: homeDir});
             externalModules.register("function", "libs");
-            fs.existsSync(path.join(homeDir,"externalModuels")).should.be.false();
+            fs.existsSync(path.join(homeDir,"externalModules")).should.be.false();
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "foo"}]}
             ])

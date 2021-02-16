@@ -1438,7 +1438,6 @@ describe('function node', function() {
                     }
                 },20);
             }).catch(err => done(err));
-
         })
         it('should require the OS module', function(done) {
             var flow = [
@@ -1459,9 +1458,18 @@ describe('function node', function() {
                 });
                 n1.receive({payload:"foo",topic: "bar"});
             }).catch(err => done(err));
-
         })
-
+        it('should fail if module variable name clashes with sandbox builtin', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"flow", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                should.not.exist(n1);
+                done();
+            }).catch(err => done(err));
+        })
     })
 
 
