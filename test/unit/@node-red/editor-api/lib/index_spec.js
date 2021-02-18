@@ -18,11 +18,9 @@ var should = require("should");
 var sinon = require("sinon");
 var request = require("supertest");
 var express = require("express");
-var when = require("when");
-var fs = require("fs");
-var path = require("path");
 
 var NR_TEST_UTILS = require("nr-test-utils");
+const auth = require("basic-auth");
 
 var api = NR_TEST_UTILS.require("@node-red/editor-api");
 
@@ -96,4 +94,89 @@ describe("api/index", function() {
             request(api.httpAdmin).get("/auth/login").expect(200).end(done)
         })
     });
+
+    describe('initialises api with admin middleware', function(done) {
+        it('ignores non-function values',function(done) {
+            api.init({ httpAdminRoot: true, httpAdminMiddleware: undefined },{},{},{});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            should(middlewareFound).be.empty();
+            done();
+        });
+
+        it('only accepts functions as middleware',function(done) {
+            const testMiddleware = function(req, res, next){ next(); };
+            api.init({ httpAdminRoot: true, httpAdminMiddleware: testMiddleware },{},{},{});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
+            should(middlewareFound).be.length(1);
+            done();
+        });
+    });
+
+    describe('initialises api with authentication enabled', function(done) {
+
+        it('enables an oauth/openID based authentication mechanism',function(done) {
+            const stub = sinon.stub(apiAuth, 'genericStrategy', function(){});
+            const adminAuth = { type: 'strategy', strategy: {} }
+            api.init({ httpAdminRoot: true, adminAuth },{},{},{});
+            should(stub.called).be.ok();
+            stub.restore();
+            done();
+        });
+
+        it('enables password protection',function(done) {
+            const adminAuth = { type: 'credentials' }
+            api.init({ httpAdminRoot: true, adminAuth },{},{},{});
+            
+            // is the name ("initialize") of the passport middleware present
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'initialize')
+            should(middlewareFound).be.length(1);
+            done();
+        });
+
+    });
+
+    describe('initialises api with custom cors config', function (done) {
+        const httpAdminCors = {
+            origin: "*",
+            methods: "GET,PUT,POST,DELETE"
+        };
+
+        it('uses default cors middleware when user settings absent', function(done){
+            api.init({ httpAdminRoot: true }, {}, {}, {});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            should(middlewareFound).be.length(1);
+            done();
+        })
+
+        it('enables custom cors middleware when settings present', function(done){
+            api.init({ httpAdminRoot: true, httpAdminCors }, {}, {}, {});
+            const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'corsMiddleware')
+            should(middlewareFound).be.length(2);
+            done();
+        })
+    });
+
+    describe('editor start', function (done) {
+
+        it('cannot be started when editor is disabled', function (done) {
+            const stub = sinon.stub(apiEditor, 'start', function () {
+                return Promise.resolve(true);
+            });
+            api.init({ httpAdminRoot: true, disableEditor: true }, {}, {}, {});
+            should(api.start()).resolvedWith(true);
+            stub.restore();
+            done();
+        });
+
+        it('can be started when editor enabled', function (done) {
+            const stub = sinon.stub(apiEditor, 'start');
+            api.init({ httpAdminRoot: true, disableEditor: false }, {}, {}, {});
+            api.start();
+            should(stub.called).be.true();
+            stub.restore();
+            done();
+        });
+
+    });
+
 });

@@ -142,6 +142,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/text/bidi.js",
                     "packages/node_modules/@node-red/editor-client/src/js/text/format.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/state.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/plugins.js",
                     "packages/node_modules/@node-red/editor-client/src/js/nodes.js",
                     "packages/node_modules/@node-red/editor-client/src/js/font-awesome.js",
                     "packages/node_modules/@node-red/editor-client/src/js/history.js",
@@ -461,7 +462,8 @@ module.exports = function(grunt) {
                     'packages/node_modules/@node-red/runtime/lib/hooks.js',
                     'packages/node_modules/@node-red/util/**/*.js',
                     'packages/node_modules/@node-red/editor-api/lib/index.js',
-                    'packages/node_modules/@node-red/editor-api/lib/auth/index.js'
+                    'packages/node_modules/@node-red/editor-api/lib/auth/index.js',
+                    'packages/node_modules/@node-red/registry/lib/index.js'
                 ],
                 options: {
                     destination: 'docs',
@@ -622,6 +624,11 @@ module.exports = function(grunt) {
     grunt.registerTask('default',
         'Builds editor content then runs code style checks and unit tests on all components',
         ['build','verifyPackageDependencies','jshint:editor','nyc:all']);
+
+    grunt.registerTask('no-coverage',
+        'Builds editor content then runs code style checks and unit tests on all components without code coverage',
+        ['build','verifyPackageDependencies','jshint:editor','simplemocha:all']);
+
 
     grunt.registerTask('test-core',
         'Runs code style check and unit tests on core runtime code',

@@ -653,42 +653,30 @@ describe('Node', function() {
 
     describe('#log', function() {
         it('produces a log message', function(done) {
-            var n = new RedNode({id:'123',type:'abc',z:'789'});
+            var n = new RedNode({id:'123',type:'abc',z:'789', _flow: {log:function(msg) { loginfo = msg;}}});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
-                loginfo = msg;
-            });
             n.log("a log message");
             should.deepEqual({level:Log.INFO, id:n.id,
                                type:n.type, msg:"a log message",z:'789'}, loginfo);
-            Log.log.restore();
             done();
         });
         it('produces a log message with a name', function(done) {
-            var n = new RedNode({id:'123', type:'abc', name:"barney", z:'789'});
+            var n = new RedNode({id:'123', type:'abc', name:"barney", z:'789', _flow: {log:function(msg) { loginfo = msg;}}});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
-                loginfo = msg;
-            });
             n.log("a log message");
             should.deepEqual({level:Log.INFO, id:n.id, name: "barney",
                               type:n.type, msg:"a log message",z:'789'}, loginfo);
-            Log.log.restore();
             done();
         });
     });
 
     describe('#warn', function() {
         it('produces a warning message', function(done) {
-            var n = new RedNode({id:'123',type:'abc',z:'789'});
+            var n = new RedNode({id:'123',type:'abc',z:'789', _flow: {log:function(msg) { loginfo = msg;}}});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
-                loginfo = msg;
-            });
             n.warn("a warning");
             should.deepEqual({level:Log.WARN, id:n.id,
                               type:n.type, msg:"a warning",z:'789'}, loginfo);
-            Log.log.restore();
             done();
         });
     });
@@ -696,7 +684,8 @@ describe('Node', function() {
     describe('#error', function() {
         it('handles a null error message', function(done) {
             var flow = {
-                handleError: sinon.stub()
+                handleError: sinon.stub(),
+                log:sinon.stub()
             }
             var n = new RedNode({_flow:flow, id:'123',type:'abc',z:'789'});
             var message = {a:1};
@@ -712,7 +701,8 @@ describe('Node', function() {
 
         it('produces an error message', function(done) {
             var flow = {
-                handleError: sinon.stub()
+                handleError: sinon.stub(),
+                log:sinon.stub()
             }
             var n = new RedNode({_flow:flow, id:'123',type:'abc',z:'789'});
             var message = {a:2};

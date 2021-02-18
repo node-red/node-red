@@ -1,0 +1,92 @@
+[
+    {
+        "id": "cb13761f.56c328",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 380,
+        "wires": [
+            [
+                "c607642a.78c3c8"
+            ]
+        ]
+    },
+    {
+        "id": "180b1e22.0074e2",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Convert JS object to JSON string",
+        "info": "JSON node can convert JavaScript object to JSON string.",
+        "x": 250,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "c607642a.78c3c8",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Apple\",\n    \"price\": 100,\n    \"origin\": \"Canada\"\n}",
+        "output": "json",
+        "x": 400,
+        "y": 380,
+        "wires": [
+            [
+                "bf309844.fa12e8"
+            ]
+        ]
+    },
+    {
+        "id": "5b6b130b.72a14c",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "bf309844.fa12e8",
+        "type": "json",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 570,
+        "y": 380,
+        "wires": [
+            [
+                "5b6b130b.72a14c"
+            ]
+        ]
+    }
+]

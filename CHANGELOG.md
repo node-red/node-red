@@ -1,3 +1,65 @@
+### 1.2.8: Maintenance Release
+
+Editor
+
+ - Ensure subflow help is picked up for palette tooltip Fixes #2834
+ - Improve Ru locale (#2826) @alexk111
+ - Fix scrollbars (#2825) @alexk111
+
+Runtime
+
+ - Restrict project file access to inside the project directory
+ - Validate user-provided language parameter before passing to i18n
+ - Fix grunt release mkdir issue on Node.js 14 (#2827) @alexk111
+ - Prevent crash when coreNodesDir is empty (#2831) @hardillb
+
+Nodes
+
+ - Batch node: Fixing minor typo in node's documentation (#2848) @matthiasradde
+ - Split node: Handle out of order messages as long as one of the messages has msg.parts.count set to the proper value (#2748) @s4ke
+
+### 1.2.7: Maintenance Release
+
+Editor
+
+ - Ensure subflow-scoped config nodes do not get moved on import Fixes #2789
+ - Allow TypedInput to be disabled (#2752) @bartbutenaers
+ - Allow userMenu to be explicitly enabled (#2805) @tfmf
+ - Improvements to DE translation (#2192) @ketzu
+
+
+Runtime
+
+ - Handle `undefined` error passed to node.error (#2781) @johnwang71
+ - Disable nyc coverage reporting on older node versions
+ - Improve Editor API unit test coverage (#2777) @aaronmyatt
+
+
+Nodes
+
+ - Trigger: ensure timestamp option sends .now() at point of sending
+
+
+### 1.2.6: Maintenance Release
+
+
+Editor
+
+ - Update Japanese translations for 1.2.5 (#2764) @kazuhitoyokoi
+ - Library: properly handle symlinked folders (#2768) @natcl
+
+Runtime
+
+ - Support Windows paths when installing tarball by path name Fixes #2769
+ - Fix unsecure command usage in GH Action
+
+Nodes
+
+ - Update MQTT to latest to fix Node 8 URL breakage
+
+
+
+
 ### 1.2.5: Maintenance Release
 
 Editor

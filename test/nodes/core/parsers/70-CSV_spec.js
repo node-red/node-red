@@ -18,6 +18,7 @@
 var should = require("should");
 var csvNode = require("nr-test-utils").require("@node-red/nodes/core/parsers/70-CSV.js");
 var helper = require("node-red-node-test-helper");
+const { c } = require("tar");
 
 describe('CSV node', function() {
 
@@ -132,6 +133,40 @@ describe('CSV node', function() {
                     done();
                 });
                 var testString = "1,2,3,4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow commas and spaces in the template', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b b,\"c,c\",\" d, d \"", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1, "b b":2, "c,c":3, "d, d": 4 });
+                    msg.should.have.property('columns', 'a,b b,"c,c","d, d"');
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = "1,2,3,4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
+        it('should allow passing in a tempalte as first line of CSV', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrin:true, wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1, "b b":2, "c,c":3, "d, d": 4 });
+                    msg.should.have.property('columns', 'a,b b,"c,c","d, d"');
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = 'a,b b,"c,c"," d, d "'+"\n"+"1,2,3,4"+String.fromCharCode(10);
                 n1.emit("input", {payload:testString});
             });
         });
@@ -773,4 +808,43 @@ describe('CSV node', function() {
         });
     });
 
+    it('should call done when message processing is completed', function(done) {
+        const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        const flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[[]]},
+                       { id:"c1", type:"complete", scope: ["n1"], uncaught:false, wires:[["h1"]]},
+                       { id:"h1", type:"helper", wires:[[]]} ];
+        helper.load([csvNode,completeNode], flow, function() {
+            const n1 = helper.getNode("n1");
+            const h1 = helper.getNode("h1");
+            h1.on("input", function(msg) {
+                try {
+                    msg.should.have.a.property('payload', "1,2,3,4");
+                    done();
+                } catch (e) {
+                    done(e);
+                }
+            });
+            n1.receive({payload:"1,2,3,4"});
+        });
+    });
+
+    it('should call done when input causes an error', function(done) {
+        const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+        const flow = [ { id:"n1", type:"csv", temp:"a,b,c,d", wires:[[]]},
+                       { id:"c1", type:"complete", scope: ["n1"], uncaught:false, wires:[["h1"]]},
+                       { id:"h1", type:"helper", wires:[[]]} ];
+        helper.load([csvNode,completeNode], flow, function() {
+            const n1 = helper.getNode("n1");
+            const h1 = helper.getNode("h1");
+            h1.on("input", function(msg) {
+                try {
+                    msg.should.have.a.property('payload', 1);
+                    done();
+                } catch (e) {
+                    done(e);
+                }
+            });
+            n1.receive({payload:1}); // neither object nor string
+        });
+    });
 });

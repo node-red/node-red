@@ -1,0 +1,99 @@
+[
+    {
+        "id": "1216e95b.1b1e87",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 560,
+        "wires": [
+            [
+                "e41ffbbc.de2ed8"
+            ]
+        ]
+    },
+    {
+        "id": "286828bc.9233c8",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "kind,price,origin",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 600,
+        "y": 560,
+        "wires": [
+            [
+                "9d8218c.5550ee8"
+            ]
+        ]
+    },
+    {
+        "id": "e41ffbbc.de2ed8",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "CSV data",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "text",
+        "syntax": "mustache",
+        "template": "Apple,100,Canada\nOrange,120,USA\nBanana,80,Philippines",
+        "output": "str",
+        "x": 430,
+        "y": 560,
+        "wires": [
+            [
+                "286828bc.9233c8"
+            ]
+        ]
+    },
+    {
+        "id": "9d8218c.5550ee8",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "aaa1ee8f.21e2c",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Parse CSV with specified column name as messages",
+        "info": "CSV node can specify column name of parsed objects in its settings panel.",
+        "x": 340,
+        "y": 500,
+        "wires": []
+    }
+]

@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var when = require("when");
 var path = require("path");
 var fs = require('fs-extra');
 var EventEmitter = require('events');
@@ -26,6 +25,7 @@ var NR_TEST_UTILS = require("nr-test-utils");
 var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
 var registry = NR_TEST_UTILS.require("@node-red/registry/lib/index");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
+const { events, exec, log } =  NR_TEST_UTILS.require("@node-red/util");
 
 describe('nodes/registry/installer', function() {
 
@@ -39,21 +39,15 @@ describe('nodes/registry/installer', function() {
         _: function(msg) { return msg }
     }
 
+    var execResponse;
+
     beforeEach(function() {
-        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
-            run: function() {
-                return Promise.resolve("");
-            }
-        }});
+        sinon.stub(exec,"run", () => execResponse || Promise.resolve(""))
+        installer.init({})
     });
-    function initInstaller(execResult) {
-        installer.init({log:mockLog, settings:{}, events: new EventEmitter(), exec: {
-            run: function() {
-                return execResult;
-            }
-        }});
-    }
+
     afterEach(function() {
+        execResponse = null;
         if (registry.addModule.restore) {
             registry.addModule.restore();
         }
@@ -73,7 +67,7 @@ describe('nodes/registry/installer', function() {
         if (fs.statSync.restore) {
             fs.statSync.restore();
         }
-
+        exec.run.restore();
     });
 
     describe("installs module", function() {
@@ -109,7 +103,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule("this_wont_exist").catch(function(err) {
                 err.should.have.property("code",404);
                 done();
@@ -123,7 +117,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
                     version: "0.1.1"
@@ -137,6 +131,7 @@ describe('nodes/registry/installer', function() {
         it("rejects when update requested to existing version", function(done) {
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
+                    user: true,
                     version: "0.1.1"
                 }
             });
@@ -148,6 +143,7 @@ describe('nodes/registry/installer', function() {
         it("rejects when update requested to existing version and url", function(done) {
             sinon.stub(typeRegistry,"getModuleInfo", function() {
                 return {
+                    user: true,
                     version: "0.1.1"
                 }
             });
@@ -164,7 +160,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
             }).catch(err => {
@@ -182,10 +178,10 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
 
             installer.installModule("this_wont_exist").then(function(info) {
@@ -216,7 +212,7 @@ describe('nodes/registry/installer', function() {
         it("succeeds when path is valid node-red module", function(done) {
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
             var resourcesDir = path.resolve(path.join(__dirname,"resources","local","TestNodeModule","node_modules","TestNodeModule"));
 
@@ -227,7 +223,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
             installer.installModule(resourcesDir).then(function(info) {
                 info.should.eql(nodeInfo);
                 done();
@@ -243,10 +239,10 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             var addModule = sinon.stub(registry,"addModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
 
             installer.installModule("this_wont_exist",null,"https://example/foo-0.1.1.tgz").then(function(info) {
@@ -259,19 +255,20 @@ describe('nodes/registry/installer', function() {
     describe("uninstalls module", function() {
         it("rejects invalid module names", function(done) {
             var promises = [];
-            promises.push(installer.uninstallModule("this_wont_exist "));
-            promises.push(installer.uninstallModule("this_wont_exist;no_it_really_wont"));
-            when.settle(promises).then(function(results) {
-                results[0].state.should.be.eql("rejected");
-                results[1].state.should.be.eql("rejected");
+            var rejectedCount = 0;
+
+            promises.push(installer.uninstallModule("this_wont_exist ").catch(() => {rejectedCount++}));
+            promises.push(installer.uninstallModule("this_wont_exist;no_it_really_wont").catch(() => {rejectedCount++}));
+            Promise.all(promises).then(function() {
+                rejectedCount.should.eql(2);
                 done();
-            });
+            }).catch(done);
         });
 
         it("rejects with generic error", function(done) {
             var nodeInfo = [{module:"foo",types:["a"]}];
             var removeModule = sinon.stub(registry,"removeModule",function(md) {
-                return when.resolve(nodeInfo);
+                return Promise.resolve(nodeInfo);
             });
             var res = {
                 code: 1,
@@ -280,7 +277,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.reject(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             installer.uninstallModule("this_wont_exist").then(function() {
                 done(new Error("Unexpected success"));
@@ -304,7 +301,7 @@ describe('nodes/registry/installer', function() {
             }
             var p = Promise.resolve(res);
             p.catch((err)=>{});
-            initInstaller(p)
+            execResponse = p;
 
             sinon.stub(fs,"statSync", function(fn) { return {}; });
 

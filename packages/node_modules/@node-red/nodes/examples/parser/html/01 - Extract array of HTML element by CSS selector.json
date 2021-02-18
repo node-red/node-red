@@ -1,0 +1,94 @@
+[
+    {
+        "id": "8c5224a6.201b88",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 220,
+        "y": 180,
+        "wires": [
+            [
+                "d6c67e51.0d709"
+            ]
+        ]
+    },
+    {
+        "id": "d6c67e51.0d709",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "HTML text",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "plain",
+        "template": "<html>\n    <head>\n        <title>List of Fruits</title>\n    </head>\n    <body>\n        <ul>\n            <li class=\"Item\">Apple</li>\n            <li class=\"Item\">Orange</li>\n            <li class=\"Item\">Banana</li>\n        </ul>\n    </body>\n</html>\n",
+        "output": "str",
+        "x": 390,
+        "y": 180,
+        "wires": [
+            [
+                "599a1155.61a5c"
+            ]
+        ]
+    },
+    {
+        "id": "b0d5cd89.338df",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Extract array of HTML element by CSS selector",
+        "info": "HTML node can be used to extract elements in HTML document as an array using CSS selector.",
+        "x": 280,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "599a1155.61a5c",
+        "type": "html",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "outproperty": "payload",
+        "tag": ".Item",
+        "ret": "html",
+        "as": "single",
+        "x": 550,
+        "y": 180,
+        "wires": [
+            [
+                "942b23d1.cce09"
+            ]
+        ]
+    },
+    {
+        "id": "942b23d1.cce09",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 180,
+        "wires": []
+    }
+]
