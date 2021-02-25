@@ -1,0 +1,187 @@
+[
+    {
+        "id": "c362b989.954ae8",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-cookie",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 250,
+        "y": 2200,
+        "wires": [
+            [
+                "21ddf71f.d00518"
+            ]
+        ]
+    },
+    {
+        "id": "21ddf71f.d00518",
+        "type": "function",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Format cookies",
+        "func": "msg.payload = JSON.stringify(msg.req.cookies,null,4);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 460,
+        "y": 2200,
+        "wires": [
+            [
+                "f3aa98c1.befc18"
+            ]
+        ]
+    },
+    {
+        "id": "f3aa98c1.befc18",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "page",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>Cookies</h1>\n        <a href=\"hello-cookie/add\">Add a cookie</a><br/>\n        <a href=\"hello-cookie/clear\">Clear cookies</a><br/>\n        <pre>{{ payload }}</pre>\n    </body>\n</html>",
+        "output": "str",
+        "x": 650,
+        "y": 2200,
+        "wires": [
+            [
+                "f52e2880.180968"
+            ]
+        ]
+    },
+    {
+        "id": "f52e2880.180968",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "x": 870,
+        "y": 2200,
+        "wires": []
+    },
+    {
+        "id": "9a2a9a4.0fc0768",
+        "type": "change",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Redirect to /hello-cookie",
+        "rules": [
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "302",
+                "tot": "num"
+            },
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{}",
+                "tot": "json"
+            },
+            {
+                "t": "set",
+                "p": "headers.location",
+                "pt": "msg",
+                "to": "/hello-cookie",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 670,
+        "y": 2260,
+        "wires": [
+            [
+                "f52e2880.180968"
+            ]
+        ]
+    },
+    {
+        "id": "afefb90.53dcf48",
+        "type": "function",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Add a cookie",
+        "func": "msg.cookies = { };\nmsg.cookies[\"demo-\"+(Math.floor(Math.random()*1000))] = Date.now();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 2240,
+        "wires": [
+            [
+                "9a2a9a4.0fc0768"
+            ]
+        ]
+    },
+    {
+        "id": "d5205a2c.db9018",
+        "type": "function",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Clear cookies",
+        "func": "// Find demo cookies and clear them\nvar cookieNames = Object.keys(msg.req.cookies).filter(function(cookieName) { return /^demo-/.test(cookieName);});\nmsg.cookies = {};\n\ncookieNames.forEach(function(cookieName) {\n    msg.cookies[cookieName] = null;\n});\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 460,
+        "y": 2280,
+        "wires": [
+            [
+                "9a2a9a4.0fc0768"
+            ]
+        ]
+    },
+    {
+        "id": "fda60c66.04975",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-cookie/add",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 260,
+        "y": 2240,
+        "wires": [
+            [
+                "afefb90.53dcf48"
+            ]
+        ]
+    },
+    {
+        "id": "35285a76.1f8636",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-cookie/clear",
+        "method": "get",
+        "swaggerDoc": "",
+        "x": 260,
+        "y": 2280,
+        "wires": [
+            [
+                "d5205a2c.db9018"
+            ]
+        ]
+    },
+    {
+        "id": "cb094c2f.7e34d",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Working with cookies",
+        "info": "The messages sent by the `HTTP In` node include the `msg.req.cookies` property that lists the cookies set on the current request.\n\nThe `HTTP Response` node will use the `msg.cookies` property in order to set or clear cookies.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/work-with-cookies) for details.\n",
+        "x": 220,
+        "y": 2100,
+        "wires": []
+    },
+    {
+        "id": "287a9146.683afe",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Create HTTP page for testing cookies: open http://localhost:1880/hello-cookie from Web browser. ",
+        "info": "",
+        "x": 500,
+        "y": 2160,
+        "wires": []
+    }
+]

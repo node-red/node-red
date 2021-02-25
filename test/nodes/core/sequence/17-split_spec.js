@@ -1646,6 +1646,51 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should handle join an array when using msg.parts and duplicate indexed parts arrive', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload[0].should.equal("C");
+                    msg.payload[1].should.equal("D");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "A", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "B", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "C", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "D", parts: { id:1, type:"array", ch:",", index:1, count:2 } });
+         });
+    });
+
+    it('should handle join an array when using msg.parts and duplicate indexed parts arrive and being reset halfway', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload[0].should.equal("D");
+                    msg.payload[1].should.equal("C");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "A", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "B", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ reset:true });
+            n1.receive({ payload: "C", parts: { id:1, type:"array", ch:",", index:1, count:2 } });
+            n1.receive({ payload: "D", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+         });
+    });
+
     describe('messaging API', function() {
         function mapiDoneSplitTestHelper(done, splt, spltType, stream, msgAndTimings) {
             const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
@@ -1821,4 +1866,5 @@ describe('JOIN node', function() {
         });
 
     })
+
 });

@@ -1,0 +1,174 @@
+[
+    {
+        "id": "d9a91d7e.05f0d",
+        "type": "tcp in",
+        "z": "cfd9159c.6f73e8",
+        "name": "",
+        "server": "server",
+        "host": "localhost",
+        "port": "1883",
+        "datamode": "stream",
+        "datatype": "utf8",
+        "newline": "¥n",
+        "topic": "",
+        "base64": false,
+        "x": 230,
+        "y": 740,
+        "wires": [
+            [
+                "3871d8af.25e208"
+            ]
+        ]
+    },
+    {
+        "id": "9fa8f09d.7591b",
+        "type": "inject",
+        "z": "cfd9159c.6f73e8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "\"Hello, World!¥n\"",
+        "payloadType": "jsonata",
+        "x": 190,
+        "y": 640,
+        "wires": [
+            [
+                "948a8410.ab0a08"
+            ]
+        ]
+    },
+    {
+        "id": "33df08b.753e9f8",
+        "type": "debug",
+        "z": "cfd9159c.6f73e8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "948a8410.ab0a08",
+        "type": "tcp request",
+        "z": "cfd9159c.6f73e8",
+        "server": "localhost",
+        "port": "1883",
+        "out": "char",
+        "splitc": "\\n",
+        "name": "",
+        "x": 350,
+        "y": 640,
+        "wires": [
+            [
+                "f6d6be6a.efb4c"
+            ]
+        ]
+    },
+    {
+        "id": "fbd442d8.cb273",
+        "type": "tcp out",
+        "z": "cfd9159c.6f73e8",
+        "host": "",
+        "port": "",
+        "beserver": "reply",
+        "base64": false,
+        "end": false,
+        "name": "",
+        "x": 530,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "3871d8af.25e208",
+        "type": "change",
+        "z": "cfd9159c.6f73e8",
+        "name": "set result",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "\"Received: \" & payload & \"\b\\n\"",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 400,
+        "y": 740,
+        "wires": [
+            [
+                "fbd442d8.cb273"
+            ]
+        ]
+    },
+    {
+        "id": "f6d6be6a.efb4c",
+        "type": "function",
+        "z": "cfd9159c.6f73e8",
+        "name": "Buffer to String",
+        "func": "msg.payload = msg.payload.toString();\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 540,
+        "y": 640,
+        "wires": [
+            [
+                "33df08b.753e9f8"
+            ]
+        ]
+    },
+    {
+        "id": "e1412987.91dcc8",
+        "type": "comment",
+        "z": "cfd9159c.6f73e8",
+        "name": "Send reply to client of TCP connection",
+        "info": "Input message from `TCP in` node may be passed to `TCP out` node to return a reply to client.\n",
+        "x": 230,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "5f43905f.2425d",
+        "type": "comment",
+        "z": "cfd9159c.6f73e8",
+        "name": "↓ Accept request",
+        "info": "",
+        "x": 220,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "a6f57329.c87c6",
+        "type": "comment",
+        "z": "cfd9159c.6f73e8",
+        "name": "↓ Reply result",
+        "info": "",
+        "x": 550,
+        "y": 700,
+        "wires": []
+    }
+]
