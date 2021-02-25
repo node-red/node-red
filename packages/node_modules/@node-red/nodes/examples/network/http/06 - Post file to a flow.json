@@ -1,0 +1,126 @@
+[
+    {
+        "id": "59760c9d.172d94",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-upload",
+        "method": "post",
+        "upload": true,
+        "swaggerDoc": "",
+        "x": 270,
+        "y": 1980,
+        "wires": [
+            [
+                "e30073f3.ad429"
+            ]
+        ]
+    },
+    {
+        "id": "d0b3e8b4.2cfde8",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Post file to a flow",
+        "info": "The `HTTP In` node can listen for POST requests for file upload.  Information for uploaded files can be accessed from `msg.req.files`.\n",
+        "x": 200,
+        "y": 1760,
+        "wires": []
+    },
+    {
+        "id": "a888a043.ebb72",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-upload",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 270,
+        "y": 1880,
+        "wires": [
+            [
+                "14b950b.0ed5aaf"
+            ]
+        ]
+    },
+    {
+        "id": "2ccb67c7.02c568",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 590,
+        "y": 1880,
+        "wires": []
+    },
+    {
+        "id": "14b950b.0ed5aaf",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <form method=\"POST\" enctype=\"multipart/form-data\">\n            <div>\n                <label for=\"file\">Select file to upload:</label>\n                <input type=\"file\" id=\"file\" name=\"file\"/>\n            </div>\n            <div>\n                <button type=\"submit\">OK</button>\n            </div>\n        </form>\n    </body>\n</html>",
+        "output": "str",
+        "x": 440,
+        "y": 1880,
+        "wires": [
+            [
+                "2ccb67c7.02c568"
+            ]
+        ]
+    },
+    {
+        "id": "54f2edb5.62fca4",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 590,
+        "y": 1980,
+        "wires": []
+    },
+    {
+        "id": "e30073f3.ad429",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>Hello {{req.files.0.originalname}}</h1>\n    </body>\n</html>",
+        "output": "str",
+        "x": 440,
+        "y": 1980,
+        "wires": [
+            [
+                "54f2edb5.62fca4"
+            ]
+        ]
+    },
+    {
+        "id": "6c3c1bf.48cc2e4",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Create HTTP page for file upload: open http://localhost:1880/hello-upload \\n from Web browser.  Then upload a file.",
+        "info": "",
+        "x": 440,
+        "y": 1820,
+        "wires": []
+    },
+    {
+        "id": "c6242caa.8ec63",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Serve POST request for file upload",
+        "info": "",
+        "x": 320,
+        "y": 1940,
+        "wires": []
+    }
+]

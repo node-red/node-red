@@ -1,0 +1,226 @@
+[
+    {
+        "id": "87bd706a.aec93",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Create an HTTP Endpoint",
+        "info": "The `HTTP In` and `HTTP Response` pair of nodes are the starting point for all HTTP endpoints you create.\n\nAny flow that starts with an `HTTP In` node must have a path to an `HTTP Response` node otherwise requests will eventually timeout.\n\nThe `HTTP Response` node uses the `payload` property of messages it receives as the body of the response. Other properties can be used to further customize the response - they are covered in other recipes.\n\nThe `Template` node provides a convenient way to embed a body of content into a flow. It may be desirable to maintain such static content outside of the flow.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/create-an-http-endpoint) for details.",
+        "x": 230,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "7f10afe.b1faa5",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 240,
+        "y": 140,
+        "wires": [
+            [
+                "db134063.83b7a"
+            ]
+        ]
+    },
+    {
+        "id": "d5ce67fc.e6e608",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 490,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "5a89ce70.db6d5",
+        "type": "http request",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:1880/hello",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 390,
+        "y": 280,
+        "wires": [
+            [
+                "18b48ed8.1072e1"
+            ]
+        ]
+    },
+    {
+        "id": "31f7aabb.3fbe06",
+        "type": "inject",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 280,
+        "wires": [
+            [
+                "5a89ce70.db6d5"
+            ]
+        ]
+    },
+    {
+        "id": "18b48ed8.1072e1",
+        "type": "debug",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "3c61c12c.5abaae",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Send HTTP request: http://localhost:1880/hello",
+        "info": "`http request` node can be used to make an **HTTP GET** request.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/simple-get-request) for details.",
+        "x": 300,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "db134063.83b7a",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "page",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>Hello World!</h1>\n    </body>\n</html>",
+        "output": "str",
+        "x": 370,
+        "y": 140,
+        "wires": [
+            [
+                "d5ce67fc.e6e608"
+            ]
+        ]
+    },
+    {
+        "id": "83e766b1.154438",
+        "type": "http request",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 390,
+        "y": 360,
+        "wires": [
+            [
+                "188bc18.5487a3f"
+            ]
+        ]
+    },
+    {
+        "id": "89c4d7a7.f8d798",
+        "type": "inject",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "url",
+                "v": "http://localhost:1880/hello",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 360,
+        "wires": [
+            [
+                "83e766b1.154438"
+            ]
+        ]
+    },
+    {
+        "id": "188bc18.5487a3f",
+        "type": "debug",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "a65364a3.c72a58",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Set URL in HTTP request node setting panel",
+        "info": "`http request` node can be used to make an **HTTP GET** request.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/simple-get-request) for details.",
+        "x": 490,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "47396a8e.6804f4",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Set URL via url property of input message of HTTP request node",
+        "info": "Target URL of `http request` node can be specified via `url` property of input message.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/set-request-url) for details.",
+        "x": 550,
+        "y": 320,
+        "wires": []
+    }
+]

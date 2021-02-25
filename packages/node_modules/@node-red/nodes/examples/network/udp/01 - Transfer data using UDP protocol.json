@@ -1,0 +1,92 @@
+[
+    {
+        "id": "73279b5.5151664",
+        "type": "udp in",
+        "z": "92236e19.9e4cb",
+        "name": "",
+        "iface": "",
+        "port": "1881",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "",
+        "datatype": "utf8",
+        "x": 220,
+        "y": 220,
+        "wires": [
+            [
+                "d98b60d3.7331e"
+            ]
+        ]
+    },
+    {
+        "id": "fb19b98f.d5aa58",
+        "type": "udp out",
+        "z": "92236e19.9e4cb",
+        "name": "",
+        "addr": "localhost",
+        "iface": "",
+        "port": "1881",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 410,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "33f18897.35d5b8",
+        "type": "inject",
+        "z": "92236e19.9e4cb",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Hello, World!",
+        "payloadType": "str",
+        "x": 230,
+        "y": 160,
+        "wires": [
+            [
+                "fb19b98f.d5aa58"
+            ]
+        ]
+    },
+    {
+        "id": "d98b60d3.7331e",
+        "type": "debug",
+        "z": "92236e19.9e4cb",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "f86495aa.8a9848",
+        "type": "comment",
+        "z": "92236e19.9e4cb",
+        "name": "Transfer data using UDP protocol",
+        "info": "`UDP in` node can be used to receive data from `UDP out` node using UDP protocol.",
+        "x": 230,
+        "y": 100,
+        "wires": []
+    }
+]

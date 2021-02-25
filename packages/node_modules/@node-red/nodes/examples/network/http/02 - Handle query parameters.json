@@ -1,0 +1,135 @@
+[
+    {
+        "id": "ac0b58f6.c85138",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-query",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 260,
+        "y": 560,
+        "wires": [
+            [
+                "d9c345c7.c2e148"
+            ]
+        ]
+    },
+    {
+        "id": "c110b7f7.22f238",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 530,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "976b2bb3.f5ff98",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Handle query parameters passed to an HTTP endpoint",
+        "info": "The `HTTP in` node can accept query parameters passwd to an HTTP endpoint.  It use the `msg.req.query` property of the message sent by the HTTP In node to access the parameters.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/handle-query-parameters) for details.",
+        "x": 320,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "77a6b44f.4695ac",
+        "type": "inject",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 660,
+        "wires": [
+            [
+                "9094aba0.095678"
+            ]
+        ]
+    },
+    {
+        "id": "f523b8e.b5c8c48",
+        "type": "debug",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "9a63c9c5.949128",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Send HTTP GET request: http://localhost:1880/hello-query?name=Nick",
+        "info": "`http request` node can be used to send **HTTP GET** request.",
+        "x": 370,
+        "y": 620,
+        "wires": []
+    },
+    {
+        "id": "d9c345c7.c2e148",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "page",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>Hello {{req.query.name}}!</h1>\n    </body>\n</html>",
+        "output": "str",
+        "x": 410,
+        "y": 560,
+        "wires": [
+            [
+                "c110b7f7.22f238"
+            ]
+        ]
+    },
+    {
+        "id": "9094aba0.095678",
+        "type": "http request",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:1880/hello-query?name=Nick",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 390,
+        "y": 660,
+        "wires": [
+            [
+                "f523b8e.b5c8c48"
+            ]
+        ]
+    }
+]

@@ -44,6 +44,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -51,13 +56,16 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => ["lib1"] },
                 storage: {}
             })
             return settings.getRuntimeSettings({}).then(result => {
                 result.should.have.property("httpNodeRoot","testHttpNodeRoot");
                 result.should.have.property("version","testVersion");
                 result.should.have.property("paletteCategories",["red","blue","green"]);
+                result.should.have.property("libraries",["lib1"]);
                 result.should.have.property("testNodeSetting","helloWorld");
+                result.should.have.property("testPluginSettings","helloPluginWorld");
                 result.should.not.have.property("foo",123);
                 result.should.have.property("flowEncryptionType","test-key-type");
                 result.should.not.have.property("user");
@@ -75,6 +83,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -82,6 +95,7 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {}
             })
             return settings.getRuntimeSettings({
@@ -111,6 +125,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -118,6 +137,7 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         getActiveProject: () => 'test-active-project',
@@ -162,6 +182,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -169,6 +194,7 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         getActiveProject: () => 'test-active-project',
@@ -203,6 +229,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -210,6 +241,7 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         flowFileExists: () => true,
@@ -248,6 +280,11 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
@@ -255,6 +292,7 @@ describe("runtime-api/settings", function() {
                     installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         flowFileExists: () => false,
