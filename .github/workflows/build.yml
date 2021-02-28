@@ -1,5 +1,6 @@
 name: PublishDockerImage
-
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 on:
   release:
     types: [published]
@@ -27,8 +28,6 @@ jobs:
         with:
             node-version: '12'
       - run: node ./node-red/.github/scripts/update-node-red-docker.js
-        env:
-          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
       - name: Create Docker Pull Request
         uses: peter-evans/create-pull-request@v2
         with:

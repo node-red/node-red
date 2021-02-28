@@ -33,11 +33,11 @@ describe("api/editor/theme", function () {
         theme.init({settings: {}});
         fs.statSync.restore();
     });
-    it("applies the default theme", function () {
+    it("applies the default theme", async function () {
         var result = theme.init({});
         should.not.exist(result);
 
-        var context = theme.context();
+        var context = await theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Node-RED");
         context.page.should.have.a.property("favicon", "favicon.ico");
@@ -52,7 +52,7 @@ describe("api/editor/theme", function () {
         should.not.exist(theme.settings());
     });
 
-    it("picks up custom theme", function () {
+    it("picks up custom theme", async function () {
         theme.init({
             editorTheme: {
                 page: {
@@ -104,7 +104,7 @@ describe("api/editor/theme", function () {
 
         theme.app();
 
-        var context = theme.context();
+        var context = await theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Test Page Title");
         context.page.should.have.a.property("favicon", "theme/favicon/favicon");
@@ -140,6 +140,21 @@ describe("api/editor/theme", function () {
         settings.palette.should.have.a.property("theme", [{ category: ".*", type: ".*", color: "#f0f" }]);
         settings.should.have.a.property("projects");
         settings.projects.should.have.a.property("enabled", false);
+    });
+
+    it("test explicit userMenu set to true in theme setting", function () {
+      theme.init({
+          editorTheme: {
+              userMenu: true,
+          }
+      });
+
+      theme.app();
+
+      var settings = theme.settings();
+      settings.should.have.a.property("userMenu");
+      settings.userMenu.should.be.eql(true);
+
     });
 
 });

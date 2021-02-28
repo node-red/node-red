@@ -1,0 +1,22 @@
+<script type="text/javascript">
+    RED.plugins.registerPlugin("node-red-library-filestore", {
+        type: "node-red-library-source",
+        name: "Local File-System Library",
+        icon: "font-awesome/fa-hdd-o",
+        defaults: {
+            path: { value: ""},
+            // secret: { type: "password" }
+        }
+    })
+
+
+
+    RED.plugins.registerPlugin("node-red-library-dbstore", {
+        type: "node-red-library-source",
+        name: "Database Library",
+        icon: "font-awesome/fa-database",
+        defaults: {
+            connection: { value: ""}
+        }
+    })
+</script>

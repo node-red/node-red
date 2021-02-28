@@ -1,0 +1,140 @@
+[
+    {
+        "id": "1ccc20e.71730df",
+        "type": "http in",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "url": "/hello-headers",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 270,
+        "y": 1260,
+        "wires": [
+            [
+                "3a62f641.2c0e8a"
+            ]
+        ]
+    },
+    {
+        "id": "bc626348.1496d",
+        "type": "http response",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 550,
+        "y": 1260,
+        "wires": []
+    },
+    {
+        "id": "b13b7c19.79cbd",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Access HTTP request headers",
+        "info": " `msg.req.headers` property of the message sent by the `HTTP In` node to access the headers.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/access-http-request-headers) for details.",
+        "x": 240,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "7fe0fee5.f3ed7",
+        "type": "http request",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://localhost:1880/hello-headers",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 390,
+        "y": 1360,
+        "wires": [
+            [
+                "65b13d57.700074"
+            ]
+        ]
+    },
+    {
+        "id": "65b13d57.700074",
+        "type": "debug",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 550,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "3a62f641.2c0e8a",
+        "type": "template",
+        "z": "d41b4dd3.ecd6a",
+        "name": "page",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "html",
+        "syntax": "mustache",
+        "template": "<html>\n    <head></head>\n    <body>\n        <h1>User agent: {{req.headers.user-agent}}</h1>\n    </body>\n</html>",
+        "output": "str",
+        "x": 430,
+        "y": 1260,
+        "wires": [
+            [
+                "bc626348.1496d"
+            ]
+        ]
+    },
+    {
+        "id": "757fe655.e28558",
+        "type": "inject",
+        "z": "d41b4dd3.ecd6a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "headers",
+                "v": "{\"User-Agent\":\"Node-RED\"}",
+                "vt": "json"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 1360,
+        "wires": [
+            [
+                "7fe0fee5.f3ed7"
+            ]
+        ]
+    },
+    {
+        "id": "5195095.03b4cf8",
+        "type": "comment",
+        "z": "d41b4dd3.ecd6a",
+        "name": "Set HTTP request header & send HTTP GET request: http://localhost:1880/hello-headers",
+        "info": "The field value pairs of the request headers \nyou would like to include in the message sent to the `HTTP request` node can be specified by setting `the msg.headers` field.\n\nSee Node-RED cookbook [item](https://cookbook.nodered.org/http/set-request-header) for details.",
+        "x": 430,
+        "y": 1320,
+        "wires": []
+    }
+]
