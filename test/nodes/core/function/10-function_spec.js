@@ -1416,11 +1416,26 @@ describe('function node', function() {
 
     describe('externalModules', function() {
 
+        it('should fail if using OS module without functionExternalModules set to true', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"os", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                should.not.exist(n1);
+                done();
+            }).catch(err => done(err));
+        })
+
         it('should fail if using OS module without it listed in libs', function(done) {
             var flow = [
                 {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;"},
                 {id:"n2", type:"helper"}
             ];
+            helper.settings({
+                functionExternalModules: true
+            })
             helper.load(functionNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -1444,6 +1459,9 @@ describe('function node', function() {
                 {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"os", module:"os"}]},
                 {id:"n2", type:"helper"}
             ];
+            helper.settings({
+                functionExternalModules: true
+            })
             helper.load(functionNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -1464,6 +1482,9 @@ describe('function node', function() {
                 {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"flow", module:"os"}]},
                 {id:"n2", type:"helper"}
             ];
+            helper.settings({
+                functionExternalModules: true
+            })
             helper.load(functionNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 should.not.exist(n1);
