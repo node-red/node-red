@@ -36,6 +36,7 @@ describe('flows/index', function() {
 
     var flowCreate;
     var getType;
+    var checkFlowDependencies;
 
     var mockLog = {
         log: sinon.stub(),
@@ -52,9 +53,16 @@ describe('flows/index', function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
             return type.indexOf('missing') === -1;
         });
+        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies", async function(flow) {
+            if (flow[0].id === "node-with-missing-modules") {
+                throw new Error("Missing module");
+            }
+        });
     });
+
     after(function() {
         getType.restore();
+        checkFlowDependencies.restore();
     });
 
 
@@ -306,7 +314,7 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
+                return flows.startFlows();
             });
         });
         it('does not start if nodes missing', function(done) {
@@ -321,9 +329,14 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
-                flowCreate.called.should.be.false();
-                done();
+                return flows.startFlows();
+            }).then(() => {
+                try {
+                    flowCreate.called.should.be.false();
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
 
@@ -339,9 +352,9 @@ describe('flows/index', function() {
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
+                return flows.startFlows();
+            }).then(() => {
                 flowCreate.called.should.be.false();
-
                 events.emit("type-registered","missing");
                 setTimeout(function() {
                     flowCreate.called.should.be.false();
@@ -354,7 +367,44 @@ describe('flows/index', function() {
             });
         });
 
+        it('does not start if external modules missing', function(done) {
+            var originalConfig = [
+                {id:"node-with-missing-modules",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
 
+            storage.getFlows = function() {
+                return Promise.resolve({flows:originalConfig});
+            }
+            var receivedEvent = null;
+            var handleEvent = function(payload) {
+                receivedEvent = payload;
+            }
+
+            events.on("runtime-event",handleEvent);
+
+            //{id:"runtime-state",payload:{error:"missing-modules", type:"warning",text:"notification.warnings.missing-modules",modules:missingModules},retain:true});"
+
+
+            flows.init({log:mockLog, settings:{},storage:storage});
+            flows.load().then(flows.startFlows).then(() => {
+                events.removeListener("runtime-event",handleEvent);
+                try {
+                    flowCreate.called.should.be.false();
+                    receivedEvent.should.have.property('id','runtime-state');
+                    receivedEvent.should.have.property('payload',
+                       { error: 'missing-modules',
+                         type: 'warning',
+                         text: 'notification.warnings.missing-modules',
+                         modules: [] }
+                     );
+
+                    done();
+                }catch(err) {
+                    done(err)
+                }
+            });
+        });
 
     });
 
