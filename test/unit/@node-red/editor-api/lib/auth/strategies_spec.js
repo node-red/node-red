@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require('when');
 var sinon = require('sinon');
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -37,7 +36,7 @@ describe("api/auth/strategies", function() {
 
         it('Handles authentication failure',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
 
             strategies.passwordTokenExchange({},"user","password","scope",function(err,token) {
@@ -53,7 +52,7 @@ describe("api/auth/strategies", function() {
 
         it('Handles scope overreach',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
-                return when.resolve({username:"user",permissions:"read"});
+                return Promise.resolve({username:"user",permissions:"read"});
             });
 
             strategies.passwordTokenExchange({},"user","password","*",function(err,token) {
@@ -69,14 +68,14 @@ describe("api/auth/strategies", function() {
 
         it('Creates new token on authentication success',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
-                return when.resolve({username:"user",permissions:"*"});
+                return Promise.resolve({username:"user",permissions:"*"});
             });
             var tokenDetails = {};
             var tokenCreate = sinon.stub(Tokens,"create",function(username,client,scope) {
                 tokenDetails.username = username;
                 tokenDetails.client = client;
                 tokenDetails.scope = scope;
-                return when.resolve({accessToken: "123456"});
+                return Promise.resolve({accessToken: "123456"});
             });
 
             strategies.passwordTokenExchange({id:"myclient"},"user","password","read",function(err,token) {
@@ -100,7 +99,7 @@ describe("api/auth/strategies", function() {
     describe("Anonymous Strategy", function() {
         it('Succeeds if anon user enabled',function(done) {
             var userDefault = sinon.stub(Users,"default",function() {
-                return when.resolve("anon");
+                return Promise.resolve("anon");
             });
             strategies.anonymousStrategy._success = strategies.anonymousStrategy.success;
             strategies.anonymousStrategy.success = function(user) {
@@ -113,7 +112,7 @@ describe("api/auth/strategies", function() {
         });
         it('Fails if anon user not enabled',function(done) {
             var userDefault = sinon.stub(Users,"default",function() {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
             strategies.anonymousStrategy._fail = strategies.anonymousStrategy.fail;
             strategies.anonymousStrategy.fail = function(err) {
@@ -129,10 +128,65 @@ describe("api/auth/strategies", function() {
         })
     });
 
+    describe("Tokens Strategy", function() {
+        it('Succeeds if tokens user enabled custom header',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function(token) {
+                return Promise.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "x-test-token";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-1234");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"x-test-token":"1234"}});
+        });
+        it('Succeeds if tokens user enabled default header',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function(token) {
+                return Promise.resolve("tokens-"+token);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._success = strategies.tokensStrategy.success;
+            strategies.tokensStrategy.success = function(user) {
+                user.should.equal("tokens-1234");
+                strategies.tokensStrategy.success = strategies.tokensStrategy._success;
+                delete strategies.tokensStrategy._success;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
+        });
+        it('Fails if tokens user not enabled',function(done) {
+            var userTokens = sinon.stub(Users,"tokens",function() {
+                return Promise.resolve(null);
+            });
+            var userTokenHeader = sinon.stub(Users,"tokenHeader",function(token) {
+                return "authorization";
+            });
+            strategies.tokensStrategy._fail = strategies.tokensStrategy.fail;
+            strategies.tokensStrategy.fail = function(err) {
+                err.should.equal(401);
+                strategies.tokensStrategy.fail = strategies.tokensStrategy._fail;
+                delete strategies.tokensStrategy._fail;
+                done();
+            };
+            strategies.tokensStrategy.authenticate({headers:{"authorization":"Bearer 1234"}});
+        });
+        afterEach(function() {
+            Users.tokens.restore();
+            Users.tokenHeader.restore();
+        })
+    });
+
     describe("Bearer Strategy", function() {
         it('Rejects invalid token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
 
             strategies.bearerStrategy("1234",function(err,user) {
@@ -149,10 +203,10 @@ describe("api/auth/strategies", function() {
         });
         it('Accepts valid token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
-                return when.resolve({user:"user",scope:"scope"});
+                return Promise.resolve({user:"user",scope:"scope"});
             });
             var getUser = sinon.stub(Users,"get",function(username) {
-                return when.resolve("aUser");
+                return Promise.resolve("aUser");
             });
 
             strategies.bearerStrategy("1234",function(err,user,opts) {
@@ -171,10 +225,10 @@ describe("api/auth/strategies", function() {
         });
         it('Fail if no user for token',function(done) {
             var getToken = sinon.stub(Tokens,"get",function(token) {
-                return when.resolve({user:"user",scope:"scope"});
+                return Promise.resolve({user:"user",scope:"scope"});
             });
             var getUser = sinon.stub(Users,"get",function(username) {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
 
             strategies.bearerStrategy("1234",function(err,user,opts) {
@@ -197,7 +251,7 @@ describe("api/auth/strategies", function() {
         it('Accepts valid client',function(done) {
             var testClient = {id:"node-red-editor",secret:"not_available"};
             var getClient = sinon.stub(Clients,"get",function(client) {
-                return when.resolve(testClient);
+                return Promise.resolve(testClient);
             });
 
             strategies.clientPasswordStrategy(testClient.id,testClient.secret,function(err,client) {
@@ -215,7 +269,7 @@ describe("api/auth/strategies", function() {
         it('Rejects invalid client secret',function(done) {
             var testClient = {id:"node-red-editor",secret:"not_available"};
             var getClient = sinon.stub(Clients,"get",function(client) {
-                return when.resolve(testClient);
+                return Promise.resolve(testClient);
             });
 
             strategies.clientPasswordStrategy(testClient.id,"invalid_secret",function(err,client) {
@@ -232,7 +286,7 @@ describe("api/auth/strategies", function() {
         });
         it('Rejects invalid client id',function(done) {
             var getClient = sinon.stub(Clients,"get",function(client) {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
             strategies.clientPasswordStrategy("invalid_id","invalid_secret",function(err,client) {
                 try {
@@ -250,7 +304,7 @@ describe("api/auth/strategies", function() {
         var userAuthentication;
         it('Blocks after 5 failures',function(done) {
             userAuthentication = sinon.stub(Users,"authenticate",function(username,password) {
-                return when.resolve(null);
+                return Promise.resolve(null);
             });
             for (var z=0; z<5; z++) {
                 strategies.passwordTokenExchange({},"user","badpassword","scope",function(err,token) {

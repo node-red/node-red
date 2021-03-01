@@ -102,20 +102,20 @@ describe('trigger node', function() {
     function basicTest(type, val, rval) {
         it('should output 1st value when triggered ('+type+')', function(done) {
             var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:val, op1type:type, op2:"", op2type:"null", duration:"20", wires:[["n2"]] },
-                        {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             process.env[val] = rval;
             helper.load(triggerNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-			if (rval) {
-			    msg.should.have.property("payload");
-			    should.deepEqual(msg.payload, rval);
-			}
-			else {
-			    msg.should.have.property("payload", val);
-			}
+                        if (rval) {
+                            msg.should.have.property("payload");
+                            should.deepEqual(msg.payload, rval);
+                        }
+                        else {
+                            msg.should.have.property("payload", val);
+                        }
                         delete process.env[val];
                         done();
                     }
@@ -127,7 +127,7 @@ describe('trigger node', function() {
 
         it('should output 2st value when triggered ('+type+')', function(done) {
             var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"str", op2:val, op2type:type, duration:"20", wires:[["n2"]] },
-                        {id:"n2", type:"helper"} ];
+                {id:"n2", type:"helper"} ];
             process.env[val] = rval;
             helper.load(triggerNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -136,17 +136,17 @@ describe('trigger node', function() {
                 n2.on("input", function(msg) {
                     try {
                         if (c === 0) {
-			    msg.should.have.property("payload", "foo");
+                            msg.should.have.property("payload", "foo");
                             c++;
                         }
                         else {
-			    if (rval) {
-			        msg.should.have.property("payload");
-			        should.deepEqual(msg.payload, rval);
-			    }
-			    else {
-			        msg.should.have.property("payload", val);
-			    }
+                            if (rval) {
+                                msg.should.have.property("payload");
+                                should.deepEqual(msg.payload, rval);
+                            }
+                            else {
+                                msg.should.have.property("payload", val);
+                            }
                             delete process.env[val];
                             done();
                         }
@@ -232,6 +232,65 @@ describe('trigger node', function() {
             },30);
         });
     });
+
+    it('should ignore msg.delay if overrideDelay not set', function(done) {
+        var flow = [
+            {"id":"n1", "type":"trigger", "name":"triggerNode", duration:"50",wires:[["n2"]] },
+            {id:"n2", type:"helper"}
+        ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            var firstTime;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    firstTime = Date.now();
+                } else if (c === 1) {
+                    try {
+                        var delta = Date.now() - firstTime;
+                        delta.should.be.greaterThan(30);
+                        delta.should.be.lessThan(100);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+                c++;
+            });
+            n1.emit("input", {payload:null, delay: 300});
+        });
+    });
+
+    it('should use msg.delay if overrideDelay is set', function(done) {
+        var flow = [
+            {"id":"n1", "type":"trigger", "name":"triggerNode", overrideDelay: true, duration:"50",wires:[["n2"]] },
+            {id:"n2", type:"helper"}
+        ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            var firstTime;
+            n2.on("input", function(msg) {
+                if (c === 0) {
+                    firstTime = Date.now();
+                } else if (c === 1) {
+                    try {
+                        var delta = Date.now() - firstTime;
+                        delta.should.be.greaterThan(270);
+                        delta.should.be.lessThan(380);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+                c++;
+            });
+            n1.emit("input", {payload:null, delay: 300});
+        });
+    });
+
 
     it('should handle true and false as strings and delay of 0', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"true",op1type:"val",op2:"false",op2type:"val",duration:"30", wires:[["n2"]] },
@@ -378,6 +437,51 @@ describe('trigger node', function() {
         });
     });
 
+    it('should handle multiple other properties individually if asked to do so', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", bytopic:"topic", topic:"foo", op1:"1", op2:"0", op1type:"num", op2type:"num", duration:"30", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    c += 1;
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "A");
+                    }
+                    else if (c === 2) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "B");
+                    }
+                    else if (c === 3) {
+                        msg.should.have.a.property("payload", 1);
+                        msg.should.have.a.property("foo", "C");
+                    }
+                    else if (c === 4) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "A");
+                    }
+                    else if (c === 5) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "B");
+                    }
+                    else if (c === 6) {
+                        msg.should.have.a.property("payload", 0);
+                        msg.should.have.a.property("foo", "C");
+                        done();
+                    }
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.emit("input", {payload:1,foo:"A"});
+            n1.emit("input", {payload:2,foo:"B"});
+            n1.emit("input", {payload:3,foo:"C"});
+        });
+    });
+
     it('should be able to return things from flow and global context variables', function(done) {
         var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
             function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
@@ -408,8 +512,8 @@ describe('trigger node', function() {
 
     it('should be able to return things from persistable flow and global context variables', function (done) {
         var flow = [{"id": "n1", "type": "trigger", "name": "triggerNode", "op1": "#:(memory1)::foo", "op1type": "flow",
-                     "op2": "#:(memory1)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
-                    {"id": "n2", "type": "helper"}];
+            "op2": "#:(memory1)::bar", "op2type": "global", "duration": "20", "wires": [["n2"]], "z": "flow" },
+        {"id": "n2", "type": "helper"}];
         helper.load(triggerNode, flow, function () {
             initContext(function () {
                 var n1 = helper.getNode("n1");
@@ -442,11 +546,11 @@ describe('trigger node', function() {
 
     it('should be able to return things from multiple persistable global context variables', function (done) {
         var flow = [{"id": "n1", "z": "flow", "type": "trigger",
-                     "duration": "20", "wires": [["n2"]],
-                     "op1": "#:(memory1)::val", "op1type": "global",
-                     "op2": "#:(memory2)::val", "op2type": "global"
-                    },
-                    {"id": "n2", "type": "helper"}];
+            "duration": "20", "wires": [["n2"]],
+            "op1": "#:(memory1)::val", "op1type": "global",
+            "op2": "#:(memory2)::val", "op2type": "global"
+        },
+        {"id": "n2", "type": "helper"}];
         helper.load(triggerNode, flow, function () {
             initContext(function () {
                 var n1 = helper.getNode("n1");
@@ -481,11 +585,11 @@ describe('trigger node', function() {
 
     it('should be able to return things from multiple persistable flow context variables', function (done) {
         var flow = [{"id": "n1", "z": "flow", "type": "trigger",
-                     "duration": "20", "wires": [["n2"]],
-                     "op1": "#:(memory1)::val", "op1type": "flow",
-                     "op2": "#:(memory2)::val", "op2type": "flow"
-                    },
-                    {"id": "n2", "type": "helper"}];
+            "duration": "20", "wires": [["n2"]],
+            "op1": "#:(memory1)::val", "op1type": "flow",
+            "op2": "#:(memory2)::val", "op2type": "flow"
+        },
+        {"id": "n2", "type": "helper"}];
         helper.load(triggerNode, flow, function () {
             initContext(function () {
                 var n1 = helper.getNode("n1");
@@ -520,11 +624,11 @@ describe('trigger node', function() {
 
     it('should be able to return things from multiple persistable flow & global context variables', function (done) {
         var flow = [{"id": "n1", "z": "flow", "type": "trigger",
-                     "duration": "20", "wires": [["n2"]],
-                     "op1": "#:(memory1)::val", "op1type": "flow",
-                     "op2": "#:(memory2)::val", "op2type": "global"
-                    },
-                    {"id": "n2", "type": "helper"}];
+            "duration": "20", "wires": [["n2"]],
+            "op1": "#:(memory1)::val", "op1type": "flow",
+            "op2": "#:(memory2)::val", "op2type": "global"
+        },
+        {"id": "n2", "type": "helper"}];
         helper.load(triggerNode, flow, function () {
             initContext(function () {
                 var n1 = helper.getNode("n1");
@@ -600,30 +704,39 @@ describe('trigger node', function() {
     });
 
     it('should be able to reset correctly having not output anything on second edge', function(done) {
-        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"nul", op1:"true",op1type:"val", op2:"false", duration:"35", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op2type:"nul", op1:"true",op1type:"val", op2:"false", duration:"100", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(triggerNode, flow, function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             var c = 0;
+            var errors = [];
             n2.on("input", function(msg) {
                 try {
+                    msg.should.have.a.property("topic", "pass")
                     msg.should.have.a.property("payload", true);
                     c += 1;
                 }
-                catch(err) { done(err); }
+                catch(err) { errors.push(err) }
             });
             setTimeout( function() {
-                c.should.equal(3); // should only have had one output.
-                done();
-            },300);
-            n1.emit("input", {payload:1});
+                if (errors.length > 0) {
+                    done(errors[0])
+                } else {
+                    c.should.equal(2);
+                    done();
+                }
+            },350);
+            n1.emit("input", {payload:1, topic:"pass"});
             setTimeout( function() {
-                n1.emit("input", {payload:2});
-            },100);
+                n1.emit("input", {payload:2, topic:"should-block"});
+            },50);
             setTimeout( function() {
-                n1.emit("input", {payload:3});
+                n1.emit("input", {payload:3, topic:"pass"});
             },200);
+            setTimeout( function() {
+                n1.emit("input", {payload:2, topic:"should-block"});
+            },250);
         });
     });
 
@@ -736,10 +849,12 @@ describe('trigger node', function() {
                 try {
                     if (c === 0) {
                         msg.should.have.a.property("payload", "Goodbye");
+                        msg.should.have.a.property("topic", "test2");
                         c += 1;
                     }
                     else {
                         msg.should.have.a.property("payload", "World");
+                        msg.should.have.a.property("topic", "test3");
                         (Date.now() - ss).should.be.greaterThan(70);
                         done();
                     }
@@ -747,13 +862,48 @@ describe('trigger node', function() {
                 catch(err) { done(err); }
             });
             var ss = Date.now();
-            n1.emit("input", {payload:"Hello"});
+            n1.emit("input", {payload:"Hello", topic:"test1"});
             setTimeout( function() {
-                n1.emit("input", {payload:"Goodbye"});
+                n1.emit("input", {payload:"Goodbye", topic:"test2"});
             },20);
             setTimeout( function() {
-                n1.emit("input", {payload:"World"});
+                n1.emit("input", {payload:"World", topic:"test3"});
             },80);
+        });
+    });
+
+    it('should be able output the 2nd payload and handle multiple topics', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"false", op1type:"nul", op2type:"payl", op1:"false", op2:"true", duration:"80", bytopic:"topic", wires:[["n2"]] },
+            {id:"n2", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "Goodbye1");
+                        msg.should.have.a.property("topic", "test1");
+                        c += 1;
+                    }
+                    else {
+                        msg.should.have.a.property("payload", "Goodbye2");
+                        msg.should.have.a.property("topic", "test2");
+                        done();
+                    }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"Hello1", topic:"test1"});
+            setTimeout( function() {
+                n1.emit("input", {payload:"Hello2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye2", topic:"test2"});
+            },20);
+            setTimeout( function() {
+                n1.emit("input", {payload:"Goodbye1", topic:"test1"});
+            },20);
         });
     });
 
@@ -778,6 +928,40 @@ describe('trigger node', function() {
                 catch(err) { done(err); }
             });
             n1.emit("input", {payload:"Hello",topic:"World"});
+        });
+    });
+
+    it('should be able to send 2nd message to a 2nd output', function(done) {
+        var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1type:"val", op2type:"val", op1:"hello",  op2:"world", duration:"50", outputs:2, wires:[["n2"],["n3"]] },
+            {id:"n2", type:"helper"}, {id:"n3", type:"helper"} ];
+        helper.load(triggerNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            var c = 0;
+            n2.on("input", function(msg) {
+                try {
+                    if (c === 0) {
+                        msg.should.have.a.property("payload", "hello");
+                        msg.should.have.a.property("topic", "test");
+                        c+=1;
+                    }
+                    else { done(err); }
+                }
+                catch(err) { done(err); }
+            });
+            n3.on("input", function(msg) {
+                try {
+                    if (c === 1) {
+                        msg.should.have.a.property("payload", "world");
+                        msg.should.have.a.property("topic", "test");
+                        done();
+                    }
+                    else { done(err); }
+                }
+                catch(err) { done(err); }
+            });
+            n1.emit("input", {payload:"go",topic:"test"});
         });
     });
 
@@ -871,18 +1055,18 @@ describe('trigger node', function() {
                 }
                 catch(err) { done(err); }
             });
-            setTimeout( function() {
-                if (c === 2) { done(); }
-                else {
-                    done(new Error("Too many messages received"));
-                }
-            },20);
             n1.emit("input", {payload:null});   // trigger
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:null});   // blocked
             n1.emit("input", {payload:"foo"});  // don't clear the blockage
             n1.emit("input", {payload:"boo"});  // clear the blockage
             n1.emit("input", {payload:null});   // trigger
+            setTimeout( function() {
+                if (c === 2) { done(); }
+                else {
+                    done(new Error("Too many messages received"));
+                }
+            },50);
         });
     });
 
@@ -970,5 +1154,45 @@ describe('trigger node', function() {
             },180);
         });
     });
-
+    describe('messaging API', function () {
+        function mapiDoneTriggerTestHelper(done, nodeSetting, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [
+                { ...nodeSetting, id: "triggerNode1", type: "trigger", wires: [[]] },
+                { id: "completeNode1", type: "complete", scope: ["triggerNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "catchNode1", type: "catch", scope: ["triggerNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "helperNode1", type: "helper", wires: [[]] }];
+            const numMsgs = msgAndTimings.length;
+            helper.load([triggerNode, completeNode, catchNode], flow, function () {
+                const triggerNode1 = helper.getNode("triggerNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 3;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.seq].avr, msgAndTimings[msg.seq].var);
+                    c += 1;
+                    if (c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout(function () { triggerNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+        it('should call done() when first message has been processed', function (done) {
+            // not when second and more messages are emitted.
+            mapiDoneTriggerTestHelper(done, { units:"s", duration:"1" }, [
+                { msg: { seq: 0, payload: "A"}, delay: 0, avr: 0, var: 100}
+            ]);
+        });
+        it('should call done() when it receives reset message', function (done) {
+            mapiDoneTriggerTestHelper(done, {units:"s", duration:"1"}, [
+                {msg: { seq: 0, payload: "A", reset:true}, delay: 0, avr: 0, var:100}
+            ]);
+        })
+    });
 });

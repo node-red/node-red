@@ -1,0 +1,99 @@
+[
+    {
+        "id": "e89019c5.70ae78",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Convert array of JavaScript objects to CSV",
+        "info": "CSV node can convert an array of JavaScript objects to multi-line CSV text.",
+        "x": 300,
+        "y": 1020,
+        "wires": []
+    },
+    {
+        "id": "bd0d82ed.7b28",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 260,
+        "y": 1080,
+        "wires": [
+            [
+                "1d857b8d.3a4014"
+            ]
+        ]
+    },
+    {
+        "id": "66a37667.16ebd8",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "kind,price",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 600,
+        "y": 1080,
+        "wires": [
+            [
+                "859725fd.dc93d8"
+            ]
+        ]
+    },
+    {
+        "id": "1d857b8d.3a4014",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "[\n    {\n        \"kind\": \"Apple\",\n        \"price\": 100,\n        \"origin\": \"Canada\"\n    },\n    {\n        \"kind\": \"Orange\",\n        \"price\": 120,\n        \"origin\": \"USA\"\n    },\n    {\n        \"kind\": \"Banana\",\n        \"price\": 80,\n        \"origin\": \"Philippines\"\n    }\n]",
+        "output": "json",
+        "x": 430,
+        "y": 1080,
+        "wires": [
+            [
+                "66a37667.16ebd8"
+            ]
+        ]
+    },
+    {
+        "id": "859725fd.dc93d8",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 1080,
+        "wires": []
+    }
+]

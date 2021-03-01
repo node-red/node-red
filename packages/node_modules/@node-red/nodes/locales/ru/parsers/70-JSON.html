@@ -1,0 +1,56 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="json">
+  <p>
+    Выполняет преобразования между строкой в JSON формате и ее представлением в JavaScript-объекте, в любом направлении.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt>payload<span class="property-type">объект | строка</span></dt>
+    <dd>JavaScript объект или JSON-строка.</dd>
+    <dt>schema<span class="property-type">объект</span></dt>
+    <dd>Необязательный объект JSON-схемы для проверки данных. Свойство будет удалено перед отправкой <code>msg</code> следующему узлу.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>payload<span class="property-type">объект | строка</span></dt>
+    <dd>
+      <ul>
+        <li>Если вход является JSON-строкой, узел пытается проанализировать ее как JavaScript объект.</li>
+        <li>Если вход является JavaScript объектом, узел создает JSON-строку. Строка может быть при желании отформатирована.</li>
+      </ul>
+    </dd>
+    <dt>schemaError<span class="property-type">массив</span></dt>
+    <dd>Если проверка JSON-схемы завершится неудачно, узлом catch можно получить свойство <code>schemaError</code>, содержащее массив ошибок.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    По умолчанию узел работает с <code>msg.payload</code>, но его можно настроить для преобразования любого свойства сообщения.
+  </p>
+  <p>
+    Узел также может быть сконфигурирован для обеспечения конкретной кодировки вместо переключения между ними. Это можно использовать, например, при работе с узлом <code>HTTP In</code>, чтобы гарантировать, что данные payload всегда будут являться объектом, даже если входящий запрос неправильно установил свой тип содержимого для узла HTTP In, чтобы выполнить преобразование.
+  </p>
+  <p>
+    Если узел настроен так, чтобы свойство кодировалось как строка, и он получает строку, дальнейшие проверки этого свойства выполняться не будут. Он не будет проверять, является ли строка допустимым JSON, и не будет переформатировать ее, если выбрана опция форматирования.
+  </p>
+  <p>
+    Подробнее о JSON-схеме Вы можете узнать в спецификации <a href="http://json-schema.org/latest/json-schema-validation.html">здесь</a>.
+  </p>
+</script>

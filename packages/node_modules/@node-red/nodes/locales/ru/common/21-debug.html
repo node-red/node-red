@@ -1,0 +1,39 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="debug">
+  <p>
+    Отображает выбранные свойства получаемых узлом сообщения на боковой панели во вкладке отладки и, при необходимости, журнале среды выполнения. По умолчанию отображается содержимое <code>msg.payload</code>, но узел можно настроить на отображение любого свойства, всех свойств сообщения или результата выражения JSONata.
+  </p>
+
+  <h3>Подробности</h3>
+  <p>
+    Вкладка отладки на боковой панели обеспечивает структурированное представление полученных узлом сообщений, что упрощает исследование их структуры.
+  </p>
+  <p>
+    Объекты и массивы JavaScript могут быть свернуты и развернуты по мере необходимости. Буферы могут отображаться в виде данных как есть или в виде строки, когда это возможно.
+  </p>
+  <p>
+    Рядом с каждым сообщением отладочная панель показывает информацию о времени получения сообщения, узле, который его отправил, и типе данных.
+    Нажатие на идентификатор узла-источника покажет этот узел в рабочей области.
+  </p>
+  <p>
+    Кнопка на узле может использоваться для включения или отключения вывода информации о получаемых сообщениях. Рекомендуется отключать или удалять любые отладочные узлы, которые не используются.
+  </p>
+  <p>
+    Узел также может быть настроен на отправку всех сообщений в журнал выполнения или отправку короткого (32 символа) текста в статус под узлом.
+  </p>
+</script>

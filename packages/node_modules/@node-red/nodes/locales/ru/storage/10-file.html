@@ -1,0 +1,86 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="file">
+  <p>
+    Записывает <code>msg.payload</code> в файл, либо добавлением в конец, либо заменой существующего контента. Кроме того, им можно удалять файл.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt class="optional">filename <span class="property-type">строка</span></dt>
+    <dd>Если не настроено в узле, это необязательное свойство устанавливает имя файла, который будет обновлен.</dd>
+  </dl>
+
+  <h3>Выход</h3>
+  <p>
+    По завершении записи входное сообщение отправляется на выходной порт.
+  </p>
+
+  <h3>Подробности</h3>
+  <p>
+    Данные каждого сообщения будут добавлены в конец файла, при желании добавляя символ новой строки (\n) между каждым.
+  </p>
+  <p>
+    Если используется <code>msg.filename</code>, файл будет закрыт после каждой записи. Для лучшей производительности используйте фиксированное имя файла.
+  </p>
+  <p>
+    Он может быть настроен на перезапись всего файла, а не на добавление. Например, при записи двоичных данных (типа изображения) в файл, следует использовать эту опцию и отключить опцию добавления новой строки.
+  </p>
+  <p>
+    Кодировка данных, записанных в файл, может быть выбрана в списке кодировок.
+  </p>
+  <p>
+    Кроме того, этот узел может быть настроен на удаление файла.
+  </p>
+</script>
+
+<script type="text/html" data-help-name="file in">
+  <p>
+    Читает содержимое файла как строку или двоичный буфер.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt class="optional">filename <span class="property-type">строка</span></dt>
+    <dd>это свойство устанавливает имя файла для чтения, если оно не задано в настройках узла.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">строка | буфер</span></dt>
+    <dd>Содержимое файла в виде строки или двоичного буфера.</dd>
+    <dt class="optional">filename <span class="property-type">строка</span></dt>
+    <dd>Если не настроено в узле, это необязательное свойство устанавливает имя файла для чтения.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    Имя файла должно быть абсолютным путем к файлу, иначе оно будет путем относительно рабочего каталога процесса Node-RED.
+  </p>
+  <p>
+    В Windows может быть необходимо кодировать разделители пути двойной косой чертой, например: <code>\\Users\\myUser</code>.
+  </p>
+  <p>
+    При желании текстовый файл можно разбить на строки, выводя по одному сообщению для каждой строки, или двоичный файл разбить на более мелкие фрагменты буфера - размер блока зависит от операционной системы, но обычно составляет 64 КБ (Linux/Mac) или 41 КБ (Windows).
+  </p>
+  <p>
+    При разбиении на несколько сообщений каждое сообщение будет иметь свойство <code>parts</code>, формирующее полную последовательность сообщений.
+  </p>
+  <p>
+    Кодировка входных данных может быть выбрана из списка кодировок, если выходной формат - строка.
+  </p>
+</script>

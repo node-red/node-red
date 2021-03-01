@@ -15,7 +15,6 @@
  **/
 
 var should = require("should");
-var when = require('when');
 var sinon = require('sinon');
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -144,17 +143,21 @@ describe("api/auth/users", function() {
            Users.init({
                type:"credentials",
                users:function(username) {
-                   return when.resolve({'username':'dave','permissions':'read'});
+                   return Promise.resolve({'username':'dave','permissions':'read'});
                },
                authenticate: function(username,password) {
                    authUsername = username;
                    authPassword = password;
-                   return when.resolve({'username':'pete','permissions':'write'});
+                   return Promise.resolve({'username':'pete','permissions':'write'});
                }
            });
        });
 
         describe('#get',function() {
+            it("returns null for tokenHeader", function() {
+                should.not.exist(Users.tokenHeader());
+            });
+
             it('delegates get user',function(done) {
                 Users.get('dave').then(function(user) {
                     try {
@@ -227,4 +230,47 @@ describe("api/auth/users", function() {
             });
         });
     });
+
+    describe('Initialised with tokens set as function',function() {
+        before(function() {
+            Users.init({
+                type:"strategy",
+                tokens: function(token) { return("Done-"+token); }
+            });
+        });
+        after(function() {
+            Users.init({});
+        });
+        describe('#tokens',function() {
+            it('handles api.tokens being a function',function(done) {
+                Users.should.have.property('tokens').which.is.a.Function();
+                (Users.tokens("1234")).should.equal("Done-1234");
+                (Users.tokenHeader()).should.equal("authorization");
+                done();
+            });
+        });
+    });
+
+    describe('Initialised with tokens set as function and tokenHeader set as token header name',function() {
+        before(function() {
+            Users.init({
+                type:"strategy",
+                tokens: function(token) { return("Done-"+token); },
+                tokenHeader: "X-TEST-TOKEN"
+            });
+        });
+        after(function() {
+            Users.init({});
+        });
+        describe('#tokens',function() {
+            it('handles api.tokens being a function and api.tokenHeader being a header name',function(done) {
+                Users.should.have.property('tokens').which.is.a.Function();
+                (Users.tokens("1234")).should.equal("Done-1234");
+                Users.should.have.property('tokenHeader').which.is.a.Function();
+                (Users.tokenHeader()).should.equal("x-test-token");
+                done();
+            });
+        });
+    });
+
 });

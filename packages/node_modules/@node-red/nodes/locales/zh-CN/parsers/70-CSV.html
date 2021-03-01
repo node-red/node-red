@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="csv">
+    <p>在CSV格式的字符串及其JavaScript对象表示形式之间进行相互转换。</p>
+    <h3>输入</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 数组 | 字符串</span></dt>
+        <dd>JavaScript对象，数组或CSV字符串。</dd>
+    </dl>
+    <h3>输出</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">object | 数组 | 字符串</span></dt>
+        <dd>
+        <ul>
+            <li>如果输入是字符串，它将尝试将其解析为CSV，并为每行创建键/值对的JavaScript对象。然后该节点将为每行发送一条消息，或者发送一条包含对象数组的消息。</li>
+            <li>如果输入是JavaScript对象，它将尝试构建CSV字符串。</li>
+            <li>如果输入是简单值的数组，则将构建单行CSV字符串。</li>
+            <li>如果输入是数组数组或对象数组，则会创建多行CSV字符串。</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>详细</h3>
+    <p>列模板可以包含列名称的有序列表。将CSV转换为对象时，列名将用作属性名称。或者也可以从CSV的第一行中获取列名称。</p>
+    <p>转换为CSV时，列模板用于标识从对象中提取的属性以及提取的顺序。</p>
+    <p>如果输入是数组，则列模板仅用于有选择地生成一行列标题。</p>
+    <p>只要正确设置<code>parts</code>属性，该节点就可以接受多部分输入。</p>
+    <p>如果输出多个消息，则将设置其<code>parts</code>属性并形成完整的消息序列。</p>
+    <p><b>注意：</b>列模板必须用逗号分隔，即使数据中已有了其他分隔符。</p>
+</script>

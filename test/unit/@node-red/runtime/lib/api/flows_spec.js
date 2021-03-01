@@ -37,7 +37,7 @@ describe("runtime-api/flows", function() {
         it("returns the current flow configuration", function(done) {
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return [1,2,3] }
                 }
             });
@@ -53,7 +53,7 @@ describe("runtime-api/flows", function() {
         var loadFlows;
         var reloadError = false;
         beforeEach(function() {
-            setFlows = sinon.spy(function(flows,type) {
+            setFlows = sinon.spy(function(flows,credentials,type) {
                 if (flows[0] === "error") {
                     var err = new Error("error");
                     err.code = "error";
@@ -76,7 +76,7 @@ describe("runtime-api/flows", function() {
             })
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlows: function() { return {rev:"currentRev",flows:[]} },
                     setFlows: setFlows,
                     loadFlows: loadFlows
@@ -91,7 +91,19 @@ describe("runtime-api/flows", function() {
                 result.should.eql({rev:"newRev"});
                 setFlows.called.should.be.true();
                 setFlows.lastCall.args[0].should.eql([4,5,6]);
-                setFlows.lastCall.args[1].should.eql("full");
+                setFlows.lastCall.args[2].should.eql("full");
+                done();
+            }).catch(done);
+        });
+        it("includes credentials when part of the request", function(done) {
+            flows.setFlows({
+                flows: {flows:[4,5,6], credentials: {$:"creds"}},
+            }).then(function(result) {
+                result.should.eql({rev:"newRev"});
+                setFlows.called.should.be.true();
+                setFlows.lastCall.args[0].should.eql([4,5,6]);
+                setFlows.lastCall.args[1].should.eql({$:"creds"});
+                setFlows.lastCall.args[2].should.eql("full");
                 done();
             }).catch(done);
         });
@@ -103,7 +115,7 @@ describe("runtime-api/flows", function() {
                 result.should.eql({rev:"newRev"});
                 setFlows.called.should.be.true();
                 setFlows.lastCall.args[0].should.eql([4,5,6]);
-                setFlows.lastCall.args[1].should.eql("nodes");
+                setFlows.lastCall.args[2].should.eql("nodes");
                 done();
             }).catch(done);
         });
@@ -125,7 +137,7 @@ describe("runtime-api/flows", function() {
                 result.should.eql({rev:"newRev"});
                 setFlows.called.should.be.true();
                 setFlows.lastCall.args[0].should.eql([4,5,6]);
-                setFlows.lastCall.args[1].should.eql("nodes");
+                setFlows.lastCall.args[2].should.eql("nodes");
                 done();
             }).catch(done);
         });
@@ -180,7 +192,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     addFlow: addFlow
                 }
             });
@@ -213,7 +225,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     getFlow: getFlow
                 }
             });
@@ -243,7 +255,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (id === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
@@ -256,7 +270,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     updateFlow: updateFlow
                 }
             });
@@ -299,7 +313,9 @@ describe("runtime-api/flows", function() {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
                     err.code = 404;
-                    throw err;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
                 } else if (flow === "error") {
                     var err = new Error();
                     // TODO: quirk of internal api - uses .code for .status
@@ -312,7 +328,7 @@ describe("runtime-api/flows", function() {
             });
             flows.init({
                 log: mockLog(),
-                nodes: {
+                flows: {
                     removeFlow: removeFlow
                 }
             });

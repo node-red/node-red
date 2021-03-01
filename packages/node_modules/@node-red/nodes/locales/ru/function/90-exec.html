@@ -1,0 +1,106 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="exec">
+  <p>
+    Запускает системную команду и возвращает ее вывод.
+  </p>
+  <p>
+    Узел может быть настроен либо на ожидание завершения выполнения команды, либо на отправку выходных данных по мере их генерации в ходе выполнения.
+  </p>
+  <p>
+    Выполняемая команда может быть установлена в настройках узла или полученным сообщением.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt class="optional">payload <span class="property-type">строка</span></dt>
+    <dd>будет добавлено к выполняемой команде, если узел настроен так делать.</dd>
+    <dt class="optional">kill <span class="property-type">строка</span></dt>
+    <dd>тип сигнала уничтожения для отправки существующему процессу узла exec.</dd>
+    <dt class="optional">pid <span class="property-type">число|строка</span></dt>
+    <dd>идентификатор существующего процесса узла exec для уничтожения.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <ol class="node-ports">
+    <li>Стандартный вывод
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">строка</span></dt>
+        <dd>стандартный вывод команды.</dd>
+      </dl>
+      <dl class="message-properties">
+        <dt>rc <span class="property-type">объект</span></dt>
+        <dd>только в exec режиме, копия объекта кода возврата (также доступна по 3-му порту)</dd>
+      </dl>
+    </li>
+    <li>Стандартный вывод ошибок
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">строка</span></dt>
+        <dd>стандартная ошибка команды.</dd>
+      </dl>
+      <dl class="message-properties">
+        <dt>rc <span class="property-type">объект</span></dt>
+        <dd>только в exec режиме, копия объекта кода возврата (также доступна по 3-му порту)</dd>
+      </dl>
+    </li>
+    <li>Код возврата
+      <dl class="message-properties">
+        <dt>payload <span class="property-type">объект</span></dt>
+        <dd>объект, содержащий код возврата и, возможно, свойства <code>message</code>, <code>signal</code>.</dd>
+      </dl>
+    </li>
+  </ol>
+
+  <h3>Подробности</h3>
+  <p>
+    По умолчанию используется системный вызов <code>exec</code>, который вызывает команду, ожидает ее завершения и возвращает результат. Например, успешная команда должна иметь код возврата <code>{code: 0}</code>.
+  </p>
+  <p>
+    При желании вместо этого можно использовать <code>spawn</code>, который возвращает выходные данные из stdout и stderr по ходу выполнения команды, обычно по одной строке за раз. После завершения он возвращает объект на 3-й порт. Например, успешная команда должна вернуть <code>{code: 0}</code>.
+  </p>
+  <p>
+    Ошибки могут возвращать на 3-й порт дополнительную информацию в <code>msg.payload</code>, такую как строка <code>message</code>, строка <code>signal</code>.
+  </p>
+  <p>
+    Выполняемая команда настраивается в узле, с возможностью добавления к ней <code>msg.payload</code> и дополнительного набора параметров.
+  </p>
+  <p>
+    Команды или параметры с пробелами должны быть заключены в кавычки - <code>"Это один параметр"</code>
+  </p>
+  <p>
+    Возвращаемый <code>payload</code> обычно представляет собой <i>строку</i>, пока не обнаружены символы, отличные от UTF8, в этом случае возвращаемое значение будет иметь тип <i>буфер</i>.
+  </p>
+  <p>
+    Значок статуса узла и PID будут видны, когда узел активен. Изменения в статусе можно отслеживать узлом <code>Status</code>.
+  </p>
+
+  <h4>
+    Уничтожения процессов
+  </h4>
+  <p>
+    Отправка <code>msg.kill</code> уничтожит один активный процесс. <code>msg.kill</code> должен быть строкой, содержащей тип передаваемого сигнала, например, <code>SIGINT</code>, <code>SIGQUIT</code> или <code>SIGHUP</code>. По умолчанию будет передан <code>SIGTERM</code>, если задана пустая строка.
+  </p>
+  <p>
+    Если узлом запущено более одного процесса, тогда в <code>msg.pid</code> также должно быть установлено значение PID процесса для уничтожения.
+  </p>
+  <p>
+    Если в поле <code>Тайм-аут</code> введено значение, тогда, если процесс не завершится по истечении указанного количества секунд, он будет автоматически уничтожен.
+  </p>
+  <p>
+    Совет: если вы запускаете Python приложение, вам может потребоваться использование параметра <code>-u</code>, чтобы остановить буферизацию вывода.
+  </p>
+</script>

@@ -1,0 +1,56 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="sort">
+  <p>
+    Функция, которая сортирует свойство сообщения или последовательность сообщений.
+  </p>
+  <p>
+    Когда узел настроен сортировать свойство сообщения, он сортирует данные массива в указанном свойстве сообщения.
+  </p>
+  <p>
+    Когда узел настроен сортировать последовательность сообщений, он будет переупорядочивать сообщения.
+  </p>
+  <p>
+    Порядок сортировки может быть:
+  </p>
+  <ul>
+    <li><b>восходящий</b>,</li>
+    <li><b>нисходящий</b>.</li>
+  </ul>
+  <p>
+    Для чисел, числовое упорядочивание можно указать с помощью флажка.
+  </p>
+  <p>
+    Когда выбрана сортировка свойства, ключом сортировки может быть значение элемента или выражение JSONata. Когда выбрана сортировка последовательности сообщений, ключом сортировка может быть свойство сообщения или выражение JSONata.
+  </p>
+  <p>
+    При сортировке последовательности сообщений узел сортировки полагается на полученные сообщения, чтобы установить <code>msg.parts</code>. Узел split генерирует это свойство, но его можно создать вручную. Оно имеет следующие свойства:
+  </p>
+  <p>
+    <ul>
+      <li><code>id</code> - идентификатор группы сообщений</li>
+      <li><code>index</code> - позиция в группе</li>
+      <li><code>count</code> - общее количество сообщений в группе</li>
+    </ul>
+  </p>
+  <p>
+    <b>Примечание.</b> Этот узел буферизирует сообщения внутри для своей работы. Чтобы предотвратить непредвиденное использование памяти, можно указать максимальное количество хранимых сообщений. По умолчанию количество сообщений не ограничено.
+    <ul>
+      <li>Свойство <code>nodeMessageBufferMaxLength</code> устанавливается в <b>settings.js</b>.</li>
+    </ul>
+  </p>
+</script>

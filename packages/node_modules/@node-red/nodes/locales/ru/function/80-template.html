@@ -1,0 +1,63 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="template">
+  <p>
+    Генерирует текст по установленному шаблону и присваивает его выбранному свойству сообщения.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt>msg <span class="property-type">объект</span></dt>
+    <dd>Объект сообщения msg, содержащий информацию для заполнения шаблона.</dd>
+    <dt class="optional">шаблон <span class="property-type">строка</span></dt>
+    <dd>Шаблон текста для заполнения данными из сообщения msg. Если шаблон не введен на панели редактирования, тогда он может быть установлен через свойство msg.template.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>msg <span class="property-type">объект</span></dt>
+    <dd>Сообщение msg, у которого выбранному свойству присвоено тексктовое значение, полученное после заполнения шаблона данными входящего сообщения.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    По умолчанию используется формат <i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>. При необходимости это можно отключить.
+  </p>
+  <p>
+    Например, когда шаблон:
+  </p>
+  <pre>Привет, {{payload.name}}. Сегодня {{date}}.</pre>
+  <p>
+    получает сообщение msg, содержащее:
+  </p>
+  <pre>{
+  date: "понедельник",
+  payload: {
+    name: "Иван"
+  }
+}</pre>
+  <p>
+    Выбранному свойству будет присвоен текст:
+  </p>
+  <pre>Привет, Иван. Сегодня понедельник.</pre>
+  <p>
+    Можно использовать свойство из контекста потока или глобального контекста. Просто используйте <code>{{flow.name}}</code> или <code>{{global.name}}</code>, или для постоянного хранилища <code>store</code> используйте <code>{{flow[store].name}}</code> или <code>{{global[store].name}}</code>.
+  </p>
+  <p>
+    <b>Примечание:</b> по умолчанию <i>mustache</i> заменяет определенные символы их escape-кодами для безопасного использования в HTML. Чтобы это не происходило, вы можете использовать тройные фигурные скобки <code>{{{triple}}}</code>.
+  </p>
+</script>

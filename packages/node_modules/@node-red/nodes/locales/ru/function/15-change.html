@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="change">
+  <p>
+    Устанавливает, изменяет, удаляет или перемещает свойства сообщения, контекста потока или глобального контекста.
+  </p>
+  <p>
+    В узле можно указать несколько операций, которые будут применяться в том порядке, в котором они заданы.
+  </p>
+
+  <h3>Подробности</h3>
+  <p>
+    Доступные операции:
+  </p>
+  <dl class="message-properties">
+    <dt>Установить</dt>
+    <dd>устанавливает свойство. Значение может быть различных типов или может быть взято из существующего свойства сообщения или контекста.</dd>
+    <dt>Изменить</dt>
+    <dd>ищет и заменяет части текста в свойстве сообщения. Если используется регулярное выражение, настройка &quot;заменить на&quot; может включать группы захвата, например <code>$1</code>. При полном совпадении заменяет только тип.</dd>
+    <dt>Удалить</dt>
+    <dd>удаляет свойство.</dd>
+    <dt>Переместить</dt>
+    <dd>перемещает или переименовывает свойство.</dd>
+  </dl>
+  <p>
+    Тип свойства &quot;выражение&quot; использует язык запросов и выражений <a href="http://jsonata.org/" target="_new">JSONata</a>.
+  </p>
+</script>

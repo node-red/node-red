@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/x-red" data-help-name="catch">
+  <p>捕獲由同一標簽頁上的節點引發的錯誤。</p>
+  <h3>輸出</h3>
+  <dl class="message-properties">
+      <dt>error.message <span class="property-type">字符串</span></dt>
+      <dd>錯誤消息。</dd>
+      <dt>error.source.id <span class="property-type">字符串</span></dt>
+      <dd>引發錯誤的節點的ID。</dd>
+      <dt>error.source.type <span class="property-type">字符串</span></dt>
+      <dd>引發錯誤的節點的類型。</dd>
+      <dt>error.source.name <span class="property-type">字符串</span></dt>
+      <dd>引發錯誤的節點的名稱。（如果已設置）</dd>
+  </dl>
+  <h3>詳細</h3>
+  <p>如果節點在處理消息時抛出錯誤，則流程通常會停止。該節點可用于捕獲那些錯誤並通過專用流程進行處理。</p>
+  <p>默認情況下，該節點將捕獲同一標簽頁上任何節點抛出的錯誤。或者，它可以針對特定節點，或配置爲僅捕獲另一個“目標”捕獲節點尚未捕獲的錯誤。</p>
+  <p>當錯誤發生時，所有匹配的catch節點都會收到錯誤消息。</p>
+  <p>如果在子流程中發送了錯誤，則該錯誤將由子流程中的任意捕獲節點處理。如果子流程中不存在捕獲節點，則那錯誤將被傳播到子流程實例所在的標簽頁。</p>
+  <p>如果消息已經具有<code>error</code>屬性，則將該<code>error</code>複制爲<code>_error</code>。</p>
+</script>

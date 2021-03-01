@@ -19,7 +19,6 @@ var request = require('supertest');
 var express = require('express');
 var bodyParser = require('body-parser');
 var sinon = require('sinon');
-var when = require('when');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 

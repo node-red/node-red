@@ -1,0 +1,59 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="range">
+  <p>
+    Соотносит значение одного числового диапазона с другим числовым диапазоном.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">число</span></dt>
+    <dd>Данные <i>должны</i> быть числом. Данные другого типа будут преобразованы в число и отклонены, если это не удастся.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">число</span></dt>
+    <dd>Значение, соотнесенное с новым диапазоном.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    Этот узел будет линейно масштабировать полученное значение. По умолчанию результат не ограничен диапазоном, определенным в узле.
+  </p>
+  <p>
+    <i>Масштабировать и ограничить целевым диапазоном</i> означает, что результат никогда не будет выходить за пределы диапазона, указанного в целевом диапазоне.
+  </p>
+  <p>
+    <i>Масштабировать и обернуть в целевой диапазон</i> означает, что результат будет обернут вокруг целевого диапазона:
+  </p>
+  <p>
+    Например, если входные 0 - 10 сопоставляются с 0 - 100:
+  </p>
+  <table style="outline-width:#888 solid thin">
+    <tr><th width="80px">режим</th><th width="80px">вход</th><th width="80px">выход</th></tr>
+    <tr><td><center>масштабировать</center></td><td><center>2</center></td><td><center>20</center></td></tr>
+    <tr><td><center>ограничить</center></td><td><center>2</center></td><td><center>20</center></td></tr>
+    <tr><td><center>обернуть</center></td><td><center>2</center></td><td><center>20</center></td></tr>
+    <tr><td><center>масштабировать</center></td><td><center>12</center></td><td><center>120</center></td></tr>
+    <tr><td><center>ограничить</center></td><td><center>12</center></td><td><center>100</center></td></tr>
+    <tr><td><center>обернуть</center></td><td><center>12</center></td><td><center>20</center></td></tr>
+    <tr><td><center>масштабировать</center></td><td><center>18</center></td><td><center>180</center></td></tr>
+    <tr><td><center>ограничить</center></td><td><center>18</center></td><td><center>100</center></td></tr>
+    <tr><td><center>обернуть</center></td><td><center>18</center></td><td><center>80</center></td></tr>
+  </table>
+</script>

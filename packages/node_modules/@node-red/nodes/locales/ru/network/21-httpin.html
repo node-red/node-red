@@ -1,0 +1,107 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http in">
+  <p>
+    Создает конечную точку HTTP для веб-службы.
+  </p>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>payload</dt>
+    <dd>Для GET-запроса содержит объект с любыми параметрами строки запроса. В противном случае содержит тело HTTP-запроса.</dd>
+    <dt>req<span class="property-type">объект</span></dt>
+    <dd>Объект HTTP-запроса. Этот объект содержит несколько свойств, которые предоставляют информацию о запросе.
+      <ul>
+        <li><code>body</code> - тело входящего запроса. Формат будет зависеть от запроса.</li>
+        <li><code>headers</code> - объект, содержащий заголовки HTTP-запроса.</li>
+        <li><code>query</code> - объект, содержащий любые параметры строки запроса.</li>
+        <li><code>params</code> - объект, содержащий любые параметры маршрута.</li>
+        <li><code>cookies</code> - объект, содержащий куки запроса.</li>
+        <li><code>files</code> - если включено в узле, объект, содержащий любые файлы, загруженные как часть POST-запроса.</li>
+      </ul>
+    </dd>
+    <dt>res<span class="property-type">объект</span></dt>
+    <dd>Объект ответа HTTP. Это свойство не должно использоваться напрямую. Для ответа на входящий HTTP запрос используется узел ответа <code>HTTP Response</code>. Это свойство должно оставаться в сообщении вплоть до передачи узлу ответа.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    По настроенному пути узел будет принимать запросы определенного типа. Путь может быть указан конкретно, например <code>/user</code>, или включать именованные параметры, которые принимают любое значение, например <code>/user/:name</code>. Когда используются именованные параметры, их фактическое значение в запросе будет доступно в <code>msg.req.params</code>.
+  </p>
+  <p>
+    Для запросов, которые содержат тело, такие как POST или PUT, содержимое запроса доступно в <code>msg.payload</code>.
+  </p>
+  <p>
+    Если тип содержимого запроса может быть определен, тело будет преобразовано в любой подходящий тип. Например, <code>application/json</code> будет преобразован в объект JavaScript.
+  </p>
+  <p>
+    <b>Примечание:</b> этот узел не отправляет никакого ответа на запрос. Поток должен включать узел ответа HTTP Response для завершения запроса.
+  </p>
+</script>
+
+<script type="text/html" data-help-name="http response">
+  <p>
+    Отправляет ответ на запрос, полученный от узла HTTP Input.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">строка</span></dt>
+    <dd>Тело ответа.</dd>
+    <dt class="optional">statusCode <span class="property-type">число</span></dt>
+    <dd>Если установлено, то используется как код состояния ответа. По умолчанию: 200.</dd>
+    <dt class="optional">headers <span class="property-type">объект</span></dt>
+    <dd>Если установлено, предоставляет заголовки HTTP для включения в ответ.</dd>
+    <dt class="optional">cookies <span class="property-type">объект</span></dt>
+    <dd>Если установлено, может использоваться для записи или удаления куков.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    Свойства <code>statusCode</code> и <code>headers</code> также могут быть установлены внутри самого узла, настройками 'код состояния' и 'заголовки' соответственно. Если свойство установлено в узле, оно не может быть переопределено соответствующим свойством сообщения.
+  </p>
+
+  <h4>Обработка куков</h4>
+  <p>
+    Свойство <code>cookies</code> должно быть объектом пар имя/значение. Значением может быть либо строка для установки значения куки с параметрами по умолчанию, либо это может быть объект параметров.
+  </p>
+  <p>
+    В следующем примере устанавливаются два куки - один с именем <code>name</code> и значением <code>nick</code>, другой с именем <code>session</code> и значением <code>1234</code> и сроком действия в 15 минут.
+  </p>
+  <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+  <p>
+    Допустимые параметры включают в себя:
+  </p>
+  <ul>
+    <li><code>domain</code> - (Строка) доменное имя для куки</li>
+    <li><code>expires</code> - (Дата) срок годности по Гринвичу. Если не указан или установлен в 0, создает сессионный куки</li>
+    <li><code>maxAge</code> - (Строка) дата истечения срока действия относительно текущего времени в миллисекундах</li>
+    <li><code>path</code> - (Строка) путь для куки. По умолчанию /</li>
+    <li><code>value</code> - (Строка) значение, используемое для куки</li>
+  </ul>
+  <p>
+    Чтобы удалить куки, установите для его <code>value</code> значение <code>null</code>.
+  </p>
+
+</script>

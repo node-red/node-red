@@ -1,0 +1,106 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http request">
+  <p>
+    Отправляет HTTP-запрос и возвращает ответ.
+  </p>
+
+  <h3>Принимает</h3>
+  <dl class="message-properties">
+    <dt class="optional">url <span class="property-type">строка</span></dt>
+    <dd>Если 'URL' не установлен в узле, это необязательное свойство устанавливает URL запроса.</dd>
+    <dt class="optional">method <span class="property-type">строка</span></dt>
+    <dd>Если 'метод' не установлен в узле, это необязательное свойство устанавливает HTTP-метод запроса. Должно быть <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> или <code>DELETE</code>.</dd>
+    <dt class="optional">headers <span class="property-type">объект</span></dt>
+    <dd>Устанавливает заголовки HTTP запроса.</dd>
+    <dt class="optional">cookies <span class="property-type">объект</span></dt>
+    <dd>Если установлено, может использоваться для отправки куки с запросом.</dd>
+    <dt class="optional">payload</dt>
+    <dd>Отправляется как тело запроса.</dd>
+    <dt class="optional">rejectUnauthorized</dt>
+    <dd>Если установлено значение <code>false</code>, разрешает отправлять запросы на сайты https, которые используют самозаверенные сертификаты.</dd>
+    <dt class="optional">followRedirects</dt>
+    <dd>Если установлено значение <code>false</code>, запрещает переадресацию (HTTP 301). По умолчанию <code>true</code>.</dd>
+    <dt class="optional">requestTimeout</dt>
+    <dd>Если задано положительное число миллисекунд, будет переопределен глобально заданный параметр <code>httpRequestTimeout</code>.</dd>
+  </dl>
+
+  <h3>Выводит</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">строка | объект | буфер</span></dt>
+    <dd>Тело ответа. Узел можно настроить так, чтобы он возвращал тело в виде строки, пытался проанализировать его как строку JSON или оставлял его в виде двоичного буфера.</dd>
+    <dt>statusCode <span class="property-type">число</span></dt>
+    <dd>Код статуса ответа или код ошибки, если запрос не может быть выполнен.</dd>
+    <dt>headers <span class="property-type">объект</span></dt>
+    <dd>Объект, содержащий заголовки ответа.</dd>
+    <dt>responseUrl <span class="property-type">строка</span></dt>
+    <dd>Если при обработке запроса произошли перенаправления, это свойство является окончательным перенаправленным URL-адресом. В противном случае, URL исходного запроса.</dd>
+    <dt>responseCookies <span class="property-type">объект</span></dt>
+    <dd>Если ответ содержит куки, это свойство является объектом пар имя/значение для каждого из них.</dd>
+    <dt>redirectList <span class="property-type">массив</span></dt>
+    <dd>Если запрос был перенаправлен один или несколько раз, накопленная информация будет добавлена в это свойство. `location` - это следующий пункт назначения перенаправления. `cookies` - это куки, возвращаемые из источника перенаправления.</dd>
+  </dl>
+
+  <h3>Подробности</h3>
+  <p>
+    При настройке внутри узла свойство URL может содержать <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a>-теги. Это позволяет построить URL-адрес, используя значения входящего сообщения. Например, если для URL-адреса задано значение <code>example.com/{{{topic}}}</code>, то автоматически будет вставлено значение <code>msg.topic</code>. Использование {{{...}}} предотвращает HTML-кодирование таких символов, как / & и т.д.
+  </p>
+  <p>
+    Узел может также автоматически кодировать <code>msg.payload</code> как параметры для GET-запроса. В этом случае <code>msg.payload</code> должен быть объектом.
+  </p>
+  <p>
+    <b>Примечание</b>. При работе через прокси-сервер следует либо установить стандартную переменную среды <code>http_proxy=...</code> и перезапустить Node-RED, либо использовать конфигурацию прокси-сервера. Если была установлена конфигурация прокси, то она имеет приоритет над переменной среды.
+  </p>
+
+  <h4>Использование нескольких узлов HTTP-запросов</h4>
+  <p>
+    Чтобы использовать несколько таких узлов в одном потоке, нужно позаботиться о свойстве <code>msg.headers</code>. Первый узел установит это свойство с заголовками ответа. Затем следующий узел будет использовать эти заголовки для своего запроса - обычно это неправильный подход. Если свойство <code>msg.headers</code> остается неизменным между узлами, оно будет проигнорировано вторым узлом. Чтобы установить свои заголовки, сначала необходимо удалить <code>msg.headers</code> или сбросить это свойство до пустого объекта: <code>{}</code>.
+  </p>
+
+  <h4>Обработка куки</h4>
+  <p>
+    Свойство <code>cookies</code>, передаваемое узлу, должно быть объектом из пар имя/значение. Значением может быть либо строка для установки значения куки, либо это может быть объект с единственным свойством <code>value</code>.
+  </p>
+  <p>
+    Все куки, возвращаемые запросом, передаются обратно в свойстве <code>responseCookies</code>.
+  </p>
+
+  <h4>Обработка типов контента</h4>
+  <p>
+    Если <code>msg.payload</code> является объектом, узел автоматически установит тип содержимого запроса в <code>application/json</code> и закодирует тело соответствующим образом.
+  </p>
+  <p>
+    Чтобы закодировать запрос как данные формы, для <code>msg.headers["content-type"]</code> должно быть установлено <code>application/x-www-form-urlencoded</code>.
+  </p>
+
+  <h4>Загрузка файла</h4>
+  <p>
+    Чтобы выполнить загрузку файла, для <code>msg.headers["content-type"]</code> должно быть установлено значение <code>multipart/form-data</code>, а <code>msg.payload</code> переданный на узел должен быть объектом со следующей структурой:
+  </p>
+  <pre><code>{
+  "КЛЮЧ": {
+      "value": СОДЕРЖИМОЕ_ФАЙЛА,
+      "options": {
+          "filename": "ИМЯ_ФАЙЛА"
+      }
+  }
+}</code></pre>
+  <p>
+    На местах <code>КЛЮЧ</code>, <code>СОДЕРЖИМОЕ_ФАЙЛА</code> и <code>ИМЯ_ФАЙЛА</code> должны быть установлены соответствующие значения.
+  </p>
+
+</script>

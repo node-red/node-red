@@ -1,0 +1,8 @@
+{
+    "label": {
+        "path": "Path"
+    },
+    "desc": {
+        "path":"The local file-system path to the library"
+    }
+}

@@ -1,0 +1,200 @@
+[
+    {
+        "id": "1ae28939.9f5fc7",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Send column name when reset property set",
+        "info": "CSV node can send column names at first or `reset` property exists in input message.",
+        "x": 310,
+        "y": 1540,
+        "wires": []
+    },
+    {
+        "id": "c16ad95b.4f9ac8",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "Apple",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 1600,
+        "wires": [
+            [
+                "7f7bfc72.aed104"
+            ]
+        ]
+    },
+    {
+        "id": "870620b9.95343",
+        "type": "csv",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": "once",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "kind,price",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 650,
+        "y": 1720,
+        "wires": [
+            [
+                "d960de42.619c7"
+            ]
+        ]
+    },
+    {
+        "id": "7f7bfc72.aed104",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Apple\",\n    \"price\": 100,\n    \"origin\": \"Canada\"\n}",
+        "output": "json",
+        "x": 470,
+        "y": 1600,
+        "wires": [
+            [
+                "870620b9.95343"
+            ]
+        ]
+    },
+    {
+        "id": "d960de42.619c7",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 830,
+        "y": 1720,
+        "wires": []
+    },
+    {
+        "id": "6f8296e.f95ca68",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "Orange",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 1660,
+        "wires": [
+            [
+                "c37d0dfa.ec1ab"
+            ]
+        ]
+    },
+    {
+        "id": "c37d0dfa.ec1ab",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Orange\",\n    \"price\": 120,\n    \"origin\": \"USA\"\n}\n",
+        "output": "json",
+        "x": 470,
+        "y": 1660,
+        "wires": [
+            [
+                "870620b9.95343"
+            ]
+        ]
+    },
+    {
+        "id": "35209fe2.16926",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "Banana & reset",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "reset",
+                "v": "",
+                "vt": "date"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 280,
+        "y": 1720,
+        "wires": [
+            [
+                "afd4e6b3.624a28"
+            ]
+        ]
+    },
+    {
+        "id": "afd4e6b3.624a28",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JS object",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Banana\",\n    \"price\": 80,\n    \"origin\": \"Philippines\"\n}",
+        "output": "json",
+        "x": 470,
+        "y": 1720,
+        "wires": [
+            [
+                "870620b9.95343"
+            ]
+        ]
+    }
+]

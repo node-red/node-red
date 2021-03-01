@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="udp in">
+  <p>
+    Входящий UDP-узел, который создает <code>msg.payload</code>, содержащий буфер, строку или base64-строку. Поддерживает многоадресную рассылку.
+  </p>
+  <p>
+    Он также предоставляет <code>msg.ip</code> и <code>msg.port</code> для IP-адреса и порта, с которого было получено сообщение.
+  </p>
+  <p>
+    <b>Примечание</b>. В некоторых системах вам могут потребоваться права root или администратора для доступа к портам ниже 1024 и/или широковещательной рассылки.
+  </p>
+</script>
+
+<script type="text/html" data-help-name="udp out">
+  <p>
+    Этот узел отправляет <code>msg.payload</code> на назначенный UDP-хост и порт. Поддерживает многоадресную рассылку.
+  </p>
+  <p>
+    Вы также можете использовать <code>msg.ip</code> и <code>msg.port</code> для установки значений пункта назначения, но статически настроенные значения имеют приоритет.
+  </p>
+  <p>
+    Если Вы выберете широковещательную рассылку, то либо задайте в качестве адреса локальный широковещательный IP-адрес, либо попробуйте 255.255.255.255, который является глобальным широковещательным адресом.
+  </p>
+  <p>
+    <b>Примечание</b>. В некоторых системах вам могут потребоваться права root или администратора для доступа к портам ниже 1024 и/или широковещательной рассылки.
+  </p>
+</script>
