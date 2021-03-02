@@ -34,6 +34,7 @@ describe('Flow', function() {
     var getType;
 
     var stoppedNodes = {};
+    var stoppedOrder = [];
     var currentNodes = {};
     var rewiredNodes = {};
     var createCount = 0;
@@ -41,6 +42,7 @@ describe('Flow', function() {
     beforeEach(function() {
         currentNodes = {};
         stoppedNodes = {};
+        stoppedOrder =[];
         rewiredNodes = {};
         createCount = 0;
         Flow.init({settings:{},log:{
@@ -71,6 +73,7 @@ describe('Flow', function() {
         this.on('close',function() {
             node.stopped = true;
             stoppedNodes[node.id] = node;
+            stoppedOrder.push(node.id)
             delete currentNodes[node.id];
         });
         this.__updateWires = this.updateWires;
@@ -99,6 +102,7 @@ describe('Flow', function() {
         this.on('close',function() {
             node.stopped = true;
             stoppedNodes[node.id] = node;
+            stoppedOrder.push(node.id)
             delete currentNodes[node.id];
         });
         this.__updateWires = this.updateWires;
@@ -131,6 +135,7 @@ describe('Flow', function() {
             setTimeout(function() {
                 node.stopped = true;
                 stoppedNodes[node.id] = node;
+                stoppedOrder.push(node.id)
                 delete currentNodes[node.id];
                 done();
             },node.closeDelay);
@@ -159,6 +164,7 @@ describe('Flow', function() {
             setTimeout(function() {
                 node.stopped = true;
                 stoppedNodes[node.id] = node;
+                stoppedOrder.push(node.id)
                 delete currentNodes[node.id];
                 done();
             },node.closeDelay);
@@ -460,6 +466,34 @@ describe('Flow', function() {
                 done();
             });
         });
+
+        it("stops config nodes last",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"c1",z:"t1",type:"test"},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]},
+                {id:"c2",z:"t1",type:"test"},
+                {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]},
+                {id:"c3",z:"t1",type:"test"}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            flow.start();
+
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            currentNodes.should.have.a.property("c1");
+            currentNodes.should.have.a.property("c2");
+            currentNodes.should.have.a.property("c3");
+            stoppedOrder.should.have.a.length(0);
+
+            flow.stop().then(function() {
+                stoppedOrder.should.eql([ '1', '2', '3', 'c1', 'c2', 'c3' ]);
+                done();
+            }).catch(done);
+        });
+
 
         it("Times out a node that fails to close", function(done) {
             Flow.init({settings:{nodeCloseTimeout:50},log:{

@@ -18,7 +18,7 @@ var should = require("should");
 var functionNode = require("nr-test-utils").require("@node-red/nodes/core/function/10-function.js");
 var Context = require("nr-test-utils").require("@node-red/runtime/lib/nodes/context");
 var helper = require("node-red-node-test-helper");
-
+var RED = require("nr-test-utils").require("node-red/lib/red");
 describe('function node', function() {
 
     before(function(done) {
@@ -52,6 +52,46 @@ describe('function node', function() {
             return Context.close();
         });
     });
+
+    it('should send returned message using send()', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],func:"node.send(msg);"},
+        {id:"n2", type:"helper"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                done();
+            });
+            n1.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+    it('should do something with the catch node', function(done) {
+        var flow = [{"id":"funcNode","type":"function","wires":[["goodNode"]],"func":"node.error('This is an error', msg);"},{"id":"goodNode","type":"helper"},{"id":"badNode","type":"helper"},{"id":"catchNode","type":"catch","scope":null,"uncaught":false,"wires":[["badNode"]]}];
+        var catchNodeModule = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js")
+        helper.load([catchNodeModule, functionNode], flow, function() {
+            var funcNode = helper.getNode("funcNode");
+            var catchNode = helper.getNode("catchNode");
+            var goodNode = helper.getNode("goodNode");
+            var badNode = helper.getNode("badNode");
+
+            badNode.on("input", function(msg) {
+                msg.should.have.property('topic', 'bar');
+                msg.should.have.property('payload', 'foo');
+                msg.should.have.property('error');
+                msg.error.should.have.property('message',"This is an error");
+                msg.error.should.have.property('source');
+                msg.error.source.should.have.property('id', "funcNode");
+                done();
+            });
+            funcNode.receive({payload:"foo",topic: "bar"});
+        });
+    });
+
+
+
 
     it('should be loaded', function(done) {
         var flow = [{id:"n1", type:"function", name: "function" }];
@@ -1373,6 +1413,82 @@ describe('function node', function() {
             });
         });
     });
+
+    describe('externalModules', function() {
+        afterEach(function() {
+            delete RED.settings.functionExternalModules;
+        })
+        it('should fail if using OS module without functionExternalModules set to true', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"os", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                should.not.exist(n1);
+                done();
+            }).catch(err => done(err));
+        })
+
+        it('should fail if using OS module without it listed in libs', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;"},
+                {id:"n2", type:"helper"}
+            ];
+            RED.settings.functionExternalModules = true;
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var messageReceived = false;
+                n2.on("input", function(msg) {
+                    messageReceived = true;
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+                setTimeout(function() {
+                    try {
+                        messageReceived.should.be.false();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                },20);
+            }).catch(err => done(err));
+        })
+        it('should require the OS module', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"os", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            RED.settings.functionExternalModules = true;
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('topic', 'bar');
+                        msg.should.have.property('payload', require('os').type());
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            }).catch(err => done(err));
+        })
+        it('should fail if module variable name clashes with sandbox builtin', function(done) {
+            var flow = [
+                {id:"n1",type:"function",wires:[["n2"]],func:"msg.payload = os.type(); return msg;", "libs": [{var:"flow", module:"os"}]},
+                {id:"n2", type:"helper"}
+            ];
+            RED.settings.functionExternalModules = true;
+            helper.load(functionNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                should.not.exist(n1);
+                done();
+            }).catch(err => done(err));
+        })
+    })
+
 
     describe('Logger', function () {
 

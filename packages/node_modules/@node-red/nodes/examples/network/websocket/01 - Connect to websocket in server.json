@@ -1,0 +1,96 @@
+[
+    {
+        "id": "13410716.69c9d9",
+        "type": "websocket in",
+        "z": "a8360b47.074ec8",
+        "name": "",
+        "server": "89db22b6.9aa36",
+        "client": "",
+        "x": 280,
+        "y": 180,
+        "wires": [
+            [
+                "c2541f10.59544"
+            ]
+        ]
+    },
+    {
+        "id": "c2541f10.59544",
+        "type": "debug",
+        "z": "a8360b47.074ec8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "6788839e.04576c",
+        "type": "inject",
+        "z": "a8360b47.074ec8",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Hello, World!",
+        "payloadType": "str",
+        "x": 290,
+        "y": 120,
+        "wires": [
+            [
+                "438c232a.06c2cc"
+            ]
+        ]
+    },
+    {
+        "id": "438c232a.06c2cc",
+        "type": "websocket out",
+        "z": "a8360b47.074ec8",
+        "name": "",
+        "server": "",
+        "client": "63620788.bda128",
+        "x": 500,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c88f97a9.4410f8",
+        "type": "comment",
+        "z": "a8360b47.074ec8",
+        "name": "Connect to websocket in server",
+        "info": "`websocket out` node can connect to web socket server.  `websocket in` node can serve a web socket server.\n",
+        "x": 290,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "89db22b6.9aa36",
+        "type": "websocket-listener",
+        "path": "/ws1",
+        "wholemsg": "false"
+    },
+    {
+        "id": "63620788.bda128",
+        "type": "websocket-client",
+        "path": "ws://localhost:1880/ws1",
+        "tls": "",
+        "wholemsg": "false"
+    }
+]

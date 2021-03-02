@@ -40,7 +40,7 @@ describe('red/registry/index', function() {
             stubs.push(sinon.stub(loader,"init"));
             stubs.push(sinon.stub(typeRegistry,"init"));
 
-            registry.init({});
+            registry.init({settings:{}});
             installer.init.called.should.be.true();
             loader.init.called.should.be.true();
             typeRegistry.init.called.should.be.true();
