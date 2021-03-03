@@ -38,7 +38,7 @@ Editor
  - hide unused input field (#2823)
  - Implement node property typing (#2812) @knolleary
  - Improve SemVer comparison in Palette Manager (#2821 #2879) @HaKr
- - Library: properly handle symlinked folders (#2768) $natcl
+ - Library: properly handle symlinked folders (#2768) @natcl
  - make flow download code separate utility instead of polyfill
  - Prevent duplicate keyboard shortcut from being assigned
  - Prevent rogue mouseup on tab from triggering tab change
