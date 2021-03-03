@@ -1,3 +1,107 @@
+### 1.3.0-beta.1: Beta Release
+
+Editor
+
+ - Add config node to refer to when exporting subflow
+ - Add confirm dialog when deleting subflow with instances in use (#2845) @knolleary
+ - Add easier ways to find subflow instances
+ - Add enable/disable toggle button for groups in info-outliner (#2844) @knolleary
+ - Add IE11 polyfill to support URI download scheme (#2871) @HiroyasuNishiyama
+ - Add Japanese translations for Node-RED v1.3.0 (#2874) @kazuhitoyokoi
+ - Add preview of exported nodes to Export dialog (#2820) @knolleary
+ - Add RED.plugins module to editor
+ - Add select-connected action (#2877) @knolleary
+ - Add select-up/downstream-nodes action to editor (#2877) @knolleary
+ - Add subflow edit button to palette tooltip
+ - Add subflow meta data edit pane
+ - Add support for library source plugins (#2785) @knolleary
+ - Adds shift-click support for selecting up/down stream nodes
+ - Allow default keymap to be overridden in settings file (#2843) @knolleary
+ - Allow EditableList to have custom buttons (#2881) @bartbutenaers
+ - Allow filtering of debug node output within subflow (#2870) @HiroyasuNishiyama
+ - Ensure the first sidebar tab is shown when editor loads (#2846) @knolleary
+ - Ensure TypedInput Change event is passed type/value properties Fixes #2883
+ - Escape all user input
+ - Filter palette manager nodes based on allow/deny list
+ - Fix check for existing config nodes in subflow export set
+ - Fix handling of + in shortcuts
+ - fix jshint failure (#2850) @HiroyasuNishiyama
+ - Fix keymap entries with multiple keys for same action
+ - fix line break of exporting nodes to clipboard (#2849) @HiroyasuNishiyama
+ - Fix line break of subflow label on palette (#2828)
+ - Fix loading individual module catalog
+ - Fix removing links when deleting node
+ - Fix semver comparison for IE11 (#2888) @knolleary
+ - fixed #2790 swapped description of encodeUrl/encodeUrlComponent and d… (#2791)
+ - Handle timeouts when trying to load node credentials in editor Fixes #2840 (#2841) @knolleary
+ - Hide projects dialog when opening proj with invalid encrypt key
+ - hide unused input field (#2823)
+ - Implement node property typing (#2812) @knolleary
+ - Improve SemVer comparison in Palette Manager (#2821 #2879) @HaKr
+ - Library: properly handle symlinked folders (#2768) $natcl
+ - make flow download code separate utility instead of polyfill
+ - Prevent duplicate keyboard shortcut from being assigned
+ - Prevent rogue mouseup on tab from triggering tab change
+ - Rename paletteEditorEnabled to installerEnabled
+ - Tidy some subflow env props css
+ - Tidy up typedInput syntax
+ - Use subflow.info for help text and meta.type for node type
+
+Runtime
+
+ - Deprecate autoInstallModules for externalModules.autoInstall
+ - Deprecate editorTheme.palette.editable for externalModules.palette.allowInstall
+ - Initial plugin runtime api implementation (#2779) @knolleary
+ - Add initial support for ThemePlugins (#2836) @knolleary
+ - Support npm subflow modules (#2690) @knolleary
+ - Ability to add projects path to the settings file (#2816) @tfmf
+ - Add i18n function to editor plugins when they are registered
+ - Add optional 'lang' to settings file (#2796) @fellinga
+ - Add SubflowModule class for running subflow modules
+ - Add support for settings.externalModules (#2797) @knolleary
+ - Allow default project workflow to be set via settings (#2763) @knolleary
+ - Allow for adding an array of middleware functions (#2788) @kevinGodell
+ - Better logging when deprecated editorTheme.palette.* settings used
+ - Detect externalModule dependencies inside subflow modules
+ - Fix global leak in lib/flows/index.js
+ - Fix numeric status not displaying by ensuring it's a string (#2859) @knolleary
+ - Fully remove when.js dependency (#2772) @knolleary
+ - make nodes with only group change not deployed by nodes deploy mode
+ - Move exec and events components to util module
+ - Nodes log via parent flow to allow flow-info to be added
+ - Restart node only if node's group changes (#2872) @HiroyasuNishiyama
+ - Stop config nodes after flow nodes Fixes #2876 (#2880) @knolleary
+ - Update marked dependency
+ - Use more async funcs in runtime/lib/api to reduce Promise creation
+ - Use npm info to check pending install version
+
+Nodes
+
+ - Allow nested msg properties in msg/flow/global expressions (#2822)
+ - Batch: Messaging API support in Batch node (#2738) @k-toumura
+ - CSV: Handle commas in msg.columns if quoted.
+ - CSV: Fix csv node template reset when array complete (#2854) @dceejay
+ - CSV: Messaging API support in CSV node (#2734) @k-toumura
+ - Debug: Sanitize Debug node name when display enable/disable message
+ - Delay: Add support for Messaging API to delay node (#2733)
+ - Exec: Add settings.execMaxBufferSize to control buffer size of exec node (#2819)
+ - Exec: Don't append msg.payload to command by default (#2818)
+ - Function: Add 'node' object to close scope
+ - Function: allow to load external modules (#2873) @knolleary
+ - Function: Add functionExternalModules to settings and default to false
+ - Join: Fix join node in array mode with repeated messages, and allow reset all (#2869) @dceejay
+ - MQTT: Add MQTT v5 support (#2778 #2886) @Steve-Mcl
+ - Sort: Messaging API support in Sort node (#2744) @k-toumura
+ - Split/Join: Messaging API support in Split/Join nodes (#2750) @k-toumura
+ - Trigger: Messaging API support in Trigger node (#2751) @k-toumura
+ - Add example flows for storage nodes (#2784) @HiroyasuNishiyama
+ - Add example flows for network nodes (#2855) @HiroyasuNishiyama
+ - Add example flows for parser nodes (#2749) @HiroyasuNishiyama
+
+
+
+
+
 ### 1.2.9: Maintenance Release
 
 Editor

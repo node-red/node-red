@@ -1,6 +1,6 @@
 {
   "name": "test-subflow-mod",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "keywords": [],
   "license": "ISC",
@@ -13,6 +13,7 @@
       ]
   },
   "dependencies": {
-      "node-red-node-random": "*"
+      "node-red-node-random": "*",
+      "cowsay2": "*"
   }
 }
