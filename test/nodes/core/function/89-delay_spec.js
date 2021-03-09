@@ -18,6 +18,7 @@ var should = require("should");
 
 var delayNode = require("nr-test-utils").require("@node-red/nodes/core/function/89-delay.js");
 var helper = require("node-red-node-test-helper");
+var RED = require("nr-test-utils").require("node-red/lib/red");
 
 var GRACE_PERCENTAGE=10;
 
@@ -35,6 +36,7 @@ describe('delay Node', function() {
     });
 
     afterEach(function(done) {
+        RED.settings.nodeMessageBufferMaxLength = 0;
         helper.unload();
         helper.stopServer(done);
     });
@@ -150,6 +152,7 @@ describe('delay Node', function() {
      * We send a message, take a timestamp then when the message is received by the helper node, we take another timestamp.
      * Then check if the message has been delayed by the expected amount.
      */
+
     it('delays the message in seconds', function(done) {
         genericDelayTest(0.5, "seconds", done);
     });
@@ -176,14 +179,14 @@ describe('delay Node', function() {
      * @param nbUnit - the multiple of the unit, aLimit Message for nbUnit Seconds
      * @param runtimeInMillis - when to terminate run and count messages received
      */
-    function genericRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, done) {
+    function genericRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, done) {
         var flow = [{"id":"delayNode1","type":"delay","nbRateUnits":nbUnit,"name":"delayNode","pauseType":"rate","timeout":5,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
             var receivedMessagesStack = [];
-            var rate = 1000/aLimit;
+            var rate = 1000 / aLimit * nbUnit;
 
             var receiveTimestamp;
 
@@ -201,7 +204,7 @@ describe('delay Node', function() {
 
             var i = 0;
             for (; i < possibleMaxMessageCount + 1; i++) {
-                delayNode1.receive({payload:i});
+                delayNode1.receive({ payload: i, rate: rateValue });
             }
 
             setTimeout(function() {
@@ -224,17 +227,22 @@ describe('delay Node', function() {
     }
 
     it('limits the message rate to 1 per second', function(done) {
-        genericRateLimitSECONDSTest(1, 1, 1500, done);
+        genericRateLimitSECONDSTest(1, 1, 1500, null, done);
     });
 
     it('limits the message rate to 1 per 2 seconds', function(done) {
         this.timeout(6000);
-        genericRateLimitSECONDSTest(1, 2, 3000, done);
+        genericRateLimitSECONDSTest(1, 2, 3000, null, done);
     });
 
     it('limits the message rate to 2 per seconds, 2 seconds', function(done) {
         this.timeout(6000);
-        genericRateLimitSECONDSTest(2, 1, 2100, done);
+        genericRateLimitSECONDSTest(2, 1, 2100, null, done);
+    });
+
+    it('limits the message rate using msg.rate', function (done) {
+        RED.settings.nodeMessageBufferMaxLength = 3;
+        genericRateLimitSECONDSTest(1, 1, 1500, 2000, done);
     });
 
     /**
@@ -243,7 +251,7 @@ describe('delay Node', function() {
      * @param nbUnit - the multiple of the unit, aLimit Message for nbUnit Seconds
      * @param runtimeInMillis - when to terminate run and count messages received
      */
-    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, done) {
+    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, done) {
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":nbUnit,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,"wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
         helper.load(delayNode, flow, function() {
@@ -269,7 +277,7 @@ describe('delay Node', function() {
             var possibleMaxMessageCount = Math.ceil(aLimit * (runtimeInMillis / 1000) + aLimit); // +aLimit as at the start of the 2nd period, we're allowing the 3rd burst
 
             var i = 0;
-            delayNode1.receive({payload:i});
+            delayNode1.receive({ payload: i, rate: rateValue });
             i++;
             for (; i < possibleMaxMessageCount + 1; i++) {
                 setTimeout(function() {
@@ -306,17 +314,23 @@ describe('delay Node', function() {
 
     it('limits the message rate to 1 per second, 4 seconds, with drop', function(done) {
         this.timeout(6000);
-        dropRateLimitSECONDSTest(1, 1, 4000, done);
+        dropRateLimitSECONDSTest(1, 1, 4000, null, done);
     });
 
     it('limits the message rate to 1 per 2 seconds, 4 seconds, with drop', function(done) {
         this.timeout(6000);
-        dropRateLimitSECONDSTest(1, 2, 4500, done);
+        dropRateLimitSECONDSTest(1, 2, 4500, null, done);
     });
 
     it('limits the message rate to 2 per second, 5 seconds, with drop', function(done) {
         this.timeout(6000);
-        dropRateLimitSECONDSTest(2, 1, 5000, done);
+        dropRateLimitSECONDSTest(2, 1, 5000, null, done);
+    });
+
+    it('limits the message rate with drop using msg.rate', function (done) {
+        this.timeout(6000);
+        RED.settings.nodeMessageBufferMaxLength = 3;
+        dropRateLimitSECONDSTest(2, 1, 5000, 1000, done);
     });
 
     /**
@@ -719,7 +733,7 @@ describe('delay Node', function() {
             setImmediate( function() { delayNode1.receive({reset:true});  });          // reset the queue
         });
     });
-    
+
     /* Messaging API support */
     function mapiDoneTestHelper(done, pauseType, drop, msgAndTimings) {
         const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
@@ -747,7 +761,7 @@ describe('delay Node', function() {
             }
         });
     }
-    
+
     it('calls done when queued message is emitted (type: delay)', function(done) {
         mapiDoneTestHelper(done, "delay", false, [{msg:{payload:1}, avr:1000, var:100}]);
     });
