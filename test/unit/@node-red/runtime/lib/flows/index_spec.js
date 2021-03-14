@@ -33,6 +33,7 @@ describe('flows/index', function() {
     var eventsOn;
     var credentialsClean;
     var credentialsLoad;
+    var credentialsAdd;
 
     var flowCreate;
     var getType;
@@ -80,6 +81,7 @@ describe('flows/index', function() {
             }
             return Promise.resolve();
         });
+        credentialsAdd = sinon.stub(credentials,"add", async function(id, conf){})
         flowCreate = sinon.stub(Flow,"create",function(parent, global, flow) {
             var id;
             if (typeof flow === 'undefined') {
@@ -117,6 +119,7 @@ describe('flows/index', function() {
         eventsOn.restore();
         credentialsClean.restore();
         credentialsLoad.restore();
+        credentialsAdd.restore();
         flowCreate.restore();
 
         flows.stopFlows().then(done);
@@ -196,9 +199,10 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig,credentials).then(function() {
-                credentialsClean.called.should.be.false();
-                credentialsLoad.called.should.be.true();
-                credentialsLoad.lastCall.args[0].should.eql(credentials);
+                credentialsClean.called.should.be.true();
+                credentialsAdd.called.should.be.true();
+                credentialsAdd.lastCall.args[0].should.eql("t1-1");
+                credentialsAdd.lastCall.args[1].should.eql({"a":1});
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
