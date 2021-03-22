@@ -115,7 +115,7 @@ describe('exec node', function() {
         });
 
         it('should exec a simple command with appended value from message', function (done) {
-            var flow = [{id:"n1", type:"exec", wires:[["n2"]], command:"echo", addpay:true, addpayValue:"topic", addpayValueType:"msg", append:"more", oldrc:"false"},
+            var flow = [{id:"n1", type:"exec", wires:[["n2"]], command:"echo", addpay:true, addpayValue:"topic", append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"}];
             helper.load(execNode, flow, function () {
                 var n1 = helper.getNode("n1");
