@@ -114,6 +114,22 @@ describe('exec node', function() {
             });
         });
 
+        it('should exec a simple command with appended value from message', function (done) {
+            var flow = [{id:"n1", type:"exec", wires:[["n2"]], command:"echo", addpay:true, addpayValue:"topic", addpayValueType:"msg", append:"more", oldrc:"false"},
+                        {id:"n2", type:"helper"}];
+            helper.load(execNode, flow, function () {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("bar more\n");
+                        done();
+                });
+                n1.receive({payload:"foo", topic:"bar"});
+            });
+        });
+
         it('should exec a simple command with extra parameters', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
