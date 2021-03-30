@@ -439,6 +439,7 @@ describe('Node', function() {
                         done(err);
                     }
                 },
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var message = {payload:"hello world"};
@@ -461,6 +462,7 @@ describe('Node', function() {
                         done(err);
                     }
                 },
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var message = {payload:"hello world"};
@@ -492,6 +494,7 @@ describe('Node', function() {
                         done(err);
                     }
                 },
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
 
@@ -532,7 +535,8 @@ describe('Node', function() {
                     } catch(err) {
                         done(err);
                     }
-                }
+                },
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow, id:'n1',type:'abc',wires:[['n2'],['n3'],['n4','n5']]});
             var n2 = new RedNode({_flow:flow, id:'n2',type:'abc'});
@@ -554,6 +558,7 @@ describe('Node', function() {
             var flow = {
                 handleError: (node,logMessage,msg,reportingNode) => {done(logMessage)},
                 getNode: (id) => { return {'n1':n1,'n2':n2}[id]},
+                incrPendingMsgId: (_msgid) => {},
             };
             var n1 = new RedNode({_flow:flow,id:'n1',type:'abc',wires:[['n2']]});
             var n2 = new RedNode({_flow:flow,id:'n2',type:'abc'});
