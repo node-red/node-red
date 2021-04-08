@@ -132,8 +132,8 @@ describe('function node', function() {
         });
     });
 
-    it('should allow accessing node.id and node.name and node.outputs', function(done) {
-        var flow = [{id:"n1",name:"test-function", outputs: 2, type:"function",wires:[["n2"]],func: "return [{ topic: node.name, payload:node.id, outputs: node.outputs }];"},
+    it('should allow accessing node.id and node.name and node.outputCount', function(done) {
+        var flow = [{id:"n1",name:"test-function", outputs: 2, type:"function",wires:[["n2"]],func: "return [{ topic: node.name, payload:node.id, outputCount: node.outputCount }];"},
         {id:"n2", type:"helper"}];
         helper.load(functionNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -144,7 +144,7 @@ describe('function node', function() {
                     // the sandbox and doesn't get all the should.js monkey patching
                     should.equal(msg.payload, n1.id);
                     should.equal(msg.topic, n1.name);
-                    should.equal(msg.outputs, n1.outputs);
+                    should.equal(msg.outputCount, n1.outputs);
                     done();
                 } catch(err) {
                     done(err);
@@ -1440,8 +1440,8 @@ describe('function node', function() {
             });
         });
 
-        it('should allow accessing node.id and node.name and node.outputs', function(done) {
-            var flow = [{id:"n1",name:"test-function", outputs: 2, type:"function",wires:[["n2"]],finalize:"global.set('finalize-data', { topic: node.name, payload:node.id, outputs: node.outputs});", func: "return msg;"}];
+        it('should allow accessing node.id and node.name and node.outputCount', function(done) {
+            var flow = [{id:"n1",name:"test-function", outputs: 2, type:"function",wires:[["n2"]],finalize:"global.set('finalize-data', { topic: node.name, payload:node.id, outputCount: node.outputCount});", func: "return msg;"}];
             helper.load(functionNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var ctx = n1.context().global;
@@ -1449,7 +1449,7 @@ describe('function node', function() {
                     const finalizeData = ctx.get('finalize-data');
                     should.equal(finalizeData.payload, n1.id);
                     should.equal(finalizeData.topic, n1.name);
-                    should.equal(finalizeData.outputs, n1.outputs);
+                    should.equal(finalizeData.outputCount, n1.outputs);
                     done();
                 });
             });
@@ -1698,8 +1698,8 @@ describe('function node', function() {
             });
         });
 
-        it('should allow accessing node.id and node.name and node.outputs and sending message', function(done) {
-            var flow = [{id:"n1",name:"test-function", outputs: 1, type:"function",wires:[["n2"]],initialize:"setTimeout(function() { node.send({ topic: node.name, payload:node.id, outputs: node.outputs})},10)", func: ""},
+        it('should allow accessing node.id and node.name and node.outputCount and sending message', function(done) {
+            var flow = [{id:"n1",name:"test-function", outputs: 1, type:"function",wires:[["n2"]],initialize:"setTimeout(function() { node.send({ topic: node.name, payload:node.id, outputCount: node.outputCount})},10)", func: ""},
             {id:"n2", type:"helper"}];
             helper.load(functionNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -1710,7 +1710,7 @@ describe('function node', function() {
                         // the sandbox and doesn't get all the should.js monkey patching
                         should.equal(msg.payload, n1.id);
                         should.equal(msg.topic, n1.name);
-                        should.equal(msg.outputs, n1.outputs);
+                        should.equal(msg.outputCount, n1.outputs);
                         done();
                     } catch(err) {
                         done(err);
