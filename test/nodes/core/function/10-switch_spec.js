@@ -267,7 +267,12 @@ describe('switch Node', function() {
     it('should not match if the key is not a string', function(done) {
         genericSwitchTest("hask", 1, true, false, {a:1}, done);
     });
-
+    it('should not match if the parent object does not exist - null', function(done) {
+        genericSwitchTest("hask", "a", true, false, null, done);
+    });
+    it('should not match if the parent object does not exist - undefined', function(done) {
+        genericSwitchTest("hask", "a", true, false, undefined, done);
+    });
     it('should check if payload is between given values', function(done) {
         twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });

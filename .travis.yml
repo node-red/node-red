@@ -16,6 +16,6 @@ matrix:
     - node_js: "10"
       script:
         - ./node_modules/.bin/grunt no-coverage
-    - node_js: "8"
-      script:
-        - ./node_modules/.bin/grunt no-coverage
+    #- node_js: "8"
+    #  script:
+    #    - ./node_modules/.bin/grunt no-coverage
