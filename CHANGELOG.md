@@ -1,3 +1,10 @@
+
+### 1.3.1: Maintenance Release
+
+Nodes
+
+ - Fix change node form validation
+
 ### 1.3.0: Milestone Release
 
 Editor
