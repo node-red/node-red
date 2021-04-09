@@ -51,10 +51,10 @@ describe('flows/index', function() {
 
 
     before(function() {
-        getType = sinon.stub(typeRegistry,"get",function(type) {
+        getType = sinon.stub(typeRegistry,"get").callsFake(function(type) {
             return type.indexOf('missing') === -1;
         });
-        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies", async function(flow) {
+        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies").callsFake(async function(flow) {
             if (flow[0].id === "node-with-missing-modules") {
                 throw new Error("Missing module");
             }
@@ -69,20 +69,20 @@ describe('flows/index', function() {
 
     beforeEach(function() {
         eventsOn = sinon.spy(events,"on");
-        credentialsClean = sinon.stub(credentials,"clean",function(conf) {
+        credentialsClean = sinon.stub(credentials,"clean").callsFake(function(conf) {
             conf.forEach(function(n) {
                 delete n.credentials;
             });
             return Promise.resolve();
         });
-        credentialsLoad = sinon.stub(credentials,"load",function(creds) {
+        credentialsLoad = sinon.stub(credentials,"load").callsFake(function(creds) {
             if (creds && creds.hasOwnProperty("$") && creds['$'] === "fail") {
                 return Promise.reject("creds error");
             }
             return Promise.resolve();
         });
-        credentialsAdd = sinon.stub(credentials,"add", async function(id, conf){})
-        flowCreate = sinon.stub(Flow,"create",function(parent, global, flow) {
+        credentialsAdd = sinon.stub(credentials,"add").callsFake(async function(id, conf){})
+        flowCreate = sinon.stub(Flow,"create").callsFake(function(parent, global, flow) {
             var id;
             if (typeof flow === 'undefined') {
                 flow = global;
@@ -551,7 +551,7 @@ describe('flows/index', function() {
     describe('#checkTypeInUse', function() {
 
         before(function() {
-            sinon.stub(typeRegistry,"getNodeInfo",function(id) {
+            sinon.stub(typeRegistry,"getNodeInfo").callsFake(function(id) {
                 if (id === 'unused-module') {
                     return {types:['one','two','three']}
                 } else {

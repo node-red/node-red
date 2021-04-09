@@ -30,7 +30,7 @@ var i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
 
 describe("red/nodes/registry/localfilesystem",function() {
     beforeEach(function() {
-        stubs.push(sinon.stub(i18n,"registerMessageCatalog", function() { return Promise.resolve(); }));
+        stubs.push(sinon.stub(i18n,"registerMessageCatalog").callsFake(function() { return Promise.resolve(); }));
     })
 
     var stubs = [];
@@ -131,7 +131,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
         it("Finds nodes module path",function(done) {
             var _join = path.join;
-            stubs.push(sinon.stub(path,"join",function() {
+            stubs.push(sinon.stub(path,"join").callsFake(function() {
                 if (arguments[0] == resourcesDir) {
                     // This stops the module tree scan from going any higher
                     // up the tree than resourcesDir.
@@ -206,7 +206,7 @@ describe("red/nodes/registry/localfilesystem",function() {
     describe("#getModuleFiles",function() {
         it("gets a nodes module files",function(done) {
             var _join = path.join;
-            stubs.push(sinon.stub(path,"join",function() {
+            stubs.push(sinon.stub(path,"join").callsFake(function() {
                 if (arguments[0] == resourcesDir) {
                     // This stops the module tree scan from going any higher
                     // up the tree than resourcesDir.
@@ -232,7 +232,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         });
         it("throws an error if a node isn't found",function(done) {
             var _join = path.join;
-            stubs.push(sinon.stub(path,"join",function() {
+            stubs.push(sinon.stub(path,"join").callsFake(function() {
                 if (arguments[0] == resourcesDir) {
                     // This stops the module tree scan from going any higher
                     // up the tree than resourcesDir.
@@ -251,7 +251,7 @@ describe("red/nodes/registry/localfilesystem",function() {
         it.skip("finds icon path directory");
         it("scans icon files with a module file",function(done) {
             var _join = path.join;
-            stubs.push(sinon.stub(path,"join",function() {
+            stubs.push(sinon.stub(path,"join").callsFake(function() {
                 if (arguments[0] == resourcesDir) {
                     // This stops the module tree scan from going any higher
                     // up the tree than resourcesDir.

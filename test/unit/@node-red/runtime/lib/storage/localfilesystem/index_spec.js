@@ -313,7 +313,7 @@ describe('storage/localfilesystem', function() {
         var flowFile = 'test.json';
         var flowFilePath = path.join(userDir,flowFile);
         localfilesystem.init({userDir:userDir, flowFile:flowFilePath,getUserSettings: () => {{}}}, mockRuntime).then(function() {
-            sinon.stub(fs,"fsync", function(fd, cb) {
+            sinon.stub(fs,"fsync").callsFake(function(fd, cb) {
                 cb(new Error());
             });
             sinon.spy(log,"warn");

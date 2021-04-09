@@ -27,7 +27,7 @@ var theme = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme");
 
 describe("api/editor/theme", function () {
     beforeEach(function () {
-        sinon.stub(fs, "statSync", function () { return true; });
+        sinon.stub(fs, "statSync").callsFake(function () { return true; });
     });
     afterEach(function () {
         theme.init({settings: {}});
