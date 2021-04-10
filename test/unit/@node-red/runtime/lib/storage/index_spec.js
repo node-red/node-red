@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-var when = require("when");
 var should = require("should");
 var paff = require('path');
 
@@ -79,16 +78,16 @@ describe("red/storage/index", function() {
                 },
                 getFlows : function() {
                     calledFlagGetFlows = true;
-                    return when.resolve([]);
+                    return Promise.resolve([]);
                 },
                 saveFlows : function (flows) {
                     flows.should.be.an.Array();
                     flows.should.have.lengthOf(0);
-                    return when.resolve("");
+                    return Promise.resolve("");
                 },
                 getCredentials : function() {
                     calledFlagGetCredentials = true;
-                    return when.resolve({});
+                    return Promise.resolve({});
                 },
                 saveCredentials : function(credentials) {
                     credentials.should.be.true();
@@ -147,7 +146,7 @@ describe("red/storage/index", function() {
         storage.getLibraryEntry(true, "name");
         storage.saveLibraryEntry(true, "name", true, true);
 
-        when.settle(promises).then(function() {
+        Promise.all(promises).then(function() {
             try {
                 calledInit.should.be.true();
                 calledFlagGetFlows.should.be.true();
@@ -174,11 +173,11 @@ describe("red/storage/index", function() {
                 getLibraryEntry : function(type, path) {
                     if (type === "flows") {
                         if (path === "/" || path === "\\") {
-                            return when.resolve(["a",{fn:"test.json"}]);
+                            return Promise.resolve(["a",{fn:"test.json"}]);
                         } else if (path == "/a" || path == "\\a") {
-                            return when.resolve([{fn:"test2.json"}]);
+                            return Promise.resolve([{fn:"test2.json"}]);
                         } else if (path == paff.join("","a","test2.json")) {
-                            return when.resolve("test content");
+                            return Promise.resolve("test content");
                         }
                     }
                 },
@@ -187,7 +186,7 @@ describe("red/storage/index", function() {
                     savePath = path;
                     saveContent = body;
                     saveMeta = meta;
-                    return when.resolve();
+                    return Promise.resolve();
                 }
         };
 

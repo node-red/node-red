@@ -19,6 +19,7 @@ var sinon = require("sinon");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 var comms = NR_TEST_UTILS.require("@node-red/runtime/lib/api/comms");
+var events = NR_TEST_UTILS.require("@node-red/util/lib/events");
 
 describe("runtime-api/comms", function() {
     describe("listens for events", function() {
@@ -30,21 +31,19 @@ describe("runtime-api/comms", function() {
         }
         var eventHandlers = {};
         before(function(done) {
+            sinon.stub(events,"removeListener", function() {})
+            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}
-                },
-                events: {
-                    removeListener: function() {},
-                    on: function(evt,handler) {
-                        eventHandlers[evt] = handler;
-                    }
                 }
             })
             comms.addConnection({client: clientConnection}).then(done);
         })
         after(function(done) {
             comms.removeConnection({client: clientConnection}).then(done);
+            events.removeListener.restore();
+            events.on.restore();
         })
         afterEach(function() {
             messages = [];
@@ -98,17 +97,17 @@ describe("runtime-api/comms", function() {
             }
         }
         before(function() {
+            sinon.stub(events,"removeListener", function() {})
+            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}
-                },
-                events: {
-                    removeListener: function() {},
-                    on: function(evt,handler) {
-                        eventHandlers[evt] = handler;
-                    }
                 }
             })
+        })
+        after(function() {
+            events.removeListener.restore();
+            events.on.restore();
         })
         afterEach(function(done) {
             comms.removeConnection({client: clientConnection1}).then(function() {
@@ -178,17 +177,17 @@ describe("runtime-api/comms", function() {
         }
         var eventHandlers = {};
         before(function() {
+            sinon.stub(events,"removeListener", function() {})
+            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}
-                },
-                events: {
-                    removeListener: function() {},
-                    on: function(evt,handler) {
-                        eventHandlers[evt] = handler;
-                    }
                 }
             })
+        })
+        after(function() {
+            events.removeListener.restore();
+            events.on.restore();
         })
         afterEach(function(done) {
             messages = [];

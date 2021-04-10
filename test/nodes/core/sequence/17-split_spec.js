@@ -1646,6 +1646,191 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should handle join an array when using msg.parts and duplicate indexed parts arrive', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload[0].should.equal("C");
+                    msg.payload[1].should.equal("D");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "A", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "B", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "C", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "D", parts: { id:1, type:"array", ch:",", index:1, count:2 } });
+         });
+    });
+
+    it('should handle join an array when using msg.parts and duplicate indexed parts arrive and being reset halfway', function (done) {
+        var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "array", mode: "auto" },
+                    { id: "n2", type: "helper" }];
+        helper.load(joinNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload[0].should.equal("D");
+                    msg.payload[1].should.equal("C");
+                    done();
+                }
+                catch (e) { done(e); }
+            });
+            n1.receive({ payload: "A", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ payload: "B", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+            n1.receive({ reset:true });
+            n1.receive({ payload: "C", parts: { id:1, type:"array", ch:",", index:1, count:2 } });
+            n1.receive({ payload: "D", parts: { id:1, type:"array", ch:",", index:0, count:2 } });
+         });
+    });
+
+    describe('messaging API', function() {
+        function mapiDoneSplitTestHelper(done, splt, spltType, stream, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [
+                { id: "splitNode1", type:"split", splt, spltType, stream, wires: [[]]},
+                { id: "completeNode1", type: "complete", scope: ["splitNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "catchNode1", type: "catch", scope: ["splitNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "helperNode1", type: "helper", wires: [[]] }];
+            const numMsgs = msgAndTimings.length;
+            helper.load([splitNode, completeNode, catchNode], flow, function () {
+                const splitNode1 = helper.getNode("splitNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 2;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.seq].avr, msgAndTimings[msg.seq].var);
+                    c += 1;
+                    if (c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout(function () { splitNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+        it('should call done() when message is sent (string)', function (done) {
+            mapiDoneSplitTestHelper(done, 2, "len", false, [
+                { msg: { seq: 0, payload: "12345" }, delay: 0, avr: 0, var: 100 },
+            ]);
+        });
+        it('should call done() when message is sent (array)', function (done) {
+            mapiDoneSplitTestHelper(done, 2, "len", false, [
+                { msg: { seq: 0, payload: [0,1,2,3,4] }, delay: 0, avr: 0, var: 100 },
+            ]);
+        });
+        it('should call done() when message is sent (object)', function (done) {
+            mapiDoneSplitTestHelper(done, 2, "len", false, [
+                { msg: { seq: 0, payload: {a:1,b:2}}, delay: 0, avr: 0, var: 100 },
+            ]);
+        });
+        it('should call done() when consolidated message is emitted (string, len)', function (done) {
+            mapiDoneSplitTestHelper(done, 5, "len", true, [
+                { msg: { seq: 0, payload: "12"}, delay: 0, avr: 500, var: 100 },
+                { msg: { seq: 1, payload: "34"}, delay: 200, avr: 500, var: 100 },
+                { msg: { seq: 2, payload: "5"},  delay: 500, avr: 500, var: 100 }
+            ]);
+        });
+        it('should call done() when consolidated message is emitted (Buffer, len)', function (done) {
+            mapiDoneSplitTestHelper(done, 5, "len", true, [
+                { msg: { seq: 0, payload: Buffer.from("12")}, delay: 0, avr: 500, var: 100 },
+                { msg: { seq: 1, payload: Buffer.from("34")}, delay: 200, avr: 500, var: 100 },
+                { msg: { seq: 2, payload: Buffer.from("5")},  delay: 500, avr: 500, var: 100 }
+            ]);
+        });
+        it('should call done() when consolidated message is emitted (Buffer, str)', function (done) {
+            mapiDoneSplitTestHelper(done, "5", "str", true, [
+                { msg: { seq: 0, payload: Buffer.from("12")}, delay: 0, avr: 500, var: 100 },
+                { msg: { seq: 1, payload: Buffer.from("34")}, delay: 200, avr: 500, var: 100 },
+                { msg: { seq: 2, payload: Buffer.from("5")},  delay: 500, avr: 500, var: 100 }
+            ]);
+        });
+        it('should call done() when consolidated message is emitted (Buffer, bin)', function (done) {
+            mapiDoneSplitTestHelper(done, "[53]", "bin", true, [
+                { msg: { seq: 0, payload: Buffer.from("12")}, delay: 0, avr: 500, var: 100 },
+                { msg: { seq: 1, payload: Buffer.from("34")}, delay: 200, avr: 500, var: 100 },
+                { msg: { seq: 2, payload: Buffer.from("5")},  delay: 500, avr: 500, var: 100 }
+            ]);
+        });
+
+        function mapiDoneJoinTestHelper(done, joinNodeSetting, msgAndTimings) {
+            const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
+            const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
+            const flow = [
+                { ...joinNodeSetting, id: "joinNode1", type:"join", wires: [[]]},
+                { id: "completeNode1", type: "complete", scope: ["joinNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "catchNode1", type: "catch", scope: ["joinNode1"], uncaught: false, wires: [["helperNode1"]] },
+                { id: "helperNode1", type: "helper", wires: [[]] }];
+            const numMsgs = msgAndTimings.length;
+            helper.load([joinNode, completeNode, catchNode], flow, function () {
+                const joinNode1 = helper.getNode("joinNode1");
+                const helperNode1 = helper.getNode("helperNode1");
+                RED.settings.nodeMessageBufferMaxLength = 3;
+                const t = Date.now();
+                let c = 0;
+                helperNode1.on("input", function (msg) {
+                    msg.should.have.a.property('payload');
+                    (Date.now() - t).should.be.approximately(msgAndTimings[msg.seq].avr, msgAndTimings[msg.seq].var);
+                    c += 1;
+                    if (c === numMsgs) {
+                        done();
+                    }
+                });
+                for (let i = 0; i < numMsgs; i++) {
+                    setTimeout(function () { joinNode1.receive(msgAndTimings[i].msg); }, msgAndTimings[i].delay);
+                }
+            });
+        }
+        it('should call done() when all messages are joined', function (done) {
+            mapiDoneJoinTestHelper(done, {mode:"auto", timeout:1}, [
+                { msg: {seq:0, payload:"A", parts:{id:1, type:"string", ch:",", index:0, count:3}}, delay:0, avr:500, var:100},
+                { msg: {seq:1, payload:"B", parts:{id:1, type:"string", ch:",", index:1, count:3}}, delay:200, avr:500, var:100},
+                { msg: {seq:2, payload:"C", parts:{id:1, type:"string", ch:",", index:2, count:3}}, delay:500, avr:500, var:100}
+            ]);
+        });
+        it('should call done() when the node is reset', function (done) {
+            mapiDoneJoinTestHelper(done, {mode:"auto", timeout:1}, [
+                { msg: {seq:0, payload:"A", parts:{id:1, type:"string", ch:",", index:0, count:3}}, delay:0, avr:500, var:100},
+                { msg: {seq:1, payload:"B", parts:{id:1, type:"string", ch:",", index:1, count:3}}, delay:200, avr:500, var:100},
+                { msg: {seq:2, payload:"dummy", reset: true, parts:{id:1}}, delay:500, avr:500, var:100}
+            ]);
+        });
+        it('should call done() when timed out', function (done) {
+            mapiDoneJoinTestHelper(done, {mode:"custom", joiner:",", build:"string", timeout:0.5}, [
+                { msg: {seq:0, payload:"A"}, delay:0, avr:500, var:100},
+                { msg: {seq:1, payload:"B"}, delay:200, avr:500, var:100},
+            ]);
+        });
+        it('should call done() when all messages are reduced', function (done) {
+            mapiDoneJoinTestHelper(done, {mode:"reduce", reduceRight:false, reduceExp:"$A+payload", reduceInit:"0",
+                                          reduceInitType:"num", reduceFixup:undefined}, [
+                { msg: {seq:0, payload:3, parts: {index:2, count:3, id:222}}, delay:0, avr:500, var:100},
+                { msg: {seq:1, payload:2, parts: {index:1, count:3, id:222}}, delay:200, avr:500, var:100},
+                { msg: {seq:2, payload:4, parts: {index:0, count:3, id:222}}, delay:500, avr:500, var:100}
+            ]);
+        });
+        it('should call done() regardless of buffer overflow', function (done) {
+            mapiDoneJoinTestHelper(done, {mode:"reduce", reduceRight:false, reduceExp:"$A+payload", reduceInit:"0",
+                                          reduceInitType:"num", reduceFixup:undefined}, [
+                { msg: {seq:0, payload:3, parts: {index:2, count:5, id:222}}, delay:0, avr:600, var:100},
+                { msg: {seq:1, payload:2, parts: {index:1, count:5, id:222}}, delay:200, avr:600, var:100},
+                { msg: {seq:2, payload:4, parts: {index:0, count:5, id:222}}, delay:400, avr:600, var:100},
+                { msg: {seq:3, payload:1, parts: {index:3, count:5, id:222}}, delay:600, avr:600, var:100},
+            ]);
+        });
+    });
+
     it('should handle msg.parts even if messages are out of order in auto mode if exactly one message has count set', function (done) {
         var flow = [{ id: "n1", type: "join", wires: [["n2"]], mode: "auto" },
                 { id: "n2", type: "helper" }];
@@ -1679,7 +1864,7 @@ describe('JOIN node', function() {
             _msg.payload = 0;
             n1.receive(_msg);
         });
-        
+
     })
 
 });

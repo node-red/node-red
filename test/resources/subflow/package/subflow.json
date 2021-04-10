@@ -1,0 +1,269 @@
+{
+    "id": "caf258cc.4e2c48",
+    "type": "subflow",
+    "name": "Test Subflow",
+    "info":"This is my exportable module subflow\n\nI hope this shows as help!",
+    "category": "common",
+    "in": [
+        {
+            "x": 120,
+            "y": 100,
+            "wires": [
+                {
+                    "id": "2f1d674f.a02d28"
+                }
+            ]
+        }
+    ],
+    "out": [
+        {
+            "x": 560,
+            "y": 100,
+            "wires": [
+                {
+                    "id": "1497236e.07f12d",
+                    "port": 0
+                }
+            ]
+        },
+        {
+            "x": 360,
+            "y": 200,
+            "wires": [
+                {
+                    "id": "f4334f5f.4905c",
+                    "port": 0
+                }
+            ]
+        }
+    ],
+    "env": [
+        {
+            "name": "FOO",
+            "type": "cred",
+            "ui": {
+                "icon": "font-awesome/fa-thermometer-0"
+            }
+        },
+        {
+            "name": "BAR",
+            "type": "str",
+            "value": "1",
+            "ui": {
+                "icon": "font-awesome/fa-thermometer-2",
+                "type": "select",
+                "opts": {
+                    "opts": [
+                        {
+                            "l": {
+                                "en-US": "option 1"
+                            },
+                            "v": "1"
+                        },
+                        {
+                            "l": {
+                                "en-US": "option 2"
+                            },
+                            "v": "2"
+                        },
+                        {
+                            "l": {
+                                "en-US": "option 3"
+                            },
+                            "v": "3"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "onewithaverylongname",
+            "type": "str",
+            "value": ""
+        },
+        {
+            "name": "BARRY",
+            "type": "bool",
+            "value": "true",
+            "ui": {
+                "icon": "font-awesome/fa-thermometer-4",
+                "type": "checkbox"
+            }
+        },
+        {
+            "name": "WILMA",
+            "type": "num",
+            "value": "10",
+            "ui": {
+                "icon": "font-awesome/fbomb",
+                "type": "spinner"
+            }
+        },
+        {
+            "name": "awg",
+            "type": "num",
+            "value": "",
+            "ui": {
+                "icon": "font-awesome/fa-address-book-o",
+                "type": "spinner"
+            }
+        },
+        {
+            "name": "awf",
+            "type": "str",
+            "value": "",
+            "ui": {
+                "type": "select",
+                "opts": {
+                    "opts": [
+                        {
+                            "l": {
+                                "en-US": "one"
+                            },
+                            "v": "1"
+                        },
+                        {
+                            "l": {
+                                "en-US": "two"
+                            },
+                            "v": "2"
+                        },
+                        {
+                            "l": {
+                                "en-US": "three"
+                            },
+                            "v": "3"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "aawf",
+            "type": "bool",
+            "value": "true",
+            "ui": {
+                "type": "checkbox"
+            }
+        },
+        {
+            "name": "awgawgawg",
+            "type": "str",
+            "value": "",
+            "ui": {
+                "type": "none"
+            }
+        },
+        {
+            "name": "seagseg",
+            "type": "str",
+            "value": "",
+            "ui": {
+                "type": "hide"
+            }
+        }
+    ],
+    "meta": {
+        "type": "fly-a-plane"
+    },
+    "color": "#A6BBCF",
+    "icon": "font-awesome/fa-space-shuttle",
+    "status": {
+        "x": 500,
+        "y": 300,
+        "wires": [
+            {
+                "id": "8252d1cc.54f94",
+                "port": 0
+            }
+        ]
+    },
+    "flow": [
+        {
+            "id": "2f1d674f.a02d28",
+            "type": "function",
+            "z": "caf258cc.4e2c48",
+            "name": "",
+            "func": "node.error(\"subflow error \"+msg.payload,msg);\nmsg.payload = {\n    FOO: env.get(\"FOO\"),\n    BAR: env.get(\"BAR\"),\n    WILMA: env.get(\"WILMA\"),\n    BARRY: env.get(\"BARRY\")\n}\nnode.warn(\"warning\");\n\nreturn msg;",
+            "outputs": 1,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [ {"var":"cowsay2","module":"cowsay2"}],
+            "x": 240,
+            "y": 100,
+            "wires": [
+                [
+                    "1497236e.07f12d"
+                ]
+            ]
+        },
+        {
+            "id": "f4334f5f.4905c",
+            "type": "catch",
+            "z": "caf258cc.4e2c48",
+            "name": "",
+            "scope": null,
+            "uncaught": false,
+            "x": 220,
+            "y": 200,
+            "wires": [
+                [
+                    "8252d1cc.54f94"
+                ]
+            ]
+        },
+        {
+            "id": "8252d1cc.54f94",
+            "type": "change",
+            "z": "caf258cc.4e2c48",
+            "name": "",
+            "rules": [
+                {
+                    "t": "set",
+                    "p": "payload",
+                    "pt": "msg",
+                    "to": "error.message",
+                    "tot": "msg"
+                }
+            ],
+            "action": "",
+            "property": "",
+            "from": "",
+            "to": "",
+            "reg": false,
+            "x": 350,
+            "y": 300,
+            "wires": [
+                []
+            ]
+        },
+        {
+            "id": "1497236e.07f12d",
+            "type": "random",
+            "z": "caf258cc.4e2c48",
+            "name": "",
+            "low": "1",
+            "high": "10",
+            "inte": "true",
+            "property": "random",
+            "x": 420,
+            "y": 100,
+            "wires": [
+                []
+            ]
+        },
+        {
+            "id": "876fc49e.f15268",
+            "type": "subflow:caf258cc.4e2c48",
+            "z": "d607ce33.4fa5a",
+            "name": "",
+            "x": 200,
+            "y": 760,
+            "wires": [
+                [],
+                []
+            ]
+        }
+    ]
+}

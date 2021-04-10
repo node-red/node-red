@@ -1,0 +1,160 @@
+[
+    {
+        "id": "2b18621b.e2670e",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "OK",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 580,
+        "wires": [
+            [
+                "5986faee.aef954"
+            ]
+        ]
+    },
+    {
+        "id": "59acf99.9a92308",
+        "type": "comment",
+        "z": "4b63452d.672afc",
+        "name": "Validate input JSON string",
+        "info": "JSON node can validate input JSON string using [JSON schema](https://json-schema.org/) when converting to JavaScript object.",
+        "x": 230,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "5986faee.aef954",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JSON string",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Apple\",\n    \"price\": 100,\n    \"origin\": \"Canada\"\n}",
+        "output": "str",
+        "x": 410,
+        "y": 580,
+        "wires": [
+            [
+                "f8a67c6d.4f1f1"
+            ]
+        ]
+    },
+    {
+        "id": "ca27c92c.ad7cb8",
+        "type": "debug",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "2fad9978.ea1916",
+        "type": "json",
+        "z": "4b63452d.672afc",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 750,
+        "y": 580,
+        "wires": [
+            [
+                "ca27c92c.ad7cb8"
+            ]
+        ]
+    },
+    {
+        "id": "f8a67c6d.4f1f1",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "Schema",
+        "field": "schema",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"type\": \"object\",\n    \"properties\": {\n        \"kind\": {\n            \"type\": \"string\"\n        },\n        \"price\": {\n            \"type\": \"number\"\n        },\n        \"origin\": {\n            \"type\": \"string\"\n        }\n    }\n}",
+        "output": "json",
+        "x": 590,
+        "y": 580,
+        "wires": [
+            [
+                "2fad9978.ea1916"
+            ]
+        ]
+    },
+    {
+        "id": "8337e847.ac18d8",
+        "type": "inject",
+        "z": "4b63452d.672afc",
+        "name": "NG",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 230,
+        "y": 660,
+        "wires": [
+            [
+                "fa14d8bf.1ac938"
+            ]
+        ]
+    },
+    {
+        "id": "fa14d8bf.1ac938",
+        "type": "template",
+        "z": "4b63452d.672afc",
+        "name": "JSON string",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "json",
+        "syntax": "plain",
+        "template": "{\n    \"kind\": \"Apple\",\n    \"price\": \"100\",\n    \"origin\": \"Canada\"\n}",
+        "output": "str",
+        "x": 410,
+        "y": 660,
+        "wires": [
+            [
+                "f8a67c6d.4f1f1"
+            ]
+        ]
+    }
+]

@@ -17,7 +17,6 @@
 var should = require("should");
 var sinon = require("sinon");
 var path = require("path");
-var when = require("when");
 var fs = require("fs");
 
 var NR_TEST_UTILS = require("nr-test-utils");
@@ -41,7 +40,7 @@ describe('red/registry/index', function() {
             stubs.push(sinon.stub(loader,"init"));
             stubs.push(sinon.stub(typeRegistry,"init"));
 
-            registry.init({});
+            registry.init({settings:{}});
             installer.init.called.should.be.true();
             loader.init.called.should.be.true();
             typeRegistry.init.called.should.be.true();
@@ -51,7 +50,7 @@ describe('red/registry/index', function() {
     describe('#addModule', function() {
         it('loads the module and returns its info', function(done) {
             stubs.push(sinon.stub(loader,"addModule",function(module) {
-                return when.resolve();
+                return Promise.resolve();
             }));
             stubs.push(sinon.stub(typeRegistry,"getModuleInfo", function(module) {
                 return "info";
@@ -63,7 +62,7 @@ describe('red/registry/index', function() {
         });
         it('rejects if loader rejects', function(done) {
             stubs.push(sinon.stub(loader,"addModule",function(module) {
-                return when.reject("error");
+                return Promise.reject("error");
             }));
             stubs.push(sinon.stub(typeRegistry,"getModuleInfo", function(module) {
                 return "info";
@@ -80,7 +79,7 @@ describe('red/registry/index', function() {
     describe('#enableNode',function() {
         it('enables a node set',function(done) {
             stubs.push(sinon.stub(typeRegistry,"enableNodeSet",function() {
-                return when.resolve();
+                return Promise.resolve();
             }));
             stubs.push(sinon.stub(typeRegistry,"getNodeInfo", function() {
                 return {id:"node-set",loaded:true};
@@ -104,14 +103,14 @@ describe('red/registry/index', function() {
 
         it('triggers a node load',function(done) {
             stubs.push(sinon.stub(typeRegistry,"enableNodeSet",function() {
-                return when.resolve();
+                return Promise.resolve();
             }));
             var calls = 0;
             stubs.push(sinon.stub(typeRegistry,"getNodeInfo", function() {
                 // loaded=false on first call, true on subsequent
                 return {id:"node-set",loaded:(calls++>0)};
             }));
-            stubs.push(sinon.stub(loader,"loadNodeSet",function(){return when.resolve();}));
+            stubs.push(sinon.stub(loader,"loadNodeSet",function(){return Promise.resolve();}));
             stubs.push(sinon.stub(typeRegistry,"getFullNodeInfo"));
 
             registry.enableNode("node-set").then(function(ns) {

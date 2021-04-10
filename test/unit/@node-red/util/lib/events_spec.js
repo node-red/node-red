@@ -17,9 +17,9 @@ var should = require("should");
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-describe("runtime/events", function() {
+describe("@node-red/util/events", function() {
     it('can be required without errors', function() {
-        NR_TEST_UTILS.require("@node-red/runtime/lib/events");
+        NR_TEST_UTILS.require("@node-red/util/lib/events");
     });
     it.skip('more tests needed', function(){})
 });

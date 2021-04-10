@@ -44,25 +44,33 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => ["lib1"] },
                 storage: {}
             })
             return settings.getRuntimeSettings({}).then(result => {
                 result.should.have.property("httpNodeRoot","testHttpNodeRoot");
                 result.should.have.property("version","testVersion");
                 result.should.have.property("paletteCategories",["red","blue","green"]);
+                result.should.have.property("libraries",["lib1"]);
                 result.should.have.property("testNodeSetting","helloWorld");
+                result.should.have.property("testPluginSettings","helloPluginWorld");
                 result.should.not.have.property("foo",123);
                 result.should.have.property("flowEncryptionType","test-key-type");
                 result.should.not.have.property("user");
-                result.should.have.property("editorTheme");
-                result.editorTheme.should.eql({palette:{editable:false}});
+                result.should.have.property("externalModules");
+                result.externalModules.should.eql({palette:{allowInstall:false, allowUpload: false}});
 
             })
         });
@@ -75,13 +83,19 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {}
             })
             return settings.getRuntimeSettings({
@@ -111,13 +125,19 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         getActiveProject: () => 'test-active-project',
@@ -162,13 +182,19 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         getActiveProject: () => 'test-active-project',
@@ -203,13 +229,19 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         flowFileExists: () => true,
@@ -248,13 +280,19 @@ describe("runtime-api/settings", function() {
                     paletteCategories :["red","blue","green"],
                     exportNodeSettings: (obj) => {
                         obj.testNodeSetting = "helloWorld";
+                    },
+                },
+                plugins: {
+                    exportPluginSettings: (obj) => {
+                        obj.testPluginSettings = "helloPluginWorld";
                     }
                 },
                 nodes: {
                     listContextStores: () => { return {stores:["file","memory"], default: "file"} },
-                    paletteEditorEnabled: () => false,
+                    installerEnabled: () => false,
                     getCredentialKeyType: () => "test-key-type"
                 },
+                library: {getLibraries: () => { ["lib1"]} },
                 storage: {
                     projects: {
                         flowFileExists: () => false,
@@ -588,7 +626,6 @@ var comms = require("../../../../red/api/editor/comms");
 var info = require("../../../../red/api/editor/settings");
 var auth = require("../../../../red/api/auth");
 var sshkeys = require("../../../../red/api/editor/sshkeys");
-var when = require("when");
 var bodyParser = require("body-parser");
 var fs = require("fs-extra");
 var fspath = require("path");
@@ -611,11 +648,11 @@ describe("api/editor/sshkeys", function() {
             exportNodeSettings:function(){},
             storage: {
                 getSessions: function(){
-                    return when.resolve(session_data);
+                    return Promise.resolve(session_data);
                 },
                 setSessions: function(_session) {
                     session_data = _session;
-                    return when.resolve();
+                    return Promise.resolve();
                 }
             }
         },
@@ -633,7 +670,7 @@ describe("api/editor/sshkeys", function() {
         },
         events:{on:function(){},removeListener:function(){}},
         isStarted: function() { return isStarted; },
-        nodes: {paletteEditorEnabled: function() { return false }}
+        nodes: {installerEnabled: function() { return false }}
     };
 
     before(function() {

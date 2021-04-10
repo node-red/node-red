@@ -17,7 +17,6 @@
 var should = require("should");
 var express = require('express');
 var sinon = require('sinon');
-var when = require('when');
 var fs = require("fs");
 
 var app = express();
@@ -34,11 +33,11 @@ describe("api/editor/theme", function () {
         theme.init({settings: {}});
         fs.statSync.restore();
     });
-    it("applies the default theme", function () {
+    it("applies the default theme", async function () {
         var result = theme.init({});
         should.not.exist(result);
 
-        var context = theme.context();
+        var context = await theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Node-RED");
         context.page.should.have.a.property("favicon", "favicon.ico");
@@ -53,7 +52,7 @@ describe("api/editor/theme", function () {
         should.not.exist(theme.settings());
     });
 
-    it("picks up custom theme", function () {
+    it("picks up custom theme", async function () {
         theme.init({
             editorTheme: {
                 page: {
@@ -105,7 +104,7 @@ describe("api/editor/theme", function () {
 
         theme.app();
 
-        var context = theme.context();
+        var context = await theme.context();
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Test Page Title");
         context.page.should.have.a.property("favicon", "theme/favicon/favicon");

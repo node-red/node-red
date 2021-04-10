@@ -16,7 +16,6 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var when = require("when");
 var clone = require("clone");
 var NR_TEST_UTILS = require("nr-test-utils");
 var flowUtil = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");

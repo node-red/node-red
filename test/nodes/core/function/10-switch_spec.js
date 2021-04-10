@@ -119,13 +119,17 @@ describe('switch Node', function() {
      * @param done - callback when done
      */
     function customFlowSwitchTest(flow, shouldReceive, sendPayload, done) {
+        customFlowMessageSwitchTest(flow,shouldReceive,{payload: sendPayload}, done);
+    }
+
+    function customFlowMessageSwitchTest(flow, shouldReceive, message, done) {
         helper.load(switchNode, flow, function() {
             var switchNode1 = helper.getNode("switchNode1");
             var helperNode1 = helper.getNode("helperNode1");
             helperNode1.on("input", function(msg) {
                 try {
                     if (shouldReceive === true) {
-                        should.equal(msg.payload,sendPayload);
+                        should.equal(msg,message);
                         done();
                     } else {
                         should.fail(null, null, "We should never get an input!");
@@ -134,7 +138,7 @@ describe('switch Node', function() {
                     done(err);
                 }
             });
-            switchNode1.receive({payload:sendPayload});
+            switchNode1.receive(message);
             if (shouldReceive === false) {
                 setTimeout(function() {
                     done();
@@ -263,7 +267,12 @@ describe('switch Node', function() {
     it('should not match if the key is not a string', function(done) {
         genericSwitchTest("hask", 1, true, false, {a:1}, done);
     });
-
+    it('should not match if the parent object does not exist - null', function(done) {
+        genericSwitchTest("hask", "a", true, false, null, done);
+    });
+    it('should not match if the parent object does not exist - undefined', function(done) {
+        genericSwitchTest("hask", "a", true, false, undefined, done);
+    });
     it('should check if payload is between given values', function(done) {
         twoFieldSwitchTest("btwn", "3", "5", true, true, 4, done);
     });
@@ -424,6 +433,29 @@ describe('switch Node', function() {
             });
         });
     });
+
+    it('should use a nested message property to compare value - matches', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload[msg.topic]",rules:[{"t":"eq","v":"bar"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, true, {topic:"foo",payload:{"foo":"bar"}}, done);
+    })
+    it('should use a nested message property to compare value - no match', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload[msg.topic]",rules:[{"t":"eq","v":"bar"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, false, {topic:"foo",payload:{"foo":"none"}}, done);
+
+    })
+
+    it('should use a nested message property to compare nested message property - matches', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload[msg.topic]",rules:[{"t":"eq","v":"payload[msg.topic2]",vt:"msg"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, true, {topic:"foo",topic2:"foo2",payload:{"foo":"bar","foo2":"bar"}}, done);
+    })
+    it('should use a nested message property to compare nested message property - no match', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload[msg.topic]",rules:[{"t":"eq","v":"payload[msg.topic2]",vt:"msg"}],checkall:true,outputs:1,wires:[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        customFlowMessageSwitchTest(flow, false, {topic:"foo",topic2:"foo2",payload:{"foo":"bar","foo2":"none"}}, done);
+    })
 
     it('should match regex with ignore-case flag set true', function(done) {
         var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[{"t":"regex","v":"onetwothree","case":true}],checkall:true,outputs:1,wires:[["helperNode1"]]},

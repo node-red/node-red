@@ -16,14 +16,13 @@
 
 var should = require("should");
 var sinon = require("sinon");
-var when = require("when");
 var clone = require("clone");
 var NR_TEST_UTILS = require("nr-test-utils");
 
 var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var RedNode = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
 var RED = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes");
-var events = NR_TEST_UTILS.require("@node-red/runtime/lib/events");
+var events = NR_TEST_UTILS.require("@node-red/util/lib/events");
 var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry")
 var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
@@ -34,9 +33,11 @@ describe('flows/index', function() {
     var eventsOn;
     var credentialsClean;
     var credentialsLoad;
+    var credentialsAdd;
 
     var flowCreate;
     var getType;
+    var checkFlowDependencies;
 
     var mockLog = {
         log: sinon.stub(),
@@ -53,9 +54,16 @@ describe('flows/index', function() {
         getType = sinon.stub(typeRegistry,"get",function(type) {
             return type.indexOf('missing') === -1;
         });
+        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies", async function(flow) {
+            if (flow[0].id === "node-with-missing-modules") {
+                throw new Error("Missing module");
+            }
+        });
     });
+
     after(function() {
         getType.restore();
+        checkFlowDependencies.restore();
     });
 
 
@@ -65,14 +73,15 @@ describe('flows/index', function() {
             conf.forEach(function(n) {
                 delete n.credentials;
             });
-            return when.resolve();
+            return Promise.resolve();
         });
         credentialsLoad = sinon.stub(credentials,"load",function(creds) {
             if (creds && creds.hasOwnProperty("$") && creds['$'] === "fail") {
-                return when.reject("creds error");
+                return Promise.reject("creds error");
             }
-            return when.resolve();
+            return Promise.resolve();
         });
+        credentialsAdd = sinon.stub(credentials,"add", async function(id, conf){})
         flowCreate = sinon.stub(Flow,"create",function(parent, global, flow) {
             var id;
             if (typeof flow === 'undefined') {
@@ -101,7 +110,7 @@ describe('flows/index', function() {
         storage = {
             saveFlows: function(conf) {
                 storage.conf = conf;
-                return when.resolve();
+                return Promise.resolve();
             }
         }
     });
@@ -110,6 +119,7 @@ describe('flows/index', function() {
         eventsOn.restore();
         credentialsClean.restore();
         credentialsLoad.restore();
+        credentialsAdd.restore();
         flowCreate.restore();
 
         flows.stopFlows().then(done);
@@ -145,10 +155,10 @@ describe('flows/index', function() {
             var loadStorage = {
                 saveFlows: function(conf) {
                     loadStorage.conf = conf;
-                    return when.resolve(456);
+                    return Promise.resolve(456);
                 },
                 getFlows: function() {
-                    return when.resolve({flows:originalConfig,rev:123})
+                    return Promise.resolve({flows:originalConfig,rev:123})
                 }
             }
             flows.init({log:mockLog, settings:{},storage:loadStorage});
@@ -189,9 +199,10 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig,credentials).then(function() {
-                credentialsClean.called.should.be.false();
-                credentialsLoad.called.should.be.true();
-                credentialsLoad.lastCall.args[0].should.eql(credentials);
+                credentialsClean.called.should.be.true();
+                credentialsAdd.called.should.be.true();
+                credentialsAdd.lastCall.args[0].should.eql("t1-1");
+                credentialsAdd.lastCall.args[1].should.eql({"a":1});
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
@@ -207,7 +218,7 @@ describe('flows/index', function() {
             newConfig.push({id:"t2",type:"tab"});
             newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             events.once('flows:started',function() {
                 flows.setFlows(newConfig,"nodes").then(function() {
@@ -235,7 +246,7 @@ describe('flows/index', function() {
             newConfig.push({id:"t2",type:"tab"});
             newConfig.push({id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]});
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
 
             events.once('flows:started',function() {
@@ -277,7 +288,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
@@ -297,7 +308,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
 
             events.once('flows:started',function() {
@@ -307,7 +318,7 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
+                return flows.startFlows();
             });
         });
         it('does not start if nodes missing', function(done) {
@@ -317,14 +328,19 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
-                flowCreate.called.should.be.false();
-                done();
+                return flows.startFlows();
+            }).then(() => {
+                try {
+                    flowCreate.called.should.be.false();
+                    done();
+                } catch(err) {
+                    done(err);
+                }
             });
         });
 
@@ -336,13 +352,13 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
-                flows.startFlows();
+                return flows.startFlows();
+            }).then(() => {
                 flowCreate.called.should.be.false();
-
                 events.emit("type-registered","missing");
                 setTimeout(function() {
                     flowCreate.called.should.be.false();
@@ -355,7 +371,44 @@ describe('flows/index', function() {
             });
         });
 
+        it('does not start if external modules missing', function(done) {
+            var originalConfig = [
+                {id:"node-with-missing-modules",x:10,y:10,z:"t1",type:"test",wires:[]},
+                {id:"t1",type:"tab"}
+            ];
 
+            storage.getFlows = function() {
+                return Promise.resolve({flows:originalConfig});
+            }
+            var receivedEvent = null;
+            var handleEvent = function(payload) {
+                receivedEvent = payload;
+            }
+
+            events.on("runtime-event",handleEvent);
+
+            //{id:"runtime-state",payload:{error:"missing-modules", type:"warning",text:"notification.warnings.missing-modules",modules:missingModules},retain:true});"
+
+
+            flows.init({log:mockLog, settings:{},storage:storage});
+            flows.load().then(flows.startFlows).then(() => {
+                events.removeListener("runtime-event",handleEvent);
+                try {
+                    flowCreate.called.should.be.false();
+                    receivedEvent.should.have.property('id','runtime-state');
+                    receivedEvent.should.have.property('payload',
+                       { error: 'missing-modules',
+                         type: 'warning',
+                         text: 'notification.warnings.missing-modules',
+                         modules: [] }
+                     );
+
+                    done();
+                }catch(err) {
+                    done(err)
+                }
+            });
+        });
 
     });
 
@@ -370,7 +423,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
@@ -394,7 +447,7 @@ describe('flows/index', function() {
     //             {id:"t1",type:"tab"}
     //         ];
     //         storage.getFlows = function() {
-    //             return when.resolve({flows:originalConfig});
+    //             return Promise.resolve({flows:originalConfig});
     //         }
     //
     //         events.once('flows:started',function() {
@@ -419,7 +472,7 @@ describe('flows/index', function() {
     //             {id:"t3-1",x:10,y:10,z:"t3",type:"test",config:"configNode",wires:[]}
     //         ];
     //         storage.getFlows = function() {
-    //             return when.resolve({flows:originalConfig});
+    //             return Promise.resolve({flows:originalConfig});
     //         }
     //
     //         events.once('flows:started',function() {
@@ -447,7 +500,7 @@ describe('flows/index', function() {
     //             {id:"t1",type:"tab"}
     //         ];
     //         storage.getFlows = function() {
-    //             return when.resolve({flows:originalConfig});
+    //             return Promise.resolve({flows:originalConfig});
     //         }
     //
     //         events.once('flows:started',function() {
@@ -473,7 +526,7 @@ describe('flows/index', function() {
     //             {id:"t3-1",x:10,y:10,z:"t3",type:"test",config:"configNode",wires:[]}
     //         ];
     //         storage.getFlows = function() {
-    //             return when.resolve({flows:originalConfig});
+    //             return Promise.resolve({flows:originalConfig});
     //         }
     //
     //         events.once('flows:started',function() {
@@ -548,7 +601,7 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
@@ -572,10 +625,10 @@ describe('flows/index', function() {
                 {id:"t1",type:"tab"}
             ];
             storage.getFlows = function() {
-                return when.resolve({flows:originalConfig});
+                return Promise.resolve({flows:originalConfig});
             }
             storage.setFlows = function() {
-                return when.resolve();
+                return Promise.resolve();
             }
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.load().then(function() {
