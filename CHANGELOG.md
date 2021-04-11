@@ -1,3 +1,10 @@
+
+### 1.3.1: Maintenance Release
+
+Nodes
+
+ - Fix change node form validation
+
 ### 1.3.0: Milestone Release
 
 Editor
@@ -30,7 +37,9 @@ Nodes
 
  - Change: Add property validation to Change node rule set Closes #2911
  - Exec: Allow any property to be appended to command (#2908) @kazuhitoyokoi
+ - HTTP Request: set followAllRedirects to work with POSTs Fixes #2017
  - Inject: Flag validation errors in Inject node props config Fixes #2914
+ - Function: add node.outputCount to sandbox (#2918) @kristianheljas
  - Switch: Fix Switch node handling of hasKey rule when property is undefined
  - Switch: Handle invalid regex set dynamically in Switch node Fixes #2905
 
