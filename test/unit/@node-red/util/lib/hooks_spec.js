@@ -1,9 +1,9 @@
 const should = require("should");
 const NR_TEST_UTILS = require("nr-test-utils");
 
-const hooks = NR_TEST_UTILS.require("@node-red/runtime/lib/hooks");
+const hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 
-describe("runtime/hooks", function() {
+describe("util/hooks", function() {
     afterEach(function() {
         hooks.clear();
     })
@@ -81,7 +81,7 @@ describe("runtime/hooks", function() {
                 hooks.has("onSend.A").should.be.false();
                 hooks.has("onSend.B").should.be.false();
                 hooks.has("onSend").should.be.false();
-                
+
                 done(err);
             } catch(err2) {
                 done(err2);
