@@ -249,4 +249,51 @@ describe("util/hooks", function() {
             done();
         })
     })
+
+
+    it("handler can use callback function - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            setTimeout(function() {
+                payload.order.push("A")
+                done()
+            },30)
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            data.order.should.eql(["A","B"])
+            done()
+        }).catch(done)
+    })
+
+    it("handler can halt execution - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            setTimeout(function() {
+                payload.order.push("A")
+                done(false)
+            },30)
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            data.order.should.eql(["A"])
+            done()
+        }).catch(done)
+    })
+
+    it("handler can halt execution on error - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            throw new Error("error");
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            done("hooks.trigger resolved unexpectedly")
+        }).catch(err => {
+            done();
+        })
+    })
 });
