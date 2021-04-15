@@ -170,6 +170,24 @@ describe('CSV node', function() {
                 n1.emit("input", {payload:testString});
             });
         });
+
+        it('should allow passing in a template as first line of CSV (not comma)', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrin:true, sep:";", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1, "b b":2, "c;c":3, "d, d": 4 });
+                    msg.should.have.property('columns', 'a,b b,c;c,"d, d"');
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = 'a;b b;"c;c";" d, d "'+"\n"+"1;2;3;4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
         it('should leave numbers starting with 0, e and + as strings (except 0.)', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
@@ -600,6 +618,24 @@ describe('CSV node', function() {
                 n2.on("input", function(msg) {
                     try {
                         msg.should.have.property('payload', '1,foo,"ba""r","di,ng"\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = { d:1, b:"foo", c:"ba\"r", a:"di,ng" };
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
+        it('should convert a simple object back to a tsv using a tab as a separator', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", sep:"\t", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '1\tfoo\t"ba""r"\tdi,ng\n');
                         done();
                     }
                     catch(e) { done(e); }

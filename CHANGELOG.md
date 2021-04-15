@@ -1,3 +1,23 @@
+### 1.3.2: Maintenance Release
+
+
+Runtime
+ - Handle package.json without dependencies section
+
+Editor
+
+ - Fix variable reference error in editableList Fixes #2933
+ - Fix handling of user-provided keymap Fixes #2926
+ - Ensure theme login image is passed through to api response Fixes #2929
+ - Add Japanese translations for Node-RED v1.3.1 (#2930) @kazuhitoyokoi
+
+Nodes
+
+ - CSV: Fix CSV parsing with other than , separator
+ - File out: Fix timing of msg.send to be after close
+ - Function: describe `node.outputCount` in help text
+ - MQTT: Fix MQTT Broker TLS config row layout Fixes #2927
+ - Split: add comment to info re $N being number of messages arriving
 
 ### 1.3.1: Maintenance Release
 
