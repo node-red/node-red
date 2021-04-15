@@ -26,7 +26,7 @@ var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
 var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
-var hooks = NR_TEST_UTILS.require("@node-red/runtime/lib/hooks");
+var hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
 
 
