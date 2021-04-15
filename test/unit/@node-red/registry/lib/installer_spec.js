@@ -262,7 +262,7 @@ describe('nodes/registry/installer', function() {
             p.catch((err)=>{});
             execResponse = p;
 
-            var addModule = sinon.stub(registry,"addModule",function(md) {
+            var addModule = sinon.stub(registry,"addModule").callsFake(function(md) {
                 return Promise.resolve(nodeInfo);
             });
 
