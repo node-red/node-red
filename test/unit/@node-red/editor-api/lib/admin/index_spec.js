@@ -45,35 +45,35 @@ describe("api/admin/index", function() {
         };
         before(function() {
             mockList.forEach(function(m) {
-                sinon.stub(m,"init",function(){});
+                sinon.stub(m,"init").callsFake(function(){});
             });
-            sinon.stub(auth,"needsPermission", function(permission) {
+            sinon.stub(auth,"needsPermission").callsFake(function(permission) {
                 return function(req,res,next) {
                     permissionChecks[permission] = (permissionChecks[permission]||0)+1;
                     next();
                 };
             });
 
-            sinon.stub(flows,"get",stubApp);
-            sinon.stub(flows,"post",stubApp);
+            sinon.stub(flows,"get").callsFake(stubApp);
+            sinon.stub(flows,"post").callsFake(stubApp);
 
-            sinon.stub(flow,"get",stubApp);
-            sinon.stub(flow,"post",stubApp);
-            sinon.stub(flow,"delete",stubApp);
-            sinon.stub(flow,"put",stubApp);
+            sinon.stub(flow,"get").callsFake(stubApp);
+            sinon.stub(flow,"post").callsFake(stubApp);
+            sinon.stub(flow,"delete").callsFake(stubApp);
+            sinon.stub(flow,"put").callsFake(stubApp);
 
-            sinon.stub(nodes,"getAll",stubApp);
-            sinon.stub(nodes,"post",stubApp);
-            sinon.stub(nodes,"getModule",stubApp);
-            sinon.stub(nodes,"putModule",stubApp);
-            sinon.stub(nodes,"delete",stubApp);
-            sinon.stub(nodes,"getSet",stubApp);
-            sinon.stub(nodes,"putSet",stubApp);
-            sinon.stub(nodes,"getModuleCatalog",stubApp);
-            sinon.stub(nodes,"getModuleCatalogs",stubApp);
+            sinon.stub(nodes,"getAll").callsFake(stubApp);
+            sinon.stub(nodes,"post").callsFake(stubApp);
+            sinon.stub(nodes,"getModule").callsFake(stubApp);
+            sinon.stub(nodes,"putModule").callsFake(stubApp);
+            sinon.stub(nodes,"delete").callsFake(stubApp);
+            sinon.stub(nodes,"getSet").callsFake(stubApp);
+            sinon.stub(nodes,"putSet").callsFake(stubApp);
+            sinon.stub(nodes,"getModuleCatalog").callsFake(stubApp);
+            sinon.stub(nodes,"getModuleCatalogs").callsFake(stubApp);
 
-            sinon.stub(context,"get",stubApp);
-            sinon.stub(context,"delete",stubApp);
+            sinon.stub(context,"get").callsFake(stubApp);
+            sinon.stub(context,"delete").callsFake(stubApp);
         });
         after(function() {
             mockList.forEach(function(m) {

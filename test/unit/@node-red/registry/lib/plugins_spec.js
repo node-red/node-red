@@ -37,8 +37,8 @@ describe("red/nodes/registry/plugins",function() {
             }
         }
         events.on("registry:plugin-added",handleEvent);
-        sinon.stub(registry,"getModule", moduleId => modules[moduleId]);
-        sinon.stub(registry,"getModuleList", () => modules)
+        sinon.stub(registry,"getModule").callsFake(moduleId => modules[moduleId]);
+        sinon.stub(registry,"getModuleList").callsFake(() => modules)
     });
     afterEach(function() {
         events.removeListener("registry:plugin-added",handleEvent);

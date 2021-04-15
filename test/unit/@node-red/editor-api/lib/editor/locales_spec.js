@@ -50,9 +50,9 @@ describe("api/editor/locales", function() {
             locales.init({});
 
             // bit of a mess of internal workings
-            sinon.stub(i18n.i,'changeLanguage',function(lang,callback) { if (callback) {callback();}});
+            sinon.stub(i18n.i,'changeLanguage').callsFake(function(lang,callback) { if (callback) {callback();}});
             if (i18n.i.getResourceBundle) {
-                sinon.stub(i18n.i,'getResourceBundle',function(lang, namespace) {return {namespace:namespace, lang:lang};});
+                sinon.stub(i18n.i,'getResourceBundle').callsFake(function(lang, namespace) {return {namespace:namespace, lang:lang};});
             } else {
                 // If i18n.init has not been called, then getResourceBundle isn't
                 // defined - so hardcode a stub
@@ -121,7 +121,7 @@ describe("api/editor/locales", function() {
     //     var app;
     //     before(function() {
     //         // bit of a mess of internal workings
-    //         sinon.stub(i18n,'catalog',function(namespace, lang) {
+    //         sinon.stub(i18n,'catalog').callsFake(function(namespace, lang) {
     //                     return {
     //                         "node-red": "should not return",
     //                         "test-module-a-id": "test-module-a-catalog",

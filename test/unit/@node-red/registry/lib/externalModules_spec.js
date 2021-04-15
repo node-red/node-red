@@ -44,7 +44,7 @@ describe("externalModules api", function() {
     })
     describe("checkFlowDependencies", function() {
         beforeEach(function() {
-            sinon.stub(exec,"run", async function(cmd, args, options) {
+            sinon.stub(exec,"run").callsFake(async function(cmd, args, options) {
                 let error;
                 if (args[1] === "moduleNotFound") {
                     error = new Error();

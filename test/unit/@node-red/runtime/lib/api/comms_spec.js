@@ -31,8 +31,8 @@ describe("runtime-api/comms", function() {
         }
         var eventHandlers = {};
         before(function(done) {
-            sinon.stub(events,"removeListener", function() {})
-            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
+            sinon.stub(events,"removeListener").callsFake(function() {})
+            sinon.stub(events,"on").callsFake(function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}
@@ -97,8 +97,8 @@ describe("runtime-api/comms", function() {
             }
         }
         before(function() {
-            sinon.stub(events,"removeListener", function() {})
-            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
+            sinon.stub(events,"removeListener").callsFake(function() {})
+            sinon.stub(events,"on").callsFake(function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}
@@ -177,8 +177,8 @@ describe("runtime-api/comms", function() {
         }
         var eventHandlers = {};
         before(function() {
-            sinon.stub(events,"removeListener", function() {})
-            sinon.stub(events,"on", function(evt,handler) { eventHandlers[evt] = handler })
+            sinon.stub(events,"removeListener").callsFake(function() {})
+            sinon.stub(events,"on").callsFake(function(evt,handler) { eventHandlers[evt] = handler })
             comms.init({
                 log: {
                     trace: function(){}

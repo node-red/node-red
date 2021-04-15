@@ -34,7 +34,7 @@ describe("localfilesystem/projects/ssh/keygen", function() {
         var command;
         var args;
         var opts;
-        sinon.stub(child_process,"spawn", function(_command,_args,_opts) {
+        sinon.stub(child_process,"spawn").callsFake(function(_command,_args,_opts) {
             _command = command;
             _args = args;
             _opts = opts;

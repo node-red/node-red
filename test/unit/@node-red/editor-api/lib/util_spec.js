@@ -33,8 +33,8 @@ describe("api/util", function() {
         var app;
         before(function() {
             app = express();
-            sinon.stub(log,'error',function(msg) {loggedError = msg;});
-            sinon.stub(log,'audit',function(event) {loggedEvent = event;});
+            sinon.stub(log,'error').callsFake(function(msg) {loggedError = msg;});
+            sinon.stub(log,'audit').callsFake(function(event) {loggedEvent = event;});
             app.get("/tooLarge", function(req,res) {
                 var err = new Error();
                 err.message = "request entity too large";
