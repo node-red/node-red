@@ -14,6 +14,7 @@ const os = require("os");
 const NR_TEST_UTILS = require("nr-test-utils");
 const externalModules = NR_TEST_UTILS.require("@node-red/registry/lib/externalModules");
 const exec = NR_TEST_UTILS.require("@node-red/util/lib/exec");
+const hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 
 let homeDir;
 
@@ -40,6 +41,7 @@ describe("externalModules api", function() {
         await createUserDir()
     })
     afterEach(async function() {
+        hooks.clear();
         await fs.remove(homeDir);
     })
     describe("checkFlowDependencies", function() {
@@ -99,6 +101,25 @@ describe("externalModules api", function() {
                 {type: "function", libs:[{module: "foo"}]}
             ])
             exec.run.called.should.be.true();
+            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
+        })
+
+
+        it("calls pre/postInstall hooks", async function() {
+            externalModules.init({userDir: homeDir});
+            externalModules.register("function", "libs");
+            let receivedPreEvent,receivedPostEvent;
+            hooks.add("preInstall", function(event) { receivedPreEvent = event; })
+            hooks.add("postInstall", function(event) { receivedPostEvent = event; })
+
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "foo"}]}
+            ])
+            exec.run.called.should.be.true();
+            receivedPreEvent.should.have.property("module","foo")
+            receivedPreEvent.should.have.property("version")
+            receivedPreEvent.should.have.property("dir")
+            receivedPreEvent.should.eql(receivedPostEvent)
             fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
 
