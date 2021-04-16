@@ -40,8 +40,11 @@ module.exports = function(grunt) {
     if (nonHeadless) {
         process.env.NODE_RED_NON_HEADLESS = true;
     }
+    let packageFile = grunt.file.readJSON('package.json')
+    process.env.NODE_RED_PACKAGE_VERSION = packageFile.version;
+
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: packageFile,
         paths: {
             dist: ".dist"
         },
@@ -467,7 +470,8 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     destination: 'docs',
-                    configure: './jsdoc.json'
+                    configure: './jsdoc.json',
+                    fred: "hi there"
                 }
             },
             _editor: {
