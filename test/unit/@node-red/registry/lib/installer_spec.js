@@ -291,16 +291,19 @@ describe('nodes/registry/installer', function() {
             }).catch(done);
         });
 
-        it("fails install if preInstall hook fails", function(done) {
+        it("skips invoking npm if preInstall returns false", function(done) {
             let receivedEvent;
-            hooks.add("preInstall", function(event) { throw new Error("preInstall-error"); })
+            hooks.add("preInstall", function(event) { return false })
+            hooks.add("postInstall", function(event) { receivedEvent = event; })
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
 
             installer.installModule("this_wont_exist","1.2.3").catch(function(err) {
                 exec.run.called.should.be.false();
+                should.exist(receivedEvent);
                 done();
             }).catch(done);
         });
+
         it("rollsback install if postInstall hook fails", function(done) {
             hooks.add("postInstall", function(event) { throw new Error("fail"); })
             installer.installModule("this_wont_exist","1.2.3").catch(function(err) {

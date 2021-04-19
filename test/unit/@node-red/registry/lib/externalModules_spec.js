@@ -123,6 +123,25 @@ describe("externalModules api", function() {
             fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
 
+        it("skips npm install if preInstall returns false", async function() {
+            externalModules.init({userDir: homeDir});
+            externalModules.register("function", "libs");
+            let receivedPreEvent,receivedPostEvent;
+            hooks.add("preInstall", function(event) { receivedPreEvent = event; return false })
+            hooks.add("postInstall", function(event) { receivedPostEvent = event; })
+
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "foo"}]}
+            ])
+            exec.run.called.should.be.false();
+            receivedPreEvent.should.have.property("module","foo")
+            receivedPreEvent.should.have.property("version")
+            receivedPreEvent.should.have.property("dir")
+            receivedPreEvent.should.eql(receivedPostEvent)
+            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
+        })
+
+
         it("installs missing modules from inside subflow module", async function() {
             externalModules.init({userDir: homeDir});
             externalModules.register("function", "libs");
