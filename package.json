@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "1.3.2",
+    "version": "1.3.3",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",

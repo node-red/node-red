@@ -1,5 +1,25 @@
-### 1.3.2: Maintenance Release
+### 1.3.3: Maintenance Release
 
+Editor
+
+ - Fix package semver comparison to allow >1 version increment
+ - Prevent TypedInput label overflowing element Fixes #2941
+ - Remove TypedInput from tab focus when only one type available
+ - Make typedInput.disable more consistent in behaviour Fixes #2942
+ - Fix project credential secret reset handling Part of #2868
+
+Runtime
+
+ - Export package version in Grunt file so docs template can access
+
+Nodes
+
+ - CSV: ensure CSV node can send false as string
+ - HTTPIn: handle application/x-protobuf as Buffer type (#2935 #2938) @hardillb
+ - MQTT: Ensure mqtt-close message is published when closing mqtt nodes
+
+
+### 1.3.2: Maintenance Release
 
 Runtime
  - Handle package.json without dependencies section
