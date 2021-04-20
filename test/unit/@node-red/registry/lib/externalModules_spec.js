@@ -48,13 +48,13 @@ describe("externalModules api", function() {
         beforeEach(function() {
             sinon.stub(exec,"run").callsFake(async function(cmd, args, options) {
                 let error;
-                if (args[1] === "moduleNotFound") {
+                if (args[2] === "moduleNotFound") {
                     error = new Error();
                     error.stderr = "E404";
-                } else if (args[1] === "moduleVersionNotFound") {
+                } else if (args[2] === "moduleVersionNotFound") {
                     error = new Error();
                     error.stderr = "ETARGET";
-                } else if (args[1] === "moduleFail") {
+                } else if (args[2] === "moduleFail") {
                     error = new Error();
                     error.stderr = "Some unexpected install error";
                 }
@@ -109,13 +109,14 @@ describe("externalModules api", function() {
             externalModules.init({userDir: homeDir});
             externalModules.register("function", "libs");
             let receivedPreEvent,receivedPostEvent;
-            hooks.add("preInstall", function(event) { receivedPreEvent = event; })
+            hooks.add("preInstall", function(event) { event.args = ["a"]; receivedPreEvent = event; })
             hooks.add("postInstall", function(event) { receivedPostEvent = event; })
 
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "foo"}]}
             ])
             exec.run.called.should.be.true();
+            // exec.run.lastCall.args[1].should.eql([ 'install', 'a', 'foo' ]);
             receivedPreEvent.should.have.property("module","foo")
             receivedPreEvent.should.have.property("version")
             receivedPreEvent.should.have.property("dir")

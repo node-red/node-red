@@ -254,7 +254,7 @@ describe('nodes/registry/installer', function() {
 
         it("triggers preInstall and postInstall hooks", function(done) {
             let receivedPreEvent,receivedPostEvent;
-            hooks.add("preInstall", function(event) { receivedPreEvent = event; })
+            hooks.add("preInstall", function(event) { event.args = ["a"]; receivedPreEvent = event; })
             hooks.add("postInstall", function(event) { receivedPostEvent = event; })
             var nodeInfo = {nodes:{module:"foo",types:["a"]}};
             var res = {code: 0,stdout:"",stderr:""}
@@ -267,6 +267,8 @@ describe('nodes/registry/installer', function() {
             });
 
             installer.installModule("this_wont_exist","1.2.3").then(function(info) {
+                exec.run.called.should.be.true();
+                exec.run.lastCall.args[1].should.eql([ 'install', 'a', 'this_wont_exist@1.2.3' ]);
                 info.should.eql(nodeInfo);
                 should.exist(receivedPreEvent)
                 receivedPreEvent.should.have.property("module","this_wont_exist")
