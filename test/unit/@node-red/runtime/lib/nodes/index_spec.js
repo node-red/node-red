@@ -177,15 +177,15 @@ describe("red/nodes/index", function() {
 
             var userDir = path.join(__dirname,".testUserHome");
             before(function(done) {
-                sinon.stub(log,"log",function(){});
+                sinon.stub(log,"log").callsFake(function(){});
                 fs.remove(userDir,function(err) {
                     fs.mkdir(userDir,function() {
-                        sinon.stub(index, 'load', function() {
+                        sinon.stub(index, 'load').callsFake(function() {
                             return new Promise(function(resolve,reject){
                                 resolve([]);
                             });
                         });
-                        sinon.stub(localfilesystem, 'getCredentials', function() {
+                        sinon.stub(localfilesystem, 'getCredentials').callsFake(function() {
                             return new Promise(function(resolve,reject) {
                                 resolve({"tab1":{"b":1,"c":2}});
                             });
@@ -271,7 +271,7 @@ describe("red/nodes/index", function() {
         var randomNodeInfo = {id:"5678",types:["random"]};
 
         beforeEach(function() {
-            sinon.stub(registry,"getNodeInfo",function(id) {
+            sinon.stub(registry,"getNodeInfo").callsFake(function(id) {
                 if (id == "test") {
                     return {id:"1234",types:["test"]};
                 } else if (id == "doesnotexist") {
@@ -280,7 +280,7 @@ describe("red/nodes/index", function() {
                     return randomNodeInfo;
                 }
             });
-            sinon.stub(registry,"disableNode",function(id) {
+            sinon.stub(registry,"disableNode").callsFake(function(id) {
                 return Promise.resolve(randomNodeInfo);
             });
         });
@@ -343,7 +343,7 @@ describe("red/nodes/index", function() {
         };
 
         before(function() {
-            sinon.stub(registry,"getNodeInfo",function(id) {
+            sinon.stub(registry,"getNodeInfo").callsFake(function(id) {
                 if (id == "node-red/foo") {
                     return {id:"1234",types:["test"]};
                 } else if (id == "doesnotexist") {
@@ -352,7 +352,7 @@ describe("red/nodes/index", function() {
                     return randomNodeInfo;
                 }
             });
-            sinon.stub(registry,"getModuleInfo",function(module) {
+            sinon.stub(registry,"getModuleInfo").callsFake(function(module) {
                 if (module == "node-red") {
                     return {nodes:[{name:"foo"}]};
                 } else if (module == "doesnotexist") {
@@ -361,7 +361,7 @@ describe("red/nodes/index", function() {
                     return randomModuleInfo;
                 }
             });
-            sinon.stub(registry,"removeModule",function(id) {
+            sinon.stub(registry,"removeModule").callsFake(function(id) {
                 return randomModuleInfo;
             });
         });

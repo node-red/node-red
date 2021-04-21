@@ -32,8 +32,8 @@ describe("api/editor/index", function() {
     var app;
     describe("disabled the editor", function() {
         beforeEach(function() {
-            sinon.stub(comms,'init', function(){});
-            sinon.stub(info,'init', function(){});
+            sinon.stub(comms,'init').callsFake(function(){});
+            sinon.stub(info,'init').callsFake(function(){});
         });
         afterEach(function() {
             comms.init.restore();
@@ -54,13 +54,13 @@ describe("api/editor/index", function() {
         var errors = [];
         var session_data = {};
         before(function() {
-            sinon.stub(auth,'needsPermission',function(permission) {
+            sinon.stub(auth,'needsPermission').callsFake(function(permission) {
                 return function(req,res,next) { next(); }
             });
             mockList.forEach(function(m) {
-                sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m),"init",function(){});
+                sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m),"init").callsFake(function(){});
             });
-            sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme"),"app",function(){ return express()});
+            sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme"),"app").callsFake(function(){ return express()});
         });
         after(function() {
             mockList.forEach(function(m) {
@@ -72,7 +72,7 @@ describe("api/editor/index", function() {
         });
 
         before(function() {
-            sinon.stub(log,"error",function(err) { errors.push(err)})
+            sinon.stub(log,"error").callsFake(function(err) { errors.push(err)})
             app = editorApi.init({},{httpNodeRoot:true, httpAdminRoot: true,disableEditor:false,exportNodeSettings:function(){}},{
                 isStarted: () => Promise.resolve(isStarted)
             });

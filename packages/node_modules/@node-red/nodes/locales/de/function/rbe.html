@@ -1,0 +1,40 @@
+<script type="text/html" data-help-name="rbe">
+    <p>Report by Exception (RBE) - Daten-Weiterleitung nur bei Änderung der Nutzdaten (Payload).
+       Der Node kann auch blockieren oder weiterleiten, wenn die Wertänderung eine Grenze überschreitet (Totband- und Nahband-Modus).</p>
+    <h3>Eingangsdaten</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">number | string | (object)</span>
+        </dt>
+        <dd>Der RBE-Modus mit Prüfung auf Wertänderung akzeptiert Zahlen (numbers), Zeichenfolgen (string) und einfache Objekte (object).
+            Bei den anderen wertvergleichenden Modies müssen analysierbare (parseable) Zahlenwerte übergeben werden.</dd>
+        <dt class="optional">topic <span class="property-type">string</span>
+        </dt>
+        <dd>Wenn vorgegeben erfolgt die Auswertung separat für jedes Topic</dd>
+        <dt class="optional">reset<span class="property-type">any</span></dt>
+        <dd>Wenn gesetzt wird/werden der/die gespeicherte(n) Wert(e) rückgesetzt</dd>
+    </dl>
+    <h3>Ausgangsdaten</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">wie Eingangsdaten</span>
+        </dt>
+        <dd>Wenn Bedingung erfüllt, sind die Ausgangsdaten gleich den Eingangsdaten</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>Im <i>RBE</i>-Modus mit Prüfung auf Wertänderung blockiert dieser Node die Datenweitergabe bis
+       <code>msg.payload</code> (oder die eingestellte Eigenschaft) verändert ist gegenüber dessen vorherigen Wert.
+       Wenn benötigt, wird der Anfangswert ignoriert, sodass beim Start nichts gesendet wird.</p>
+    <p>In den <i>Totband</i>-Modies werden die Eingangswerte geblockt,
+       <i>bis</i> die Wertänderung größer oder größer-gleich ist als &plusmn; des Bandes um den voherigen Wert.</p>
+    <p>In den <i>Nahband</i>-Modies werden die Eingangswerte geblockt,
+       <i>wenn</i> die Wertänderung größer oder größer-gleich ist als &plusmn; des Bandes um den voherigen Wert.
+       Dies ist beispielsweise nützlich, um Ausreißer eines fehlerhaften Sensors zu ignorieren.</p>
+    <p>In den Totband und Nahband-Modies müssen die Eingangswerte analysierbare (parseable) Zahlenwerte sein und
+       beide unterstützen auch % (prozentuale Angabe), d.h. der Node sendet nur, wenn der Eingangswert mehr als x% vom vorherigen Wert abweicht.</p>
+    <p>Die Totband- und Nahband-Modies erlauben den Vergleich entweder gegen den letzten gültigen Ausgangswert,
+       dieses zum Ignorieren von Werten außerhalb des gültigen Bereichs, oder gegen den des vorherigen Eingangswertes,
+       welches den Sollwert rücksetzt, was einen allmähligen Drift (Totband) oder einen eine schrittweise Veränderung (Nahband) ermöglicht.</p>
+    <p><b>Hinweis</b>: Dieser Node arbeitet auf per-<code>msg.topic</code>-Basis.
+       Dies bedeutet, dass ein einzelner rbe-Node mehrere verschiedene Topics parallel bearbeiten kann.</p>
+</script>

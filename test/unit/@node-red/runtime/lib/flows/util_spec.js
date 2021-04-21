@@ -26,7 +26,7 @@ describe('flows/util', function() {
     var getType;
 
     before(function() {
-        getType = sinon.stub(typeRegistry,"get",function(type) {
+        getType = sinon.stub(typeRegistry,"get").callsFake(function(type) {
             return type!=='missing';
         });
     });

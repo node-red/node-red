@@ -1,0 +1,31 @@
+<!-- Source revision: https://github.com/node-red/node-red-nodes/commit/467907776088422882076f46d85e25601449564d -->
+
+<script type="text/html" data-help-name="rbe">
+    <p>Report by Exception(例外データの報告)ノード - ペイロードの値が変化した場合だけデータを送信。</p>
+    <p>値が指定した量変化するまでブロックすることもできます- 不感帯(deadband)モード。</p>
+    <h3>入力</h3>    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">数値 | 文字列 | (オブジェクト)</span>
+        </dt>
+        <dd>RBEモードでは数値、文字列、シンプルなオブジェクトを受け付けます。他のモードではパース可能な数値を指定します。</dd>
+        <dt class="optional">topic <span class="property-type">文字列</span>
+        </dt>
+        <dd>指定すると、トピックごとに動作します。</dd>
+        <dt class="optional">reset<span class="property-type">任意</span></dt>
+        <dd>値を設定すると、保存した値をクリアします。msg.topicを指定した場合は対応する値、指定しなければ全てのトピックが対象となります。</dd>
+    </dl>
+    <h3>出力</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">入力と同じ</span>
+        </dt>
+        <dd>トリガー条件を満たした場合、入力を出力として送信。</dd>
+    </dl>
+    <h3>詳細</h3>
+    <p>RBEモードでは、<code>msg.payload</code>が前の値から変化するまでブロックします。</p>
+    <p>不感帯モードでは、入力データはパース可能な数値でなければなりません。以前の入力値に対する差分が指定値より大きな場合にのみメッセージを出力します。</p>
+    <p>不感帯モードでは%による指定もサポートしています。入力と前の値の差分がX%より大きな場合に出力を行います。</p>
+    <p>狭帯域(narrowband)モードでは、前の値に対する差分が一定値より大きな場合に入力ペイロードをブロックします。このモードは、故障したセンサから発生する外れ値を無視する時などに有用です。</p>
+    <p>不感帯モードと狭帯域モードでは、以前の有効出力値、もしくは、以前の入力値との比較ができます。有効出力値を用いると範囲外の値を無視することが、入力値を用いると設定点がリセットされるため漸次的変化(不感帯モード)もしくは段階的変化(狭帯域モード)が可能です。</p>
+    <p><b>注:</b> このノードは<code>msg.topic</code>毎に動作します。そのため、ひとつのrbeノードで複数の異なるトピックを同時に扱うことができます。</p>
+</script>

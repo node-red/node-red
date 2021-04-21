@@ -53,7 +53,7 @@ describe('exec node', function() {
         it('should exec a simple command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
             function(arg1, arg2, arg3, arg4) {
                 // arg3(error,stdout,stderr);
                 arg3(null,arg1,arg1.toUpperCase());
@@ -137,7 +137,7 @@ describe('exec node', function() {
         it('should exec a simple command with extra parameters', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:"payload", append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
                 function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
@@ -193,7 +193,7 @@ describe('exec node', function() {
         it('should be able to return a binary buffer', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:true, append:"more", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
                 function(arg1, arg2, arg3, arg4) {
                     //console.log(arg1);
                     // arg3(error,stdout,stderr);
@@ -325,7 +325,7 @@ describe('exec node', function() {
         it('should return the rc for a failing command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
             function(arg1, arg2, arg3, arg4) {
                 //console.log(arg1);
                 // arg3(error,stdout,stderr);
@@ -388,7 +388,7 @@ describe('exec node', function() {
         it('should preserve existing properties on msg object', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"echo", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
             function(arg1, arg2, arg3, arg4) {
                 // arg3(error,stdout,stderr);
                 arg3(null,arg1,arg1.toUpperCase());
@@ -455,7 +455,7 @@ describe('exec node', function() {
         it('should preserve existing properties on msg object for a failing command', function(done) {
             var flow = [{id:"n1",type:"exec",wires:[["n2"],["n3"],["n4"]],command:"error", addpay:false, append:"", oldrc:"false"},
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
-            var spy = sinon.stub(child_process, 'exec',
+            var spy = sinon.stub(child_process, 'exec').callsFake(
             function(arg1, arg2, arg3, arg4) {
                 // arg3(error,stdout,stderr);
                 arg3({code: 1},arg1,arg1.toUpperCase());

@@ -41,7 +41,7 @@ describe("runtime/exec", function() {
         mockProcess = new EventEmitter();
         mockProcess.stdout = new EventEmitter();
         mockProcess.stderr = new EventEmitter();
-        sinon.stub(child_process,'spawn',function(command,args,options) {
+        sinon.stub(child_process,'spawn').callsFake(function(command,args,options) {
             mockProcess._args = {command,args,options};
             return mockProcess;
         });

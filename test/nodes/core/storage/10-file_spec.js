@@ -391,7 +391,7 @@ describe('file Nodes', function() {
 
         it('should fail to write to a ro file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'createWriteStream', function(arg1,arg2) {
+            var spy = sinon.stub(fs, 'createWriteStream').callsFake(function(arg1,arg2) {
                 var ws = {};
                 ws.on = function(e,d) { throw("Stub error message"); }
                 ws.write = function(e,d) { }
@@ -421,7 +421,7 @@ describe('file Nodes', function() {
 
         it('should fail to append to a ro file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'createWriteStream', function(arg1,arg2) {
+            var spy = sinon.stub(fs, 'createWriteStream').callsFake(function(arg1,arg2) {
                 var ws = {};
                 ws.on = function(e,d) { throw("Stub error message"); }
                 ws.write = function(e,d) { }
@@ -451,7 +451,7 @@ describe('file Nodes', function() {
 
         it('should cope with failing to delete a file', function(done) {
             // Stub file write so we can make writes fail
-            var spy = sinon.stub(fs, 'unlink', function(arg,arg2) { arg2(new Error("Stub error message")); });
+            var spy = sinon.stub(fs, 'unlink').callsFake(function(arg,arg2) { arg2(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":"delete"}];
             helper.load(fileNode, flow, function() {
@@ -477,7 +477,7 @@ describe('file Nodes', function() {
         it('should fail to create a new directory if not asked to do so (append)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
-            //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
+            //var spy = sinon.stub(fs, 'appendFile').callsFake(function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false}];
             helper.load(fileNode, flow, function() {
@@ -508,7 +508,7 @@ describe('file Nodes', function() {
             }
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
-            var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
+            var spy = sinon.stub(fs, "ensureDir").callsFake(function(arg1,arg2,arg3,arg4) { arg2(null); });
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":false, "createDir":true}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileNode1");
@@ -531,7 +531,7 @@ describe('file Nodes', function() {
         it('should fail to create a new directory if not asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
-            //var spy = sinon.stub(fs, 'appendFile', function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
+            //var spy = sinon.stub(fs, 'appendFile').callsFake(function(arg,arg2,arg3,arg4){ arg4(new Error("Stub error message")); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":false, "overwriteFile":true}];
             helper.load(fileNode, flow, function() {
@@ -557,7 +557,7 @@ describe('file Nodes', function() {
         it('should try to create a new directory if asked to do so (overwrite)', function(done) {
             // Stub file write so we can make writes fail
             var fileToTest2 = path.join(resourcesDir,"file-out-node","50-file-test-file.txt");
-            var spy = sinon.stub(fs, "ensureDir", function(arg1,arg2,arg3,arg4) { arg2(null); });
+            var spy = sinon.stub(fs, "ensureDir").callsFake(function(arg1,arg2,arg3,arg4) { arg2(null); });
 
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest2, "appendNewline":true, "overwriteFile":true, "createDir":true}];
             helper.load(fileNode, flow, function() {

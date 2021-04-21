@@ -24,7 +24,7 @@ var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 describe("@node-red/util/log", function() {
     beforeEach(function () {
-        var spy = sinon.stub(util, 'log', function(arg){});
+        var spy = sinon.stub(util, 'log').callsFake(function(arg){});
         var settings = {logging: { console: { level: 'metric', metrics: true } } };
         log.init(settings);
     });

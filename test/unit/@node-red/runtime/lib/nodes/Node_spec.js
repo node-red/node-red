@@ -151,7 +151,7 @@ describe('Node', function() {
 
         it('handles thrown errors', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            sinon.stub(n,"error",function(err,msg) {});
+            sinon.stub(n,"error").callsFake(function(err,msg) {});
             var message = {payload:"hello world"};
             n.on('input',function(msg) {
                 throw new Error("test error");
@@ -271,7 +271,7 @@ describe('Node', function() {
         });
         it('logs error if callback provides error', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
-            sinon.stub(n,"error",function(err,msg) {});
+            sinon.stub(n,"error").callsFake(function(err,msg) {});
 
             var message = {payload:"hello world"};
             n.on('input',function(msg, nodeSend, nodeDone) {
@@ -723,7 +723,7 @@ describe('Node', function() {
         it('produces a metric message', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
+            sinon.stub(Log, 'log').callsFake(function(msg) {
                 loginfo = msg;
             });
             var msg = {payload:"foo", _msgid:"987654321"};
@@ -739,7 +739,7 @@ describe('Node', function() {
         it('returns metric value if eventname undefined', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
+            sinon.stub(Log, 'log').callsFake(function(msg) {
                 loginfo = msg;
             });
             var msg = {payload:"foo", _msgid:"987654321"};
@@ -751,7 +751,7 @@ describe('Node', function() {
         it('returns not defined if eventname defined', function(done) {
             var n = new RedNode({id:'123',type:'abc'});
             var loginfo = {};
-            sinon.stub(Log, 'log', function(msg) {
+            sinon.stub(Log, 'log').callsFake(function(msg) {
                 loginfo = msg;
             });
             var msg = {payload:"foo", _msgid:"987654321"};

@@ -320,7 +320,7 @@ describe('context', function() {
 
     describe('external context storage',function() {
         var resourcesDir = path.resolve(path.join(__dirname,"..","resources","context"));
-        var sandbox = sinon.sandbox.create();
+        var sandbox = sinon.createSandbox();
         var stubGet = sandbox.stub();
         var stubSet = sandbox.stub();
         var stubKeys = sandbox.stub();
