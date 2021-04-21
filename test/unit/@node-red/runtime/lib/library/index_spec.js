@@ -37,14 +37,14 @@ var mockLog = {
 
 describe("runtime/library", function() {
     before(function() {
-        sinon.stub(localLibrary,"getEntry",function(type,path) {
+        sinon.stub(localLibrary,"getEntry").callsFake(function(type,path) {
             return Promise.resolve({
                 library: "local",
                 type:type,
                 path:path
             })
         });
-        sinon.stub(localLibrary,"saveEntry",function(type, path, meta, body) {
+        sinon.stub(localLibrary,"saveEntry").callsFake(function(type, path, meta, body) {
             return Promise.resolve({
                 library: "local",
                 type:type,
@@ -53,7 +53,7 @@ describe("runtime/library", function() {
                 body:body
             })
         });
-        sinon.stub(examplesLibrary,"getEntry",function(type,path) {
+        sinon.stub(examplesLibrary,"getEntry").callsFake(function(type,path) {
             return Promise.resolve({
                 library: "_examples_",
                 type:type,

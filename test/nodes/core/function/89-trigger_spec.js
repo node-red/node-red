@@ -483,7 +483,7 @@ describe('trigger node', function() {
     });
 
     it('should be able to return things from flow and global context variables', function(done) {
-        var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
+        var spy = sinon.stub(RED.util, 'evaluateNodeProperty').callsFake(
             function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"flow", op2:"bar", op2type:"global", duration:"20", wires:[["n2"]] },
@@ -742,7 +742,7 @@ describe('trigger node', function() {
 
     it('should be able to extend the delay', function(done) {
         this.timeout(5000); // add extra time for flake
-        var spy = sinon.stub(RED.util, 'evaluateNodeProperty',
+        var spy = sinon.stub(RED.util, 'evaluateNodeProperty').callsFake(
             function(arg1, arg2, arg3, arg4, arg5) { if (arg5) { arg5(null, arg1) } else { return arg1; } }
         );
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", extend:"true", op1type:"flow", op1:"foo",  op2:"bar", op2type:"global", duration:"100", wires:[["n2"]] },
