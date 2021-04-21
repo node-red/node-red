@@ -8,6 +8,8 @@ interface NodeMessage {
 
 /** @type {NodeMessage} the `msg` object */
 var msg: NodeMessage;
+/** @type {string} the id of the incoming `msg` (alias of msg._msgid) */
+const __msgid__:string;
 
 /**
  * @typedef NodeStatus
@@ -66,6 +68,12 @@ declare class node {
     * @see node-red documentation [writing-functions: adding-status](https://nodered.org/docs/user-guide/writing-functions#adding-status)
     */
     static status(status:NodeStatus);
+    /** the id of this node */
+    const id:string;
+    /** the name of this node */
+    const name:string;
+    /** the number of outputs of this node */
+    const outputCount:Number;
 }
 declare class context {
     /** Get a value from context */
