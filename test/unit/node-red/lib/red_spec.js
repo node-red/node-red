@@ -33,9 +33,9 @@ describe("red/red", function() {
 
     // describe("check build", function() {
     //     beforeEach(function() {
-    //         sinon.stub(runtime,"init",function() {});
-    //         sinon.stub(api,"init",function() {});
-    //         // sinon.stub(RED,"version",function() { return "version";});
+    //         sinon.stub(runtime,"init").callsFake(function() {});
+    //         sinon.stub(api,"init").callsFake(function() {});
+    //         // sinon.stub(RED,"version").callsFake(function() { return "version";});
     //     });
     //     afterEach(function() {
     //         runtime.init.restore();
@@ -44,7 +44,7 @@ describe("red/red", function() {
     //         // RED.version.restore();
     //     });
     //     it.skip('warns if build has not been run',function() {
-    //         sinon.stub(fs,"statSync",function() { throw new Error();});
+    //         sinon.stub(fs,"statSync").callsFake(function() { throw new Error();});
     //
     //         /*jshint immed: false */
     //         (function() {
@@ -52,7 +52,7 @@ describe("red/red", function() {
     //         }).should.throw("Node-RED not built");
     //     });
     //     it('passed if build has been run',function() {
-    //         sinon.stub(fs,"statSync",function() { });
+    //         sinon.stub(fs,"statSync").callsFake(function() { });
     //         RED.init({},{});
     //     });
     // });

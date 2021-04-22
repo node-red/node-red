@@ -1,3 +1,49 @@
+
+### 1.3.1: Maintenance Release
+
+Nodes
+
+ - Fix change node form validation
+
+### 1.3.0: Milestone Release
+
+Editor
+
+ - Remember TypedInput selected sub option when switching types Fixes #2896
+ - Show context store name on TypedInput flow/global types Fixes #2793
+ - Add core:go-to-selected-subflow action
+ - Ctrl-dbclick on subflow node opens subflow tab
+ - Add go-to-previous/next-location actions
+ - Fix copy-to-clipboard action in FireFox
+ - Fix select up/down stream when zoomed in or out
+ - Use cursor keys to change selection in workspace
+ - Prevent accidental text selection of subflow toolbar text
+ - Update node-sass to 5.x Fixes #2907
+ - Allow module to provide resources and automatically expose them (#2903) @knolleary
+
+Runtime
+
+ - DE language updates (#2806 #2901 #2913) @heikokue
+ - Remove Node 8 from travis due to node-sass breakage
+ - Allow Flow.getNode to return subflowInstance nodes Related to #2898
+ - Fix credential lookup for nested subflows Fixes #2910
+ - Add externalModules config to settings.js
+ - Add Japanese translations for Node-RED v1.3.0 (#2900)
+ - Fix handling encrypted creds on /flows api
+ - Properly handle credentials passed to /flows api
+ - Fix line-number reporting in errors on node load (#2894) @HiroyasuNishiyama
+
+Nodes
+
+ - Change: Add property validation to Change node rule set Closes #2911
+ - Exec: Allow any property to be appended to command (#2908) @kazuhitoyokoi
+ - HTTP Request: set followAllRedirects to work with POSTs Fixes #2017
+ - Inject: Flag validation errors in Inject node props config Fixes #2914
+ - Function: add node.outputCount to sandbox (#2918) @kristianheljas
+ - Switch: Fix Switch node handling of hasKey rule when property is undefined
+ - Switch: Handle invalid regex set dynamically in Switch node Fixes #2905
+
+
 ### 1.3.0-beta.1: Beta Release
 
 Editor
@@ -38,7 +84,7 @@ Editor
  - hide unused input field (#2823)
  - Implement node property typing (#2812) @knolleary
  - Improve SemVer comparison in Palette Manager (#2821 #2879) @HaKr
- - Library: properly handle symlinked folders (#2768) $natcl
+ - Library: properly handle symlinked folders (#2768) @natcl
  - make flow download code separate utility instead of polyfill
  - Prevent duplicate keyboard shortcut from being assigned
  - Prevent rogue mouseup on tab from triggering tab change
@@ -97,8 +143,6 @@ Nodes
  - Add example flows for storage nodes (#2784) @HiroyasuNishiyama
  - Add example flows for network nodes (#2855) @HiroyasuNishiyama
  - Add example flows for parser nodes (#2749) @HiroyasuNishiyama
-
-
 
 
 

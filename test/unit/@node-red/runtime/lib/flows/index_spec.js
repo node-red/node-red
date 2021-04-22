@@ -33,6 +33,7 @@ describe('flows/index', function() {
     var eventsOn;
     var credentialsClean;
     var credentialsLoad;
+    var credentialsAdd;
 
     var flowCreate;
     var getType;
@@ -50,10 +51,10 @@ describe('flows/index', function() {
 
 
     before(function() {
-        getType = sinon.stub(typeRegistry,"get",function(type) {
+        getType = sinon.stub(typeRegistry,"get").callsFake(function(type) {
             return type.indexOf('missing') === -1;
         });
-        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies", async function(flow) {
+        checkFlowDependencies = sinon.stub(typeRegistry, "checkFlowDependencies").callsFake(async function(flow) {
             if (flow[0].id === "node-with-missing-modules") {
                 throw new Error("Missing module");
             }
@@ -68,19 +69,20 @@ describe('flows/index', function() {
 
     beforeEach(function() {
         eventsOn = sinon.spy(events,"on");
-        credentialsClean = sinon.stub(credentials,"clean",function(conf) {
+        credentialsClean = sinon.stub(credentials,"clean").callsFake(function(conf) {
             conf.forEach(function(n) {
                 delete n.credentials;
             });
             return Promise.resolve();
         });
-        credentialsLoad = sinon.stub(credentials,"load",function(creds) {
+        credentialsLoad = sinon.stub(credentials,"load").callsFake(function(creds) {
             if (creds && creds.hasOwnProperty("$") && creds['$'] === "fail") {
                 return Promise.reject("creds error");
             }
             return Promise.resolve();
         });
-        flowCreate = sinon.stub(Flow,"create",function(parent, global, flow) {
+        credentialsAdd = sinon.stub(credentials,"add").callsFake(async function(id, conf){})
+        flowCreate = sinon.stub(Flow,"create").callsFake(function(parent, global, flow) {
             var id;
             if (typeof flow === 'undefined') {
                 flow = global;
@@ -117,6 +119,7 @@ describe('flows/index', function() {
         eventsOn.restore();
         credentialsClean.restore();
         credentialsLoad.restore();
+        credentialsAdd.restore();
         flowCreate.restore();
 
         flows.stopFlows().then(done);
@@ -196,9 +199,10 @@ describe('flows/index', function() {
 
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig,credentials).then(function() {
-                credentialsClean.called.should.be.false();
-                credentialsLoad.called.should.be.true();
-                credentialsLoad.lastCall.args[0].should.eql(credentials);
+                credentialsClean.called.should.be.true();
+                credentialsAdd.called.should.be.true();
+                credentialsAdd.lastCall.args[0].should.eql("t1-1");
+                credentialsAdd.lastCall.args[1].should.eql({"a":1});
                 flows.getFlows().flows.should.eql(originalConfig);
                 done();
             });
@@ -547,7 +551,7 @@ describe('flows/index', function() {
     describe('#checkTypeInUse', function() {
 
         before(function() {
-            sinon.stub(typeRegistry,"getNodeInfo",function(id) {
+            sinon.stub(typeRegistry,"getNodeInfo").callsFake(function(id) {
                 if (id === 'unused-module') {
                     return {types:['one','two','three']}
                 } else {
