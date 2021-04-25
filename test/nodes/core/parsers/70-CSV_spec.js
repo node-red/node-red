@@ -121,6 +121,23 @@ describe('CSV node', function() {
             });
         });
 
+        it('should convert a simple string to a javascript object with space separator (with spaced template)', function(done) {
+            var flow = [ { id:"n1", type:"csv", sep:" ", temp:"A, B, , D", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { A: 1, B: 2, D: 4 });
+                    msg.should.have.property('columns', "A,B,D");
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = "1 2 3 4"+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
         it('should remove quotes and whitespace from template', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:'"a",  "b" , " c "," d  " ', wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
