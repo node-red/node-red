@@ -381,7 +381,9 @@ module.exports = function(grunt) {
                             'ace/**',
                             'jquery/css/base/**',
                             'font-awesome/**',
-                            'monaco/dist/**'
+                            'monaco/dist/**',
+                            'monaco/types/extraLibs.js',
+                            'monaco/monaco-bootstrap.js'
                         ],
                         expand: true,
                         dest: 'packages/node_modules/@node-red/editor-client/public/vendor/'
