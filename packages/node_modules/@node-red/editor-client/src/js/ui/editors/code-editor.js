@@ -1,0 +1,107 @@
+/**
+ * Copyright JS Foundation and other contributors, http://js.foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+/**
+ * @namespace RED.editor.codeEditor
+ */
+ RED.editor.codeEditor = (function() {
+
+    const MONACO = "monaco";
+    const ACE = "ace";
+    const defaultEditor = ACE;
+    const DEFAULT_SETTINGS = { lib: defaultEditor, options: {} };
+    var selectedCodeEditor = null;
+    var initialised = false;
+
+    function init() {
+        var codeEditorSettings = RED.editor.codeEditor.settings;
+        var editorChoice = codeEditorSettings.lib === MONACO ? MONACO : ACE;
+        try {
+            var browser = RED.utils.getBrowserInfo();
+            selectedCodeEditor = RED.editor.codeEditor[editorChoice];
+            //fall back to default code editor if there are any issues
+            if (!selectedCodeEditor || (editorChoice === MONACO && (browser.ie || !window.monaco))) {
+                selectedCodeEditor = RED.editor.codeEditor[defaultEditor];
+            }
+            initialised = selectedCodeEditor.init();
+        } catch (error) {
+            selectedCodeEditor = null;
+            console.warn("Problem initialising '" + editorChoice + "' code editor", error);
+        }
+        if(!initialised) {
+            selectedCodeEditor = RED.editor.codeEditor[defaultEditor];
+            initialised = selectedCodeEditor.init();
+        }
+    }
+
+    function create(options) {
+        //TODO: (quandry - for consideration) 
+        // Below, I had to create a hidden element if options.id || options.element is not in the DOM
+        // I have seen 1 node calling  `this.editor = RED.editor.createEditor()` with an 
+        // invalid (non existing html element selector) (e.g. node-red-contrib-components does this)
+        // This causes monaco to throw an error when attempting to hook up its events to the dom  & the rest of the 'oneditperapre' 
+        // code is thus skipped. 
+        // In ACE mode, creating an ACE editor (with an invalid ID) allows the editor to be created (but obviously there is no UI)
+        // Because one (or more) contrib nodes have left this bad code in place, how would we handle this?
+        // For compatibility, I have decided to create a hidden element so that at least an editor is created & errors do not occur.
+        // IMO, we should warn and exit as it is a coding error by the contrib author.
+
+        if (!options) {
+            console.warn("createEditor() options are missing");
+            options = {};
+        }
+
+        if (this.editor.type === MONACO) {
+            // compatibility (see above note)
+            if (!options.element && !options.id) {
+                options.id = 'node-backwards-compatability-dummy-editor';
+            }
+            options.element = options.element || $("#" + options.id)[0];
+            if (!options.element) {
+                console.warn("createEditor() options.element or options.id is not valid", options);
+                $("#dialog-form").append('<div id="' + options.id + '" style="display: none;" />');
+            }
+            return this.editor.create(options);
+        } else {
+            return this.editor.create(options);//fallback to ACE
+        }
+    }
+ 
+    return {
+        init: init,
+        /**
+         * Get editor settings object
+         * @memberof RED.editor.codeEditor
+         */
+        get settings() {
+          return RED.settings.get('codeEditor') || DEFAULT_SETTINGS;
+        },
+        /**
+         * Get user selected code editor
+         * @return {string} Returns 
+         * @memberof RED.editor.codeEditor
+         */
+        get editor() {
+            return selectedCodeEditor;
+        },
+        /**
+         * Create a editor ui component
+         * @param {object} options - the editor options
+         * @memberof RED.editor.codeEditor
+         */
+        create: create
+    }
+})();
