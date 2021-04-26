@@ -121,7 +121,46 @@ describe("util/hooks", function() {
             })
         })
     })
+    it("allows a hook to remove itself whilst being called", function(done) {
+        let data = { order: [] }
+        hooks.add("onSend.A", function(payload) { payload.order.push("A") } )
+        hooks.add("onSend.B", function(payload) {
+            hooks.remove("*.B");
+        })
+        hooks.add("onSend.C", function(payload) { payload.order.push("C") } )
+        hooks.add("onSend.D", function(payload) { payload.order.push("D") } )
 
+        hooks.trigger("onSend", data, err => {
+            try {
+                should.not.exist(err);
+                data.order.should.eql(["A","C","D"])
+                done();
+            } catch(e) {
+                done(e);
+            }
+        })
+    });
+
+    it("allows a hook to remove itself and others whilst being called", function(done) {
+        let data = { order: [] }
+        hooks.add("onSend.A", function(payload) { payload.order.push("A") } )
+        hooks.add("onSend.B", function(payload) {
+            hooks.remove("*.B");
+            hooks.remove("*.C");
+        })
+        hooks.add("onSend.C", function(payload) { payload.order.push("C") } )
+        hooks.add("onSend.D", function(payload) { payload.order.push("D") } )
+
+        hooks.trigger("onSend", data, err => {
+            try {
+                should.not.exist(err);
+                data.order.should.eql(["A","D"])
+                done();
+            } catch(e) {
+                done(e);
+            }
+        })
+    });
 
     it("halts execution on return false", function(done) {
         hooks.add("onSend.A", function(payload) { payload.order.push("A"); return false } )
