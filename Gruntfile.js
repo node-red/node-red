@@ -40,8 +40,10 @@ module.exports = function(grunt) {
     if (nonHeadless) {
         process.env.NODE_RED_NON_HEADLESS = true;
     }
+    const pkg = grunt.file.readJSON('package.json');
+    process.env.NODE_RED_PACKAGE_VERSION = pkg.version;
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+        pkg: pkg,
         paths: {
             dist: ".dist"
         },
