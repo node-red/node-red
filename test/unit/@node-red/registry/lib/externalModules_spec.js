@@ -14,6 +14,7 @@ const os = require("os");
 const NR_TEST_UTILS = require("nr-test-utils");
 const externalModules = NR_TEST_UTILS.require("@node-red/registry/lib/externalModules");
 const exec = NR_TEST_UTILS.require("@node-red/util/lib/exec");
+const hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 
 let homeDir;
 
@@ -40,19 +41,20 @@ describe("externalModules api", function() {
         await createUserDir()
     })
     afterEach(async function() {
+        hooks.clear();
         await fs.remove(homeDir);
     })
     describe("checkFlowDependencies", function() {
         beforeEach(function() {
             sinon.stub(exec,"run").callsFake(async function(cmd, args, options) {
                 let error;
-                if (args[1] === "moduleNotFound") {
+                if (args[2] === "moduleNotFound") {
                     error = new Error();
                     error.stderr = "E404";
-                } else if (args[1] === "moduleVersionNotFound") {
+                } else if (args[2] === "moduleVersionNotFound") {
                     error = new Error();
                     error.stderr = "ETARGET";
-                } else if (args[1] === "moduleFail") {
+                } else if (args[2] === "moduleFail") {
                     error = new Error();
                     error.stderr = "Some unexpected install error";
                 }
@@ -101,6 +103,45 @@ describe("externalModules api", function() {
             exec.run.called.should.be.true();
             fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
+
+
+        it("calls pre/postInstall hooks", async function() {
+            externalModules.init({userDir: homeDir});
+            externalModules.register("function", "libs");
+            let receivedPreEvent,receivedPostEvent;
+            hooks.add("preInstall", function(event) { event.args = ["a"]; receivedPreEvent = event; })
+            hooks.add("postInstall", function(event) { receivedPostEvent = event; })
+
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "foo"}]}
+            ])
+            exec.run.called.should.be.true();
+            // exec.run.lastCall.args[1].should.eql([ 'install', 'a', 'foo' ]);
+            receivedPreEvent.should.have.property("module","foo")
+            receivedPreEvent.should.have.property("version")
+            receivedPreEvent.should.have.property("dir")
+            receivedPreEvent.should.eql(receivedPostEvent)
+            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
+        })
+
+        it("skips npm install if preInstall returns false", async function() {
+            externalModules.init({userDir: homeDir});
+            externalModules.register("function", "libs");
+            let receivedPreEvent,receivedPostEvent;
+            hooks.add("preInstall", function(event) { receivedPreEvent = event; return false })
+            hooks.add("postInstall", function(event) { receivedPostEvent = event; })
+
+            await externalModules.checkFlowDependencies([
+                {type: "function", libs:[{module: "foo"}]}
+            ])
+            exec.run.called.should.be.false();
+            receivedPreEvent.should.have.property("module","foo")
+            receivedPreEvent.should.have.property("version")
+            receivedPreEvent.should.have.property("dir")
+            receivedPreEvent.should.eql(receivedPostEvent)
+            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
+        })
+
 
         it("installs missing modules from inside subflow module", async function() {
             externalModules.init({userDir: homeDir});
