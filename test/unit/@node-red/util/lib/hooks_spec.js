@@ -1,9 +1,9 @@
 const should = require("should");
 const NR_TEST_UTILS = require("nr-test-utils");
 
-const hooks = NR_TEST_UTILS.require("@node-red/runtime/lib/hooks");
+const hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 
-describe("runtime/hooks", function() {
+describe("util/hooks", function() {
     afterEach(function() {
         hooks.clear();
     })
@@ -81,7 +81,7 @@ describe("runtime/hooks", function() {
                 hooks.has("onSend.A").should.be.false();
                 hooks.has("onSend.B").should.be.false();
                 hooks.has("onSend").should.be.false();
-                
+
                 done(err);
             } catch(err2) {
                 done(err2);
@@ -121,7 +121,46 @@ describe("runtime/hooks", function() {
             })
         })
     })
+    it("allows a hook to remove itself whilst being called", function(done) {
+        let data = { order: [] }
+        hooks.add("onSend.A", function(payload) { payload.order.push("A") } )
+        hooks.add("onSend.B", function(payload) {
+            hooks.remove("*.B");
+        })
+        hooks.add("onSend.C", function(payload) { payload.order.push("C") } )
+        hooks.add("onSend.D", function(payload) { payload.order.push("D") } )
 
+        hooks.trigger("onSend", data, err => {
+            try {
+                should.not.exist(err);
+                data.order.should.eql(["A","C","D"])
+                done();
+            } catch(e) {
+                done(e);
+            }
+        })
+    });
+
+    it("allows a hook to remove itself and others whilst being called", function(done) {
+        let data = { order: [] }
+        hooks.add("onSend.A", function(payload) { payload.order.push("A") } )
+        hooks.add("onSend.B", function(payload) {
+            hooks.remove("*.B");
+            hooks.remove("*.C");
+        })
+        hooks.add("onSend.C", function(payload) { payload.order.push("C") } )
+        hooks.add("onSend.D", function(payload) { payload.order.push("D") } )
+
+        hooks.trigger("onSend", data, err => {
+            try {
+                should.not.exist(err);
+                data.order.should.eql(["A","D"])
+                done();
+            } catch(e) {
+                done(e);
+            }
+        })
+    });
 
     it("halts execution on return false", function(done) {
         hooks.add("onSend.A", function(payload) { payload.order.push("A"); return false } )
@@ -246,6 +285,53 @@ describe("runtime/hooks", function() {
             data.order.should.eql([])
             should.exist(err);
             err.should.not.be.false()
+            done();
+        })
+    })
+
+
+    it("handler can use callback function - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            setTimeout(function() {
+                payload.order.push("A")
+                done()
+            },30)
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            data.order.should.eql(["A","B"])
+            done()
+        }).catch(done)
+    })
+
+    it("handler can halt execution - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            setTimeout(function() {
+                payload.order.push("A")
+                done(false)
+            },30)
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            data.order.should.eql(["A"])
+            done()
+        }).catch(done)
+    })
+
+    it("handler can halt execution on error - promise API", function(done) {
+        hooks.add("onSend.A", function(payload, done) {
+            throw new Error("error");
+        })
+        hooks.add("onSend.B", function(payload) { payload.order.push("B") } )
+
+        let data = { order:[] };
+        hooks.trigger("onSend",data).then(() => {
+            done("hooks.trigger resolved unexpectedly")
+        }).catch(err => {
             done();
         })
     })
