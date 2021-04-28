@@ -541,13 +541,17 @@ describe('exec node', function() {
                 var n2 = helper.getNode("n2");
                 var n3 = helper.getNode("n3");
                 var n4 = helper.getNode("n4");
+                var payload = "";
                 n2.on("input", function(msg) {
                     //console.log(msg);
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
-                        msg.payload.should.equal(expected);
-                        done();
+                        payload += msg.payload;
+                        if (payload.endsWith("\n")) {
+                            payload.should.equal(expected);
+                            done();
+                        }
                     }
                     catch(err) { done(err); }
                 });
@@ -567,6 +571,7 @@ describe('exec node', function() {
                         {id:"n2", type:"helper"},{id:"n3", type:"helper"},{id:"n4", type:"helper"}];
                 expected = "12345 deg C\n";
             }
+            var payload = "";
 
             helper.load(execNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -578,8 +583,11 @@ describe('exec node', function() {
                     try {
                         msg.should.have.property("payload");
                         msg.payload.should.be.a.String();
-                        msg.payload.should.equal(expected);
-                        done();
+                        payload += msg.payload;
+                        if (payload.endsWith("\n")) {
+                            payload.should.equal(expected);
+                            done();
+                        }
                     }
                     catch(err) { done(err); }
                 });
@@ -661,8 +669,16 @@ describe('exec node', function() {
                 };
 
                 n2.on("input", function(msg) {
-                    messages[0] = msg;
-                    completeTest();
+                    var payload = msg.payload;
+                    if (messages[0]) {
+                        messages[0].payload += payload;
+                    }
+                    else {
+                        messages[0] = msg;
+                    }
+                    if (payload.endsWith("\n")) {
+                        completeTest();
+                    }
                 });
                 n4.on("input", function(msg) {
                     messages[1] = msg;
@@ -869,8 +885,16 @@ describe('exec node', function() {
                 };
 
                 n2.on("input", function(msg) {
-                    messages[0] = msg;
-                    completeTest();
+                    var payload = msg.payload;
+                    if (messages[0]) {
+                        messages[0].payload += payload;
+                    }
+                    else {
+                        messages[0] = msg;
+                    }
+                    if (payload.endsWith("\n")) {
+                        completeTest();
+                    }
                 });
                 n4.on("input", function(msg) {
                     messages[1] = msg;
