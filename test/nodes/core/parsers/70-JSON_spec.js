@@ -389,7 +389,7 @@ describe('JSON node', function() {
                         });
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                        logEvents[0][0].msg.should.startWith("json.errors.schema-error");
                         logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
                         done();
                     } catch(err) { done(err) }
@@ -417,7 +417,7 @@ describe('JSON node', function() {
                         });
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                        logEvents[0][0].msg.should.startWith("json.errors.schema-error");
                         logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
                         done();
                     } catch(err) { done(err) }
@@ -445,7 +445,7 @@ describe('JSON node', function() {
                         });
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                        logEvents[0][0].msg.should.startWith("json.errors.schema-error");
                         logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
                         done();
                     } catch(err) { done(err) }
@@ -473,7 +473,7 @@ describe('JSON node', function() {
                         });
                         logEvents.should.have.length(1);
                         logEvents[0][0].should.have.a.property('msg');
-                        logEvents[0][0].msg.should.equal("json.errors.schema-error: data.number should be number, data.string should be string");
+                        logEvents[0][0].msg.should.startWith("json.errors.schema-error");
                         logEvents[0][0].should.have.a.property('level',helper.log().ERROR);
                         done();
                     } catch(err) { done(err) }
