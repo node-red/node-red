@@ -181,6 +181,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette-editor.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/editor.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/editors/*.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/editors/code-editors/*.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/event-log.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tray.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/clipboard.js",
@@ -285,7 +286,9 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/public/index.html",
                     "packages/node_modules/@node-red/editor-client/public/favicon.ico",
                     "packages/node_modules/@node-red/editor-client/public/icons",
-                    "packages/node_modules/@node-red/editor-client/public/vendor"
+                    "packages/node_modules/@node-red/editor-client/public/vendor",
+                    "packages/node_modules/@node-red/editor-client/public/types/node",
+                    "packages/node_modules/@node-red/editor-client/public/types/node-red",
                 ]
             },
             release: {
@@ -375,10 +378,23 @@ module.exports = function(grunt) {
                         src: [
                             'ace/**',
                             'jquery/css/base/**',
-                            'font-awesome/**'
+                            'font-awesome/**',
+                            'monaco/dist/**',
+                            'monaco/types/extraLibs.js',
+                            'monaco/style.css',
+                            'monaco/monaco-bootstrap.js'
                         ],
                         expand: true,
                         dest: 'packages/node_modules/@node-red/editor-client/public/vendor/'
+                    },
+                    {
+                        cwd: 'packages/node_modules/@node-red/editor-client/src',
+                        src: [
+                            'types/node/*.ts',
+                            'types/node-red/*.ts',
+                        ],
+                        expand: true,
+                        dest: 'packages/node_modules/@node-red/editor-client/public/'
                     },
                     {
                         cwd: 'packages/node_modules/@node-red/editor-client/src/icons',
