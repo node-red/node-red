@@ -1,3 +1,28 @@
+### 1.3.4 Maintenance Release
+
+Editor
+ - Allow nodes to access resolved theme files Fixes #2968
+ - Fix importing node to currently flow rather than match its old z value
+ - Don't let 'escape' whilst moving nodes interrupt things Fixes #2960
+ - Sort context stores in TypedInput and ensure default first Fixes #2954
+ - Fix margin between nodes on palette (#2947) @kazuhitoyokoi
+ - Ensure typedInput option is selected in dropdown menu Part of #2945
+ - Ensure typedInput without value has focus class removed Closes #2945
+
+Runtime
+ - Handle subflow modules that contain subflows
+ - Timeout http upgrade requests that are not otherwise handled Fixes #2956
+ - Fix error on auto commit for no flow change (#2957) @HiroyasuNishiyama
+
+Nodes
+
+ - CSV: Fix CSV handling of special chars as separators
+ - Delay: Give delay node random mina nd max more space so you can see complete value
+ - Exec: fix grunt fail on exec node test (#2964) @HiroyasuNishiyama
+ - Function: Ensure function expand button is above vertical scrollbar Fixes #2955
+ - Inject: Fix inject node output tooltip extra property count
+
+
 ### 1.3.3: Maintenance Release
 
 Editor
