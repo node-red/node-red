@@ -288,7 +288,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/public/favicon.ico",
                     "packages/node_modules/@node-red/editor-client/public/icons",
                     "packages/node_modules/@node-red/editor-client/public/vendor",
-                    "packages/node_modules/@node-red/editor-client/public/types"
+                    "packages/node_modules/@node-red/editor-client/public/types/node",
+                    "packages/node_modules/@node-red/editor-client/public/types/node-red",
                 ]
             },
             release: {
