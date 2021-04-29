@@ -8,6 +8,7 @@ Editor
  - Fix margin between nodes on palette (#2947) @kazuhitoyokoi
  - Ensure typedInput option is selected in dropdown menu Part of #2945
  - Ensure typedInput without value has focus class removed Closes #2945
+ - TreeList: Fix remove item when depth=0 and wrong gutter calc (#2967) @hanc2006
 
 Runtime
  - Handle subflow modules that contain subflows
