@@ -48,13 +48,14 @@ describe("externalModules api", function() {
         beforeEach(function() {
             sinon.stub(exec,"run").callsFake(async function(cmd, args, options) {
                 let error;
-                if (args[2] === "moduleNotFound") {
+                let moduleName = args[args.length-1];
+                if (moduleName === "moduleNotFound") {
                     error = new Error();
                     error.stderr = "E404";
-                } else if (args[2] === "moduleVersionNotFound") {
+                } else if (moduleName === "moduleVersionNotFound") {
                     error = new Error();
                     error.stderr = "ETARGET";
-                } else if (args[2] === "moduleFail") {
+                } else if (moduleName === "moduleFail") {
                     error = new Error();
                     error.stderr = "Some unexpected install error";
                 }
