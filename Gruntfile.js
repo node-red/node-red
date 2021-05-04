@@ -471,7 +471,8 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     destination: 'docs',
-                    configure: './jsdoc.json'
+                    configure: './jsdoc.json',
+                    fred: "hi there"
                 }
             },
             _editor: {
