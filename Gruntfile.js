@@ -16,7 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
-var sass = require("node-sass");
+var sass = require("sass");
 
 module.exports = function(grunt) {
 
