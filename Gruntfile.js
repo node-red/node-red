@@ -137,6 +137,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/jquery-addons.js",
                     "packages/node_modules/@node-red/editor-client/src/js/red.js",
                     "packages/node_modules/@node-red/editor-client/src/js/events.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/hooks.js",
                     "packages/node_modules/@node-red/editor-client/src/js/i18n.js",
                     "packages/node_modules/@node-red/editor-client/src/js/settings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/user.js",
