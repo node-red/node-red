@@ -104,7 +104,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
-                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"Object",path:"global"}
+                    data:{id:"n1",msg:'{"payload":"test"}',format:"Object",path:"global"}
                 }]);
             }, done);
         });
@@ -119,7 +119,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
-                    data:{id:"n1",msg:'{\n "payload": "test"\n}',format:"Object",path:"global"}
+                    data:{id:"n1",msg:'{"payload":"test"}',format:"Object",path:"global"}
                 }]);
             }, function() {
                 try {
@@ -259,7 +259,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
-                    data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"Object",path:"global"}
+                    data:{id:"n1",msg:'{"type":"foo"}',property:"payload",format:"Object",path:"global"}
                 }]);
             }, done);
         });
@@ -274,7 +274,7 @@ describe('debug node', function() {
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
                     topic:"debug",
-                    data:{id:"n1",msg: '[\n 0,\n 1,\n 2,\n 3\n]',format:"array[4]",
+                    data:{id:"n1",msg: '[0,1,2,3]',format:"array[4]",
                     property:"payload",path:"global"}
                 }]);
             }, done);
@@ -294,7 +294,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg:'{\n "name": "bar",\n "o": "[Circular ~]"\n}',
+                        msg:'{"name":"bar","o":"[Circular ~]"}',
                         property:"payload",format:"Object",path:"global"
                     }
                 }]);
@@ -310,7 +310,7 @@ describe('debug node', function() {
                 n1.emit("input", {payload: {type:'foo'}});
             }, function(msg) {
                 JSON.parse(msg).should.eql([{
-                    topic:"debug",data:{id:"n1",msg:'{\n "type": "foo"\n}',property:"payload",format:"Object",path:"global"}
+                    topic:"debug",data:{id:"n1",msg:'{"type":"foo"}',property:"payload",format:"Object",path:"global"}
                 }]);
             }, function() {
                 try {
@@ -406,7 +406,7 @@ describe('debug node', function() {
                     topic:"debug",
                     data:{
                         id:"n1",
-                        msg:'{\n "foo": "'+Array(1001).join("X")+'..."\n}',
+                        msg:'{"foo":"'+Array(1001).join("X")+'..."}',
                         property:"payload",
                         format:"Object",
                         path:"global"
@@ -433,7 +433,7 @@ describe('debug node', function() {
                             type: "array",
                             data: Array(1000).fill("X"),
                             length: 1001
-                        },null," "),
+                        }),
                         property:"payload",
                         format:"array[1001]",
                         path:"global"
@@ -462,7 +462,7 @@ describe('debug node', function() {
                                 data: Array(1000).fill("X"),
                                 length: 1001
                             }
-                        },null," "),
+                        }),
                         property:"payload",
                         format:"Object",
                         path:"global"
@@ -513,7 +513,7 @@ describe('debug node', function() {
                                 __enc__: true,
                                 length: 1001
                             }
-                        },null," "),
+                        }),
                         property:"payload",
                         format:"Object",
                         path:"global"
