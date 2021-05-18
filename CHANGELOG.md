@@ -1,3 +1,69 @@
+### 1.3.4 Maintenance Release
+
+Editor
+ - Allow nodes to access resolved theme files Fixes #2968
+ - Fix importing node to currently flow rather than match its old z value
+ - Don't let 'escape' whilst moving nodes interrupt things Fixes #2960
+ - Sort context stores in TypedInput and ensure default first Fixes #2954
+ - Fix margin between nodes on palette (#2947) @kazuhitoyokoi
+ - Ensure typedInput option is selected in dropdown menu Part of #2945
+ - Ensure typedInput without value has focus class removed Closes #2945
+ - TreeList: Fix remove item when depth=0 and wrong gutter calc (#2967) @hanc2006
+
+Runtime
+ - Handle subflow modules that contain subflows
+ - Timeout http upgrade requests that are not otherwise handled Fixes #2956
+ - Fix error on auto commit for no flow change (#2957) @HiroyasuNishiyama
+
+Nodes
+
+ - CSV: Fix CSV handling of special chars as separators
+ - Delay: Give delay node random mina nd max more space so you can see complete value
+ - Exec: fix grunt fail on exec node test (#2964) @HiroyasuNishiyama
+ - Function: Ensure function expand button is above vertical scrollbar Fixes #2955
+ - Inject: Fix inject node output tooltip extra property count
+
+
+### 1.3.3: Maintenance Release
+
+Editor
+
+ - Fix package semver comparison to allow >1 version increment
+ - Prevent TypedInput label overflowing element Fixes #2941
+ - Remove TypedInput from tab focus when only one type available
+ - Make typedInput.disable more consistent in behaviour Fixes #2942
+ - Fix project credential secret reset handling Part of #2868
+
+Runtime
+
+ - Export package version in Grunt file so docs template can access
+
+Nodes
+
+ - CSV: ensure CSV node can send false as string
+ - HTTPIn: handle application/x-protobuf as Buffer type (#2935 #2938) @hardillb
+ - MQTT: Ensure mqtt-close message is published when closing mqtt nodes
+
+
+### 1.3.2: Maintenance Release
+
+Runtime
+ - Handle package.json without dependencies section
+
+Editor
+
+ - Fix variable reference error in editableList Fixes #2933
+ - Fix handling of user-provided keymap Fixes #2926
+ - Ensure theme login image is passed through to api response Fixes #2929
+ - Add Japanese translations for Node-RED v1.3.1 (#2930) @kazuhitoyokoi
+
+Nodes
+
+ - CSV: Fix CSV parsing with other than , separator
+ - File out: Fix timing of msg.send to be after close
+ - Function: describe `node.outputCount` in help text
+ - MQTT: Fix MQTT Broker TLS config row layout Fixes #2927
+ - Split: add comment to info re $N being number of messages arriving
 
 ### 1.3.1: Maintenance Release
 

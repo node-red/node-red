@@ -16,7 +16,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
-var sass = require("node-sass");
+var sass = require("sass");
 
 module.exports = function(grunt) {
 
@@ -137,6 +137,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/jquery-addons.js",
                     "packages/node_modules/@node-red/editor-client/src/js/red.js",
                     "packages/node_modules/@node-red/editor-client/src/js/events.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/hooks.js",
                     "packages/node_modules/@node-red/editor-client/src/js/i18n.js",
                     "packages/node_modules/@node-red/editor-client/src/js/settings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/user.js",
@@ -487,7 +488,8 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     destination: 'docs',
-                    configure: './jsdoc.json'
+                    configure: './jsdoc.json',
+                    fred: "hi there"
                 }
             },
             _editor: {
