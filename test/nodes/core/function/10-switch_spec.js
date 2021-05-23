@@ -1134,4 +1134,20 @@ describe('switch Node', function() {
         });
     });
 
+
+    it('should handle empty rule', function(done) {
+        var flow = [{id:"switchNode1",type:"switch",name:"switchNode",property:"payload",rules:[],checkall:true,outputs:0,wires:[]}];
+        helper.load(switchNode, flow, function() {
+            var n1 = helper.getNode("switchNode1");
+            setTimeout(function() {
+                var logEvents = helper.log().args.filter(function (evt) {
+                    return evt[0].type == "switch";
+                });
+                if (logEvents.length === 0) {
+                    done();
+                }
+            }, 150);
+            n1.receive({payload:1});
+        });
+    });
 });
