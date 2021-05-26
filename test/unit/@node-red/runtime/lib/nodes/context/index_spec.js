@@ -1006,7 +1006,155 @@ describe('context', function() {
                     done();
                 }).catch(done);
             });
+            it('should throw an error in context.get if key is empty string', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get("");
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.get if key is an object', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get({});
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.get if key is a number', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get(1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.get if key array contains an empty string', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get(["ok1", "", "ok2"]);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.get if key array contains an object', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get(["ok1", {}, "ok2"]);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.get if key array contains a number', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get(["ok1", 1, "ok2"]);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
 
+            it('should throw an error in context.set if key is empty string', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set("", 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.set if key is an object', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set({}, 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.set if key is a number', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set(1, 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.set if key array contains an empty string', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set(["ok1", "", "ok2"], 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.set if key array contains an object', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set(["ok1", {}, "ok2"], 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+            it('should throw an error in context.set if key array contains a number', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set(["ok1", 1, "ok2"], 1);
+                    done("should throw an error.");
+                }).catch(function () {
+                    done();
+                });
+            });
+
+            it('should have an err set in callback for invalid key in context.get', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.get("", function(err) {
+                        if(err) {
+                            done();
+                        } else {
+                            done("should throw an error.");
+                        }
+                    });
+                }).catch(done);
+            });
+
+            it('should have an err set in callback for invalid key in context.set', function (done) {
+                Context.init({ contextStorage: memoryStorage });
+                Context.load().then(function () {
+                    var context = Context.get("1", "flow");
+                    context.set("", "value", function(err) {
+                        if(err) {
+                            done();
+                        } else {
+                            done("should throw an error.");
+                        }
+                    });
+                }).catch(done);
+            });
         });
 
         describe('listStores', function () {
