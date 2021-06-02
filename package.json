@@ -26,6 +26,8 @@
         }
     ],
     "dependencies": {
+        "acorn": "8.3.0",
+        "acorn-walk": "8.1.0",
         "ajv": "6.12.6",
         "async-mutex": "0.3.1",
         "basic-auth": "2.0.1",
