@@ -74,7 +74,7 @@
         "semver": "6.3.0",
         "tar": "6.1.0",
         "uglify-js": "3.13.3",
-        "ws": "6.2.1",
+        "ws": "6.2.2",
         "xml2js": "0.4.23"
     },
     "optionalDependencies": {
