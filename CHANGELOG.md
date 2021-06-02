@@ -1,3 +1,35 @@
+### 1.3.5 Maintenance Release
+
+Editor
+
+ - Open subflow tab next to active tab rather than at the end
+ - Shrink default notification box
+ - Support mousewheel scroll in tab bar
+ - Revert some of #2967 to fix treeList gutter width calculation
+ - Prevent unknown node from breaking editor
+ - Stop module with missing types from preventing editor load
+ - Handle sidebar tab that no longer exists when setting first active
+ - Fix plugin loading when browser sends unrecognised lang
+ - Prevent error whilst drag/drop importing from leaving dropTarget visible Fixes #2982
+ - Fix scaling issues when dragging nodes into scaled workspace
+ - Fix incorrect shortcut keys in info tips (#2980) @kazuhitoyokoi
+ - Reduce code duplication around node/label generation
+ - Fix theme handling when no editorTheme.page setting
+ - Fix jshint error in treeList
+
+Runtime
+
+ - Fix error handling in runtime/lib/api/nodes
+ - Add Node 16 with sass fixed
+ - Migrate from node-sass to sass (#2984)
+ - Fix "installRetry" was declared a constant and changed (#2974) @aheissenberger
+
+Nodes
+
+ - Function: Fix 'SyntaxError' in Function node when last line of on-stop is a comment
+ - Function: Fix Function tab label names in the node help text Closes #2978
+ - Function: Update Japanese info text of function node (#2985) @HiroyasuNishiyama
+
 ### 1.3.4 Maintenance Release
 
 Editor

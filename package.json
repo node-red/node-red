@@ -26,6 +26,8 @@
         }
     ],
     "dependencies": {
+        "acorn": "8.3.0",
+        "acorn-walk": "8.1.0",
         "ajv": "8.2.0",
         "async-mutex": "0.3.1",
         "basic-auth": "2.0.1",
@@ -71,7 +73,7 @@
         "semver": "7.3.5",
         "tar": "6.1.0",
         "uglify-js": "3.13.3",
-        "ws": "6.2.1",
+        "ws": "6.2.2",
         "xml2js": "0.4.23"
     },
     "optionalDependencies": {
