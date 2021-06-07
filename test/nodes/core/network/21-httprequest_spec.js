@@ -1614,7 +1614,8 @@ describe('HTTP Request Node', function() {
             });
         });
 
-        //
+        // Removed the Proxy Tests until a new mock proxy can be replaced with 
+        // one that supports HTTP Connect verb
         /*
         it('should authenticate on proxy server', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
