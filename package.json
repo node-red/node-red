@@ -103,7 +103,6 @@
         "grunt-sass": "~3.1.0",
         "grunt-simple-mocha": "~0.4.1",
         "grunt-simple-nyc": "^3.0.1",
-        "http-proxy": "1.18.1",
         "i18next-http-backend": "1.2.1",
         "jquery-i18next": "1.2.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
