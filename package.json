@@ -61,7 +61,7 @@
         "mqtt": "4.2.6",
         "multer": "1.4.2",
         "mustache": "4.2.0",
-        "node-red-admin": "^0.2.6",
+        "node-red-admin": "0.2.7",
         "node-red-node-rbe": "^0.5.0",
         "node-red-node-sentiment": "^0.1.6",
         "node-red-node-tail": "^0.3.0",
