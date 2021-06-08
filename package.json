@@ -79,10 +79,6 @@
         "uglify-js": "3.13.8",
         "uuid": "8.3.2",
         "ws": "7.4.6",
-        "tough-cookie": "4.0.0",
-        "uglify-js": "3.13.3",
-        "uuid": "8.3.2",
-        "ws": "6.2.1",
         "xml2js": "0.4.23"
     },
     "optionalDependencies": {
