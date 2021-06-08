@@ -510,6 +510,36 @@ describe('inject node', function() {
         });
     });
 
+    
+    it('should inject custom properties in message', function (done) {
+        //n1: inject node with  { topic:"static", payload:"static", bool1:true, str1:"1" }
+        var flow = [{id: "n1", type: "inject", props: [{p:"payload", v:"static", vt:"str"}, {p:"topic", v:"static", vt:"str"}, {p:"bool1", v:"true", vt:"bool"}, {p:"str1", v:"1", vt:"str"}], wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.not.have.property("payload"); //payload removed
+                    msg.should.have.property("topic", "t_override"); //changed value to t_override
+                    msg.should.have.property("str1", 1);//changed type from str to num
+                    msg.should.have.property("num1", 1);//new prop
+                    msg.should.have.property("bool1", false);//changed value to false
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({ __user_inject_props__: [
+                {p:"topic", v:"t_override", vt:"str"}, //change value to t_override
+                {p:"str1", v:"1", vt:"num"}, //change type
+                {p:"num1", v:"1", vt:"num"}, //new prop
+                {p:"bool1", v:"false", vt:"bool"}, //change value to false
+            ]});
+        });
+    });
+
+
     it('should inject multiple properties using legacy props if needed', function (done) {
         var flow = [{id: "n1", type: "inject", payload:"123", payloadType:"num", topic:"foo", props: [{p:"topic", vt:"str"}, {p:"payload"}], wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
@@ -590,6 +620,46 @@ describe('inject node', function() {
                                  done(err);
                              }
                          });
+        });
+
+        it('should inject custom properties in posted message', function(done) {
+            var flow = [{id:"n1", type:"inject", payloadType:"str", topic: "t4",payload:"hello", wires:[["n4"]] },
+                        { id:"n4", type:"helper"}];
+            helper.load(injectNode, flow, function() {
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    msg.should.not.have.property("payload"); //payload removed
+                    msg.should.have.property("topic", "t_override"); //changed value to t_override
+                    msg.should.have.property("str1", "1"); //injected prop
+                    msg.should.have.property("num1", 1); //injected prop
+                    msg.should.have.property("bool1", true); //injected prop
+
+                    helper.clearFlows().then(function() {
+                        done();
+                    });
+                });
+                try {
+                    helper.request()
+                    .post('/inject/n1')
+                    .send({ __user_inject_props__: [
+                        {p:"topic", v:"t_override", vt:"str"}, //change value to t_override
+                        {p:"str1", v:"1", vt:"str"}, //new prop
+                        {p:"num1", v:"1", vt:"num"}, //new prop
+                        {p:"bool1", v:"true", vt:"bool"}, //new prop
+                    ]})
+                    .expect(200).end(function(err) {
+                        if (err) {
+                            console.log(err);
+                            return helper.clearFlows()
+                            .then(function () {
+                                done(err);
+                            });
+                        }
+                    });
+                } catch(err) {
+                    done(err);
+                }
+            });
         });
 
         it('should fail for invalid node', function(done) {
