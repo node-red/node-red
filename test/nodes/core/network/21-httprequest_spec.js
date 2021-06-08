@@ -184,20 +184,11 @@ describe('HTTP Request Node', function() {
         });
         testApp.get('/proxyAuthenticate', function(req, res){
             var user = auth.parse(req.headers['proxy-authorization']);
-            var result
-            if (user) {
-                result = {
-                    user: user.name,
-                    pass: user.pass,
-                    headers: req.headers
-                };
-            } else {
-                result = {
-                    user: "foouser",
-                    pass: "barpassword",
-                    headers: req.headers
-                }
-            }
+            var result = {
+                user: user.name,
+                pass: user.pass,
+                headers: req.headers
+            };
             res.json(result);
         });
         testApp.post('/postInspect', function(req,res) {
