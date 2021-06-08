@@ -25,7 +25,7 @@ var httpRequestNode = require("nr-test-utils").require("@node-red/nodes/core/net
 var tlsNode = require("nr-test-utils").require("@node-red/nodes/core/network/05-tls.js");
 var httpProxyNode = require("nr-test-utils").require("@node-red/nodes/core/network/06-httpproxy.js");
 var hashSum = require("hash-sum");
-var httpProxy = require('http-proxy');
+var httpProxy = require('proxy');
 var cookieParser = require('cookie-parser');
 var multer = require("multer");
 var RED = require("nr-test-utils").require("node-red/lib/red");
@@ -76,20 +76,48 @@ describe('HTTP Request Node', function() {
             testSslServer.listen(testSslPort);
 
             testProxyPort += 1;
-            testProxyServer = stoppable(httpProxy.createProxyServer({target:'http://localhost:' + testPort}));
-            testProxyServer.on('proxyReq', function(proxyReq, req, res, options) {
-                proxyReq.setHeader('x-testproxy-header', 'foobar');
-            });
-            testProxyServer.on('proxyRes', function (proxyRes, req, res, options) {
-                if (req.url == getTestURL('/proxyAuthenticate')){
-                    var user = auth.parse(req.headers['proxy-authorization']);
-                    if (!(user.name == "foouser" && user.pass == "barpassword")){
-                        proxyRes.headers['proxy-authenticate'] = 'BASIC realm="test"';
-                        proxyRes.statusCode = 407;
-                    }
+            // testProxyServer = stoppable(httpProxy.createProxyServer({target:'http://localhost:' + testPort}));
+            // testProxyServer.on('proxyReq', function(proxyReq, req, res, options) {
+            //     proxyReq.setHeader('x-testproxy-header', 'foobar');
+            // });
+            // testProxyServer.on('proxyRes', function (proxyRes, req, res, options) {
+            //     if (req.url == getTestURL('/proxyAuthenticate')){
+            //         var user = auth.parse(req.headers['proxy-authorization']);
+            //         if (!(user.name == "foouser" && user.pass == "barpassword")){
+            //             proxyRes.headers['proxy-authenticate'] = 'BASIC realm="test"';
+            //             proxyRes.statusCode = 407;
+            //         }
+            //     }
+            // });
+            // testProxyServer.listen(testProxyPort);
+            testProxyServer = stoppable(httpProxy(http.createServer()))
+            //var t = httpProxy(testProxyServer)
+            testProxyServer.on('request', function(req,res){
+                console.log("********************************* ARGS")
+                if (!res.headersSent) {
+                    res.setHeader("x-testproxy-header", "foobar")
                 }
-            });
-            testProxyServer.listen(testProxyPort);
+            })
+            testProxyServer.authenticate = function(req,callback){
+                console.log("********************************* AUTH")
+                if (req.url == getTestURL('/proxyAuthenticate')) {
+                    var authHeader = req.headers['proxy-authorization'];
+                    if (authHeader) {
+                        var user = auth.parse(authHeader)
+                        if (user.name == "foouser" && user.pass == "barpassword") {
+                            console.err("Proxy Authentication pased")
+                            callback(null, true)
+                        } else {
+                            callback(null, false)
+                        }
+                    } else {
+                        callback(null, false)
+                    }
+                } else {
+                    callback(null, true)
+                }
+            }
+            testProxyServer.listen(testProxyPort)
             done(err);
         });
     }
@@ -1387,7 +1415,7 @@ describe('HTTP Request Node', function() {
         });
 
         //Removing HTTP Proxy testcases as GOT + Proxy_Agent doesn't work with mock'd proxy
-        /* 
+        /* */
         it('should use http_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
@@ -1409,6 +1437,8 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
+
+        
 
         it('should use http_proxy when environment variable is invalid', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
@@ -1453,7 +1483,7 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
-
+/*
         it('should use no_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];

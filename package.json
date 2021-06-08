@@ -113,6 +113,7 @@
         "node-red-node-test-helper": "^0.2.7",
         "node-sass": "^5.0.0",
         "nodemon": "2.0.7",
+        "proxy": "^1.0.2",
         "should": "13.2.3",
         "sinon": "10.0.1",
         "stoppable": "^1.1.0",
