@@ -138,8 +138,6 @@ describe('HTTP Request Node', function() {
         });
         testApp.use(fileUploadApp);
 
-
-
         testApp.use(bodyParser.raw({type:"*/*"}));
         testApp.use(cookieParser(undefined,{decode:String}));
         testApp.get('/statusCode204', function(req,res) { res.status(204).end();});
@@ -166,11 +164,16 @@ describe('HTTP Request Node', function() {
             res.send("");
         });
         testApp.get('/authenticate', function(req, res){
-            var user = auth.parse(req.headers['authorization']);
-            var result = {
-                user: user.name,
-                pass: user.pass,
-            };
+            let result;
+            let authHeader = req.headers['authorization'];
+            if (/^Basic/.test(authHeader)) {
+                result = auth.parse(authHeader);
+                result.user = result.name;
+            } else if (/^Bearer/.test(authHeader)) {
+                result = {
+                    token: authHeader.substring(7)
+                }
+            }
             res.json(result);
         });
         testApp.get('/proxyAuthenticate', function(req, res){
@@ -891,7 +894,8 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        msg.should.have.property('statusCode');
+                        /TIMEDOUT/.test(msg.statusCode).should.be.true();
                         var logEvents = helper.log().args.filter(function(evt) {
                             return evt[0].type == 'http request';
                         });
@@ -917,7 +921,8 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('statusCode','ESOCKETTIMEDOUT');
+                        msg.should.have.property('statusCode');
+                        /TIMEDOUT/.test(msg.statusCode).should.be.true();
                         var logEvents = helper.log().args.filter(function(evt) {
                             return evt[0].type == 'http request';
                         });
@@ -1380,7 +1385,6 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
-
         it('should use http_proxy', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
@@ -1565,9 +1569,8 @@ describe('HTTP Request Node', function() {
             });
         });
     });
-
     describe('authentication', function() {
-        it('should authenticate on server', function(done) {
+        it('should authenticate on server - basic', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/authenticate')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
@@ -1587,7 +1590,25 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
-
+        it('should authenticate on server - bearer', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"bearer", url:getTestURL('/authenticate')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {password:'passwordfoo'};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('token', 'passwordfoo');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
         it('should authenticate on proxy server', function(done) {
             var flow = [{id:"n1",type:"http request", wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/proxyAuthenticate')},
                 {id:"n2", type:"helper"}];
@@ -1740,22 +1761,24 @@ describe('HTTP Request Node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
-                    var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
-                    if (cookies1 && Object.keys(cookies1).length != 0) {
-                        done(new Error('Invalid cookie(path:/rediectToSame)'));
-                        return;
-                    }
-                    if ((cookies2 && Object.keys(cookies2).length != 1) ||
+                    try {
+                        var cookies1 = receivedCookies['localhost:'+testPort+'/redirectToSameDomain'];
+                        var cookies2 = receivedCookies['localhost:'+testPort+'/redirectReturn'];
+                        if (cookies1 && Object.keys(cookies1).length != 0) {
+                            done(new Error('Invalid cookie(path:/rediectToSame)'));
+                            return;
+                        }
+                        if ((cookies2 && Object.keys(cookies2).length != 1) ||
                         cookies2['redirectToSameDomainCookie'] !== 'same1') {
-                        done(new Error('Invalid cookie(path:/rediectReurn)'));
-                       return;
-                    }
-                    var redirect1 = msg.redirectList[0];
-                    redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
-                    redirect1.cookies.redirectToSameDomainCookie.Path.should.equal('/');
-                    redirect1.cookies.redirectToSameDomainCookie.value.should.equal('same1');
-                    done();
+                            done(new Error('Invalid cookie(path:/rediectReurn)'));
+                            return;
+                        }
+                        var redirect1 = msg.redirectList[0];
+                        redirect1.location.should.equal('http://localhost:'+testPort+'/redirectReturn');
+                        redirect1.cookies.redirectToSameDomainCookie.Path.should.equal('/');
+                        redirect1.cookies.redirectToSameDomainCookie.value.should.equal('same1');
+                        done();
+                    } catch(err) { done(err)}
                 });
                 n1.receive({});
             });
