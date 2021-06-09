@@ -22,10 +22,11 @@
 
 
 
+const os = require("os");
 const nopt = require("nopt");
 const path = require("path");
-const fs = require("fs")
-const sass = require("node-sass");
+const fs = require("fs-extra");
+const sass = require("sass");
 
 const knownOpts = {
     "help": Boolean,
@@ -73,58 +74,58 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
     updatedColors.push(match[1]+": "+(customColors[match[1]]||match[2])+";")
 }
 
-const result = sass.renderSync({
-    outputStyle: "expanded",
-    file: path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/style.scss"),
-    importer: function(url, prev, done){
-        if (url === 'colors') {
-            return {
-                contents: updatedColors.join("\n")
+
+(async function() {
+    const tmpDir = os.tmpdir();
+    const workingDir = await fs.mkdtemp(`${tmpDir}${path.sep}`);
+    await fs.copy(path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/"),workingDir)
+    await fs.writeFile(path.join(workingDir,"colors.scss"),updatedColors.join("\n"))
+
+    const result = sass.renderSync({
+        outputStyle: "expanded",
+        file: path.join(workingDir,"style.scss"),
+    });
+
+    const css = result.css.toString()
+    const lines = css.split("\n");
+    const colorCSS = []
+    const nonColorCSS = [];
+
+    let inKeyFrameBlock = false;
+
+    lines.forEach(l => {
+        if (inKeyFrameBlock) {
+            nonColorCSS.push(l);
+            if (/^}/.test(l)) {
+                inKeyFrameBlock = false;
             }
+        } else if (/^@keyframes/.test(l)) {
+            nonColorCSS.push(l);
+            inKeyFrameBlock = true;
+        } else if (!/^  /.test(l)) {
+            colorCSS.push(l);
+            nonColorCSS.push(l);
+        } else if (/color|border|background|fill|stroke|outline|box-shadow/.test(l)) {
+            colorCSS.push(l);
+        } else {
+            nonColorCSS.push(l);
         }
-        return {file:path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/"+url+".scss")}
-    }
-});
+    });
 
-const css = result.css.toString()
-const lines = css.split("\n");
-const colorCSS = []
-const nonColorCSS = [];
+    const nrPkg = require("../package.json");
+    const now = new Date().toISOString();
 
-let inKeyFrameBlock = false;
+    const header = `/*
+    * Theme generated with Node-RED ${nrPkg.version} on ${now}
+    */`;
 
-lines.forEach(l => {
-    if (inKeyFrameBlock) {
-        nonColorCSS.push(l);
-        if (/^}/.test(l)) {
-            inKeyFrameBlock = false;
-        }
-    } else if (/^@keyframes/.test(l)) {
-        nonColorCSS.push(l);
-        inKeyFrameBlock = true;
-    } else if (!/^  /.test(l)) {
-        colorCSS.push(l);
-        nonColorCSS.push(l);
-    } else if (/color|border|background|fill|stroke|outline|box-shadow/.test(l)) {
-        colorCSS.push(l);
+    var output = sass.renderSync({outputStyle: parsedArgs.long?"expanded":"compressed",data:colorCSS.join("\n")});
+    if (parsedArgs.out) {
+
+        await fs.writeFile(parsedArgs.out,header+"\n"+output.css);
     } else {
-        nonColorCSS.push(l);
+        console.log(header);
+        console.log(output.css.toString());
     }
-});
-
-
-const nrPkg = require("../package.json");
-const now = new Date().toISOString();
-
-const header = `/*
- * Theme generated with Node-RED ${nrPkg.version} on ${now}
- */`;
-
-var output = sass.renderSync({outputStyle: parsedArgs.long?"expanded":"compressed",data:colorCSS.join("\n")});
-if (parsedArgs.out) {
-
-    fs.writeFileSync(parsedArgs.out,header+"\n"+output.css);
-} else {
-    console.log(header);
-    console.log(output.css.toString());
-}
+    await fs.remove(workingDir);
+})()

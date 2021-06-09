@@ -1,0 +1,22 @@
+/* 
+Some classes and styles in node-red affect the monaco editor. 
+This stylesheet overrides those to correct some graphical glitches
+*/
+
+/* unset `margin-left: 180px` of `.controls` class for hover tips  */
+.monaco-editor div.phwrapper > div.controls {
+    margin-left: unset;
+}
+
+/* unset some styles of `code` tag (set by node-red css) for monaco hover items  */
+.monaco-editor .monaco-hover code {
+    font-size: unset;
+    color: unset;
+    margin: unset;
+}
+
+/* unset some styles of `input` tag (set by node-red css) for monaco rename box  */
+.monaco-editor .rename-box .rename-input {
+    box-sizing: unset;
+    height: unset;
+}

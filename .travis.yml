@@ -4,6 +4,9 @@ addons:
 language: node_js
 matrix:
   include:
+    - node_js: "16"
+      script:
+        - ./node_modules/.bin/grunt no-coverage
     - node_js: "14"
       script:
         - ./node_modules/.bin/grunt && ( cat coverage/lcov.info | $(npm get prefix)/bin/coveralls || true ) && rm -rf coverage
@@ -13,6 +16,7 @@ matrix:
     - node_js: "12"
       script:
         - ./node_modules/.bin/grunt no-coverage
+  allow_failures:
     - node_js: "16"
       script:
         - ./node_modules/.bin/grunt no-coverage
