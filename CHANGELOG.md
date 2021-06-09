@@ -1,3 +1,79 @@
+#### 2.0.0-beta.1: Beta Release
+
+Migration from 1.x
+
+ - Node-RED now requires Node.js 12.x or later.
+
+ - The following nodes have had significant dependency updates. Unless stated,
+   they should be fully backward compatible.
+
+   - RBE:  Relabelled as 'filter' to make it more discoverable and made part of
+           the core palette, rather than as a separate module.
+   - Tail: This node has been removed from the default palette. You can reinstall it
+           from node-red-node-tail
+   - HTTP Request: Reimplemented with a different underlying module. We have
+           tried to maintain 100% functional compatibility, but it is possible
+           some edge cases remain. In particular, if you are use http proxies in
+           your environment
+   - JSON: The schema validation option no longer supports JSON-Schema draft-04
+   - HTML: Its underlying module has had a major version update. Should be fully
+           backward compatible.
+   - HTML: Its underlying module has had a major version update. Should be fully
+           backward compatible.
+
+
+Runtime
+
+ - [MAJOR] Set minimum node version to 12.
+ - [MAJOR] Fix flowfile name to flows.json in settings (#2951) @dceejay
+ - [MAJOR] Update to latest i18n in editor and runtime (#2940) @knolleary
+ - [MAJOR] Deprecate usage of httpRoot (#2953) @knolleary
+ - Add pre/postInstall hooks to npm install handling (#2936) @knolleary
+ - Add engine-strict flag to npm install args (#2965) @nileio
+ - Restructure default settings.js to be more organised (#3012) @knolleary
+ - Ensure httpServerOptions gets applied to ALL the express apps
+ - Allow RED.settings.set to replace string property with object property
+ - Update debug tests to handle compact comms format
+ - Updates to encode/decode message when passed over debug comms link
+ - Remove all input event listeners on a node once it is closed
+ - Move hooks to util package
+ - Rework hooks structure to be a linkedlist
+ - Update dependencies (#2922) @knolleary
+
+Editor
+
+ - [MAJOR] Change node id generation to give fixed length values without '.' (#2987) @knolleary
+ - [MAJOR] Add Monaco code editor (#2971) @Steve-Mcl
+ - Update to latest Monaco (#3007) @Steve-Mcl
+ - Update Node-RED Function typings in Monaco (#3008) @Steve-Mcl
+ - Add css named variables for certain key colours (#2994) @knolleary
+ - Improve contrast of export dialog JSON font color
+ - Switch editableList buttons from <a> to <button> elements
+ - Add option to RED.nodes.createCompleteNodeSet to include node dimensions
+ - Fix css of node help table of contents elements
+ - Improve red-ui-node-icon css and add red-ui-node-icon-small modifier class
+ - Add RED.hooks to editor
+ - Add viewAddPort viewRemovePort viewAddNode viewRemoveNode hooks to view
+ - Use paletteLabel if set in help sidebar
+ - Add missing args from JSONata $now signature
+
+Nodes
+
+ - [MAJOR] Relabel RBE node as 'filter' and move into core. Also remove tail (#2944) @dceejay
+ - [MAJOR] HTTP Request: migrate to 'got' module (#2952) @knolleary
+ - [MAJOR] Move Inject node to CronosJS module (#2959) @knolleary
+ - [MAJOR] JSON: Update ajv to 8.2.0 - drop support for JSON-Schema draft-04 (#2969) @knolleary
+ - [MAJOR] HTML node: cheerio update to 1.x (#3011) @knolleary
+ - Join: change default manual mode to object (#2931) @knolleary
+ - File node: Add fileWorkingDirectory (#2932) @knolleary
+ - Delay node enhancements (#2294) @kazuhitoyokoi (#2949) @dceejay
+ - Add Japanese translations for delay node enhancements (#2958) @kazuhitoyokoi
+ - Inject node: reorder TypedInput options (#2961) @dceejay
+ - HTTP Request: update to work with proxies (#2983) @hardillb (#3009) @hardillb
+ - HTTP Request: fix msg.responseUrl (#2986) @hardillb
+ - TLS: Add ALPN support to TLS node (#2988) @hardillb
+ - Inject: add "Inject now" button to edit dialog (#2990) @Steve-Mcl
+
 ### 1.3.5 Maintenance Release
 
 Editor
