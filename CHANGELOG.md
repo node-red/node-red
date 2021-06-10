@@ -18,9 +18,6 @@ Migration from 1.x
    - JSON: The schema validation option no longer supports JSON-Schema draft-04
    - HTML: Its underlying module has had a major version update. Should be fully
            backward compatible.
-   - HTML: Its underlying module has had a major version update. Should be fully
-           backward compatible.
-
 
 Runtime
 
