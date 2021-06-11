@@ -1624,6 +1624,26 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:"foo"});
             });
         });
+        it('should authenticate on server - basic', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/authenticate')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'foo@example.com', password:'passwordfoo'};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('user', 'foo@example.com');
+                        msg.payload.should.have.property('pass', 'passwordfoo');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
         it('should authenticate on server - bearer', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"bearer", url:getTestURL('/authenticate')},
                 {id:"n2", type:"helper"}];
