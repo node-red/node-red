@@ -44,7 +44,8 @@ describe('exec node', function() {
             n1.should.have.property("addpay","payload");
             n1.should.have.property("timer",0);
             n1.should.have.property("oldrc","false");
-            n1.should.have.property("windowsHide",false);
+            n1.should.have.property("execOpt", {encoding:'binary', maxBuffer:10000000, windowsHide: false});
+            n1.should.have.property("spawnOpt", {windowsHide:false});
             done();
         });
     });
