@@ -1,4 +1,4 @@
-name: PublishDockerImage
+name: Publish Release
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 on:
