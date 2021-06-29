@@ -768,6 +768,36 @@ describe("@node-red/util/util", function() {
             result.format.should.eql("string[10]");
             result.msg.should.eql('123456...');
         });
+
+        it('encodes Map', function() {
+            const m = new Map();
+            m.set("a",1);
+            m.set("b",2);
+            var msg = {msg:m};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("map");
+            var resultJson = JSON.parse(result.msg);
+            resultJson.should.have.property("__enc__",true);
+            resultJson.should.have.property("type","map");
+            resultJson.should.have.property("data",{"a":1,"b":2});
+            resultJson.should.have.property("length",2)
+        });
+
+        it('encodes Set', function() {
+            const m = new Set();
+            m.add("a");
+            m.add("b");
+            var msg = {msg:m};
+            var result = util.encodeObject(msg);
+            result.format.should.eql("set[2]");
+            var resultJson = JSON.parse(result.msg);
+            resultJson.should.have.property("__enc__",true);
+            resultJson.should.have.property("type","set");
+            resultJson.should.have.property("data",["a","b"]);
+            resultJson.should.have.property("length",2)
+        });
+
+
         describe('encode object', function() {
             it('object', function() {
                 var msg = { msg:{"foo":"bar"} };
@@ -800,7 +830,34 @@ describe("@node-red/util/util", function() {
                 resultJson.b.should.have.property("__enc__", true);
                 resultJson.b.should.have.property("type", "undefined");
             });
-
+            it('object with Map property', function() {
+                const m = new Map();
+                m.set("a",1);
+                m.set("b",2);
+                var msg = {msg:{"aMap":m}};
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("aMap");
+                resultJson.aMap.should.have.property("__enc__",true);
+                resultJson.aMap.should.have.property("type","map");
+                resultJson.aMap.should.have.property("data",{"a":1,"b":2});
+                resultJson.aMap.should.have.property("length",2)
+            });
+            it('object with Set property', function() {
+                const m = new Set();
+                m.add("a");
+                m.add("b");
+                var msg = {msg:{"aSet":m}};
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("aSet");
+                resultJson.aSet.should.have.property("__enc__",true);
+                resultJson.aSet.should.have.property("type","set");
+                resultJson.aSet.should.have.property("data",["a","b"]);
+                resultJson.aSet.should.have.property("length",2)
+            });
             it('constructor of IncomingMessage', function() {
                 function IncomingMessage(){};
                 var msg = { msg:new IncomingMessage() };
