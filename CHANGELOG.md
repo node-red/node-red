@@ -45,7 +45,7 @@ Editor
  - Update Node-RED Function typings in Monaco (#3008) @Steve-Mcl
  - Add css named variables for certain key colours (#2994) @knolleary
  - Improve contrast of export dialog JSON font color
- - Switch editableList buttons from \<a\> to \<button\> elements
+ - Switch editableList buttons from <a> to <button> elements
  - Add option to RED.nodes.createCompleteNodeSet to include node dimensions
  - Fix css of node help table of contents elements
  - Improve red-ui-node-icon css and add red-ui-node-icon-small modifier class
