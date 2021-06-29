@@ -8,16 +8,16 @@ Migration from 1.x
    they should be fully backward compatible.
 
    - RBE:  Relabelled as 'filter' to make it more discoverable and made part of
-           the core palette, rather than as a separate module.
+     the core palette, rather than as a separate module.
    - Tail: This node has been removed from the default palette. You can reinstall it
-           from node-red-node-tail
+     from node-red-node-tail
    - HTTP Request: Reimplemented with a different underlying module. We have
-           tried to maintain 100% functional compatibility, but it is possible
-           some edge cases remain. In particular, if you are use http proxies in
-           your environment
+     tried to maintain 100% functional compatibility, but it is possible
+     some edge cases remain. In particular, if you are using http proxies in
+     your environment.
    - JSON: The schema validation option no longer supports JSON-Schema draft-04
    - HTML: Its underlying module has had a major version update. Should be fully
-           backward compatible.
+     backward compatible.
 
 Runtime
 
@@ -45,7 +45,7 @@ Editor
  - Update Node-RED Function typings in Monaco (#3008) @Steve-Mcl
  - Add css named variables for certain key colours (#2994) @knolleary
  - Improve contrast of export dialog JSON font color
- - Switch editableList buttons from <a> to <button> elements
+ - Switch editableList buttons from \<a\> to \<button\> elements
  - Add option to RED.nodes.createCompleteNodeSet to include node dimensions
  - Fix css of node help table of contents elements
  - Improve red-ui-node-icon css and add red-ui-node-icon-small modifier class
