@@ -48,7 +48,7 @@
         "fs.notify": "0.0.4",
         "got": "11.8.2",
         "hash-sum": "2.0.0",
-        "hpagent": "0.1.1",
+        "hpagent": "0.1.2",
         "https-proxy-agent": "5.0.0",
         "i18next": "20.3.2",
         "iconv-lite": "0.6.3",
