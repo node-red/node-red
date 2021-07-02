@@ -37,16 +37,20 @@ describe('exec node', function() {
     it('should be loaded with any defaults', function(done) {
         var flow = [{id:"n1", type:"exec", name: "exec1"}];
         helper.load(execNode, flow, function() {
-            var n1 = helper.getNode("n1");
-            n1.should.have.property("name", "exec1");
-            n1.should.have.property("cmd", "");
-            n1.should.have.property("append", "");
-            n1.should.have.property("addpay","payload");
-            n1.should.have.property("timer",0);
-            n1.should.have.property("oldrc","false");
-            n1.should.have.property("execOpt", {encoding:'binary', maxBuffer:10000000, windowsHide: false});
-            n1.should.have.property("spawnOpt", {windowsHide:false});
-            done();
+            try {
+                var n1 = helper.getNode("n1");
+                n1.should.have.property("name", "exec1");
+                n1.should.have.property("cmd", "");
+                n1.should.have.property("append", "");
+                n1.should.have.property("addpay","payload");
+                n1.should.have.property("timer",0);
+                n1.should.have.property("oldrc","false");
+                n1.should.have.property("execOpt", {encoding:'binary', maxBuffer:10000000, windowsHide: false});
+                n1.should.have.property("spawnOpt", {windowsHide:false});
+                done();
+            } catch(err) {
+                done(err);
+            }
         });
     });
 
