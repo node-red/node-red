@@ -1,3 +1,43 @@
+#### 2.0.0-beta.2: Beta Release
+
+**See 2.0.0-beta.1 for migration notes**
+
+Runtime
+
+ - Add `node-red admin init` (via `node-red-admin@2.1.0`)
+ - Move to GH Actions rather than Travis for build (#3042) @knolleary
+
+Editor
+
+ - Include hasUser=false config nodes when exporting whole flow (#3048)
+ - Fix padding of compact notification Closes #3045
+ - Ensure any html in changelog is escaped before displaying
+ - Add support for Map/Set property types on Debug (#3040) @knolleary
+ - Add 'theme' to default settings file
+ - Add RED.view.annotations api (#3032) @knolleary
+ - Update monaco editor to V0.25.2 (#3031) @Steve-Mcl
+ - Lower tray zIndex when overlay tray being opened Fixes #3019
+ - Reduce z-Index of Function expand buttons to prevent overlap Part of #3019
+ - Ensure RED.clipboard.import displays the right library Fixes #3021
+ - Batch messages sent over comms to prevent flooding (#3025) @knolleary
+ - Allow RED.popover.panel to specify a closeButton to ignore click events on
+ - Use browser default language for initial page load
+ - Add css var for node font color
+ - Fix label padding of toggleButton
+ - Give sidebar open tab a bit more room for its label
+ - Various Monaco updates (#3015) @Steve-Mcl
+ - Log readOnly on startup (#3024) @sammachin
+ - Translation updates (#3020 #3022) @HiroyasuNishiyama @kazuhitoyokoi
+
+Nodes
+
+ - HTTP Request: Fix proxy handling (#3044) @hardillb
+ - HTTP Request: Handle basic auth with @ in username (#3017) @hardillb
+ - Add Japanese translation for file-in node (#3037 #3039) @kazuhitoyokoi
+ - File In: Add option for file-in node to include all properties (default off) (#3035) @dceejay
+ - Exec: add windowsHide option to hide windows under Windows (#3026) @natcl
+ - Support loading external module sub path Fixes #3023
+
 #### 2.0.0-beta.1: Beta Release
 
 Migration from 1.x
