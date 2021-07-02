@@ -10,6 +10,7 @@ Runtime
 Editor
 
  - Include hasUser=false config nodes when exporting whole flow (#3048)
+ - Emit nodes:change for any updated config node when node deleted/added
  - Fix padding of compact notification Closes #3045
  - Ensure any html in changelog is escaped before displaying
  - Add support for Map/Set property types on Debug (#3040) @knolleary
