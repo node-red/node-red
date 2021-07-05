@@ -305,6 +305,22 @@ describe('CSV node', function() {
             });
         });
 
+        it('should parse numbers when told to do so', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', { a: 1.23, b: -123, c: 1000, d: 0 });
+                    check_parts(msg, 0, 1);
+                    done();
+                });
+                var testString = ' 1.23 ,  -123,1e3 ,    0  '+String.fromCharCode(10);
+                n1.emit("input", {payload:testString});
+            });
+        });
+
         it('should leave handle strings with scientific notation as numbers', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,b,c,d,e,f,g", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];

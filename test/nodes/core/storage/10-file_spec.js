@@ -14,7 +14,6 @@
  * limitations under the License.
  **/
 
-var should = require("should");
 var path = require('path');
 var fs = require('fs-extra');
 var os = require('os');
@@ -1184,6 +1183,9 @@ describe('file Nodes', function() {
                 n2.on("input", function(msg) {
                     try {
                         msg.should.have.property('payload');
+                        msg.should.have.property('topic');
+                        msg.should.not.have.property('foo');
+                        msg.should.not.have.property('bar');
                         msg.payload.should.be.a.String();
                         msg.should.have.property('parts');
                         msg.parts.should.have.property('index',c);
@@ -1205,7 +1207,7 @@ describe('file Nodes', function() {
                         done(e);
                     }
                 });
-                n1.receive({payload:""});
+                n1.receive({payload:"",topic:"A",foo:"bar",bar:"foo"});
             });
         });
 
@@ -1242,6 +1244,45 @@ describe('file Nodes', function() {
                     }
                 });
                 n1.receive({payload:""});
+            });
+        });
+
+        it('should read in a file and output split lines with parts and extra props', function(done) {
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", filename:fileToTest, format:"lines", allProps:true, wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                var c = 0;
+                n2.on("input", function(msg) {
+                    // console.log(msg)
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.should.have.property('topic');
+                        msg.should.have.property('foo');
+                        msg.should.have.property('bar');
+                        msg.should.have.property('parts');
+                        msg.parts.should.have.property('index',c);
+                        msg.parts.should.have.property('type','string');
+                        msg.parts.should.have.property('ch','\n');
+                        if (c === 0) {
+                            msg.payload.should.equal("File message line 1");
+                        }
+                        if (c === 1) {
+                            msg.payload.should.equal("File message line 2");
+                        }
+                        if (c === 2) {
+                            msg.payload.should.equal("");
+                            done();
+                        }
+                        c++;
+                    }
+                    catch(e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:"",topic:"B",foo:"bar",bar:"foo"});
             });
         });
 

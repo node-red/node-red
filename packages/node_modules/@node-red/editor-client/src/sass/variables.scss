@@ -1,0 +1,92 @@
+:root {
+    --red-ui-primary-font: #{$primary-font};
+    --red-ui-primary-font-size: #{$primary-font-size};
+    --red-ui-monospace-font: #{$monospace-font};
+
+    --red-ui-primary-background: #{$primary-background};
+
+    --red-ui-secondary-background: #{$secondary-background};
+    --red-ui-secondary-background-selected: #{$secondary-background-selected};
+    --red-ui-secondary-background-inactive: #{$secondary-background-inactive};
+    --red-ui-secondary-background-hover: #{$secondary-background-hover};
+    --red-ui-secondary-background-disabled: #{$secondary-background-disabled};
+
+    --red-ui-tertiary-background: #{$tertiary-background};
+
+    --red-ui-shadow: #{$shadow};
+
+// Main body text
+    --red-ui-primary-text-color: #{$primary-text-color};
+// UI control label text
+    --red-ui-secondary-text-color: #{$secondary-text-color};
+    --red-ui-secondary-text-color-focus: #{$secondary-text-color-focus};
+    --red-ui-secondary-text-color-hover: #{$secondary-text-color-hover};
+    --red-ui-secondary-text-color-active: #{$secondary-text-color-active};
+    --red-ui-secondary-text-color-selected: #{$secondary-text-color-selected};
+    --red-ui-secondary-text-color-inactive: #{$secondary-text-color-inactive};
+    --red-ui-secondary-text-color-disabled: #{$secondary-text-color-disabled};
+    --red-ui-secondary-text-color-disabled-active: #{$secondary-text-color-disabled-active};
+    --red-ui-secondary-text-color-disabled-inactive: #{$secondary-text-color-disabled-inactive};
+
+// Sub label text
+    --red-ui-tertiary-text-color: #{$tertiary-text-color};
+// Heading text
+    --red-ui-header-text-color: #{$header-text-color};
+
+    --red-ui-text-color-error: #{$text-color-error};
+    --red-ui-text-color-warning: #{$text-color-warning};
+    --red-ui-text-color-success: #{$text-color-success};
+    --red-ui-text-color-code: #{$text-color-code};
+    --red-ui-text-color-link: #{$text-color-link};
+
+
+
+    --red-ui-primary-border-color: #{$primary-border-color};
+    --red-ui-secondary-border-color: #{$secondary-border-color};
+    --red-ui-tertiary-border-color: #{$tertiary-border-color};
+
+    --red-ui-border-color-error: #{$border-color-error};
+    --red-ui-border-color-warning: #{$border-color-warning};
+    --red-ui-border-color-success: #{$border-color-success};
+
+    --red-ui-form-background: #{$form-background};
+
+    --red-ui-form-placeholder-color: #{$form-placeholder-color};
+    --red-ui-form-text-color: #{$form-text-color};
+    --red-ui-form-text-color-disabled: #{$form-text-color-disabled};
+    --red-ui-form-input-border-color: #{$form-input-border-color};
+    --red-ui-form-input-border-color-focus: #{$form-input-focus-color};
+    --red-ui-form-input-border-color-selected: #{$form-input-border-selected-color};
+    --red-ui-form-input-border-color-error: #{$form-input-border-error-color};
+    --red-ui-form-input-background: #{$form-input-background};
+    --red-ui-form-input-background-disabled: #{$form-input-background-disabled};
+    --red-ui-form-button-background: #{$form-button-background};
+
+    --red-ui-form-tips-background: #{$form-tips-background};
+
+    --red-ui-list-item-color: #{$list-item-color};
+    --red-ui-list-item-secondary-color: #{$list-item-secondary-color};
+    --red-ui-list-item-background: #{$list-item-background};
+    --red-ui-list-item-background-disabled: #{$list-item-background-disabled};
+    --red-ui-list-item-background-hover: #{$list-item-background-hover};
+    --red-ui-list-item-background-selected: #{$list-item-background-selected};
+    --red-ui-list-item-border-selected: #{$list-item-border-selected};
+
+    --red-ui-shade-color: #{$shade-color};
+
+    --red-ui-node-link-port-background: #{$node-link-port-background};
+
+    --red-ui-node-status-error-border: #{$node-status-error-border};
+    --red-ui-node-status-error-background: #{$node-status-error-background};
+    --red-ui-node-status-changed-border: #{$node-status-changed-border};
+    --red-ui-node-status-changed-background: #{$node-status-changed-background};
+
+
+
+    --red-ui-node-border: #{$node-border};
+    --red-ui-node-port-background:#{$node-port-background};
+
+    --red-ui-node-label-color: #{$node-label-color};
+    --red-ui-node-selected-color: #{$node-selected-color};
+    --red-ui-port-selected-color: #{$port-selected-color};
+}
