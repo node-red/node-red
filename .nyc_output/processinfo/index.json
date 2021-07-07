@@ -1,0 +1,1 @@
+{"processes":{"21ff85fc-0160-4e04-add9-56937f86f6f5":{"parent":"60724442-7f2d-4d3c-96e1-90692e323b95","children":[]},"60724442-7f2d-4d3c-96e1-90692e323b95":{"parent":null,"children":["21ff85fc-0160-4e04-add9-56937f86f6f5"]}},"files":{"/Users/steve/Documents/GitHub/node-red/nodes/StopTheBleed.js":["21ff85fc-0160-4e04-add9-56937f86f6f5"]},"externalIds":{}}

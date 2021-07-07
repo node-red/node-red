@@ -14,6 +14,8 @@
  * limitations under the License.
  **/
 
+const StopTheBleed = require('../../StopTheBleed')
+
 module.exports = function(RED) {
     "use strict";
     var util = require("util");
@@ -207,10 +209,13 @@ module.exports = function(RED) {
         try {
             this.on("input", function(msg) {
                 try {
+                    const stopTheBleed = new StopTheBleed(msg)
                     var start = process.hrtime();
                     sandbox.msg = msg;
                     const vm2Instance = new vm2.VM({ sandbox, timeout: 5000 });
                     const result = vm2Instance.run(functionText);
+                    console.log('before the bleed check')
+                    stopTheBleed.verify(result)
                     sendResults(this,msg._msgid, result);
 
                     var duration = process.hrtime(start);
