@@ -71,4 +71,13 @@ describe.only('Unit: PayloadValidator', () => {
 
     payloadValidator.verify(modifiedEvent);
   });
+
+  it('Should not die with initiating the class with bad object', () => {
+    const payloadValidator = new PayloadValidator({});
+  });
+
+  it('Should not die with initiating the class with bad object and then calling verify', () => {
+    const payloadValidator = new PayloadValidator({});
+    payloadValidator.verify({});
+  });
 });
