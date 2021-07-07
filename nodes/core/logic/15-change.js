@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
-const StopTheBleed = require('../../StopTheBleed')
+const PayloadValidator = require('../../PayloadValidator')
 
 module.exports = function(RED) {
     "use strict";
@@ -229,7 +229,7 @@ module.exports = function(RED) {
         }
         if (valid) {
             this.on('input', function(msg) {
-                const stopTheBleed = new StopTheBleed(msg)
+                const payloadValidator = new PayloadValidator(msg)
                 for (var i=0; i<this.rules.length; i++) {
                     if (this.rules[i].t === "move") {
                         var r = this.rules[i];
@@ -250,7 +250,7 @@ module.exports = function(RED) {
                         return;
                     }
                 }
-                stopTheBleed.verify(msg)
+                payloadValidator.verify(msg)
                 node.send(msg);
             });
         }

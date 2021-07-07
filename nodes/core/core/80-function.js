@@ -14,7 +14,7 @@
  * limitations under the License.
  **/
 
-const StopTheBleed = require('../../StopTheBleed')
+const PayloadValidator = require('../../PayloadValidator')
 
 module.exports = function(RED) {
     "use strict";
@@ -209,13 +209,12 @@ module.exports = function(RED) {
         try {
             this.on("input", function(msg) {
                 try {
-                    const stopTheBleed = new StopTheBleed(msg)
+                    const payloadValidator = new PayloadValidator(msg)
                     var start = process.hrtime();
                     sandbox.msg = msg;
                     const vm2Instance = new vm2.VM({ sandbox, timeout: 5000 });
                     const result = vm2Instance.run(functionText);
-                    console.log('before the bleed check')
-                    stopTheBleed.verify(result)
+                    payloadValidator.verify(result)
                     sendResults(this,msg._msgid, result);
 
                     var duration = process.hrtime(start);
