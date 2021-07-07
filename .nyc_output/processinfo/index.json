@@ -1,1 +1,0 @@
-{"processes":{"b653d3d4-4da6-4a99-8fbf-dd8c9e0790f1":{"parent":"c0adff3f-c97a-438c-9724-7f45d0d1fe66","children":[]},"c0adff3f-c97a-438c-9724-7f45d0d1fe66":{"parent":null,"children":["b653d3d4-4da6-4a99-8fbf-dd8c9e0790f1"]}},"files":{"/Users/steve/Documents/GitHub/node-red/nodes/PayloadValidator.js":["b653d3d4-4da6-4a99-8fbf-dd8c9e0790f1"]},"externalIds":{}}
