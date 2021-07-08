@@ -209,7 +209,7 @@ module.exports = function(RED) {
         try {
             this.on("input", function(msg) {
                 try {
-                    const payloadValidator = new PayloadValidator(msg)
+                    const payloadValidator = new PayloadValidator(msg, this.id)
                     var start = process.hrtime();
                     sandbox.msg = msg;
                     const vm2Instance = new vm2.VM({ sandbox, timeout: 5000 });

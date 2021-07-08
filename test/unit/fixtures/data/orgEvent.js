@@ -1,4 +1,4 @@
-module.exports = (org) => ({
+module.exports = (org, workerId = 'worker-id') => ({
   logger: {
     metadata: {
       organization: org
@@ -13,6 +13,7 @@ module.exports = (org) => ({
     },
   },
   event: {
+    workers:[{id: `${workerId}:::something:::else`}],
     event: {
       organization: org,
       token: {
