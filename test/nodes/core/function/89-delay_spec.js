@@ -629,6 +629,52 @@ describe('delay Node', function() {
         });
     });
 
+    it('can part flush delay queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "bar") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(200,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "boo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(400,100);
+                        c = c + 1;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"foo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
+            setImmediate( function() { delayNode1.receive({flush:2});  });
+            setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
+            setTimeout( function() { delayNode1.receive({flush:4});  }, 400);
+        });
+    });
+
     it('can reset delay queue', function(done) {
         this.timeout(2000);
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"delay","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
@@ -694,6 +740,52 @@ describe('delay Node', function() {
             setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
             setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );          // send something with blank topic
             setImmediate( function() { delayNode1.receive({flush:true});  });          // reset the queue
+        });
+    });
+
+    it('can part flush rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "bar") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(200,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "boo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(400,100);
+                        c = c + 1;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"foo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"foo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
+            setImmediate( function() { delayNode1.receive({flush:2});  });
+            setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
+            setTimeout( function() { delayNode1.receive({flush:4});  }, 400);
         });
     });
 
