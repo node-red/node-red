@@ -809,8 +809,9 @@ describe('delay Node', function() {
                                                  {msg:{payload:3,flush:true}, avr:0, var:100}]);
     });
     it('calls done when queued messages are sent (queue)', function(done) {
-        mapiDoneTestHelper(done, "queue", false, [{msg:{payload:1,topic:"a"}, avr:500, var:700},
-                                                  {msg:{payload:2, topic:"b"}, avr:1500, var:700}]);
+        this.timeout(3000);
+        mapiDoneTestHelper(done, "queue", false, [{msg:{payload:1,topic:"A"}, avr:1000, var:700},
+                                                  {msg:{payload:2,topic:"B"}, avr:2000, var:700}]);
     });
     it('calls done when queued messages are sent (timed)', function(done) {
         mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:500, var:700},
@@ -819,7 +820,7 @@ describe('delay Node', function() {
     it('calls done when queue is reset (queue/timed)', function(done) {
         mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:0, var:500},
                                                   {msg:{payload:2,reset:true}, avr:0, var:500}]);
-    });   
+    });
     it('calls done when queue is flushed (queue/timed)', function(done) {
         mapiDoneTestHelper(done, "timed", false, [{msg:{payload:1,topic:"a"}, avr:0, var:500},
                                                   {msg:{payload:2,flush:true}, avr:0, var:500}]);
