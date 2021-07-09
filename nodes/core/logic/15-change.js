@@ -229,7 +229,7 @@ module.exports = function(RED) {
         }
         if (valid) {
             this.on('input', function(msg) {
-                const payloadValidator = new PayloadValidator(msg)
+                const payloadValidator = new PayloadValidator(msg, this.id)
                 for (var i=0; i<this.rules.length; i++) {
                     if (this.rules[i].t === "move") {
                         var r = this.rules[i];

@@ -8,7 +8,7 @@ const variablesToCheck = [
 ];
 
 module.exports = class PayloadValidator {
-  constructor(_before) {
+  constructor(_before, id) {
     try {
       const before = clone(_before);
       const {
@@ -20,6 +20,9 @@ module.exports = class PayloadValidator {
             organization,
             region
           }
+        },
+        event: {
+          workers: [{ id: workerId }]
         }
       } = before;
       this.before = before;
@@ -28,9 +31,11 @@ module.exports = class PayloadValidator {
       this.conversationId = conversationId;
       this.organization = organization;
       this.region = region;
+      this.workerId = workerId.split(':::')[0];
+      this.nodeId = id.split(`${organization}-${this.workerId}-`)[1];
       this.isValidBefore = true;
     } catch (e) {
-      console.log('Error while instantiating class with invalid object');
+      console.log('Error while instantiating class with invalid object for');
       console.log(e);
       this.isValidBefore = false;
     }
@@ -40,13 +45,19 @@ module.exports = class PayloadValidator {
     return location.split('.').reduce((p, c) => (p && p[c]) || null, object);
   }
 
-  verify(after) {
+  verify(_after) {
     if (this.isValidBefore) {
       try {
+        let after = _after;
+        if (Array.isArray(after)) {
+          after = after.find((msg) => !!msg);
+        }
         variablesToCheck.forEach((location) => {
           if (this.getValue(this.before, location) !== this.getValue(after, location)) {
             const details = {
-              message: `msg.${location} changed from "${this.getValue(this.before, location)}" to "${this.getValue(after, location)}" for bot "${this.bot}"`
+              message: `msg.${location} changed from "${this.getValue(this.before, location)}" to "${this.getValue(after, location)}" for bot "${this.bot}"`,
+              nodeId: this.nodeId,
+              workerId: this.workerId
             };
             this.logger.error(details.message);
             this.logger.app.platform.organization({
