@@ -1,4 +1,5 @@
 const clone = require('clone');
+const _ = require('lodash');
 
 const variablesToCheck = [
   'logger.metadata.organization',
@@ -41,40 +42,70 @@ module.exports = class PayloadValidator {
     }
   }
 
+  /**
+   * Gets the value at the given location in the given object
+   *
+   * @param {*} object
+   * @param {*} location
+   * @returns
+   */
   getValue(object, location) {
-    return location.split('.').reduce((p, c) => (p && p[c]) || null, object);
+    return _.get(object, location);
+  }
+
+  /**
+   * Sets the value at the given location in the given object to the given value
+   *
+   * @param {*} object
+   * @param {*} location
+   * @param {*} value
+   * @returns
+   */
+  setValue(object, location, value) {
+    return _.set(object, location, value);
+  }
+
+  check(_after) {
+    let after = _after;
+    try {
+      variablesToCheck.forEach((location) => {
+        const beforeValue = this.getValue(this.before, location);
+        const afterValue = this.getValue(after, location);
+        if (beforeValue !== afterValue) {
+          const details = {
+            message: `msg.${location} changed from "${beforeValue}" to "${afterValue}" for bot "${this.bot}"`,
+            nodeId: this.nodeId,
+            workerId: this.workerId
+          };
+          this.logger.error(details.message);
+          this.logger.app.platform.organization({
+            srn: `srn:botnet:${this.region}:${this.organization}:bot:${this.bot}`,
+            action: 'exception',
+            actionType: 'invalid-payload-modification',
+            details,
+            conversationId: this.conversationId
+          });
+          after = this.setValue(after, location, beforeValue);
+        }
+      });
+    } catch (e) {
+      console.log('Error while trying to verify variable changes');
+      console.log(e);
+    }
+    return after;
   }
 
   verify(_after) {
+    const after = _after;
     if (this.isValidBefore) {
-      try {
-        let after = _after;
-        if (Array.isArray(after)) {
-          after = after.find((msg) => !!msg);
-        }
-        variablesToCheck.forEach((location) => {
-          if (this.getValue(this.before, location) !== this.getValue(after, location)) {
-            const details = {
-              message: `msg.${location} changed from "${this.getValue(this.before, location)}" to "${this.getValue(after, location)}" for bot "${this.bot}"`,
-              nodeId: this.nodeId,
-              workerId: this.workerId
-            };
-            this.logger.error(details.message);
-            this.logger.app.platform.organization({
-              srn: `srn:botnet:${this.region}:${this.organization}:bot:${this.bot}`,
-              action: 'exception',
-              actionType: 'invalid-payload-modification',
-              details,
-              conversationId: this.conversationId
-            });
-          }
-        });
-      } catch (e) {
-        console.log('Error while trying to verify variable changes');
-        console.log(e);
+      if (Array.isArray(after)) {
+        const afterIndex = after.findIndex((msg) => !!msg);
+        after[afterIndex] = this.check(after[afterIndex]);
+        return after;
       }
-    } else {
-      console.log('Error while trying to verify variable changes, wasn\'t initted with correct object');
+      return this.check(after);
     }
+    console.log('Error while trying to verify variable changes, wasn\'t initted with correct object');
+    return after;
   }
 };
