@@ -69,7 +69,6 @@ describe('Unit: PayloadValidator', () => {
     const modifiedEvent = orgEvent('before');
     modifiedEvent.payload = 'some text';
     const result = payloadValidator.verify(modifiedEvent);
-    console.log(errorLogStub.callCount);
     assert(errorLogStub.callCount === 1);
     assert(appLogStub.callCount === 1);
     const [[log]] = appLogStub.args;
