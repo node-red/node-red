@@ -1,6 +1,44 @@
-#### 2.0.0-beta.2: Beta Release
+#### 2.0.0: Milestone Release
 
-**See 2.0.0-beta.1 for migration notes**
+**Migration from 1.x**
+
+ - Node-RED now requires Node.js 12.x or later.
+
+ - The following nodes have had significant dependency updates. Unless stated,
+   they should be fully backward compatible.
+
+   - RBE:  Relabelled as 'filter' to make it more discoverable and made part of
+     the core palette, rather than as a separate module.
+   - Tail: This node has been removed from the default palette. You can reinstall it
+     from node-red-node-tail
+   - HTTP Request: Reimplemented with a different underlying module. We have
+     tried to maintain 100% functional compatibility, but it is possible
+     some edge cases remain.
+   - JSON: The schema validation option no longer supports JSON-Schema draft-04
+   - HTML: Its underlying module has had a major version update. Should be fully
+     backward compatible.
+
+
+Runtime
+
+ - Fix missing dependencies (#3052, #2057) @kazuhitoyokoi
+ - Ensure node.types is defined if node html file missing
+ - Fix reporting of type_already_registered error
+
+Editor
+
+ - Update translations (#3063) @kazuhitoyokoi
+ - Add a slight fade to tab labels that overflow
+ - Show config node details when selected in outliner
+ - Fix layout of info outliner for subflow entries
+
+Nodes
+
+ - Delay: let `msg.flush` specify how many messages to flush from node (#3059) @dceejay
+ - WebSocket: add option for client node to send automatic pings (#3056) @knolleary
+
+
+##### 2.0.0-beta.2: Beta Release
 
 Runtime
 
@@ -39,26 +77,9 @@ Nodes
  - Exec: add windowsHide option to hide windows under Windows (#3026) @natcl
  - Support loading external module sub path Fixes #3023
 
-#### 2.0.0-beta.1: Beta Release
+##### 2.0.0-beta.1: Beta Release
 
-Migration from 1.x
 
- - Node-RED now requires Node.js 12.x or later.
-
- - The following nodes have had significant dependency updates. Unless stated,
-   they should be fully backward compatible.
-
-   - RBE:  Relabelled as 'filter' to make it more discoverable and made part of
-     the core palette, rather than as a separate module.
-   - Tail: This node has been removed from the default palette. You can reinstall it
-     from node-red-node-tail
-   - HTTP Request: Reimplemented with a different underlying module. We have
-     tried to maintain 100% functional compatibility, but it is possible
-     some edge cases remain. In particular, if you are using http proxies in
-     your environment.
-   - JSON: The schema validation option no longer supports JSON-Schema draft-04
-   - HTML: Its underlying module has had a major version update. Should be fully
-     backward compatible.
 
 Runtime
 
