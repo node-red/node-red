@@ -94,25 +94,21 @@ module.exports = class PayloadValidator {
    * @returns
    */
   ensureOrganizationNotModified(after) {
-    try {
-      variablesToCheck.forEach((location) => {
-        const beforeValue = this.getValue(this.before, location);
-        const afterValue = this.getValue(after, location);
-        if (beforeValue !== afterValue) {
-          this.logException(beforeValue, afterValue, location);
+    variablesToCheck.forEach((location) => {
+      const beforeValue = this.getValue(this.before, location);
+      const afterValue = this.getValue(after, location);
+      if (beforeValue !== afterValue) {
+        this.logException(beforeValue, afterValue, location);
 
-          // attempt to set the value back to its correct one
-          after = this.setValue(after, location, beforeValue);
+        // attempt to set the value back to its correct one
+        after = this.setValue(after, location, beforeValue);
 
-          if (!_.has(after, location, beforeValue)) {
-           this.logger.error(`Cant set value as ${location} is no longer assessable in after`);
-          }
+        if (!_.has(after, location, beforeValue)) {
+          this.logger.error(`Cant set value as ${location} is no longer assessable in after`);
         }
-      });
-    } catch (e) {
-      console.log('Error while trying to verify variable changes');
-      console.log(e);
-    }
+      }
+    });
+
     return after;
   }
 
