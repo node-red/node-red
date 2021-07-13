@@ -26,8 +26,7 @@ async function createUserDir() {
 }
 
 async function setupExternalModulesPackage(dependencies) {
-    await fs.ensureDir(path.join(homeDir,"externalModules"))
-    await fs.writeFile(path.join(homeDir,"externalModules","package.json"),`{
+    await fs.writeFile(path.join(homeDir,"package.json"),`{
 "name": "Node-RED-External-Modules",
 "description": "These modules are automatically installed by Node-RED to use in Function nodes.",
 "version": "1.0.0",
@@ -97,12 +96,10 @@ describe("externalModules api", function() {
         it("installs missing modules", async function() {
             externalModules.init({userDir: homeDir});
             externalModules.register("function", "libs");
-            fs.existsSync(path.join(homeDir,"externalModules")).should.be.false();
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "foo"}]}
             ])
             exec.run.called.should.be.true();
-            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
 
 
@@ -122,7 +119,6 @@ describe("externalModules api", function() {
             receivedPreEvent.should.have.property("version")
             receivedPreEvent.should.have.property("dir")
             receivedPreEvent.should.eql(receivedPostEvent)
-            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
 
         it("skips npm install if preInstall returns false", async function() {
@@ -140,7 +136,6 @@ describe("externalModules api", function() {
             receivedPreEvent.should.have.property("version")
             receivedPreEvent.should.have.property("dir")
             receivedPreEvent.should.eql(receivedPostEvent)
-            fs.existsSync(path.join(homeDir,"externalModules")).should.be.true();
         })
 
 
