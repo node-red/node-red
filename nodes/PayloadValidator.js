@@ -65,21 +65,6 @@ module.exports = class PayloadValidator {
     return _.set(object, location, value);
   }
 
-  /**
-   * lodash set will always pass but might not actually set the value
-   * So here we test that it was actually set and use that to confirm we can set
-   *
-   * @param {*} object
-   * @param {*} location
-   * @returns
-   */
-  canSet(object, location) {
-    const test = 'test';
-    let clonedObject = clone(object);
-    clonedObject = this.setValue(clonedObject, location, test);
-    return test === this.getValue(clonedObject, location);
-  }
-
   check(_after) {
     let after = _after;
     try {
@@ -101,10 +86,12 @@ module.exports = class PayloadValidator {
             conversationId: this.conversationId
           });
 
-          if (!this.canSet(after, location)) {
+  
+          after = this.setValue(after, location, beforeValue);
+            
+          if (!_.has(after, location, beforeValue)) {
             throw new Error(`Cant set value as ${location} is no longer present in after`);
           }
-          after = this.setValue(after, location, beforeValue);
         }
       });
     } catch (e) {

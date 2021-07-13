@@ -280,26 +280,4 @@ describe('Unit: PayloadValidator', () => {
       assert.strictEqual(result.should.set.hello, value);
     });
   });
-
-  describe('Can set', () => {
-    let payloadValidator;
-    before(() => {
-      const event = orgEvent('event');
-      payloadValidator = new PayloadValidator(event, 'before-worker-id-nodeId');
-    });
-
-    it('Should get back false for canSet when object is a string', () => {
-      const object = 'some string';
-      const location = 'hello';
-      const result = payloadValidator.canSet(object, location);
-      assert.strictEqual(result, false);
-    });
-
-    it('Should get back true for canSet', () => {
-      const object = {};
-      const location = 'should.set.hello';
-      const result = payloadValidator.canSet(object, location);
-      assert.strictEqual(result, true);
-    });
-  });
 });
