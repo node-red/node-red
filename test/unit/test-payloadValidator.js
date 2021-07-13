@@ -26,9 +26,7 @@ describe('Unit: PayloadValidator', () => {
     };
 
     const payloadValidator = new PayloadValidator(beforeEvent, `before-${workerId}-${nodeId}`);
-
     const modifiedEvent = orgEvent('after');
-
     const result = payloadValidator.verify(modifiedEvent);
 
     assert(errorLogStub.callCount === 4);
@@ -52,6 +50,38 @@ describe('Unit: PayloadValidator', () => {
     delete beforeEvent.logger.error;
     delete beforeEvent.logger.app;
     assert.deepStrictEqual(result, beforeEvent);
+  });
+
+  it('Should warn when org is overwritten and fail to fix it due to overwriting payload', () => {
+    const nodeId = 'abc-id';
+    const workerId = 'worker-id';
+    const beforeEvent = orgEvent('before', workerId);
+    const errorLogStub = sinon.stub();
+    const appLogStub = sinon.stub();
+    beforeEvent.logger.error = errorLogStub;
+    beforeEvent.logger.app = {
+      platform: {
+        organization: appLogStub
+      }
+    };
+
+    const payloadValidator = new PayloadValidator(beforeEvent, `before-${workerId}-${nodeId}`);
+    const modifiedEvent = orgEvent('before');
+    modifiedEvent.payload = 'some text';
+    const result = payloadValidator.verify(modifiedEvent);
+    console.log(errorLogStub.callCount);
+    assert(errorLogStub.callCount === 1);
+    assert(appLogStub.callCount === 1);
+    const [[log]] = appLogStub.args;
+    assert(log.details.message.includes('msg.payload.system.organization'));
+    assert.strictEqual(log.details.nodeId, nodeId);
+    assert.strictEqual(log.details.workerId, workerId);
+    // deleting due to sinon funness
+    delete result.logger.error;
+    delete result.logger.app;
+    delete modifiedEvent.logger.error;
+    delete modifiedEvent.logger.app;
+    assert.deepStrictEqual(result, modifiedEvent);
   });
 
   it('Should warn when org is deleted and fix it', () => {
@@ -187,15 +217,6 @@ describe('Unit: PayloadValidator', () => {
     assert.deepStrictEqual(result, beforeEvent);
   });
 
-  it('Should not die when error', () => {
-    const beforeEvent = orgEvent('before');
-    const payloadValidator = new PayloadValidator(beforeEvent);
-
-    const modifiedEvent = orgEvent('after');
-
-    payloadValidator.verify(modifiedEvent);
-  });
-
   it('Should not die with initiating the class with bad object', () => {
     const payloadValidator = new PayloadValidator({});
   });
@@ -209,7 +230,7 @@ describe('Unit: PayloadValidator', () => {
     let payloadValidator;
     before(() => {
       const event = orgEvent('event');
-      payloadValidator = new PayloadValidator(event);
+      payloadValidator = new PayloadValidator(event, 'before-worker-id-nodeId');
     });
     it('Should set a root level variable', () => {
       const location = 'hello';
@@ -241,7 +262,7 @@ describe('Unit: PayloadValidator', () => {
     let payloadValidator;
     before(() => {
       const event = orgEvent('event');
-      payloadValidator = new PayloadValidator(event);
+      payloadValidator = new PayloadValidator(event, 'before-worker-id-nodeId');
     });
     it('Should set a root level variable', () => {
       const object = {};
@@ -257,6 +278,28 @@ describe('Unit: PayloadValidator', () => {
       const value = 'world';
       const result = payloadValidator.setValue(object, location, value);
       assert.strictEqual(result.should.set.hello, value);
+    });
+  });
+
+  describe('Can set', () => {
+    let payloadValidator;
+    before(() => {
+      const event = orgEvent('event');
+      payloadValidator = new PayloadValidator(event, 'before-worker-id-nodeId');
+    });
+
+    it('Should get back false for canSet when object is a string', () => {
+      const object = 'some string';
+      const location = 'hello';
+      const result = payloadValidator.canSet(object, location);
+      assert.strictEqual(result, false);
+    });
+
+    it('Should get back true for canSet', () => {
+      const object = {};
+      const location = 'should.set.hello';
+      const result = payloadValidator.canSet(object, location);
+      assert.strictEqual(result, true);
     });
   });
 });
