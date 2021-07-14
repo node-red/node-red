@@ -11,9 +11,8 @@
   "main": "red/red.js",
   "scripts": {
     "start": "node red.js",
-    "test": "grunt test-nodes",
     "build": "grunt build",
-    "test:unit": "nyc node_modules/.bin/mocha --recursive test/unit/*"
+    "test": "nyc node_modules/.bin/mocha --recursive test/unit/*"
   },
   "bin": {
     "node-red": "./red.js",
@@ -54,6 +53,7 @@
     "js-yaml": "3.11.0",
     "json-stringify-safe": "5.0.1",
     "jsonata": "1.5.4",
+    "lodash": "^4.17.21",
     "media-typer": "0.3.0",
     "memorystore": "1.6.0",
     "mqtt": "2.18.0",
