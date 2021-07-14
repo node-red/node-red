@@ -67,7 +67,7 @@ describe("externalModules api", function() {
             exec.run.restore();
         })
         it("does nothing when no types are registered",async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "foo"}]}
             ])
@@ -75,7 +75,7 @@ describe("externalModules api", function() {
         });
 
         it("skips install for modules already installed", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             await setupExternalModulesPackage({"foo": "1.2.3", "bar":"2.3.4"});
             await externalModules.checkFlowDependencies([
@@ -85,7 +85,7 @@ describe("externalModules api", function() {
         })
 
         it("skips install for built-in modules", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "fs"}]}
@@ -94,7 +94,7 @@ describe("externalModules api", function() {
         })
 
         it("installs missing modules", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             await externalModules.checkFlowDependencies([
                 {type: "function", libs:[{module: "foo"}]}
@@ -104,7 +104,7 @@ describe("externalModules api", function() {
 
 
         it("calls pre/postInstall hooks", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             let receivedPreEvent,receivedPostEvent;
             hooks.add("preInstall", function(event) { event.args = ["a"]; receivedPreEvent = event; })
@@ -122,7 +122,7 @@ describe("externalModules api", function() {
         })
 
         it("skips npm install if preInstall returns false", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             let receivedPreEvent,receivedPostEvent;
             hooks.add("preInstall", function(event) { receivedPreEvent = event; return false })
@@ -140,7 +140,7 @@ describe("externalModules api", function() {
 
 
         it("installs missing modules from inside subflow module", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             externalModules.registerSubflow("sf", {"flow":[{type: "function", libs:[{module: "foo"}]}]});
             await externalModules.checkFlowDependencies([
@@ -150,7 +150,7 @@ describe("externalModules api", function() {
         })
 
         it("reports install fail - 404", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             try {
                 await externalModules.checkFlowDependencies([
@@ -169,7 +169,7 @@ describe("externalModules api", function() {
             }
         })
         it("reports install fail - target", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             try {
                 await externalModules.checkFlowDependencies([
@@ -188,7 +188,7 @@ describe("externalModules api", function() {
         })
 
         it("reports install fail - unexpected", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             try {
                 await externalModules.checkFlowDependencies([
@@ -206,7 +206,7 @@ describe("externalModules api", function() {
             }
         })
         it("reports install fail - multiple", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             externalModules.register("function", "libs");
             try {
                 await externalModules.checkFlowDependencies([
@@ -233,7 +233,7 @@ describe("externalModules api", function() {
             }
         })
         it("reports install fail - install disabled", async function() {
-            externalModules.init({userDir: homeDir, externalModules: {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
                 modules: {
                     allowInstall: false
                 }
@@ -257,7 +257,7 @@ describe("externalModules api", function() {
         })
 
         it("reports install fail - module disallowed", async function() {
-            externalModules.init({userDir: homeDir, externalModules: {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
                 modules: {
                     denyList: ['foo']
                 }
@@ -282,7 +282,7 @@ describe("externalModules api", function() {
         })
 
         it("reports install fail - built-in module disallowed", async function() {
-            externalModules.init({userDir: homeDir, externalModules: {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
                 modules: {
                     denyList: ['fs']
                 }
@@ -308,12 +308,12 @@ describe("externalModules api", function() {
     })
     describe("require", async function() {
         it("requires built-in modules", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             const result = externalModules.require("fs")
             result.should.eql(require("fs"));
         })
         it("rejects unknown modules", async function() {
-            externalModules.init({userDir: homeDir});
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
             try {
                 externalModules.require("foo")
                 throw new Error("require did not reject after fail")
@@ -323,7 +323,7 @@ describe("externalModules api", function() {
         })
 
         it("rejects disallowed modules", async function() {
-            externalModules.init({userDir: homeDir, externalModules: {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
                 modules: {
                     denyList: ['fs']
                 }
