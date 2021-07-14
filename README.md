@@ -12,7 +12,10 @@ To make a change to the node-red runtime being used by K4 avalanche:
 
 # CHANGE-LOG
 
-
+## 0.18.7-patch-10
+2021-07-14
+- Updated logic to swap back org to correct value when possible
+  
 ## 0.18.7-patch-9.1
 2021-07-09
 - Bug fix for when retuning a array out of a function node
