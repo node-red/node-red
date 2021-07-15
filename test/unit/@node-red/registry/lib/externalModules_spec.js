@@ -336,4 +336,36 @@ describe("externalModules api", function() {
             }
         })
     })
+    describe("import", async function() {
+        it("import built-in modules", async function() {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
+            const result = await externalModules.import("fs")
+            // `result` won't have the `should` property
+            should.exist(result);
+            should.exist(result.existsSync);
+        })
+        it("rejects unknown modules", async function() {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}});
+            try {
+                await externalModules.import("foo")
+                throw new Error("import did not reject after fail")
+            } catch(err) {
+                err.should.have.property("code","module_not_allowed");
+            }
+        })
+
+        it("rejects disallowed modules", async function() {
+            externalModules.init({userDir: homeDir, get:()=>{}, set:()=>{}, externalModules: {
+                modules: {
+                    denyList: ['fs']
+                }
+            }});
+            try {
+                await externalModules.import("fs")
+                throw new Error("import did not reject after fail")
+            } catch(err) {
+                err.should.have.property("code","module_not_allowed");
+            }
+        })
+    })
 });
