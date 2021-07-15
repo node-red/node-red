@@ -18,12 +18,22 @@
    - HTML: Its underlying module has had a major version update. Should be fully
      backward compatible.
 
+ - `functionExternalModules` is now enabled by default for new installs.
+   If you have an existing settings file that contains this setting, you will
+   need to set it to `true` yourself.
+
+   The external modules will now get installed in your Node-RED user directory,
+   (`~/.node-red`) rather than in a subdirectory. This means all dependencies will
+   be listed in your top-level `package.json`. If you have existing external modules,
+   they will get reinstalled to the new location when you first run Node-RED 2.0.
+
 
 Runtime
 
  - Fix missing dependencies (#3052, #2057) @kazuhitoyokoi
  - Ensure node.types is defined if node html file missing
  - Fix reporting of type_already_registered error
+ - Move install location of external modules (#3064) @knolleary
 
 Editor
 
@@ -35,6 +45,8 @@ Editor
 Nodes
 
  - Delay: let `msg.flush` specify how many messages to flush from node (#3059) @dceejay
+ - Function: external modules is now enabled by default (#3065) @knolleary
+ - Function: external modules now supports both ES6 and CJS modules (#3065) @knolleary
  - WebSocket: add option for client node to send automatic pings (#3056) @knolleary
 
 
