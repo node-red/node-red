@@ -3,13 +3,23 @@ description: File a bug/issue on the core of Node-RED
 title: "<title>"
 labels: [needs-triage]
 body:
-- type: checkboxes
+- type: markdown
   attributes:
-    label: Is this an issue with the core of Node-RED?
-    description: This issue list is for the core runtime and editor of Node-RED. If your issue is about a 3rd-party node, please use the [forum](https://discourse.nodered.org)
-    options:
-    - label: Yes
-      required: true
+    value: |
+        This issue tracker is for problems with the Node-RED runtime, the editor or the core nodes.
+
+        If your issue is:
+          - a general 'how-to' type question,
+          - a feature request or suggestion for a change,
+          - or problems with 3rd party (`node-red-contrib-`) nodes
+
+        please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
+
+        You could also consider asking a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/node-red) and tag it `node-red`.
+
+        That way the whole Node-RED user community can help, rather than rely on the core development team.
+
+        To help us understand the issue, please fill-in as much of the following information as you can:
 - type: textarea
   attributes:
     label: Current Behavior
