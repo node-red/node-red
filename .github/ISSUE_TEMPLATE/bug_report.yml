@@ -1,6 +1,5 @@
 name: 🐞 Report a bug
 description: File a bug/issue on the core of Node-RED
-title: "<title>"
 labels: [needs-triage]
 body:
 - type: markdown
