@@ -1,0 +1,52 @@
+name: 🐞 Report a bug
+description: File a bug/issue on the core of Node-RED
+title: "<title>"
+labels: [needs-triage]
+body:
+- type: checkboxes
+  attributes:
+    label: Is this an issue with the core of Node-RED?
+    description: This issue list is for the core runtime and editor of Node-RED. If your issue is about a 3rd-party node, please use the [forum](https://discourse.nodered.org)
+    options:
+    - label: Yes
+      required: true
+- type: textarea
+  attributes:
+    label: Current Behavior
+    description: A clear & concise description of what you're experiencing.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Expected Behavior
+    description: A clear & concise description of what you expected to happen.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Steps To Reproduce
+    description: Steps to reproduce the behavior.
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Example flow
+    description: If you have a minimal example flow that demonstrates the issue, share it here.
+    value: |
+      ```
+      paste your flow here
+      ```
+  validations:
+    required: false
+- type: textarea
+  attributes:
+    label: Environment
+    description: Please tell us about your environment. Include any relevant information on how you are running Node-RED.
+    value: |
+        - Node-RED version:
+        - Node.js version:
+        - npm version:
+        - Platform/OS:
+        - Browser:
+  validations:
+    required: false
