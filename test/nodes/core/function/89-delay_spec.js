@@ -789,6 +789,62 @@ describe('delay Node', function() {
         });
     });
 
+    it('can part push to front of rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "aoo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(2,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "eoo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(4,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "coo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(202,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "boo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(406,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "doo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(4,50);
+                        c = c + 1;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"aoo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"coo",toFront:true}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"doo",toFront:true,flush:1}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"eoo",toFront:true}); }  );
+            setImmediate( function() { delayNode1.receive({flush:1});  });
+            setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
+            setTimeout( function() { delayNode1.receive({flush:4});  }, 400);
+        });
+    });
+
     it('can reset rate limit queue', function(done) {
         this.timeout(2000);
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
