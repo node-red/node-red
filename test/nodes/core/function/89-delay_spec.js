@@ -824,7 +824,7 @@ describe('delay Node', function() {
                     }
                     else if (msg.topic === "doo") {
                         msg.payload.should.equal(1);
-                        (Date.now() - t).should.be.approximately(404,50);
+                        (Date.now() - t).should.be.approximately(4,50);
                         c = c + 1;
                     }
                     if (c === 5) { done(); }
@@ -837,7 +837,7 @@ describe('delay Node', function() {
             delayNode1.receive({payload:1,topic:"aoo"});
             setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
             setImmediate( function() { delayNode1.receive({payload:1,topic:"coo",toFront:true}); }  );
-            setImmediate( function() { delayNode1.receive({payload:1,topic:"doo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"doo",toFront:true,flush:1}); }  );
             setImmediate( function() { delayNode1.receive({payload:1,topic:"eoo",toFront:true}); }  );
             setImmediate( function() { delayNode1.receive({flush:1});  });
             setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
