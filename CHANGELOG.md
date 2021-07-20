@@ -1,3 +1,9 @@
+#### 2.0.1: Maintenance Release
+
+Nodes
+
+ - Function: Ensure default module export is exposed in Function node
+
 #### 2.0.0: Milestone Release
 
 **Migration from 1.x**
