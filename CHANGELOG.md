@@ -1,3 +1,22 @@
+#### 2.0.2: Maintenance Release
+
+Runtime
+
+ - Use file:// url with dynamic import
+ - Detect if agent-base has patched https.request and undo it Fixes #3072
+
+Editor
+
+ - Fix tab fade css because Safari Fixes #3073
+ - Fix error closing library dialog with monaco
+ - Handle other error types in Manage Palette view
+
+
+Nodes
+
+ - HTTP Request node - ignore invalid cookies rather than fail request Fixes #3075
+ - Fix msg.reset handling in Delay node Fixes #3074
+
 #### 2.0.1: Maintenance Release
 
 Nodes
