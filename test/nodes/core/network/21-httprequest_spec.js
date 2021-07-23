@@ -270,6 +270,16 @@ describe('HTTP Request Node', function() {
         testApp.get('/returnError/:code', function(req,res) {
             res.status(parseInt(req.params.code)).json({gotError:req.params.code});
         })
+
+        testApp.get('/rawHeaders', function(req,res) {
+            const result = {};
+            for (let i=0;i<req.rawHeaders.length;i++) {
+                result[req.rawHeaders[i]] = req.rawHeaders[i+1]
+            }
+            res.json({
+                headers:result
+            });
+        })
         startServer(function(err) {
             if (err) {
                 done(err);
@@ -1348,6 +1358,8 @@ describe('HTTP Request Node', function() {
         });
 
         it('should convert all HTTP headers into lower case', function(done) {
+            // This is a bad test. Express lower-cases headers in the `req.headers` object,
+            // so this is actually testing express, not the original request.
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
@@ -1369,6 +1381,26 @@ describe('HTTP Request Node', function() {
             });
         });
 
+        it('should keep HTTP header case as provided by the user', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",url:getTestURL('/rawHeaders')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        msg.payload.headers.should.have.property('Content-Type').which.startWith('text/plain');
+                        msg.payload.headers.should.have.property('X-Test-HEAD', "foo");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", headers: { 'Content-Type':'text/plain', "X-Test-HEAD": "foo"}});
+            });
+        });
         it('should receive HTTP header', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getTestURL('/headersInspect')},
                 {id:"n2", type:"helper"}];
