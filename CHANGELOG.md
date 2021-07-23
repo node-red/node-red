@@ -1,3 +1,14 @@
+#### 2.0.3: Maintenance Release
+
+Nodes
+
+ - HTML: Fix HTML parsing when body is included in the select tag Fixes #3079
+ - HTTP Request: Preserve case of user-provided http headers in request node Fixes #3081
+ - HTTP Request: Set decompress to false for HTTP Request to keep 1.x compatibility Fixes #3083
+ - HTTP Request: Add unit tests for HTTP Request encodeURI and error response
+ - HTTP Request: Do not throw HTTP errors in request node Fixes #3082
+ - HTTP Request: Ensure uri is properly encoded before passing to got module Fixes #3080
+
 #### 2.0.2: Maintenance Release
 
 Runtime
