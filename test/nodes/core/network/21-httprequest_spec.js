@@ -1145,7 +1145,7 @@ describe('HTTP Request Node', function() {
                     try {
                         msg.should.have.property('payload',{
                             query:{ a: 'b', c:[ 'T24,0°|H80%|W S8,3m/s' ] },
-                            url: '/getQueryParams?a=b&c%5B0%5D.Text=T24,0%C2%B0%7CH80%25%7CW%20S8,3m/s'
+                            url: '/getQueryParams?a=b&c[0].Text=T24,0%C2%B0|H80%25|W%20S8,3m/s'
                         });
                         msg.should.have.property('statusCode',200);
                         msg.should.have.property('headers');
@@ -1154,7 +1154,7 @@ describe('HTTP Request Node', function() {
                         done(err);
                     }
                 });
-                n1.receive({url: getTestURL('/getQueryParams')+"?a=b&c[0].Text=T24,0°|H80%|W S8,3m/s"});
+                n1.receive({url: getTestURL('/getQueryParams')+"?a=b&c[0].Text=T24,0°|H80%|W%20S8,3m/s"});
             });
         })
     });
