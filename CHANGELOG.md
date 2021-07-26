@@ -1,3 +1,17 @@
+#### 2.0.4: Maintenance Release
+
+Editor
+
+ - Fix tab fade CSS for when using themes (#3085) @bonanitech
+ - Handle just-copied-but-not-deployed node with credentials in editor Fixes #3090
+
+Nodes
+
+ - Filter: Fix RBE node handling of default topi property Fixes #3087
+ - HTTP Request: Handle partially encoded url query strings in request node
+ - HTTP Request: Fix support for supplied CA certs (#3089) @hardillb
+
+
 #### 2.0.3: Maintenance Release
 
 Nodes
