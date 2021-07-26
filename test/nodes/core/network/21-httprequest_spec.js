@@ -1518,6 +1518,33 @@ describe('HTTP Request Node', function() {
             });
         });
 
+        it('should use tls-config and verify serverCert', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURLWithoutProtocol('/text'),tls:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"test/resources/ssl/server.crt", verifyservercert:true}];
+            var testNodes = [httpRequestNode, tlsNode];
+            helper.load(testNodes, flow, function() {
+                var n3 = helper.getNode("n3");
+                var n2 = helper.getNode("n2");
+                var n1 = helper.getNode("n1");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload','hello');
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        msg.headers.should.have.property('content-length',''+('hello'.length));
+                        msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.should.have.property('responseUrl').which.startWith('https://');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
         //Removing HTTP Proxy testcases as GOT + Proxy_Agent doesn't work with mock'd proxy
         /* */
         it('should use http_proxy', function(done) {
