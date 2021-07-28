@@ -10,7 +10,9 @@ Nodes
  - Filter: Fix RBE node handling of default topi property Fixes #3087
  - HTTP Request: Handle partially encoded url query strings in request node
  - HTTP Request: Fix support for supplied CA certs (#3089) @hardillb
-
+ - HTTP Request: Ensure TLS Cert is used (#3092) @hardillb
+ - Inject: Fix inject now button unable to send empty props
+ - Inject: Inject now button success notification should use label with updated props
 
 #### 2.0.3: Maintenance Release
 
