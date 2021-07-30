@@ -1,3 +1,39 @@
+### 1.3.6 Maintenance Release
+
+Editor
+
+ - Keep proper track of moved/changed state in undo/redo history Fixes #2999
+ - Fix typo in zh-CN translation (#3003) @JiyeYu
+ - Do not assign z property to tab node when updating flow Fixes #3010
+ - Ensure RED.clipboard.import displays the right library Fixes #3021
+ - Handle node icon paths for scoped modules Fixes #3013
+ - Emit nodes:change for any updated config node when node deleted/added (#3047) @knolleary
+ - Fix padding of compact notification Closes #3045
+ - Fix scriptFile handling in themes (#3054) @bonanitech
+ - Fix grip on horizontally displayed panels separator (#3055) @bonanitech
+ - Avoid prototype pollution in RED.view.calculateTextDimensions
+ - Fix focus outline overlap in button-groups Fixes #3070
+
+Runtime
+
+ - Ensure context get/set key is a string (#2993) @Steve-Mcl
+ - Update to latest 6.x ws module
+ - Fix handling of boolean subflow module properties Fixes #3000
+ - Fix over-greeding matching whilst parsing commit history Fixes #3006
+ - Fix allow Flow.getNode to return subflowInstance nodes (#3004) @KazuhiroItoh
+ - Update to latest node-red-admin
+ - Support loading external module sub path Fixes #3023
+ - Add necessary modules and remove unnecessary module in dependencies (#3058) @kazuhitoyokoi
+ - Update dependencies
+
+Nodes
+
+ - CSV: Ensure CSV node tries to parse number when set to do so (trim whitespace)
+ - Switch: Fix handling empty rules (#2991) @HiroyasuNishiyama
+ - Watch node throws errors if new files deleted (#2997) @hardillb
+ - Add full ast parsing in Function node to spot node.done calls Fixes #2998
+
+
 ### 1.3.5 Maintenance Release
 
 Editor
