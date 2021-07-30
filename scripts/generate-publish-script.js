@@ -4,6 +4,8 @@ const path = require("path");
 const fs = require("fs-extra");
 const should = require("should");
 
+const LATEST = "2";
+
 function generateScript() {
     return new Promise((resolve, reject) => {
         const packages = [
@@ -18,7 +20,13 @@ function generateScript() {
         const rootPackage = require(path.join(__dirname,"..","package.json"));
         const version = rootPackage.version;
 
-        const tagArg = /-/.test(version) ? "--tag next" : ""
+        const versionParts = version.split(".");
+        let tagArg = "";
+        if (versionParts[0] !== LATEST) {
+            tagArg = `--tag v${versionParts[0]}-maintenance`
+        } else if (/-/.test(version))  {
+            tagArg = "--tag next"
+        }
 
         const lines = [];
 
