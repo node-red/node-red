@@ -1,3 +1,19 @@
+#### 2.0.5: Maintenance Release
+
+Editor
+
+ - Remove default ctrl-enter keybinding from monaco editor Fixes #3093
+
+Runtime
+
+ - Update tar dependency
+ - Add support for maintenance streams in generate-publish-script
+
+
+Nodes
+
+ - Fix regression in Join node when manual joining array with msg.parts present Fixes #3096
+
 #### 2.0.4: Maintenance Release
 
 Editor
