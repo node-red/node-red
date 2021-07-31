@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "2.0.0",
+    "version": "2.0.3",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -64,7 +64,7 @@
         "mqtt": "4.2.8",
         "multer": "1.4.2",
         "mustache": "4.2.0",
-        "node-red-admin": "^2.1.0",
+        "node-red-admin": "^2.2.0",
         "nopt": "5.0.0",
         "oauth2orize": "1.11.0",
         "on-headers": "1.0.2",

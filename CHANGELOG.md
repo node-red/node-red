@@ -1,3 +1,39 @@
+#### 2.0.3: Maintenance Release
+
+Nodes
+
+ - HTML: Fix HTML parsing when body is included in the select tag Fixes #3079
+ - HTTP Request: Preserve case of user-provided http headers in request node Fixes #3081
+ - HTTP Request: Set decompress to false for HTTP Request to keep 1.x compatibility Fixes #3083
+ - HTTP Request: Add unit tests for HTTP Request encodeURI and error response
+ - HTTP Request: Do not throw HTTP errors in request node Fixes #3082
+ - HTTP Request: Ensure uri is properly encoded before passing to got module Fixes #3080
+
+#### 2.0.2: Maintenance Release
+
+Runtime
+
+ - Use file:// url with dynamic import
+ - Detect if agent-base has patched https.request and undo it Fixes #3072
+
+Editor
+
+ - Fix tab fade css because Safari Fixes #3073
+ - Fix error closing library dialog with monaco
+ - Handle other error types in Manage Palette view
+
+
+Nodes
+
+ - HTTP Request node - ignore invalid cookies rather than fail request Fixes #3075
+ - Fix msg.reset handling in Delay node Fixes #3074
+
+#### 2.0.1: Maintenance Release
+
+Nodes
+
+ - Function: Ensure default module export is exposed in Function node
+
 #### 2.0.0: Milestone Release
 
 **Migration from 1.x**

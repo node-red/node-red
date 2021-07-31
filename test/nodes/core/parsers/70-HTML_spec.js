@@ -68,7 +68,9 @@ describe('HTML node', function() {
                         done(err)
                     }
                 });
-                n1.receive({payload:data,topic:"bar",select:"h1"});
+                // include 'body' in the select to verify we're in document mode
+                // for the parser. See https://github.com/node-red/node-red/issues/3079
+                n1.receive({payload:data,topic:"bar",select:"body h1"});
             });
         });
     });

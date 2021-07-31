@@ -1,0 +1,14 @@
+blank_issues_enabled: true
+contact_links:
+  - name: ❓ Questions
+    url: https://discourse.nodered.org
+    about: Ask your question on the Node-RED forum
+  - name: ⭐️ Feature Request
+    url: https://discourse.nodered.org/c/development/feature-requests
+    about: Discuss your request with the community
+  - name: 🗂 Documentation
+    url: https://nodered.org/docs
+    about: Go straight to the documentation
+  - name: 💬 Slack
+    url: https://nodered.org/slack
+    about: Chat about the project on our slack team
