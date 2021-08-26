@@ -1,3 +1,35 @@
+#### 2.0.5: Maintenance Release
+
+Editor
+
+ - Remove default ctrl-enter keybinding from monaco editor Fixes #3093
+
+Runtime
+
+ - Update tar dependency
+ - Add support for maintenance streams in generate-publish-script
+
+
+Nodes
+
+ - Fix regression in Join node when manual joining array with msg.parts present Fixes #3096
+
+#### 2.0.4: Maintenance Release
+
+Editor
+
+ - Fix tab fade CSS for when using themes (#3085) @bonanitech
+ - Handle just-copied-but-not-deployed node with credentials in editor Fixes #3090
+
+Nodes
+
+ - Filter: Fix RBE node handling of default topi property Fixes #3087
+ - HTTP Request: Handle partially encoded url query strings in request node
+ - HTTP Request: Fix support for supplied CA certs (#3089) @hardillb
+ - HTTP Request: Ensure TLS Cert is used (#3092) @hardillb
+ - Inject: Fix inject now button unable to send empty props
+ - Inject: Inject now button success notification should use label with updated props
+
 #### 2.0.3: Maintenance Release
 
 Nodes

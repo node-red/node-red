@@ -516,6 +516,28 @@ describe('JOIN node', function() {
             n1.receive({payload:{a:1}});
         });
     });
+    it('should join things into an array ignoring msg.parts.index in manual mode', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",",mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.be.an.Array();
+                    msg.payload[0].should.equal(1);
+                    msg.payload[1].should.equal(true);
+                    //msg.payload[2].a.should.equal(1);
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({payload:1, parts: {index: 3}});
+            n1.receive({payload:true, parts: {index: 0}});
+            n1.receive({payload:{a:1}, parts: {index: 9}});
+        });
+    });
 
     it('should join things into an array after a count with a buffer join set', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joinerType:"bin", joiner:"" ,mode:"custom"},
@@ -1646,7 +1668,7 @@ describe('JOIN node', function() {
         });
     });
 
-    it('should handle join an array when using msg.parts and duplicate indexed parts arrive', function (done) {
+    it('should handle join an array when mode is auto and duplicate indexed parts arrive', function (done) {
         var flow = [{ id: "n1", type: "join", wires: [["n2"]], joiner: "[44]", joinerType: "bin", build: "array", mode: "auto" },
                     { id: "n2", type: "helper" }];
         helper.load(joinNode, flow, function () {
