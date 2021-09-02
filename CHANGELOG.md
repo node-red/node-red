@@ -1,3 +1,9 @@
+### 1.3.7 Maintenance Release
+
+Runtime
+
+ - Update to latest tar module
+
 ### 1.3.6 Maintenance Release
 
 Editor
