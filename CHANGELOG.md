@@ -1,3 +1,17 @@
+#### 2.0.6: Maintenance Release
+
+Editor
+
+ - Fix typo in ko editor.json Fixes #3119
+ - Change fade color when hovering an inactive tab (#3106) @bonanitech
+ - Ensure treeList row has suitable min-height when no content Fixes #3109
+
+Runtime
+
+ - Update tar to latest (#3128) @aksswami
+ - Give passport verify callback the same arity as the original callback (#3117) @dschmidt
+ - Handle HTTPS Key and certificate as string or buffer (#3115) @bartbutenaers
+
 #### 2.0.5: Maintenance Release
 
 Editor
