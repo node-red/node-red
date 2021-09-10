@@ -41,7 +41,9 @@ describe("api/editor/theme", function () {
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Node-RED");
         context.page.should.have.a.property("favicon", "favicon.ico");
-        context.page.should.have.a.property("tabicon", "red/images/node-red-icon-black.svg");
+        context.page.should.have.a.property("tabicon");
+        context.page.tabicon.should.have.a.property("icon", "red/images/node-red-icon-black.svg");
+        context.page.tabicon.should.have.a.property("colour", "#8f0000");
         context.should.have.a.property("header");
         context.header.should.have.a.property("title", "Node-RED");
         context.header.should.have.a.property("image", "red/images/node-red.svg");
@@ -58,7 +60,10 @@ describe("api/editor/theme", function () {
                 page: {
                     title: "Test Page Title",
                     favicon: "/absolute/path/to/theme/favicon",
-                    tabicon: "/absolute/path/to/theme/tabicon",
+                    tabicon: {
+                        icon: "/absolute/path/to/theme/tabicon",
+                        colour: "#8f008f"
+                    },
                     css: "/absolute/path/to/custom/css/file.css",
                     scripts: "/absolute/path/to/script.js"
                 },
@@ -108,7 +113,9 @@ describe("api/editor/theme", function () {
         context.should.have.a.property("page");
         context.page.should.have.a.property("title", "Test Page Title");
         context.page.should.have.a.property("favicon", "theme/favicon/favicon");
-        context.page.should.have.a.property("tabicon", "theme/tabicon/tabicon");
+        context.page.should.have.a.property("tabicon")
+        context.page.tabicon.should.have.a.property("icon", "theme/tabicon/tabicon");
+        context.page.tabicon.should.have.a.property("colour", "#8f008f")
         context.should.have.a.property("header");
         context.header.should.have.a.property("title", "Test Header Title");
         context.header.should.have.a.property("url", "http://nodered.org");
@@ -140,6 +147,27 @@ describe("api/editor/theme", function () {
         settings.palette.should.have.a.property("theme", [{ category: ".*", type: ".*", color: "#f0f" }]);
         settings.should.have.a.property("projects");
         settings.projects.should.have.a.property("enabled", false);
+    });
+
+    it("picks up backwards compatible tabicon setting", async function () {
+        theme.init({
+            editorTheme: {
+                page: {
+                    tabicon: "/absolute/path/to/theme/tabicon",
+                }
+            }
+        });
+
+        theme.app();
+
+        var context = await theme.context();
+        context.should.have.a.property("page");
+        context.page.should.have.a.property("tabicon");
+        context.page.tabicon.should.have.a.property("icon", "theme/tabicon/tabicon");
+        // The colour property should remain as default in this case as the
+        // legacy format for defining tabicon doesn't allow specifying a colour
+        context.page.tabicon.should.have.a.property("colour", "#8f0000");
+
     });
 
     it("test explicit userMenu set to true in theme setting", function () {
