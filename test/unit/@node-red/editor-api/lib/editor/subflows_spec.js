@@ -22,19 +22,21 @@ var sinon = require('sinon');
 
 var NR_TEST_UTILS = require("nr-test-utils");
 
-var mod = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/module");
+var subflows = NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/subflows");
 
-describe('api/editor/module', function() {
+describe('api/editor/subflows', function() {
     var app;
 
     before(function() {
         app = express();
         app.use(bodyParser.json());
         
-        app.post('/module/create/subflow', mod.createSubflow);
-        mod.init({
-            module: {
-                createSubflow: (meta, flow) => {
+        app.post('/subflows/module', subflows.createSubflow);
+        subflows.init({
+            subflows: {
+                createSubflow: (opts) => {
+                    const meta = opts.meta;
+                    const flow = opts.flow;
                     return Promise.resolve([meta.module, flow[0].id]);
                 }
             }
@@ -93,7 +95,7 @@ describe('api/editor/module', function() {
         ];
 
         request(app)
-            .post("/module/create/subflow")
+            .post("/subflows/module")
             .send({
                 meta: meta,
                 flow: flow

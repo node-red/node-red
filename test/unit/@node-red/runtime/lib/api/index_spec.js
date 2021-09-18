@@ -23,12 +23,12 @@ var index = NR_TEST_UTILS.require("@node-red/runtime/lib/api/index");
 
 describe("runtime-api/index", function() {
     before(function() {
-        ["comms","flows","nodes","settings","library","projects"].forEach(n => {
+        ["comms","flows","nodes","settings","library","projects","subflows"].forEach(n => {
             sinon.stub(NR_TEST_UTILS.require(`@node-red/runtime/lib/api/${n}`),"init").callsFake(()=>{});
         })
     });
     after(function() {
-        ["comms","flows","nodes","settings","library","projects"].forEach(n => {
+        ["comms","flows","nodes","settings","library","projects","subflows"].forEach(n => {
             NR_TEST_UTILS.require(`@node-red/runtime/lib/api/${n}`).init.restore()
         })
     })
