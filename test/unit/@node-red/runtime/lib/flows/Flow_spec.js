@@ -1228,4 +1228,54 @@ describe('Flow', function() {
         })
     })
 
+    describe("#env", function () {
+        it("can instantiate a node with environment variable property values of group and tab", function (done) {
+            try {
+                after(function() {
+                    delete process.env.V0;
+                    delete process.env.V1;
+                })
+                process.env.V0 = "gv0";
+                process.env.V1 = "gv1";
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab",env:[
+                        {"name": "V0", value: "v0", type: "str"}
+                    ]},
+                    {id:"g1",type:"group",z:"t1",env:[
+                        {"name": "V0", value: "v1", type: "str"},
+                        {"name": "V1", value: "v2", type: "str"}
+                    ]},
+                    {id:"g2",type:"group",z:"t1",g:"g1",env:[
+                        {"name": "V1", value: "v3", type: "str"}
+                    ]},
+                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"$(V0)",wires:[]},
+                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                    {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+                    {id:"4",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"$(V1)",wires:[]},
+                    {id:"5",x:10,y:10,z:"t1",type:"test",foo:"$(V1)",wires:[]},
+                ]);
+                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+                flow.start();
+
+                var activeNodes = flow.getActiveNodes();
+
+                activeNodes["1"].foo.should.equal("v0");
+                activeNodes["2"].foo.should.equal("v1");
+                activeNodes["3"].foo.should.equal("v2");
+                activeNodes["4"].foo.should.equal("v3");
+                activeNodes["5"].foo.should.equal("gv1");
+
+                flow.stop().then(function() {
+                    done();
+                });
+            }
+            catch (e) {
+                console.log(e.stack);
+                done(e);
+            }
+                
+        });
+
+    });
+
 });

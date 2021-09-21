@@ -42,6 +42,8 @@ describe('HTTP Request Node', function() {
     var testProxyPort = 10444;
     var testProxyServerAuth;
     var testProxyAuthPort = 10554;
+    var testSslClientServer;
+    var testSslClientPort = 10664;
 
     //save environment variables
     var preEnvHttpProxyLowerCase;
@@ -57,6 +59,7 @@ describe('HTTP Request Node', function() {
         testServer = stoppable(http.createServer(testApp));
         testServer.listen(testPort,function(err) {
             testSslPort += 1;
+            console.log("ssl port", testSslPort);
             var sslOptions = {
                 key:  fs.readFileSync('test/resources/ssl/server.key'),
                 cert: fs.readFileSync('test/resources/ssl/server.crt')
@@ -75,7 +78,25 @@ describe('HTTP Request Node', function() {
                 */
             };
             testSslServer = stoppable(https.createServer(sslOptions,testApp));
-            testSslServer.listen(testSslPort);
+            testSslServer.listen(testSslPort, function(err){
+                if (err) {
+                    console.log(err);
+                } else {
+                    console.log("started testSslServer");
+                }
+            });
+
+            testSslClientPort += 1;
+            var sslClientOptions = {
+                key:  fs.readFileSync('test/resources/ssl/server.key'),
+                cert: fs.readFileSync('test/resources/ssl/server.crt'),
+                ca: fs.readFileSync('test/resources/ssl/server.crt'),
+                requestCert: true
+            };
+            testSslClientServer = stoppable(https.createServer(sslClientOptions, testApp));
+            testSslClientServer.listen(testSslClientPort, function(err){
+                console.log("ssl-client", err)
+            });
 
             testProxyPort += 1;
             testProxyServer = stoppable(httpProxy(http.createServer()))
@@ -119,6 +140,10 @@ describe('HTTP Request Node', function() {
 
     function getSslTestURL(url) {
         return "https://localhost:"+testSslPort+url;
+    }
+
+    function getSslClientTestURL(url) {
+        return "https://localhost:"+testSslClientPort+url;
     }
 
     function getDifferentTestURL(url) {
@@ -280,6 +305,14 @@ describe('HTTP Request Node', function() {
                 headers:result
             });
         })
+
+        testApp.get('/getClientCert', function(req,res) {
+            if (req.client.authorized) {
+                res.send('hello');
+            } else {
+                res.status(401).send();
+            }
+        })
         startServer(function(err) {
             if (err) {
                 done(err);
@@ -293,7 +326,9 @@ describe('HTTP Request Node', function() {
             testProxyServer.stop(() => {
                 testProxyServerAuth.stop(() => {
                     testSslServer.stop(() => {
-                        helper.stopServer(done);
+                        testSslClientServer.stop(() => {
+                            helper.stopServer(done);
+                        })
                     });
                 });
             });
@@ -1145,7 +1180,7 @@ describe('HTTP Request Node', function() {
                     try {
                         msg.should.have.property('payload',{
                             query:{ a: 'b', c:[ 'T24,0°|H80%|W S8,3m/s' ] },
-                            url: '/getQueryParams?a=b&c%5B0%5D.Text=T24,0%C2%B0%7CH80%25%7CW%20S8,3m/s'
+                            url: '/getQueryParams?a=b&c[0].Text=T24,0%C2%B0|H80%25|W%20S8,3m/s'
                         });
                         msg.should.have.property('statusCode',200);
                         msg.should.have.property('headers');
@@ -1154,7 +1189,7 @@ describe('HTTP Request Node', function() {
                         done(err);
                     }
                 });
-                n1.receive({url: getTestURL('/getQueryParams')+"?a=b&c[0].Text=T24,0°|H80%|W S8,3m/s"});
+                n1.receive({url: getTestURL('/getQueryParams')+"?a=b&c[0].Text=T24,0°|H80%|W%20S8,3m/s"});
             });
         })
     });
@@ -1516,6 +1551,60 @@ describe('HTTP Request Node', function() {
                 });
                 n1.receive({payload:"foo"});
             });
+        });
+
+        it('should use tls-config and verify serverCert', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),tls:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"test/resources/ssl/server.crt", verifyservercert:true}];
+            var testNodes = [httpRequestNode, tlsNode];
+            helper.load(testNodes, flow, function() {
+                var n3 = helper.getNode("n3");
+                var n2 = helper.getNode("n2");
+                var n1 = helper.getNode("n1");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload','hello');
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        msg.headers.should.have.property('content-length',''+('hello'.length));
+                        msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.should.have.property('responseUrl').which.startWith('https://');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should use tls-config and send client cert', function(done) {
+            var flow = [
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslClientTestURL('/getClientCert'),tls:"n3"},
+                {id:"n2", type:"helper"},
+                {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"test/resources/ssl/server.crt", verifyservercert:false}];
+            var testNodes = [httpRequestNode,tlsNode];
+            helper.load(testNodes, flow, function() {
+                var n3 = helper.getNode("n3");
+                var n2 = helper.getNode("n2");
+                var n1 = helper.getNode("n1");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload','hello');
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        msg.headers.should.have.property('content-length',''+('hello'.length));
+                        msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.should.have.property('responseUrl').which.startWith('https://');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            })
         });
 
         //Removing HTTP Proxy testcases as GOT + Proxy_Agent doesn't work with mock'd proxy

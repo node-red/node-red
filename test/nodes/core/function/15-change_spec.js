@@ -542,6 +542,77 @@ describe('change Node', function() {
                     changeNode1.receive({payload:"123",topic:"ABC"});
                 });
             });
+
+            it('sets the value using env property from tab', function(done) {
+                var flow = [
+                    {"id":"tab1","type":"tab","env":[
+                        {"name":"NR_TEST_A", "value":"bar", "type": "str"}
+                    ]},
+                    {"id":"changeNode1","type":"change","z":"tab1",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}
+                ];
+                helper.load(changeNode, flow, function() {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.equal("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"123",topic:"ABC"});
+                });
+            });
+
+            it('sets the value using env property from group', function(done) {
+                var flow = [
+                    {"id":"group1","type":"group","env":[
+                        {"name":"NR_TEST_A", "value":"bar", "type": "str"}
+                    ]},
+                    {"id":"changeNode1","type":"change","g":"group1",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}
+                ];
+                helper.load(changeNode, flow, function() {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.equal("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"123",topic:"ABC"});
+                });
+            });
+
+            it('sets the value using env property from nested group', function(done) {
+                var flow = [
+                    {"id":"group1","type":"group","env":[
+                        {"name":"NR_TEST_A", "value":"bar", "type": "str"}
+                    ]},
+                    {"id":"group2","type":"group","g":"group1","env":[]},
+                    {"id":"changeNode1","type":"change","g":"group2",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}
+                ];
+                helper.load(changeNode, flow, function() {
+                    var changeNode1 = helper.getNode("changeNode1");
+                    var helperNode1 = helper.getNode("helperNode1");
+                    helperNode1.on("input", function(msg) {
+                        try {
+                            msg.payload.should.equal("bar");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
+                    changeNode1.receive({payload:"123",topic:"ABC"});
+                });
+            });
+
         });
 
 
