@@ -199,7 +199,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectUserSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/tab-versionControl.js",
-                    "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js"
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tour/*.js"
                 ],
                 dest: "packages/node_modules/@node-red/editor-client/public/red/red.js"
             },
@@ -326,6 +327,12 @@ module.exports = function(grunt) {
                 ],
                 tasks: ['jsonlint:keymaps','copy:build']
             },
+            tours: {
+                files: [
+                    'packages/node_modules/@node-red/editor-client/src/tours/**/*.js'
+                ],
+                tasks: ['copy:build']
+            },
             misc: {
                 files: [
                     'CHANGELOG.md'
@@ -423,6 +430,12 @@ module.exports = function(grunt) {
                         src: '**',
                         expand: true,
                         dest: 'packages/node_modules/@node-red/editor-client/public/vendor/ace/'
+                    },
+                    {
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/tours',
+                        src: '**',
+                        expand: true,
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/tours/'
                     }
                 ]
             }
