@@ -98,7 +98,7 @@ describe('change Node', function() {
     });
 
     describe('#set' , function() {
-        
+
         it('sets the value of the message property', function(done) {
             var flow = [{"id":"changeNode1","type":"change","action":"replace","property":"payload","from":"","to":"changed","reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -615,7 +615,6 @@ describe('change Node', function() {
 
         });
 
-
         it('changes the value using jsonata', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{"t":"set","p":"payload","to":"$length(payload)","tot":"jsonata"}],"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
@@ -847,7 +846,36 @@ describe('change Node', function() {
             });
         })
 
+        it('deep copies the property if selected', function(done) {
 
+            var flow = [{"id":"changeNode1","type":"change","rules":[{"t":"set","p":"payload","pt":"msg","to":"source","tot":"msg","dc":true}],"name":"changeNode","wires":[["helperNode1"]]},
+            {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        // Check payload has been set to a clone of original object
+                        // - the JSON should match
+                        JSON.stringify(msg.payload).should.equal(JSON.stringify(originalObject))
+                        // - but they must be different objects
+                        msg.payload.should.not.equal(originalObject);
+
+                        // Modify nested property of original object
+                        originalObject.a.c = 3;
+                        // Check that modification hasn't happened on cloned prop
+                        msg.payload.a.should.not.have.property('c');
+
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                var originalObject = { a: { b: 2 } }
+                changeNode1.receive({source:originalObject});
+            });
+
+        })
     });
     describe('#change', function() {
         it('changes the value of the message property', function(done) {
