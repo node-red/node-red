@@ -15,13 +15,61 @@
  **/
 
 const should = require("should");
+const sinon = require("sinon");
+
 const NR_TEST_UTILS = require("nr-test-utils");
 const registryUtil = NR_TEST_UTILS.require("@node-red/registry/lib/util");
 
+// Get the internal runtime api
+const runtime = NR_TEST_UTILS.require("@node-red/runtime")._;
+
+const i18n = NR_TEST_UTILS.require("@node-red/util").i18n;
 
 describe("red/nodes/registry/util",function() {
     describe("createNodeApi", function() {
-        it.skip("needs tests");
+        let i18n_;
+        let registerType;
+        let registerSubflow;
+
+        before(function() {
+            i18n_ = sinon.stub(i18n,"_").callsFake(function() {
+                return Array.prototype.slice.call(arguments,0);
+            })
+            registerType = sinon.stub(runtime.nodes,"registerType");
+            registerSubflow = sinon.stub(runtime.nodes,"registerSubflow");
+        });
+        after(function() {
+            i18n_.restore();
+            registerType.restore();
+            registerSubflow.restore();
+        })
+
+        it("builds node-specific view of runtime api", function() {
+            registryUtil.init(runtime);
+            var result = registryUtil.createNodeApi({id: "my-node", namespace: "my-namespace"})
+            // Need a better strategy here.
+            // For now, validate the node-custom functions
+
+            var message = result._("message");
+            // This should prepend the node's namespace to the message
+            message.should.eql([ 'my-namespace:message' ]);
+
+            var nodeConstructor = () => {};
+            var nodeOpts = {};
+            result.nodes.registerType("type",nodeConstructor, nodeOpts);
+            registerType.called.should.be.true();
+            registerType.lastCall.args[0].should.eql("my-node")
+            registerType.lastCall.args[1].should.eql("type")
+            registerType.lastCall.args[2].should.eql(nodeConstructor)
+            registerType.lastCall.args[3].should.eql(nodeOpts)
+
+            var subflowDef = {};
+            result.nodes.registerSubflow(subflowDef);
+            registerSubflow.called.should.be.true();
+            registerSubflow.lastCall.args[0].should.eql("my-node")
+            registerSubflow.lastCall.args[1].should.eql(subflowDef)
+
+        });
     });
     describe("checkModuleAllowed", function() {
         function checkList(module, version, allowList, denyList) {
