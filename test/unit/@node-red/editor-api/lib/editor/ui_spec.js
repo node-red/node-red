@@ -33,10 +33,21 @@ describe("api/editor/ui", function() {
             nodes: {
                 getIcon: function(opts) {
                     return new Promise(function(resolve,reject) {
-                        fs.readFile(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.svg"), function(err,data) {
-                            resolve(data);
-                        })
+                        if (opts.icon === "icon.png") {
+                            fs.readFile(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.svg"), function(err,data) {
+                                resolve(data);
+                            })
+                        } else {
+                            resolve(null);
+                        }
                     });
+                },
+                getModuleResource: async function(opts) {
+                    if (opts.module !== "test-module" || opts.path !== "a/path/text.txt") {
+                        return null;
+                    } else {
+                        return "Some text data";
+                    }
                 }
             }
         });
@@ -109,6 +120,53 @@ describe("api/editor/ui", function() {
                     done();
                 });
 
+        });
+        it('returns the default icon for invalid paths', function(done) {
+            var defaultIcon = fs.readFileSync(NR_TEST_UTILS.resolve("@node-red/editor-client/src/images/icons/arrow-in.svg"));
+            request(app)
+                .get("/icons/module/unreal.png")
+                .expect("Content-Type", /image\/svg/)
+                .expect(200)
+                .parse(binaryParser)
+                .end(function(err,res) {
+                    if (err){
+                        return done(err);
+                    }
+                    Buffer.isBuffer(res.body).should.be.true();
+                    compareBuffers(res.body,defaultIcon);
+                    done();
+                });
+
+        });
+    });
+    describe("module resource handler", function() {
+        before(function() {
+            app = express();
+            app.get(/^\/resources\/((?:@[^\/]+\/)?[^\/]+)\/(.+)$/,ui.moduleResource);
+        });
+
+        it('returns the requested resource', function(done) {
+            request(app)
+                .get("/resources/test-module/a/path/text.txt")
+                .expect(200)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    res.text.should.eql('Some text data');
+                    done();
+                });
+        });
+        it('404s invalid paths', function(done) {
+            request(app)
+                .get("/resources/test-module/../a/path/text.txt")
+                .expect(404)
+                .end(function(err,res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    done();
+                });
         });
     });
 

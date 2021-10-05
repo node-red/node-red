@@ -15,6 +15,7 @@
  **/
 
 var should = require("should");
+var request = require("supertest");
 var express = require('express');
 var sinon = require('sinon');
 var fs = require("fs");
@@ -50,8 +51,34 @@ describe("api/editor/theme", function () {
         context.should.have.a.property("asset");
         context.asset.should.have.a.property("red", "red/red.min.js");
         context.asset.should.have.a.property("main", "red/main.min.js");
+        context.asset.should.have.a.property("vendorMonaco", "");
 
         should.not.exist(theme.settings());
+    });
+
+    it("uses non-minified js files when in dev mode", async function () {
+        const previousEnv = process.env.NODE_ENV;
+        try {
+            process.env.NODE_ENV = 'development'
+            theme.init({});
+            var context = await theme.context();
+            context.asset.should.have.a.property("red", "red/red.js");
+            context.asset.should.have.a.property("main", "red/main.js");
+        } finally {
+            process.env.NODE_ENV = previousEnv;
+        }
+    });
+
+    it("Adds monaco bootstrap when enabled", async function () {
+        theme.init({
+            editorTheme: {
+                codeEditor: {
+                    lib: 'monaco'
+                }
+            }
+        });
+        var context = await theme.context();
+        context.asset.should.have.a.property("vendorMonaco", "vendor/monaco/monaco-bootstrap.js");
     });
 
     it("picks up custom theme", async function () {
@@ -64,7 +91,9 @@ describe("api/editor/theme", function () {
                         icon: "/absolute/path/to/theme/tabicon",
                         colour: "#8f008f"
                     },
-                    css: "/absolute/path/to/custom/css/file.css",
+                    css: [
+                        "/absolute/path/to/custom/css/file.css"
+                    ],
                     scripts: "/absolute/path/to/script.js"
                 },
                 header: {
@@ -185,4 +214,62 @@ describe("api/editor/theme", function () {
 
     });
 
+
+    it("includes list of plugin themes", function(done) {
+        theme.init({},{
+            plugins: { getPluginsByType: _ => [{id:"theme-plugin"}] }
+        });
+        const app = theme.app();
+        request(app)
+            .get("/")
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                try {
+                    const response = JSON.parse(res.text);
+                    response.should.have.property("themes");
+                    response.themes.should.eql(["theme-plugin"])
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+    });
+
+    it("includes theme plugin settings", async function () {
+        theme.init({
+            editorTheme: {
+                theme: 'test-theme'
+            }
+        },{
+            plugins: { getPlugin: t => {
+                    return ({'test-theme':{
+                        path: '/abosolute/path/to/plugin',
+                        css: [
+                            "path/to/custom/css/file1.css",
+                            "/invalid/path/to/file2.css",
+                            "../another/invalid/path/file3.css"
+                        ],
+                        scripts: [
+                            "path/to/custom/js/file1.js",
+                            "/invalid/path/to/file2.js",
+                            "../another/invalid/path/file3.js"
+                        ]
+                    }})[t.id];
+            } }
+        });
+
+        theme.app();
+
+        var context = await theme.context();
+        context.should.have.a.property("page");
+        context.page.should.have.a.property("css");
+        context.page.css.should.have.lengthOf(1);
+        context.page.css[0].should.eql('theme/css/file1.css');
+        context.page.should.have.a.property("scripts");
+        context.page.scripts.should.have.lengthOf(1);
+        context.page.scripts[0].should.eql('theme/scripts/file1.js');
+
+    });
 });
