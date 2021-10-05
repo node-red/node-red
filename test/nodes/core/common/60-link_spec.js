@@ -119,4 +119,69 @@ describe('link Node', function() {
         });
     });
 
+    describe("link-call node", function() {
+        it('should call link-in node and get response', function(done) {
+            var flow = [{id:"link-in-1", type:"link in", wires: [[ "func"]]},
+                        {id:"func", type:"helper", wires: [["link-out-1"]]},
+                        {id:"link-out-1", type:"link out", mode: "return"},
+                        {id:"link-call", type:"link call", links:["link-in-1"], wires:[["n4"]]},
+                        {id:"n4", type:"helper"} ];
+            helper.load(linkNode, flow, function() {
+                var func = helper.getNode("func");
+                func.on("input", function(msg, send, done) {
+                    msg.payload = "123";
+                    send(msg);
+                    done();
+                })
+                var n1 = helper.getNode("link-call");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', '123');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"hello"});
+            });
+        })
+    });
+
+    it('should allow nested link-call flows', function(done) {
+        var flow = [/** Multiply by 2 link flow **/
+                    {id:"li1", type:"link in", wires: [[ "m2"]]},
+                    {id:"m2", type:"helper", wires: [["lo1"]]},
+                    {id:"lo1", type:"link out", mode: "return"},
+                    /** Multiply by 3 link flow **/
+                    {id:"li2", type:"link in", wires: [[ "m3"]]},
+                    {id:"m3", type:"helper", wires: [["lo2"]]},
+                    {id:"lo2", type:"link out", mode: "return"},
+                    /** Multiply by 6 link flow **/
+                    {id:"li3", type:"link in", wires: [[ "link-call-1"]]},
+                    {id:"link-call-1", type:"link call", links:["m2"], wires:[["link-call-2"]]},
+                    {id:"link-call-2", type:"link call", links:["m3"], wires:[["lo3"]]},
+                    {id:"lo3", type:"link out", mode: "return"},
+                    /** Test Flow Entry **/
+                    {id:"link-call", type:"link call", links:["li3"], wires:[["n4"]]},
+                    {id:"n4", type:"helper"} ];
+        helper.load(linkNode, flow, function() {
+            var m2 = helper.getNode("m2");
+            m2.on("input", function(msg, send, done) { msg.payload *= 2 ; send(msg); done(); })
+            var m3 = helper.getNode("m3");
+            m3.on("input", function(msg, send, done) { msg.payload *= 3 ; send(msg); done(); })
+
+            var n1 = helper.getNode("link-call");
+            var n4 = helper.getNode("n4");
+            n4.on("input", function(msg) {
+                try {
+                    msg.should.have.property('payload', 24);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            n1.receive({payload:4});
+        });
+    })
 });
