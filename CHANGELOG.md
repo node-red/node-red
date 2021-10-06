@@ -31,6 +31,7 @@ Runtime
  - Improve unit test coverage (#3168) @knolleary
  - Allow coreNodesDir to be set to false (#3149) @hardillb
  - Update package dependencies
+ - uncaughtException debug improvements (#3146) @renatojuniorrs
 
 Nodes
 
@@ -42,6 +43,7 @@ Nodes
  - Join: Support for msg.resetTimeout (#3121) @magma1447
  - Link Call: Add Link Call node (#3152) @knolleary
  - Switch: Copy previous rule type when adding rule to switch node (#3170) @knolleary
+ - Delay node: add option to send intermediate messages on separate output (#3166) @knolleary
 
 #### 2.0.6: Maintenance Release
 
