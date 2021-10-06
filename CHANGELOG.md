@@ -5,6 +5,7 @@ Editor
  - Add Tour Guide component (#3136) @knolleary
  - Allow tabs to be hidden (#3120) @knolleary
  - Add support of environment variable for tab & group (#3112) @HiroyasuNishiyama
+ - Add autoComplete widget and add to TypedInput for msg. props (#3171) @knolleary
  - Render node documentation to node-red style guide when written in markdown. (#3169) @Steve-Mcl
  - Allow colouring of tab icon svg (#3140) @harmonic7
  - Restore tab selection after merging conflicts (#3151) @GerwinvBeek
