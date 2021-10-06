@@ -1,3 +1,47 @@
+#### 2.1.0-beta.1: Beta Release
+
+Editor
+
+ - Add Tour Guide component (#3136) @knolleary
+ - Allow tabs to be hidden (#3120) @knolleary
+ - Add support of environment variable for tab & group (#3112) @HiroyasuNishiyama
+ - Render node documentation to node-red style guide when written in markdown. (#3169) @Steve-Mcl
+ - Allow colouring of tab icon svg (#3140) @harmonic7
+ - Restore tab selection after merging conflicts (#3151) @GerwinvBeek
+ - Fix serving of theme files on Windows (#3154) @knolleary
+ - Ensure config-node select inherits width properly from input (#3155) @knolleary
+ - Do better remembering TypedInput values whilst switching types (#3159) @knolleary
+ - Update monaco to 0.28.1 (#3153) @knolleary
+ - Improve themeing of tourGuide (#3161) @knolleary
+ - Allow a node to specify a filter for the config nodes it can pick from (#3160) @knolleary
+ - Allow RED.notify.update to modify any notification setting (#3163) @knolleary
+ - Fix typo in ko editor.json Fixes #3119
+ - Improve RED.actions api to ensure actions cannot be overridden
+ - Ensure treeList row has suitable min-height when no content Fixes #3109
+ - Refactor edit dialogs to use separate edit panes
+ - Ensure type select button is not focussable when TypedInput only has one type
+ - Place close tab link in front of fade
+
+Runtime
+
+ - Improve error reporting with oauth login strategies (#3148) @knolleary
+ - Add allowUpdate feature to externalModules.palette (#3143) @knolleary
+ - Improve node install error reporting (#3158) @knolleary
+ - Improve unit test coverage (#3168) @knolleary
+ - Allow coreNodesDir to be set to false (#3149) @hardillb
+ - Update package dependencies
+
+Nodes
+
+ - Change: Add option to deep-clone properties in Change node (#3156) @knolleary
+ - Delay: Add push to front of rate limit queue. (#3069) @dceejay
+ - File: Add paletteLabel to file nodes to make read/write more obvious (#3157) @knolleary
+ - HTTP Request: Extend HTTP request node to log detailed timing information (#3116) @k-toumura
+ - HTTP Response: Fix sizing of HTTP Response header fields (#3164) @knolleary
+ - Join: Support for msg.resetTimeout (#3121) @magma1447
+ - Link Call: Add Link Call node (#3152) @knolleary
+ - Switch: Copy previous rule type when adding rule to switch node (#3170) @knolleary
+
 #### 2.0.6: Maintenance Release
 
 Editor
