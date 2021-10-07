@@ -4,6 +4,7 @@ Editor
 
  - Add Tour Guide component (#3136) @knolleary
  - Allow tabs to be hidden (#3120) @knolleary
+ - Add align actions to editor (#3110) @knolleary
  - Add support of environment variable for tab & group (#3112) @HiroyasuNishiyama
  - Add autoComplete widget and add to TypedInput for msg. props (#3171) @knolleary
  - Render node documentation to node-red style guide when written in markdown. (#3169) @Steve-Mcl
@@ -40,11 +41,12 @@ Nodes
  - File: Add paletteLabel to file nodes to make read/write more obvious (#3157) @knolleary
  - HTTP Request: Extend HTTP request node to log detailed timing information (#3116) @k-toumura
  - HTTP Response: Fix sizing of HTTP Response header fields (#3164) @knolleary
- - Join: Support for msg.resetTimeout (#3121) @magma1447
+ - Join: Support for msg.restartTimeout (#3121) @magma1447
  - Link Call: Add Link Call node (#3152) @knolleary
  - Switch: Copy previous rule type when adding rule to switch node (#3170) @knolleary
  - Delay node: add option to send intermediate messages on separate output (#3166) @knolleary
-
+ - Typo in http request set method translation (#3173) @mailsvb
+ 
 #### 2.0.6: Maintenance Release
 
 Editor
