@@ -1517,6 +1517,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
+                        msg.should.have.property('peerCertificate');
                         done();
                     } catch(err) {
                         done(err);
@@ -1544,6 +1545,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
+                        msg.should.have.property('peerCertificate');
                         done();
                     } catch(err) {
                         done(err);
@@ -1571,6 +1573,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
+                        msg.should.have.property('peerCertificate');
                         done();
                     } catch(err) {
                         done(err);
@@ -1598,6 +1601,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
+                        msg.should.have.property('peerCertificate');
                         done();
                     } catch(err) {
                         done(err);
