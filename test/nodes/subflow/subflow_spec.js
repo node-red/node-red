@@ -447,4 +447,124 @@ describe('subflow', function() {
         });
     });
 
+    it('should access env var of tab', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:"", env: [
+                {name: "K", type: "str", value: "V"}
+            ]},
+            {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1", wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"", env: [],
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.V = env.get('K'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("V", "V");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
+    it('should access env var of group', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:""},
+            {id:"g1", z:"t0", type:"group", env:[
+                {name: "K", type: "str", value: "V"}
+            ]},
+            {id:"n1", x:10, y:10, z:"t0", g:"g1", type:"subflow:s1", wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"", env: [],
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.V = env.get('K'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("V", "V");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
+    it('should access env var of nested group', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:""},
+            {id:"g1", z:"t0", type:"group", env:[
+                {name: "K", type: "str", value: "V"}
+            ]},
+            {id:"g2", z:"t0", g:"g1", type:"group", env:[]},
+            {id:"n1", x:10, y:10, z:"t0", g:"g2", type:"subflow:s1", wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"", env: [],
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.V = env.get('K'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("V", "V");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
 });

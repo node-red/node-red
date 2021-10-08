@@ -798,6 +798,33 @@ describe('JOIN node', function() {
         });
     });
 
+    it('should allow the timeout to be restarted', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:0.5, count:"", joiner:",",mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload");
+                    msg.payload.should.equal("a,b,c");
+                    const timeTaken = (Date.now() - start)/1000;
+                    // Node times out after 0.5s.
+                    // It receives a restartTimeout after 0.4s.
+                    // So time taken to timeout should be approx 0.9
+                    timeTaken.should.be.approximately(0.9,0.15);
+                    done();
+                }
+                catch(e) { done(e) }
+            });
+            var start = Date.now();
+            n1.receive({payload:"a"});
+            setTimeout(function() {
+                n1.receive({payload:"b", restartTimeout: true});
+                n1.receive({payload:"c"});
+            },400);
+        });
+    });
     it('should join strings with a specifed character and complete when told to', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], build:"string", timeout:5, count:0, joiner:"\n",mode:"custom"},
                     {id:"n2", type:"helper"}];

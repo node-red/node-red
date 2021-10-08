@@ -150,6 +150,51 @@ test-module-config`)
             ))
         })
     })
+    describe("exportPluginSettings", function() {
+        it("exports plugin settings - default false", function() {
+            plugins.init({ "a-plugin": { a: 123, b:234, c: 345} });
+            plugins.registerPlugin("test-module/test-set","a-plugin",{
+                settings: {
+                    a: { exportable: true },
+                    b: {exportable: false },
+                    d: { exportable: true, value: 456}
 
+                }
+            });
+            var exportedSet = {};
+            plugins.exportPluginSettings(exportedSet);
+            exportedSet.should.have.property("a-plugin");
+            // a is exportable
+            exportedSet["a-plugin"].should.have.property("a",123);
+            // b is explicitly not exportable
+            exportedSet["a-plugin"].should.not.have.property("b");
+            // c isn't listed and default false
+            exportedSet["a-plugin"].should.not.have.property("c");
+            // d has a default value
+            exportedSet["a-plugin"].should.have.property("d",456);
+        })
+        it("exports plugin settings - default true", function() {
+            plugins.init({ "a-plugin": { a: 123, b:234, c: 345} });
+            plugins.registerPlugin("test-module/test-set","a-plugin",{
+                settings: {
+                    '*': { exportable: true },
+                    a: { exportable: true },
+                    b: {exportable: false },
+                    d: { exportable: true, value: 456}
 
+                }
+            });
+            var exportedSet = {};
+            plugins.exportPluginSettings(exportedSet);
+            exportedSet.should.have.property("a-plugin");
+            // a is exportable
+            exportedSet["a-plugin"].should.have.property("a",123);
+            // b is explicitly not exportable
+            exportedSet["a-plugin"].should.not.have.property("b");
+            // c isn't listed, but default true
+            exportedSet["a-plugin"].should.have.property("c");
+            // d has a default value
+            exportedSet["a-plugin"].should.have.property("d",456);
+        })
+    });
 });
