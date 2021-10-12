@@ -251,13 +251,28 @@ describe('delay Node', function() {
      * @param nbUnit - the multiple of the unit, aLimit Message for nbUnit Seconds
      * @param runtimeInMillis - when to terminate run and count messages received
      */
-    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":nbUnit,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,"wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
+    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, sendIntermediate, done) {
+        if (!done) {
+            done = sendIntermediate;
+            sendIntermediate = false;
+        }
+        var outputs = 1;
+        if (sendIntermediate) {
+            outputs = 2;
+        }
+        var flow = [
+            {"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":nbUnit,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,outputs:outputs,"wires":[["helperNode1"],["helperNode2"]]},
+            {id:"helperNode1", type:"helper", wires:[]},
+            {id:"helperNode2", type:"helper", wires:[]}
+        ]
+
+                    ;
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
+            var helperNode2 = helper.getNode("helperNode2");
             var receivedMessagesStack = [];
+            var receivedIntermediateMessagesStack = [];
 
             // Add a small grace to the calculated delay
             var rate = 1000/aLimit + 10;
@@ -272,6 +287,9 @@ describe('delay Node', function() {
                 }
                 receiveTimestamp = process.hrtime();
                 receivedMessagesStack.push(msg);
+            });
+            helperNode2.on("input", function(msg) {
+                receivedIntermediateMessagesStack.push(msg);
             });
 
             var possibleMaxMessageCount = Math.ceil(aLimit * (runtimeInMillis / 1000) + aLimit); // +aLimit as at the start of the 2nd period, we're allowing the 3rd burst
@@ -304,6 +322,11 @@ describe('delay Node', function() {
                         }
                     }
                     foundAtLeastOneDrop.should.be.true();
+                    if (sendIntermediate) {
+                        receivedIntermediateMessagesStack.length.should.be.greaterThan(0);
+                    } else {
+                        receivedIntermediateMessagesStack.length.should.be.exactly(0);
+                    }
                     done();
                 } catch (err) {
                     done(err);
@@ -325,6 +348,11 @@ describe('delay Node', function() {
     it('limits the message rate to 2 per second, 5 seconds, with drop', function(done) {
         this.timeout(6000);
         dropRateLimitSECONDSTest(2, 1, 5000, null, done);
+    });
+
+    it('limits the message rate to 2 per second, 5 seconds, with drop, 2nd output', function(done) {
+        this.timeout(6000);
+        dropRateLimitSECONDSTest(2, 1, 5000, null, true, done);
     });
 
     it('limits the message rate with drop using msg.rate', function (done) {

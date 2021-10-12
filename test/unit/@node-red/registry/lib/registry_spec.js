@@ -574,4 +574,41 @@ describe("red/nodes/registry/registry",function() {
         });
     });
 
+    describe('#getModuleResource', function() {
+        beforeEach(function() {
+            typeRegistry.init(settings,{});
+            typeRegistry.addModule({
+                name: "test-module",version:"0.0.1",nodes: {
+                    "test-name":{
+                        id: "test-module/test-name",
+                        module: "test-module",
+                        name: "test-name",
+                        enabled: true,
+                        loaded: false,
+                        config: "configA",
+                        types: [ "test-a","test-b"],
+                        file: "abc"
+                    }
+                },
+                resources: {
+                    path: path.join(__dirname, "resources","examples")
+                }
+            });
+        });
+        it('Returns valid resource path', function() {
+            const result = typeRegistry.getModuleResource("test-module","one.json");
+            should.exist(result);
+            result.should.eql(path.join(__dirname, "resources","examples","one.json"))
+        });
+        it('Returns null for path that tries to break out', function() {
+            // Note - this path exists, but we don't allow .. in the resolved path to
+            // avoid breaking out of the resources dir
+            const result = typeRegistry.getModuleResource("test-module","../../index_spec.js");
+            should.not.exist(result);
+        });
+        it('Returns null for path that does not exist', function() {
+            const result = typeRegistry.getModuleResource("test-module","two.json");
+            should.not.exist(result);
+        });
+    });
 });
