@@ -1,3 +1,33 @@
+#### 2.1.0-beta.2: Beta Release
+
+Editor
+
+ - Fix switching projects (#3199) @knolleary
+ - Use locale setting when installing/enabling node (#3198) @knolleary
+ - Do not show projects-wecome dialog until welcome tour completes (#3197) @knolleary
+ - Fix converting selection to subflow (#3196) @knolleary
+ - Avoid conflicts with native browser cmd-ctrl type shortcuts (#3195) @knolleary
+ - Ensure message tools stay attached to top-level entry in Debug/Context (#3186) @knolleary
+ - Ensure tab state updates properly when toggling enable state (#3175) @knolleary
+ - Improve handling of long labels in TreeList (#3176) @knolleary
+ - Shift-click tab scroll arrows to jump to start/end (#3177) @knolleary
+
+Runtime
+
+ - Update package dependencies
+ - Update to latest node-red-admin
+
+Nodes
+
+ - Dynamic MQTT connections (#3189)
+ - Link: Filter out Link Out Return nodes in Link In edit dialog Fixes #3187
+ - Link: Fix link call label (#3200) @knolleary
+ - Debug: Redesign debug filter options and make them persistant (#3183) @knolleary
+ - Inject: Widen Inject interval box for >1 digit (#3184) @knolleary
+ - Switch: Fix rule focus when switch 'otherwise' rule is used (#3185) @knolleary
+
+
+
 #### 2.1.0-beta.1: Beta Release
 
 Editor
@@ -46,7 +76,7 @@ Nodes
  - Switch: Copy previous rule type when adding rule to switch node (#3170) @knolleary
  - Delay node: add option to send intermediate messages on separate output (#3166) @knolleary
  - Typo in http request set method translation (#3173) @mailsvb
- 
+
 #### 2.0.6: Maintenance Release
 
 Editor
