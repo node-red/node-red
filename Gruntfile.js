@@ -162,7 +162,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/stack.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/typedInput.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/toggleButton.js",
-                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/colorPicker.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/common/autoComplete.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actions.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/deploy.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
@@ -182,6 +182,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tab-context.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/palette-editor.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/editor.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/editors/panes/*.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/editors/*.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/editors/code-editors/*.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/event-log.js",
@@ -199,7 +200,8 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/projectUserSettings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/projects/tab-versionControl.js",
-                    "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js"
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/tour/*.js"
                 ],
                 dest: "packages/node_modules/@node-red/editor-client/public/red/red.js"
             },
@@ -326,6 +328,12 @@ module.exports = function(grunt) {
                 ],
                 tasks: ['jsonlint:keymaps','copy:build']
             },
+            tours: {
+                files: [
+                    'packages/node_modules/@node-red/editor-client/src/tours/**/*.js'
+                ],
+                tasks: ['copy:build']
+            },
             misc: {
                 files: [
                     'CHANGELOG.md'
@@ -423,6 +431,12 @@ module.exports = function(grunt) {
                         src: '**',
                         expand: true,
                         dest: 'packages/node_modules/@node-red/editor-client/public/vendor/ace/'
+                    },
+                    {
+                        cwd: 'packages/node_modules/@node-red/editor-client/src/tours',
+                        src: '**',
+                        expand: true,
+                        dest: 'packages/node_modules/@node-red/editor-client/public/red/tours/'
                     }
                 ]
             }
