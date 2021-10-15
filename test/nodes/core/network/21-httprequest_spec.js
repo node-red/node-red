@@ -1504,7 +1504,7 @@ describe('HTTP Request Node', function() {
 
     describe('protocol', function() {
         it('should use msg.rejectUnauthorized', function(done) {
-            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text')},
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),peerCertificateOutput:true},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
                 var n2 = helper.getNode("n2");
@@ -1517,7 +1517,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
-                        msg.should.have.property('peerCertificate');
+                        msg.should.have.property('peerCertificates').which.is.a.Array();
                         done();
                     } catch(err) {
                         done(err);
@@ -1529,7 +1529,7 @@ describe('HTTP Request Node', function() {
 
         it('should use tls-config', function(done) {
             var flow = [
-                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURLWithoutProtocol('/text'),tls:"n3"},
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURLWithoutProtocol('/text'),tls:"n3",peerCertificateOutput:true},
                 {id:"n2", type:"helper"},
                 {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"", verifyservercert:false}];
             var testNodes = [httpRequestNode, tlsNode];
@@ -1545,7 +1545,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
-                        msg.should.have.property('peerCertificate');
+                        msg.should.have.property('peerCertificates').which.is.a.Array();
                         done();
                     } catch(err) {
                         done(err);
@@ -1557,7 +1557,7 @@ describe('HTTP Request Node', function() {
 
         it('should use tls-config and verify serverCert', function(done) {
             var flow = [
-                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),tls:"n3"},
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),tls:"n3",peerCertificateOutput:true},
                 {id:"n2", type:"helper"},
                 {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"test/resources/ssl/server.crt", verifyservercert:true}];
             var testNodes = [httpRequestNode, tlsNode];
@@ -1573,7 +1573,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
-                        msg.should.have.property('peerCertificate');
+                        msg.should.have.property('peerCertificates').which.is.a.Array();
                         done();
                     } catch(err) {
                         done(err);
@@ -1585,7 +1585,7 @@ describe('HTTP Request Node', function() {
 
         it('should use tls-config and send client cert', function(done) {
             var flow = [
-                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslClientTestURL('/getClientCert'),tls:"n3"},
+                {id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslClientTestURL('/getClientCert'),tls:"n3",peerCertificateOutput:true},
                 {id:"n2", type:"helper"},
                 {id:"n3", type:"tls-config", cert:"test/resources/ssl/server.crt", key:"test/resources/ssl/server.key", ca:"test/resources/ssl/server.crt", verifyservercert:false}];
             var testNodes = [httpRequestNode,tlsNode];
@@ -1601,7 +1601,7 @@ describe('HTTP Request Node', function() {
                         msg.headers.should.have.property('content-length',''+('hello'.length));
                         msg.headers.should.have.property('content-type').which.startWith('text/html');
                         msg.should.have.property('responseUrl').which.startWith('https://');
-                        msg.should.have.property('peerCertificate');
+                        msg.should.have.property('peerCertificates').which.is.a.Array();
                         done();
                     } catch(err) {
                         done(err);
