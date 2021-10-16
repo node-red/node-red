@@ -1503,6 +1503,30 @@ describe('HTTP Request Node', function() {
     });
 
     describe('protocol', function() {
+        it('should use msg.peerCertificateOutput', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),peerCertificateOutput:false},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n2 = helper.getNode("n2");
+                var n1 = helper.getNode("n1");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload','hello');
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        msg.headers.should.have.property('content-length',''+('hello'.length));
+                        msg.headers.should.have.property('content-type').which.startWith('text/html');
+                        msg.should.have.property('responseUrl').which.startWith('https://');
+                        msg.should.have.property('peerCertificates').which.is.a.Array();
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo", rejectUnauthorized: false, peerCertificateOutput: true});
+            });
+        });
+
         it('should use msg.rejectUnauthorized', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getSslTestURL('/text'),peerCertificateOutput:true},
                 {id:"n2", type:"helper"}];
