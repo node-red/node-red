@@ -1,3 +1,16 @@
+#### 2.1.0: Milestone Release
+
+Editor
+
+ - Position popover properly on a scrolled page
+ - Fixes from 2.1.0-beta.2 (#3202) @knolleary
+
+Nodes
+
+- Link Out: Fix saving link out node links (#3201) @knolleary
+ - Switch: Refix #3170 - copy switch rule type when adding new rule
+ - TCP Request: Add string option to TCP request node output (#3204) @dceejay
+
 #### 2.1.0-beta.2: Beta Release
 
 Editor
@@ -25,8 +38,6 @@ Nodes
  - Debug: Redesign debug filter options and make them persistant (#3183) @knolleary
  - Inject: Widen Inject interval box for >1 digit (#3184) @knolleary
  - Switch: Fix rule focus when switch 'otherwise' rule is used (#3185) @knolleary
-
-
 
 #### 2.1.0-beta.1: Beta Release
 
