@@ -251,13 +251,28 @@ describe('delay Node', function() {
      * @param nbUnit - the multiple of the unit, aLimit Message for nbUnit Seconds
      * @param runtimeInMillis - when to terminate run and count messages received
      */
-    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, done) {
-        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":nbUnit,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,"wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}];
+    function dropRateLimitSECONDSTest(aLimit, nbUnit, runtimeInMillis, rateValue, sendIntermediate, done) {
+        if (!done) {
+            done = sendIntermediate;
+            sendIntermediate = false;
+        }
+        var outputs = 1;
+        if (sendIntermediate) {
+            outputs = 2;
+        }
+        var flow = [
+            {"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":5,"nbRateUnits":nbUnit,"timeoutUnits":"seconds","rate":aLimit,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":true,outputs:outputs,"wires":[["helperNode1"],["helperNode2"]]},
+            {id:"helperNode1", type:"helper", wires:[]},
+            {id:"helperNode2", type:"helper", wires:[]}
+        ]
+
+                    ;
         helper.load(delayNode, flow, function() {
             var delayNode1 = helper.getNode("delayNode1");
             var helperNode1 = helper.getNode("helperNode1");
+            var helperNode2 = helper.getNode("helperNode2");
             var receivedMessagesStack = [];
+            var receivedIntermediateMessagesStack = [];
 
             // Add a small grace to the calculated delay
             var rate = 1000/aLimit + 10;
@@ -272,6 +287,9 @@ describe('delay Node', function() {
                 }
                 receiveTimestamp = process.hrtime();
                 receivedMessagesStack.push(msg);
+            });
+            helperNode2.on("input", function(msg) {
+                receivedIntermediateMessagesStack.push(msg);
             });
 
             var possibleMaxMessageCount = Math.ceil(aLimit * (runtimeInMillis / 1000) + aLimit); // +aLimit as at the start of the 2nd period, we're allowing the 3rd burst
@@ -304,6 +322,11 @@ describe('delay Node', function() {
                         }
                     }
                     foundAtLeastOneDrop.should.be.true();
+                    if (sendIntermediate) {
+                        receivedIntermediateMessagesStack.length.should.be.greaterThan(0);
+                    } else {
+                        receivedIntermediateMessagesStack.length.should.be.exactly(0);
+                    }
                     done();
                 } catch (err) {
                     done(err);
@@ -325,6 +348,11 @@ describe('delay Node', function() {
     it('limits the message rate to 2 per second, 5 seconds, with drop', function(done) {
         this.timeout(6000);
         dropRateLimitSECONDSTest(2, 1, 5000, null, done);
+    });
+
+    it('limits the message rate to 2 per second, 5 seconds, with drop, 2nd output', function(done) {
+        this.timeout(6000);
+        dropRateLimitSECONDSTest(2, 1, 5000, null, true, done);
     });
 
     it('limits the message rate with drop using msg.rate', function (done) {
@@ -784,6 +812,62 @@ describe('delay Node', function() {
             setImmediate( function() { delayNode1.receive({payload:1,topic:"bar"}); }  );
             setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
             setImmediate( function() { delayNode1.receive({flush:2});  });
+            setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
+            setTimeout( function() { delayNode1.receive({flush:4});  }, 400);
+        });
+    });
+
+    it('can part push to front of rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "aoo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(2,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "eoo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(4,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "coo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(202,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "boo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(406,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "doo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(4,50);
+                        c = c + 1;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"aoo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"boo"}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"coo",toFront:true}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"doo",toFront:true,flush:1}); }  );
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"eoo",toFront:true}); }  );
+            setImmediate( function() { delayNode1.receive({flush:1});  });
             setTimeout( function() { delayNode1.receive({flush:1});  }, 200);
             setTimeout( function() { delayNode1.receive({flush:4});  }, 400);
         });

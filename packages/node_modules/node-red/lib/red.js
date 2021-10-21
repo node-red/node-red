@@ -61,7 +61,7 @@ module.exports = {
             checkVersion(userSettings);
         }
 
-        if (!userSettings.coreNodesDir) {
+        if (!userSettings.hasOwnProperty("coreNodesDir")) {
             userSettings.coreNodesDir = path.dirname(require.resolve("@node-red/nodes"))
         }
         redUtil.init(userSettings);
