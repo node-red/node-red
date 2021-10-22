@@ -583,7 +583,7 @@ module.exports = function(grunt) {
     grunt.registerMultiTask('attachCopyright', function() {
         var files = this.data.src;
         var copyright = "/**\n"+
-            " * Copyright JS Foundation and other contributors, http://js.foundation\n"+
+            " * Copyright OpenJS Foundation and other contributors, https://openjsf.org/\n"+
             " *\n"+
             " * Licensed under the Apache License, Version 2.0 (the \"License\");\n"+
             " * you may not use this file except in compliance with the License.\n"+
