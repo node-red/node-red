@@ -1,3 +1,12 @@
+#### 2.1.1: Maintenance Release
+
+Editor
+
+ - Ensure tourGuide popover doesn't fall offscreen (#3212) @knolleary
+ - Fix issue with old inject nodes that migrated topic to 'string' type (#3210) @knolleary
+ - Add cache-busting query params to index.mst (#3211) @knolleary
+ - Fix TypedInput validation of type without options (#3207) @knolleary
+
 #### 2.1.0: Milestone Release
 
 Editor
