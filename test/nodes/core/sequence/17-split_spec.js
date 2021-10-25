@@ -1893,11 +1893,11 @@ describe('JOIN node', function() {
             });
 
         }
-        it('should emit correlate log when message is splitted (string, mode=len)', function(done) {
+        it('should emit correlation log when message is splitted (string, mode=len)', function(done) {
             // "abcdefg" -> "ab", "cd", "ef", "g":  "abcdefg" - ["ab","cd","ef","g"]
             nonStreamSplit(done, "abcdefg", {splt:2, spltType:"len"});
         });
-        it('should emit correlate logs when messages are splitted/joined (string, mode=len, stream)', function(done) {
+        it('should emit correlation logs when messages are splitted/joined (string, mode=len, stream)', function(done) {
             // "a","b","c","d" -> "ab","cd": "a" - ["ab"], "b" - ["ab"], "c" - ["cd"], "d" - ["cd"]
             const flow = [{ id: "n1", type: "split", splt: 2, spltType: "len", stream: true, wires: [["n2"]]},
                           { id: "n2", type: "helper"}]; 
@@ -1928,11 +1928,11 @@ describe('JOIN node', function() {
                 }, 20);
             });
         });
-        it('should emit correlate logs when message are splitted (string, mode=str)', function (done) {
+        it('should emit a correlation logs when message are splitted (string, mode=str)', function (done) {
             // "a-b-c-d" -> "a","b","c","d": "a-b-c-d": ["a","b","c","d"]
             nonStreamSplit(done, "a-b-c-d", {splt:"-", spliType:"str"});
         });
-        it('should emit correlate logs when messages are splitted/joined (string, mode=str, stream)', function(done) {
+        it('should emit correlation logs when messages are splitted/joined (string, mode=str, stream)', function(done) {
             // "a","b-c","-" -> "ab","c": "a" - ["ab"], "b-c" - ["ab","c"], "-" - ["c"]
             const flow = [{ id: "n1", type: "split", splt: "-", spltType: "str", stream: true, wires: [["n2"]]},
                           { id: "n2", type: "helper"}]; 
@@ -1961,19 +1961,19 @@ describe('JOIN node', function() {
                 }, 20);
             });
         });
-        it('should emit correlate log when a message is splitted (array)', function(done) {
+        it('should emit a correlation log when a message is splitted (array)', function(done) {
             // "[1,2,3]" -> "1","2","3": "[1,2,3]" - ["1","2","3"]
             nonStreamSplit(done, [1,2,3], {arraySplt:1, arraySpltType:"len"});
         });
-        it('should emit correlate log when a message is splitted (object)', function(done) {
+        it('should emit a correlation log when a message is splitted (object)', function(done) {
             // "{a:1,b:2,c:3}" -> "1","2","3": "{a:1,b:2,c:3}" - ["1","2","3"]
             nonStreamSplit(done, {a:1,b:2,c:3}, {});
         });
-        it('should emit correlate log when a message is splitted (buffer, mode=len)', function(done) {
+        it('should emit a correlation log when a message is splitted (buffer, mode=len)', function(done) {
             // Buffer([1,2,3]) -> Buffer([1]),Buffer([2]),Buffer([3])
             nonStreamSplit(done, Buffer.from([1,2,3]), {splt:1, spltType: "len"});
         });
-        it('should emit correlate logs when messages are splitted/joined (buffer, mode=len, stream)', function(done) {
+        it('should emit correlation logs when messages are splitted/joined (buffer, mode=len, stream)', function(done) {
             // Buffer([1,2,3]),Buffer([4,5,6]) -> Buffer([1,2]),Buffer([3,4]),Buffer([5,6]):
             // [1,2,3] -> [1,2],[3,4], [4,5,6]->[3,4],[5,6]
             const flow = [{ id: "n1", type: "split", splt: 2, spltType: "len", stream: true, wires: [["n2"]]},
@@ -2001,11 +2001,11 @@ describe('JOIN node', function() {
                 }, 20);
             });
         });
-        it('should emit correlate log when a message is splitted (buffer, mode=bin)', function(done) {
+        it('should emit a correlation log when a message is splitted (buffer, mode=bin)', function(done) {
             // Buffer([1,2,3]) -> Buffer([1]),Buffer([2]),Buffer([3])
             nonStreamSplit(done, Buffer.from([1,2,3]), {splt:"[2]", spltType: "bin"});
         });
-        it('should emit correlate logs when messages are splitted/joined (buffer, mode=bin, stream)', function(done) {
+        it('should emit correlation logs when messages are splitted/joined (buffer, mode=bin, stream)', function(done) {
             // Buffer([1]),Buffer([1,2,3]),Buffer([2]) -> Buffer([1,1]),Buffer([3]):
             // [1] - [1,2], [1,2,3] - [1,1],[3], [2] -> [3] 
             const flow = [{ id: "n1", type: "split", splt: "[2]", spltType: "bin", stream: true, wires: [["n2"]]},
@@ -2037,7 +2037,7 @@ describe('JOIN node', function() {
         });
     });
     describe('Correlation log (JOIN node)', function() {
-        it('should emit correlate log when messages are joined (automatic)', function(done) {
+        it('should a emit correlation log when messages are joined (automatic)', function(done) {
             const flow = [ { id: "n1", type: "join", mode: "auto"}];
             helper.load(joinNode, flow, function() {
                 const n1 = helper.getNode("n1");
@@ -2057,7 +2057,7 @@ describe('JOIN node', function() {
                 }, 20);
             })
         });
-        it('should emit correlate log when messages are joined (reduce)', function(done) {
+        it('should emit a correlation log when messages are joined (reduce)', function(done) {
             const flow = [ { id: "n1", type: "join", mode: "reduce",
                              reduceRight:false, reduceExp: "$A+payload", reduceInit: "0",
                              reduceInitType: "num", reduceFixup: "$A/$N" }];
