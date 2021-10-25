@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Copyright JS Foundation and other contributors, http://js.foundation
 #
@@ -29,15 +29,16 @@ do
 done
 
 # Find the real location of this script
-CURRENT_PATH=`pwd`
-SCRIPT_PATH="${BASH_SOURCE[0]}";
+CURRENT_PATH=$(pwd)
+SCRIPT_PATH=$(readlink -f "$0")
 while [ -h "${SCRIPT_PATH}" ]; do
-    cd "`dirname "${SCRIPT_PATH}"`"
-    SCRIPT_PATH="$(readlink "`basename "${SCRIPT_PATH}"`")";
+    cd "$(dirname "${SCRIPT_PATH}")" || exit 1
+    P=$(basename "${SCRIPT_PATH}")
+    SCRIPT_PATH=$(readlink "${P}")
 done
-cd "`dirname "${SCRIPT_PATH}"`" > /dev/null
-SCRIPT_PATH="`pwd`";
-cd $CURRENT_PATH
+cd "$(dirname "${SCRIPT_PATH}")" > /dev/null || exit 1
+SCRIPT_PATH=$(pwd)
+cd "$CURRENT_PATH" || exit 1
 
 # Run Node-RED
-exec /usr/bin/env node $OPTIONS $SCRIPT_PATH/../red.js $ARGS
+exec /usr/bin/env node ${OPTIONS} ${SCRIPT_PATH}/../red.js ${ARGS}
