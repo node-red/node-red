@@ -1,5 +1,21 @@
 #### 2.1.1: Maintenance Release
 
+
+Runtime
+
+ - node-red-pi: Remove bash dependency (#3216) @a16bitsysop
+
+Editor
+
+ - Improved regex for markdown renderer (#3213) @GerwinvBeek
+ - Fix TypedInput initialisation (#3220) @knolleary
+
+Nodes
+
+ - MQTT: fix datatype in node config not used. fixes #3215 (#3219) @Steve-Mcl
+
+#### 2.1.1: Maintenance Release
+
 Editor
 
  - Ensure tourGuide popover doesn't fall offscreen (#3212) @knolleary
