@@ -1,3 +1,19 @@
+#### 2.1.3: Maintenance Release
+
+Runtime
+
+ - Update gen-publish script to update 'next' tag for main releases
+ - Add environment variable to enable/disable tours (#3221) @hardillb
+ - Fix loading non-default language files leaving runtime in wrong locale (#3225) @knolleary
+
+Editor
+
+ - Refresh editor settings whenever a node is added or enabled (#3227) @knolleary
+ - Revert spinner css change that made it shrink in some cases (#3229) @knolleary
+ - Fix import notification message when importing config nodes (#3224) @knolleary
+ - Handle changing types of TypedInput repeatedly (#3223) @knolleary
+
+
 #### 2.1.2: Maintenance Release
 
 
