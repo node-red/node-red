@@ -10,6 +10,7 @@ Runtime
 
 Editor
 
+ - Change tab hide button icon to an eye and add search option (#3282) @knolleary
  - Fix i18n handling of namespaces with spaces in (#3281) @knolleary
  - Trigger change event when autoComplete fills in input (#3280) @knolleary
  - Apply CN i18n fix (#3279) @knolleary
