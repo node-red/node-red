@@ -2,6 +2,39 @@
 
 
 
+#### 2.1.4: Maintenance Release
+
+Runtime
+
+ - fix env var access using $parent for groups (#3278) @HiroyasuNishiyama
+ - Add proper error handling for 404 errors when serving debug files (#3277) @knolleary
+ - Add Japanese translations for Node-RED v2.1.0-beta.1 (#3179) @kazuhitoyokoi
+ - Include full user object on login audit events (#3269) @knolleary
+ - Remove styling from de locale files (#3237) @knolleary
+
+Editor
+
+ - Change tab hide button icon to an eye and add search option (#3282) @knolleary
+ - Fix i18n handling of namespaces with spaces in (#3281) @knolleary
+ - Trigger change event when autoComplete fills in input (#3280) @knolleary
+ - Apply CN i18n fix (#3279) @knolleary
+ - fix select menu label of config node to use paletteLabel (#3273) @HiroyasuNishiyama
+ - fix removed tab not to cause node conflict (#3275) @HiroyasuNishiyama
+ - Group diff fix (#3239) @knolleary
+ - Only toggle disabled workspace flag if on activeWorkspace (#3252) @knolleary
+ - Do not show status for disabled nodes (#3253) @knolleary
+ - Set dimension value for tour guide (#3265) @kazuhitoyokoi
+ - Avoid redundant initialisation of TypedInput type (#3263) @knolleary
+ - Don't let themes change flow port label color (#3270) @bonanitech
+ - Fix treeList gutter calculation to handle floating gutters (#3238) @knolleary
+
+Nodes
+
+- Debug: Handle RegExp types in Debug sidebar (#3251) @knolleary
+- Delay: fix 2nd output when in rate limit per topic modes (#3261) @dceejay
+- Link: fix to show link target when selected (#3267) @HiroyasuNishiyama
+- Inject: Do not modify inject node props in oneditprepare (#3242) @knolleary
+- HTTP Request: HTTP Basic Auth should always add : between username and password even if empty (#3236) @hardillb
 
 #### 2.1.3: Maintenance Release
 
