@@ -18,6 +18,7 @@ Sparkle's Guide is inspired by [roadmap.sh](https://roadmap.sh) and is a derivat
 ### To Code
 
 >coming soon...
+1. `npm run dev` # auto load code changes
 
 ## Copyright and license
 
