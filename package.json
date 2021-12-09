@@ -1,12 +1,12 @@
 {
-    "name": "node-red",
-    "version": "2.2.2",
-    "description": "Low-code programming for event-driven applications",
-    "homepage": "http://nodered.org",
+    "name": "sparkles-guide",
+    "version": "0.0.1",
+    "description": "a guide to sparkles and unicorns in the blessing on their magical journey to better themselves and each other.",
+    "homepage": "http://localhost:1880",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/node-red/node-red.git"
+        "url": "https://github.com/andrewsgreene/not-node-red.git"
     },
     "private": "true",
     "scripts": {
@@ -18,14 +18,6 @@
         "build-dev": "grunt build-dev",
         "docs": "grunt docs"
     },
-    "contributors": [
-        {
-            "name": "Nick O'Leary"
-        },
-        {
-            "name": "Dave Conway-Jones"
-        }
-    ],
     "dependencies": {
         "acorn": "8.7.0",
         "acorn-walk": "8.2.0",
@@ -122,6 +114,6 @@
         "supertest": "6.2.2"
     },
     "engines": {
-        "node": ">=12"
+        "node": ">=16"
     }
 }
