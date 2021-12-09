@@ -12,6 +12,7 @@
     "scripts": {
         "start": "node packages/node_modules/node-red/red.js",
         "test": "grunt",
+        "cy:run": "cypress run",
         "build": "grunt build",
         "dev": "grunt dev",
         "build-dev": "grunt build-dev",
@@ -85,6 +86,7 @@
     },
     "devDependencies": {
         "dompurify": "2.3.5",
+        "cypress": "^9.1.1",
         "grunt": "1.4.1",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.4.3",
