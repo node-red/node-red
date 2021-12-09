@@ -27,3 +27,4 @@ docs
 .vscode
 .nyc_output
 sync.ffs_db
+.idea
