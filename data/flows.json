@@ -1,0 +1,314 @@
+[
+    {
+        "id": "eb7909bcf5fcaf8a",
+        "type": "tab",
+        "label": "Big Bang",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "0ac7681ed1c2bc4b",
+        "type": "subflow",
+        "name": "Kubernetes",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 60,
+                "y": 180,
+                "wires": [
+                    {
+                        "id": "73521b98841c6355"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1720,
+                "y": 300,
+                "wires": [
+                    {
+                        "id": "752d2d1fc700d27e",
+                        "port": 0
+                    },
+                    {
+                        "id": "c53965f3ddc770ad",
+                        "port": 0
+                    },
+                    {
+                        "id": "e902145181ebd724",
+                        "port": 0
+                    },
+                    {
+                        "id": "418551f904d62b20",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "73521b98841c6355",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Kubernetes",
+        "info": "",
+        "x": 450,
+        "y": 180,
+        "wires": [
+            [
+                "90665185044d3fc2",
+                "ccf8bad6e9ebfb6a",
+                "4146a7d5608cc03b",
+                "418551f904d62b20"
+            ]
+        ]
+    },
+    {
+        "id": "90665185044d3fc2",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Kubernetes Objects",
+        "info": "",
+        "x": 780,
+        "y": 180,
+        "wires": [
+            [
+                "d810b83f64f0bc5e",
+                "0d309e7b063a4ce2"
+            ]
+        ]
+    },
+    {
+        "id": "ccf8bad6e9ebfb6a",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Kubernetes Networking",
+        "info": "",
+        "x": 770,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4146a7d5608cc03b",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Kubernetes Storage",
+        "info": "",
+        "x": 760,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "418551f904d62b20",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Kubernetes App Manifests",
+        "info": "",
+        "x": 780,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0d309e7b063a4ce2",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Configurations",
+        "info": "",
+        "x": 1040,
+        "y": 220,
+        "wires": [
+            [
+                "c53965f3ddc770ad",
+                "e902145181ebd724"
+            ]
+        ]
+    },
+    {
+        "id": "d810b83f64f0bc5e",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Deployments",
+        "info": "",
+        "x": 1030,
+        "y": 100,
+        "wires": [
+            [
+                "752d2d1fc700d27e"
+            ]
+        ]
+    },
+    {
+        "id": "752d2d1fc700d27e",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Pods",
+        "info": "",
+        "x": 1290,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c53965f3ddc770ad",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Configmaps",
+        "info": "",
+        "x": 1270,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e902145181ebd724",
+        "type": "comment",
+        "z": "0ac7681ed1c2bc4b",
+        "name": "Secrets",
+        "info": "",
+        "x": 1260,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5dfd2ba38ec5178d",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Containerization",
+        "info": "",
+        "x": 80,
+        "y": 280,
+        "wires": [
+            [
+                "ea946e25b7c2079f"
+            ]
+        ]
+    },
+    {
+        "id": "8c04bec4a15f6702",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Helm",
+        "info": "",
+        "x": 890,
+        "y": 440,
+        "wires": [
+            [
+                "e328f5849309e731"
+            ]
+        ]
+    },
+    {
+        "id": "fc01372231b580db",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Custom Resource Definitions",
+        "info": "",
+        "x": 940,
+        "y": 500,
+        "wires": [
+            [
+                "e328f5849309e731"
+            ]
+        ]
+    },
+    {
+        "id": "09d8e90d5b4ade12",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Kustomization",
+        "info": "",
+        "x": 920,
+        "y": 640,
+        "wires": [
+            [
+                "e328f5849309e731"
+            ]
+        ]
+    },
+    {
+        "id": "71a96ec4058930db",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "GitOps",
+        "info": "",
+        "x": 920,
+        "y": 260,
+        "wires": [
+            [
+                "45465f711df6da7e"
+            ]
+        ]
+    },
+    {
+        "id": "98df2d11adb09046",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "git",
+        "info": "",
+        "x": 750,
+        "y": 180,
+        "wires": [
+            [
+                "71a96ec4058930db"
+            ]
+        ]
+    },
+    {
+        "id": "45465f711df6da7e",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Flux",
+        "info": "",
+        "x": 1130,
+        "y": 300,
+        "wires": [
+            [
+                "e328f5849309e731"
+            ]
+        ]
+    },
+    {
+        "id": "e328f5849309e731",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Big Bang",
+        "info": "",
+        "x": 1440,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ea946e25b7c2079f",
+        "type": "subflow:0ac7681ed1c2bc4b",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "",
+        "x": 400,
+        "y": 300,
+        "wires": [
+            [
+                "8c04bec4a15f6702",
+                "fc01372231b580db",
+                "09d8e90d5b4ade12",
+                "71a96ec4058930db"
+            ]
+        ]
+    }
+]
