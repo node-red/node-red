@@ -11,11 +11,11 @@
         "id": "0ac7681ed1c2bc4b",
         "type": "subflow",
         "name": "Kubernetes",
-        "info": "",
+        "info": "Kubernetes is an open source container orchestration engine for automating deployment, scalling, and management of containerized applications. [source](https://kubernetes.io/docs/home/)",
         "category": "",
         "in": [
             {
-                "x": 60,
+                "x": 240,
                 "y": 180,
                 "wires": [
                     {
@@ -57,7 +57,7 @@
         "type": "comment",
         "z": "0ac7681ed1c2bc4b",
         "name": "Kubernetes",
-        "info": "",
+        "info": "# Description\n\n\n## Resources\n- https://kubernetes.io/docs/home/ ***\n- https://www.youtube.com/watch?v=VnvRFRk_51k ",
         "x": 450,
         "y": 180,
         "wires": [
@@ -90,7 +90,7 @@
         "z": "0ac7681ed1c2bc4b",
         "name": "Kubernetes Networking",
         "info": "",
-        "x": 770,
+        "x": 810,
         "y": 260,
         "wires": [
             []
@@ -102,8 +102,8 @@
         "z": "0ac7681ed1c2bc4b",
         "name": "Kubernetes Storage",
         "info": "",
-        "x": 760,
-        "y": 320,
+        "x": 820,
+        "y": 340,
         "wires": [
             []
         ]
@@ -192,7 +192,7 @@
         "name": "Containerization",
         "info": "",
         "x": 80,
-        "y": 280,
+        "y": 300,
         "wires": [
             [
                 "ea946e25b7c2079f"
@@ -260,7 +260,7 @@
         "type": "comment",
         "z": "eb7909bcf5fcaf8a",
         "name": "git",
-        "info": "",
+        "info": "# Description\n\n[Git](https://git-scm.com/) is a free and open source distributed version control system.\n\n## Resources\n- https://git-scm.com/docs\n\n\n## Examples\n- github.com\n- gitlab.com\n- https://gitea.com/",
         "x": 750,
         "y": 180,
         "wires": [
