@@ -4,10 +4,16 @@
 Sparkle's Guide is inspired by [roadmap.sh](https://roadmap.sh) and is a derivative open source work of [node-red](https://github.com/node-red/node-red). This project aims to be a guide to sparkles and unicorns in the [blessing](https://unicornyard.com/what-is-a-group-of-unicorns-called/) on their magical journey to better themselves and each other. 
 
 ## Quick Start
+Local Environment with NPM
 1. `npm install`
 2. `npm run build`
 3. `npm start`
 4. Open <http://127.0.0.1:1880/>
+
+Docker
+1. `./docker-build.sh`
+2. `./docker-run.sh`
+3. Open <http://127.0.0.1:1880/>
 
 ## Contributing
 
