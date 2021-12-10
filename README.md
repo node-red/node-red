@@ -25,8 +25,7 @@ See [this](docs/sparkles-guides-contribution.md) guide, if you are looking to co
 
 ### To Code
 
->coming soon...
-1. `npm run dev` # auto load code changes
+See [this](docs/code-contribution.md) guide, if you are looking to add/remove/modify code implementing Sparkle's Guide.
 
 ## Copyright and license
 
