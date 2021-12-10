@@ -17,9 +17,11 @@ Docker
 
 ## Contributing
 
+Submit an [issue](https://github.com/defenseunicorns/Sparkles-Guide/issues/new) if unsure.
+
 ### To Sparkle Guides
 
->coming soon...
+See [this](docs/sparkles-guides-contribution.md) guide, if you are looking to contribute to the guides and flows. 
 
 ### To Code
 
