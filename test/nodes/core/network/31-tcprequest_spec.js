@@ -84,9 +84,17 @@ describe('TCP Request Node', function() {
             n2.on("input", msg => {
                 try {
                     if (typeof result === 'object') {
-                        msg.should.have.properties(Object.assign({}, result, {payload: Buffer.from(result.payload)}));
+                        if (flow[0].ret === "string") {
+                            msg.should.have.properties(Object.assign({}, result, {payload: result.payload}));
+                        } else {
+                            msg.should.have.properties(Object.assign({}, result, {payload: Buffer.from(result.payload)}));
+                        }
                     } else {
-                        msg.should.have.property('payload', Buffer.from(result));
+                        if (flow[0].ret === "string") {
+                            msg.should.have.property('payload', result);
+                        } else {
+                            msg.should.have.property('payload', Buffer.from(result));
+                        }
                     }
                     done();
                 } catch(err) {
@@ -245,10 +253,23 @@ describe('TCP Request Node', function() {
             }, done);
         });
 
+        it('should send & receive, then keep connection, and split return strings', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", ret:"string", newline:"<A>", wires:[["n2"]] },
+                        {id:"n2", type:"helper"}];
+            testTCPMany(flow, [{
+                payload: "foo<A>bar",
+                topic: 'boo'
+            }], {
+                payload: "ACK:foo<A>",
+                topic: 'boo'
+            }, done);
+        });
+
         it('should send & recv data to/from server:port from msg', function(done) {
             var flow = [{id:"n1", type:"tcp request", server:"", port:"", out:"time", splitc: "0", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
-            testTCPMany(flow, [{
+            testTCPMany(flow, [
+                {
                     payload: "f",
                     host: "localhost",
                     port: port
