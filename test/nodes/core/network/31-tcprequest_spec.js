@@ -253,14 +253,32 @@ describe('TCP Request Node', function() {
             }, done);
         });
 
-        it('should send & receive, then keep connection, and split return strings', function(done) {
-            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", ret:"string", newline:"<A>", wires:[["n2"]] },
+        it('should send & receive, then keep connection, and not split return strings', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", ret:"string", newline:"", wires:[["n2"]] },
                         {id:"n2", type:"helper"}];
             testTCPMany(flow, [{
-                payload: "foo<A>bar",
+                payload: "foo",
+                topic: 'boo'
+            }, {
+                payload: "bar<A>\nfoo",
                 topic: 'boo'
             }], {
-                payload: "ACK:foo<A>",
+                payload: "ACK:foobar<A>\nfoo",
+                topic: 'boo'
+            }, done);
+        });
+
+        it('should send & receive, then keep connection, and split return strings', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", ret:"string", newline:"<A>\\n", wires:[["n2"]] },
+                        {id:"n2", type:"helper"}];
+            testTCPMany(flow, [{
+                payload: "foo",
+                topic: 'boo'
+            }, {
+                payload: "bar<A>\nfoo",
+                topic: 'boo'
+            }], {
+                payload: "ACK:foobar<A>",
                 topic: 'boo'
             }, done);
         });
