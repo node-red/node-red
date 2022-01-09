@@ -1,0 +1,156 @@
+[
+    {
+        "id": "62ea32aa.d73aac",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "Example: Link Call Node",
+        "info": "Link call node can call link in node then get result from link out node.",
+        "x": 230,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "c588bc36.87fec",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↓ call link in node",
+        "info": "",
+        "x": 440,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "cd31efb4d2c6967e",
+        "type": "link call",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "links": [
+            "dbc46892c8d14c37"
+        ],
+        "timeout": "30",
+        "x": 420,
+        "y": 260,
+        "wires": [
+            [
+                "c3db64d1d2260340"
+            ]
+        ]
+    },
+    {
+        "id": "dbc46892c8d14c37",
+        "type": "link in",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "links": [],
+        "x": 315,
+        "y": 340,
+        "wires": [
+            [
+                "e10575d73f2e5352"
+            ]
+        ]
+    },
+    {
+        "id": "6b61792143b3b0a3",
+        "type": "inject",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 240,
+        "y": 260,
+        "wires": [
+            [
+                "cd31efb4d2c6967e"
+            ]
+        ]
+    },
+    {
+        "id": "e10575d73f2e5352",
+        "type": "change",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "Hello, World!",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 450,
+        "y": 340,
+        "wires": [
+            [
+                "cf8438e7137bc0f0"
+            ]
+        ]
+    },
+    {
+        "id": "cf8438e7137bc0f0",
+        "type": "link out",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "mode": "return",
+        "links": [],
+        "x": 595,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c3db64d1d2260340",
+        "type": "debug",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "6d077dfa0987febb",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↑called from link call node",
+        "info": "",
+        "x": 410,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "53b9a0adfd8c4217",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↑return to link call node",
+        "info": "",
+        "x": 680,
+        "y": 380,
+        "wires": []
+    }
+]
