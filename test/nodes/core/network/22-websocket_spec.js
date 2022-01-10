@@ -372,8 +372,8 @@ describe('websocket Node', function() {
                 { id: "n1", type: "websocket-client", path: getWsUrl("/ws") },
                 { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), subprotocol: "testprotocol" }];
             helper.load(websocketNode, flow, function() {
-                helper.getNode("n1").should.have.property("protocol", undefined);
-                helper.getNode("n2").should.have.property("protocol", "testprotocol");
+                helper.getNode("n1").should.have.property("subprotocol", undefined);
+                helper.getNode("n2").should.have.property("subprotocol", "testprotocol");
                 done();
             });
         });
