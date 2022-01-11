@@ -425,7 +425,7 @@ describe('rbe node', function() {
     });
 
     it('should not send output if x away or greater from original value (narrowbandEq)', function(done) {
-        var flow = [{"id":"n1", "type":"rbe", func:"narrowbandEq", gap:"10", inout:"out", wires:[["n2"]] },
+        var flow = [{"id":"n1", "type":"rbe", func:"narrowbandEq", gap:"10", inout:"out", start:"1", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(testNode, flow, function() {
             var n1 = helper.getNode("n1");
@@ -445,6 +445,7 @@ describe('rbe node', function() {
                     done();
                 }
             });
+            n1.emit("input", {payload:100});
             n1.emit("input", {payload:0});
             n1.emit("input", {payload:10});
             n1.emit("input", {payload:5});
