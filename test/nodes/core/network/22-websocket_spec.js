@@ -366,6 +366,18 @@ describe('websocket Node', function() {
             });
         });
 
+        it('should handle protocol property', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n1", type: "websocket-client", path: getWsUrl("/ws") },
+                { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), subprotocol: "testprotocol1, testprotocol2" }];
+            helper.load(websocketNode, flow, function() {
+                helper.getNode("n1").should.have.property("subprotocol", []);
+                helper.getNode("n2").should.have.property("subprotocol", ["testprotocol1","testprotocol2"]);
+                done();
+            });
+        });
+
         it('should connect to server', function(done) {
             var flow = [
                 { id: "server", type: "websocket-listener", path: "/ws" },
@@ -375,6 +387,18 @@ describe('websocket Node', function() {
                     done();
                 });
 
+            });
+        });
+
+        it('should initiate with subprotocol', function(done) {
+            var flow = [
+                { id: "server", type: "websocket-listener", path: "/ws" },
+                { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), subprotocol: "testprotocol" }];
+            helper.load(websocketNode, flow, function() {
+                getSocket('server').on('connection', function (sock) {
+                    sock.should.have.property("protocol", "testprotocol")
+                    done();
+                });
             });
         });
 
