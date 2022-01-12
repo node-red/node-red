@@ -370,10 +370,10 @@ describe('websocket Node', function() {
             var flow = [
                 { id: "server", type: "websocket-listener", path: "/ws" },
                 { id: "n1", type: "websocket-client", path: getWsUrl("/ws") },
-                { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), subprotocol: "testprotocol" }];
+                { id: "n2", type: "websocket-client", path: getWsUrl("/ws"), subprotocol: "testprotocol1, testprotocol2" }];
             helper.load(websocketNode, flow, function() {
-                helper.getNode("n1").should.have.property("subprotocol", undefined);
-                helper.getNode("n2").should.have.property("subprotocol", "testprotocol");
+                helper.getNode("n1").should.have.property("subprotocol", []);
+                helper.getNode("n2").should.have.property("subprotocol", ["testprotocol1","testprotocol2"]);
                 done();
             });
         });
