@@ -1,3 +1,37 @@
+#### 2.1.5: Maintenance Release
+
+Runtime
+
+ - Handle reporting error location when stack is truncated (#3346) @knolleary
+ - Initialize passport when only adminAuth.tokens is set (#3343) @knolleary
+ - Add log logging (#3342) @knolleary
+
+Editor
+
+ - Fix copy buttons on the debug window (another method) (#3331) @kazuhitoyokoi
+ - Add Japanese translations for hidden flow (#3302) @kazuhitoyokoi
+ - Improve jsonata legacy mode detection regex (#3345) @knolleary
+ - Fix generating flow name with incrementing number (#3347) @knolleary
+ - resume focus after import/export dialog close (#3337) @HiroyasuNishiyama
+ - Fix findPreviousVisibleTab action (#3321) @knolleary
+ - Fix storing hidden tab state when not hidden via action (#3312) @knolleary
+ - Avoid adding empty env properties to tabs/groups (#3311) @knolleary
+ - Fix hide icon in tour guide (#3301) @kazuhitoyokoi
+
+Nodes
+
+ - File: Update file node examples according to node name change (#3335) @HiroyasuNishiyama
+ - Filter (RBE): Fix for filter node narrrowbandEq mode start condition failure (#3339) @dceejay
+ - Function: Prevent function scrollbar from obscuring expand button (#3348) @knolleary
+ - Function: load extralibs when expanding monaco. fixes #3319 (#3334) @Steve-Mcl
+ - Function: Update Function to use correct api to access env vars (#3310) @knolleary
+ - HTTP Request: Fix basic auth with empty username or password (#3325) @hardillb
+ - Inject: Fix incorrect clearing of blank payload property in Inject node (#3322) @knolleary
+ - Link Call: add link call example (#3336) @HiroyasuNishiyama
+ - WebSocket: Only setup ws client heartbeat once it is connected (#3344) @knolleary
+ - Update Japanese translations in node help (#3332) @kazuhitoyokoi
+
+
 #### 2.1.4: Maintenance Release
 
 Runtime
