@@ -106,6 +106,42 @@ describe('inject node', function() {
         });
     });
 
+    it('inject name of node as environment variable ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NODE_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "NAME");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject id of node as environment variable ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NODE_ID", payloadType: "env", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "n1");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
     it('sets the value of flow context property', function (done) {
         var flow = [{id: "n1", type: "inject", topic: "t1", payload: "flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
