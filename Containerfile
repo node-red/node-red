@@ -10,6 +10,9 @@ RUN npm run build
 
 FROM node:stretch-slim
 
+RUN useradd -ms /bin/bash appuser
+USER appuser
+
 WORKDIR /app
 
 COPY --from=builder --chown=appuser:appuser /home/node/node_modules node_modules
