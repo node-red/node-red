@@ -8,6 +8,14 @@
         "env": []
     },
     {
+        "id": "c86af370eff94afa",
+        "type": "tab",
+        "label": "(Engineer) Unicorn Getting Started",
+        "disabled": false,
+        "info": "Guide to an incoming Unicorn to get their technical hoofs wet. The guide takes you through familiarization with local K8s clusters, bigbang, and zarf.",
+        "env": []
+    },
+    {
         "id": "0ac7681ed1c2bc4b",
         "type": "subflow",
         "name": "Kubernetes",
@@ -309,6 +317,130 @@
                 "09d8e90d5b4ade12",
                 "71a96ec4058930db"
             ]
+        ]
+    },
+    {
+        "id": "40bfe328130d9c41",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Deploy K3d",
+        "info": "https://k3d.io/v5.2.2/",
+        "x": 240,
+        "y": 160,
+        "wires": [
+            [
+                "691424f6cfd58372"
+            ]
+        ]
+    },
+    {
+        "id": "691424f6cfd58372",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Deploy a pod info application (with Kustomize)",
+        "info": "https://github.com/stefanprodan/podinfo\n`kubectl apply -k github.com/stefanprodan/podinfo//kustomize`",
+        "x": 580,
+        "y": 160,
+        "wires": [
+            [
+                "2d66fece0a8f5fdf"
+            ]
+        ]
+    },
+    {
+        "id": "2d66fece0a8f5fdf",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Expose podinfo with an Ingress",
+        "info": "",
+        "x": 1010,
+        "y": 160,
+        "wires": [
+            [
+                "52eb692e4c51108f"
+            ]
+        ]
+    },
+    {
+        "id": "52eb692e4c51108f",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Create a podinfo helm chart",
+        "info": "",
+        "x": 1410,
+        "y": 160,
+        "wires": [
+            [
+                "5361df412a99db12"
+            ]
+        ]
+    },
+    {
+        "id": "5361df412a99db12",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Deploy BigBang on a new K3d cluster",
+        "info": "https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md",
+        "x": 1810,
+        "y": 160,
+        "wires": [
+            [
+                "67415f95eb8ab46c"
+            ]
+        ]
+    },
+    {
+        "id": "67415f95eb8ab46c",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Deploy podinfo helmchart in bigbang",
+        "info": "",
+        "x": 2240,
+        "y": 160,
+        "wires": [
+            [
+                "9b8fdffdc9b5cc53"
+            ]
+        ]
+    },
+    {
+        "id": "9b8fdffdc9b5cc53",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Add Istio Virtual Service for the podinfo deployment",
+        "info": "https://istio.io/latest/docs/reference/config/networking/virtual-service/",
+        "x": 2750,
+        "y": 160,
+        "wires": [
+            [
+                "339481fd79e107a6"
+            ]
+        ]
+    },
+    {
+        "id": "339481fd79e107a6",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Deploy podinfo as a Flux HelmRelease",
+        "info": "",
+        "x": 3210,
+        "y": 160,
+        "wires": [
+            [
+                "0f9889d8e9cb7edb"
+            ]
+        ]
+    },
+    {
+        "id": "0f9889d8e9cb7edb",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Play DOOM using ZARF",
+        "info": "https://github.com/defenseunicorns/zarf/tree/master/examples/game",
+        "x": 3620,
+        "y": 160,
+        "wires": [
+            []
         ]
     }
 ]
