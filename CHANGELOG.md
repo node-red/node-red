@@ -1,3 +1,16 @@
+#### 2.1.6: Maintenance Release
+
+Editor
+
+ - Revert copy-text change and apply alternative fix (#3363) @knolleary
+ - Update marked to latest (#3362) @knolleary
+ - fix to make start of property error tooltip messages aligned (#3358) @HiroyasuNishiyama
+
+Nodes
+
+ - Inject: fix JSON propety validation of inject node (#3349) @HiroyasuNishiyama
+ - Delay: fix unit value validation of delay node (#3351) @HiroyasuNishiyama
+
 #### 2.1.5: Maintenance Release
 
 Runtime
