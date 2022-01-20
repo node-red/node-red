@@ -6,7 +6,7 @@
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/andrewsgreene/not-node-red.git"
+        "url": "https://github.com/defenseunicorns/Sparkles-Guide.git"
     },
     "private": "true",
     "scripts": {
@@ -77,8 +77,8 @@
         "bcrypt": "5.0.1"
     },
     "devDependencies": {
-        "dompurify": "2.3.5",
         "cypress": "^9.1.1",
+        "dompurify": "2.3.5",
         "grunt": "1.4.1",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.4.3",
