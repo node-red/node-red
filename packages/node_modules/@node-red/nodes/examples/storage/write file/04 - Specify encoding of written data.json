@@ -1,0 +1,113 @@
+[
+    {
+        "id": "e4ef1f5e.7cd82",
+        "type": "inject",
+        "z": "6312c0588348b2d4",
+        "name": "Base64 encoded string",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "8J+YgA==",
+        "payloadType": "str",
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "72b37cc8.177054"
+            ]
+        ]
+    },
+    {
+        "id": "f5997af4.5a9298",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "Specify encoding of written data",
+        "info": "Write file node can specify encoding of data.",
+        "x": 170,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "72b37cc8.177054",
+        "type": "file",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "filename": "/tmp/hello.txt",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "base64",
+        "x": 420,
+        "y": 220,
+        "wires": [
+            [
+                "2da33ec.f45cac2"
+            ]
+        ]
+    },
+    {
+        "id": "2e814354.278c8c",
+        "type": "debug",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 810,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "2da33ec.f45cac2",
+        "type": "file in",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "filename": "/tmp/hello.txt",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "none",
+        "x": 620,
+        "y": 220,
+        "wires": [
+            [
+                "2e814354.278c8c"
+            ]
+        ]
+    },
+    {
+        "id": "ec754c99.84bfd",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↓write string with base64 encoding",
+        "info": "",
+        "x": 480,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "3e6704ff.4ce25c",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↑read result from file",
+        "info": "",
+        "x": 630,
+        "y": 260,
+        "wires": []
+    }
+]

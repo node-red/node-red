@@ -1,0 +1,114 @@
+[
+    {
+        "id": "8997398f.c5d628",
+        "type": "inject",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "😀",
+        "payloadType": "str",
+        "x": 170,
+        "y": 260,
+        "wires": [
+            [
+                "56e32d23.050f44"
+            ]
+        ]
+    },
+    {
+        "id": "4e598e65.1799d",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "Read data in specified encoding",
+        "info": "Read file node can specify encoding of data read from a file.",
+        "x": 190,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "56e32d23.050f44",
+        "type": "file",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "filename": "/tmp/hello.txt",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 340,
+        "y": 260,
+        "wires": [
+            [
+                "38fa0579.f2cd8a"
+            ]
+        ]
+    },
+    {
+        "id": "d28c8994.99c0a8",
+        "type": "debug",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "38fa0579.f2cd8a",
+        "type": "file in",
+        "z": "6312c0588348b2d4",
+        "name": "",
+        "filename": "/tmp/hello.txt",
+        "format": "utf8",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "base64",
+        "allProps": false,
+        "x": 540,
+        "y": 260,
+        "wires": [
+            [
+                "d28c8994.99c0a8"
+            ]
+        ]
+    },
+    {
+        "id": "fa22ca20.ae4528",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↑read data from file as base64 string",
+        "info": "",
+        "x": 600,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "148e25ad.98891a",
+        "type": "comment",
+        "z": "6312c0588348b2d4",
+        "name": "↓write to /tmp/hello.txt",
+        "info": "",
+        "x": 360,
+        "y": 220,
+        "wires": []
+    }
+]
