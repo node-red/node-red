@@ -8,4 +8,4 @@ fi
 
 echo using $CONTAINER_ENGINE container engine...
 
-$CONTAINER_ENGINE run -p 1880:1880 -v "$(pwd)"/data/:/root/.node-red/ sparkle-guide:$VERSION &
+$CONTAINER_ENGINE run -p 1880:1880 -v "$(pwd)"/data:/home/appuser/.node-red sparkle-guide:$VERSION &

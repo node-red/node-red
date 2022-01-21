@@ -7,12 +7,12 @@ Sparkle's Guide is inspired by [roadmap.sh](https://roadmap.sh) and is a derivat
 Local Environment with NPM
 1. `npm install`
 2. `npm run build`
-3. `npm start`
+3. `npm start -- data/flows.json`
 4. Open <http://127.0.0.1:1880/>
 
-Docker
-1. `./docker-build.sh`
-2. `./docker-run.sh`
+Docker/Podman
+1. `./container-build.sh`
+2. `./container-run.sh`
 3. Open <http://127.0.0.1:1880/>
 
 ## Contributing
