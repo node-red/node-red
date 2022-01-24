@@ -65,7 +65,7 @@
         "type": "comment",
         "z": "0ac7681ed1c2bc4b",
         "name": "Kubernetes",
-        "info": "# Description\n\n\n## Resources\n- https://kubernetes.io/docs/home/ ***\n- https://www.youtube.com/watch?v=VnvRFRk_51k ",
+        "info": "# Description\n\n\n## Resources\n- https://kubernetes.io/docs/home/ ***\n- https://www.youtube.com/watch?v=VnvRFRk_51k \n- https://www.youtube.com/watch?v=X48VuDVv0do (long video, covers most topics in this flow)",
         "x": 450,
         "y": 180,
         "wires": [
@@ -315,7 +315,22 @@
                 "8c04bec4a15f6702",
                 "fc01372231b580db",
                 "09d8e90d5b4ade12",
-                "71a96ec4058930db"
+                "71a96ec4058930db",
+                "81348cdecdf51fd9"
+            ]
+        ]
+    },
+    {
+        "id": "81348cdecdf51fd9",
+        "type": "comment",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Operators",
+        "info": "https://www.youtube.com/watch?v=ha3LjlD6g7g",
+        "x": 890,
+        "y": 380,
+        "wires": [
+            [
+                "e328f5849309e731"
             ]
         ]
     },
@@ -324,7 +339,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Deploy K3d",
-        "info": "https://k3d.io/v5.2.2/",
+        "info": "https://k3d.io/v5.2.2/\n\n### Choose your platform\nThe preferred free VM software is [VirtualBox](https://www.virtualbox.org/); however, it is not compatible with M1 chips! So, if you are using an M1 Mac, we highly recommend you go with the [Cloud](#Cloud) option below\n\n##### Cloud\nRecommend using an EC2 instance with the following specs:\n- AMI: Ubuntu Server (64-bit, x86)\n- Instance Type: t3a.2xlarge\n- 100 GB EBS\n- Security group rules for allowing web traffic\n\n##### Local\nUse [Vagrant](https://www.vagrantup.com/) to spin up a VM with at least the following specs:\n- 10GB RAM\n- 4 CPU cores\n- An IP that can be [accessed](https://www.vagrantup.com/docs/networking/private_network#static-ip) from the host machine. \n\nDepending on RAM/CPU availability, you may want to run 2 or more K3d nodes",
         "x": 240,
         "y": 160,
         "wires": [
