@@ -10,17 +10,18 @@ Editor
  - Fix vertical align subflow port (#3370) @knolleary
  - Add Japanese translations for v2.2.0-beta.1 (#3353) @kazuhitoyokoi
  - Make actions list i18n ready and Japanese translation (#3359) @HiroyasuNishiyama
+ - Update tour for 2.2.0 (#3378) @knolleary
 
 Runtime
 
  - Add support for accessing node id & name as environment variable (#3356) @HiroyasuNishiyama
- - Add _path property to nodes and expose as node.path in Function node (#3371) @knolleary
  - Clear context contents when switching projects (#3243) @knolleary
 
 Nodes
 
  - MQTT: reject invalid topics (#3374) @Steve-Mcl
-
+ - Function: Expose node.path property (#3371) @knolleary
+ - Function: Update `node` declarations in func.d.ts (#3377) @Steve-Mcl
 
 #### 2.2.0-beta.1: Beta Release
 
