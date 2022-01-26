@@ -1,3 +1,27 @@
+#### 2.2.0: Milestone Release
+
+Editor
+
+ - Add editorTheme.tours property to default settings file (#3375) @knolleary
+ - Remember Zoom level and Sidebar tab selection between sessions (#3361) @knolleary
+ - Fix timing issue when merging background changes fixes #3364 (#3373) @Steve-Mcl
+ - Use a nodes palette label in help tree (#3372) @Steve-Mcl
+ - Subflow: Add labels to OUTPUT nodes (#3352) @ralphwetzel
+ - Fix vertical align subflow port (#3370) @knolleary
+ - Add Japanese translations for v2.2.0-beta.1 (#3353) @kazuhitoyokoi
+ - Make actions list i18n ready and Japanese translation (#3359) @HiroyasuNishiyama
+
+Runtime
+
+ - Add support for accessing node id & name as environment variable (#3356) @HiroyasuNishiyama
+ - Add _path property to nodes and expose as node.path in Function node (#3371) @knolleary
+ - Clear context contents when switching projects (#3243) @knolleary
+
+Nodes
+
+ - MQTT: reject invalid topics (#3374) @Steve-Mcl
+
+
 #### 2.2.0-beta.1: Beta Release
 
 Editor
