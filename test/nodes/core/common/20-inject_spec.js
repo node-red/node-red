@@ -142,6 +142,25 @@ describe('inject node', function() {
         });
     });
 
+    it('inject path of node as environment variable ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_NODE_PATH", payloadType: "env", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "flow/n1");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+
     it('inject name of flow as environment variable ', function (done) {
         var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_FLOW_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"},
