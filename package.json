@@ -13,6 +13,7 @@
         "start": "node packages/node_modules/node-red/red.js",
         "test": "grunt",
         "cy:run": "cypress run",
+        "cy:debug": "cypress open",
         "build": "grunt build",
         "dev": "grunt dev",
         "build-dev": "grunt build-dev",
@@ -77,7 +78,7 @@
         "bcrypt": "5.0.1"
     },
     "devDependencies": {
-        "cypress": "^9.1.1",
+        "cypress": "^9.3.1",
         "dompurify": "2.3.5",
         "grunt": "1.4.1",
         "grunt-chmod": "~1.1.1",
