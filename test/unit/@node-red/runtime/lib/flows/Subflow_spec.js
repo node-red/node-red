@@ -212,7 +212,7 @@ describe('Subflow', function() {
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
             var flow = node._flow;
-            var val = flow.getSetting("NODE_NAME");
+            var val = flow.getSetting("NR_NODE_NAME");
             node.received = val;
             node.send({payload: val});
         });
@@ -241,7 +241,7 @@ describe('Subflow', function() {
         currentNodes[node.id] = node;
         this.on('input',function(msg) {
             var flow = node._flow;
-            var val = flow.getSetting("NODE_ID");
+            var val = flow.getSetting("NR_NODE_ID");
             node.received = val;
             node.send({payload: val});
         });
