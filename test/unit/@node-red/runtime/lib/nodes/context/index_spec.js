@@ -156,6 +156,22 @@ describe('context', function() {
             });
         });
 
+        it('deletes global context',function() {
+            Context.init({functionGlobalContext: {foo:"bar"}});
+            return Context.load().then(function(){
+                var globalContextA = Context.get("global")
+
+                globalContextA.get('foo').should.eql('bar')
+                globalContextA.set("another","value");
+
+                return Context.delete("global").then(function(){
+                    var globalContextB = Context.get("global")
+                    globalContextB.get('foo').should.eql('bar')
+                    should.not.exist(globalContextB.get("another"));
+                });
+            });
+        });
+
         it('enumerates context keys - sync', function() {
             var flowContextA = Context.getFlowContext("flowA")
             var context = Context.get("1","flowA");
@@ -316,6 +332,31 @@ describe('context', function() {
             });
         });
 
+
+        describe("clear", function() {
+            it('clears all context',function() {
+                Context.init({functionGlobalContext: {foo:"bar"}});
+                return Context.load().then(function(){
+                    var globalContextA = Context.get("global")
+                    globalContextA.get('foo').should.eql('bar')
+                    globalContextA.set("another","value");
+
+                    var flowContextA = Context.getFlowContext("flowA")
+                    flowContextA.set("foo","abc");
+                    flowContextA.get("foo").should.equal("abc");
+
+                    return Context.clear().then(function(){
+                        var globalContextB = Context.getFlowContext("global")
+                        globalContextB.get('foo').should.eql('bar')
+                        should.not.exist(globalContextB.get("another"));
+
+                        flowContextA = Context.getFlowContext("flowA")
+                        should.not.exist(flowContextA.get("foo"))
+
+                    });
+                });
+            });
+        })
     });
 
     describe('external context storage',function() {
