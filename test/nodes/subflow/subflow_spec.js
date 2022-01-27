@@ -567,4 +567,43 @@ describe('subflow', function() {
         });
     });
 
+    it('should access NR_NODE_PATH env var within subflow instance', function(done) {
+        var flow = [
+            {id:"t0", type:"tab", label:"", disabled:false, info:""},
+            {id:"n1", x:10, y:10, z:"t0", type:"subflow:s1",
+             env: [], wires:[["n2"]]},
+            {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
+            // Subflow
+            {id:"s1", type:"subflow", name:"Subflow", info:"",
+             in:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1"} ]
+             }],
+             out:[{
+                 x:10, y:10,
+                 wires:[ {id:"s1-n1", port:0} ]
+             }]
+            },
+            {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
+             func:"msg.payload = env.get('NR_NODE_PATH'); return msg;",
+             wires:[]}
+        ];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("payload", "t0/n1/s1-n1");
+                    done();
+                }
+                catch (e) {
+                    console.log(e);
+                    done(e);
+                }
+            });
+            n1.receive({payload:"foo"});
+        });
+    });
+
+
 });

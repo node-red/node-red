@@ -38,12 +38,9 @@ If you want to raise a pull-request with a new feature, or a refactoring
 of existing code, it may well get rejected if you haven't discussed it on
 the [forum](https://discourse.nodered.org) first.
 
-All contributors need to sign the JS Foundation's Contributor License Agreement.
-It is an online process and quick to do. You can read the details of the agreement
-here: https://cla.js.foundation/node-red/node-red.
-
-If you raise a pull-request without having signed the CLA, you will be prompted
-to do so automatically.
+All contributors need to sign the OpenJS Foundation's Contributor License Agreement.
+It is an online process and quick to do. If you raise a pull-request without
+having signed the CLA, you will be prompted to do so automatically.
 
 
 ### Code Branches
