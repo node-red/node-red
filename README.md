@@ -56,13 +56,13 @@ This project adheres to the [Contributor Covenant 1.4](http://contributor-covena
 
 ## Authors
 
-Node-RED is a project of the [OpenJS Foundation](https://openjsf.org).
+Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
 
-It was created by [IBM Emerging Technology](https://www.ibm.com/blogs/emerging-technology/).
+It is maintained by:
 
-* Nick O'Leary [@knolleary](http://twitter.com/knolleary)
-* Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
-
+ * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
+ * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
+ * And many others...
 
 
 ## Copyright and license
