@@ -8,9 +8,11 @@ Editor
  - Use a nodes palette label in help tree (#3372) @Steve-Mcl
  - Subflow: Add labels to OUTPUT nodes (#3352) @ralphwetzel
  - Fix vertical align subflow port (#3370) @knolleary
- - Add Japanese translations for v2.2.0-beta.1 (#3353) @kazuhitoyokoi
  - Make actions list i18n ready and Japanese translation (#3359) @HiroyasuNishiyama
  - Update tour for 2.2.0 (#3378) @knolleary
+ - Include paletteLabel when building search index (#3380) @Steve-Mcl
+ - Fix opening/closing subflow template not to make subflow changed (#3382) @HiroyasuNishiyama
+ - Add Japanese translations for v2.2.0 (#3353, #3381) @kazuhitoyokoi
 
 Runtime
 
