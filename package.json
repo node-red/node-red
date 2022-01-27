@@ -107,7 +107,7 @@
         "i18next-http-backend": "1.3.2",
         "jquery-i18next": "1.2.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
-        "marked": "4.0.10",
+        "marked": "4.0.12",
         "minami": "1.2.3",
         "mocha": "9.2.0",
         "node-red-node-test-helper": "^0.2.7",
