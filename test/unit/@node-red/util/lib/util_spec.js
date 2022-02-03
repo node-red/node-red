@@ -830,6 +830,24 @@ describe("@node-red/util/util", function() {
                 resultJson.b.should.have.property("__enc__", true);
                 resultJson.b.should.have.property("type", "undefined");
             });
+            it('object with no prototype builtins', function() {
+                const payload = new Object(null);
+                payload.c = 3;
+                var msg = { msg:{b:payload} };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("b");
+                resultJson.b.should.have.property("c", 3);
+            });
+            it('object with overriden hasOwnProperty', function() {
+                var msg = { msg:{b:{hasOwnProperty:null}} };
+                var result = util.encodeObject(msg);
+                result.format.should.eql("Object");
+                var resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("b");
+                resultJson.b.should.have.property("hasOwnProperty");
+            });
             it('object with Map property', function() {
                 const m = new Map();
                 m.set("a",1);
