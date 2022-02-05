@@ -395,7 +395,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Deploy BigBang on a new K3d cluster",
-        "info": "https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md",
+        "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the qiuckstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
         "x": 1810,
         "y": 160,
         "wires": [
@@ -409,7 +409,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Deploy podinfo helmchart in bigbang",
-        "info": "",
+        "info": "# Big Bang Extensibility\n\nUp to now - we have configured and deployed k3d clusters, we've used `kustomize` and `Helm` to orchestrate deploying `podinfo` to our cluster.\n\nWe then used flux and it's controllers to deploy bigbang (which is using helm and kustomize under the hood).\n\n## Objective\nNow we will look at extending the big bang deployment to include deploying the podinfo helm chart. \n\n## Recommended Reading",
         "x": 2240,
         "y": 160,
         "wires": [
