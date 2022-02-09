@@ -408,9 +408,9 @@
         "id": "67415f95eb8ab46c",
         "type": "comment",
         "z": "c86af370eff94afa",
-        "name": "Deploy podinfo helmchart in bigbang",
-        "info": "# Big Bang Extensibility\n\nUp to now - we have configured and deployed k3d clusters, we've used `kustomize` and `Helm` to orchestrate deploying `podinfo` to our cluster.\n\nWe then used flux and it's controllers to deploy bigbang (which is using helm and kustomize under the hood).\n\n## Objective\nNow we will look at extending the big bang deployment to include deploying the podinfo helm chart. \n\n## Recommended Reading",
-        "x": 2240,
+        "name": "Deploy podinfo helmchart in a bigbang cluster",
+        "info": "# Big Bang Extensibility\n\nUp to now - we have configured and deployed k3d clusters, we've used `kustomize` and `Helm` to orchestrate deploying `podinfo` to our cluster.\n\nWe then used flux and it's controllers to deploy bigbang (which is using helm and kustomize under the hood).\n\n## Recommended Reading\n\n## Objective\nNow we will look at extending the big bang deployment to include deploying the podinfo helm chart and ensuring the deployment architecture aligns with the Big Bang \"Core\" technologies.\n\nThis is a precursory step to follow-on nodes in this flow. \n\n## Execution\n\nClone the podinfo repository if not done already.\n\nCreate a namespace with the label:\n`istio-injection: enabled`\n\nDeploy the helm chart for the podinfo applicaiton as we have done previously.\n\n## Success Criteria\nDeploy the podinfo helm chart into your cluster that already has big bang deployed.\n\nThe application should come online and be able to be reached via `kubectl port-forward`\n\nContinue to the next node for extending this with Istio",
+        "x": 2270,
         "y": 160,
         "wires": [
             [
@@ -423,7 +423,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Add Istio Virtual Service for the podinfo deployment",
-        "info": "https://istio.io/latest/docs/reference/config/networking/virtual-service/",
+        "info": "# Istio VirtualServices\n\n## Recommended Reading\n\n- https://istio.io/latest/docs/reference/config/networking/virtual-service/\n\n### Example\n- https://repo1.dso.mil/platform-one/big-bang/apps/core/kiali/-/blob/main/chart/values.yaml#:~:text=istio%3A,kiali.%7B%7B%20.Values.hostname%20%7D%7D\n- https://repo1.dso.mil/platform-one/big-bang/apps/core/kiali/-/blob/main/chart/templates/bigbang/virtualservice.yaml\n\n## Objective\nWith the podinfo helm chart deployed (in it's basic state), we will look to leverage some of th technologies that Big Bang has reconciled and configured.\n\nBig Bang exposes cluster applications to external traffic through an Istio Ingress Gateway.\n\nVirtual services are then used to link kubernetes services to traffic from the ingresss gateways.\n\n## Execution\n\n\n\n## Success Criteria\nWrite a virtual service resource definition file for the podinfo application that was deployed as part of the last node.\n\nIf you add the `podinfo.bigbang.dev` endpoint to your hosts file, then it should be resolveable from the browser.\n\n## Solution\n<details><summary>show</summary>\n<p>\n\n```\napiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: podinfo\n  namespace: podinfo\nspec:\n  gateways:\n  - istio-system/public\n  hosts:\n  - podinfo.bigbang.dev\n  http:\n  - route:\n    - destination:\n        host: podinfo.podinfo.svc.cluster.local\n        port:\n          number: 9898\n```\n\n</p>\n</details>",
         "x": 2750,
         "y": 160,
         "wires": [
@@ -437,7 +437,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Deploy podinfo as a Flux HelmRelease",
-        "info": "",
+        "info": "# Flux helm release reconciliation\n\"Big Bang follows a GitOps approach to configuration management, using Flux v2 to reconcile Git with the cluster.  Environments (e.g. dev, prod) and packages (e.g. istio) can be fully configured to suit the deployment needs.\"\n\n## Prerequisites\n- Remove all prior content for podinfo from your cluster. \n\n## Recommended Reading\n- https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/README.md\n\n## Objective\nFollowing the umbrella structure in the Big Bang chart, we can create the templates under a `podinfo` directory (under the templates dir).\n\nNote: there are many ways to accomplish this task - the podinfo directory under the templates directory most-accurately represents how the umbrella structure works.\n\n### Minimum Requirements\n- namespace resource\n- git repository resource\n- helm release resource\n- virtual service resource\n\nThis would meet the bare minimum requirements.\n\n### Additional Content\n- values file (a helper generates a secret resource from this)\n\n## Success Criteria\nIf we run the `helm upgrade` command against the modified Big Bang helm chart, it should deploy the podinfo chart (if properly enabled) with the ability to access/resolve the application through the `Ingress Gateway`.",
         "x": 3210,
         "y": 160,
         "wires": [
@@ -451,7 +451,7 @@
         "type": "comment",
         "z": "c86af370eff94afa",
         "name": "Play DOOM using ZARF",
-        "info": "https://github.com/defenseunicorns/zarf/tree/master/examples/game",
+        "info": "# Zarf!\n\nZarf is a Defense Unicorns developed tool - please read about it below!\n\n## Recommended Reading\n- https://github.com/defenseunicorns/zarf\n\n\n## Objective\nUsing Zarf, we will follow the guide below in order to play DOOM.\n\nhttps://github.com/defenseunicorns/zarf/tree/master/examples/game\n\n## Success Criteria\nPackaging, Deployment and execution of playing DOOM from within the browser.",
         "x": 3620,
         "y": 160,
         "wires": [
