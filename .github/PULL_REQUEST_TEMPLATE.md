@@ -12,6 +12,7 @@ Put an `x` in the boxes that apply
 
 - [ ] Bugfix (non-breaking change which fixes an issue)
 - [ ] New feature (non-breaking change which adds functionality)
+- [ ] Improved node content
 
 <!--
 If you want to raise a pull-request with a new feature, or a refactoring
@@ -28,7 +29,7 @@ the [forum](https://discourse.nodered.org) or
 ## Checklist
 <!-- Put an `x` in the boxes that apply -->
 
-- [ ] I have read the [contribution guidelines](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md)
+- [ ] I have read the [contribution guidelines](../docs/sparkles-guides-contribution.md)
 - [ ] For non-bugfix PRs, I have discussed this change on the forum/slack team.
-- [ ] I have run `grunt` to verify the unit tests pass
-- [ ] I have added suitable unit tests to cover the new/changed functionality
+- [ ] I have run `cypress` to verify the tests pass
+- [ ] I have added suitable tests to cover the new/changed functionality
