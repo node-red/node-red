@@ -14,6 +14,6 @@ Finally, deleting code often has unintended consequences - you should, at a mini
 
 ## Testing code
 
-1. `npm run dev` or `npm start`
+1. `npm run dev -- data/flows.json` or `npm start -- data/flows.json`
 2. `npm run cy:run` # Runs cypress tests
 
