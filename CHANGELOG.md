@@ -1,3 +1,10 @@
+#### 2.2.2: Maintenance Release
+
+Nodes
+
+ - Fix "close timed out" error when performing full deploy or modifying broker node. (#3451) @Steve-Mcl
+
+
 #### 2.2.1: Maintenance Release
 
 Editor
