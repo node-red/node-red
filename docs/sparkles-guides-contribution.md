@@ -11,7 +11,7 @@ At the simplest level:
 
 ## Conventions and Guidelines
 
-- Topics within flows, build upon each other from left to right. For example, knowing containerization prior to kubernetes.
+- Topics within flows, build upon each other from top to bottom. For example, knowing containerization prior to kubernetes.
 - Use subflows when a common topic exists. Ex. Zarf requires golang, which is a learning topic itself, or BigBang requires kubernetes
 - Add materials (youtube, course, SME, article, etc...) to the description of nodes.
 - Add a * to materials that you found helpful 
