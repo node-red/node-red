@@ -278,6 +278,21 @@ describe('TCP Request Node', function() {
                 payload: "bar<A>\nfoo",
                 topic: 'boo'
             }], {
+                payload: "ACK:foobar",
+                topic: 'boo'
+            }, done);
+        });
+
+        it('should send & receive, then keep connection, and split return strings and reattach delimiter', function(done) {
+            var flow = [{id:"n1", type:"tcp request", server:"localhost", port:port, out:"sit", ret:"string", newline:"<A>\\n", trim:true, wires:[["n2"]] },
+                        {id:"n2", type:"helper"}];
+            testTCPMany(flow, [{
+                payload: "foo",
+                topic: 'boo'
+            }, {
+                payload: "bar<A>\nfoo",
+                topic: 'boo'
+            }], {
                 payload: "ACK:foobar<A>",
                 topic: 'boo'
             }, done);

@@ -121,6 +121,19 @@ describe('TCP in Node', function() {
         testTCP0(flow, ["foo\nbar"], ["foo", "bar"], done);
     });
 
+    it('should recv data (Stream/String/Delimiter:o\\n)', function(done) {
+        var flow = [{id:"n1", type:"tcp in", server:"server", host:"localhost", port:port, datamode:"stream", datatype:"utf8", newline:"o\n", topic:"", base64:false, wires:[["n2"]] },
+                    {id:"n2", type:"helper"}];
+        testTCP0(flow, ["foo\nbar"], ["fo", "bar"], done);
+    });
+
+    it('should recv data (Stream/String/Delimiter:o\\n) and reattach o', function(done) {
+        var flow = [{id:"n1", type:"tcp in", server:"server", host:"localhost", port:port, datamode:"stream", datatype:"utf8", newline:"o\n", trim:true, topic:"", base64:false, wires:[["n2"]] },
+                    {id:"n2", type:"helper"}];
+        testTCP0(flow, ["foo\nbar"], ["foo", "bar"], done);
+    });
+
+
     it('should recv data (Stream/String/No delimiter)', function(done) {
         var flow = [{id:"n1", type:"tcp in", server:"server", host:"localhost", port:port, datamode:"stream", datatype:"utf8", newline:"", topic:"", base64:false, wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
