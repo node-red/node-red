@@ -120,7 +120,7 @@ describe('link Node', function() {
     });
 
     describe("link-call node", function() {
-        it('should call link-in node and get response', function(done) {
+        it('should call static link-in node and get response', function(done) {
             var flow = [{id:"link-in-1", type:"link in", wires: [[ "func"]]},
                         {id:"func", type:"helper", wires: [["link-out-1"]]},
                         {id:"link-out-1", type:"link out", mode: "return"},
@@ -146,42 +146,141 @@ describe('link Node', function() {
                 n1.receive({payload:"hello"});
             });
         })
-    });
-
-    it('should allow nested link-call flows', function(done) {
-        var flow = [/** Multiply by 2 link flow **/
-                    {id:"li1", type:"link in", wires: [[ "m2"]]},
-                    {id:"m2", type:"helper", wires: [["lo1"]]},
-                    {id:"lo1", type:"link out", mode: "return"},
-                    /** Multiply by 3 link flow **/
-                    {id:"li2", type:"link in", wires: [[ "m3"]]},
-                    {id:"m3", type:"helper", wires: [["lo2"]]},
-                    {id:"lo2", type:"link out", mode: "return"},
-                    /** Multiply by 6 link flow **/
-                    {id:"li3", type:"link in", wires: [[ "link-call-1"]]},
-                    {id:"link-call-1", type:"link call", links:["m2"], wires:[["link-call-2"]]},
-                    {id:"link-call-2", type:"link call", links:["m3"], wires:[["lo3"]]},
-                    {id:"lo3", type:"link out", mode: "return"},
-                    /** Test Flow Entry **/
-                    {id:"link-call", type:"link call", links:["li3"], wires:[["n4"]]},
-                    {id:"n4", type:"helper"} ];
-        helper.load(linkNode, flow, function() {
-            var m2 = helper.getNode("m2");
-            m2.on("input", function(msg, send, done) { msg.payload *= 2 ; send(msg); done(); })
-            var m3 = helper.getNode("m3");
-            m3.on("input", function(msg, send, done) { msg.payload *= 3 ; send(msg); done(); })
-
-            var n1 = helper.getNode("link-call");
-            var n4 = helper.getNode("n4");
-            n4.on("input", function(msg) {
-                try {
-                    msg.should.have.property('payload', 24);
+    
+        it('should call link-in node by name and get response', function(done) {
+            var payload = Date.now();
+            var flow = [{id:"link-in-1", type:"link in", name:"double payload", wires: [[ "func"]]},
+                        {id:"func", type:"helper", wires: [["link-out-1"]]},
+                        {id:"link-out-1", type:"link out", mode: "return"},
+                        {id:"link-call", type:"link call", linkType:"dynamic", links:[], wires:[["n4"]]},
+                        {id:"n4", type:"helper"} ];
+            helper.load(linkNode, flow, function() {
+                var func = helper.getNode("func");
+                func.on("input", function(msg, send, done) {
+                    msg.payload += msg.payload;
+                    send(msg);
                     done();
-                } catch(err) {
-                    done(err);
-                }
+                })
+                var n1 = helper.getNode("link-call");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.eql(payload + payload);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:payload, target:"double payload" });
             });
-            n1.receive({payload:4});
-        });
-    })
+        })
+        it('should timeout waiting for link return', function(done) {
+            this.timeout(1000); 
+            const flow = [
+                { id: "tab-flow-1", type: "tab", label: "Flow 1" },
+                { id: "link-in-1", z: "tab-flow-1", type: "link in", name: "double payload", wires: [["func"]] },
+                { id: "func", z: "tab-flow-1", type: "helper", wires: [["link-out-1"]] },
+                { id: "link-out-1", z: "tab-flow-1", type: "link out", mode: "" }, //not return mode, cause link-call timeout
+                { id: "link-call", z: "tab-flow-1", type: "link call", linkType: "static", "timeout": "0.5", links: ["link-in-1"], wires: [["n4"]] },
+                { id: "catch-all", z: "tab-flow-1", type: "catch", scope: ["link-call"], uncaught: true, wires: [["n4"]] },
+                { id: "n4", z: "tab-flow-1", type: "helper" } 
+            ];
+            helper.load(linkNode, flow, function() {
+                const funcNode = helper.getNode("func");
+                const linkCallNode = helper.getNode("link-call");
+                const helperNode = helper.getNode("n4");
+                funcNode.on("input", function(msg, send, done) {
+                    msg.payload += msg.payload;
+                    send(msg);
+                    done();
+                })
+                helperNode.on("input", function(msg) {
+                    try {
+                        msg.should.have.property("target", "double payload");
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message", "timeout");
+                        msg.error.should.have.property("source");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                linkCallNode.receive({payload:"hello", target:"double payload" });
+            });
+        })
+        it('should raise error due to multiple targets', function(done) {
+            this.timeout(500);
+            const flow = [
+                { id: "tab-flow-1", type: "tab", label: "Flow 1" },
+                { id: "tab-flow-2", type: "tab", label: "Flow 2" },
+                { id: "tab-flow-3", type: "tab", label: "Flow 3" },
+                { id: "link-in-1", z: "tab-flow-2", type: "link in", name: "double payload", wires: [["func"]] },
+                { id: "link-in-2", z: "tab-flow-3", type: "link in", name: "double payload", wires: [["func"]] },
+                { id: "func", z: "tab-flow-1", type: "helper", wires: [["link-out-1"]] },
+                { id: "link-out-1", z: "tab-flow-1", type: "link out", mode: "return" },
+                { id: "link-call", z: "tab-flow-1", type: "link call", linkType: "dynamic", links: [], wires: [["n4"]] },
+                { id: "catch-all", z: "tab-flow-1", type: "catch", scope: ["link-call"], uncaught: true, wires: [["n4"]] },
+                { id: "n4", z: "tab-flow-1", type: "helper" } 
+            ];
+            helper.load(linkNode, flow, function() {
+                const funcNode = helper.getNode("func");
+                const linkCall = helper.getNode("link-call");
+                const helperNode = helper.getNode("n4");
+                funcNode.on("input", function(msg, send, _done) {
+                    done(new Error("Function should not be called"))
+                })
+                helperNode.on("input", function(msg) {
+                    try{
+                        msg.should.have.property("target", "double payload");
+                        msg.should.have.property("error");
+                        msg.error.should.have.property("message");
+                        msg.error.message.should.match(/.*Multiple link-in nodes.*/)
+                        msg.error.should.have.property("source");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                linkCall.receive({payload:"hello", target:"double payload" });
+            });
+        })
+        it('should allow nested link-call flows', function(done) {
+            this.timeout(500);
+            var flow = [/** Multiply by 2 link flow **/
+                        {id:"li1", type:"link in", wires: [[ "m2"]]},
+                        {id:"m2", type:"helper", wires: [["lo1"]]},
+                        {id:"lo1", type:"link out", mode: "return"},
+                        /** Multiply by 3 link flow **/
+                        {id:"li2", type:"link in", wires: [[ "m3"]]},
+                        {id:"m3", type:"helper", wires: [["lo2"]]},
+                        {id:"lo2", type:"link out", mode: "return"},
+                        /** Multiply by 6 link flow **/
+                        {id:"li3", type:"link in", wires: [[ "link-call-1"]]},
+                        {id:"link-call-1", type:"link call", links:["li1"], wires:[["link-call-2"]]},
+                        {id:"link-call-2", type:"link call", links:["li2"], wires:[["lo3"]]},
+                        {id:"lo3", type:"link out", mode: "return"},
+                        /** Test Flow Entry **/
+                        {id:"link-call", type:"link call", links:["li3"], wires:[["n4"]]},
+                        {id:"n4", type:"helper"} ];
+            helper.load(linkNode, flow, function() {
+                var m2 = helper.getNode("m2");
+                m2.on("input", function(msg, send, done) { msg.payload *= 2 ; send(msg); done(); })
+                var m3 = helper.getNode("m3");
+                m3.on("input", function(msg, send, done) { msg.payload *= 3 ; send(msg); done(); })
+
+                var n1 = helper.getNode("link-call");
+                var n4 = helper.getNode("n4");
+                n4.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 24);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:4});
+            });
+        })
+    });
 });
