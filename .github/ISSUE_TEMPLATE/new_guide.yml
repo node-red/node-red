@@ -1,0 +1,10 @@
+name: Suggest a Guide
+description: File a bug/issue on Sparkles-Guide
+labels: [needs-triage, new-guide]
+body:
+- type: textarea
+  attributes:
+    label: New Guide
+    description: Describe the guide you are suggesting.
+  validations:
+    required: true
