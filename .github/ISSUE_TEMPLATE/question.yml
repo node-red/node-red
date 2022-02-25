@@ -1,0 +1,10 @@
+name: ? Question
+description: Ask a question Sparkles-Guide
+labels: [needs-triage, question]
+body:
+- type: textarea
+  attributes:
+    label: Question
+    description: Your question
+  validations:
+    required: true
