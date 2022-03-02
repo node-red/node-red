@@ -476,7 +476,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Kustomize",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://kubernetes.io/docs/tasks/manage-kubernetes-objects/kustomization/",
         "x": 90,
         "y": 130,
         "wires": [
@@ -490,7 +490,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Helm",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://helm.sh/docs/intro/quickstart/",
         "x": 90,
         "y": 270,
         "wires": [
@@ -504,7 +504,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Big Bang",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/README.md",
         "x": 90,
         "y": 340,
         "wires": [
@@ -518,7 +518,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Istio",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://istio.io/latest/docs/",
         "x": 90,
         "y": 480,
         "wires": [
@@ -532,7 +532,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Flux",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://fluxcd.io/docs/",
         "x": 90,
         "y": 550,
         "wires": [
@@ -546,7 +546,7 @@
         "type": "resource",
         "z": "c86af370eff94afa",
         "name": "Traefix Ingress",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "https://doc.traefik.io/traefik/providers/kubernetes-ingress/",
         "x": 90,
         "y": 200,
         "wires": [
