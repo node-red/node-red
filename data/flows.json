@@ -341,12 +341,11 @@
         "name": "Deploy K3d",
         "info": "Throughout this guide you will be using K3d to deploy and manage kubernetes instances.\n\n## Choose your platform\nThe preferred free VM software is [VirtualBox](https://www.virtualbox.org/); however, it is not compatible with M1 chips! So, if you are using an M1 Mac, we highly recommend you go with the [Cloud](#Cloud) option below\n\n### Cloud\nRecommend using an EC2 instance with the following specs:\n- AMI: Ubuntu Server (64-bit, x86)\n- Instance Type: t3a.2xlarge\n- 100 GB EBS\n- Security group rules for allowing web traffic\n\n### Local VM\nUse [Vagrant](https://www.vagrantup.com/) to spin up a VM with at least the following specs:\n- 10GB RAM\n- 4 CPU cores\n- An IP that can be [accessed](https://www.vagrantup.com/docs/networking/private_network#static-ip) from the host machine. \n\n### Local\nAny Docker installation except a non-WSL2 Windows installation will work with K3d natively.\n\n## K3d setup\n\nSetup instructions for K3d can be found at the link below.\n\nhttps://k3d.io/v5.2.2/\n\n## Cluster creation\n\nOnce you have a host for deploying a k3d cluster - you can configure a cluster for future nodes in this training.\n\nOne possible configuration would be a 3 node cluster with 1 server and 2 agents (to get started).\n\nAnother consideration is exposing applications after the cluster is running and apps have been deployed w/ services and ingresses.\n\nDepending on RAM/CPU availability, you may want to run 2 or more K3d nodes\n\nA possible configuration might look like:\n\n`k3d cluster create -s 1 -a 2 -p \"8081:80@loadbalancer\" dev-cluster`\n\n-s 1 represents 1 server node\n-a 2 represents 2 agent nodes\n\n-p \"8081:80@loadbalancer\" represents mapping 8081 on this k3d host to ports 80 internally.",
         "x": 360,
-        "y": 60,
+        "y": 130,
         "wires": [
             [
                 "691424f6cfd58372",
-                "1458b18889c13942",
-                "6d2d525b92151db2"
+                "1458b18889c13942"
             ]
         ]
     },
@@ -356,8 +355,8 @@
         "z": "c86af370eff94afa",
         "name": "Deploy a pod info application (with Kustomize)",
         "info": "# Kustomize\n\n\"Kustomize is a command-line configuration manager for Kubernetes objects. Integrated with kubectl since 1.14, it allows you to make declarative changes to your configurations without touching a template.\"\n\n## Recommended Reading\n\n`https://www.mirantis.com/blog/introduction-to-kustomize-part-1-creating-a-kubernetes-app-out-of-multiple-pieces/`\n\nThe above tutorial can be run on the k3d cluster you have created. This is a much more complex example than the podinfo example you will deploy below.\n\n## Podinfo\n\n\"Podinfo is a tiny web application made with Go that showcases best practices of running microservices in Kubernetes\"\n\n### Deployment\n\nNavigate to `https://github.com/stefanprodan/podinfo`\n\nClone the repository to your local machine\n\nFrom within the cloned directory, we can execute kustomize through the built in functionality in `kubectl`.\n\n`kubectl kustomize ./kustomize`\n\nThis will return the built manifest for the application to be deployed. You can then deploy the application to the cluster through `kubectl apply -k ./kustomize`\n\n## Success Criteria\n\n- 2 podinfo pods in the target namespace (default if not specified)\n- A podinfo service\n- A horizontal pod autoscaler\n\nWe can port-forward this applications service and visit it in browser to confirm functionality.\n\n`kubectl port-forward service/podinfo 9898:http`\n\nThis port fowards the podinfo service `http` port (as defined in the service) to the 9898 host port.",
-        "x": 420,
-        "y": 190,
+        "x": 360,
+        "y": 200,
         "wires": [
             [
                 "2d66fece0a8f5fdf"
@@ -370,8 +369,8 @@
         "z": "c86af370eff94afa",
         "name": "Expose podinfo with an Ingress",
         "info": "# Ingress\n\nIn the previous exercise, we deployed the podinfo application and confirmed functionality by visiting it in-browser through port-forwarding with kubectl. We can instead use an ingress and the default traefik ingress-controller to handle this functionaity more natively. \n\nOfficial k3d docs:  https://k3d.io/v5.0.0/usage/exposing_services/\n\n## Ingress deployment\nDue to the cluster configuration that we executed in the first node (See the -p loadbalancer parameter). we can configure an ingress to expose the application, as is one of a few standard practices for exposing internal applications to external traffic.\n\n### Ingress template\n\nIngress docs: https://kubernetes.io/docs/concepts/services-networking/ingress/\n\nGiven the template from the docs/tutorial we can write an ingress to support this traffic.\n\n## Success Criteria\n\nAfter the ingress is deployed (and given you configured your cluster as described in the first node), then you should be able to access the podinfo application without port-forwarding at `http://localhost:8081` \n\n## Cleanup\n\nThis concludes this deployment of podinfo. You'll want to cleanup the resources we have created. ",
-        "x": 420,
-        "y": 260,
+        "x": 360,
+        "y": 270,
         "wires": [
             [
                 "52eb692e4c51108f"
@@ -384,8 +383,8 @@
         "z": "c86af370eff94afa",
         "name": "Create a podinfo helm chart",
         "info": "# Helm\n\"Helm is the package manager for Kubernetes\"\n\n## Recommended Reading\nhttps://helm.sh/\nhttps://helm.sh/docs/intro/\n\n## Podinfo Helm Chart from Scratch\n\nTODO - Insert content for:\n- deployment\n- service\n- ingress\n- HPA\n* All templated from scratch\n\n## Deploy the official podinfo chart from local files\n\nPreviously we cloned the podinfo repository to our/a local machine. Under the root of the project there is a `charts` directory with a `podinfo` directory that contains the podinfo chart content.\n\n## Basic deployment\n\nLet's create a testing namespace for our target\n`kubectl create ns testing`\n\nWith Helm installed and our k3d cluster still running/configured, we can install the chart in  it's vanilla form (without enabling any additional content).\n\n(From the charts directory)\n`helm install podinfo-dev ./podinfo -n testing`\n\nThis will deploy the chart which results in the deployment and service creation in the target namespace.\n\n## Customizations\nWe can inject exposed customizations as outlined in the README/values.yaml for the purpose of configuring the end package being suited for our needs.\n\nWe can make an edit to the values.yaml and upgrade our application.\n\nhpa:\n  enabled: true\n  \n`helm upgrade podinfo-dev -n testing ./podinfo`\n\nThis should result in an HPA being deployed to our namespace for the application.\n",
-        "x": 420,
-        "y": 330,
+        "x": 360,
+        "y": 340,
         "wires": [
             [
                 "5361df412a99db12"
@@ -398,8 +397,8 @@
         "z": "c86af370eff94afa",
         "name": "Deploy BigBang on a new K3d cluster",
         "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the qiuckstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
-        "x": 420,
-        "y": 400,
+        "x": 360,
+        "y": 410,
         "wires": [
             [
                 "67415f95eb8ab46c"
@@ -412,8 +411,8 @@
         "z": "c86af370eff94afa",
         "name": "Deploy podinfo helmchart in a bigbang cluster",
         "info": "# Big Bang Extensibility\n\nUp to now - we have configured and deployed k3d clusters, we've used `kustomize` and `Helm` to orchestrate deploying `podinfo` to our cluster.\n\nWe then used flux and it's controllers to deploy bigbang (which is using helm and kustomize under the hood).\n\n## Recommended Reading\n\n## Objective\nNow we will look at extending the big bang deployment to include deploying the podinfo helm chart and ensuring the deployment architecture aligns with the Big Bang \"Core\" technologies.\n\nThis is a precursory step to follow-on nodes in this flow. \n\n## Execution\n\nClone the podinfo repository if not done already.\n\nCreate a namespace with the label:\n`istio-injection: enabled`\n\nDeploy the helm chart for the podinfo applicaiton as we have done previously.\n\n## Success Criteria\nDeploy the podinfo helm chart into your cluster that already has big bang deployed.\n\nThe application should come online and be able to be reached via `kubectl port-forward`\n\nContinue to the next node for extending this with Istio",
-        "x": 420,
-        "y": 470,
+        "x": 360,
+        "y": 480,
         "wires": [
             [
                 "9b8fdffdc9b5cc53"
@@ -426,8 +425,8 @@
         "z": "c86af370eff94afa",
         "name": "Add Istio Virtual Service for the podinfo deployment",
         "info": "# Istio VirtualServices\n\n## Recommended Reading\n\n- https://istio.io/latest/docs/reference/config/networking/virtual-service/\n\n### Example\n- https://repo1.dso.mil/platform-one/big-bang/apps/core/kiali/-/blob/main/chart/values.yaml#:~:text=istio%3A,kiali.%7B%7B%20.Values.hostname%20%7D%7D\n- https://repo1.dso.mil/platform-one/big-bang/apps/core/kiali/-/blob/main/chart/templates/bigbang/virtualservice.yaml\n\n## Objective\nWith the podinfo helm chart deployed (in it's basic state), we will look to leverage some of th technologies that Big Bang has reconciled and configured.\n\nBig Bang exposes cluster applications to external traffic through an Istio Ingress Gateway.\n\nVirtual services are then used to link kubernetes services to traffic from the ingresss gateways.\n\n## Execution\n\n\n\n## Success Criteria\nWrite a virtual service resource definition file for the podinfo application that was deployed as part of the last node.\n\nIf you add the `podinfo.bigbang.dev` endpoint to your hosts file, then it should be resolveable from the browser.\n\n## Solution\n<details><summary>show</summary>\n<p>\n\n```\napiVersion: networking.istio.io/v1beta1\nkind: VirtualService\nmetadata:\n  name: podinfo\n  namespace: podinfo\nspec:\n  gateways:\n  - istio-system/public\n  hosts:\n  - podinfo.bigbang.dev\n  http:\n  - route:\n    - destination:\n        host: podinfo.podinfo.svc.cluster.local\n        port:\n          number: 9898\n```\n\n</p>\n</details>",
-        "x": 420,
-        "y": 540,
+        "x": 360,
+        "y": 550,
         "wires": [
             [
                 "339481fd79e107a6"
@@ -440,8 +439,8 @@
         "z": "c86af370eff94afa",
         "name": "Deploy podinfo as a Flux HelmRelease",
         "info": "# Flux helm release reconciliation\n\"Big Bang follows a GitOps approach to configuration management, using Flux v2 to reconcile Git with the cluster.  Environments (e.g. dev, prod) and packages (e.g. istio) can be fully configured to suit the deployment needs.\"\n\n## Prerequisites\n- Remove all prior content for podinfo from your cluster. \n\n## Recommended Reading\n- https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/README.md\n\n## Objective\nFollowing the umbrella structure in the Big Bang chart, we can create the templates under a `podinfo` directory (under the templates dir).\n\nNote: there are many ways to accomplish this task - the podinfo directory under the templates directory most-accurately represents how the umbrella structure works.\n\n### Minimum Requirements\n- namespace resource\n- git repository resource\n- helm release resource\n- virtual service resource\n\nThis would meet the bare minimum requirements.\n\n### Additional Content\n- values file (a helper generates a secret resource from this)\n\n## Success Criteria\nIf we run the `helm upgrade` command against the modified Big Bang helm chart, it should deploy the podinfo chart (if properly enabled) with the ability to access/resolve the application through the `Ingress Gateway`.",
-        "x": 420,
-        "y": 610,
+        "x": 360,
+        "y": 620,
         "wires": [
             [
                 "0f9889d8e9cb7edb"
@@ -454,8 +453,8 @@
         "z": "c86af370eff94afa",
         "name": "Play DOOM using ZARF",
         "info": "# Zarf!\n\nZarf is a Defense Unicorns developed tool - please read about it below!\n\n## Recommended Reading\n- https://github.com/defenseunicorns/zarf\n\n\n## Objective\nUsing Zarf, we will follow the guide below in order to play DOOM.\n\nhttps://github.com/defenseunicorns/zarf/tree/master/examples/game\n\n## Success Criteria\nPackaging, Deployment and execution of playing DOOM from within the browser.",
-        "x": 420,
-        "y": 680,
+        "x": 360,
+        "y": 690,
         "wires": [
             []
         ]
@@ -466,8 +465,8 @@
         "z": "c86af370eff94afa",
         "name": "Deploy and Access the Kubernetes Dashboard",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 800,
-        "y": 190,
+        "x": 740,
+        "y": 200,
         "wires": [
             []
         ]
@@ -478,8 +477,8 @@
         "z": "c86af370eff94afa",
         "name": "Kustomize",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 230,
-        "y": 120,
+        "x": 90,
+        "y": 130,
         "wires": [
             [
                 "691424f6cfd58372"
@@ -492,8 +491,8 @@
         "z": "c86af370eff94afa",
         "name": "Helm",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 150,
-        "y": 260,
+        "x": 90,
+        "y": 270,
         "wires": [
             [
                 "52eb692e4c51108f"
@@ -506,8 +505,8 @@
         "z": "c86af370eff94afa",
         "name": "Big Bang",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 150,
-        "y": 330,
+        "x": 90,
+        "y": 340,
         "wires": [
             [
                 "5361df412a99db12"
@@ -520,8 +519,8 @@
         "z": "c86af370eff94afa",
         "name": "Istio",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 150,
-        "y": 470,
+        "x": 90,
+        "y": 480,
         "wires": [
             [
                 "9b8fdffdc9b5cc53"
@@ -534,8 +533,8 @@
         "z": "c86af370eff94afa",
         "name": "Flux",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 150,
-        "y": 540,
+        "x": 90,
+        "y": 550,
         "wires": [
             [
                 "339481fd79e107a6"
@@ -548,11 +547,66 @@
         "z": "c86af370eff94afa",
         "name": "Traefix Ingress",
         "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
-        "x": 150,
-        "y": 190,
+        "x": 90,
+        "y": 200,
         "wires": [
             [
                 "2d66fece0a8f5fdf"
+            ]
+        ]
+    },
+    {
+        "id": "3e09e4de880b9956",
+        "type": "comment",
+        "z": "c86af370eff94afa",
+        "name": "Sparkle Engineer Getting Started",
+        "info": "",
+        "x": 610,
+        "y": 40,
+        "wires": [
+            [
+                "40bfe328130d9c41",
+                "1bf6704ac725ea82"
+            ]
+        ]
+    },
+    {
+        "id": "ef3535e20ee71428",
+        "type": "guide",
+        "z": "c86af370eff94afa",
+        "name": "Commit Signing (M1 macOS)",
+        "info": "# Prerequisites\nHave the homebrew package manager installed. Go to [homebrew's website](https://brew.sh/) for instructions on installation, setup, and usage.\n\n# Installing Backing software\n```\nbrew install gnupg pinentry-mac\n```\nThis command installs all necessary packages for commit signing.\n\n# Configure gnuPG\nCreate the `.gnupg` directory in your home folder.\n```\nmkdir -m 700 ~/.gnupg\n```\n\nCreate the `gpg-agent.conf` file.\n```\ntouch ~/.gnupg/gpg-agent.conf\nchmod 600 ~/.gnupg/gpg-agent.conf\n```\n\nWrite the configuration to the `gpg-agent.conf` file.\n```\necho \"pinentry-program /opt/homebrew/bin/pinentry-mac\" > ~/.gnupg/gpg-agent.conf\n```\nRun this so gpg-agent uses the updated config file\n```\ngpgconf --kill gpg-agent\n```\n\n# Configure Shell\nBy default macOS uses zsh. This guide assumes that you have not changed this, if you have change references to `.zshrc` to your shell's equivalent.\n```\necho 'export GPG_TTY=$(tty)' >> ~/.zshrc\n```\n\n# Generate your GPG Key\n```\ngpg --full-generate-key\n```\n- `RSA` and `RSA`\n- `4096` key size\n- No expiration (unless you want one)\n- Enter real name or github username\n- Enter github email address, can be any authorized email on your account but MUST match one\n- Comment can be anything including being empty\n\n# Add GPG Key to GitHub\n```\ngpg --list-secret-keys --keyid-format LONG\n```\nThe part you want to copy is the string following `sec rsa4096/`. Copy that string into this command over the Xs.\n```\ngpg --armor --export XXXXXXXXXXXXXXXX | pbcopy\n```\nThat command will have copied your public key to your clipboard. This can be pasted into the \"Create new GPG key\" wizard on github.com.\n\n# Configure Git To Sign Commits\nThey key id used above is also used in the git config to tell git which GPG key to use for signing.\n```\ngit config --global user.signingkey XXXXXXXXXXXXXXXX\n```\nThis command is necessary so git knows which gpg binary to run.\n```\ngit config --global gpg.program=/opt/homebrew/bin/gpg\n```\nIf you always want all commits to be signed you can run this command as well\n```\ngit config --global commit.gpgsign true\n```\n\nYou may enable \"vigilant mode\" on github.com so that any unsigned commits are marked as unverified.",
+        "x": 1040,
+        "y": 270,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1bf6704ac725ea82",
+        "type": "task",
+        "z": "c86af370eff94afa",
+        "name": "Setup GitHub Account",
+        "info": "An up to date GitHub account is necessary for contributing to projects on the defense unicorns repository. \n\nIf you do not already have one you can create one here: https://github.com/join\n\nThere is no rule as to whether or not you need to tie your @defenseunicorns.com email to it. You can even create the account with a personal email and add the DU email to it later.",
+        "x": 1040,
+        "y": 130,
+        "wires": [
+            [
+                "37842ffb402cfc62"
+            ]
+        ]
+    },
+    {
+        "id": "37842ffb402cfc62",
+        "type": "task",
+        "z": "c86af370eff94afa",
+        "name": "Add GitHub 2FA",
+        "info": "GitHub 2FA is required to be added to the DU organization. \nA guide to doing so can be found here: https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication",
+        "x": 1040,
+        "y": 200,
+        "wires": [
+            [
+                "ef3535e20ee71428"
             ]
         ]
     }
