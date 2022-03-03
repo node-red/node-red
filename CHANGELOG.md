@@ -1,3 +1,35 @@
+#### 2.2.2: Maintenance Release
+
+Nodes
+
+ - Fix "close timed out" error when performing full deploy or modifying broker node. (#3451) @Steve-Mcl
+
+
+#### 2.2.1: Maintenance Release
+
+Editor
+
+ - Handle mixed-cased filter terms in keyboard shortcut dialog (#3444) @knolleary
+ - Prevent duplicate links being added between nodes (#3442) @knolleary
+ - Fix to hide tooltip after removing subflow tab (#3391) @HiroyasuNishiyama
+ - Fix node validation to be applied to config node (#3397) @HiroyasuNishiyama
+ - Fix: Dont add wires to undo buffer twice (#3437) @Steve-Mcl
+
+Runtime
+
+ - Improve module location parsing (of stack info) when adding hook (#3447) @Steve-Mcl
+ - Fix substitution of NR_NODE_PATH (#3445) @HiroyasuNishiyama
+ - Remove console.log when ignoring disabled module (#3439) @knolleary
+ - Improve "Unexpected Node Error" logging (#3446) @Steve-Mcl
+
+Nodes
+
+ - Debug: Fix no-prototype-builtins bug in debug node and utils (#3394) @Alkarex
+ - Delay: Fix Japanese message of delay node (#3434)
+ - Allow nbRateUnits to be undefined when validating (#3443) @knolleary
+ - Coding help for recently added node-red Predefined Environment Variables (#3440) @Steve-Mcl
+
+
 #### 2.2.0: Milestone Release
 
 Editor

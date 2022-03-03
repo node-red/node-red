@@ -265,6 +265,38 @@ describe('debug node', function() {
         });
     });
 
+    it('should publish an object with no-prototype-builtins', function(done) {
+        const flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            const n1 = helper.getNode("n1");
+            const payload = Object.create(null);
+            payload.type = 'foo';
+            websocket_test(function() {
+                n1.emit("input", {payload: payload});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",
+                    data:{id:"n1",msg:'{"type":"foo"}',property:"payload",format:"Object",path:"global"}
+                }]);
+            }, done);
+        });
+    });
+
+    it('should publish an object with overriden hasOwnProperty', function(done) {
+        const flow = [{id:"n1", type:"debug" }];
+        helper.load(debugNode, flow, function() {
+            const n1 = helper.getNode("n1");
+            websocket_test(function() {
+                n1.emit("input", {payload: {type:'foo', hasOwnProperty: null}});
+            }, function(msg) {
+                JSON.parse(msg).should.eql([{
+                    topic:"debug",
+                    data:{id:"n1",msg:'{"type":"foo","hasOwnProperty":null}',property:"payload",format:"Object",path:"global"}
+                }]);
+            }, done);
+        });
+    });
+
     it('should publish an array', function(done) {
         var flow = [{id:"n1", type:"debug" }];
         helper.load(debugNode, flow, function() {
