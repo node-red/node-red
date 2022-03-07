@@ -310,6 +310,12 @@ describe('switch Node', function() {
     it('should check if payload if of type number 0', function(done) {
         genericSwitchTest("istype", "number", true, true, 0, done);
     });
+    it('should check if payload if of type number NaN', function(done) {
+        genericSwitchTest("istype", "number", true, false, parseInt("banana"), done);
+    });
+    it('should check if payload if of type number Infinity', function(done) {
+        genericSwitchTest("istype", "number", true, true, 1/0, done);
+    });
     it('should check if payload if of type boolean true', function(done) {
         genericSwitchTest("istype", "boolean", true, true, true, done);
     });
