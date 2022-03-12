@@ -1500,6 +1500,50 @@ describe('HTTP Request Node', function() {
                 n1.receive({payload:{foo:"bar"}, headers: { 'content-type': 'text/plain', "x-node-red-request-node":"INVALID_SUM"}});
             });
         });
+
+        it('should use ui headers', function (done) {
+            const flow = [
+                {
+                    id: "n1", type: "http request", wires: [["n2"]], method: "GET", ret: "obj", url: getTestURL('/rawHeaders'),
+                    "headers": [
+                        { "keyType": "Accept", "keyValue": "", "valueType": "application/json", "valueValue": "" },//set "Accept" to "application/json"
+                        { "keyType": "Content-Type", "keyValue": "", "valueType": "application/json", "valueValue": "" },//overwrite msg.headers['content-type'] with UI header 'Content-Type']
+                        { "keyType": "msg", "keyValue": "dynamicHeaderName", "valueType": "msg", "valueValue": "dynamicHeaderValue" }, //dynamic msg.dynamicHeaderName/msg.dynamicHeaderValue
+                        { "keyType": "other", "keyValue": "static-header-name", "valueType": "other", "valueValue": "static-header-value" }, //static "other" header and value
+                        { "keyType": "Location", "keyValue": "", "valueType": "other", "valueValue": "" }, //delete "Location" header (initially set in msg.headers['location'] by passing empty string for value
+                    ]
+                },
+                { id: "n2", type: "helper" }];
+            helper.load(httpRequestNode, flow, function () {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('statusCode',200);
+                        msg.payload.should.have.property('headers');
+                        //msg.headers['Accept'] should be set by Flow UI
+                        msg.payload.headers.should.have.property('Accept').which.startWith('application/json');
+                        //msg.headers['content-type'] should be updated to 'Content-Type' by the value set in the Flow UI
+                        msg.payload.headers.should.have.property('Content-Type').which.startWith('application/json');
+                        //msg.dynamicHeaderName should be present in headers with the value of msg.dynamicHeaderValue
+                        msg.payload.headers.should.have.property('dyn-header-name').which.startWith('dyn-header-value');
+                        //static (custom) header set in Flow UI should be present 
+                        msg.payload.headers.should.have.property('static-header-name').which.startWith('static-header-value');
+                        //msg.headers['location'] should be deleted because Flow UI "Location" header has a blank value
+                        //ensures headers with matching characters but different case are eliminated
+                        msg.payload.headers.should.not.have.property('location');
+                        msg.payload.headers.should.not.have.property('Location');
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+                // Pass in a headers property with a "content-type" & "location" header
+                // Pass in dynamicHeaderName & dynamicHeaderValue properties to set the Flow UI `msg.xxx` header entries
+                n1.receive({ payload: { foo: "bar" }, dynamicHeaderName: "dyn-header-name", dynamicHeaderValue: "dyn-header-value", headers: { 'content-type': 'text/plain', 'location': 'london' } });
+            });
+        });
+
     });
 
     describe('protocol', function() {
@@ -1976,8 +2020,14 @@ describe('HTTP Request Node', function() {
 
     describe('file-upload', function() {
         it('should upload a file', function(done) {
-            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'POST',ret:'obj',url:getTestURL('/file-upload')},
-                {id:"n2", type:"helper"}];
+            const flow = [
+                {
+                    id: 'n1', type: 'http request', wires: [['n2']], method: 'POST', ret: 'obj', url: getTestURL('/file-upload'), headers: [
+                        { "keyType": "Content-Type", "keyValue": "", "valueType": "multipart/form-data", "valueValue": "" }
+                    ]
+                },
+                { id: "n2", type: "helper" }
+            ];
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -1995,9 +2045,6 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({
-                    headers: {
-                        'content-type':'multipart/form-data'
-                    },
                     payload: {
                         file: {
                             value: Buffer.from("Hello World"),
