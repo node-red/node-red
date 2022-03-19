@@ -444,6 +444,20 @@ describe('red/runtime/nodes/credentials', function() {
                 done();
             });
         });
+        it('handles bad credentials object - resets credentials', function(done) {
+            settings = {
+                credentialSecret: "e3a36f47f005bf2aaa51ce3fc6fcaafd79da8d03f2b1a9281f8fb0a285e6255a"
+            };
+            // {"node":{user1:"abc",password1:"123"}}
+            var cryptedFlows = {"FOO":"5b89d8209b5158a3c313675561b1a5b5phN1gDBe81Zv98KqS/hVDmc9EKvaKqRIvcyXYvBlFNzzzJtvN7qfw06i"};
+            credentials.init(runtime);
+            credentials.load(cryptedFlows).then(function() {
+                done();
+            }).catch(function(err) {
+                err.should.have.property('code','credentials_load_failed');
+                done();
+            });
+        });
 
         it('handles unavailable settings - leaves creds unencrypted', function(done) {
             var runtime = {
