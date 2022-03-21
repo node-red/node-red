@@ -379,7 +379,6 @@ describe('red/runtime/nodes/credentials', function() {
                 credentials.export().then(function(result) {
                     result.should.have.a.property("$");
                     settings.should.not.have.a.property("_credentialSecret");
-
                     // reset everything - but with _credentialSecret still set
                     credentials.init(runtime);
                     // load the freshly encrypted version
@@ -444,12 +443,13 @@ describe('red/runtime/nodes/credentials', function() {
                 done();
             });
         });
+
         it('handles bad credentials object - resets credentials', function(done) {
             settings = {
                 credentialSecret: "e3a36f47f005bf2aaa51ce3fc6fcaafd79da8d03f2b1a9281f8fb0a285e6255a"
             };
             // {"node":{user1:"abc",password1:"123"}}
-            var cryptedFlows = {"FOO":"5b89d8209b5158a3c313675561b1a5b5phN1gDBe81Zv98KqS/hVDmc9EKvaKqRIvcyXYvBlFNzzzJtvN7qfw06i"};
+            var cryptedFlows = {"BADKEY":"5b89d8209b5158a3c313675561b1a5b5phN1gDBe81Zv98KqS/hVDmc9EKvaKqRIvcyXYvBlFNzzzJtvN7qfw06i"};
             credentials.init(runtime);
             credentials.load(cryptedFlows).then(function() {
                 done();
