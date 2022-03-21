@@ -443,7 +443,7 @@
         "y": 620,
         "wires": [
             [
-                "0f9889d8e9cb7edb"
+                "e4d3465dcafc826f"
             ]
         ]
     },
@@ -454,7 +454,7 @@
         "name": "Play DOOM using ZARF",
         "info": "# Zarf!\n\nZarf is a Defense Unicorns developed tool - please read about it below!\n\n## Recommended Reading\n- https://github.com/defenseunicorns/zarf\n\n\n## Objective\nUsing Zarf, we will follow the guide below in order to play DOOM.\n\nhttps://github.com/defenseunicorns/zarf/tree/master/examples/game\n\n## Success Criteria\nPackaging, Deployment and execution of playing DOOM from within the browser.",
         "x": 360,
-        "y": 690,
+        "y": 760,
         "wires": [
             []
         ]
@@ -607,6 +607,20 @@
         "wires": [
             [
                 "ef3535e20ee71428"
+            ]
+        ]
+    },
+    {
+        "id": "e4d3465dcafc826f",
+        "type": "task",
+        "z": "c86af370eff94afa",
+        "name": "Deploy the podinfo BigBang Package",
+        "info": "## Prerequisites\n- Remove all prior content for podinfo from your cluster.\n\n## Objective\nThis exercise is very similar to the previous one except that you will be using the podinfo bigbang package instead of the upstream version. This package is located at https://repo1.dso.mil/platform-one/big-bang/apps/sandbox/podinfo.\n\nDeployment will be accomplished using the same pattern as before except the virtualservice needs to be enabled by using helm values. \n\n### Minimum Requirements\n- Namespace\n- GitRepository\n- HelmRelease\n- Helm Values\n\n## Success Criteria\nAfter deploying the podinfo packge, it should be accessible through the istio gateway via podinfo.bigbang.dev",
+        "x": 360,
+        "y": 690,
+        "wires": [
+            [
+                "0f9889d8e9cb7edb"
             ]
         ]
     }
