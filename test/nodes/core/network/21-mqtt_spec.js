@@ -20,9 +20,9 @@
 const should = require("should");
 const helper = require("node-red-node-test-helper");
 const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
-const BROKER_HOST = process.env.MQTT_BROKER_SERVER || "broker.emqx.io";// "mqtt.eclipse.org"; //"test.mosquitto.org"; //"localhost";
+const BROKER_HOST = process.env.MQTT_BROKER_SERVER || "localhost";
 const BROKER_PORT = process.env.MQTT_BROKER_PORT || 1883;
-const skipTests = process.env.MQTT_SKIP_TESTS == "true";
+const skipTests = process.env.CI == "true" || process.env.CI == "1"; //CI Env - skip MQTT tests
 
 describe('MQTT Nodes', function () {
 
