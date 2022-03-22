@@ -1,18 +1,18 @@
 [
     {
-        "id": "eb7909bcf5fcaf8a",
-        "type": "tab",
-        "label": "Big Bang",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "c86af370eff94afa",
         "type": "tab",
         "label": "(Engineer) Unicorn Getting Started",
         "disabled": false,
         "info": "Guide to an incoming Unicorn to get their technical hoofs wet. The guide takes you through familiarization with local K8s clusters, bigbang, and zarf.",
+        "env": []
+    },
+    {
+        "id": "eb7909bcf5fcaf8a",
+        "type": "tab",
+        "label": "Kubernetes to Big Bang",
+        "disabled": false,
+        "info": "",
         "env": []
     },
     {
@@ -54,6 +54,63 @@
                         "port": 0
                     }
                 ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "56bd5f348afad14f",
+        "type": "subflow",
+        "name": "Golang",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 540,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "10a24d4bdf2a0f02"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 540,
+                "y": 590,
+                "wires": [
+                    {
+                        "id": "50a4c6a1e304101c",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99"
+    },
+    {
+        "id": "13374ec618504763",
+        "type": "subflow",
+        "name": "Big Bang",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 50,
+                "y": 30,
+                "wires": []
+            }
+        ],
+        "out": [
+            {
+                "x": 160,
+                "y": 30,
+                "wires": []
             }
         ],
         "env": [],
@@ -194,144 +251,263 @@
         ]
     },
     {
-        "id": "5dfd2ba38ec5178d",
-        "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Containerization",
-        "info": "",
-        "x": 430,
-        "y": 50,
+        "id": "447bce72e21d67db",
+        "type": "guide",
+        "z": "56bd5f348afad14f",
+        "name": "Learn Go",
+        "info": "Learn basic Go syntax, conventions and data types. Keep an eye out for the following concepts:\n\n- Structs\n- Pointers\n- Goroutines",
+        "x": 540,
+        "y": 250,
         "wires": [
             [
-                "ea946e25b7c2079f"
+                "bcc94caf6482eeed"
             ]
         ]
     },
     {
-        "id": "8c04bec4a15f6702",
+        "id": "5ab88cc4881dc30e",
         "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Helm",
-        "info": "",
-        "x": 610,
-        "y": 200,
+        "z": "56bd5f348afad14f",
+        "name": "Learn Go With Tests",
+        "info": "Literally the **best** resource to learn Go: https://quii.gitbook.io/learn-go-with-tests/\n\nRecommend using this resource to learn basic Go concepts and sytnax",
+        "x": 290,
+        "y": 170,
         "wires": [
             [
-                "e328f5849309e731"
+                "447bce72e21d67db"
             ]
         ]
     },
     {
-        "id": "fc01372231b580db",
-        "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Custom Resource Definitions",
-        "info": "",
-        "x": 430,
-        "y": 200,
+        "id": "bcc94caf6482eeed",
+        "type": "guide",
+        "z": "56bd5f348afad14f",
+        "name": "Build a Web App",
+        "info": "The goal of this section is to build a Go web app that will eventually get deployed in K8s. Recommend building at least 1 CRUD operation and adding a DB (with migrations to make life easier when spinning up DB pods down the line)",
+        "x": 540,
+        "y": 380,
         "wires": [
             [
-                "e328f5849309e731"
+                "50a4c6a1e304101c"
             ]
         ]
     },
     {
-        "id": "09d8e90d5b4ade12",
+        "id": "93a8f10c220fc106",
         "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Kustomization",
-        "info": "",
-        "x": 90,
-        "y": 200,
+        "z": "56bd5f348afad14f",
+        "name": "Go Web Tutorials",
+        "info": "Birdpedia: https://hhwe.github.io/dev/golang/Build-a-web-application-in-Go.html\n\nTodo app: https://betterprogramming.pub/build-a-simple-todolist-app-in-golang-82297ec25c7d",
+        "x": 290,
+        "y": 290,
         "wires": [
             [
-                "e328f5849309e731"
+                "bcc94caf6482eeed",
+                "95836a67ff9c5c4c"
             ]
         ]
     },
     {
-        "id": "71a96ec4058930db",
+        "id": "95836a67ff9c5c4c",
         "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "GitOps",
-        "info": "",
-        "x": 720,
-        "y": 150,
-        "wires": [
-            [
-                "45465f711df6da7e"
-            ]
-        ]
-    },
-    {
-        "id": "98df2d11adb09046",
-        "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "git",
-        "info": "# Description\n\n[Git](https://git-scm.com/) is a free and open source distributed version control system.\n\n## Resources\n- https://git-scm.com/docs\n\n\n## Examples\n- github.com\n- gitlab.com\n- https://gitea.com/",
-        "x": 720,
-        "y": 50,
-        "wires": [
-            [
-                "71a96ec4058930db"
-            ]
-        ]
-    },
-    {
-        "id": "45465f711df6da7e",
-        "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Flux",
-        "info": "",
-        "x": 720,
-        "y": 200,
-        "wires": [
-            [
-                "e328f5849309e731"
-            ]
-        ]
-    },
-    {
-        "id": "e328f5849309e731",
-        "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Big Bang",
-        "info": "",
-        "x": 430,
-        "y": 620,
+        "z": "56bd5f348afad14f",
+        "name": "DB Migrations",
+        "info": "https://github.com/golang-migrate/migrate",
+        "x": 290,
+        "y": 360,
         "wires": [
             []
         ]
     },
     {
-        "id": "ea946e25b7c2079f",
-        "type": "subflow:0ac7681ed1c2bc4b",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "",
-        "x": 430,
-        "y": 110,
+        "id": "10a24d4bdf2a0f02",
+        "type": "comment",
+        "z": "56bd5f348afad14f",
+        "name": "Start Here!",
+        "info": "## Motivation\nThe purpose of this flow is to introduce Unicorns to Golang (or Go for short) with the goal of producing a small web app that can be deployed and integrated with K8s and/or Big Bang\n",
+        "x": 540,
+        "y": 150,
         "wires": [
             [
-                "8c04bec4a15f6702",
-                "fc01372231b580db",
-                "09d8e90d5b4ade12",
-                "71a96ec4058930db",
-                "81348cdecdf51fd9"
+                "447bce72e21d67db"
             ]
         ]
     },
     {
-        "id": "81348cdecdf51fd9",
+        "id": "50a4c6a1e304101c",
+        "type": "guide",
+        "z": "56bd5f348afad14f",
+        "name": "Dockerize",
+        "info": "Create a Dockerfile for the Go web app, recommend using the the builder image pattern (utilizing multi-stage builds). \n\nYou can also try creating the image without using a builder pattern and seeing the (massive) size difference in image size.",
+        "x": 540,
+        "y": 520,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a11809c78f2b406c",
         "type": "resource",
-        "z": "eb7909bcf5fcaf8a",
-        "name": "Operators",
-        "info": "https://www.youtube.com/watch?v=ha3LjlD6g7g",
-        "x": 240,
-        "y": 200,
+        "z": "56bd5f348afad14f",
+        "name": "Builder Pattern",
+        "info": "https://docs.docker.com/develop/develop-images/multistage-build/\n\nhttps://blog.alexellis.io/mutli-stage-docker-builds/",
+        "x": 290,
+        "y": 450,
         "wires": [
             [
-                "e328f5849309e731"
+                "50a4c6a1e304101c"
             ]
+        ]
+    },
+    {
+        "id": "8a7eebc511e2c773",
+        "type": "comment",
+        "z": "13374ec618504763",
+        "name": "Start here!",
+        "info": "## Motivation\nThe goal of this guide to introduce Big Bang tooling in a layered approach from the bottom up. That is, instead of installing Big Bang proper, the purpose is to learn a single tool used in Big Bang, integrate it with an application, observe the effects and then layer the next tool, etc.\n\nInspired by: https://github.com/defenseunicorns/bb-up",
+        "x": 270,
+        "y": 60,
+        "wires": [
+            [
+                "6018b32890e917d5"
+            ]
+        ]
+    },
+    {
+        "id": "6018b32890e917d5",
+        "type": "subflow:56bd5f348afad14f",
+        "z": "13374ec618504763",
+        "name": "",
+        "x": 270,
+        "y": 140,
+        "wires": [
+            [
+                "c3c92b9186f4ff8f"
+            ]
+        ]
+    },
+    {
+        "id": "c3c92b9186f4ff8f",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Helmify",
+        "info": "## Prerequsities\n- You must have a containerized web app and database before starting this step\n\n\n## Goal\nCreate a Helm chart that describes the deployment of the containerized web app and database built in the previous step\n\n## Checklist\n- Create a Helm chart as described above\n- Use a ConfigMap / Secret for database configuration\n- Use K8s DNS resolution to point the application to the database",
+        "x": 270,
+        "y": 220,
+        "wires": [
+            [
+                "c0c9b74371c0c8c3"
+            ]
+        ]
+    },
+    {
+        "id": "8bf22775dd836668",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Deploy with Flux",
+        "info": "## Goals\n- Install Flux on the K8s cluster\n- Deploy the Helm chart using Flux\n- Understand pros/cons of using Flux bootstrap vs other installation methods\n- Understand pros/cons of deploying with a HelmRelease vs Kustomization\n\n## Checklist\n- Install Flux on the cluster (explore [bootstrap](https://fluxcd.io/docs/cmd/flux_bootstrap/) vs non-boostrap approaches)\n- Create a [GitRepository](https://fluxcd.io/docs/components/source/gitrepositories/)\n- Deploy using a [HelmRelease](https://fluxcd.io/docs/components/helm/helmreleases/)\n- Deploy using [kustomize](https://github.com/kubernetes-sigs/kustomize) + [Kustomization](https://fluxcd.io/docs/components/kustomize/kustomization/)\n- Explore how to reconcile a HelmRelease/Kustomization/GitRepository manually vs automatically\n- Create an `install-with-flux.yaml` that applies the Flux CRDs to the cluster\n    - This enables you to create the cluster, install Flux and install all applications by applying this `yaml` file (ie. simplifying the deployment process)\n- Make changes to the Helm Values file, commit and push, and ensure the changes propagate to the cluster (do this for both the Kustomization and HelmRelease methods)\n   - Really practice this! Flux has a lot of nuance that is easy to gloss over, and is the cornerstone of deploying and updating BB",
+        "x": 270,
+        "y": 360,
+        "wires": [
+            [
+                "43dd83070be818d8"
+            ]
+        ]
+    },
+    {
+        "id": "43dd83070be818d8",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Add Istio Service Mesh",
+        "info": "## Goals\n- Install Istio\n- Install an Istio Ingress Gateway\n- Securely expose the app with its own hostname\n\n## Checklist\nWIP",
+        "x": 270,
+        "y": 440,
+        "wires": [
+            [
+                "5ad47fc6ed33a9fd"
+            ]
+        ]
+    },
+    {
+        "id": "c0c9b74371c0c8c3",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Create K8s Cluster",
+        "info": "## Goal\nBuild a new K8s cluster using whatever tooling (K3d, Kind, EKS, etc) you prefer",
+        "x": 270,
+        "y": 290,
+        "wires": [
+            [
+                "8bf22775dd836668"
+            ]
+        ]
+    },
+    {
+        "id": "fa0f28fa8cd90972",
+        "type": "comment",
+        "z": "13374ec618504763",
+        "name": "Note",
+        "info": "Learning Go is optional for this guide, this is just a prime opportunity to get introduced! \n\n## Goal\nThe goal of this node is to have a containerized web app with a database ready to be deployed onto K8s. (Note if you are building a custom app, it is recommended to have at least 1 CRUD operation so you can generate some traffic when the time comes).",
+        "x": 450,
+        "y": 70,
+        "wires": [
+            [
+                "6018b32890e917d5"
+            ]
+        ]
+    },
+    {
+        "id": "5ad47fc6ed33a9fd",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Kiali",
+        "info": "WIP",
+        "x": 270,
+        "y": 520,
+        "wires": [
+            [
+                "06fc4e182fa3fb81"
+            ]
+        ]
+    },
+    {
+        "id": "06fc4e182fa3fb81",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Prometheus",
+        "info": "WIP",
+        "x": 270,
+        "y": 600,
+        "wires": [
+            [
+                "2f1d37dbad9f2fb0"
+            ]
+        ]
+    },
+    {
+        "id": "2f1d37dbad9f2fb0",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "Velero",
+        "info": "WIP",
+        "x": 270,
+        "y": 680,
+        "wires": [
+            [
+                "2f38309ec3176f7c"
+            ]
+        ]
+    },
+    {
+        "id": "2f38309ec3176f7c",
+        "type": "guide",
+        "z": "13374ec618504763",
+        "name": "TBD!",
+        "info": "Other tools will be added eventually\n- Jaeger\n- SOPS\n- OPA (Gatekeeper)\n- ...",
+        "x": 270,
+        "y": 780,
+        "wires": [
+            []
         ]
     },
     {
@@ -622,6 +798,146 @@
             [
                 "0f9889d8e9cb7edb"
             ]
+        ]
+    },
+    {
+        "id": "5dfd2ba38ec5178d",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Containerization",
+        "info": "",
+        "x": 430,
+        "y": 50,
+        "wires": [
+            [
+                "ea946e25b7c2079f"
+            ]
+        ]
+    },
+    {
+        "id": "8c04bec4a15f6702",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Helm",
+        "info": "",
+        "x": 610,
+        "y": 200,
+        "wires": [
+            [
+                "803aead6445263d4"
+            ]
+        ]
+    },
+    {
+        "id": "fc01372231b580db",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Custom Resource Definitions",
+        "info": "",
+        "x": 430,
+        "y": 200,
+        "wires": [
+            [
+                "803aead6445263d4"
+            ]
+        ]
+    },
+    {
+        "id": "09d8e90d5b4ade12",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Kustomization",
+        "info": "",
+        "x": 90,
+        "y": 200,
+        "wires": [
+            [
+                "803aead6445263d4"
+            ]
+        ]
+    },
+    {
+        "id": "71a96ec4058930db",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "GitOps",
+        "info": "",
+        "x": 720,
+        "y": 150,
+        "wires": [
+            [
+                "45465f711df6da7e"
+            ]
+        ]
+    },
+    {
+        "id": "98df2d11adb09046",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "git",
+        "info": "# Description\n\n[Git](https://git-scm.com/) is a free and open source distributed version control system.\n\n## Resources\n- https://git-scm.com/docs\n\n\n## Examples\n- github.com\n- gitlab.com\n- https://gitea.com/",
+        "x": 720,
+        "y": 50,
+        "wires": [
+            [
+                "71a96ec4058930db"
+            ]
+        ]
+    },
+    {
+        "id": "45465f711df6da7e",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Flux",
+        "info": "",
+        "x": 720,
+        "y": 200,
+        "wires": [
+            [
+                "803aead6445263d4"
+            ]
+        ]
+    },
+    {
+        "id": "ea946e25b7c2079f",
+        "type": "subflow:0ac7681ed1c2bc4b",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "",
+        "x": 430,
+        "y": 110,
+        "wires": [
+            [
+                "8c04bec4a15f6702",
+                "fc01372231b580db",
+                "09d8e90d5b4ade12",
+                "71a96ec4058930db",
+                "81348cdecdf51fd9"
+            ]
+        ]
+    },
+    {
+        "id": "81348cdecdf51fd9",
+        "type": "resource",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "Operators",
+        "info": "https://www.youtube.com/watch?v=ha3LjlD6g7g",
+        "x": 240,
+        "y": 200,
+        "wires": [
+            [
+                "803aead6445263d4"
+            ]
+        ]
+    },
+    {
+        "id": "803aead6445263d4",
+        "type": "subflow:13374ec618504763",
+        "z": "eb7909bcf5fcaf8a",
+        "name": "",
+        "x": 420,
+        "y": 500,
+        "wires": [
+            []
         ]
     }
 ]
