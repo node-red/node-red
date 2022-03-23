@@ -45,7 +45,7 @@ describe('JSON node', function() {
                 msg.payload.employees[0].should.have.property('lastName', 'Smith');
                 done();
             });
-            var jsonString = '{"employees":[{"firstName":"John", "lastName":"Smith"}]}';
+            var jsonString = ' {"employees":[{"firstName":"John", "lastName":"Smith"}]}\r\n ';
             jn1.receive({payload:jsonString,topic: "bar"});
         });
     });
@@ -63,7 +63,7 @@ describe('JSON node', function() {
                 msg.payload.employees[0].should.have.property('lastName', 'Smith');
                 done();
             });
-            var jsonString = Buffer.from('{"employees":[{"firstName":"John", "lastName":"Smith"}]}');
+            var jsonString = Buffer.from(' {"employees":[{"firstName":"John", "lastName":"Smith"}]}\r\n ');
             jn1.receive({payload:jsonString,topic: "bar"});
         });
     });

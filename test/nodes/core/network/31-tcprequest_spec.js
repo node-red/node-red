@@ -293,7 +293,7 @@ describe('TCP Request Node', function() {
                 payload: "bar<A>\nfoo",
                 topic: 'boo'
             }], {
-                payload: "ACK:foobar<A>",
+                payload: "ACK:foobar<A>\n",
                 topic: 'boo'
             }, done);
         });
