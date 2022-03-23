@@ -7,7 +7,8 @@ const helper = require("node-red-node-test-helper");
 const mqttNodes = require("nr-test-utils").require("@node-red/nodes/core/network/10-mqtt.js");
 const BROKER_HOST = process.env.MQTT_BROKER_SERVER || "localhost";
 const BROKER_PORT = process.env.MQTT_BROKER_PORT || 1883;
-const skipTests = process.env.CI == "true" || process.env.CI == "1"; //CI Env - skip MQTT tests
+//By default, MQTT tests are disabled. Set ENV VAR  NR_MQTT_TESTS  to "1" or "true" to enable
+const skipTests = process.env.NR_MQTT_TESTS != "true" &&  process.env.NR_MQTT_TESTS != "1";
 
 describe('MQTT Nodes', function () {
 
@@ -67,7 +68,7 @@ describe('MQTT Nodes', function () {
     });
 
     if (skipTests) {
-        it('should skip following MQTT tests (no broker available)', function (done) {
+        it('skipping MQTT tests. Set env var "NR_MQTT_TESTS=true" to enable. Requires a v5 capable broker running on localhost:1883.', function (done) {
             done();
         });
     }
