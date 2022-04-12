@@ -78,6 +78,7 @@
         "bcrypt": "5.0.1"
     },
     "devDependencies": {
+        "cypress": "^9.3.1",
         "dompurify": "2.3.5",
         "grunt": "1.4.1",
         "grunt-chmod": "~1.1.1",
