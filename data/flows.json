@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "6a6a274a201cb47d",
+        "type": "tab",
+        "label": "Baffles",
+        "disabled": false,
+        "info": "Baffles is an integration of Kubevirt with Big Bang. Kubevirt enables the operation of virtual machines or non containerized applications on top of Kubernetes. Integrating Kubevirt with Big Bang allows leveraging the declarative, gitops baseline and its secure runtime configuration. Big Bang is a declarative, continuous delivery tool for core DoD hardened and approved packages into a Kubernetes cluster. Big Bang follows a GitOps approach to configuration management, using Flux v2 to reconcile Git with the cluster.",
+        "env": []
+    },
+    {
         "id": "0ac7681ed1c2bc4b",
         "type": "subflow",
         "name": "Kubernetes",
@@ -936,6 +944,128 @@
         "name": "",
         "x": 420,
         "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e5a5a6e4ec936973",
+        "type": "comment",
+        "z": "6a6a274a201cb47d",
+        "name": "Baffles",
+        "info": "# Description\n\nBaffles is an integration of Kubevirt with Big Bang. Kubevirt enables the operation of virtual machines or non containerized applications on top of Kubernetes. Integrating Kubevirt with Big Bang allows leveraging the declarative, gitops baseline and its secure runtime configuration. Big Bang is a declarative, continuous delivery tool for core DoD hardened and approved packages into a Kubernetes cluster. Big Bang follows a GitOps approach to configuration management, using Flux v2 to reconcile Git with the cluster.\n\n# Resources\n\n# Unicorn SME(s)\n\nAndrew Greene",
+        "x": 470,
+        "y": 60,
+        "wires": [
+            [
+                "e4bc242fecadfd12"
+            ]
+        ]
+    },
+    {
+        "id": "e4bc242fecadfd12",
+        "type": "guide",
+        "z": "6a6a274a201cb47d",
+        "name": "Virtual Machines",
+        "info": "[Virtual Machines explained in 15 minutes](https://www.youtube.com/watch?v=mQP0wqNT_DI) by TechWorld with Nana",
+        "x": 460,
+        "y": 160,
+        "wires": [
+            [
+                "c5b04d09073d58fb"
+            ]
+        ]
+    },
+    {
+        "id": "c5b04d09073d58fb",
+        "type": "subflow:0ac7681ed1c2bc4b",
+        "z": "6a6a274a201cb47d",
+        "name": "",
+        "x": 470,
+        "y": 280,
+        "wires": [
+            [
+                "996299cdf05948b7"
+            ]
+        ]
+    },
+    {
+        "id": "996299cdf05948b7",
+        "type": "guide",
+        "z": "6a6a274a201cb47d",
+        "name": "Virtual Machines + Kubernetes",
+        "info": "",
+        "x": 470,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "46b80f7f0ba9ddb3",
+        "type": "resource",
+        "z": "6a6a274a201cb47d",
+        "name": "KubeVirt",
+        "info": "Introduction/Overview: https://kubevirt.io/\n\nCommunity - https://kubevirt.io/community/",
+        "x": 240,
+        "y": 340,
+        "wires": [
+            [
+                "996299cdf05948b7",
+                "131e4f8c833bfbee"
+            ]
+        ]
+    },
+    {
+        "id": "ed5fac6f95ac2076",
+        "type": "resource",
+        "z": "6a6a274a201cb47d",
+        "name": "Rancher Harvestor",
+        "info": "Suggested Research:\nhttps://rancher.com/products/harvester",
+        "x": 750,
+        "y": 340,
+        "wires": [
+            [
+                "996299cdf05948b7"
+            ]
+        ]
+    },
+    {
+        "id": "131e4f8c833bfbee",
+        "type": "task",
+        "z": "6a6a274a201cb47d",
+        "name": "Use KubeVirt",
+        "info": "https://kubevirt.io/labs/kubernetes/lab1.html",
+        "x": 190,
+        "y": 420,
+        "wires": [
+            [
+                "c399cbb1c8160af7"
+            ]
+        ]
+    },
+    {
+        "id": "c399cbb1c8160af7",
+        "type": "task",
+        "z": "6a6a274a201cb47d",
+        "name": "Experiment with CDI",
+        "info": "https://kubevirt.io/labs/kubernetes/lab2.html",
+        "x": 180,
+        "y": 500,
+        "wires": [
+            [
+                "65aae8f158cb5c2f"
+            ]
+        ]
+    },
+    {
+        "id": "65aae8f158cb5c2f",
+        "type": "task",
+        "z": "6a6a274a201cb47d",
+        "name": "Live Migration",
+        "info": "https://kubevirt.io/labs/kubernetes/migration.html\n\nNote: \"Enable Live Migration\" is incorrect in this lab, correct answer can be found [here](https://kubevirt.io/user-guide/)... somewhere",
+        "x": 200,
+        "y": 580,
         "wires": [
             []
         ]
