@@ -1021,7 +1021,7 @@
         "type": "resource",
         "z": "6a6a274a201cb47d",
         "name": "Rancher Harvestor",
-        "info": "Suggested Research:\nhttps://rancher.com/products/harvester",
+        "info": "Suggested Research:\nhttps://rancher.com/products/harvester\n\nGood Overview: https://www.youtube.com/watch?v=tVsMen_e6OI",
         "x": 750,
         "y": 340,
         "wires": [
