@@ -48,6 +48,7 @@ describe('file Nodes', function() {
 
         beforeEach(function(done) {
             //fs.writeFileSync(fileToTest, "File message line 1\File message line 2\n");
+            process.env.TEST_FILE = fileToTest;
             helper.startServer(done);
         });
 
@@ -58,6 +59,7 @@ describe('file Nodes', function() {
                 //fs.unlinkSync(fileToTest);
                 helper.stopServer(done);
             });
+            delete process.env.TEST_FILE
         });
 
         it('should be loaded', function(done) {
@@ -341,6 +343,64 @@ describe('file Nodes', function() {
                 });
 
                 n1.receive({payload:"fine", filename:fileToTest});
+            });
+        });
+        it('should use msg._user_specified_filename set in nodes typedInput', function(done) {
+            var flow = [{id:"fileNode1", type:"file", filename:"_user_specified_filename", filenameType: "msg", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "typedInput");
+                        msg.should.have.property("filename", fileToTest);
+
+                        var f = fs.readFileSync(fileToTest).toString();
+                        if (os.type() !== "Windows_NT") {
+                            f.should.equal("typedInput\n");
+                        }
+                        else {
+                            f.should.equal("typedInput\r\n");
+                        }
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+
+                n1.receive({payload:"typedInput", _user_specified_filename:fileToTest});
+            });
+        });
+        it('should use env.TEST_FILE set in nodes typedInput', function(done) {
+            var flow = [{id:"fileNode1", type:"file", filename:"TEST_FILE", filenameType: "env", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload", "envTest");
+                        msg.should.have.property("filename", fileToTest);
+
+                        var f = fs.readFileSync(fileToTest).toString();
+                        if (os.type() !== "Windows_NT") {
+                            f.should.equal("envTest\n");
+                        }
+                        else {
+                            f.should.equal("envTest\r\n");
+                        }
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+
+                n1.receive({payload:"envTest"});
             });
         });
 
