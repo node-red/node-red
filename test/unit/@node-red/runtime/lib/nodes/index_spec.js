@@ -63,7 +63,7 @@ describe("red/nodes/index", function() {
     var runtime = {
         settings: settings,
         storage: storage,
-        log: {debug:function() {}, warn:function() {}},
+        log: {debug:function() {}, warn:function() {}, _: function() {}},
         events: new EventEmitter()
     };
 
