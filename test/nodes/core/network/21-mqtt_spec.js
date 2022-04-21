@@ -94,20 +94,20 @@ describe('MQTT Nodes', function () {
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
     });
     //Prior to V3, "auto" mode would only parse to string or buffer.
-    // itConditional('should send JSON and receive string (auto mode)', function (done) {
-    //     if (skipTests) { return this.skip() }
-    //     this.timeout = 2000;
-    //     const options = {}
-    //     options.sendMsg = {
-    //         topic: nextTopic(),
-    //         payload: '{"prop":"value1", "num":1}',
-    //         qos: 1
-    //     }
-    //     options.expectMsg = Object.assign({}, options.sendMsg);
-    //     testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
-    // })
+    itConditional('should send JSON and receive string (auto mode)', function (done) {
+        if (skipTests) { return this.skip() }
+        this.timeout = 2000;
+        const options = {}
+        options.sendMsg = {
+            topic: nextTopic(),
+            payload: '{"prop":"value1", "num":1}',
+            qos: 1
+        }
+        options.expectMsg = Object.assign({}, options.sendMsg);
+        testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
+    })
     //In V3, "auto" mode should try to parse JSON, then string and fall back to buffer
-    itConditional('should send JSON and receive object (auto mode)', function (done) {
+    itConditional('should send JSON and receive object (auto-detect mode)', function (done) {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
         const options = {}
@@ -118,7 +118,7 @@ describe('MQTT Nodes', function () {
         }
         options.expectMsg = Object.assign({}, options.sendMsg);
         options.expectMsg.payload = JSON.parse(options.sendMsg.payload);
-        testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
+        testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     })
     itConditional('should send invalid JSON and receive string (auto mode)', function (done) {
         if (skipTests) { return this.skip() }
@@ -130,6 +130,17 @@ describe('MQTT Nodes', function () {
         }
         options.expectMsg = Object.assign({}, options.sendMsg);//expect same payload
         testSendRecv({}, { datatype: "auto", topicType: "static" }, {}, options, { done: done });
+    });
+    itConditional('should send invalid JSON and receive string (auto-detect mode)', function (done) {
+        if (skipTests) { return this.skip() }
+        this.timeout = 2000;
+        const options = {}
+        options.sendMsg = {
+            topic: nextTopic(),
+            payload: '{prop:"value3", "num":3}'// send invalid JSON ...
+        }
+        options.expectMsg = Object.assign({}, options.sendMsg);//expect same payload
+        testSendRecv({}, { datatype: "auto-detect", topicType: "static" }, {}, options, { done: done });
     });
 
     itConditional('should send JSON and receive string (utf8 mode)', function (done) {
@@ -259,7 +270,18 @@ describe('MQTT Nodes', function () {
         options.expectMsg = Object.assign({}, options.sendMsg);
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
-    itConditional('should send JSON with v5 media type "application/json" and receive an object (auto mode)', function (done) {
+    itConditional('should send JSON with v5 media type "text/plain" and receive a string (auto-detect mode)', function (done) {
+        if (skipTests) { return this.skip() }
+        this.timeout = 2000;
+        const options = {}
+        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
+        options.sendMsg = {
+            topic: nextTopic(), payload: '{"prop":"val"}', contentType: "text/plain"
+        }
+        options.expectMsg = Object.assign({}, options.sendMsg);
+        testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
+    });
+    itConditional('should send JSON with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
         const options = {}
@@ -268,7 +290,7 @@ describe('MQTT Nodes', function () {
             topic: nextTopic(), payload: '{"prop":"val"}', contentType: "application/json",
         }
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: JSON.parse(options.sendMsg.payload)});
-        testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
+        testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
     itConditional('should send invalid JSON with v5 media type "application/json" and raise an error (auto mode)', function (done) {
         if (skipTests) { return this.skip() }
@@ -295,7 +317,7 @@ describe('MQTT Nodes', function () {
         testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
     });
     
-    itConditional('should send buffer with v5 media type "application/json" and receive an object (auto mode)', function (done) {
+    itConditional('should send buffer with v5 media type "application/json" and receive an object (auto-detect mode)', function (done) {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
         const options = {}
@@ -304,7 +326,7 @@ describe('MQTT Nodes', function () {
             topic: nextTopic(), payload: Buffer.from([0x7b,0x22,0x70,0x72,0x6f,0x70,0x22,0x3a,0x22,0x76,0x61,0x6c,0x22,0x7d]), contentType: "application/json",
         }
         options.expectMsg = Object.assign({}, options.sendMsg, { payload: {"prop":"val"}});
-        testSendRecv({ protocolVersion: 5 }, { datatype: "auto", topicType: "static" }, {}, options, hooks);
+        testSendRecv({ protocolVersion: 5 }, { datatype: "auto-detect", topicType: "static" }, {}, options, hooks);
     });
     itConditional('should send buffer with v5 media type "text/plain" and receive a string (auto mode)', function (done) {
         if (skipTests) { return this.skip() }
