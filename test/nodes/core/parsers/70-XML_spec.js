@@ -56,7 +56,7 @@ describe('XML node', function() {
                 should.equal(msg.payload.employees.lastName[0], 'Smith');
                 done();
             });
-            var string = '<employees><firstName>John</firstName><lastName>Smith</lastName></employees>';
+            var string = '  <employees><firstName>John</firstName><lastName>Smith</lastName></employees>\r\n  ';
             n1.receive({payload:string,topic: "bar"});
         });
     });
@@ -76,7 +76,7 @@ describe('XML node', function() {
                 should.equal(msg.foo.employees.lastName[0], 'Smith');
                 done();
             });
-            var string = '<employees><firstName>John</firstName><lastName>Smith</lastName></employees>';
+            var string = '  <employees><firstName>John</firstName><lastName>Smith</lastName></employees>\r\n ';
             n1.receive({foo:string,topic: "bar"});
         });
     });
@@ -96,7 +96,7 @@ describe('XML node', function() {
                 should.equal(msg.payload.employees.lastName[0], 'Smith');
                 done();
             });
-            var string = '<employees><firstName>John</firstName><lastName>Smith</lastName></employees>';
+            var string = '  <employees><firstName>John</firstName><lastName>Smith</lastName></employees>\r\n  ';
             n1.receive({payload:string, topic:"bar", options:{trim:true}});
         });
     });

@@ -242,6 +242,142 @@ describe('inject node', function() {
     });
 
 
+    it('inject name of node as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "NAME");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject id of node as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "n1");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject path of node as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_PATH}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"}];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "flow/n1");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+
+    it('inject name of flow as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_FLOW_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"},
+                    {id: "flow", type: "tab", label: "FLOW" },
+                   ];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "FLOW");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject id of flow as environment variable ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_FLOW_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper"},
+                    {id: "flow", type: "tab", name: "FLOW" },
+                   ];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "flow");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject name of group as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_GROUP_NAME}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper"},
+                    {id: "g0", type: "group", name: "GROUP" },
+                   ];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "GROUP");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+    it('inject id of group as environment variable by substitution ', function (done) {
+        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_GROUP_ID}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper"},
+                    {id: "g0", type: "group", name: "GROUP" },
+                   ];
+        helper.load(injectNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function (msg) {
+                try {
+                    msg.should.have.property("payload", "g0");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n1.receive({});
+        });
+    });
+
+
     it('sets the value of flow context property', function (done) {
         var flow = [{id: "n1", type: "inject", topic: "t1", payload: "flowValue", payloadType: "flow", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];

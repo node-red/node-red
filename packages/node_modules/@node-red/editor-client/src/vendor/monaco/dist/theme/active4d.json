@@ -3,6 +3,10 @@
   "inherit": true,
   "rules": [
     {
+      "background": "FFFFFF",
+      "token": ""
+    },
+    {
       "background": "e2e9ff5e",
       "token": "text.html source.active4d"
     },
