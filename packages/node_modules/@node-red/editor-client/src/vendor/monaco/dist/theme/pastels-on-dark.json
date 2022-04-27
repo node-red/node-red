@@ -3,6 +3,10 @@
   "inherit": true,
   "rules": [
     {
+      "background": "211E1E",
+      "token": ""
+    },
+    {
       "foreground": "555555",
       "token": "comment"
     },
