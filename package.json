@@ -64,7 +64,7 @@
         "mqtt": "4.3.7",
         "multer": "1.4.4",
         "mustache": "4.2.0",
-        "node-red-admin": "^2.2.4",
+        "node-red-admin": "^3.0.0",
         "nopt": "5.0.0",
         "oauth2orize": "1.11.1",
         "on-headers": "1.0.2",
