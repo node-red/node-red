@@ -73,8 +73,7 @@ describe('MQTT Nodes', function () {
             done();
         });
     }
-
-    /** Conditional test runner (only run if skipTests=false) */
+    // Conditional test runner (only run if skipTests=false) 
     function itConditional(title, test) {
         return !skipTests ? it(title, test) : it.skip(title, test);
     }
@@ -444,7 +443,8 @@ describe('MQTT Nodes', function () {
             const mqttOut = helper.getNode("mqtt.out");
             const mqttBroker1 = helper.getNode("mqtt.broker1");
             const mqttBroker2 = helper.getNode("mqtt.broker2");
-            waitBrokerConnect([mqttBroker1, mqttBroker2], function connected() {
+            waitBrokerConnect([mqttBroker1, mqttBroker2])
+            .then(() => {
                 //connected - add the on handler and call to disconnect
                 helperNode.on("input", function (msg) {
                     try {
@@ -458,6 +458,7 @@ describe('MQTT Nodes', function () {
                 })
                 mqttOut.receive({ "action": "disconnect" });//close broker2
             })
+            .catch(done);
         });
     });
     itConditional('should publish will message', function (done) {
@@ -473,7 +474,8 @@ describe('MQTT Nodes', function () {
             const helperNode = helper.getNode("helper.node");
             const mqttBroker1 = helper.getNode("mqtt.broker1");
             const mqttBroker2 = helper.getNode("mqtt.broker2");
-            waitBrokerConnect([mqttBroker1, mqttBroker2], function connected() {
+            waitBrokerConnect([mqttBroker1, mqttBroker2])
+            .then(() => {
                 //connected - add the on handler and call to disconnect
                 helperNode.on("input", function (msg) {
                     try {
@@ -487,6 +489,7 @@ describe('MQTT Nodes', function () {
                 });
                 mqttBroker2.client.end(true); //force closure
             })
+            .catch(done);
         });
     });
     itConditional('should publish will message with V5 properties', function (done) {
@@ -528,7 +531,8 @@ describe('MQTT Nodes', function () {
             const helperNode = helper.getNode("helper.node");
             const mqttBroker1 = helper.getNode("mqtt.broker1");
             const mqttBroker2 = helper.getNode("mqtt.broker2");
-            waitBrokerConnect([mqttBroker1, mqttBroker2], function connected() {
+            waitBrokerConnect([mqttBroker1, mqttBroker2])
+            .then(() => {
                 //connected - add the on handler and call to disconnect
                 helperNode.on("input", function (msg) {
                     try {
@@ -540,6 +544,7 @@ describe('MQTT Nodes', function () {
                 });
                 mqttBroker2.client.end(true); //force closure
             })
+            .catch(done);
         });
     });
     //#endregion  ADVANCED TESTS
@@ -597,17 +602,24 @@ function testSendRecv(brokerOptions, inNodeOptions, outNodeOptions, options, hoo
                     }
                 });
             }
-            waitBrokerConnect(mqttBroker, function () {
+            waitBrokerConnect(mqttBroker)
+            .then(() => {
                 //finally, connected!
                 if (hooks.afterConnect) {
                     let handled = hooks.afterConnect(helperNode, mqttBroker, mqttIn, mqttOut);
                     if (handled) { return }
                 }
-                if (mqttIn.isDynamic) {
-                    mqttIn.receive({ "action": "subscribe", "topic": sendMsg.topic })
+                if(sendMsg.topic) {
+                    if (mqttIn.isDynamic) {
+                        mqttIn.receive({ "action": "subscribe", "topic": sendMsg.topic })
+                    }
+                    mqttOut.receive(sendMsg);
                 }
-                mqttOut.receive(sendMsg);
             })
+            .catch((e) => {
+                if (hooks.done) { hooks.done(e); }
+                else { throw e; }
+            });
         } catch (err) {
             if (hooks.done) { hooks.done(err); }
             else { throw err; }
@@ -743,22 +755,33 @@ function compareMsgToExpected(msg, expectMsg) {
     if (hasProperty(expectMsg, "messageExpiryInterval")) { msg.should.have.property("messageExpiryInterval", expectMsg.messageExpiryInterval); }
 }
 
-function waitBrokerConnect(broker, callback, timeLimit) {
-    timeLimit = timeLimit || 2000;
-    const brokers = Array.isArray(broker) ? broker : [broker];
-    wait();
-    function wait() {
-        if (brokers.every(e => e.connected == true)) {
-            callback(); //yey - connected!
-        } else {
-            timeLimit = timeLimit - 15;
-            if (timeLimit <= 0) {
-                throw new Error("Timeout waiting broker connect")
+function waitBrokerConnect(broker, timeLimit) {
+
+    let waitConnected = (broker, timeLimit) => {
+        const brokers = Array.isArray(broker) ? broker : [broker];
+        timeLimit = timeLimit || 1000;
+        let timer, resolved = false;
+        return new Promise( (resolve, reject) => {
+            timer = wait();
+            function wait() {
+                if (brokers.every(e => e.connected == true)) {
+                    resolved = true;
+                    clearTimeout(timer);
+                    resolve();
+                } else {
+                    timeLimit = timeLimit - 15;
+                    if (timeLimit <= 0) {
+                        if(!resolved) {
+                            reject("Timeout waiting broker connect")
+                        }
+                    }
+                    timer = setTimeout(wait, 15);
+                    return timer;
+                }
             }
-            setTimeout(wait, 15);
-            return;
-        }
-    }
+        });
+    };
+    return waitConnected(broker, timeLimit);
 }
 
 function hasProperty(obj, propName) {
