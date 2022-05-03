@@ -1,3 +1,74 @@
+#### 3.0.0-beta.1: Beta Release
+
+Editor
+
+ - Add Junctions (#3462) @knolleary
+ - Allow node name to be auto-generated when added (#3478, #3538) @knolleary
+ - Set monaco as default code editor as of v3.x (#3543) @Steve-Mcl
+ - Update Monaco to V0.33.0 (#3522) @Steve-Mcl
+ - Auto-complete Improvements (#3521) @Steve-Mcl
+ - Add a tooltip to debug sidebar messages to reveal full path to node (#3503) @knolleary
+ - Fix down arrow triggering menu in search box (#3507) @Steve-Mcl
+ - Add Japanese translations for v3.0 (#3512) @kazuhitoyokoi
+ - Add feature: Continuous search tools (search previous, search next) (#3405) @Steve-Mcl
+ - Add feature: split-wire-to-links (#3399, #3476) @Steve-Mcl
+ - Add copy button to node properties tables (#3390) @knolleary
+ - Add info-tab search options dropdown to the regular search (#3395) @Steve-Mcl
+ - New Feature: Add ability to find modified nodes/flows. (#3392) @Steve-Mcl
+ - Code editor ux improvements around remembering state of each code editor in a flow (#3553) @Steve-Mcl
+ - Make it easier to apply themes on SVG icons (#3515) @bonanitech
+ - Add support of property validation message (#3438) @HiroyasuNishiyama
+ - Ensure node validation tooltip is closed when field becomes valid (#3570) @knolleary
+ - Add "search for" buttons to notifications (#3567) @Steve-Mcl
+ - Don't let themes change node config colors (#3564) @bonanitech
+ - Fix gap between typedInput containers borders (#3560) @bonanitech
+ - Fix recording removed links in edit history (#3547) @knolleary
+ - Remove unused SASS vars (#3536) @bonanitech
+ - Add custom style for jQuery widgets borders (#3537) @bonanitech
+ - fix out of scope reference of hasUnusedConfig variable (#3535) @HiroyasuNishiyama
+ - correct "non string" check parenthesis (#3524) @Steve-Mcl
+ - Ensure i18n of scoped package name (#3516) @Steve-Mcl
+ - Prevent shortcut deploy when deploy button shaded (#3517) @Steve-Mcl
+ - Fix: Sidebar "Configuration" filter button tooltip (#3500) @ralphwetzel
+ - Add the ability to customize diff colors even more (#3499) @bonanitech
+ - Do JSON comparison of old value/new value in editor (#3481) @Steve-Mcl
+ - Fix nodes losing their wires when in an iframe (#3484) @zettca
+ - Improve scroll into view (#3468) @Steve-Mcl
+ - Do not show 1st tab if hidden when loading (#3464) @Steve-Mcl
+
+Runtime
+
+ - Fix importing external module from node-red module (#3541) @knolleary
+ - Add support for multiple static paths with optional static root (#3542) @Steve-Mcl
+ - Store external token when authenticating if provided (#3460) @ArFe
+ - Support OAuth/OpenID logout (#3388) @mw75
+ - Allow adminAuth to auto-login users when using passport strategy (#3519) @knolleary
+ - Add runtime diagnostics admin endpoint (#3511) @Steve-Mcl
+ - Don't start if user has no home directory (#3540) @hardillb
+ - Error on invalid encrypted credentials (#3498) @sammachin
+
+Nodes
+
+ - Debug: Add message count option to Debug status (#3544 #3551) @rafaelmuynarsk @knolleary
+ - File: Change basic Filename field to a typedInput (#3533) @Steve-Mcl
+ - HTTP Request: Add UI for Http Request node headers (#3488) @Steve-Mcl
+ - Inject: let inject optionally fire at start in only at time mode. (#3385) @dceejay
+ - Link Call: Dynamic link call (#3463) @Steve-Mcl
+ - Link Call: Display link targets of nodes in a regular flow, for Link Call nodes inside a subflow (#3528) @Steve-Mcl
+ - MQTT: MQTT payload auto parsing improvements (#3530) @Steve-Mcl
+ - MQTT: Add client and Runtime MQTT topic validation (#3563) @Steve-Mcl [dev]
+ - MQTT: save and restore v5 config user props (#3562) @Steve-Mcl
+ - MQTT: Fix incorrect MQTT status (#3552) @Steve-Mcl
+ - MQTT: fix reference error of msg.status in debug node (#3526) @HiroyasuNishiyama
+ - MQTT: Add unit tests for MQTT nodes (#3497) @Steve-Mcl
+ - MQTT: fix typo of will properties (#3502) @Steve-Mcl
+ - MQTT: ensure mqtt v5 props can be set false (#3472) @Steve-Mcl
+ - Switch: add check for NaN in is of type number to be false (#3409) @dceejay
+ - TCP: TCP node better split (#3465) @dceejay
+ - Watch: Update Watch node to use node-watch module (#3559 #3569) @knolleary
+ - WebSocket: call done after ws disconnects (#3531) @Steve-Mcl
+
+
 #### 2.2.2: Maintenance Release
 
 Nodes
