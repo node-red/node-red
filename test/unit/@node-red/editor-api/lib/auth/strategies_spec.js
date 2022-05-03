@@ -92,7 +92,23 @@ describe("api/auth/strategies", function() {
                     tokenCreate.restore();
                 }
             });
+        });
 
+        it('Uses provided token on authentication success and token provided',function(done) {
+            userAuthentication = sinon.stub(Users,"authenticate").callsFake(function(username,password) {
+                return Promise.resolve({username:"user",permissions:"*",token:"123456"});
+            });
+
+            strategies.passwordTokenExchange({id:"myclient"},"user","password","read",function(err,token) {
+                try {
+                    should.not.exist(err);
+                    token.should.equal("123456");
+                    done();
+                } catch(e) {
+                    done(e);
+                }
+            });
+        
         });
     });
 

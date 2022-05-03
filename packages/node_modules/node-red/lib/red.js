@@ -229,5 +229,12 @@ module.exports = {
      * @see @node-red/editor-api_auth
      * @memberof node-red
      */
-    auth: api.auth
+    auth: api.auth,
+
+    /**
+     * The editor authentication api.
+     * @see @node-red/editor-api_auth
+     * @memberof node-red
+     */
+    get diagnostics() { return api.diagnostics }
 };
