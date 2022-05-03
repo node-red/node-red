@@ -1,5 +1,11 @@
 #### 3.0.0-beta.1: Beta Release
 
+**Migration from 2.x**
+
+ - Node-RED now requires Node.js 14.x or later.
+ - New installs of Node-RED will default to the monaco editor.
+
+
 Editor
 
  - Add Junctions (#3462) @knolleary
