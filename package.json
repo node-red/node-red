@@ -52,6 +52,7 @@
         "i18next": "21.6.16",
         "iconv-lite": "0.6.3",
         "is-utf8": "0.2.1",
+        "@iarna/toml": "3.0.0",
         "js-yaml": "4.1.0",
         "json-stringify-safe": "5.0.1",
         "jsonata": "1.8.6",
