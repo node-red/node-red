@@ -1,3 +1,38 @@
+#### 3.0.0-beta.2: Beta Release
+
+**Migration from 2.x**
+
+ - The 'slice wires' action has changed from Ctrl-RightMouseButton to Alt-LeftMouseButton
+
+Editor
+
+ - Rework Junctions to be more node like in their event handling (#3607) @knolleary
+ - Change slicing / slice-junction operations over to mouse button 0 (Left Mouse Button) (#3609) @Steve-Mcl
+ - Do not slice-junction link node wires (#3608) @knolleary
+ - Handle many-to-one slicing of wires (#3604) @knolleary
+ - Ensure ACE worker options are set (#3611) @Steve-Mcl
+ - Remove duplicate history add of ungroup event (#3605) @knolleary
+ - use text width instead of number of characters for deciding select fi… (#3603) @HiroyasuNishiyama
+ - Update Japanese info of link call node reflecting update of English info (#3600) @HiroyasuNishiyama
+ - Fix typedInput label not visible on themes (#3580) @bonanitech
+ - Fix project switching when junctions are present (#3595) @Steve-Mcl
+ - Fix junction: when wiring from a regular nodes INPUT, backwards to a junction (#3591) @Steve-Mcl
+ - Fix error initialising flow tab editor (#3585) @Steve-Mcl
+ - Add Japanese translations for v3.0-beta.1 (#3576) @kazuhitoyokoi
+ - Fix image paths where `red/image/typedInput/XXXX.png` should be `red/image/typedInput/XXXX.svg` (#3592) @kazuhitoyokoi
+ - Fix browser console error Uncaught TypeError when searching certain terms (#3584) @Steve-Mcl
+
+Runtime
+
+ - fix error on system-info action (#3589) @HiroyasuNishiyama
+
+Nodes
+
+ - I18n switch rule selector (#3602) @HiroyasuNishiyama
+ - Handle removal of event handlers to allow mqtt client.end() to work (#3594) @PhilDay-CT
+ - update link-call node info according to current behavior (#3597) @HiroyasuNishiyama
+
+
 #### 3.0.0-beta.1: Beta Release
 
 **Migration from 2.x**
