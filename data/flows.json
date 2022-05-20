@@ -580,7 +580,7 @@
         "type": "guide",
         "z": "c86af370eff94afa",
         "name": "Deploy BigBang on a new K3d cluster",
-        "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the qiuckstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
+        "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the qiuckstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment_scenarios/quickstart.md\n\n## Dev Notes\nAs declared in the helm install command in step 10, the ingress-certs and default `domain` variables included in the Big Bang repository are meant for development. The DNS record for `*.bigbang.dev` is set for `127.0.0.1`. This is important for any routing is configured to use the `bigbang.dev` domain.\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
         "x": 360,
         "y": 410,
         "wires": [
