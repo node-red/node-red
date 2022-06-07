@@ -40,7 +40,7 @@
         "cookie-parser": "1.4.6",
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
-        "cronti": "^3.0.4",
+        "cronti": "^3.0.5",
         "denque": "2.0.1",
         "express": "4.18.1",
         "express-session": "1.17.2",
