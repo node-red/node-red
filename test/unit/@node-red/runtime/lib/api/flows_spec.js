@@ -427,4 +427,126 @@ describe("runtime-api/flows", function() {
         });
     });
 
+    describe("flow run state", function() {
+        var startFlows, stopFlows, runtime;
+        beforeEach(function() {
+            let flowsStarted = true;
+            let flowsState = "started";
+            startFlows = sinon.spy(function(type) {
+                if (type !== "full") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = 400;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+                flowsStarted = true;
+                flowsState = "started";
+                return Promise.resolve();
+            });
+            stopFlows = sinon.spy(function(type) {
+                if (type !== "full") {
+                    var err = new Error();
+                    // TODO: quirk of internal api - uses .code for .status
+                    err.code = 400;
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                }
+                flowsStarted = false;
+                flowsState = "stopped";
+                return Promise.resolve();
+            });
+            runtime = {
+                log: mockLog(),
+                settings: {
+                    runtimeState: {
+                        enabled: true,
+                        ui: true,
+                    },
+                },
+                flows: {
+                    get started() {
+                        return flowsStarted;
+                    },
+                    startFlows,
+                    stopFlows,
+                    getFlows: function() { return {rev:"currentRev",flows:[]} },
+                }
+            }
+        })
+
+        it("gets flows run state", async function() {
+            flows.init(runtime);
+            const state = await flows.getState({})
+            state.should.have.property("started", true)
+            state.should.have.property("state", "started")
+        });
+        it("permits getting flows run state when setting disabled", async function() {
+            runtime.settings.runtimeState.enabled = false;
+            flows.init(runtime);
+            const state = await flows.getState({})
+            state.should.have.property("started", true)
+            state.should.have.property("state", "started")
+        });
+        it("start flows", async function() {
+            flows.init(runtime);
+            const state = await flows.setState({requestedState:"start"})
+            state.should.have.property("started", true)
+            state.should.have.property("state", "started")
+            stopFlows.called.should.not.be.true();
+            startFlows.called.should.be.true();
+        });
+        it("stop flows", async function() {
+            flows.init(runtime);
+            const state = await flows.setState({requestedState:"stop"})
+            state.should.have.property("started", false)
+            state.should.have.property("state", "stopped")
+            stopFlows.called.should.be.true();
+            startFlows.called.should.not.be.true();
+        });
+        it("rejects starting flows when setting disabled", async function() {
+            let err;
+            runtime.settings.runtimeState.enabled = false;
+            flows.init(runtime);
+            try {
+                await flows.setState({requestedState:"start"})
+            } catch (error) {
+                err = error
+            }
+            stopFlows.called.should.not.be.true();
+            startFlows.called.should.not.be.true();
+            should(err).have.property("code", "not_allowed")
+            should(err).have.property("status", 405)
+        });
+        it("rejects stopping flows when setting disabled", async function() {
+            let err;
+            runtime.settings.runtimeState.enabled = false;
+            flows.init(runtime);
+            try {
+                await flows.setState({requestedState:"stop"})
+            } catch (error) {
+                err = error
+            }
+            stopFlows.called.should.not.be.true();
+            startFlows.called.should.not.be.true();
+            should(err).have.property("code", "not_allowed")
+            should(err).have.property("status", 405)
+        });
+        it("rejects setting invalid flows run state", async function() {
+            let err;
+            flows.init(runtime);
+            try {
+                await flows.setState({requestedState:"bad-state"})
+            } catch (error) {
+                err = error
+            }
+            stopFlows.called.should.not.be.true();
+            startFlows.called.should.not.be.true();
+            should(err).have.property("code", "invalid_run_state")
+            should(err).have.property("status", 400)
+        });
+    });
+
 });

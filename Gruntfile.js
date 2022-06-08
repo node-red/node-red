@@ -142,6 +142,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/settings.js",
                     "packages/node_modules/@node-red/editor-client/src/js/user.js",
                     "packages/node_modules/@node-red/editor-client/src/js/comms.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/runtime.js",
                     "packages/node_modules/@node-red/editor-client/src/js/text/bidi.js",
                     "packages/node_modules/@node-red/editor-client/src/js/text/format.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/state.js",
