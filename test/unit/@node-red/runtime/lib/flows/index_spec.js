@@ -131,7 +131,7 @@ describe('flows/index', function() {
     //         eventsOn.calledOnce.should.be.true();
     //     });
     // });
-/*
+
     describe('#setFlows', function() {
         it('sets the full flow', function(done) {
             var originalConfig = [
@@ -300,7 +300,6 @@ describe('flows/index', function() {
             });
         });
     });
-    */
 
     describe('#startFlows', function() {
         it('starts the loaded config', function(done) {
@@ -332,7 +331,6 @@ describe('flows/index', function() {
             }
             let receivedEvent = null;
             const handleEvent = (data) => {
-                console.log(data)
                 if(data && data.id === 'flows-run-state') {
                     receivedEvent = data;
                 }
@@ -376,33 +374,6 @@ describe('flows/index', function() {
             receivedEvent.should.have.property("payload", { started: false, state: "stopped" })
             receivedEvent.should.have.property("retain", true)
         });
-        // it('raises error when invalid flows run state requested', async function () {
-        //     const originalConfig = [
-        //         { id: "t1-1", x: 10, y: 10, z: "t1", type: "test", wires: [] },
-        //         { id: "t1", type: "tab" }
-        //     ];
-        //     storage.getFlows = function () {
-        //         return Promise.resolve({ flows: originalConfig });
-        //     }
-        //     let receivedEvent = null;
-        //     const handleEvent = (data) => {
-        //         if(data && data.id === 'flows-run-state') {
-        //             receivedEvent = data;
-        //         }
-        //     }
-        //     events.on('runtime-event', handleEvent);
-        //     flows.init({ log: mockLog, settings: {}, storage: storage });
-        //     await flows.load()
-        //     await flows.startFlows()
-        //     await flows.stopFlows()
-        //     events.removeListener("runtime-event", handleEvent);
-
-        //     //{id:"flows-run-state", payload: {started: true, state: "started"}
-        //     should(receivedEvent).not.be.null()
-        //     receivedEvent.should.have.property("id", "flows-run-state")
-        //     receivedEvent.should.have.property("payload", { started: false, state: "stopped" })
-        //     receivedEvent.should.have.property("retain", true)
-        // });
         it('does not start if nodes missing', function(done) {
             var originalConfig = [
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
@@ -497,7 +468,7 @@ describe('flows/index', function() {
     describe.skip('#get',function() {
 
     });
-/*
+
     describe('#eachNode', function() {
         it('iterates the flow nodes', function(done) {
             var originalConfig = [
@@ -664,7 +635,7 @@ describe('flows/index', function() {
             ];
             flows.init({log:mockLog, settings:{},storage:storage});
             flows.setFlows(originalConfig).then(function() {
-
+                /*jshint immed: false */
                 try {
                     flows.checkTypeInUse("used-module");
                     done("type_in_use error not thrown");
@@ -748,5 +719,4 @@ describe('flows/index', function() {
     describe('#enableFlow', function() {
         it.skip("enableFlow");
     })
-    */
 });
