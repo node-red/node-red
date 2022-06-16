@@ -2,6 +2,7 @@
 
 Editor
 
+ - Add Right-Click content menu (#3678) @knolleary
  - Fix disable junction (#3671) @HiroyasuNishiyama
  - Add Japanese translations for v2.2.3 (#3672) @kazuhitoyokoi
  - Reset mouse state when switching tabs (#3643) @knolleary
