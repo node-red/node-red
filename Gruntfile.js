@@ -192,6 +192,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/library.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/notifications.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/search.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/contextMenu.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/actionList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/typeSearch.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/subflow.js",
