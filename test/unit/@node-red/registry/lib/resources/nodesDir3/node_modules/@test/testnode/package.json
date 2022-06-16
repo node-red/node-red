@@ -1,0 +1,20 @@
+{
+  "name": "@test/testnode",
+  "version": "1.0.0",
+  "description": "A test node that does nothing other than exist",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node-red",
+    "test"
+  ],
+  "node-red": {
+    "nodes": {
+      "testnode": "index.js"
+    }
+  },
+  "author": "@testyMcTersterson",
+  "license": "MIT"
+}
