@@ -1,3 +1,42 @@
+#### 3.0.0-beta.3: Beta Release
+
+Editor
+
+ - Add Right-Click content menu (#3678) @knolleary
+ - Fix disable junction (#3671) @HiroyasuNishiyama
+ - Add Japanese translations for v2.2.3 (#3672) @kazuhitoyokoi
+ - Reset mouse state when switching tabs (#3643) @knolleary
+ - Fix uncorrect fix of junction to subflow conversion (#3666) @HiroyasuNishiyama
+ - Fix undoing junction to subflow (#3653) @HiroyasuNishiyama
+ - Fix conversion of junction to subflow (#3652) @HiroyasuNishiyama
+ - Fix to include junction to exported nodes (#3650) @HiroyasuNishiyama
+ - Fix z-index value for shade to cover nodes in palette (#3649) @kazuhitoyokoi
+ - Fix to extend escaped subflow category characters (#3647) @HiroyasuNishiyama
+ - Fix to sanitize tab name (#3646) @HiroyasuNishiyama
+ - Fix selector placement (#3644) @bonanitech
+ - Add Japanese translations for v3.0-beta.2 (#3622) @kazuhitoyokoi
+ - Fix new folder menu of save to library dialog (#3633) @HiroyasuNishiyama
+ - Fix layer of palette node (#3638) @HiroyasuNishiyama
+ - Fix to place a node dragged from palette within the workspace (#3637) @HiroyasuNishiyama
+ - Fix typo in CSS (#3628) @bonanitech
+ - Use the correct variable for the gutter text color (#3615) @bonanitech
+
+
+Runtime
+
+ - Support loading node modules from `nodesdir` (#3676) @Steve-Mcl
+ - fix buffer parse error message of evaluateNodeProperty (#3624) @HiroyasuNishiyama
+
+Nodes
+
+ - File: Further simplify file node filename entry UX (v3) (#3677) @Steve-Mcl
+ - Function: Fix initial cursor position of init/finalize tab of function node (#3674) @HiroyasuNishiyama
+ - Function: Fix ESM module loading in Function node (#3645) @knolleary
+ - Inject: Fix JSONata evaluation of inject button (#3632) @HiroyasuNishiyama
+ - TCP: Dont delete TCP socket twice (#3630) @Steve-Mcl
+ - MQTT Node: define noproxy variable (#3626) @Steve-Mcl
+ - Debug: i18n debug sidebar node label (#3623) @HiroyasuNishiyama
+
 #### 3.0.0-beta.2: Beta Release
 
 **Migration from 2.x**
