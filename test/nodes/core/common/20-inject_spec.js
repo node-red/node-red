@@ -906,6 +906,7 @@ describe('inject node', function() {
                     msg.should.have.property("str1", "1"); //injected prop
                     msg.should.have.property("num1", 1); //injected prop
                     msg.should.have.property("bool1", true); //injected prop
+                    msg.should.have.property("jsonata1", "AB"); //injected prop
 
                     helper.clearFlows().then(function() {
                         done();
@@ -919,6 +920,7 @@ describe('inject node', function() {
                         {p:"str1", v:"1", vt:"str"}, //new prop
                         {p:"num1", v:"1", vt:"num"}, //new prop
                         {p:"bool1", v:"true", vt:"bool"}, //new prop
+                        {p:"jsonata1", v:'"A" & "B"', vt:"jsonata"}, //new prop
                     ]})
                     .expect(200).end(function(err) {
                         if (err) {
