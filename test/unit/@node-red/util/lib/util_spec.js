@@ -388,6 +388,19 @@ describe("@node-red/util/util", function() {
             result[0].should.eql(1);
             result[1].should.eql(2);
         });
+        it('throws an error if buffer data is not array or string', function (done) {
+            try {
+                var result = util.evaluateNodeProperty('12','bin');
+                done("should throw an error");
+            } catch (err) {
+                if (err.code === "INVALID_BUFFER_DATA") {
+                    done();
+                }
+                else {
+                    done("should throw an error");
+                }
+            }
+        });
         it('returns msg property',function() {
             var result = util.evaluateNodeProperty('foo.bar','msg',{},{foo:{bar:"123"}});
             result.should.eql("123");
