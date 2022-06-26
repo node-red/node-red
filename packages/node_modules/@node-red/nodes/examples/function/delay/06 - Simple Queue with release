@@ -1,0 +1,149 @@
+[
+    {
+        "id": "48d660b3a4109400",
+        "type": "inject",
+        "z": "9e5f48c16729e4f0",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 185,
+        "y": 795,
+        "wires": [
+            [
+                "e0f9e206681f3504"
+            ]
+        ]
+    },
+    {
+        "id": "e0f9e206681f3504",
+        "type": "delay",
+        "z": "9e5f48c16729e4f0",
+        "name": "",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "30",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 430,
+        "y": 795,
+        "wires": [
+            [
+                "e470f1d794e1bef9",
+                "af7cea1dfb797a75"
+            ]
+        ]
+    },
+    {
+        "id": "943543cf7a1958e4",
+        "type": "change",
+        "z": "9e5f48c16729e4f0",
+        "name": "set flush to 1",
+        "rules": [
+            {
+                "t": "set",
+                "p": "flush",
+                "pt": "msg",
+                "to": "1",
+                "tot": "num"
+            },
+            {
+                "t": "delete",
+                "p": "payload",
+                "pt": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 510,
+        "y": 915,
+        "wires": [
+            [
+                "e0f9e206681f3504"
+            ]
+        ]
+    },
+    {
+        "id": "e470f1d794e1bef9",
+        "type": "function",
+        "z": "9e5f48c16729e4f0",
+        "name": "Do something that takes a few seconds",
+        "func": "\n//send on the message between 3 and 6 seconds later\nsetTimeout(\n    function() { \n        node.send(msg) \n    }, \n    Math.random() * 3000 + 3000\n);\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 760,
+        "y": 795,
+        "wires": [
+            [
+                "943543cf7a1958e4",
+                "859258551b8389b7"
+            ]
+        ]
+    },
+    {
+        "id": "af7cea1dfb797a75",
+        "type": "debug",
+        "z": "9e5f48c16729e4f0",
+        "name": "IN",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 735,
+        "wires": []
+    },
+    {
+        "id": "859258551b8389b7",
+        "type": "debug",
+        "z": "9e5f48c16729e4f0",
+        "name": "OUT",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 895,
+        "y": 735,
+        "wires": []
+    },
+    {
+        "id": "ecaaf26326da10ee",
+        "type": "comment",
+        "z": "9e5f48c16729e4f0",
+        "name": "Simple Queue with release",
+        "info": "This example shows how to use a delay node set to rate limit mode as a simple queue to feed a\nprocess that may take some time to complete. Once that process completes the feedback is then\nset to flush out the next message - thus running the \"loop\" as fast as possible with no overlaps.\n\n**Note**: only the `msg.flush` property msut be set - otherwise the other properties that are fed \nback will be added as another new message to the queue.",
+        "x": 235,
+        "y": 915,
+        "wires": []
+    }
+]
