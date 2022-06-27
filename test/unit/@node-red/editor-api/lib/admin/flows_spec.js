@@ -254,7 +254,7 @@ describe("api/admin/flows", function() {
         request(app)
             .post('/flows/state')
             .set('Accept', 'application/json')
-            .set('Node-RED-Flow-Run-State-Change', 'stop')
+            .send({state:'stop'})
             .expect(200)
             .end(function (err, res) {
                 if (err) {
@@ -295,7 +295,7 @@ describe("api/admin/flows", function() {
         request(app)
             .post('/flows/state')
             .set('Accept', 'application/json')
-            .set('Node-RED-Flow-Run-State-Change', 'bad-state')
+            .send({state:'bad-state'})
             .expect(400)
             .end(function(err,res) {
                 if (err) {
