@@ -693,19 +693,19 @@ describe('CSV node', function() {
     describe('json object to csv', function() {
 
         it('should convert a simple object back to a csv', function(done) {
-            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,,e", wires:[["n2"]] },
+            var flow = [ { id:"n1", type:"csv", temp:"a,b,c,,e,f", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
             helper.load(csvNode, flow, function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', '4,foo,true,,0\n');
+                        msg.should.have.property('payload', '4,foo,true,,0,"Hello\nWorld"\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = { e:0, d:1, b:"foo", c:true, a:4 };
+                var testJson = { e:0, d:1, b:"foo", c:true, a:4, f:"Hello\nWorld" };
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -777,7 +777,7 @@ describe('CSV node', function() {
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                var testJson = [{ d:1, b:3, c:2, a:4 },{d:4, a:1, c:3, b:2}];
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -790,12 +790,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', 'a,b,c,d\n4,3,2,1\n1,2,3,4\n');
+                        msg.should.have.property('payload', 'a,b,c,d\n4,3,2,1\n1,2,3,"a\nb"\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                var testJson = [{ d:1, b:3, c:2, a:4 },{d:"a\nb", a:1, c:3, b:2}];
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -826,12 +826,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', 'd,b,c,a\n1,3,2,4\n4,2,3,1\n');
+                        msg.should.have.property('payload', 'd,b,c,a\n1,3,2,4\n4,"f\ng",3,1\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:2}];
+                var testJson = [{ d: 1, b: 3, c: 2, a: 4 },{d:4,a:1,c:3,b:"f\ng"}];
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -844,12 +844,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', ',0,1,foo,"ba""r","di,ng"\n');
+                        msg.should.have.property('payload', ',0,1,foo,"ba""r","di,ng","fa\nba"\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = ["",0,1,"foo",'ba"r','di,ng'];
+                var testJson = ["",0,1,"foo",'ba"r','di,ng',"fa\nba"];
                 n1.emit("input", {payload:testJson});
             });
         });
@@ -898,12 +898,12 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', 'col1,col2,col3,col4\r\nH1,H2,H3,H4\r\nA,B,,\r\nA,,C,\r\nA,,,D\r\n');
+                        msg.should.have.property('payload', 'col1,col2,col3,col4\r\nH1,H2,H3,H4\r\nA,B,,\r\nA,,C,\r\nA,,,"D\nE"\r\n');
                         done();
                     }
                     catch(e) { done(e); }
                 });
-                var testJson = [{"col1":"H1","col2":"H2","col3":"H3","col4":"H4"},{"col1":"A","col2":"B"},{"col1":"A","col3":"C"},{"col1":"A","col4":"D"}];
+                var testJson = [{"col1":"H1","col2":"H2","col3":"H3","col4":"H4"},{"col1":"A","col2":"B"},{"col1":"A","col3":"C"},{"col1":"A","col4":"D\nE"}];
                 n1.emit("input", {payload:testJson});
             });
         });
