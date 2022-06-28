@@ -111,7 +111,7 @@
         "marked": "4.0.17",
         "minami": "1.2.3",
         "mocha": "9.2.2",
-        "node-red-node-test-helper": "^0.2.7",
+        "node-red-node-test-helper": "^0.3.0",
         "nodemon": "2.0.16",
         "proxy": "^1.0.2",
         "sass": "1.52.3",

@@ -144,6 +144,28 @@ describe('template node', function() {
         });
     });
 
+    describe('env var', function() {
+        before(function() {
+            process.env.TEST = 'xyzzy';
+        })
+        after(function() {
+            delete process.env.TEST;
+        })
+
+        it('should modify payload from env variable', function(done) {
+            var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{env.TEST}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
+            helper.load(templateNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    msg.should.have.property('payload', 'payload=xyzzy');
+                    done();
+                });
+                n1.receive({payload:"foo",topic: "bar"});
+            });
+        });
+    });
+
     it('should modify payload from flow context', function(done) {
         var flow = [{id:"n1",z:"t1", type:"template", field:"payload", template:"payload={{flow.value}}",wires:[["n2"]]},{id:"n2",z:"t1",type:"helper"}];
         helper.load(templateNode, flow, function() {
