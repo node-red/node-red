@@ -431,7 +431,7 @@ describe("runtime-api/flows", function() {
         var startFlows, stopFlows, runtime;
         beforeEach(function() {
             let flowsStarted = true;
-            let flowsState = "started";
+            let flowsState = "start";
             startFlows = sinon.spy(function(type) {
                 if (type !== "full") {
                     var err = new Error();
@@ -442,7 +442,7 @@ describe("runtime-api/flows", function() {
                     return p;
                 }
                 flowsStarted = true;
-                flowsState = "started";
+                flowsState = "start";
                 return Promise.resolve();
             });
             stopFlows = sinon.spy(function(type) {
@@ -455,7 +455,7 @@ describe("runtime-api/flows", function() {
                     return p;
                 }
                 flowsStarted = false;
-                flowsState = "stopped";
+                flowsState = "stop";
                 return Promise.resolve();
             });
             runtime = {
@@ -473,6 +473,7 @@ describe("runtime-api/flows", function() {
                     startFlows,
                     stopFlows,
                     getFlows: function() { return {rev:"currentRev",flows:[]} },
+                    state: function() { return flowsState}
                 }
             }
         })
@@ -480,29 +481,25 @@ describe("runtime-api/flows", function() {
         it("gets flows run state", async function() {
             flows.init(runtime);
             const state = await flows.getState({})
-            state.should.have.property("started", true)
-            state.should.have.property("state", "started")
+            state.should.have.property("state", "start")
         });
         it("permits getting flows run state when setting disabled", async function() {
             runtime.settings.runtimeState.enabled = false;
             flows.init(runtime);
             const state = await flows.getState({})
-            state.should.have.property("started", true)
-            state.should.have.property("state", "started")
+            state.should.have.property("state", "start")
         });
         it("start flows", async function() {
             flows.init(runtime);
-            const state = await flows.setState({requestedState:"start"})
-            state.should.have.property("started", true)
-            state.should.have.property("state", "started")
+            const state = await flows.setState({state:"start"})
+            state.should.have.property("state", "start")
             stopFlows.called.should.not.be.true();
             startFlows.called.should.be.true();
         });
         it("stop flows", async function() {
             flows.init(runtime);
-            const state = await flows.setState({requestedState:"stop"})
-            state.should.have.property("started", false)
-            state.should.have.property("state", "stopped")
+            const state = await flows.setState({state:"stop"})
+            state.should.have.property("state", "stop")
             stopFlows.called.should.be.true();
             startFlows.called.should.not.be.true();
         });
@@ -511,7 +508,7 @@ describe("runtime-api/flows", function() {
             runtime.settings.runtimeState.enabled = false;
             flows.init(runtime);
             try {
-                await flows.setState({requestedState:"start"})
+                await flows.setState({state:"start"})
             } catch (error) {
                 err = error
             }
@@ -525,7 +522,7 @@ describe("runtime-api/flows", function() {
             runtime.settings.runtimeState.enabled = false;
             flows.init(runtime);
             try {
-                await flows.setState({requestedState:"stop"})
+                await flows.setState({state:"stop"})
             } catch (error) {
                 err = error
             }
@@ -538,7 +535,7 @@ describe("runtime-api/flows", function() {
             let err;
             flows.init(runtime);
             try {
-                await flows.setState({requestedState:"bad-state"})
+                await flows.setState({state:"bad-state"})
             } catch (error) {
                 err = error
             }
