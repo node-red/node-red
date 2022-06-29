@@ -321,59 +321,6 @@ describe('flows/index', function() {
                 return flows.startFlows();
             });
         });
-        it('emits runtime-event "flows-run-state" "started"', async function () {
-            var originalConfig = [
-                { id: "t1-1", x: 10, y: 10, z: "t1", type: "test", wires: [] },
-                { id: "t1", type: "tab" }
-            ];
-            storage.getFlows = function () {
-                return Promise.resolve({ flows: originalConfig });
-            }
-            let receivedEvent = null;
-            const handleEvent = (data) => {
-                if(data && data.id === 'flows-run-state') {
-                    receivedEvent = data;
-                }
-            }
-            events.on('runtime-event', handleEvent);
-            flows.init({ log: mockLog, settings: {}, storage: storage });
-            await flows.load()
-            await flows.startFlows()
-            events.removeListener("runtime-event", handleEvent);
-
-            //{id:"flows-run-state", payload: {started: true, state: "started"}
-            should(receivedEvent).not.be.null()
-            receivedEvent.should.have.property("id", "flows-run-state")
-            receivedEvent.should.have.property("payload", { started: true, state: "started" })
-            receivedEvent.should.have.property("retain", true)
-        });
-        it('emits runtime-event "flows-run-state" "stopped"', async function () {
-            const originalConfig = [
-                { id: "t1-1", x: 10, y: 10, z: "t1", type: "test", wires: [] },
-                { id: "t1", type: "tab" }
-            ];
-            storage.getFlows = function () {
-                return Promise.resolve({ flows: originalConfig });
-            }
-            let receivedEvent = null;
-            const handleEvent = (data) => {
-                if(data && data.id === 'flows-run-state') {
-                    receivedEvent = data;
-                }
-            }
-            events.on('runtime-event', handleEvent);
-            flows.init({ log: mockLog, settings: {}, storage: storage });
-            await flows.load()
-            await flows.startFlows()
-            await flows.stopFlows()
-            events.removeListener("runtime-event", handleEvent);
-
-            //{id:"flows-run-state", payload: {started: true, state: "started"}
-            should(receivedEvent).not.be.null()
-            receivedEvent.should.have.property("id", "flows-run-state")
-            receivedEvent.should.have.property("payload", { started: false, state: "stopped" })
-            receivedEvent.should.have.property("retain", true)
-        });
         it('does not start if nodes missing', function(done) {
             var originalConfig = [
                 {id:"t1-1",x:10,y:10,z:"t1",type:"test",wires:[]},
@@ -449,12 +396,13 @@ describe('flows/index', function() {
                 try {
                     flowCreate.called.should.be.false();
                     receivedEvent.should.have.property('id','runtime-state');
-                    receivedEvent.should.have.property('payload',
-                       { error: 'missing-modules',
-                         type: 'warning',
-                         text: 'notification.warnings.missing-modules',
-                         modules: [] }
-                     );
+                    receivedEvent.should.have.property('payload', {
+                        state: 'stop',
+                        error: 'missing-modules',
+                        type: 'warning',
+                        text: 'notification.warnings.missing-modules',
+                        modules: []
+                     });
 
                     done();
                 }catch(err) {
