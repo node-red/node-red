@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "3.0.0-beta.3",
+    "version": "3.0.0-beta.4",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -45,7 +45,7 @@
         "express-session": "1.17.3",
         "form-data": "4.0.0",
         "fs-extra": "10.1.0",
-        "got": "11.8.3",
+        "got": "11.8.5",
         "hash-sum": "2.0.0",
         "hpagent": "1.0.0",
         "https-proxy-agent": "5.0.1",

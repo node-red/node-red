@@ -1,3 +1,38 @@
+#### 3.0.0-beta.4: Beta Release
+
+Editor
+
+ - Fix clicking on node in workspace to hide context menu (#3696) @knolleary
+ - Fix credential type input item of subflow template (#3703) @HiroyasuNishiyama
+ - Add option flag `reimport` to `importNodes` (#3718) @Steve-Mcl
+ - Update german translation (#3691) @Dennis14e
+ - List welcome tours in help sidebar (#3717) @knolleary
+ - Ensure 'hidden flow' count doesn't include subflows (#3715) @knolleary
+ - Fix Chinese translate (#3706) @hotlong
+ - Fix use default button for node icon (#3714) @kazuhitoyokoi
+ - Fix select boxes vertical alignment (#3698) @bonanitech
+ - Ensure workspace clean after undoing dropped node (#3708) @Steve-Mcl
+ - Use solid colour as config node icon background to hide text overflow (#3710) @Steve-Mcl
+ - Increase quick-add height to reveal 2 most recent entries (#3711) @Steve-Mcl
+ - Set default editor to monaco in absence of user preference (#3702) @knolleary
+ - Add Japanese translations for v3.0-beta.3 (#3688) @kazuhitoyokoi
+ - Fix handling of spacebar inside JSON visual editor (#3687) @knolleary
+ - Fix menu padding to handle both icons and submenus (#3686) @knolleary
+ - Include scroll offset when positioning quick-add dialog (#3685) @knolleary
+
+Runtime
+
+ - Import default export if node is a transpiled es module (#3669) @dschmidt
+ - Leave Monaco theme commented out by default (#3704) @bonanitech
+
+Nodes
+
+ - CSV: Fix CSV node to handle when outputting text fields (#3716) @dceejay
+ - Delay: Fix delay rate limit last timing when empty (#3709) @dceejay
+ - Link: Ensure link-call cache is updated when link-in is modified (#3695) @Steve-Mcl
+ - Join: Join node in reduce mode doesn't keep existing msg properties (#3670) @dceejay
+ - Template: Add support for evalulating {{env.<var>}} within a template node (#3690) @cow0w
+
 #### 3.0.0-beta.3: Beta Release
 
 Editor
