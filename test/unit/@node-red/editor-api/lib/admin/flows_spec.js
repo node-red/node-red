@@ -32,7 +32,9 @@ describe("api/admin/flows", function() {
         app = express();
         app.use(bodyParser.json());
         app.get("/flows",flows.get);
+        app.get("/flows/state",flows.getState);
         app.post("/flows",flows.post);
+        app.post("/flows/state",flows.postState);
     });
 
     it('returns flow - v1', function(done) {
@@ -205,6 +207,101 @@ describe("api/admin/flows", function() {
                 }
                 setFlows.called.should.be.true();
                 setFlows.lastCall.args[0].should.not.have.property('flows');
+                done();
+            });
+    });
+    it('returns flows run state', function (done) {
+        var setFlows = sinon.spy(function () { return Promise.resolve(); });
+        flows.init({
+            flows: {
+                setFlows,
+                getState: async function () {
+                    return { started: true, state: "started" };
+                }
+            }
+        });
+        request(app)
+            .get('/flows/state')
+            .set('Accept', 'application/json')
+            .set('Node-RED-Deployment-Type', 'reload')
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                try {
+                    res.body.should.have.a.property('started', true);
+                    res.body.should.have.a.property('state', "started");
+                    done();
+                } catch (e) {
+                    return done(e);
+                }
+            });
+    });
+    it('sets flows run state - stopped', function (done) {
+        var setFlows = sinon.spy(function () { return Promise.resolve(); });
+        flows.init({
+            flows: {
+                setFlows: setFlows,
+                getState: async function () {
+                    return { started: true, state: "started" };
+                },
+                setState: async function () {
+                    return { started: false, state: "stopped" };
+                },
+            }
+        });
+        request(app)
+            .post('/flows/state')
+            .set('Accept', 'application/json')
+            .send({state:'stop'})
+            .expect(200)
+            .end(function (err, res) {
+                if (err) {
+                    return done(err);
+                }
+                try {
+                    res.body.should.have.a.property('started', false);
+                    res.body.should.have.a.property('state', "stopped");
+                    done();
+                } catch (e) {
+                    return done(e);
+                }
+            });
+    });
+    it('sets flows run state - bad value', function (done) {
+        var setFlows = sinon.spy(function () { return Promise.resolve(); });
+        const makeError = (error, errcode, statusCode) => {
+            const message = typeof error == "object" ? error.message : error
+            const err = typeof error == "object" ? error : new Error(message||"Unexpected Error")
+            err.status = err.status || statusCode || 400;
+            err.code = err.code || errcode || "unexpected_error"
+            return err
+        }
+        flows.init({
+            flows: {
+                setFlows: setFlows,
+                getState: async function () {
+                    return { started: true, state: "started" };
+                },
+                setState: async function () {
+                    var err = (makeError("Cannot set runtime state. Invalid state", "invalid_run_state", 400))
+                    var p = Promise.reject(err);
+                    p.catch(()=>{});
+                    return p;
+                },
+            }
+        });
+        request(app)
+            .post('/flows/state')
+            .set('Accept', 'application/json')
+            .send({state:'bad-state'})
+            .expect(400)
+            .end(function(err,res) {
+                if (err) {
+                    return done(err);
+                }
+                res.body.should.have.property("code","invalid_run_state");
                 done();
             });
     });
