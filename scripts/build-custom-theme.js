@@ -83,7 +83,7 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
 
     const result = sass.renderSync({
         outputStyle: "expanded",
-        file: path.join(workingDir,"style.scss"),
+        file: path.join(workingDir,"style-custom-theme.scss"),
     });
 
     const css = result.css.toString()

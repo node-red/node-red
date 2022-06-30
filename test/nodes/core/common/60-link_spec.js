@@ -17,6 +17,7 @@
 var should = require("should");
 var linkNode = require("nr-test-utils").require("@node-red/nodes/core/common/60-link.js");
 var helper = require("node-red-node-test-helper");
+var clone = require("clone");
 
 describe('link Node', function() {
 
@@ -318,6 +319,48 @@ describe('link Node', function() {
                 });
                 linkCall.receive({ payload: "hello", target: "double payload" });
             });
+        })
+        it('should not raise error after deploying a name change to a duplicate link-in node', async function () {
+            this.timeout(400);
+            const flow = [
+                { id: "tab-flow-1", type: "tab", label: "Flow 1" },
+                { id: "link-in-1", z: "tab-flow-1", type: "link in", name: "duplicate", wires: [["link-out-1"]] },
+                { id: "link-in-2", z: "tab-flow-1", type: "link in", name: "duplicate", wires: [["link-out-1"]] }, //duplicate name
+                { id: "link-out-1", z: "tab-flow-1", type: "link out", mode: "return" },
+                { id: "link-call", z: "tab-flow-1", type: "link call", linkType: "dynamic", links: [], wires: [["n4"]] },
+                { id: "n4", z: "tab-flow-1", type: "helper" }
+            ];
+
+            await helper.load(linkNode, flow)
+
+            const linkIn2before = helper.getNode("link-in-2");
+            linkIn2before.should.have.property("name", "duplicate") // check link-in-2 has been deployed with the duplicate name
+
+            //modify the flow and deploy change
+            const newConfig = clone(flow);
+            newConfig[2].name = "add" // change nodes name
+            await helper.setFlows(newConfig, "nodes") // deploy "nodes" only
+
+            const helperNode = helper.getNode("n4");
+            const linkCall2 = helper.getNode("link-call");
+            const linkIn2after = helper.getNode("link-in-2");
+            linkIn2after.should.have.property("name", "add") // check link-in-2 no longer has a duplicate name
+
+            //poke { payload: "hello", target: "add" } into the link-call node and 
+            //ensure that a message arrives via the link-in node named "add"
+            await new Promise((resolve, reject) => {
+                helperNode.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("target", "add");
+                        msg.should.not.have.property("error");
+                        resolve()
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+                linkCall2.receive({ payload: "hello", target: "add" });
+            });
+
         })
         it('should allow nested link-call flows', function(done) {
             this.timeout(500);
