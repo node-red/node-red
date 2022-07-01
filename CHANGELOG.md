@@ -2,6 +2,7 @@
 
 Editor
 
+ - Move all colours to CSS variables (#3692) @bonanitech
  - Fix clicking on node in workspace to hide context menu (#3696) @knolleary
  - Fix credential type input item of subflow template (#3703) @HiroyasuNishiyama
  - Add option flag `reimport` to `importNodes` (#3718) @Steve-Mcl
@@ -22,6 +23,7 @@ Editor
 
 Runtime
 
+ - Allow flows to be stopped and started manually (#3719) @knolleary
  - Import default export if node is a transpiled es module (#3669) @dschmidt
  - Leave Monaco theme commented out by default (#3704) @bonanitech
 
