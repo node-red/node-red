@@ -51,7 +51,7 @@ describe("api/editor/theme", function () {
         context.should.have.a.property("asset");
         context.asset.should.have.a.property("red", "red/red.min.js");
         context.asset.should.have.a.property("main", "red/main.min.js");
-        context.asset.should.have.a.property("vendorMonaco", "");
+        context.asset.should.have.a.property("vendorMonaco", "vendor/monaco/monaco-bootstrap.js");
 
         should.not.exist(theme.settings());
     });
@@ -69,16 +69,16 @@ describe("api/editor/theme", function () {
         }
     });
 
-    it("Adds monaco bootstrap when enabled", async function () {
+    it("Does not add monaco bootstrap when ace selected", async function () {
         theme.init({
             editorTheme: {
                 codeEditor: {
-                    lib: 'monaco'
+                    lib: 'ace'
                 }
             }
         });
         var context = await theme.context();
-        context.asset.should.have.a.property("vendorMonaco", "vendor/monaco/monaco-bootstrap.js");
+        context.asset.should.have.a.property("vendorMonaco", "");
     });
 
     it("picks up custom theme", async function () {
