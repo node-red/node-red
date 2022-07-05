@@ -1,26 +1,13 @@
-FROM node:stretch-slim AS builder
-USER node
-
-WORKDIR /home/node
-
-COPY --chown=node:node . .
-
-RUN npm install
-RUN npm run build
-
-FROM node:stretch-slim
-
-RUN useradd -ms /bin/bash appuser
-USER appuser
+FROM node:18
 
 WORKDIR /app
 
-COPY --from=builder --chown=appuser:appuser /home/node/node_modules node_modules
-COPY --from=builder --chown=appuser:appuser /home/node/package.json .
-COPY --from=builder --chown=appuser:appuser /home/node/packages packages
-COPY --from=builder --chown=appuser:appuser /home/node/data/flows.json /root/.node-red/flows.json
+COPY . .
 
+RUN npm install
 
-EXPOSE 1880
+ENV NODE_ENV=production
 
-CMD [ "npm", "start" ]
+RUN npm run build
+
+CMD [ "npm", "start", "--", "data/flows.json" ]
