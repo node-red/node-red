@@ -89,27 +89,9 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
     const css = result.css.toString()
     const lines = css.split("\n");
     const colorCSS = []
-    const nonColorCSS = [];
-
-    let inKeyFrameBlock = false;
 
     lines.forEach(l => {
-        if (inKeyFrameBlock) {
-            nonColorCSS.push(l);
-            if (/^}/.test(l)) {
-                inKeyFrameBlock = false;
-            }
-        } else if (/^@keyframes/.test(l)) {
-            nonColorCSS.push(l);
-            inKeyFrameBlock = true;
-        } else if (!/^  /.test(l)) {
-            colorCSS.push(l);
-            nonColorCSS.push(l);
-        } else if (/color|border|background|fill|stroke|outline|box-shadow/.test(l)) {
-            colorCSS.push(l);
-        } else {
-            nonColorCSS.push(l);
-        }
+        colorCSS.push(l);
     });
 
     const nrPkg = require("../package.json");
