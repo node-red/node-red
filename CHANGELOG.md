@@ -2,6 +2,7 @@
 
 Editor
 
+ - Use theme page and header values if settings.js values are not present (#3767) @Steve-Mcl
  - Focus editor for undo after some actions in menu (#3759) @kazuhitoyokoi
  - Ensure node icon shade has properly rounded corners (#3763) @knolleary
  - Fix storing subflow credential type when input has multiple types (#3762) @knolleary
@@ -22,6 +23,7 @@ Editor
  - Update add-junction menu to work in more cases (#3727) @knolleary
  - Ensure importMap is not null when using import UI (#3723) @Steve-Mcl
  - Add Japanese translations for v3.0-beta.4 (#3724) @kazuhitoyokoi
+ - Fix "split with" on virtual links (#3766) @Steve-Mcl
 
 Runtime
 
