@@ -1,5 +1,13 @@
 [
     {
+        "id": "5ca0ee0f1a963b2c",
+        "type": "tab",
+        "label": "(Non-Engineer) Unicorn Getting Started Guide",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "c86af370eff94afa",
         "type": "tab",
         "label": "(Engineer) Unicorn Getting Started",
