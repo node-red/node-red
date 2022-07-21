@@ -11,7 +11,7 @@ describe('The Getting Start Flow', () => {
 
     it('Has expected nodes in Flow', () => {
         cy.contains('(Engineer) Unicorn Getting Started').click()
-        cy.get('.red-ui-flow-node-group').should('have.length', 9)
+        cy.get('.red-ui-flow-node-group').should('have.length', 21)
     })
 
 })
