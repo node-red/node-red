@@ -28,3 +28,6 @@ docs
 .nyc_output
 sync.ffs_db
 .idea
+cypress/plugins
+cypress/support
+cypress/videos
