@@ -1,0 +1,14 @@
+{
+  "name": "regular_node",
+  "version": "1.0.0",
+  "description": "A regular node that does nothing other than exist",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "test"
+  ],
+  "author": "@testyMcTersterson",
+  "license": "MIT"
+}

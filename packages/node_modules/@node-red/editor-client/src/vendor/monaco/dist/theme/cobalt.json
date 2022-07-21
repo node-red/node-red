@@ -3,6 +3,10 @@
   "inherit": true,
   "rules": [
     {
+      "background": "002240",
+      "token": ""
+    },
+    {
       "foreground": "e1efff",
       "token": "punctuation - (punctuation.definition.string || punctuation.definition.comment)"
     },
