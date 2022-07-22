@@ -17,3 +17,11 @@ Finally, deleting code often has unintended consequences - you should, at a mini
 1. `npm run dev -- data/flows.json` or `npm start -- data/flows.json`
 2. `npm run cy:run` # Runs cypress tests
 
+## Updating from upstream
+
+1. Add a reference to upstream `git remote add upstream https://github.com/node-red/node-red.git` (verify with `git remote -v`)
+2. Fetch upstream `git fetch upstream`
+3. `git checkout master`
+4. `git merge upstream/master` # We've found rebasing to be quite difficult, preference is a single merge commit
+5. Resolve merge conflicts
+6. `git push origin master`
