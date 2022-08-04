@@ -1,3 +1,63 @@
+#### 2.2.3: Maintenance Release
+
+Editor
+
+ - Fix storing subflow credential type when input has multiple types (backport to v2.x) (#3828) @Steve-Mcl
+ - Fix markdown editor to mark up orderedlists correctly
+ - Ensure 'hidden flow' count doesn't include subflows (backport to v2.x) (#3823) @Steve-Mcl
+ - Fix credential type input item of subflow template (backport to v2.x) (#3822) @Steve-Mcl
+ - Fix to extend escaped subflow category characters (backport #3647 to v2.x) (#3665) @Steve-Mcl
+ - Reset mouse state when switching tabs (Backport #3643 to v2.x) (#3664) @Steve-Mcl
+ - Fix to sanitize tab name (Backport #3646 to v2.x) (#3663) @Steve-Mcl
+ - fix new folder menu of save to library dialog (backport #3633 to v2.x) (#3661) @Steve-Mcl
+ - Ensure ACE worker options are set (Backport 3611 to v2.x) (#3657) @Steve-Mcl
+ - Fix browser console error Uncaught TypeError when searching certain terms (Backport #3548 to v2.x) (#3656) @Steve-Mcl
+ - Remove duplicate history add of ungroup event (backport #3581to v2.x) (#3655) @Steve-Mcl
+ - Don't let themes change node config colors (#3564) @bonanitech
+ - Fix gap between typedInput containers borders (#3560) @bonanitech
+ - Fix recording removed links in edit history (#3547) @knolleary
+ - Remove unused SASS vars (#3536) @bonanitech
+ - Add custom style for jQuery widgets borders (#3537) @bonanitech
+ - fix out of scope reference of hasUnusedConfig variable (#3535) @HiroyasuNishiyama
+ - correct "non string" check parenthesis (#3524) @Steve-Mcl
+ - Ensure i18n of scoped package name (#3516) @Steve-Mcl
+ - Prevent shortcut deploy when deploy button shaded (#3517) @Steve-Mcl
+ - Fix: Sidebar "Configuration" filter button tooltip (#3500) @ralphwetzel
+ - Add the ability to customize diff colors even more (#3499) @bonanitech
+ - do JSON comparison of old value/new value (#3481) @Steve-Mcl
+ - fix nodes losing their wires when in an iframe (#3484) @zettca
+ - Improve scroll into view (#3468) @Steve-Mcl
+ - Dont show 1st tab if hidden when loading (#3464) @Steve-Mcl
+
+Runtime
+
+ - Do not remove unknown credentials of Subflow Modules (backport to v2.x) (#3826) @Steve-Mcl
+ - Backports to v2.x (#3735) @kazuhitoyokoi
+ - Backports to v2.x (#3705) @kazuhitoyokoi
+ - fix buffer parse error message of evaluateNodeProperty (backports #3624 for v2.x) (#3659) @Steve-Mcl
+ - Don't start if user has no home directory (#3540) @hardillb
+ - Error on invalid encrypted credentials (#3498) @sammachin
+
+Nodes
+
+ - Allow HTTP Headers not in spec (backport to v2.x) (#3829) @Steve-Mcl
+ - Fix change node, not handling from field properly when using context (backport to v2.x) (#3827) @Steve-Mcl
+ - undo regression to tcp-in node
+ - Fix CSV node to handle when outputting text fields (backport to v2.x) (#3825) @Steve-Mcl
+ - Fix delay rate limit last timing when empty (backport to v2.x) (#3824) @Steve-Mcl
+ - Join-reduce keep existing msg properties (backport to v2.x) (#3821) @Steve-Mcl
+ - Fix ESM module loading in Function node (Backport #3645 to v2.x) (#3662) @Steve-Mcl
+ - Fix JSONata evaluation of inject button (Backport 3632 to v2.x) (#3660) @Steve-Mcl
+ - Dont delete TCP socket twice (backport Backport: #3630 to v2.x) (#3658) @Steve-Mcl
+ - Mqtt fixes in v3 for v2.x (backports #3563 #3594 #3626 to v2.x) (#3654) @Steve-Mcl
+ - MQTT Node - save and restore v5 config user props (#3562) @Steve-Mcl
+ - Fix incorrect MQTT status (#3552) @Steve-Mcl
+ - fix reference error of msg.status in debug node (#3526) @HiroyasuNishiyama
+ - call done after ws disconnects (#3531) @Steve-Mcl
+ - Add unit tests for MQTT nodes (#3497) @Steve-Mcl
+ - fix typo of will properties (properies) (#3502) @Steve-Mcl
+ - fix: ensure mqtt v5 props can be set false (#3472) @Steve-Mcl
+
 #### 2.2.2: Maintenance Release
 
 Nodes
