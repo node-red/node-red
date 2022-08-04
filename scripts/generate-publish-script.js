@@ -4,7 +4,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const should = require("should");
 
-const LATEST = "2";
+const LATEST = "3";
 
 function generateScript() {
     return new Promise((resolve, reject) => {
