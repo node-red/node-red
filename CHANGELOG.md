@@ -1,3 +1,23 @@
+#### 3.0.2: Maintenance Release
+
+Editor
+
+ - Fix workspace chart bottom property (#3812) @bonanitech
+ - Update german translation (#3802) @Dennis14e
+ - Support color reset to the default in subflow and group (#3801) @kazuhitoyokoi
+ - Allow generateNodeNames to handle names containing regex control chars (#3817) @knolleary
+ - Hide scrollbars until they're needed (#3808) @bonanitech
+ - Include junctions/groups when exporting subflows plus related fixes (#3816) @knolleary
+ - remove console.log (#3820) @Steve-Mcl
+
+Runtime
+
+ - Register subflow module instance node with parent flow (#3818) @knolleary
+
+Nodes
+
+ - HTTP Request: Allow HTTP Headers not in spec (#3776) @hardillb
+
 #### 3.0.1: Maintenance Release
 
 Editor
