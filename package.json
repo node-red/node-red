@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -40,7 +40,7 @@
         "cookie-parser": "1.4.6",
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
-        "denque": "2.0.1",
+        "denque": "2.1.0",
         "express": "4.18.1",
         "express-session": "1.17.3",
         "form-data": "4.0.0",
@@ -49,7 +49,7 @@
         "hash-sum": "2.0.0",
         "hpagent": "1.0.0",
         "https-proxy-agent": "5.0.1",
-        "i18next": "21.8.14",
+        "i18next": "21.8.16",
         "iconv-lite": "0.6.3",
         "is-utf8": "0.2.1",
         "js-yaml": "4.1.0",
@@ -76,7 +76,7 @@
         "semver": "7.3.7",
         "tar": "6.1.11",
         "tough-cookie": "4.0.0",
-        "uglify-js": "3.16.2",
+        "uglify-js": "3.16.3",
         "uuid": "8.3.2",
         "ws": "7.5.6",
         "xml2js": "0.4.23"
@@ -85,7 +85,7 @@
         "bcrypt": "5.0.1"
     },
     "devDependencies": {
-        "dompurify": "2.3.9",
+        "dompurify": "2.3.10",
         "grunt": "1.5.3",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.4.3",
@@ -114,7 +114,7 @@
         "node-red-node-test-helper": "^0.3.0",
         "nodemon": "2.0.19",
         "proxy": "^1.0.2",
-        "sass": "1.53.0",
+        "sass": "1.54.2",
         "should": "13.2.3",
         "sinon": "11.1.2",
         "stoppable": "^1.1.0",
