@@ -219,7 +219,7 @@ describe('MQTT Nodes', function () {
             topic: nextTopic(),
             payload: '{prop:"value3", "num":3}', // send invalid JSON ...
         }
-        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
+        const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null }
         hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
             helperNode.on("input", function (msg) {
                 try {
@@ -345,7 +345,7 @@ describe('MQTT Nodes', function () {
             topic: nextTopic(),
             payload: '{prop:"value3", "num":3}', contentType: "application/json", // send invalid JSON ...
         }
-        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
+        const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null }
         hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
             helperNode.on("input", function (msg) {
                 try {
@@ -431,7 +431,7 @@ describe('MQTT Nodes', function () {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
         const options = {}
-        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null }
+        const hooks = { beforeLoad: null, afterLoad: null, afterConnect: null }
         hooks.beforeLoad = (flow) => { //add a status node pointed at MQTT Out node (to watch for connection status change)
             flow.push({ "id": "status.node", "type": "status", "name": "status_node", "scope": ["mqtt.out"], "wires": [["helper.node"]] });//add status node to watch mqtt_out
         }
@@ -462,18 +462,31 @@ describe('MQTT Nodes', function () {
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
+            autoConnect: false,
             protocolVersion: 4,
             birthTopic: baseTopic + "/birth",
-            birthPayload: "broker connected",
+            birthPayload: "broker birth",
             birthQos: 2,
         }
-        const options = {};
-        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null };
-        options.expectMsg = {
+        const expectMsg = {
             topic: brokerOptions.birthTopic,
             payload: brokerOptions.birthPayload,
             qos: brokerOptions.birthQos
         };
+        const options = { };
+        const hooks = { };
+        hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
+            helperNode.on("input", function (msg) {
+                try {
+                    compareMsgToExpected(msg, expectMsg);
+                    done();
+                } catch (error) {
+                    done(error)
+                }
+            })
+            mqttIn.receive({ "action": "connect" }); //now request connect action
+            return true; //handled
+        }       
         testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
     itConditional('should publish close message', function (done) {
@@ -807,8 +820,8 @@ function waitBrokerConnect(broker, timeLimit) {
     let waitConnected = (broker, timeLimit) => {
         const brokers = Array.isArray(broker) ? broker : [broker];
         timeLimit = timeLimit || 1000;
-        let timer, resolved = false;
         return new Promise( (resolve, reject) => {
+            let timer, resolved = false;
             timer = wait();
             function wait() {
                 if (brokers.every(e => e.connected == true)) {
