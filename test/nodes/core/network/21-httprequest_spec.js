@@ -2268,7 +2268,7 @@ describe('HTTP Request Node', function() {
         });
     });
 
-    describe('should parse broken headers', function(done) {
+    describe('should parse broken headers', function() {
 
         const versions = process.versions.node.split('.')
 
@@ -2332,8 +2332,6 @@ describe('HTTP Request Node', function() {
                     
                 });
             });
-        } else {
-            done()
         }
     });
 });
