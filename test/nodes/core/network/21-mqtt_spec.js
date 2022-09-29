@@ -430,24 +430,38 @@ describe('MQTT Nodes', function () {
         };
         testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
-    itConditional('should fail with bad birth topic', function (done) {
+    itConditional('should safely discard bad birth topic', function (done) {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
         const baseTopic = nextTopic();
         const brokerOptions = {
             protocolVersion: 4,
-            birthTopic: baseTopic + "#",
+            birthTopic: baseTopic + "#", // a publish topic should never have a wildcard
             birthPayload: "broker connected",
             birthQos: 2,
         }
         const options = {};
-        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null };
-        options.expectMsg = {
-            topic: brokerOptions.birthTopic,
-            payload: brokerOptions.birthPayload,
-            qos: brokerOptions.birthQos
-        };
-        testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
+        const hooks = { done: null, beforeLoad: null, afterLoad: null, afterConnect: null };
+        hooks.afterLoad = (helperNode, mqttBroker, mqttIn, mqttOut) => {
+            helperNode.on("input", function (msg) {
+                try {
+                    msg.should.have.a.property("error").type("object");
+                    msg.error.should.have.a.property("source").type("object");
+                    msg.error.source.should.have.a.property("id", mqttIn.id);
+                    done();
+                } catch (err) {
+                    done(err)
+                }
+            });
+            return true; //handled
+        }
+        options.expectMsg = null;
+        try {
+            testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
+            done()
+        } catch(err) {
+            done(e)
+        }
     });
     itConditional('should publish close message', function (done) {
         if (skipTests) { return this.skip() }
@@ -606,12 +620,13 @@ function testSendRecv(brokerOptions, inNodeOptions, outNodeOptions, options, hoo
             const mqttBroker = helper.getNode(brokerOptions.id);
             const mqttIn = helper.getNode(nodes.mqtt_in.id);
             const mqttOut = helper.getNode(nodes.mqtt_out.id);
-            let afterLoadHandled = false;
+            let afterLoadHandled = false, finished = false;
             if (hooks.afterLoad) {
                 afterLoadHandled = hooks.afterLoad(helperNode, mqttBroker, mqttIn, mqttOut)
             }
             if (!afterLoadHandled) {
                 helperNode.on("input", function (msg) {
+                    finished = true
                     try {
                         compareMsgToExpected(msg, expectMsg);
                         if (hooks.done) { hooks.done(); }
@@ -636,10 +651,12 @@ function testSendRecv(brokerOptions, inNodeOptions, outNodeOptions, options, hoo
                 }
             })
             .catch((e) => {
+                if(finished) { return }
                 if (hooks.done) { hooks.done(e); }
                 else { throw e; }
             });
         } catch (err) {
+            if(finished) { return }
             if (hooks.done) { hooks.done(err); }
             else { throw err; }
         }
