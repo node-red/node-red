@@ -430,6 +430,25 @@ describe('MQTT Nodes', function () {
         };
         testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
     });
+    itConditional('should fail with bad birth topic', function (done) {
+        if (skipTests) { return this.skip() }
+        this.timeout = 2000;
+        const baseTopic = nextTopic();
+        const brokerOptions = {
+            protocolVersion: 4,
+            birthTopic: baseTopic + "#",
+            birthPayload: "broker connected",
+            birthQos: 2,
+        }
+        const options = {};
+        const hooks = { done: done, beforeLoad: null, afterLoad: null, afterConnect: null };
+        options.expectMsg = {
+            topic: brokerOptions.birthTopic,
+            payload: brokerOptions.birthPayload,
+            qos: brokerOptions.birthQos
+        };
+        testSendRecv(brokerOptions, { topic: brokerOptions.birthTopic }, {}, options, hooks);
+    });
     itConditional('should publish close message', function (done) {
         if (skipTests) { return this.skip() }
         this.timeout = 2000;
