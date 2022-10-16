@@ -1529,7 +1529,7 @@ describe('HTTP Request Node', function() {
                         msg.payload.headers.should.have.property('Content-Type').which.startWith('application/json');
                         //msg.dynamicHeaderName should be present in headers with the value of msg.dynamicHeaderValue
                         msg.payload.headers.should.have.property('dyn-header-name').which.startWith('dyn-header-value');
-                        //static (custom) header set in Flow UI should be present 
+                        //static (custom) header set in Flow UI should be present
                         msg.payload.headers.should.have.property('static-header-name').which.startWith('static-header-value');
                         //msg.headers['location'] should be deleted because Flow UI "Location" header has a blank value
                         //ensures headers with matching characters but different case are eliminated
@@ -2281,7 +2281,7 @@ describe('HTTP Request Node', function() {
             let port = testPort++
 
             let server;
-        
+
             before(function() {
                 server = net.createServer(function (socket) {
                     socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
@@ -2291,7 +2291,7 @@ describe('HTTP Request Node', function() {
                 server.listen(port,'127.0.0.1', function(err) {
                 })
             });
-            
+
             after(function() {
                 server.close()
             });
@@ -2322,14 +2322,14 @@ describe('HTTP Request Node', function() {
                     var n2 = helper.getNode("n2");
                     n2.on('input', function(msg) {
                         try{
-                            msg.payload.should.equal(`RequestError: Parse Error: Missing expected CR after header value : http://localhost:${port}/`)
+                            msg.payload.should.match(/RequestError: Parse Error/)
                             done()
                         } catch (err) {
                             done(err)
                         }
                     })
                     n1.receive({payload: 'foo'})
-                    
+
                 });
             });
         }
