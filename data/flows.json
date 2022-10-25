@@ -656,7 +656,7 @@
         "type": "guide",
         "z": "c86af370eff94afa",
         "name": "Deploy and Access the Kubernetes Dashboard",
-        "info": "# Description\n\n# Resources\n\n# Unicorn SME(s)\n",
+        "info": "# Description\n> \"Dashboard is a web-based Kubernetes user interface. You can use Dashboard to deploy containerized applications to a Kubernetes cluster, troubleshoot your containerized application, and manage the cluster resources. You can use Dashboard to get an overview of applications running on your cluster, as well as for creating or modifying individual Kubernetes resources (such as Deployments, Jobs, DaemonSets, etc). For example, you can scale a Deployment, initiate a rolling update, restart a pod or deploy new applications using a deploy wizard.\"\n\n# Recommended Reading\n- [K8s Web UI Dashboard Guide](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)\n\n# Install and Access\n- From your terminal run `kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.6.1/aio/deploy/recommended.yaml` to deploy the dashboard.\n- Follow the [User Creation](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/creating-sample-user.md) instructions to create an account to access the dashboard.\n- Once you have the bearer token run `kubectl proxy` and head to the [dashboard login screen](http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/) where you can supply the token and access the dashboard\n\n# Unicorn SME(s)\n",
         "x": 740,
         "y": 200,
         "wires": [
