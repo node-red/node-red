@@ -5,8 +5,8 @@ The Guides are crowd sourced and contributions should be made with the overarchi
 At the simplest level:
 
 1. Run Sparkles Guide
-2. Make an update in the UI (i.e. new flow, new topic, new material, etc...)
-3. Save the flow (by clicking the "Deploy" button, until issue #5 is resolved)
+2. Make an update in the UI (i.e. new flow, new topic, new material, etc...), existing nodes can be edited by double clicking them.
+3. Save the flow (by clicking the "Save Changes" button)
 4. commit and push your changes (which are saved in data/flows.json)
 
 ## Conventions and Guidelines
