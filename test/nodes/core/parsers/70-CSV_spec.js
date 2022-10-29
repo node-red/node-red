@@ -773,7 +773,7 @@ describe('CSV node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload', 'a"a,b\'b\nA1,B1\nA2,B2\n');
+                        msg.should.have.property('payload', '"a""a",b\'b\nA1,B1\nA2,B2\n');
                         done();
                     }
                     catch(e) { done(e); }
