@@ -92,7 +92,7 @@ describe('watch Node', function() {
                     msg.should.have.property('payload', result.payload);
                     msg.should.have.property('type', result.type);
                     if('size' in result) {
-                        if (!((arch != "arm64") && (platform !== "darwin"))) {
+                        if (!((arch === "arm64") && (platform === "darwin"))) {
                             // On OSX/ARM, two change events occur and first event do not reflect file size change.  So ignore size field in the case. 
                             msg.should.have.property('size', result.size);
                         }
