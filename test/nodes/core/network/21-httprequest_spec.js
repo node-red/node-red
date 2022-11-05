@@ -2322,7 +2322,7 @@ describe('HTTP Request Node', function() {
                     var n2 = helper.getNode("n2");
                     n2.on('input', function(msg) {
                         try{
-                            msg.payload.should.equal(`RequestError: Parse Error: Missing expected CR after header value : http://localhost:${port}/`)
+                            msg.payload.should.startWith(`RequestError: Parse Error:`)
                             done()
                         } catch (err) {
                             done(err)
