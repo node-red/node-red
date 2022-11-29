@@ -299,10 +299,11 @@ describe('HTTP Request Node', function() {
             // GOT never sent a body. (there is nothing in params/query/body)
             // Oddly, if we set options.json (instead of options.body) in the GOT
             // request, then req.body will have the values!
-            // Has the 21-httprequest node ever been able to send a payload in body
-            // for a GET request?
+            //I suspect the GOT lib *is* sending body on a GET request since an 
+            // error is thrown if we try to set options.body on a GET request without
+            // setting options.allowGetBody to true.
             res.json({
-                // body:JSON.parse(req.body),
+                // body:JSON.parse(req.body), //req.body is empty!
                 url: req.originalUrl
             });
         })
