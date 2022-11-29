@@ -1161,7 +1161,7 @@ describe('HTTP Request Node', function() {
         });
 
         it('should allow the message to specify that the payload be append to querystring for a GET request', function(done) {
-            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",ret:"obj",url:getTestURL('/getQueryParams')},
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",paytoqs:"setby",ret:"obj",url:getTestURL('/getQueryParams')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
@@ -1185,7 +1185,7 @@ describe('HTTP Request Node', function() {
 
 
         it('should allow the message to specify that the payload be sent in the body for a GET request', function(done) {
-            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",ret:"obj",url:getTestURL('/getBodyParams')},
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",paytoqs:"setby",ret:"obj",url:getTestURL('/getBodyParams')},
                 {id:"n2", type:"helper"}];
             helper.load(httpRequestNode, flow, function() {
                 var n1 = helper.getNode("n1");
