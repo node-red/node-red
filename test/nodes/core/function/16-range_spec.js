@@ -106,6 +106,27 @@ describe('range Node', function() {
         genericRangeTest("clamp", 0, 10, 0, 1000, false, -1, 0, done);
     });
 
+    it('drops msg if in drop mode and input outside range', function(done) {
+        var flow = [{"id":"rangeNode1","type":"range","minin":2,"maxin":8,"minout":20,"maxout":80,"action":"drop","round":true,"name":"rangeNode","wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(rangeNode, flow, function() {
+            var rangeNode1 = helper.getNode("rangeNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            helperNode1.on("input", function(msg) {
+                try {
+                    msg.should.have.property('payload');
+                    msg.payload.should.equal(50);
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            });
+            rangeNode1.receive({payload:1});
+            rangeNode1.receive({payload:9});
+            rangeNode1.receive({payload:5});
+        });
+    });
+
     it('just passes on msg if payload not present', function(done) {
         var flow = [{"id":"rangeNode1","type":"range","minin":0,"maxin":100,"minout":0,"maxout":100,"action":"scale","round":true,"name":"rangeNode","wires":[["helperNode1"]]},
                     {id:"helperNode1", type:"helper", wires:[]}];
