@@ -2334,4 +2334,38 @@ describe('HTTP Request Node', function() {
             });
         }
     });
+
+    describe('multipart form posts', function() {
+        it('should send arrays as multiple entries', function (done) {
+            const flow = [
+                {
+                    id: 'n1', type: 'http request', wires: [['n2']], method: 'POST', ret: 'obj', url: getTestURL('/file-upload'), headers: [
+                    ]
+                },
+                { id: "n2", type: "helper" }
+            ];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg){
+                    try {
+                        msg.payload.body.should.have.property('foo')
+                        msg.payload.body.list.should.deepEqual(['a','b','c'])
+                        done()
+                    } catch (e) {
+                        done(e)
+                    }
+                });
+                n1.receive({
+                    headers: {
+                        'content-type': 'multipart/form-data'
+                    },
+                    payload: {
+                        foo: 'bar',
+                        list: [ 'a', 'b', 'c' ]
+                    }
+                });
+            })
+        });
+    })
 });
