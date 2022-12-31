@@ -1,5 +1,5 @@
 node {
-    def application = "GruntApp"
+    def application = "gruntapp"
     def dockerhubacc = "anurag2000"
 
     stage('Clone Repo'){
