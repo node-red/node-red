@@ -7,7 +7,7 @@ node {
     }
 
     stage('Build Image'){
-        app = docker.build("${dockerhubacc}/${application}:${BUILD_IMAGE}")
+        app = docker.build("${dockerhubacc}/${application}:${BUILD_NUMBER}")
     }
 
     stage('Push Image'){
