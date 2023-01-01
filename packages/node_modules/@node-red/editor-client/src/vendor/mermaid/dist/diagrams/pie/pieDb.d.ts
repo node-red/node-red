@@ -1,0 +1,30 @@
+export function parseDirective(statement: any, context: any, type: any): void;
+declare namespace _default {
+    export { parseDirective };
+    export function getConfig(): import("../../config.type").BaseDiagramConfig | undefined;
+    export { addSection };
+    export { getSections };
+    export { cleanupValue };
+    export { clear };
+    export { setAccTitle };
+    export { getAccTitle };
+    export { setDiagramTitle };
+    export { getDiagramTitle };
+    export { setShowData };
+    export { getShowData };
+    export { getAccDescription };
+    export { setAccDescription };
+}
+export default _default;
+declare function addSection(id: any, value: any): void;
+declare function getSections(): {};
+declare function cleanupValue(value: any): number;
+declare function clear(): void;
+import { setAccTitle } from "../../commonDb";
+import { getAccTitle } from "../../commonDb";
+import { setDiagramTitle } from "../../commonDb";
+import { getDiagramTitle } from "../../commonDb";
+declare function setShowData(toggle: any): void;
+declare function getShowData(): boolean;
+import { getAccDescription } from "../../commonDb";
+import { setAccDescription } from "../../commonDb";
