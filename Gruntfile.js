@@ -169,6 +169,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diagnostics.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/keyboard.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/env-var.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/workspaces.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/statusBar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view.js",
