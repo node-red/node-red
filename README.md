@@ -12,6 +12,9 @@ To make a change to the node-red runtime being used by K4 avalanche:
 
 # CHANGE-LOG
 
+## 0.18.7-patch-10.3
+2023-01-03
+- Removed subflow ID auto-generation, now prefixes the nodeId with the subflow id
 ## 0.18.7-patch-10
 2021-07-14
 - Updated logic to swap back org to correct value when possible
