@@ -1,0 +1,27 @@
+<script type="text/html" data-template-name="global-config">
+　　<div class="form-row">
+        <label style="width: 100%"><span data-i18n="global-config.label.open-conf"></span>:</label>
+    </div>
+    <div class="form-row">
+        <button class="red-ui-button" type="button" id="node-input-edit-env-var" data-i18n="editor:env-var.header" style="margin-left: 20px"></button>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('global-config',{
+        category: 'config',
+        defaults: {
+            name: { value: "" },
+            env: { value: [] },
+        },
+        credentials: {
+            map: { type: "map" }
+        },
+        oneditprepare: function() {
+            $('#node-input-edit-env-var').on('click', function(evt) {
+                RED.actions.invoke('core:show-user-settings', 'envvar')
+            });
+        },
+        hasUsers: false
+    });
+</script>
