@@ -109,6 +109,7 @@
         "jquery-i18next": "1.2.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
         "marked": "4.2.3",
+        "mermaid": "^9.3.0",
         "minami": "1.2.3",
         "mocha": "9.2.2",
         "node-red-node-test-helper": "^0.3.0",
