@@ -1,5 +1,6 @@
 #### 3.1.0-beta.1: Beta Release
 
+
 Editor
 
  - NEW: Locking Flows (#3938) @knolleary
@@ -7,7 +8,8 @@ Editor
  - NEW: Add support for inline image in markdown editor by drag and drop of an image file (#4006) @HiroyasuNishiyama
  - NEW: Add support for mermaid diagram to markdown editor (#4007) @HiroyasuNishiyama
  - NEW: Support uri fragments for nodes and groups including edit support (#3870) @knolleary
- 
+ - NEW: Add global environment variable feature (#3941) @HiroyasuNishiyama
+
  - Remember compact/pretty flow export user choice (#3974) @Steve-Mcl
  - fix .red-ui-notification class (#4035) @xiaobinqt
  - Fix border radius on Modules list header (#4038) @bonanitech
@@ -38,7 +40,6 @@ Editor
 
 Runtime
 
- - NEW: Add global environment variable feature (#3941) @HiroyasuNishiyama
  - Force IPv4 name resolution to have priority (#4019) @dceejay
  - Fix async loading of modules containing both nodes and plugins (#3999) @knolleary
  - Use main branch as default in project feature (#4036) @kazuhitoyokoi
