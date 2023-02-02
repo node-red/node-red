@@ -329,16 +329,35 @@ describe("red/nodes/registry/localfilesystem",function() {
             localfilesystem.init({nodesDir:[nodesDir2]});
             const nodeModule = localfilesystem.getModuleFiles();
             const loaded = Object.keys(nodeModule)
-            loaded.should.have.a.property("length", 3)
             loaded.indexOf('@test/testnode').should.greaterThan(-1, "Should load @test/testnode")
+            loaded.indexOf('lower-case').should.greaterThan(-1, "Should load lower-case")
+            loaded.indexOf('@lowercase/lower-case2').should.greaterThan(-1, "Should load @lowercase/lower-case2")
             loaded.indexOf('testnode2').should.greaterThan(-1, "Should load testnode2")
             loaded.indexOf('test-theme2').should.greaterThan(-1, "Should load test-theme2")
+            loaded.should.have.a.property("length", 5)
 
+            // scoped module with nodes in same dir as package.json
             nodeModule['@test/testnode'].should.have.a.property('name','@test/testnode');
             nodeModule['@test/testnode'].should.have.a.property('version','1.0.0');
             nodeModule['@test/testnode'].should.have.a.property('nodes');
             nodeModule['@test/testnode'].should.have.a.property('path');
             nodeModule['@test/testnode'].should.have.a.property('user', false);
+
+            // node-red module with nodes in sub dir
+            nodeModule['@lowercase/lower-case2'].should.have.a.property('name','@lowercase/lower-case2');
+            nodeModule['@lowercase/lower-case2'].should.have.a.property('version','2.0.0');
+            nodeModule['@lowercase/lower-case2'].should.have.a.property('nodes');
+            nodeModule['@lowercase/lower-case2'].nodes.should.have.a.property('lower-case');
+            nodeModule['@lowercase/lower-case2'].should.have.a.property('path');
+            nodeModule['@lowercase/lower-case2'].should.have.a.property('user', false);
+
+            // scoped module with nodes in sub dir
+            nodeModule['lower-case'].should.have.a.property('name', 'lower-case');
+            nodeModule['lower-case'].should.have.a.property('version','1.0.0');
+            nodeModule['lower-case'].should.have.a.property('nodes');
+            nodeModule['lower-case'].nodes.should.have.a.property('lower-case');
+            nodeModule['lower-case'].should.have.a.property('path');
+            nodeModule['lower-case'].should.have.a.property('user', false);
 
             nodeModule['testnode2'].should.have.a.property('name','testnode2');
             nodeModule['testnode2'].should.have.a.property('version','1.0.0');

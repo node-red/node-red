@@ -1,3 +1,37 @@
+#### 3.0.2: Maintenance Release
+
+Editor
+
+ - Fix workspace chart bottom property (#3812) @bonanitech
+ - Update german translation (#3802) @Dennis14e
+ - Support color reset to the default in subflow and group (#3801) @kazuhitoyokoi
+ - Allow generateNodeNames to handle names containing regex control chars (#3817) @knolleary
+ - Hide scrollbars until they're needed (#3808) @bonanitech
+ - Include junctions/groups when exporting subflows plus related fixes (#3816) @knolleary
+ - remove console.log (#3820) @Steve-Mcl
+
+Runtime
+
+ - Register subflow module instance node with parent flow (#3818) @knolleary
+
+Nodes
+
+ - HTTP Request: Allow HTTP Headers not in spec (#3776) @hardillb
+
+#### 3.0.1: Maintenance Release
+
+Editor
+
+ - Allow codeEditor theme to be set even if `codeEditor` is not set in settings.js (#3794) @Steve-Mcl
+ - Sys info (diagnostics report) amendments (#3793) @Steve-Mcl
+ - Allow `mode` and `title` to be omitted in `options` argument for `createEditor` (#3791) @Steve-Mcl
+ - Fix focus issues (#3789) @Steve-Mcl
+ - Ensure all typedInput buttons have button type set (#3788) @knolleary
+ - Do not flag hasUsers=false nodes as unused in search (#3787) @knolleary
+ - Properly position quick-add dialog in all cases (#3786) @knolleary
+ - Ensure quick-add dialog does not obscure ghost node when shifted (#3785) @knolleary
+ - Remove use of Object.hasOwn (#3784) @knolleary
+
 #### 3.0.0: Milestone Release
 
 Editor

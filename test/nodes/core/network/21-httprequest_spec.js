@@ -31,6 +31,8 @@ var multer = require("multer");
 var RED = require("nr-test-utils").require("node-red/lib/red");
 var fs = require('fs-extra');
 var auth = require('basic-auth');
+const { version } = require("os");
+const net = require('net')
 
 describe('HTTP Request Node', function() {
     var testApp;
@@ -1527,7 +1529,7 @@ describe('HTTP Request Node', function() {
                         msg.payload.headers.should.have.property('Content-Type').which.startWith('application/json');
                         //msg.dynamicHeaderName should be present in headers with the value of msg.dynamicHeaderValue
                         msg.payload.headers.should.have.property('dyn-header-name').which.startWith('dyn-header-value');
-                        //static (custom) header set in Flow UI should be present 
+                        //static (custom) header set in Flow UI should be present
                         msg.payload.headers.should.have.property('static-header-name').which.startWith('static-header-value');
                         //msg.headers['location'] should be deleted because Flow UI "Location" header has a blank value
                         //ensures headers with matching characters but different case are eliminated
@@ -2265,4 +2267,105 @@ describe('HTTP Request Node', function() {
             });
         });
     });
+
+    describe('should parse broken headers', function() {
+
+        const versions = process.versions.node.split('.')
+
+        if (( versions[0] == 14 && versions[1] >= 20 ) ||
+            ( versions[0] == 16 && versions[1] >= 16 ) ||
+            ( versions[0] == 18 && versions[1] >= 5 ) ||
+            ( versions[0] > 18)) {
+            // only test if on new enough NodeJS version
+
+            let port = testPort++
+
+            let server;
+
+            before(function() {
+                server = net.createServer(function (socket) {
+                    socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
+                    socket.end()
+                })
+
+                server.listen(port,'127.0.0.1', function(err) {
+                })
+            });
+
+            after(function() {
+                server.close()
+            });
+
+            it('should accept broken headers', function (done) {
+                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
+                {id:"n2", type:"helper"}];
+                helper.load(httpRequestNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    n2.on('input', function(msg) {
+                        try {
+                            msg.payload.should.equal('HelloWorld')
+                            done()
+                        } catch (err) {
+                            done(err)
+                        }
+                    })
+                    n1.receive({payload: 'foo'})
+                });
+            });
+
+            it('should reject broken headers', function (done) {
+                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
+                {id:"n2", type:"helper"}];
+                helper.load(httpRequestNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    n2.on('input', function(msg) {
+                        try{
+                            msg.payload.should.match(/RequestError: Parse Error/)
+                            done()
+                        } catch (err) {
+                            done(err)
+                        }
+                    })
+                    n1.receive({payload: 'foo'})
+
+                });
+            });
+        }
+    });
+
+    describe('multipart form posts', function() {
+        it('should send arrays as multiple entries', function (done) {
+            const flow = [
+                {
+                    id: 'n1', type: 'http request', wires: [['n2']], method: 'POST', ret: 'obj', url: getTestURL('/file-upload'), headers: [
+                    ]
+                },
+                { id: "n2", type: "helper" }
+            ];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg){
+                    try {
+                        msg.payload.body.should.have.property('foo')
+                        msg.payload.body.list.should.deepEqual(['a','b','c'])
+                        done()
+                    } catch (e) {
+                        done(e)
+                    }
+                });
+                n1.receive({
+                    headers: {
+                        'content-type': 'multipart/form-data'
+                    },
+                    payload: {
+                        foo: 'bar',
+                        list: [ 'a', 'b', 'c' ]
+                    }
+                });
+            })
+        });
+    })
 });
