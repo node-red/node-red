@@ -1,0 +1,9 @@
+{
+    "name" : "lower-case",
+    "node-red" : {
+        "nodes": {
+            "lower-case": "lower-case/lower-case.js"
+        }
+    },
+    "version": "1.0.0"
+}
