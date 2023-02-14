@@ -120,6 +120,14 @@ Node.prototype.send = function(msg) {
     var msgSent = false;
     var node;
 
+    if (Number.isInteger(msg.nodeSendCounter)) {
+        msg.nodeSendCounter += 1;
+        if (msg.nodeSendCounter >= msg.MAXIMUM_NODE_SEND_COUNT) {
+            msg.logger.info('Loop Detected, terminating conversation');
+            return;
+        }
+    }
+
     if (msg === null || typeof msg === "undefined") {
         return;
     } else if (!util.isArray(msg)) {
