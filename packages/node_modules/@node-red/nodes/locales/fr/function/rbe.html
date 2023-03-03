@@ -1,0 +1,41 @@
+<script type="text/html" data-help-name="rbe">
+    <p>Noeud de rapport par exception (RBE) - ne transmet les données que si la charge utile a changée.
+        Il peut également bloquer, ou ignorer si la valeur change d'une quantité spécifiée (mode bande morte et bande étroite).</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">nombre | chaîne de caractères | (objet)</span>
+        </dt>
+        <dd>Le mode RBE accepte les nombres, les chaînes et les objets simples.
+            Les autres modes doivent fournir un nombre analysable.</dd>
+        <dt class="optional">topic <span class="property-type">chaîne de caractères</span>
+        </dt>
+        <dd>si spécifié, la fonction fonctionnera sur une base par sujet. Cette propriété peut être définie par configuration.</dd>
+        <dt class="optional">reset<span class="property-type">tout</span></dt>
+        <dd>si défini efface la valeur stockée pour le msg.topic spécifié, ou
+            tous les sujets si msg.topic n'est pas spécifié.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">selon l'entrée</span>
+        </dt>
+        <dd>Si elle est déclenchée, la sortie sera la même que l'entrée.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>En mode RBE ce noeud bloquera jusqu'au <code>msg.payload</code>,
+        (ou la propriété sélectionnée) est différente de la précédente.
+        Si nécessaire, il peut ignorer la valeur initiale, afin de ne rien envoyer au démarrage.</p>
+    <p>Les modes <a href="https://en.wikipedia.org/wiki/Deadband" target="_blank">Bande morte</a> bloqueront la valeur entrante
+        <i>sauf si</i> sa variation est supérieure ou égale à &plusmn; la bande morte par rapport à une valeur précédente.</p>
+    <p>Les modes à bande étroite bloqueront la valeur entrante,
+        <i>si</i> sa variation est supérieure ou égale à &plusmn; la bande morte par rapport à la valeur précédente.
+        C'est utile pour ignorer les valeurs aberrantes d'un capteur défectueux par exemple.</p>
+        <p>En mode bande morte et bande étroite, la valeur entrante doit contenir un nombre analysable et
+        les deux prennent également en charge % - n'envoie que si/sauf si l'entrée diffère de plus de x % de la valeur d'origine.</p>
+        <p>La bande morte et la bande étroite permettent une comparaison avec la valeur de sortie valide précédente, donc
+        en ignorant toute valeur hors plage ou la valeur d'entrée précédente, ce qui réinitialise le point de consigne, permettant ainsi
+        une dérive graduelle (bande morte) ou un changement progressif (bande étroite).</p>
+        <p><b>Remarque :</b> Cela fonctionne sur un <code>msg.topic</code> par défaut, bien que cela puisse être changé pour une autre propriété si vous le souhaitez.
+        Cela signifie qu'un seul noeud de filtre peut gérer plusieurs sujets différents en même temps.</p>
+</script>

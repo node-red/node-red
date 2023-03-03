@@ -1,0 +1,158 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="mqtt in">
+   <p>Conecta-se a um negociante MQTT e assina mensagens do tópico especificado.</p>
+   <h3>Saídas</h3>
+   <dl class="message-properties">
+      <dt>carga útil<span class="property-type"> cadeia de caracteres | armazenament temporário</span></dt>
+      <dd>uma cadeia de caracteres, a menos que seja detectada como um buffer binário.</dd>
+      <dt>tópico<span class="property-type"> cadeia de caracteres</span></dt>
+      <dd>o tópico MQTT, usa / como um separador de hierarquia.</dd>
+      <dt> qos <span class="property-type"> número</span></dt>
+      <dd> 0, dispare e esqueça - 1, pelo menos uma vez - 2, uma vez e apenas uma vez.</dd>
+      <dt>reter<span class="property-type"> booliano</span></dt>
+      <dd>verdadeiro indica que a mensagem foi retida e pode ser antiga.</dd>
+
+      <dt class="optional">responseTopic<span class="property-type">cadeia de caracteres</span></dt>
+      <dd><b>MQTTv5:</b> o tópico de resposta MQTT para a mensagem</dd>
+      <dt class="optional">CorrelData <span class="property-type">Armazenamento temporário</span> </dt>
+      <dd><b>MQTTv5:</b> os dados de correlação para a mensagem</dd>
+      <dt class="optional">contentType<span class="property-type">cadeia de caracteres</span></dt>
+      <dd><b>MQTTv5:</b> o tipo de conteúdo da carga útil</dd>
+      <dt class="optional">userProperties<span class="property-type">objeto</span></dt>
+      <dd><b>MQTTv5:</b> quaisquer propriedades do usuário da mensagem</dd>
+      <dt class="optional">messageExpiryInterval<span class="property-type">número</span></dt>
+      <dd><b>MQTTv5:</b> o tempo de expiração, em segundos, da mensagem</dd>
+   </dl>
+   <h3>Detalhes</h3>
+   O tópico de assinatura pode incluir curingas MQTT, + para um nível, # para vários níveis.</p>
+   <p>Este nó requer uma conexão com um negociante MQTT para ser configurado. Isso é configurado clicando em
+   o ícone do lápis.</p>
+   <p>Vários nós MQTT(dentro ou fora) podem compartilhar a mesma conexão do negociante, se necessário.</p>
+   <h4>Assinatura dinâmica</h4>
+    O nó pode ser configurado para controlar dinamicamente a conexão MQTT e suas assinaturas. Quando
+    habilitado, o nó terá uma entrada e poderá ser controlado passando-lhe mensagens.
+    <h3>Entradas</h3>
+    <p>Isso só se aplica quando o nó foi configurado para assinaturas dinâmicas.</p>
+    <dl class="message-properties">
+       <dt>ação <span class="property-type">cadeia de caracteres</span></dt>
+       <dd>o nome da ação que o nó deve executar. As ações disponíveis são: <code>"connect"</code>,
+       <code>"disconnect"</code>, <code>"subscribe"</code> e <code>"unsubscribe"</code>.</dd>
+       <dt class="optional">tópico<span class="property-type">cadeia de caracteres|objeto|matriz</span></dt>
+       <dd>Para as ações <code>"subscribe"</code> e <code>"unsubscribe"</code>, esta propriedade
+           fornece o tema. Pode ser definido como:<ul>
+           <li>uma cadeia de caracteres contendo o filtro de tópico</li>
+           <li>um objeto contendo as propriedades <code>topic</code> e <code>qos</code></li>
+           <li>uma matriz ou de cadeia de caracteres ou objetos para manusear vários tópicos em um</li>
+            </ul>
+        </dd>
+       <dt class="opcional">negociante<span class="property-type">negociante</span></dt>
+       <dd>Para a ação <code>"conectar"</code>, esta propriedade pode substituir qualquer
+           das definições individuais de configuração do negociante, incluindo:<ul>
+               <li><code>negociante</code></li>
+               <li><code>porta</code></li>
+               <li><code>url</code> - substitui o negociante/porta para fornecer uma URL de conexão completa</li>
+               <li><code>nome de usuário</code></li>
+               <li><code>senha</code></li>
+           </ul>
+           <p>Se esta propriedade estiver configurada e o negociante já estiver conectado, um erro
+              será registrado a menos que tenha a propriedade <code>force</code> definida - nesse caso, será
+              desconectado do negociante, aplicada as novas configurações e reconectado.</p>
+       </dd>
+    </dl>
+</script>
+
+<script type="text/html" data-help-name="mqtt out">
+   <p>Conecta-se a um negociante MQTT e publica mensagens.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+       <dt>carga útil <span class="property-type"> cadeia de caracteres | armazenagem temporária</span></dt>
+       <dd>a carga útil a ser publicada. Se esta propriedade não for configurada, nenhuma mensagem será enviada. Para enviar uma mensagem em branco, defina esta propriedade como uma cadeia de caracteres vazia.</dd>
+       <dt class="optional">tópico<span class="property-type">cadeia de caracteres</span></dt>
+       <dd>o tópico MQTT para publicar.</dd>
+       <dt class="optional">qos<span class="property-type">número</span></dt>
+       <dd> 0, dispare e esqueça - 1, pelo menos uma vez - 2, uma vez e apenas uma vez. Padrão 0. </dd>
+       <dt class ="optional">reter<span class="property-type">booliano</span></dt>
+       <dd>configurado como verdadeiro para reter a mensagem no negociante. O padrão é falso.</dd>
+       <dt class="optional">responseTopic<span class="property-type">cadeia de caracteres</span></dt>
+       <dd><b>MQTTv5:</b> o tópico de resposta MQTT para a mensagem</dd>
+       <dt class="optional">CorrelData<span class="property-type">Armazenamento temporário</span></dt>
+       <dd><b>MQTTv5:</b> os dados de correlação para a mensagem</dd>
+       <dt class="optional">contentType<span class="property-type">cadeia de caracteres</span></dt>
+       <dd><b>MQTTv5:</b> o tipo de conteúdo da carga útil</dd>
+       <dt class="optional">userProperties<span class="property-type">objeto</span></dt>
+       <dd><b>MQTTv5:</b> quaisquer propriedades do usuário da mensagem</dd>
+       <dt class="optional">messageExpiryInterval<span class="property-type">número</span></dt>
+       <dd><b>MQTTv5:</b> o tempo de expiração, em segundos, da mensagem</dd>
+       <dt class="optional">topicAlias​​<span class="property-type">número</span></dt>
+       <dd><b>MQTTv5:</b> o alias do tópico MQTT a ser usado</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <code>msg.payload</code> é usado como a carga útil da mensagem publicada.
+    Se contiver um objeto, ele será convertido em uma cadeia de caracteres JSON antes de ser enviado.
+    Se contiver um armazenamento temporário binário, a mensagem será publicada no estado em que se encontra.</p>
+    <p>O tópico usado pode ser configurado no nó ou, se deixado em branco, pode ser definido por <code>msg.topic</code>.</p>
+    <p>Da mesma forma, os valores de QoS e retenção podem ser configurados no nó ou, se deixado
+    em branco, definido por<code>msg.qos</code> e <code>msg.retain</code> respectivamente. Para limpar um tópico anteriormente
+    retido pelo negociante, envie uma mensagem em branco para esse tópico com o sinalizador de retenção ativado.</p>
+    <p>Este nó requer uma conexão com um negociante MQTT para ser configurado. Configura-se o nó clicando 
+    no ícone do lápis.</p>
+    <p>Vários nós MQTT(dentro ou fora) podem compartilhar a mesma conexão do negociante, se necessário.</p>
+
+    <h4>Controle Dinâmico</h4>
+    A conexão compartilhada pelo nó pode ser controlada dinamicamente. Se o nó receber
+    uma das seguintes mensagens de controle, ele também não publicará a carga útil da mensagem.
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+       <dt>ação<span class="property-type">cadeia de caracteres</span></dt>
+       <dd>o nome da ação que o nó deve executar. As ações disponíveis são: <code>"connect"</code>,
+       e <code>"disconnect"</code>.</dd>
+       <dt class="opcional">negociante<span class="property-type">negociante</span></dt>
+       <dd>Para a ação <code>"connect"</code>, esta propriedade pode substituir qualquer
+           das definições individuais de configuração do negociante, incluindo:<ul>
+               <li><code>corretor</code></li>
+               <li><code>porta</code></li>
+               <li><code>url</code> - substitui o agente/porta para fornecer uma URL de conexão completa</li>
+               <li><code>nome de usuário</code></li>
+               <li><code>senha</code></li>
+           </ul>
+           <p>Se esta propriedade estiver configurada e o negociante já estiver conectado, um erro
+              será registrado a menos que tenha a propriedade <code>force</code> definida - nesse caso, será
+	      desconectado do negociante, aplicada as novas configurações e reconectado.</p> 
+       </dd>
+    </dl>
+</script>
+
+<script type="text/html" data-help-name="mqtt-broker">
+   <p>Configuração para conexão com um negociante MQTT.</p>
+    <p>Esta configuração criará uma única conexão com o negociante que pode
+       em seguida, ser reutilizada pelos nós <code>Entrada MQTT</code> e <code>Saída MQTT</code>.</p>
+    <p>O nó irá gerar um ID de cliente aleatório se nenhum estiver definido e o
+       o nó está configurado para usar uma conexão de sessão limpa. Se um ID de cliente for definido,
+       deve ser exclusivo do negociante ao qual você está se conectando.</p>
+    <h4>Mensagem de nascimento</h4>
+    <p>Esta é uma mensagem que será publicada no tópico configurado sempre que o
+       conexão for estabelecida.</p>
+    <h4>Fechar mensagem</h4>
+    <p>Esta é uma mensagem que será publicada no tópico configurado antes do
+       a conexão é fechada normalmente, reimplantando o nó ou desligando. </p>
+    <H4>Mensagem de arbítrio</h4>
+    <p>Esta é uma mensagem que será publicada pelo negociante caso o nó
+       perca sua conexão inesperadamente.</p>
+    <h4>WebSockets</h4>
+    <p>O nó pode ser configurado para usar uma conexão WebSocket. Para fazer isso, o campo do servidor
+       deve ser configurado com uma URI completa para a conexão. Por exemplo:</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+
+</script>

@@ -61,7 +61,7 @@ describe("api/index", function() {
         should.not.exist(api.httpAdmin);
         done();
     });
-    describe('initalises admin api without adminAuth', function(done) {
+    describe('initalises admin api without adminAuth', function() {
         before(function() {
             beforeEach();
             api.init({},{},{},{});
@@ -78,7 +78,7 @@ describe("api/index", function() {
         })
     });
 
-    describe('initalises admin api without editor', function(done) {
+    describe('initalises admin api without editor', function() {
         before(function() {
             beforeEach();
             api.init({ disableEditor: true },{},{},{});
@@ -95,7 +95,7 @@ describe("api/index", function() {
         })
     });
 
-    describe('initialises api with admin middleware', function(done) {
+    describe('initialises api with admin middleware', function() {
         it('ignores non-function values',function(done) {
             api.init({ httpAdminRoot: true, httpAdminMiddleware: undefined },{},{},{});
             const middlewareFound = api.httpAdmin._router.stack.filter((layer) => layer.name === 'testMiddleware')
@@ -112,7 +112,7 @@ describe("api/index", function() {
         });
     });
 
-    describe('initialises api with authentication enabled', function(done) {
+    describe('initialises api with authentication enabled', function() {
 
         it('enables an oauth/openID based authentication mechanism',function(done) {
             const stub = sinon.stub(apiAuth, 'genericStrategy').callsFake(function(){});
@@ -135,7 +135,7 @@ describe("api/index", function() {
 
     });
 
-    describe('initialises api with custom cors config', function (done) {
+    describe('initialises api with custom cors config', function () {
         const httpAdminCors = {
             origin: "*",
             methods: "GET,PUT,POST,DELETE"
@@ -156,7 +156,7 @@ describe("api/index", function() {
         })
     });
 
-    describe('editor start', function (done) {
+    describe('editor start', function () {
 
         it('cannot be started when editor is disabled', function (done) {
             const stub = sinon.stub(apiEditor, 'start').callsFake(function () {

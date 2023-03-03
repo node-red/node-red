@@ -1,0 +1,172 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="split">
+    <p>Divise un message en une séquence de messages.</p>
+
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objet | chaîne | tableau | tampon</span></dt>
+        <dd>Le comportement du noeud est déterminé par le type du <code>msg.payload</code>:
+            <ul>
+                <li><b>chaîne</b>/<b>tampon</b> - le message est divisé en utilisant le caractère spécifié (par défaut : <code>\n</code>), la séquence du tampon ou en longueurs fixes. </li>
+                <li><b>tableau</b> - le message est divisé en éléments de tableau individuels ou en tableaux de longueur fixe.</li>
+                <li><b>objet</b> - un message est envoyé pour chaque paire clé/valeur de l'objet.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">objet</span></dt>
+        <dd>Cette propriété contient des informations sur la manière dont le message a été séparé du
+        message d'origine. Si elle est transmise au noeud <b>join</b>, la séquence peut être
+        regroupés en un seul message. La propriété a les propriétés suivantes :
+        <ul>
+            <li><code>id</code> - un identifiant pour le groupe de messages</li>
+            <li><code>index</code> - la position au sein du groupe</li>
+            <li><code>count</code> - si connu, le nombre total de messages dans le groupe. Voir 'mode streaming' ci-dessous.</li>
+            <li><code>type</code> - le type de message - chaîne/tableau/objet/tampon</li>
+            <li><code>ch</code> - pour une chaîne ou un tampon, les données utilisées pour diviser le message en chaîne ou en tableau d'octets</li>
+            <li><code>key</code> - pour un objet, la clé de la propriété à partir de laquelle ce message a été créé. Le noeud peut être configuré pour copier également cette valeur dans d'autres propriétés du message, telles que <code>msg.topic</code>.</li>
+            <li><code>len</code> - la longueur de chaque message lorsqu'elle est divisée à l'aide d'une valeur de longueur fixe</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Ce noeud facilite la création d'un flux qui exécute des actions communes sur
+    une séquence de messages, à l'aide du noeud <b>join</b>, qui recombine la
+    séquence en un seul message.</p>
+    <p>Il utilise la propriété <code>msg.parts</code> pour suivre les parties individuelles
+    d'une séquence.</p>
+    <h4>Mode diffusion</h4>
+    <p>Le noeud peut également être utilisé pour rediffuser un flux de messages. Par exemple, un
+    périphérique série qui envoie des commandes terminées par une nouvelle ligne peut délivrer un seul message
+    avec une commande partielle à sa fin. En "mode streaming", ce noeud divisera
+    le message et enverra chaque segment complet. S'il y a un segment partiel à la fin,
+    le noeud le conservera et l'ajoutera au prochain message reçu.
+    </p>
+    <p>Lorsqu'il fonctionne dans ce mode, le noeud ne définira pas le <code>msg.parts.count</code>
+    car il ne sait pas combien de messages attendent dans le flux. Cela
+    signifie qu'il ne peut pas être utilisé avec le noeud <b>join</b> en mode automatique.</p>
+</script>
+
+<script type="text/html" data-help-name="join">
+    <p>Joint des séquences de messages en un seul message.</p>
+    <p>Trois modes sont disponibles :</p>
+    <dl>
+        <dt>automatique</dt>
+        <dd>Lorsqu'il est associé au noeud <b>split</b>, il joindra automatiquement les messages pour inverser le fractionnement qui a été effectué.</dd>
+        <dt>manuel</dt>
+        <dd>Joindre des séquences de messages de différentes manières.</dd>
+        <dt>réduire la séquence</dt>
+        <dd>Appliquer une expression à tous les messages d'une séquence pour la réduire à un seul message.</dd>
+    </dl>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">objet</span></dt>
+        <dd>Pour joindre automatiquement une séquence de messages, ils doivent tous avoir
+        cet ensemble de propriétés. Le noeud <b>split</b> génère cette propriété mais il
+        peut être créé manuellement. Il a les propriétés suivantes :
+        <ul>
+            <li><code>id</code> - un identifiant pour le groupe de messages</li>
+            <li><code>index</code> - la position au sein du groupe</li>
+            <li><code>count</code> - le nombre total de messages dans le groupe</li>
+            <li><code>type</code> - le type de message - chaîne/tableau/objet/tampon</li>
+            <li><code>ch</code> - pour une chaîne ou un tampon, les données utilisées pour diviser le message en chaîne ou en tableau d'octets</li>
+            <li><code>key</code> - pour un objet, la clé de la propriété à partir de laquelle ce message a été créé</li>
+            <li><code>len</code> - la longueur de chaque message lorsqu'il est divisé à l'aide d'une valeur de longueur fixe</li>
+        </ul>
+        </dd>
+        <dt class="optional">complete</dt>
+        <dd>S'il est défini, le noeud ajoutera la charge utile, puis enverra le message de sortie dans son état actuel.
+        Si vous ne souhaitez pas ajouter la charge utile, supprimer-la du msg.</dd>
+        <dt class="optional">reset</dt>
+        <dd>S'il est défini, le noeud effacera tout message partiellement terminé et ne l'enverra pas.</dd>
+        <dt class="optional">restartTimeout</dt>
+        <dd>S'il est défini et que le noeud a un délai d'attente configuré, ce délai d'attente sera redémarré.</dd>
+    </dl>
+    <h3>Détails</h3>
+
+    <h4>Mode automatique</h4>
+    <p>Le mode automatique utilise la propriété <code>parts</code> des messages entrants pour
+    déterminer comment la séquence doit être jointe. Cela lui permet de automatiquement
+    inverser l'action d'un noeud <b>split</b>.</p>
+
+    <h4>Mode manuel</h4>
+    <p>Lorsqu'il est configuré pour se joindre en mode manuel, le noeud peut joindre des séquences
+    de messages dans un certain nombre de résultats différents :</p>
+    <ul>
+        <li>une <b>chaîne</b> ou un <b>tampon</b> - créé en joignant la propriété sélectionnée de chaque message avec les caractères de jointure ou le tampon spécifiés.</li>
+        <li>un <b>tableau</b> - créé en ajoutant chaque propriété sélectionnée, ou le message entier, au tableau de sortie.</li>
+        <li>un <b>objet clé/valeur</b> - créé en utilisant une propriété de chaque message pour déterminer la clé sous laquelle
+        la valeur requise est stockée.</li>
+        <li>un <b>objet fusionné</b> - créé en fusionnant la propriété de chaque message sous un seul objet.</li>
+    </ul>
+    <p>Les autres propriétés du message de sortie sont extraites du dernier message reçu avant l'envoi du résultat.</p>
+    <p>Un <i>compteur</i> peut être défini pour le nombre de messages à recevoir avant de générer le message de sortie.
+    Pour les sorties d'objet, une fois ce nombre atteint, le noeud peut être configuré pour envoyer un message pour chaque message suivant
+    reçu.</p>
+    <p>Un <i>temps mort</i> peut être défini pour déclencher l'envoi du nouveau message en utilisant tout ce qui a été reçu jusqu'à présent.
+     Ce délai peut être redémarré en envoyant un message avec la propriété <code>msg.restartTimeout</code> définie.</p>
+    <p>Si un message est reçu avec la propriété <code>msg.complete</code> définie, le message de sortie est finalisé et envoyé.
+    Cela réinitialise tous les compteurs de pièces.</p>
+    <p>Si un message est reçu avec la propriété <code>msg.reset</code> définie, le message partiellement complet est supprimé et n'est pas envoyé.
+    Cela réinitialise tous les compteurs de pièces.</p>
+
+    <h4>Réduire le mode de séquence</h4>
+    <p>Lorsqu'il est configuré pour joindre en mode de réduction, une expression est appliquée à chaque
+        message dans une séquence et le résultat accumulé pour n'envoyer qu'un seul message.</p>
+
+    <dl class="message-properties">
+        <dt>Valeur initiale</dt>
+        <dd>La valeur initiale de la valeur cumulée (<code>$A</code>).</dd>
+        <dt>Réduire l'expression</dt>
+        <dd>Une expression JSONata appelée pour chaque message de la séquence.
+            Le résultat est transmis au prochain appel de l'expression en tant que valeur cumulée.
+            Dans l'expression, les variables spéciales suivantes peuvent être utilisées :
+            <ul>
+                <li><code>$A</code>: la valeur accumulée, </li>
+                <li><code>$I</code>: index du message dans la séquence, </li>
+                <li><code>$N</code>: nombre de messages dans la séquence.</li>
+            </ul>
+        </dd>
+        <dt>Expression de correction</dt>
+        <dd>Une expression JSONata facultative qui est appliquée après l'expression de réduction
+            a été appliqué à tous les messages de la séquence.
+            Dans l'expression, les variables spéciales suivantes peuvent être utilisées :
+            <ul>
+                <li><code>$A</code>: la valeur accumulée, </li>
+                <li><code>$N</code>: nombre de messages dans la séquence.</li>
+            </ul>
+        </dd>
+        <p>Par défaut, l'expression de réduction est appliquée dans l'ordre, du premier
+            au dernier message de la séquence. Il peut éventuellement être appliqué dans
+            l'ordre inverse.</p>
+        <p>$N est le nombre de messages qui arrivent - même s'ils sont identiques.</p>
+    </dl>
+    <p><b>Exemple</b> : les paramètres suivants, donnés en tant que séquence de valeurs numériques,
+        le noeud calculera la valeur moyenne :
+        <ul>
+            <li><b>Réduire l'expression</b> : <code>$A+payload</code></li>
+            <li><b>Valeur initiale</b> : <code>0</code></li>
+            <li><b>Expression de correction</b> : <code>$A/$N</code></li>
+        </ul>
+    </p>
+    <h4>Stocker des messages</h4>
+     <p>Ce noeud mettra les messages en mémoire tampon en interne afin de travailler sur plusieurs séquences. Le
+        paramètre d'exécution <code>nodeMessageBufferMaxLength</code> peut être utilisé pour limiter le nombre de messages
+        à mettre en mémoire tampon dans le noeud.</p>
+</script>
