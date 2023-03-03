@@ -408,7 +408,7 @@ module.exports = function(grunt) {
                     {
                         cwd: 'packages/node_modules/@node-red/editor-client/src',
                         src: [
-                            'types/node/*.ts',
+                            'types/node/**/*.ts',
                             'types/node-red/*.ts',
                         ],
                         expand: true,
