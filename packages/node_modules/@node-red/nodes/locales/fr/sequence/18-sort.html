@@ -1,0 +1,41 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="sort">
+    <p>Une fonction qui trie la propriété du message ou une séquence de messages.</p>
+    <p>Lorsqu'il est configuré pour trier la propriété du message, le noeud trie les données du tableau pointées par la propriété du message spécifiée.</p>
+    <p>Lorsqu'il est configuré pour trier une séquence du messages, il réorganisera les messages.</p>
+    <p>L'ordre de tri peut être :</p>
+    <ul>
+        <li><b>ascendant</b>,</li>
+        <li><b>descendant</b>.</li>
+    </ul>
+    <p>Pour les nombres, l'ordre numérique peut être spécifié par une case à cocher.</p>
+    <p>La clé de tri peut être une valeur d'élément ou une expression JSONata pour trier une valeur de propriété, ou une propriété du message ou une expression JSONata afin de trier une séquence de messages.<p>
+    <p>Lors du tri d'une séquence du messages, le noeud de tri s'appuie sur les messages reçus pour définir <code>msg.parts</code>. Le noeud fractionné génère cette propriété, mais peut être créé manuellement. Il a les propriétés suivantes :</p>
+    <p>
+        <ul>
+            <li><code>id</code> - un identifiant pour le groupe de messages</li>
+            <li><code>index</code> - la position au sein du groupe</li>
+            <li><code>count</code> - le nombre total de messages dans le groupe</li>
+        </ul>
+    </p>
+    <p><b>Remarque</b> : Ce noeud conserve en interne les messages pour son fonctionnement. Afin d'éviter une utilisation inattendue de la mémoire, le nombre maximum de messages conservés peut être spécifié. Par défaut, il n'y a pas de limite sur le nombre de messages.
+        <ul>
+            <li><code>nodeMessageBufferMaxLength</code> propriété définie dans <b>settings.js</b>.</li>
+        </ul>
+    </p>
+</script>

@@ -1,0 +1,30 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="watch">
+  <p>Surveille les modifications d'un répertoire ou d'un fichier.</p>
+  <p>Vous pouvez saisir une liste de répertoires et/ou de fichiers séparés par des virgules. Vous aurez
+  besoin de mettre des guillemets "..." autour de tous les répertoires qui contiennent des espaces.</p>
+  <p>Sous Windows, vous devez utiliser des doubles barres obliques inverses \\ dans tous les noms de répertoire.</p>
+  <p>Le nom de fichier complet du fichier qui a réellement changé est placé dans <code>msg.payload</code> et <code>msg.filename</code>,
+  tandis qu'une version sous forme de chaîne de la liste de surveillance est renvoyée dans <code>msg.topic</code>.</p>
+  <p><code>msg.file</code> contient uniquement le nom court du fichier qui a été modifié.
+  <code>msg.type</code> contient le type de ce qui a changé, généralement <i>fichier</i> ou <i>répertoire</i>,
+  tandis que <code>msg.size</code> contient la taille du fichier en octets.</p>
+  <p>Bien sûr sous Linux, <i>everything</i> est un fichier et peut donc être regardé...</p>
+  <p><b>Remarque</b> : Le répertoire ou le fichier doit exister pour être surveillé. Si le dossier
+  ou le répertoire est supprimé, il peut ne plus être surveillé même s'il est recréé.</p>
+</script>

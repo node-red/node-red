@@ -1322,6 +1322,40 @@ describe('Flow', function() {
                 
         });
 
+        it("can define environment variable using JSONata", function (done) {
+            try {
+                after(function() {
+                    delete process.env.V0;
+                })
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab",env:[
+                        {"name": "V0", value: "1+2", type: "jsonata"}
+                    ]},
+                    {id:"g1",type:"group",z:"t1",env:[
+                        {"name": "V1", value: "2+3", type: "jsonata"},
+                    ]},
+                    {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+                ]);
+                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+                flow.start();
+
+                var activeNodes = flow.getActiveNodes();
+
+                activeNodes["1"].foo.should.equal(3);
+                activeNodes["2"].foo.should.equal(5);
+
+                flow.stop().then(function() {
+                    done();
+                });
+            }
+            catch (e) {
+                console.log(e.stack);
+                done(e);
+            }
+                
+        });
+
     });
 
 });

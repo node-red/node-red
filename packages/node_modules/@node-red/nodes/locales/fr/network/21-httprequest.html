@@ -1,0 +1,96 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http request">
+    <p>Envoie des requêtes HTTP et renvoie la réponse.</p>
+
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">chaîne de caractères</span></dt>
+        <dd>Si elle n'est pas configurée dans le noeud, cette propriété facultative définit l'url de la requête.</dd>
+        <dt class="optional">method <span class="property-type">chaîne de caractères</span></dt>
+        <dd>Si elle n'est pas configurée dans le noeud, cette propriété facultative définit la méthode HTTP de la requête.
+            Doit être l'une des méthodes suivantes <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> or <code>DELETE</code>.</dd>
+        <dt class="optional">headers <span class="property-type">objet</span></dt>
+        <dd>Définit les en-têtes HTTP de la requête. REMARQUE : Tous les en-têtes définis dans la configuration du noeud écraseront tous les en-têtes correspondants dans <code>msg.headers</code>.</dd>
+        <dt class="optional">cookies <span class="property-type">object</span></dt>
+        <dd>Si défini, peut être utilisé pour envoyer des cookies avec la demande.</dd>
+        <dt class="optional">payload</dt>
+        <dd>Envoyé dans le corps de la requête.</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>Si défini sur <code>false</code>, permet d'effectuer des requêtes vers des sites https qui utilisent
+            des certificats auto-signés.</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>Si défini sur <code>false</code> empêche la redirection suivante (HTTP 301).<code>true</code> par défaut</dd>
+        <dt class="optional">requestTimeout</dt>
+        <dd>Si défini sur un nombre positif de millisecondes, remplacera le paramètre <code>httpRequestTimeout</code> défini globalement.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">chaîne de caractères | objet | tampon</span></dt>
+        <dd>Le corps de la réponse. Le noeud peut être configuré pour renvoyer le corps
+            en tant que chaîne, essayer de l'analyser en tant que chaîne JSON ou laisser-le en tant que
+            tampon binaire.</dd>
+        <dt>statusCode <span class="property-type">nombre</span></dt>
+        <dd>Le code d'état de la réponse, ou le code d'erreur si la demande n'a pas pu être complétée.</dd>
+        <dt>headers <span class="property-type">objet</span></dt>
+        <dd>Un objet contenant les en-têtes de réponse.</dd>
+        <dt>responseUrl <span class="property-type">chaîne de caractères</span></dt>
+        <dd>Dans le cas où des redirections se sont produites lors du traitement de la demande, cette propriété est l'URL finale redirigée.
+            Sinon, l'url de la demande d'origine.</dd>
+        <dt>responseCookies <span class="property-type">object</span></dt>
+        <dd>Si la réponse inclut des cookies, cette propriété est un objet de paires nom/valeur pour chaque cookie.</dd>
+        <dt>redirectList <span class="property-type">tableau</span></dt>
+        <dd>Si la requête a été redirigée une ou plusieurs fois, les informations accumulées seront ajoutées à cette propriété. `location` est la prochaine destination de redirection. `cookies` correspond aux cookies renvoyés par la source de redirection.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Lorsqu'elle est configurée dans le noeud, la propriété URL peut contenir des balises <a href="http://mustache.github.io/mustache.5.html" target="_blank">de style moustache</a>. Celles-ci permettent à
+    l'url de construire en utilisant les valeurs du message entrant. Par exemple, si l'URL est définie sur
+    <code>example.com/{{{topic}}}</code>, la valeur du <code>msg.topic</code> sera automatiquement insérée.
+    L'utilisation de {{{...}}} empêche le style moustache de s'échapper des caractères comme / & etc.</p>
+    <p>Le noeud peut éventuellement encoder automatiquement <code>msg.payload</code> en tant que paramètres de chaîne de requête pour une requête GET, dans ce cas <code>msg.payload</code> doit être un objet.</p >
+    <p><b>Remarque</b> : en cas d'exécution derrière un proxy, la variable d'environnement standard <code>http_proxy=...</code> doit être définie et Node-RED redémarré, ou utiliser la configuration du proxy. Si la configuration du proxy a été définie, la configuration a priorité sur la variable d'environnement.</p>
+    <h4>Utilisation de plusieurs noeuds de requête HTTP</h4>
+    <p>Afin d'utiliser plus d'un de ces noeuds dans le même flux, des précautions doivent être prises avec
+    la propriété <code>msg.headers</code>. Le premier noeud définira cette propriété avec
+    les en-têtes de réponse. Le noeud suivant utilisera alors ces en-têtes pour sa requête - ceci
+    n'est généralement pas la bonne chose à faire. Si la propriété du <code>msg.headers</code> reste inchangée
+    entre les noeuds, il sera ignoré par le deuxième noeud. Pour définir des en-têtes personnalisés, le <code>msg.headers</code>
+    doit d'abord être supprimé ou réinitialisé sur un objet vide : <code>{}</code>.
+    <h4>Gestion des cookies</h4>
+    <p>La propriété <code>cookies</code> transmise au noeud doit être un objet de paires nom/valeur.
+    La valeur peut être soit une chaîne pour définir la valeur du cookie, soit un
+    objet avec une seule propriété <code>value</code>.<p>
+    <p>Tous les cookies renvoyés par la requête sont envoyés sous la propriété <code>responseCookies</code>.</p>
+    <h4>Gestion des types de contenu</h4>
+    <p>Si <code>msg.payload</code> est un objet, le noeud définira automatiquement le type de contenu
+    de la requête à <code>application/json</code> et encode le corps en tant que tel.</p>
+    <p>Pour encoder la demande en tant que données de formulaire, <code>msg.headers["content-type"]</code> doit être défini sur <code>application/x-www-form-urlencoded</code>.< /p>
+    <h4>Téléchargement de fichier</h4>
+    <p>Pour effectuer un téléchargement de fichier, <code>msg.headers["content-type"]</code> doit être défini sur <code>multipart/form-data</code>
+        et le <code>msg.payload</code> passé au noeud doit être un objet avec la structure suivante :</p>
+    <pre><code>{
+    "KEY": {
+        "value": FILE_CONTENTS,
+        "options": {
+            "filename": "FILENAME"
+        }
+    }
+}</code></pre>
+    <p>Les valeurs de <code>KEY</code>, <code>FILE_CONTENTS</code> et <code>FILENAME</code>
+        doivent être réglées sur les valeurs appropriées.</p>
+
+</script>

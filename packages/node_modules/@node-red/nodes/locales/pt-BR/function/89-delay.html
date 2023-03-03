@@ -1,0 +1,64 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="delay">
+    <p> Atrasa a passagem de cada mensagem pelo nó ou limita a taxa de transmissão. </p>
+    <h3> Entradas </h3>
+    <dl class="message-properties">
+        <dt class="optional">atraso<span class = "property-type"> número </span> </dt>
+        <dd> Define o atraso, em milissegundos, a ser aplicado à mensagem. este
+            opção só se aplica se o nó estiver configurado para permitir a mensagem para
+            sobrescrever o intervalo de atraso padrão configurado. </dd>
+        <dt class="optional">taxa<span class="property-type"> número</span> </dt>
+        <dd> Define o valor da taxa em milissegundos entre as mensagens.
+            Este nó sobrescreve o valor da taxa existente definido na configuração do nó
+            quando recebe a mensagem que contém o valor <code> msg.rate </code> em miliSegundos.
+            Esta opção só se aplica se o nó estiver configurado para permitir a mensagem para
+            sobrescrever o intervalo de taxa padrão configurado. </dd>
+        <dt class="optional">redefinir</dt>
+        <dd> Se a mensagem recebida tiver esta propriedade definida para qualquer valor, todos
+            as mensagens pendentes mantidas pelo nó são apagadas sem serem enviadas. </dd>
+        <dt class="optional">descarrergar</dt>
+        <dd> Se a mensagem recebida tiver esta propriedade definida para um valor numérico, então essa quantidade de mensagens
+            será liberada imediatamente. Se definida para qualquer outro tipo (por exemplo, booliano), então todas as
+            mensagens pendentes mantidas pelo nó são enviadas imediatamente.</dd>
+        <dt class="optional">paraFrente</dt>
+        <dd>Quando em modo de limite de taxa, se a mensagem recebida tiver esta propriedade definida como booliana <code>verdadeira</code>,
+             então a mensagem é empurrada para a frente da fila e será liberada em seguida.
+             Isso pode ser usado em combinação com <code>msg.flush=1</code> para reenviar imediatamente.
+        </dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>Quando configurada para atrasar mensagens, o intervalo de atraso pode ser um valor fixo,
+        um valor aleatório dentro de um intervalo ou definido dinamicamente para cada mensagem.
+        Cada mensagem é atrasada independentemente de qualquer outra mensagem, com base em
+        a hora de sua chegada.
+    </p>
+    <p> Quando configurada para mensagens de limite de taxa, sua entrega é distribuída
+        pelo período de tempo configurado. O status mostra o número de mensagens atualmente na fila.
+        pode-se, opcionalmente, descartar mensagens intermediárias assim que chegarem. </p>
+    </p>
+    <p> Se configurada para permitir a substituição da taxa, a nova taxa será aplicada imediatamente,
+        e permanecerá em vigor até que seja alterada novamente, o nó seja redefinido ou o fluxo seja reiniciado. </p>
+    <p> A limitação de taxa pode ser aplicada a todas as mensagens ou agrupá-las de acordo com
+        seu valor <code> msg.topic </code>. Ao agrupar, as mensagens intermediárias são
+        caiu automaticamente. A cada intervalo de tempo, o nó pode liberar
+        a mensagem mais recente para todos os tópicos ou libere a mensagem mais recente
+        para o próximo tópico.
+    </p>
+     <p><b>Nota</b>: Em modo de limite de taxa, a profundidade máxima da fila pode ser configurar por uma propriedade no seu arquivo
+        <i>settings.js</i>. Por exemplo <code>nodeMessageBufferMaxLength: 1000</code></p>
+</script>

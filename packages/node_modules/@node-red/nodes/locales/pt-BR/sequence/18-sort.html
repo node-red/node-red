@@ -1,0 +1,41 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="sort">
+    <p>Uma função que classifica a propriedade da mensagem ou uma sequência de mensagens.</p>
+    <p>Quando configurado para classificar a propriedade da mensagem, o nó classifica os dados da matriz apontados pela propriedade da mensagem especificada.</p>
+    <p>Quando configurado para classificar uma sequência de mensagens, reordenará as mensagens.</p>
+    <p>A ordem de classificação pode ser:</p>
+    <ul>
+        <li><b>ascendente</b>,</li>
+        <li><b>decrescente</b>.</li>
+    </ul>
+    <p>Para números, a ordem numérica pode ser especificada por uma caixa de seleção.</p>
+    <p>A chave de classificação pode ser um valor de elemento ou expressão JSONata para classificar o valor da propriedade, ou propriedade da mensagem ou expressão JSONata para classificar uma sequência de mensagem.</p>
+    <p>Ao classificar uma sequência de mensagens, o nó de classificação depende das mensagens recebidas para ter <code>msg.parts</code> definido. O nó dividido gera esta propriedade, mas pode ser criado manualmente. Possui as seguintes propriedades:</p>
+    <p>
+        <ul>
+            <li><code>id </code> - um identificador para o grupo de mensagens</li>
+            <li><code>index </code> - a posição dentro do grupo</li>
+            <li><code>contagem </code> - o número total de mensagens no grupo</li>
+        </ul>
+   </p>
+    <p><b>Nota:</b>  Este nodo internamente mantém mensagens para sua operação. Para evitar o uso inesperado da memória, o número máximo de mensagens mantidas pode ser especificado. O padrão não tem limite do número de mensagens.
+        <ul>
+            Propriedade<li><code>nodeMessageBufferMaxLength</code>definida em <b>settings.js</b>.</li>
+        </ul>
+   </p>
+</script>

@@ -766,6 +766,33 @@ describe('CSV node', function() {
             });
         });
 
+        it('should handle a template with quotes in the property names', function(done) {
+            var flow = [ { id:"n1", type:"csv", temp:"", hdrout:"all", wires:[["n2"]] },
+                {id:"n2", type:"helper"} ];
+            helper.load(csvNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload', 'a"a,b\'b\nA1,B1\nA2,B2\n');
+                        done();
+                    }
+                    catch(e) { done(e); }
+                });
+                var testJson = [
+                    {
+                        "a\"a": "A1",
+                        "b'b": "B1"
+                    },
+                    {
+                        "a\"a": "A2",
+                        "b'b": "B2"
+                    }
+                ]
+                n1.emit("input", {payload:testJson});
+            });
+        });
+
         it('should convert an array of objects to a multi-line csv', function(done) {
             var flow = [ { id:"n1", type:"csv", temp:"a,d,c,b", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
