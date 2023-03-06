@@ -1,5 +1,54 @@
-#### 3.1.0-beta.1: Beta Release
+#### 3.1.0-beta.2: Beta Release
 
+Editor
+
+ - NEW: Add change icon to tabs (#4068) @knolleary
+ - NEW: Complete overhaul of Group UX (#4079) @knolleary
+ - NEW: Add link to node help in node edit dialog footer (#4065) @knolleary
+ - NEW: Added editor feature for connecting multiple nodes to single node (#4051) @sonntam
+ - NEW: Increase workspace size to 8000x8000 (#4094) @knolleary
+ - Ensure node buttons are redrawn when flow lock state is changed (#4091) @knolleary
+ - Prevent loops being created with junction nodes (#4087) @knolleary
+ - Prevent opening locked node's edit dialog (#4069) @knolleary
+ - Reverse direction of tab scroll to expected direction (#4064) @knolleary
+ - Add cancel operation to editableList (#4077) @HiroyasuNishiyama
+ - Apply Mermaid diagram for project settings UI (#4054) @kazuhitoyokoi
+ - Add tooltip for show/hide button on info sidebar (#4050) @kazuhitoyokoi
+ - Fix align nodes on locked tab (#4072) @HiroyasuNishiyama
+ - Fix importing connected link nodes into a subflow (#4082) @knolleary
+ - Fix to add empty marker to empty group (#4060) @HiroyasuNishiyama
+ - Fix image URLs for v3.0 tour (#4053) @kazuhitoyokoi
+ - Show scrollbar in notification dialog only when needed (#4048) @kazuhitoyokoi
+ - Update-monaco-and-typings (#4089) @Steve-Mcl
+ - Update jquery UI (#4088) @knolleary
+ - Support i18n of lock/unlock buttons in flow property UI (#4049) @kazuhitoyokoi
+ - Translation kr (#3895) @hae-iotplatform
+ - Translation zhcn (！！请懂中文的帮忙review) (#3952) @cliyr
+ - Add French translation of nodes (#3964) @GogoVega
+ - Add French translation (#3962) @GogoVega
+ - Portuguese Brazilian (pt-BR) translation (#3804) @FabsMuller
+ 
+
+Runtime
+
+ - NEW: Generate stable ids for subflow instance internal nodes (#4093) @knolleary
+ - NEW: Change default file name to flows.json in project feature (#4073) @kazuhitoyokoi
+ - NEW: Deprecate synchronous access to jsonata (#4090) @knolleary
+ - Add Node 18 to test matrix (#4084) @knolleary
+ - Bump minimum nodejs version supported to match documented value (#4086) @knolleary
+ - Update monaco docs link in settings.js (#4075) @Steve-Mcl
+ - Remove duplicated messages in the message catalog (#4066) @kazuhitoyokoi
+ - Ensure errors in preDeliver callback are handled (#3911) @knolleary
+ - Fix "EADDRINUSE" error (#4046) @bggbr
+
+Nodes
+
+ - Link Call: Clear link-call timeouts when node is closed (#4085) @knolleary
+ - Join: ensure inflight status is cleared when in auto mode (#4083) @knolleary
+ - File Out: Fix extra newline append for multipart file write (#3915) @dceejay
+ - Add validators for complete and link call nodes (#4056) @kazuhitoyokoi
+
+#### 3.1.0-beta.1: Beta Release
 
 Editor
 
