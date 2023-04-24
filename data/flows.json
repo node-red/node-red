@@ -575,7 +575,7 @@
         "z": "c86af370eff94afa",
         "name": "Create a podinfo helm chart",
         "info": "# Helm\n\"Helm is the package manager for Kubernetes\"\n\n## Recommended Reading\nhttps://helm.sh/\nhttps://helm.sh/docs/intro/\n\n## Podinfo Helm Chart from Scratch\n\nTODO - Insert content for:\n- deployment\n- service\n- ingress\n- HPA\n* All templated from scratch\n\n## Deploy the official podinfo chart from local files\n\nPreviously we cloned the podinfo repository to our/a local machine. Under the root of the project there is a `charts` directory with a `podinfo` directory that contains the podinfo chart content.\n\n## Basic deployment\n\nLet's create a testing namespace for our target\n`kubectl create ns testing`\n\nWith Helm installed and our k3d cluster still running/configured, we can install the chart in  it's vanilla form (without enabling any additional content).\n\n(From the charts directory)\n`helm install podinfo-dev ./podinfo -n testing`\n\nThis will deploy the chart which results in the deployment and service creation in the target namespace.\n\n## Customizations\nWe can inject exposed customizations as outlined in the README/values.yaml for the purpose of configuring the end package being suited for our needs.\n\nWe can make an edit to the values.yaml and upgrade our application.\n\nhpa:\n  enabled: true\n  \n`helm upgrade podinfo-dev -n testing ./podinfo`\n\nThis should result in an HPA being deployed to our namespace for the application.\n",
-        "x": 360,
+        "x": 330,
         "y": 340,
         "wires": [
             [
@@ -588,12 +588,13 @@
         "type": "guide",
         "z": "c86af370eff94afa",
         "name": "Deploy BigBang on a new K3d cluster",
-        "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the quickstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment-scenarios/quickstart.md \n\n## Dev Notes\n\nAs declared in the helm install command in step 10, the ingress-certs and default `domain` variables included in the Big Bang repository are meant for development. The DNS record for `*.bigbang.dev` is set for `127.0.0.1`. This is important for any routing is configured to use the `bigbang.dev` domain.\n\nIf you are not already, it is highly recommended that you use the previously mentioned cloud instance in the `Deploy K3d` step. Running BigBang locally will require at least similar specs to the [t3a.2xlarge](https://instances.vantage.sh/aws/ec2/t3a.2xlarge).\n\nIf attempting to run this locally on an M1 Mac manual changes to references in the quickstart file are required. As references to `amd64` dependencies will not resolve without being replaced with `arm64`.\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
+        "info": "# Big Bang\n\nUsing our machine with k3d, we can instantiate a development/prototype deployment of Big Bang.\n\n## Objective\n\nFollow the quickstart here:\nhttps://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/deployment-scenarios/quickstart.md \n\n## Dev Notes\n\nAs declared in the helm install command in step 10, the ingress-certs and default `domain` variables included in the Big Bang repository are meant for development. The DNS record for `*.bigbang.dev` is set for `127.0.0.1`.  This is important for any routing is configured to use the `bigbang.dev` domain.\n\nIf you are not already, it is highly recommended that you use the previously mentioned cloud instance in the `Deploy K3d` step. Running BigBang locally will require at least similar specs to the [t3a.2xlarge](https://instances.vantage.sh/aws/ec2/t3a.2xlarge).\n\nIf attempting to run this locally on an M1 Mac manual changes to references in the quickstart file are required. As references to `amd64` dependencies will not resolve without being replaced with `arm64`.\n\n## Success Criteria\n\nAs noted in step 13 - the web UI's should be resolvable and accessible. All pods should be up and healthy (running). ",
         "x": 360,
         "y": 410,
         "wires": [
             [
-                "67415f95eb8ab46c"
+                "67415f95eb8ab46c",
+                "0571474bde3a7f49"
             ]
         ]
     },
@@ -814,6 +815,18 @@
             [
                 "0f9889d8e9cb7edb"
             ]
+        ]
+    },
+    {
+        "id": "0571474bde3a7f49",
+        "type": "guide",
+        "z": "c86af370eff94afa",
+        "name": "Troubleshooting hints",
+        "info": "If you are having some issues with deploying bigbang, you should tear down the cluster created for podinfo.\n\nFollow the bigbang deployment document:\nhttps://repo1.dso.mil/big-bang/bigbang/-/blob/master/docs/guides/deployment-scenarios/quickstart.md#step-5-create-a-k3d-cluster\n\n## Neuvector\nSince we're using `k3d` the necessary container runtime needs to be enabled in the values.yaml chart in the bigbang repository with the following:\n\n```\nneuvector:\n  ...\n  values:\n    k3s:\n     enabled: true\n```\n\nwhich will allow neuvector to work with the correct runtime.\n\n### Networking\n# Accessing the UI\nIf you are using the recommended Cloud deployment method with K3d and attempting to connect to any of the UI, you must create an entry in your local machines /etc/hosts file for the IP address to the EC2 instance, and your *.bigbang.dev entry to access `bigbang.dev` through HTTPS.",
+        "x": 780,
+        "y": 460,
+        "wires": [
+            []
         ]
     },
     {
