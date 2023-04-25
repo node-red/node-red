@@ -194,6 +194,55 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should append to a file and add newline, except last line of multipart input', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            try {
+                fs.unlinkSync(fileToTest);
+            } catch(err) {
+            }
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                var count = 0;
+                //var data = ["Line1", "Line2"];
+
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        //data.should.containDeep([msg.payload]);
+                        if (count === 3) {
+                            var f = fs.readFileSync(fileToTest).toString();
+                            if (os.type() !== "Windows_NT") {
+                                f.should.have.length(23);
+                                f.should.equal("Line1\nLine2\nLine3\nLine4");
+                            }
+                            else {
+                                f.should.have.length(23);
+                                f.should.equal("Line1\r\nLine2\r\nLine3\r\nLine4");
+                            }
+                            done();
+                        }
+                        count++;
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+
+                n1.receive({payload:"Line1",parts:{index:0,type:"string"}});    // string
+                setTimeout(function() {
+                    n1.receive({payload:"Line2",parts:{index:1,type:"string"}});    // string
+                },30);
+                setTimeout(function() {
+                    n1.receive({payload:"Line3",parts:{index:2,type:"string"}});    // string
+                },60);
+                setTimeout(function() {
+                    n1.receive({payload:"Line4",parts:{index:3,type:"string",count:4}});    // string
+                },90);
+            });
+        });
+
         it('should append to a file after it has been deleted ', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":false, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
