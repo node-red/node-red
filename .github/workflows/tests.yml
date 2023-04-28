@@ -29,8 +29,8 @@ jobs:
     - name: Run tests
       run: |
         npm run test
-    - name: Publish to coveralls.io
-      if: ${{ matrix.node-version == 16 }}
-      uses: coverallsapp/github-action@v1.1.2
-      with:
-        github-token: ${{ github.token }}
+    # - name: Publish to coveralls.io
+    #   if: ${{ matrix.node-version == 16 }}
+    #   uses: coverallsapp/github-action@v1.1.2
+    #   with:
+    #     github-token: ${{ github.token }}
