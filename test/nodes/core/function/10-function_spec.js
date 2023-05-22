@@ -1424,7 +1424,30 @@ describe('function node', function() {
         });
     });
 
-
+    it('should timeout if timeout is set', function(done) {
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],timeout:"10",func:"while(1==1){};\nreturn msg;"}];
+        helper.load(functionNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            n1.receive({payload:"foo",topic: "bar"});
+            setTimeout(function() {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function(evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    should.equal(msg.msg.message, 'Script execution timed out after 10ms');
+                    done();
+                } catch(err) {
+                    done(err);
+                }
+            },50);
+        });
+    });
 
     describe("finalize function", function() {
 
