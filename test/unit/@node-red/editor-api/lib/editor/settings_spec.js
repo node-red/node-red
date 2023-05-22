@@ -41,7 +41,7 @@ describe("api/editor/settings", function() {
     });
 
     it('returns the user settings', function(done) {
-        info.init({
+        info.init({}, {
             settings: {
                 getUserSettings: function(opts) {
                     if (opts.user !== "fred") {
@@ -67,7 +67,7 @@ describe("api/editor/settings", function() {
     });
     it('updates the user settings', function(done) {
         var update;
-        info.init({
+        info.init({}, {
             settings: {
                 updateUserSettings: function(opts) {
                     if (opts.user !== "fred") {
