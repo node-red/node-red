@@ -6,16 +6,22 @@ on:
   pull_request:
     branches: [ master, dev ]
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    permissions:
+      checks: write  # for coverallsapp/github-action to create new checks
+      contents: read  # for actions/checkout to fetch code
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14, 16]
+        node-version: [16, 18]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
     - name: Install Dependencies
@@ -23,8 +29,8 @@ jobs:
     - name: Run tests
       run: |
         npm run test
-    - name: Publish to coveralls.io
-      if: ${{ matrix.node-version == 14 }}
-      uses: coverallsapp/github-action@v1.1.2
-      with:
-        github-token: ${{ github.token }}
+    # - name: Publish to coveralls.io
+    #   if: ${{ matrix.node-version == 16 }}
+    #   uses: coverallsapp/github-action@v1.1.2
+    #   with:
+    #     github-token: ${{ github.token }}

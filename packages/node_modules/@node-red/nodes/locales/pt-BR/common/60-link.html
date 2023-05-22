@@ -1,0 +1,66 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="link in">
+   <p>Crie fios virtuais entre fluxos. </p>
+   <h3>Detalhes</h3>
+   <p>O nó pode ser conectado a qualquer nó de <code>ligação de saída</code> que exista em qualquer guia.
+      Uma vez conectados, eles agem como se tivessem sido ligados em conjunto.</p>
+   <p>Os fios entre os nós de ligação são exibidos apenas quando um nó de ligação é selecionado.
+      Se existir quaisquer outros fios para outras guias; um nó virtual é exibido, onde pode-se clicar
+      e ser direcionado para a guia apropriada.</p>
+   <p><b>Observação:</b> as ligações não podem ser criadas entrando ou saindo de um subfluxo.</p>
+</script>
+
+<script type="text/html" data-help-name="link out">
+    <p>Crie conexões virtuais entre fluxos.</p>
+    <h3>Detalhes</h3>
+    <p>Este nó pode ser configurado para enviar mensagens para todos os nós de <code>ligação de entradas</code>
+       aos quais está conectado ou para enviar uma resposta de volta para o nó de <code>ligação de chamada</code>
+       que acionou o fluxo.</p>
+    <p>No modo 'enviar para todos', os fios entre os nós da ligação são exibidos apenas quando
+       o nó é selecionado. Se houver ligações para outras guias, um nó virtual
+       é mostrado; podendo ser clicado para se deslocar até a guia apropriada.</p>
+    <p><b>Observação:</b>As ligações não podem ser criadas em direação ao, ou saindo de, um subfluxo.</p>
+</script>
+
+<script type="text/html" data-help-name="link call">
+    <p>Chama um fluxo que começa com um nó de <code>ligação de entrada</code> e passa adiante a resposta.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+      <dt class="opcional">destino<span class="property-type">cadeia de caracteres</span></dt>
+      <dd>Quando a opção <b>Tipo de ligação</b> estiver definida como "Destino dinâmico", defina <code>msg.target</code> como o nome do
+         nó de <code>ligação de entrada</code> que você deseja chamar.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>Este nó pode ser conectado a um nó de <code>ligação de entrada</code> que exista em qualquer guia.
+       O fluxo conectado a esse nó deve terminar com um nó de <code>ligação de saída</code> configurado
+       no modo 'retorno'.</p>
+    <p>Quando este nó recebe uma mensagem, ela é passada para o nó de <code>ligação de entrada</code> conectado.
+       Em seguida, aguarda uma resposta que este então envia.</p>
+    <p>Se nenhuma resposta for recebida dentro do tempo limite configurado, padrão de 30 segundos, o nó
+       registrará um erro que pode ser detectado usando o nó de <code>captura</code>.</p>
+    <p>Quando a opção <b>Tipo de ligação</b> é definida como "Destino dinâmico", <code>msg.target</code> pode ser usado para chamar uma
+       <code>ligação de entrada</code> por nome ou id.
+    <ul>
+      <li>Se houver um nó de <code>ligação de entrada</code> com o mesmo id, este será chamado</li>
+      <li>Se houverem dois ou mais nós de <code>ligação de entrada</code> com o mesmo nome, um erro será gerado</li>
+      <li>Uma <code>chamada de ligação</code>não pode chamar um nó de <code>ligação de entrada</code> dentro de um subfluxo</li>
+    </ul>
+    </p>
+    O fluxo conectado a esse nó deve terminar com um nó de <code>ligação de saída</code> configurado
+    no modo 'retorno'.</p>
+</script>

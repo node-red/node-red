@@ -1,0 +1,54 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="json">
+    <p>Convertit une chaîne JSON en une représentation d'objet JavaScript, et inversément.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objet | chaîne de caractères</span></dt>
+        <dd>Un objet JavaScript ou une chaîne JSON.</dd>
+        <dt>schema<span class="property-type">object</span></dt>
+        <dd>Un objet JSON facultatif pour valider la charge utile.
+            La propriété sera supprimée avant que le <code>msg</code> ne soit envoyé au noeud suivant.
+        </dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objet | chaîne de caractères</span></dt>
+        <dd>
+            <ul>
+                <li>Si l'entrée est une chaîne JSON, elle essaie de l'analyser en un objet JavaScript.</li>
+                <li>Si l'entrée est un objet JavaScript, elle crée une chaîne JSON. La chaîne peut éventuellement être formatée.</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">tableau</span></dt>
+        <dd>Si la conversion JSON échoue, le noeud Catch aura une propriété <code>schemaError</code>
+            contenant un tableau d'erreurs.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Par défaut, le noeud fonctionne sur le <code>msg.payload</code>, mais peut être configuré
+        pour convertir n'importe quelle propriété du message.</p>
+    <p>Le noeud peut également être configuré pour assurer un encodage particulier au lieu de basculer
+        entre les deux. Cela peut être utilisé, par exemple, avec le noeud <code>HTTP in</code>
+        pour s'assurer que la charge utile soit un objet analysé même si une demande entrante
+        n'a pas correctement défini son type de contenu pour que le noeud HTTP entrant effectue la conversion.</p>
+    <p>Si le noeud est configuré pour s'assurer que la propriété est encodée sous forme de chaîne et qu'elle
+        reçoit une chaîne, aucune autre vérification ne sera effectuée sur la propriété. Cela ne
+        vérifiera pas que la chaîne soit valide au format JSON et ne la reformatera pas si l'option de format
+        est sélectionné.</p>
+    <p>Pour plus de détails sur le schéma JSON, vous pouvez consulter la spécification
+    <a href="http://json-schema.org/latest/json-schema-validation.html">ici</a>.</p>
+</script>

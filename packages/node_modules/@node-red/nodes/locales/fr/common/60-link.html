@@ -1,0 +1,66 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="link in">
+    <p>Crée des liens virtuelles entre les flux.</p>
+    <h3>Détails</h3>
+    <p>Le noeud peut être connecté à n'importe quel noeud <code>Link out</code> qui existe sur n'importe quel onglet.
+      Une fois connectés, ils se comportent comme s'ils étaient câblés ensemble.</p>
+    <p>Les fils entre les noeuds de lien ne s'affichent que lorsqu'un noeud de lien est sélectionné.
+      S'il y a des fils vers d'autres onglets, un noeud virtuel est affiché et permet si on clique dessus 
+      d'accéder à l'onglet approprié.</p>
+    <p><b>Remarque</b> : Impossible de créer des liens entrant ou sortant d'un sous-flux.</p>
+</script>
+
+<script type="text/html" data-help-name="link out">
+    <p>Créer des liens virtuels entre les flux.</p>
+    <h3>Détails</h3>
+    <p>Ce noeud peut être configuré pour envoyer des messages à tous les noeuds <code>Link in</code>
+      auxquels il est connecté, ou pour renvoyer une réponse au noeud <code>Link call</code>
+      qui a déclenché le flux.</p>
+    <p>En mode 'envoyer à tous', les fils entre les noeuds de liaison ne sont affichés que lorsque
+      le noeud est sélectionné. S'il existe des fils vers d'autres onglets, un noeud virtuel
+      s'affiche sur lequel il est possible de cliquer pour passer à l'onglet approprié.</p>
+    <p><b>Remarque</b> : Impossible de créer des liens entrant ou sortant d'un sous-flux.</p>
+</script>
+
+<script type="text/html" data-help-name="link call">
+    <p>Appelle un flux qui commence par un noeud <code>Link in</code> et transmet la réponse.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+      <dt class="optional">target<span class="property-type">chaîne de caractères</span></dt>
+      <dd>Lorsque l'option <b>Type de lien</b> est définie sur 'Cible dynamique', définisser <code>msg.target</code> sur le nom du
+         noeud <code>Link in</code> que vous souhaitez appeler.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Ce noeud peut être connecté à un noeud <code>Link in</code> qui existe sur n'importe quel onglet.
+      Le flux connecté à ce noeud doit se terminer par un noeud <code>Link out</code> configuré
+      en mode 'retour'.</p>
+    <p>Lorsque ce noeud reçoit un message, il est transmis au noeud <code>Link in</code> connecté.
+      Il attend alors une réponse qu'il envoie ensuite.</p>
+    <p>Si aucune réponse n'est reçue dans le délai configuré, 30 secondes par défaut, le noeud
+      déclenchera une erreur qui peut être détectée à l'aide du noeud <code>Catch</code>.</p>
+    <p>Lorsque l'option <b>Type de lien</b> est définie sur 'Cible dynamique', <code>msg.target</code> peut être utilisé pour appeler un
+      noeud <code>Link in</code> par nom ou identifiant.
+    <ul>
+      <li>S'il existe un noeud <code>Link in</code> avec le même identifiant, il sera appelé</li>
+      <li>S'il existe au moins deux noeuds <code>Link in</code> portant le même nom, une erreur sera générée</li>
+      <li>Un noeud <code>Link call</code> ne peut pas appeler un noeud <code>Link in</code> à l'intérieur d'un sous-flux</li>
+    </ul>
+    </p>
+    Le flux connecté à ce noeud doit se terminer par un noeud <code>Link out</code> configuré
+     en mode 'retour'.</p>
+</script>
