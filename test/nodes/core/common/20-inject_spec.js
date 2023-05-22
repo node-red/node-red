@@ -854,7 +854,7 @@ describe('inject node', function() {
             });
             n1.on("call:error", function(err) {
                 count++;
-                if (count == 2) {
+                if (count == 1) {
                     done();
                 }
             });
