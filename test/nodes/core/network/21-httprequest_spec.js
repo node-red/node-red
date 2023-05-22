@@ -223,7 +223,7 @@ describe('HTTP Request Node', function() {
             }
             authFields[match[1]] = match[2] || match[3];
         }
-        console.log(JSON.stringify(authFields));
+        // console.log(JSON.stringify(authFields));
 
         if (qop && authFields['qop'] != qop) {
             console.log('test1');
@@ -250,7 +250,7 @@ describe('HTTP Request Node', function() {
             req, algorithm, sess, realm, username, nonce, nc, cnonce, qop
         );
         if (!response || expectedResponse.toLowerCase() !== response.toLowerCase()) {
-            console.log('test3');
+            console.log('test3', response, expectedResponse);
             res.status(401).end();
             return;
         }
