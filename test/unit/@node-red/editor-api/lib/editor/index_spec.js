@@ -61,12 +61,14 @@ describe("api/editor/index", function() {
                 sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m),"init").callsFake(function(){});
             });
             sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme"),"app").callsFake(function(){ return express()});
+            sinon.stub(NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/settings"),"sshkeys").callsFake(function(){ return express()});
         });
         after(function() {
             mockList.forEach(function(m) {
                 NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/"+m).init.restore();
             })
             NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/theme").app.restore();
+            NR_TEST_UTILS.require("@node-red/editor-api/lib/editor/settings").sshkeys.restore();
             auth.needsPermission.restore();
             log.error.restore();
         });
