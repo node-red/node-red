@@ -686,6 +686,44 @@ describe('Flow', function() {
             },50);
         });
 
+        it.only("passes a status event to the group scoped status node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3" },
+                {id: "g2", type: "group" },
+                {id: "g3", type: "group" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"status",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"status",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+            setTimeout(function() {
+                try {
+                    currentNodes["sn"].should.have.a.property("handled",1);
+                    currentNodes["sn2"].should.have.a.property("handled",0);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    done()
+                } catch(err) {
+                    done(err)
+                }
+            },50);
+        });
+
+
+
     });
 
     describe("#handleError",function() {
@@ -794,6 +832,42 @@ describe('Flow', function() {
                         done();
                     });
                 },50);
+            },50);
+        });
+        it("passes an error event to the group scoped catch node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3" },
+                {id: "g2", type: "group" },
+                {id: "g3", type: "group" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"catch",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"catch",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            setTimeout(function() {
+                try {
+                    currentNodes["sn"].should.have.a.property("handled",1);
+                    currentNodes["sn2"].should.have.a.property("handled",0);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    done()
+                } catch(err) {
+                    done(err)
+                }
             },50);
         });
         it("moves any existing error object sideways",function(done){
