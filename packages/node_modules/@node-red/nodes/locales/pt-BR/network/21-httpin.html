@@ -1,0 +1,100 @@
+<!--
+  copyright js foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http in">
+    <p>Cria um ponto de extremidade HTTP para a criação de serviços da web.</p>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt>carga útil</dt>
+        <dd>Para uma solicitação GET, contém um objeto de qualquer parâmetro de cadeia de caracteres de consulta.
+            Caso contrário, contém o corpo da solicitação HTTP.</dd>
+        <dt>req <span class="property-type">objeto</span></dt>
+        <dd>Um objeto de solicitação HTTP. Este objeto contém várias propriedades que
+            fornecer informações sobre a solicitação.
+            <ul>
+             <li><code>body</code> - o corpo da solicitação de entrada. O formato
+                 dependerá da solicitação.</li>
+             <li><code>headers</code> - um objeto que contém os cabeçalhos de solicitação HTTP.</li>
+             <li><code>query</code> - um objeto que contém quaisquer parâmetros de string de consulta.</li>
+             <li><code>params</code> - um objeto que contém quaisquer parâmetros de rota.</li>
+             <li><code>cookies</code> - um objeto que contém os cookies para a solicitação.</li>
+             <li><code>arquivos</code> - se habilitado no nó, um objeto contendo
+                 quaisquer arquivos carregados como parte de uma solicitação POST.</li>
+            </ul>
+        </dd>
+        <dt> res <span class="property-type">objeto</span></dt>
+        <dd>Um objeto de resposta HTTP. Esta propriedade não deve ser usada diretamente;
+            o nó de <code>Resposta HTTP</code> documenta como responder a uma solicitação.
+            Esta propriedade deve permanecer anexada à mensagem passada ao nó de resposta.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>O nó escutará no caminho configurado para solicitações de um tipo particular.
+       O caminho pode ser totalmente especificado, como <code>/user</code>, ou incluir
+       parâmetros nomeados que aceitam qualquer valor, como <code>/user/:name</code>.
+       Quando parâmetros nomeados são usados, seus valores reais em uma solicitação podem ser acessados em <code>msg.req.params</code>.</p>
+    <p>Para solicitações que incluem um corpo, como POST ou PUT, o conteúdo de
+       a solicitação é disponibilizada como <code>msg.payload</code>.</p>
+    <p>Se o tipo de conteúdo da solicitação puder ser determinado, o corpo será analisado sintaticamente para
+       qualquer tipo apropriado. Por exemplo,<code>application/json</code> será analisado sintaticamente para
+       sua representação de objeto JavaScript.</p>
+    <p><b>Nota:</b> este nó não envia nenhuma resposta à solicitação. O fluxo
+       deve incluir um nó de resposta HTTP para concluir a solicitação.</p>
+</script>
+
+<script type="text/html" data-help-name="http response">
+    <p>Envia respostas de volta às solicitações recebidas de um nó de entrada HTTP.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>carga útil<span class="property-type"> cadeia de caracteres</span></dt>
+        <dd>O corpo da resposta.</dd>
+        <dt class="optional">statusCode<span class="property-type"> número</span></dt>
+        <dd>Se definido, é usado como código de estadi de resposta. Padrão:200.</dd>
+        <dt class="optional">cabeçalhos<span class="property-type"> objeto</span></dt>
+        <dd>Se definido, fornece cabeçalhos HTTP para incluir na resposta.</dd>
+        <dt class="optional">cookies<span class="property-type"> objeto</span></dt>
+        <dd>Se definido, pode ser usado para definir ou excluir cookies.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>O <code>statusCode</code> e <code>headers</code> também podem ser definidos dentro
+    do próprio nó. Se uma propriedade for definida dentro do nó, ela não pode ser substituída
+    pela propriedade da mensagem correspondente.</p>
+    <h4>Tratamento de cookies</h4>
+    <p>A propriedade <code>cookies</code> deve ser um objeto de pares nome/valor.
+    O valor pode ser uma cadeia de caracteres para definir o valor do cookie com o padrão
+    opções, ou pode ser um objeto de opções.</p>
+    <p>O exemplo a seguir define dois cookies - um chamado <code>nome</code> com
+    um valor de <code>'nick'</code>, o outro chamado <code>session</code> com um
+    valor de <code>1234</code> e um prazo de validade definido para 15 minutos.</p>
+    <pre>
+    msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>As opções válidas incluem:</p>
+    <ul>
+    <li><code>domain</code> - (cadeia de caracteres) nome de domínio para o cookie</li>
+    <li><code>expires</code> - (Data) data de expiração em GMT. Se não for especificado ou definido como 0, cria um cookie de sessão</li>
+    <li><code>maxAge</code> - (cadeia de caracteres) data de expiração em relação à hora atual em milissegundos</li>
+    <li><code>path</code> - (cadeia de caracteres) caminho para o cookie. Padrões para /</li>
+    <li><code>value</code> - (cadeia de caracteres) o valor a ser usado para o cookie</li>
+    </ul>
+    <p>Para excluir um cookie, defina seu <code>valor</code> como <code>nulo</code>.</p>
+
+</script>

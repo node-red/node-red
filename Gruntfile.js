@@ -151,6 +151,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/font-awesome.js",
                     "packages/node_modules/@node-red/editor-client/src/js/history.js",
                     "packages/node_modules/@node-red/editor-client/src/js/validators.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/mermaid.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/utils.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/editableList.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/common/treeList.js",
@@ -169,6 +170,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diagnostics.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/diff.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/keyboard.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/ui/env-var.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/workspaces.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/statusBar.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/view.js",
@@ -224,7 +226,7 @@ module.exports = function(grunt) {
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js",
+                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js"
                     ],
                     // "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
                     //     // TODO: resolve relative resource paths in
@@ -233,6 +235,9 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
                         "node_modules/jsonata/jsonata-es5.min.js",
                         "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
+                    ],
+                    "packages/node_modules/@node-red/editor-client/public/vendor/mermaid/mermaid.min.js": [
+                        "node_modules/mermaid/dist/mermaid.min.js"
                     ]
                 }
             }
@@ -403,7 +408,7 @@ module.exports = function(grunt) {
                     {
                         cwd: 'packages/node_modules/@node-red/editor-client/src',
                         src: [
-                            'types/node/*.ts',
+                            'types/node/**/*.ts',
                             'types/node-red/*.ts',
                         ],
                         expand: true,

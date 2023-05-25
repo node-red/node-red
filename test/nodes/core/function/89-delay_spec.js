@@ -817,6 +817,105 @@ describe('delay Node', function() {
         });
     });
 
+    it('can part flush and reset rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"allowrate":false,"outputs":1,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                // console.log("GOT",Date.now() - t,msg)
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "bar") {
+                        msg.payload.should.equal(2);
+                        (Date.now() - t).should.be.approximately(200,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "fob") {
+                        msg.payload.should.equal(5);
+                        (Date.now() - t).should.be.approximately(400,100);
+                        c = 5;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            // delayNode1.receive({payload:1,topic:"foo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"foo"}); }  );
+            setTimeout( function() { delayNode1.receive({payload:2,topic:"far"}); }, 10  );
+            setTimeout( function() { delayNode1.receive({payload:3,topic:"boo"}); }, 20  );
+            setTimeout( function() { delayNode1.receive({payload:4,topic:"bar"}); }, 30  );
+            setTimeout( function() { delayNode1.receive({flush:2,reset:true});  }, 200);
+            setTimeout( function() { delayNode1.receive({payload:5,topic:"fob"}); }, 300  );
+            setTimeout( function() { delayNode1.receive({flush:1,reset:true});  }, 400);
+        });
+    });
+
+    it('can full flush and reset rate limit queue', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"allowrate":false,"outputs":1,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                // console.log("GOT",Date.now() - t,msg)
+                msg.should.have.a.property('payload');
+                msg.should.have.a.property('topic');
+                try {
+                    if (msg.topic === "foo") {
+                        msg.payload.should.equal(1);
+                        (Date.now() - t).should.be.approximately(0,50);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "bar") {
+                        msg.payload.should.equal(4);
+                        (Date.now() - t).should.be.approximately(200,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "all") {
+                        msg.payload.should.equal(5);
+                        (Date.now() - t).should.be.approximately(200,100);
+                        c = c + 1;
+                    }
+                    else if (msg.topic === "fob") {
+                        msg.payload.should.equal(6);
+                        (Date.now() - t).should.be.approximately(400,100);
+                        c = 5;
+                    }
+                    if (c === 5) { done(); }
+                } catch(e) {
+                    done(e);
+                }
+            });
+
+            // send test messages
+            // delayNode1.receive({payload:1,topic:"foo"});
+            setImmediate( function() { delayNode1.receive({payload:1,topic:"foo"}); }  );
+            setTimeout( function() { delayNode1.receive({payload:2,topic:"far"}); }, 10  );
+            setTimeout( function() { delayNode1.receive({payload:3,topic:"boo"}); }, 20  );
+            setTimeout( function() { delayNode1.receive({payload:4,topic:"bar"}); }, 30  );
+            setTimeout( function() { delayNode1.receive({payload:5,topic:"last",flush:true,reset:true});  }, 200);
+            setTimeout( function() { delayNode1.receive({payload:6,topic:"fob"}); }, 300  );
+            setTimeout( function() { delayNode1.receive({flush:1,reset:true});  }, 400);
+        });
+    });
+
     it('can part push to front of rate limit queue', function(done) {
         this.timeout(2000);
         var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":1,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},

@@ -1,0 +1,64 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="delay">
+    <p>Retarde chaque message traversant le noeud ou limite la vitesse à laquelle ils peuvent passer.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">delay <span class="property-type">nombre</span></dt>
+        <dd>Définit le délai, en millisecondes, à appliquer au message. Cette
+            option ne s'applique que si le noeud est configuré pour autoriser le message à
+            remplacer l'intervalle de délai configuré par défaut.</dd>
+        <dt class="optional">rate <span class="property-type">nombre</span></dt>
+        <dd>Définit la valeur du débit en millisecondes entre les messages.
+            Ce noeud écrase la valeur de taux (rate) existante définie dans la configuration du noeud
+            lorsqu'il reçoit le message contenant la valeur <code>msg.rate</code> en millisecondes.
+            Cette option ne s'applique que si le noeud est configuré pour autoriser le message à
+            remplacer l'intervalle de taux par défaut configurée.</dd>
+        <dt class="optional">reset</dt>
+        <dd>Si le message reçu a cette propriété définie sur n'importe quelle valeur, tous
+            les messages en suspens détenus par le noeud sont effacés sans être envoyés.</dd>
+        <dt class="optional">flush</dt>
+        <dd>Si le message reçu a cette propriété définie sur une valeur numérique, alors autant de messages
+            sera libéré immédiatement. Si défini sur un autre type (par exemple booléen), alors tous
+            les messages en attente détenus par le noeud sont envoyés immédiatement.</dd>
+        <dt class="optional">toFront</dt>
+        <dd>En mode limite de débit, si le message reçu a cette propriété définie sur booléen <code>true</code>,
+            alors le message est poussé au début de la file d'attente et sera publié ensuite.
+            Ceci peut être utilisé en combinaison avec <code>msg.flush=1</code> pour envoyer immédiatement.
+        </dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Lorsqu'il est configuré pour retarder les messages, l'intervalle de retard peut être une valeur fixe,
+        une valeur aléatoire dans une plage ou définie dynamiquement pour chaque message.
+        Chaque message est retardé indépendamment de tout autre message, en fonction de
+        l'heure de son arrivée.
+    </p>
+    <p>Lorsqu'ils sont configurés pour limiter le débit des messages, leur diffusion est répartie sur
+        la période configurée. L'état indique le nombre de messages actuellement dans la file d'attente.
+        Il peut éventuellement supprimer les messages intermédiaires à mesure qu'ils arrivent.</p>
+    </p>
+    <p>S'il est défini pour autoriser le remplacement du taux, le nouveau taux sera appliqué immédiatement,
+        et restera en vigueur jusqu'à ce qu'il soit modifié à nouveau, que le noeud soit réinitialisé ou que le flux soit redémarré.</p>
+    <p>La limitation de débit peut être appliquée à tous les messages, ou les regrouper selon
+        leur sujet <code>msg.topic</code>. Lors du regroupement, les messages intermédiaires sont
+        automatiquement abandonnés. A chaque intervalle de temps, le noeud peut soit libérer
+        le message le plus récent pour tous les sujets, ou publier le message le plus récent
+        pour le sujet suivant.
+    </p>
+    <p><b>Remarque</b> : En mode limite de débit, la profondeur maximale de la file d'attente peut être définie par une propriété de votre
+        fichier <i>settings.js</i>. Par exemple <code>nodeMessageBufferMaxLength : 1000</code></p>
+</script>

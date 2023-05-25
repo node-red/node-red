@@ -1,0 +1,41 @@
+<script type="text/html" data-help-name="rbe">
+    <p>Nó Relatório Por Excessão (RPE) - apenas repassa os dados se a carga útil tiver mudado.
+        também pode bloquear ao menos, ou ignorar, se o valor mudar devido a uma quantidade específica(modo de banda estreita e morta).</p>
+     <h3>Entradas</h3>
+     <dl class="message-properties">
+         <dt>carga útil
+             <span class="property-type"> número | cadeia de caracteres | (objeto)</span>
+         </dt>
+         <dd>O modo RPE aceita números, cadeia de caracteres e objetos simples.
+             Outros modos devem fornecer um número analisável sintáticamente.</dd>
+         <dt class="optional">tópico<span class="property-type">cadeia de caracteres</span>
+         </dt>
+         <dd>se especificado, a função funcionará por tópico. Esta propriedade pode ser definida por configuração.</dd>
+         <dt class="optional">redefinir<span class="property-type">qualquer</span></dt>
+         <dd>se definido, limpa o valor armazenado para o msg.topic especificado, ou
+             todos os tópicos se msg.topic não for especificado.</dd>
+     </dl>
+     <h3>Saídas</h3>
+     <dl class="message-properties">
+         <dt>carga útil
+             <span class="property-type">conforme entrada</span>
+         </dt>
+         <dd>Se acionado, a saída será igual à entrada.</dd>
+     </dl>
+     <h3>Detalhes</h3>
+     <p>No modo RPE, este nó irá bloquear até o valor de <code>msg.payload</code>,
+        (ou propriedade selecionada) seja diferente do valor anterior.
+        Se necessário, ele pode ignorar o valor inicial para não enviar nada no início.</p>
+     <p>Os modos <a href="https://en.wikipedia.org/wiki/Deadband" target="_blank">Bandamorta</a> bloquearão o valor de entrada
+        <i>a menos que</i> sua alteração seja maior ou maior-igual que &plusmn; a distância da lacuna de banda de um valor anterior.</p>
+     <p>Os modos de banda estreita bloquearão o valor de entrada,
+        <i>se</i> sua alteração for maior ou maior-igual que &plusmn; a distância da lacuna de banda de um valor anterior.
+        É útil para ignorar casos atípicos de um sensor com defeito, por exemplo.</p>
+     <p>Tanto nos modos de banda morta quanto no de banda estreita, o valor de entrada deve conter um número analisável e
+        ambos também suportam % - envio apenas se/a menos que a entrada difira em mais de x% do valor original.</p>
+     <p>Tanto a banda morta quanto a banda estreita permitem a comparação ou com o valor de saída válido anterior, ignorando desse modo 
+     quaisquer valores fora do intervalo, ou com o valor de entrada anterior, que redefine o ponto de ativação, permitindo assim
+     derivação gradual(banda morta) ou uma mudança de etapa(banda estreita).</p>
+     <p><b>Nota:</b> isso funciona por base em  <code>msg.topic</code>, embora possa ser alterado para outra propriedade, se desejado.
+        Isso significa que um único nó de filtro pode lidar com vários tópicos diferentes ao mesmo tempo.</p>
+</script>
