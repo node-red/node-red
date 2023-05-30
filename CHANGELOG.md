@@ -1,3 +1,38 @@
+#### 3.1.0-beta.3: Beta Release
+
+Editor
+
+ - Select the item that is specified in a deep link URL (#4113) @Steve-Mcl
+ - Update to Monaco 0.38.0 (#4189) @Steve-Mcl
+ - Place subflow outputs/inputs relative to current view (#4183) @knolleary
+ - Enable RED.view.select to select group by id (#4184) @knolleary
+ - Combine existing env vars when merging groups (#4182) @knolleary
+ - Avoid creating empty global-config node if not needed (#4153) @knolleary
+ - Fix group selection when using lasso (#4108) @knolleary
+ - Use editor path in generating localStorage keys (#4151) @mw75
+ - Ensure no node credentials are included when exporting to clipboard (#4112) @knolleary
+ - Fix jsonata expression test ui (#4097) @knolleary
+ - Fix search button in palette popover (#4096) @knolleary
+
+Runtime
+
+ - Allow options object on each httpStatic configuration (#4109) @kevinGodell
+ - Ensure non-zero exit codes for errors (#4181) @knolleary
+ - Ensure external modules are installed synchronously (#4180) @knolleary
+ - Update dependecies include got (#4155) @knolleary
+ - Add Japanese translations for v3.1 beta.2 (#4158) @kazuhitoyokoi
+ - Ensure express server options are applied consistently (#4178) @knolleary
+ - Remove version info from theme endpoint (#4179) @knolleary
+ - Add Japanese translations for welcome tour of 3.1.0 beta.2 (#4145) @kazuhitoyokoi
+ - Added SHA-256 and SHA-512-256 digest authentication (#4100) @sroebert
+ - Add "timers" types to known types (#4103) @Steve-Mcl
+
+Nodes
+
+ - Allow Catch/Status nodes to be scoped to their group (#4185) @NetHans
+ - MQTT: Option to disable MQTT topic unsubscribe on disconnect (#4078) @flying7eleven
+
+
 #### 3.1.0-beta.2: Beta Release
 
 Editor
