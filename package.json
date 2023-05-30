@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "3.1.0-beta.2",
+    "version": "3.1.0-beta.3",
     "description": "Low-code programming for event-driven applications",
     "homepage": "http://nodered.org",
     "license": "Apache-2.0",
@@ -79,7 +79,7 @@
         "uglify-js": "3.17.4",
         "uuid": "9.0.0",
         "ws": "7.5.6",
-        "xml2js": "0.5.0"
+        "xml2js": "0.6.0"
     },
     "optionalDependencies": {
         "bcrypt": "5.1.0"
