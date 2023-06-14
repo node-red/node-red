@@ -91,13 +91,13 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
     const colorCSS = []
     const nonColorCSS = [];
 
-    let inKeyFrameBlock = false;
+    let s = false;
 
     lines.forEach(l => {
-        if (inKeyFrameBlock) {
+        if (s) {
             nonColorCSS.push(l);
             if (/^}/.test(l)) {
-                inKeyFrameBlock = false;
+                s = false;
             }
         } else if (/^@keyframes/.test(l)) {
             nonColorCSS.push(l);
