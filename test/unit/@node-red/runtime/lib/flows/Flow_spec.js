@@ -686,7 +686,7 @@ describe('Flow', function() {
             },50);
         });
 
-        it.only("passes a status event to the group scoped status node",function(done) {
+        it("passes a status event to the group scoped status node",function(done) {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id: "g1", type: "group", g: "g3" },
