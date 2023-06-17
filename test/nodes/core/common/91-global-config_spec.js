@@ -44,7 +44,7 @@ describe('unknown Node', function() {
         });
     });
 
-    it.only('should evaluate a global environment variable that is a JSONata value', function (done) {
+    it('should evaluate a global environment variable that is a JSONata value', function (done) {
         const flow = [{
             id: "n1", type: "global-config", name: "XYZ",
             env: [
