@@ -107,7 +107,7 @@ describe('inject node', function() {
     });
 
     it('inject name of node as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_NODE_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_NODE_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -125,7 +125,7 @@ describe('inject node', function() {
     });
 
     it('inject id of node as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_NODE_ID", payloadType: "env", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_NODE_ID", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -143,7 +143,7 @@ describe('inject node', function() {
     });
 
     it('inject path of node as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_NODE_PATH", payloadType: "env", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_NODE_PATH", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -162,7 +162,7 @@ describe('inject node', function() {
 
 
     it('inject name of flow as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_FLOW_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_FLOW_NAME", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"},
                     {id: "flow", type: "tab", label: "FLOW" },
                    ];
@@ -182,7 +182,7 @@ describe('inject node', function() {
     });
 
     it('inject id of flow as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_FLOW_ID", payloadType: "env", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_FLOW_ID", payloadType: "env", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"},
                     {id: "flow", type: "tab", name: "FLOW" },
                    ];
@@ -202,7 +202,7 @@ describe('inject node', function() {
     });
 
     it('inject name of group as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_GROUP_NAME", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_NAME", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
                     {id: "n2", type: "helper"},
                     {id: "g0", type: "group", name: "GROUP" },
                    ];
@@ -222,7 +222,7 @@ describe('inject node', function() {
     });
 
     it('inject id of group as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "NR_GROUP_ID", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_ID", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
                     {id: "n2", type: "helper"},
                     {id: "g0", type: "group", name: "GROUP" },
                    ];
@@ -243,7 +243,7 @@ describe('inject node', function() {
 
 
     it('inject name of node as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_NODE_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -261,7 +261,7 @@ describe('inject node', function() {
     });
 
     it('inject id of node as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_NODE_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -279,7 +279,7 @@ describe('inject node', function() {
     });
 
     it('inject path of node as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_NODE_PATH}", payloadType: "str", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_NODE_PATH}", payloadType: "str", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -298,7 +298,7 @@ describe('inject node', function() {
 
 
     it('inject name of flow as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_FLOW_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_FLOW_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"},
                     {id: "flow", type: "tab", label: "FLOW" },
                    ];
@@ -318,7 +318,7 @@ describe('inject node', function() {
     });
 
     it('inject id of flow as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_FLOW_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_FLOW_ID}", payloadType: "str", wires: [["n2"]], z: "flow"},
                     {id: "n2", type: "helper"},
                     {id: "flow", type: "tab", name: "FLOW" },
                    ];
@@ -338,7 +338,7 @@ describe('inject node', function() {
     });
 
     it('inject name of group as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_GROUP_NAME}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_NAME}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
                     {id: "n2", type: "helper"},
                     {id: "g0", type: "group", name: "GROUP" },
                    ];
@@ -358,7 +358,7 @@ describe('inject node', function() {
     });
 
     it('inject id of group as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topnic: "t1", payload: "${NR_GROUP_ID}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_ID}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
                     {id: "n2", type: "helper"},
                     {id: "g0", type: "group", name: "GROUP" },
                    ];
