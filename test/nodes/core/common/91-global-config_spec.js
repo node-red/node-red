@@ -44,4 +44,30 @@ describe('unknown Node', function() {
         });
     });
 
+    it('should evaluate a global environment variable that is a JSONata value', function (done) {
+        const flow = [{
+            id: "n1", type: "global-config", name: "XYZ",
+            env: [
+                { name: "now-var", type: "jsonata", value: "$millis()" }
+            ]
+        },
+        { id: "n2", type: "inject", topic: "t1", payload: "now-var", payloadType: "env", wires: [["n3"]], z: "flow" },
+        { id: "n3", type: "helper" }
+        ];
+        helper.load([config, inject], flow, function () {
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            n3.on("input", (msg) => {
+                try {
+                    const now = Date.now();
+                    msg.should.have.property("payload").and.be.approximately(now, 1000);
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n2.receive({});
+        });
+    });
+
 });
