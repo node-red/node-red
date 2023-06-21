@@ -1425,7 +1425,7 @@ describe('function node', function() {
     });
 
     it('should timeout if timeout is set', function(done) {
-        var flow = [{id:"n1",type:"function",wires:[["n2"]],timeout:"10",func:"while(1==1){};\nreturn msg;"}];
+        var flow = [{id:"n1",type:"function",wires:[["n2"]],timeout:"0.010",func:"while(1==1){};\nreturn msg;"}];
         helper.load(functionNode, flow, function() {
             var n1 = helper.getNode("n1");
             n1.receive({payload:"foo",topic: "bar"});
