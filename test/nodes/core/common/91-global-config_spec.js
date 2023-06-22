@@ -3,7 +3,7 @@ var config = require("nr-test-utils").require("@node-red/nodes/core/common/91-gl
 var inject = require("nr-test-utils").require("@node-red/nodes/core/common/20-inject.js");
 var helper = require("node-red-node-test-helper");
 
-describe('unknown Node', function() {
+describe('Global Config Node', function() {
 
     afterEach(function() {
         helper.unload();
@@ -35,6 +35,32 @@ describe('unknown Node', function() {
             n3.on("input", (msg) => {
                 try {
                     msg.should.have.property("payload", "foo");
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            });
+            n2.receive({});
+        });
+    });
+
+    it('should evaluate a global environment variable that is a JSONata value', function (done) {
+        const flow = [{
+            id: "n1", type: "global-config", name: "XYZ",
+            env: [
+                { name: "now-var", type: "jsonata", value: "$millis()" }
+            ]
+        },
+        { id: "n2", type: "inject", topic: "t1", payload: "now-var", payloadType: "env", wires: [["n3"]], z: "flow" },
+        { id: "n3", type: "helper" }
+        ];
+        helper.load([config, inject], flow, function () {
+            var n2 = helper.getNode("n2");
+            var n3 = helper.getNode("n3");
+            n3.on("input", (msg) => {
+                try {
+                    const now = Date.now();
+                    msg.should.have.property("payload").and.be.approximately(now, 1000);
                     done();
                 } catch (err) {
                     done(err);
