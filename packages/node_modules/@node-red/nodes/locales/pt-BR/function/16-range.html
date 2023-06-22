@@ -1,0 +1,44 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="range">
+<p>Mapeia um valor numérico para um intervalo diferente.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt><span class="property-type">número</span> da carga útil</dt>
+        <dd>A carga útil <i>tem que</i> ser um número. Qualquer outra coisa tentará ser
+        analisada gramaticalmente como número e rejeitada se falhar.</dd>
+    </dl>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt><span class="property-type"> número</span> da carga útil</dt>
+        <dd> O valor mapeado para a novo intervalo.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>Este nó irá dimensionar linearmente o valor recebido. Por padrão, o resultado
+    não está restrito ao intervalo definido no nó.</p>
+    <p><i> Escala e limita ao intervalo de destino </i>significa que o resultado nunca estará fora
+    do intervalo especificado dentro do intervalo que se quer alcançar.</p>
+    <p><i>Escala e empacota dentro do intervalo de destino</i> significa que o resultado
+    será empacotado dentro do intervalo que se quer alcançar.</p>
+    <p>Por exemplo, uma entrada de 0 - 10 mapeada para 0 - 100.</p>
+    <table style="outline-width: #888 solid thin">
+        <tr><th width="80px">modo</th><th width="80px"> entrada </th> <th width="80px"> saída </th></tr>
+        <tr><td><center>escala</center></td><td><center>12</center></td><td><center>120</center> </td></tr>
+        <tr><td><center>limite</center></td><td><center>12</center></td><td><center>100</center> </td></tr>
+        <tr><td><center>empacotamento</center></td><td><center>12</center></td><td><center>20</center></td></tr>
+    </table>
+</script>

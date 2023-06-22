@@ -1,0 +1,83 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="exec">
+    <p>Executa um comando do sistema e retorna sua saída.</p>
+    <p>O nó pode ser configurado ou para esperar até que o comando seja concluído ou para
+    enviar sua saída conforme o comando vai gerando-a.</p>
+    <p>O comando que é executado pode ser configurado no nó ou fornecido pelo mensagem 
+    recebida.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">carga útil<span class="property-type"> cadeia de caracteres</span></dt>
+        <dd>se configurado dessa forma, será adicionado ao final do comando executado.</dd>
+        <dt class="optional">matar<span class="property-type"> cadeia de caracteres</span></dt>
+        <dd>o tipo de sinal de eliminação para ser enviado a um processo de nó exec existente.</dd>
+        <dt class="optional">pid<span class="property-type"> número | cadeia de caracteres</span> </dt>
+        <dd>o ID do processo de um processo de nó exec existente a ser eliminado.</dd>
+    </dl>
+
+    <h3>Saídas</h3>
+    <ol class="node-ports">
+        <li>Saída padrão
+            <dl class="message-properties">
+                <dt>carga útil<span class = "property-type"> cadeia de caracteres</span></dt>
+                <dd>a saída padrão do comando.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc<span class = "property-type"> objeto</span></dt>
+                <dd>modo exec apenas, uma cópia do objeto de código de retorno(também disponível na porta 3)</dd>
+            </dl>
+        </li>
+        <li> Erro padrão
+            <dl class="message-properties">
+                <dt>carga útil <span class = "property-type"> cadeia de caracteres</span></dt>
+                <dd>o erro padrão do comando.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc<span class="property-type"> objeto </span> </dt>
+                <dd>modo exec apenas, uma cópia do objeto de código de retorno(também disponível na porta 3)</dd>
+            </dl>
+        </li>
+        <li>Código de retorno
+            <dl class="message-properties">
+                <dt>carga útil<span class = "property-type"> objeto</span></dt>
+                <dd>um objeto que contém o código de retorno e, possivelmente,<code> mensagem</code>, propriedades de <code>sinal</code>.</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>Detalhes</h3>
+    <p>Por padrão, usa a chamada do sistema <code>exec</code> que chama o comando, espera que ele seja concluído e, em seguida,
+    retorna a saída. Por exemplo, um comando bem-sucedido deve ter um código de retorno de <code>{code: 0}</code>.</p>
+    <p>Opcionalmente, pode usar <code>spawn</code>, que retorna a saída de stdout e stderr
+    conforme o comando é executado, geralmente uma linha de cada vez. Na conclusão, ele retorna um objeto
+    na 3ª porta. Por exemplo, um comando bem-sucedido deve retornar <code>{code: 0}</code>.</p>
+    <p>Os erros podem retornar informações extras na terceira porta <code>msg.payload</code>, como uma cadeia de caracteres do tipo <code>mensagem</code> ou
+    cadeia de caracteres do tipo <code>sinal</code>.</p>
+    <p>O comando executado é definido dentro do nó, com uma opção para adicionar <code>msg.payload</code> e um outro conjunto de parâmetros.</p>
+    <p>Comandos ou parâmetros com espaços devem ser colocados entre aspas - <code>"Este é um parâmetro único"</code></p>
+    <p>A <code>carga útil</code> retornada é geralmente uma <i> cadeia de caracteres </i>, a menos que caracteres não UTF8 sejam detectados, nesse caso será  <i>armazenamento temporário</i>.</p>
+    <p>O ícone de estado do nó e o PID ficarão visíveis enquanto o nó estiver ativo. As alterações podem ser lidas pelo nó de <code>Estado</code>.</p>
+    <p>A opção <code>Ocultar console</code> ocultará o console do processo normalmente mostrado em sistemas Windows.</p>
+    <h4>Processos de morte</h4>
+    <p> O envio de <code>msg.kill</code> eliminará um único processo ativo. <code>msg.kill</code> deve ser uma cadeia de caracteres contendo
+    o tipo de sinal a ser enviado, por exemplo, <code>SIGINT</code>, <code>SIGQUIT</code> ou <code>SIGHUP</code>.
+    O padrão é <code>SIGTERM</code> se definido como uma cadeia de caracteres vazia.</p>
+    <p>Se o nó tiver mais de um processo em execução, <code>msg.pid</code> também deve ser definido com o valor do PID a ser eliminado.</p>
+    <p>Se um valor for fornecido no campo <code>Tempo limite</code> então, se o processo não for concluído quando o número especificado de segundos tiver decorrido, o processo será encerrado automaticamente</p>
+    <p>Dica: se estiver executando um aplicativo Python, você pode precisar usar o parâmetro <code>-u</code> para interromper o armazenamento temporário da saída.</p>
+</script>

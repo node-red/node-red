@@ -1,0 +1,34 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="status">
+    <p>Signale les messages d'état des autres noeuds sur le même onglet.</p>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>status.text <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le texte d'état.</dd>
+        <dt>status.source.type <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le type de noeud qui a signalé l'état.</dd>
+        <dt>status.source.id <span class="property-type">chaîne de caractères</span></dt>
+        <dd>l'identifiant du noeud qui a signalé l'état.</dd>
+        <dt>status.source.name <span class="property-type">chaîne de caractères</span></dt>
+        <dd>tle nom, s'il est défini, du noeud qui a signalé l'état.</dd>
+    </dl>
+    <h3>Détails</h3>
+   <p>Ce noeud ne produit pas de <code>payload</code>.</p>
+   <p>Par défaut, le noeud signale l'état de tous les noeuds sur le même onglet de l'espace de travail.
+    Il peut être configuré pour signaler de manière sélective l'état des noeuds individuels.</p>
+</script>

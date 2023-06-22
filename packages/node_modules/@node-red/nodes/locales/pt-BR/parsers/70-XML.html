@@ -1,0 +1,50 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="xml">
+  <p>Converte entre uma cadeia de caracteres XML e sua representação de objeto JavaScript, em qualquer direção.</p>
+  <h3>Entradas</h3>
+  <dl class="message-properties">
+      <dt>carga útil<span class="property-type">objeto | cadeia de caracteres</span></dt>
+      <dd>Um objeto JavaScript ou cadeia de caracteres XML.</dd>
+      <dt class="optional">opções<span class="property-type">objeto</span></dt>
+      <dd>Esta propriedade opcional pode ser usada para passar qualquer uma das opções suportadas pelo biblioteca subjacente usada para converter de e para XML. Consulte <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">os documentos xml2js</a>
+          para obter maiores informações.</dd>
+  </dl>
+  <h3>Saídas</h3>
+  <dl class="message-properties">
+      <dt>carga útil<span class="property-type">objeto | cadeia de caracteres </span></dt>
+      <dd>
+          <ul>
+              <li>Se a entrada for uma cadeia de caracteres, tenta-se analisá-la sintáticamente como XML e criar um objeto JavaScript.</li>
+              <li>Se a entrada for um objeto JavaScript,tenta-se construir uma cadeia de caracteres XML.</li>
+          </ul>
+      </dd>
+  </dl>
+  <h3>Detalhes</h3>
+  <p>Ao converter entre XML e um objeto, quaisquer atributos XML são adicionados como uma propriedade chamada <code>$</code> por padrão.
+  Qualquer conteúdo de texto é adicionado como uma propriedade chamada <code>_</code>. Essas propriedades dos nomes podem ser especificadas na configuração do nó.</p>
+  <p>Por exemplo, o seguinte XML será convertido conforme mostrado:</p>
+  <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
+</script>

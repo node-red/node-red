@@ -25,9 +25,15 @@ var api = require("@node-red/editor-api");
 var server = null;
 var apiEnabled = false;
 
+const NODE_MAJOR_VERSION = process.versions.node.split('.')[0];
+if (NODE_MAJOR_VERSION > 14) {
+    const dns = require('node:dns');
+    dns.setDefaultResultOrder('ipv4first');
+}
+
 function checkVersion(userSettings) {
     var semver = require('semver');
-    if (!semver.satisfies(process.version,">=8.9.0")) {
+    if (!semver.satisfies(process.version,">=14.0.0")) {
         // TODO: in the future, make this a hard error.
         // var e = new Error("Unsupported version of Node.js");
         // e.code = "unsupported_version";

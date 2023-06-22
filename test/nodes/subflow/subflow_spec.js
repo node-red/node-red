@@ -260,7 +260,8 @@ describe('subflow', function() {
                  {name: "KB", type: "bool", value: "true"},
                  {name: "KJ", type: "json", value: "[1,2,3]"},
                  {name: "Kb", type: "bin", value: "[65,65]"},
-                 {name: "Ke", type: "env", value: "KS"}
+                 {name: "Ke", type: "env", value: "KS"},
+                 {name: "Kj", type: "jsonata", value: "1+2"},
              ],
              wires:[["n2"]]},
             {id:"n2", x:10, y:10, z:"t0", type:"helper", wires:[]},
@@ -279,7 +280,7 @@ describe('subflow', function() {
              ]
             },
             {id:"s1-n1", x:10, y:10, z:"s1", type:"function",
-             func:"msg.VE = env.get('Ke'); msg.VS = env.get('KS'); msg.VN = env.get('KN'); msg.VB = env.get('KB'); msg.VJ = env.get('KJ'); msg.Vb = env.get('Kb'); return msg;",
+             func:"msg.VE = env.get('Ke'); msg.VS = env.get('KS'); msg.VN = env.get('KN'); msg.VB = env.get('KB'); msg.VJ = env.get('KJ'); msg.Vb = env.get('Kb'); msg.Vj = env.get('Kj'); return msg;",
              wires:[]}
         ];
         helper.load(functionNode, flow, function() {
@@ -294,6 +295,7 @@ describe('subflow', function() {
                     msg.should.have.property("Vb");
                     should.ok(msg.Vb instanceof Buffer);
                     msg.should.have.property("VE","STR");
+                    msg.should.have.property("Vj",3);
                     done();
                 }
                 catch (e) {

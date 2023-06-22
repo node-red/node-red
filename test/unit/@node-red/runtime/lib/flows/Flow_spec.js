@@ -686,6 +686,44 @@ describe('Flow', function() {
             },50);
         });
 
+        it("passes a status event to the group scoped status node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3" },
+                {id: "g2", type: "group" },
+                {id: "g3", type: "group" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"status",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"status",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+            setTimeout(function() {
+                try {
+                    currentNodes["sn"].should.have.a.property("handled",1);
+                    currentNodes["sn2"].should.have.a.property("handled",0);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    done()
+                } catch(err) {
+                    done(err)
+                }
+            },50);
+        });
+
+
+
     });
 
     describe("#handleError",function() {
@@ -794,6 +832,42 @@ describe('Flow', function() {
                         done();
                     });
                 },50);
+            },50);
+        });
+        it("passes an error event to the group scoped catch node",function(done) {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3" },
+                {id: "g2", type: "group" },
+                {id: "g3", type: "group" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"catch",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"catch",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            setTimeout(function() {
+                try {
+                    currentNodes["sn"].should.have.a.property("handled",1);
+                    currentNodes["sn2"].should.have.a.property("handled",0);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    currentNodes["sn3"].should.have.a.property("handled",1);
+                    done()
+                } catch(err) {
+                    done(err)
+                }
             },50);
         });
         it("moves any existing error object sideways",function(done){
@@ -1237,33 +1311,42 @@ describe('Flow', function() {
                 })
                 process.env.V0 = "gv0";
                 process.env.V1 = "gv1";
+                process.env.V3 = "gv3";
                 var config = flowUtils.parseConfig([
                     {id:"t1",type:"tab",env:[
-                        {"name": "V0", value: "v0", type: "str"}
+                        {"name": "V0", value: "t1v0", type: "str"},
+                        {"name": "V2", value: "t1v2", type: "str"}
                     ]},
                     {id:"g1",type:"group",z:"t1",env:[
-                        {"name": "V0", value: "v1", type: "str"},
-                        {"name": "V1", value: "v2", type: "str"}
+                        {"name": "V0", value: "g1v0", type: "str"},
+                        {"name": "V1", value: "g1v1", type: "str"}
                     ]},
                     {id:"g2",type:"group",z:"t1",g:"g1",env:[
-                        {"name": "V1", value: "v3", type: "str"}
+                        {"name": "V1", value: "g2v1", type: "str"}
                     ]},
-                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"$(V0)",wires:[]},
-                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
-                    {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
-                    {id:"4",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"$(V1)",wires:[]},
-                    {id:"5",x:10,y:10,z:"t1",type:"test",foo:"$(V1)",wires:[]},
+                    {id:"t1__V0",x:10,y:10,z:"t1",type:"test",foo:"${V0}",wires:[]}, // V0 will come from tab env V0
+                    {id:"t1g1V0",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${V0}",wires:[]}, // V0 will come from group 1 env V0
+                    {id:"t1g1V1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${V1}",wires:[]}, // V1 will come from group 1 env V1
+                    {id:"t1g2V0",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V0}",wires:[]}, // V0 will come from group 1 env V0
+                    {id:"t1g2V1",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V1}",wires:[]}, // V1 will come from group 2 env V1
+                    {id:"t1g2V2",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V2}",wires:[]}, // V2 will come from tab 1 env V2
+                    {id:"t1g2V3",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V3}",wires:[]}, // V3 will come from process env V3
+
+                    {id:"t1__V1",x:10,y:10,z:"t1",type:"test",foo:"${V1}",wires:[]},
                 ]);
                 var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
                 flow.start();
 
                 var activeNodes = flow.getActiveNodes();
 
-                activeNodes["1"].foo.should.equal("v0");
-                activeNodes["2"].foo.should.equal("v1");
-                activeNodes["3"].foo.should.equal("v2");
-                activeNodes["4"].foo.should.equal("v3");
-                activeNodes["5"].foo.should.equal("gv1");
+                activeNodes.t1__V0.foo.should.equal("t1v0"); // node in tab 1, get tab 1 env V0
+                activeNodes.t1__V1.foo.should.equal("gv1"); // node in tab 1, get V1, (tab 1 no V1) --> parent (global has V1)
+                activeNodes.t1g1V0.foo.should.equal("g1v0"); // node in group 1, get V0, (group 1 has V0)
+                activeNodes.t1g1V1.foo.should.equal("g1v1"); // node in group 1, get V1, (group 1 has V1)
+                activeNodes.t1g2V0.foo.should.equal("g1v0"); // node in group 2, get V0, (group 2 no V0) --> parent (group 1 has V0)
+                activeNodes.t1g2V1.foo.should.equal("g2v1"); // node in group 2, get V1, (group 2 has V1)
+                activeNodes.t1g2V2.foo.should.equal("t1v2"); // node in group 2, get V2, (group 2 no V2) --> parent (tab 1 has V2)
+                activeNodes.t1g2V3.foo.should.equal("gv3"); // node in group 2, get V3, (group 2 no V3) --> parent (tab 1 no V2) --> parent (global has V3)
 
                 flow.stop().then(function() {
                     done();
@@ -1273,7 +1356,6 @@ describe('Flow', function() {
                 console.log(e.stack);
                 done(e);
             }
-                
         });
         it("can access environment variable property using $parent", function (done) {
             try {
@@ -1319,9 +1401,73 @@ describe('Flow', function() {
                 console.log(e.stack);
                 done(e);
             }
-                
         });
 
+        it("can define environment variable using JSONata", function (done) {
+            try {
+                after(function() {
+                    delete process.env.V0;
+                })
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab",env:[
+                        {"name": "V0", value: "1+2", type: "jsonata"}
+                    ]},
+                    {id:"g1",type:"group",z:"t1",env:[
+                        {"name": "V1", value: "2+3", type: "jsonata"},
+                    ]},
+                    {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+                ]);
+                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+                flow.start();
+
+                var activeNodes = flow.getActiveNodes();
+
+                activeNodes["1"].foo.should.equal(3);
+                activeNodes["2"].foo.should.equal(5);
+
+                flow.stop().then(function() {
+                    done();
+                });
+            }
+            catch (e) {
+                console.log(e.stack);
+                done(e);
+            }
+        });
+
+        it("can access global environment variables defined as JSONata values", function (done) {
+            try {
+                after(function() {
+                    delete process.env.V0;
+                })
+                var config = flowUtils.parseConfig([
+                    {id:"t1",type:"tab",env:[
+                        {"name": "V0", value: "1+2", type: "jsonata"}
+                    ]},
+                    {id:"g1",type:"group",z:"t1",env:[
+                        {"name": "V1", value: "2+3", type: "jsonata"},
+                    ]},
+                    {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+                ]);
+                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+                flow.start();
+
+                var activeNodes = flow.getActiveNodes();
+
+                activeNodes["1"].foo.should.equal(3);
+                activeNodes["2"].foo.should.equal(5);
+
+                flow.stop().then(function() {
+                    done();
+                });
+            }
+            catch (e) {
+                console.log(e.stack);
+                done(e);
+            }
+        });
     });
 
 });

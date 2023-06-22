@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="xml">
+    <p>Convertit une chaîne XML en une représentation d'objet JavaScript, et inversément.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objet | chaîne de caractères</span></dt>
+        <dd>Un objet JavaScript ou une chaîne XML.</dd>
+        <dt class="optional">options <span class="property-type">objet</span></dt>
+        <dd>Cette propriété facultative peut être utilisée pour transmettre l'une des options prises en charge par la sous-jacente
+          bibliothèque utilisée pour convertir vers et depuis XML. Voir la <a href="https://github.com/Leonidas-from-XIV/node-xml2js/blob/master/README.md#options" target="_blank">documentation de xml2js</a>
+            pour plus d'informations.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objet | chaîne de caractères</span></dt>
+        <dd>
+            <ul>
+                <li>Si l'entrée est une chaîne, le noeud essaie de l'analyser en tant que XML et crée un objet JavaScript.</li>
+                <li>Si l'entrée est un objet JavaScript, le noeud essaie de créer une chaîne XML.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Lors de la conversion entre XML et un objet, tous les attributs XML sont ajoutés en tant que propriété nommée <code>$</code> par défaut.
+      Tout contenu textuel est ajouté en tant que propriété nommée <code>_</code>. Ces noms de propriété peuvent être spécifiés dans la configuration du noeud.</p>
+    <p>Par exemple, le XML suivant sera converti comme indiqué :</p>
+    <pre>&lt;p class="tag"&gt;Hello World&lt;/p&gt;</pre>
+    <pre>{
+  "p": {
+    "$": {
+      "class": "tag"
+    },
+    "_": "Hello World"
+  }
+}</pre>
+</script>
