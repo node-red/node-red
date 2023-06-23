@@ -1369,6 +1369,31 @@ describe('Flow', function() {
 
             await flow.stop()
         });
+        it("global flow can access global-config defined environment variables", async function () {
+            after(function() {
+                delete process.env.V0;
+            })
+            const config = flowUtils.parseConfig([
+                {id:"gc", type:"global-config", env:[
+                    {"name": "GC0", value: "3+4", type: "jsonata"}
+                ]},
+                {id:"t1",type:"tab" },
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${GC0}",wires:[]},
+            ]);
+            // Two-arg call - makes this the global flow that handles global-config nodes
+            const globalFlow = Flow.create({getSetting:v=>process.env[v]},config);
+            await globalFlow.start();
+
+            // Pass the globalFlow in as the parent flow to allow global-config lookup
+            const flow = Flow.create(globalFlow,config,config.flows["t1"]);
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            activeNodes["1"].foo.should.equal(7);
+
+            await flow.stop()
+            await globalFlow.stop()
+        });
     });
 
 });
