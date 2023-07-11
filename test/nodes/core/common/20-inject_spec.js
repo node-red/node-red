@@ -22,7 +22,9 @@ var helper = require("node-red-node-test-helper");
 describe('inject node', function() {
 
     beforeEach(function(done) {
-        helper.startServer(done);
+        helper.startServer(() => {
+            done()
+        });
     });
 
     function initContext(done) {
@@ -41,7 +43,7 @@ describe('inject node', function() {
         });
     }
 
-    afterEach(function(done) {
+    afterEach(async function() {
         helper.unload().then(function () {
             return Context.clean({allNodes: {}});
         }).then(function () {
@@ -53,8 +55,11 @@ describe('inject node', function() {
 
     function basicTest(type, val, rval) {
         it('inject value ('+type+')', function (done) {
-            var flow = [{id: "n1", type: "inject", topic: "t1", payload: val, payloadType: type, wires: [["n2"]], z: "flow"},
-            {id: "n2", type: "helper"}];
+            var flow = [
+                {id:'flow', type:'tab'},
+                {id: "n1", type: "inject", topic: "t1", payload: val, payloadType: type, wires: [["n2"]], z: "flow"},
+                {id: "n2", type: "helper", z:'flow'}
+            ];
             helper.load(injectNode, flow, function () {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
@@ -93,6 +98,7 @@ describe('inject node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function (msg) {
+                delete process.env.NR_TEST
                 try {
                     msg.should.have.property("topic", "t1");
                     msg.should.have.property("payload", "foo");
@@ -101,7 +107,7 @@ describe('inject node', function() {
                     done(err);
                 }
             });
-	    process.env.NR_TEST = 'foo';
+            process.env.NR_TEST = 'foo';
             n1.receive({});
         });
     });
@@ -202,9 +208,10 @@ describe('inject node', function() {
     });
 
     it('inject name of group as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_NAME", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
-                    {id: "n2", type: "helper"},
-                    {id: "g0", type: "group", name: "GROUP" },
+        var flow = [{id: "flow", type: "tab" },
+                    {id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_NAME", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper", z: "flow"},
+                    {id: "g0", type: "group", name: "GROUP", z: "flow" },
                    ];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -222,9 +229,10 @@ describe('inject node', function() {
     });
 
     it('inject id of group as environment variable ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_ID", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
-                    {id: "n2", type: "helper"},
-                    {id: "g0", type: "group", name: "GROUP" },
+        var flow = [{id: "flow", type: "tab" },
+                    {id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "NR_GROUP_ID", payloadType: "env", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper", z: "flow"},
+                    {id: "g0", type: "group", name: "GROUP", z: "flow" },
                    ];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -243,8 +251,9 @@ describe('inject node', function() {
 
 
     it('inject name of node as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_NODE_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
-                    {id: "n2", type: "helper"}];
+        var flow = [{id: "flow", type: "tab" },
+                    {id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_NODE_NAME}", payloadType: "str", wires: [["n2"]], z: "flow"},
+                    {id: "n2", type: "helper", z: "flow"}];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
@@ -338,9 +347,10 @@ describe('inject node', function() {
     });
 
     it('inject name of group as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_NAME}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
-                    {id: "n2", type: "helper"},
-                    {id: "g0", type: "group", name: "GROUP" },
+        var flow = [{id: "flow", type: "tab" },
+                    {id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_NAME}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper", z: "flow"},
+                    {id: "g0", type: "group", name: "GROUP", z: "flow" },
                    ];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");
@@ -358,9 +368,10 @@ describe('inject node', function() {
     });
 
     it('inject id of group as environment variable by substitution ', function (done) {
-        var flow = [{id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_ID}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
-                    {id: "n2", type: "helper"},
-                    {id: "g0", type: "group", name: "GROUP" },
+        var flow = [{id: "flow", type: "tab" },
+                    {id: "n1", type: "inject", name: "NAME", topic: "t1", payload: "${NR_GROUP_ID}", payloadType: "str", wires: [["n2"]], z: "flow", g: "g0"},
+                    {id: "n2", type: "helper", z: "flow"},
+                    {id: "g0", type: "group", name: "GROUP", z: "flow" },
                    ];
         helper.load(injectNode, flow, function () {
             var n1 = helper.getNode("n1");

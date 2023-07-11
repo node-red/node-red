@@ -3,7 +3,7 @@ var config = require("nr-test-utils").require("@node-red/nodes/core/common/91-gl
 var inject = require("nr-test-utils").require("@node-red/nodes/core/common/20-inject.js");
 var helper = require("node-red-node-test-helper");
 
-describe('unknown Node', function() {
+describe('Global Config Node', function() {
 
     afterEach(function() {
         helper.unload();
