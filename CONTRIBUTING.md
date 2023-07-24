@@ -5,7 +5,7 @@ We welcome contributions, but request you follow these guidelines.
  - [Raising issues](#raising-issues)
  - [Feature requests](#feature-requests)
  - [Pull-Requests](#pull-requests)
-   - [Contributor License Agreement](#contributor-license-agreement)
+ - [Contributor License Agreement](#contributor-license-agreement)
 
 This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
 By participating, you are expected to uphold this code. Please report unacceptable
@@ -16,7 +16,7 @@ behavior to the project's core team at team@nodered.org.
 Please raise any bug reports on the relevant project's issue tracker. Be sure to
 search the list to see if your issue has already been raised.
 
-A good bug report is one that make it easy for us to understand what you were
+A good bug report is one that makes it easy for us to understand what you were
 trying to do and what went wrong.
 
 Provide as much context as possible so we can try to recreate the issue.
