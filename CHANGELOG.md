@@ -1,3 +1,33 @@
+#### 3.1.0-beta.4: Beta Release
+
+ Editor
+
+ - Add Japanese translation for 3.1.0 (#4252) @kazuhitoyokoi
+ - Improve Catalogue visibility (#4248) @Steve-Mcl
+ - Add support for wiring and moving junctions on touch device (#4244) @Steve-Mcl
+ - Show errors and statuses of config nodes in the sidebar when no catch node is available (#4231) @bvmensvoort
+ - Improve wiring for horizontally aligned nodes (#4232) @knolleary
+ - French translation of Welcome Tours (#4200) @GogoVega
+ - French translation of v3.1.0-beta.3 changes (#4199) @GogoVega
+ - add Japanese message for 3.1.0 beta 3 (#4209) @HiroyasuNishiyama
+ - Dont clone the group nodes `node` array when saving edits (#4208) @Steve-Mcl
+
+ Runtime
+
+ - Add NR_SUBFLOW_NAME/ID/PATH env vars (#4250) @knolleary
+ - Evaluate all env vars as part of async flow start (#4230) @knolleary
+ - Add support for httpStatic middleware (#4229) @knolleary
+
+ Nodes
+
+ - Fix JSONata in file nodes (#4246) @kazuhitoyokoi
+ - Fix timeout icon in function and link call nodes (#4253) @kazuhitoyokoi
+ - Fix connection keep-alive in http request node (#4228) @knolleary
+ - adding timeout attribute to function node (#4177) @k1ln
+ - Fix manual mode join when multiple sequences being handled (#4143) @BitCaesar
+ - Fix delay node flush issue (#4203) @dceejay
+ - Update status and catch node labels in group mode (#4207) @Steve-Mcl
+
 #### 3.1.0-beta.3: Beta Release
 
 Editor
