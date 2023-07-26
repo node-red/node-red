@@ -98,6 +98,30 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should write to a file using JSONata', function(done) {
+            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename": fileToTest4jsonata, "filenameType": "jsonata", "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function(msg) {
+                    try {
+                        var f = fs.readFileSync(fileToTest);
+                        f.should.have.length(4);
+                        fs.unlinkSync(fileToTest);
+                        msg.should.have.property("payload", "test");
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:"test"});
+            });
+        });
+
+
         it('should write to a file using RED.settings.fileWorkingDirectory', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":relativePathToFile, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
@@ -1237,6 +1261,27 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should read in a file using JSONata and output a utf8 string', function(done) {
+            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest4jsonata, "filenameType": "jsonata", "format":"utf8", wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.have.length(40)
+                        msg.payload.should.equal("File message line 1\nFile message line 2\n");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:""});
+            });
+        });
 
         it('should read in a file using fileWorkingDirectory to set cwd', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":relativePathToFile, "format":"utf8", wires:[["n2"]]},
