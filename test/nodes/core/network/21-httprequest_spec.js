@@ -557,7 +557,7 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload','');
+                        msg.should.have.property('payload',{});
                         msg.should.have.property('statusCode',204);
                         done();
                     } catch(err) {
