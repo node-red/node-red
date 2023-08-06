@@ -121,7 +121,6 @@ describe('file Nodes', function() {
             });
         });
 
-
         it('should write to a file using RED.settings.fileWorkingDirectory', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":relativePathToFile, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
@@ -144,7 +143,6 @@ describe('file Nodes', function() {
                 n1.receive({payload:"test"});
             });
         });
-
 
         it('should write multi-byte string to a file', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
@@ -447,6 +445,31 @@ describe('file Nodes', function() {
                 n1.receive({payload:"typedInput", _user_specified_filename:fileToTest});
             });
         });
+
+        it('should support number in msg._user_specified_filename', function (done) {
+            var flow = [{id:"fileNode1", type:"file", filename:"_user_specified_filename", filenameType:"msg", name:"fileNode", "appendNewline":false, "overwriteFile":true, wires:[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function () {
+                RED.settings.fileWorkingDirectory = resourcesDir;
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function (msg) {
+                    try {
+                        var fileToTest = path.join(resourcesDir, "123");
+                        var f = fs.readFileSync(fileToTest);
+                        f.should.have.length(4);
+                        fs.unlinkSync(fileToTest);
+                        msg.should.have.property("payload", "test");
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload: "test", _user_specified_filename: 123});
+            });
+        });
+
         it('should use env.TEST_FILE set in nodes typedInput', function(done) {
             var flow = [{id:"fileNode1", type:"file", filename:"TEST_FILE", filenameType: "env", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
