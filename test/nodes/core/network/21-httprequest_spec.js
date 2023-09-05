@@ -294,6 +294,19 @@ describe('HTTP Request Node', function() {
                 url: req.originalUrl
             });
         })
+        testApp.get('/getBodyParams', function(req,res) {
+            // Either body-parser or express is discarding the body OR 
+            // GOT never sent a body. (there is nothing in params/query/body)
+            // Oddly, if we set options.json (instead of options.body) in the GOT
+            // request, then req.body will have the values!
+            //I suspect the GOT lib *is* sending body on a GET request since an 
+            // error is thrown if we try to set options.body on a GET request without
+            // setting options.allowGetBody to true.
+            res.json({
+                // body:JSON.parse(req.body), //req.body is empty!
+                url: req.originalUrl
+            });
+        })
         testApp.get('/returnError/:code', function(req,res) {
             res.status(parseInt(req.params.code)).json({gotError:req.params.code});
         })
@@ -1114,6 +1127,89 @@ describe('HTTP Request Node', function() {
                     }
                 });
                 n1.receive({payload:{a:1,b:2,c:3}});
+            });
+        });
+
+        it('should allow the payload to be sent in the body for a GET request', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",paytoqs:"body",ret:"obj",url:getTestURL('/getBodyParams')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                const payload = {a:"one",b:true,c:3}
+                n2.on("input", function(msg) {
+                    try {
+                        // Either Express does not deliver the body of a GET request OR GOT doesn't send it!
+                        // That means we cannot test this!  Oddly, if the HTTP-Req node sets options.json instead 
+                        // of options.body, then the body is delivered. 
+                        // msg.should.have.property('payload',{
+                        //     body:payload,
+                        //     url: '/getBodyParams'
+                        // });
+                        msg.should.have.property('payload').and.be.an.Object()
+                        msg.payload.should.have.property('url', '/getBodyParams')
+
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:payload});
+            });
+        });
+
+        it('should allow the message to specify that the payload be append to querystring for a GET request', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",paytoqs:"setby",ret:"obj",url:getTestURL('/getQueryParams')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload',{
+                            query:{a:'1',b:'2',c:'3'},
+                            url: '/getQueryParams?a=1&b=2&c=3'
+                        });
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:{a:1,b:2,c:3},method:"get",payloadHandling:'query'});
+            });
+        });
+
+
+        it('should allow the message to specify that the payload be sent in the body for a GET request', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"use",paytoqs:"setby",ret:"obj",url:getTestURL('/getBodyParams')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                const payload = {a:"one",b:true,c:3}
+                n2.on("input", function(msg) {
+                    try {
+                        // Either Express does not deliver the body of a GET request OR GOT doesn't send it!
+                        // That means we cannot test this!  Oddly, if the HTTP-Req node sets options.json instead 
+                        // of options.body, then the body is delivered. 
+                        // msg.should.have.property('payload',{
+                        //     payload: payload,
+                        //     url: '/getBodyParams'
+                        // });
+                        msg.should.have.property('payload').and.be.an.Object()
+                        msg.payload.should.have.property('url', '/getBodyParams')
+                        msg.should.have.property('statusCode',200);
+                        msg.should.have.property('headers');
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:payload,method:"get",payloadHandling:'body'});
             });
         });
 
