@@ -14,20 +14,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out node-red repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
             path: 'node-red'
       - name: Check out node-red-docker repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
             repository: 'node-red/node-red-docker'
             path: 'node-red-docker'
       - name: Check out node-red.github.io repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
             repository: 'node-red/node-red.github.io'
             path: 'node-red.github.io'
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
             node-version: '16'
       - run: node ./node-red/.github/scripts/update-node-red-docker.js
