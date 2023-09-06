@@ -1,4 +1,38 @@
-#### 3.1.0-beta.4: Beta Release
+#### 3.1.0: Milestone Release
+
+Editor
+
+ - Default filter to All Catalogues and show nodes for small lists (#4318) @knolleary
+ - Better distinguish between ctrl and meta keys on mac (#4310) @knolleary
+ - Ensure junction appears when filtering quick-add list (#4297) @knolleary
+ - Update message catalogs for JSONata Expression editor (#4287) @kazuhitoyokoi
+ - Add tooltip to relevance sort button in user settings UI (#4288) @kazuhitoyokoi
+ - Capture workspace dirty state when quick-adding junction (#4283) @knolleary
+ - Add docs for $clone function (#4284) @knolleary
+
+Runtime
+
+ - Dependency updates (#4317) @knolleary
+ - Ensure storage/util.writeFile handles concurrent write attempts (#4316) @knolleary
+ - Migrate http -> https for nodered.org (#4313) @Rotzbua
+ - Add Node 20 to GH Action test matrix (#4305) @Rotzbua
+ - Handle group-scoped nodes inside subflow (#4301) @knolleary
+ - Handle non-url-safe chars in context api (#4298) @knolleary
+ - Fix git pull operation in project feature (#4290) @kazuhitoyokoi
+ - Change linefeed codes in Korean message catalogs (#4286) @kazuhitoyokoi
+ - Fix file permissions of message catalogs (#4285) @kazuhitoyokoi
+ - Update tour (#4278) @knolleary
+ 
+Nodes
+
+ - File: Fix handling in file nodes when number is specified as file name (#4267) @kazuhitoyokoi
+ - Function: Adding function timeout to settings file (#4265) (#4309) @knolleary
+ - Function: Fix function setup tab layout (#4299) @knolleary
+ - HTTP Request: Handle 204 in httprequest JSON (#4262) @sammachin
+ - JSON: Fix test cases of JSON node (#4275) @kazuhitoyokoi
+ - MQTT: Remove unnecessary check for clientid if autoUnsub set (#4302) @knolleary
+
+##### 3.1.0-beta.4: Beta Release
 
  Editor
 
@@ -28,7 +62,7 @@
  - Fix delay node flush issue (#4203) @dceejay
  - Update status and catch node labels in group mode (#4207) @Steve-Mcl
 
-#### 3.1.0-beta.3: Beta Release
+##### 3.1.0-beta.3: Beta Release
 
 Editor
 
@@ -63,7 +97,7 @@ Nodes
  - MQTT: Option to disable MQTT topic unsubscribe on disconnect (#4078) @flying7eleven
 
 
-#### 3.1.0-beta.2: Beta Release
+##### 3.1.0-beta.2: Beta Release
 
 Editor
 
@@ -113,7 +147,7 @@ Nodes
  - File Out: Fix extra newline append for multipart file write (#3915) @dceejay
  - Add validators for complete and link call nodes (#4056) @kazuhitoyokoi
 
-#### 3.1.0-beta.1: Beta Release
+##### 3.1.0-beta.1: Beta Release
 
 Editor
 
