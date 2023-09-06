@@ -1,0 +1,31 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="udp in">
+    <p>Un noeud d'entrée UDP, qui produit un <code>msg.payload</code> contenant un
+    tampon, chaîne ou chaîne encodée en base64. Prend en charge la multidiffusion.</p>
+    <p>Il fournit également <code>msg.ip</code> et <code>msg.port</code> définis sur
+    l'adresse IP et le port à partir desquels le message a été reçu.</p>
+    <p><b>Remarque</b> : Sur certains systèmes, vous aurez peut-être besoin d'un accès root ou administrateur pour utiliser
+    les ports inférieurs à 1024 et/ou diffusés.</p>
+</script>
+
+<script type="text/html" data-help-name="udp out">
+    <p>Ce noeud envoie un <code>msg.payload</code> à l'hôte et au port UDP désigné. Prend en charge la multidiffusion.</p>
+    <p>Vous pouvez également utiliser <code>msg.ip</code> et <code>msg.port</code> pour définir les valeurs de destination, mais les valeurs configurées statiquement ont priorité.</p>
+    <p>Si vous sélectionnez la diffusion, définisser l'adresse sur l'adresse IP de diffusion locale ou essayer 255.255.255.255, qui est l'adresse de diffusion globale.</p>
+    <p><b>Remarque</b> : sur certains systèmes, vous devrez peut-être être root pour utiliser des ports inférieurs à 1024 et/ou de diffusion.</p>
+</script>

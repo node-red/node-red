@@ -53,7 +53,7 @@ describe('MQTT Nodes', function () {
                 mqttBroker.should.have.property('broker', BROKER_HOST);
                 mqttBroker.should.have.property('port', BROKER_PORT);
                 mqttBroker.should.have.property('brokerurl');
-                // mqttBroker.should.have.property('autoUnsubscribe', true);//default: true 
+                mqttBroker.should.have.property('autoUnsubscribe', true); //default: true
                 mqttBroker.should.have.property('autoConnect', false);//Set "autoConnect:false" in brokerOptions 
                 mqttBroker.should.have.property('options');
                 mqttBroker.options.should.have.property('clean', true);
@@ -96,8 +96,8 @@ describe('MQTT Nodes', function () {
                 mqttBroker.should.have.property('broker', BROKER_HOST);
                 mqttBroker.should.have.property('port', BROKER_PORT);
                 mqttBroker.should.have.property('brokerurl');
-                // mqttBroker.should.have.property('autoUnsubscribe', true);//default: true 
-                mqttBroker.should.have.property('autoConnect', false);//Set "autoConnect:false" in brokerOptions 
+                mqttBroker.should.have.property('autoUnsubscribe', true);
+                mqttBroker.should.have.property('autoConnect', false); //Set "autoConnect:false" in brokerOptions
                 mqttBroker.should.have.property('options');
                 mqttBroker.options.should.have.property('clean', false);
                 mqttBroker.options.should.have.property('clientId', 'clientid');

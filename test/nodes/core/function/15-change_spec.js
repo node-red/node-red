@@ -568,11 +568,12 @@ describe('change Node', function() {
 
             it('sets the value using env property from group', function(done) {
                 var flow = [
+                    {"id": "flow", type:"tab"},
                     {"id":"group1","type":"group","env":[
                         {"name":"NR_TEST_A", "value":"bar", "type": "str"}
-                    ]},
-                    {"id":"changeNode1","type":"change","g":"group1",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}
+                    ], z: "flow"},
+                    {"id":"changeNode1","type":"change","g":"group1",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]], z: "flow"},
+                    {id:"helperNode1", type:"helper", wires:[], z: "flow"}
                 ];
                 helper.load(changeNode, flow, function() {
                     var changeNode1 = helper.getNode("changeNode1");
@@ -591,12 +592,13 @@ describe('change Node', function() {
 
             it('sets the value using env property from nested group', function(done) {
                 var flow = [
+                    {"id": "flow", type:"tab"},
                     {"id":"group1","type":"group","env":[
                         {"name":"NR_TEST_A", "value":"bar", "type": "str"}
-                    ]},
-                    {"id":"group2","type":"group","g":"group1","env":[]},
-                    {"id":"changeNode1","type":"change","g":"group2",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]]},
-                    {id:"helperNode1", type:"helper", wires:[]}
+                    ], z: "flow"},
+                    {"id":"group2","type":"group","g":"group1","env":[], z: "flow"},
+                    {"id":"changeNode1","type":"change","g":"group2",rules:[{"t":"set","p":"payload","pt":"msg","to":"NR_TEST_A","tot":"env"}],"name":"changeNode","wires":[["helperNode1"]], z: "flow"},
+                    {id:"helperNode1", type:"helper", wires:[], z: "flow"}
                 ];
                 helper.load(changeNode, flow, function() {
                     var changeNode1 = helper.getNode("changeNode1");

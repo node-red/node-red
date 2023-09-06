@@ -1,0 +1,84 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="exec">
+    <p>Exécute une commande système et renvoie sa sortie.</p>
+    <p>Le noeud peut être configuré pour attendre la fin de la commande ou pour
+        envoyer sa sortie au fur et à mesure que la commande la génère.</p>
+    <p>La commande exécutée peut être configurée dans le noeud ou fournie par le
+        message reçu.</p>
+
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">chaîne de caractères</span></dt>
+        <dd>si configuré pour le faire, sera ajouté à la commande exécutée.</dd>
+        <dt class="optional">kill <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le type de signal d'arrêt pour envoyer au noeud du processus exec existant.</dd>
+        <dt class="optional">pid <span class="property-type">nombre|chaîne de caractères</span></dt>
+        <dd>l'ID de processus d'un noeud exec existant à tuer.</dd>
+    </dl>
+
+    <h3>Sorties</h3>
+    <ol class="node-ports">
+        <li>Sortie standard
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">chaîne de caractères</span></dt>
+                <dd>la sortie standard de la commande.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">objet</span></dt>
+                <dd>mode exec uniquement, une copie de l'objet code retourné (également disponible sur le port 3)</dd>
+            </dl>
+        </li>
+        <li>Erreur standard
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">chaîne de caractères</span></dt>
+                <dd>l'erreur standard de la commande.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">objet</span></dt>
+                <dd>mode exec uniquement, une copie de l'objet code retourné (également disponible sur le port 3)</dd>
+            </dl>
+        </li>
+        <li>Code de retour
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">objet</span></dt>
+                <dd>un objet contenant le code retourné, et éventuellement les propriétés <code>message</code>, <code>signal</code>.</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>Détails</h3>
+    <p>Par défaut, utiliser l'appel système <code>exec</code> qui appelle la commande, attend qu'elle se termine, puis
+    renvoie la sortie. Par exemple, une commande réussie doit avoir un code de retour <code>{ code : 0 }</code>.</p>
+    <p>Vous pouvez éventuellement utiliser <code>spawn</code> à la place, qui renvoie la sortie de stdout et stderr
+    pendant l'exécution de la commande, généralement une ligne à la fois. À la fin, il renvoie ensuite un objet
+    sur le 3ème port. Par exemple, une commande réussie doit renvoyer <code>{ code : 0 }</code>.</p>
+    <p>Des informations supplémentaires sur les erreurs peuvent être envoyées sur le 3e port <code>msg.payload</code>, comme une chaîne <code>message</code>,
+    <code>signal</code> chaîne.</p>
+    <p>La commande qui est exécutée est définie dans le noeud, avec une option pour ajouter <code>msg.payload</code> et un autre ensemble de paramètres.</p>
+    <p>Les commandes ou les paramètres avec des espaces doivent être placés entre guillemets - <code>"Ceci est un paramètre unique"</code></p>
+    <p>La charge utile <code>payload</code> renvoyée est généralement une <i>chaîne</i>, sauf si des caractères non UTF8 sont détectés, dans ce cas,
+    il s'agit d'un <i>tampon</i>.</p>
+    <p>L'icône d'état et le PID du noeud seront visibles tant que le noeud est actif. Les modifications apportées à cela peuvent être lues par le noeud <code>Status</code>.</p>
+    <p>L'option <code>Masquer la console</code> masquera la console de processus normalement affichée sur les systèmes Windows.</p>
+    <h4>Tuer les processus</h4>
+    <p>L'envoi de <code>msg.kill</code> tuera un seul processus actif. <code>msg.kill</code> doit être une chaîne contenant
+    le type de signal à envoyer, par exemple, <code>SIGINT</code>, <code>SIGQUIT</code> ou <code>SIGHUP</code>.
+    La valeur par défaut est <code>SIGTERM</code> si défini sur une chaîne vide.</p>
+    <p>Si le noeud a plus d'un processus en cours d'exécution, alors <code>msg.pid</code> doit également être défini avec la valeur du PID à tuer.</p>
+    <p>Si une valeur est fournie dans le champ <code>Timeout</code> alors, si le processus n'est pas terminé lorsque le nombre de secondes spécifié s'est écoulé, le processus sera tué automatiquement</p>
+    <p>Astuce : si vous exécutez une application Python, vous devrez peut-être utiliser le paramètre <code>-u</code> pour arrêter la mise en mémoire tampon de la sortie.</p>
+</script>

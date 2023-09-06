@@ -1,3 +1,242 @@
+#### 3.1.0: Milestone Release
+
+Editor
+
+ - Default filter to All Catalogues and show nodes for small lists (#4318) @knolleary
+ - Better distinguish between ctrl and meta keys on mac (#4310) @knolleary
+ - Ensure junction appears when filtering quick-add list (#4297) @knolleary
+ - Update message catalogs for JSONata Expression editor (#4287) @kazuhitoyokoi
+ - Add tooltip to relevance sort button in user settings UI (#4288) @kazuhitoyokoi
+ - Capture workspace dirty state when quick-adding junction (#4283) @knolleary
+ - Add docs for $clone function (#4284) @knolleary
+
+Runtime
+
+ - Dependency updates (#4317) @knolleary
+ - Ensure storage/util.writeFile handles concurrent write attempts (#4316) @knolleary
+ - Migrate http -> https for nodered.org (#4313) @Rotzbua
+ - Add Node 20 to GH Action test matrix (#4305) @Rotzbua
+ - Handle group-scoped nodes inside subflow (#4301) @knolleary
+ - Handle non-url-safe chars in context api (#4298) @knolleary
+ - Fix git pull operation in project feature (#4290) @kazuhitoyokoi
+ - Change linefeed codes in Korean message catalogs (#4286) @kazuhitoyokoi
+ - Fix file permissions of message catalogs (#4285) @kazuhitoyokoi
+ - Update tour (#4278) @knolleary
+ 
+Nodes
+
+ - File: Fix handling in file nodes when number is specified as file name (#4267) @kazuhitoyokoi
+ - Function: Adding function timeout to settings file (#4265) (#4309) @knolleary
+ - Function: Fix function setup tab layout (#4299) @knolleary
+ - HTTP Request: Handle 204 in httprequest JSON (#4262) @sammachin
+ - JSON: Fix test cases of JSON node (#4275) @kazuhitoyokoi
+ - MQTT: Remove unnecessary check for clientid if autoUnsub set (#4302) @knolleary
+
+##### 3.1.0-beta.4: Beta Release
+
+ Editor
+
+ - Add Japanese translation for 3.1.0 (#4252) @kazuhitoyokoi
+ - Improve Catalogue visibility (#4248) @Steve-Mcl
+ - Add support for wiring and moving junctions on touch device (#4244) @Steve-Mcl
+ - Show errors and statuses of config nodes in the sidebar when no catch node is available (#4231) @bvmensvoort
+ - Improve wiring for horizontally aligned nodes (#4232) @knolleary
+ - French translation of Welcome Tours (#4200) @GogoVega
+ - French translation of v3.1.0-beta.3 changes (#4199) @GogoVega
+ - add Japanese message for 3.1.0 beta 3 (#4209) @HiroyasuNishiyama
+ - Dont clone the group nodes `node` array when saving edits (#4208) @Steve-Mcl
+
+ Runtime
+
+ - Add NR_SUBFLOW_NAME/ID/PATH env vars (#4250) @knolleary
+ - Evaluate all env vars as part of async flow start (#4230) @knolleary
+ - Add support for httpStatic middleware (#4229) @knolleary
+
+ Nodes
+
+ - Fix JSONata in file nodes (#4246) @kazuhitoyokoi
+ - Fix timeout icon in function and link call nodes (#4253) @kazuhitoyokoi
+ - Fix connection keep-alive in http request node (#4228) @knolleary
+ - adding timeout attribute to function node (#4177) @k1ln
+ - Fix manual mode join when multiple sequences being handled (#4143) @BitCaesar
+ - Fix delay node flush issue (#4203) @dceejay
+ - Update status and catch node labels in group mode (#4207) @Steve-Mcl
+
+##### 3.1.0-beta.3: Beta Release
+
+Editor
+
+ - Select the item that is specified in a deep link URL (#4113) @Steve-Mcl
+ - Update to Monaco 0.38.0 (#4189) @Steve-Mcl
+ - Place subflow outputs/inputs relative to current view (#4183) @knolleary
+ - Enable RED.view.select to select group by id (#4184) @knolleary
+ - Combine existing env vars when merging groups (#4182) @knolleary
+ - Avoid creating empty global-config node if not needed (#4153) @knolleary
+ - Fix group selection when using lasso (#4108) @knolleary
+ - Use editor path in generating localStorage keys (#4151) @mw75
+ - Ensure no node credentials are included when exporting to clipboard (#4112) @knolleary
+ - Fix jsonata expression test ui (#4097) @knolleary
+ - Fix search button in palette popover (#4096) @knolleary
+
+Runtime
+
+ - Allow options object on each httpStatic configuration (#4109) @kevinGodell
+ - Ensure non-zero exit codes for errors (#4181) @knolleary
+ - Ensure external modules are installed synchronously (#4180) @knolleary
+ - Update dependecies include got (#4155) @knolleary
+ - Add Japanese translations for v3.1 beta.2 (#4158) @kazuhitoyokoi
+ - Ensure express server options are applied consistently (#4178) @knolleary
+ - Remove version info from theme endpoint (#4179) @knolleary
+ - Add Japanese translations for welcome tour of 3.1.0 beta.2 (#4145) @kazuhitoyokoi
+ - Added SHA-256 and SHA-512-256 digest authentication (#4100) @sroebert
+ - Add "timers" types to known types (#4103) @Steve-Mcl
+
+Nodes
+
+ - Allow Catch/Status nodes to be scoped to their group (#4185) @NetHans
+ - MQTT: Option to disable MQTT topic unsubscribe on disconnect (#4078) @flying7eleven
+
+
+##### 3.1.0-beta.2: Beta Release
+
+Editor
+
+ - NEW: Add change icon to tabs (#4068) @knolleary
+ - NEW: Complete overhaul of Group UX (#4079) @knolleary
+ - NEW: Add link to node help in node edit dialog footer (#4065) @knolleary
+ - NEW: Added editor feature for connecting multiple nodes to single node (#4051) @sonntam
+ - NEW: Increase workspace size to 8000x8000 (#4094) @knolleary
+ - Ensure node buttons are redrawn when flow lock state is changed (#4091) @knolleary
+ - Prevent loops being created with junction nodes (#4087) @knolleary
+ - Prevent opening locked node's edit dialog (#4069) @knolleary
+ - Reverse direction of tab scroll to expected direction (#4064) @knolleary
+ - Add cancel operation to editableList (#4077) @HiroyasuNishiyama
+ - Apply Mermaid diagram for project settings UI (#4054) @kazuhitoyokoi
+ - Add tooltip for show/hide button on info sidebar (#4050) @kazuhitoyokoi
+ - Fix align nodes on locked tab (#4072) @HiroyasuNishiyama
+ - Fix importing connected link nodes into a subflow (#4082) @knolleary
+ - Fix to add empty marker to empty group (#4060) @HiroyasuNishiyama
+ - Fix image URLs for v3.0 tour (#4053) @kazuhitoyokoi
+ - Show scrollbar in notification dialog only when needed (#4048) @kazuhitoyokoi
+ - Update-monaco-and-typings (#4089) @Steve-Mcl
+ - Update jquery UI (#4088) @knolleary
+ - Support i18n of lock/unlock buttons in flow property UI (#4049) @kazuhitoyokoi
+ - Translation kr (#3895) @hae-iotplatform
+ - Translation zhcn (！！请懂中文的帮忙review) (#3952) @cliyr
+ - Add French translation of nodes (#3964) @GogoVega
+ - Add French translation (#3962) @GogoVega
+ - Portuguese Brazilian (pt-BR) translation (#3804) @FabsMuller
+ 
+
+Runtime
+
+ - NEW: Generate stable ids for subflow instance internal nodes (#4093) @knolleary
+ - NEW: Change default file name to flows.json in project feature (#4073) @kazuhitoyokoi
+ - NEW: Deprecate synchronous access to jsonata (#4090) @knolleary
+ - Add Node 18 to test matrix (#4084) @knolleary
+ - Bump minimum nodejs version supported to match documented value (#4086) @knolleary
+ - Update monaco docs link in settings.js (#4075) @Steve-Mcl
+ - Remove duplicated messages in the message catalog (#4066) @kazuhitoyokoi
+ - Ensure errors in preDeliver callback are handled (#3911) @knolleary
+ - Fix "EADDRINUSE" error (#4046) @bggbr
+
+Nodes
+
+ - Link Call: Clear link-call timeouts when node is closed (#4085) @knolleary
+ - Join: ensure inflight status is cleared when in auto mode (#4083) @knolleary
+ - File Out: Fix extra newline append for multipart file write (#3915) @dceejay
+ - Add validators for complete and link call nodes (#4056) @kazuhitoyokoi
+
+##### 3.1.0-beta.1: Beta Release
+
+Editor
+
+ - NEW: Locking Flows (#3938) @knolleary
+ - NEW: Improve UX around hiding flows via context menu (#3930) @knolleary
+ - NEW: Add support for inline image in markdown editor by drag and drop of an image file (#4006) @HiroyasuNishiyama
+ - NEW: Add support for mermaid diagram to markdown editor (#4007) @HiroyasuNishiyama
+ - NEW: Support uri fragments for nodes and groups including edit support (#3870) @knolleary
+ - NEW: Add global environment variable feature (#3941) @HiroyasuNishiyama
+
+ - Remember compact/pretty flow export user choice (#3974) @Steve-Mcl
+ - fix .red-ui-notification class (#4035) @xiaobinqt
+ - Fix border radius on Modules list header (#4038) @bonanitech
+ - fix workspace reference error in case of empty tabs (#4029) @HiroyasuNishiyama
+ - Disable delete tab menu when single tab exists (#4030) @HiroyasuNishiyama
+ - Disable hide all menu if all tabs hidden (#4031) @HiroyasuNishiyama
+ - fix hide subflow tooltip (#4033) @HiroyasuNishiyama
+ - Fix disabled menu items in project feature (#4027) @kazuhitoyokoi
+ - Let themes change radialMenu text colors (#3995) @bonanitech
+ - Add Japanese translations for v3.0.3 (#4012) @kazuhitoyokoi
+ - Add Japanese translation for v3.1.0-beta.0 (#3997) @kazuhitoyokoi
+ - Add Japanese translation for v3.1.0-beta.0 (#3916) @kazuhitoyokoi
+ - Hide subflow category after deleting subflow (#3980) @kazuhitoyokoi
+ - Prevent dbl-click opening node edit dialog with text selected (#3970) @knolleary
+ - Handle replacing unknown node inside group or subflow (#3921) @knolleary
+ - Fix #3939, red border red-ui-typedInput-container (#3949) @Steveorevo
+ - i18n item URL copy notification & add Japanese message (#3946) @HiroyasuNishiyama
+ - add Japanese message for item url copy actions (#3947) @HiroyasuNishiyama
+ - Fix autocomplete entry for responseUrl (#3884) @knolleary
+ - Fix Japanese translation for JSONata editor (#3872) @HiroyasuNishiyama
+ - Fix search type with spaces (#3841) @Steve-Mcl
+ - Fix error hanndling of JSONata expression editor for extended functions (#3871) @HiroyasuNishiyama
+ - Add button type to the adding SSH key button (#3866) @kazuhitoyokoi
+ - Check radio button as default in project dialog (#3879) @kazuhitoyokoi
+ - Add $clone as supported function (#3874) @HiroyasuNishiyama
+ - Env var jsonata (#3807) @HiroyasuNishiyama
+ - Add Japanese translation for v3.0.2 (#3852) @kazuhitoyokoi
+
+Runtime
+
+ - Force IPv4 name resolution to have priority (#4019) @dceejay
+ - Fix async loading of modules containing both nodes and plugins (#3999) @knolleary
+ - Use main branch as default in project feature (#4036) @kazuhitoyokoi
+ - Rename package var to avoid strict mode error (#4020) @knolleary
+ - Fix typos in settings.js (#4013) @ypid
+ - Ensure credentials object is removed before returning node in getFlow request (#3971) @knolleary
+ - Ignore commit error in project feature (#3987) @kazuhitoyokoi
+ - Update dependencies (#3969) @knolleary
+ - Add check that node sends object rather than primitive type (#3909) @knolleary
+ - Ensure key_path is quoted in GIT_SSH_COMMAND in case of spaces in pathname (#3912) @knolleary
+ - Fix nodesDir scan when node package has js/html in sub dir to package.json (#3867) @Steve-Mcl
+ - Fix file permissions (#3917) @kazuhitoyokoi
+ - ci: add minimum GitHub token permissions for workflows (#3907) @boahc077
+
+Nodes
+
+ - Catch: fix typo in catch.html (#3965) @we11adam
+ - Change: Fix change node overwriting msg with itself (#3899) @dceejay
+ - Comment node: Clarify where the text will appear (#4004) @dirkjanfaber
+ - CSV: change replace to replaceAll (#3990) @dceejay
+ - CSV node: check header properties for ' and " (#3920) @dceejay
+ - CSV: Fix for CSV undefined property (#3906) @dceejay
+ - Delay: let delay node handle both flush then reset (#3898) @dceejay
+ - Function: Limit number of ports in function node (#3886) @kazuhitoyokoi
+ - Function: Remove dot from variable name for external module in function node (#3880) @kazuhitoyokoi
+ - Function: add function node monaco types util and promisify (#3868) @Steve-Mcl
+ - HTTP In: Ensure msg.req.headers is enumerable (#3908) @knolleary
+ - HTTP Request: Support form-data arrays (#3991) @hardillb
+ - HTTP Request: Fix httprequest tests to be more lenient on error message (#3922) @knolleary
+ - HTTP Request: Add missing property to node object HTTPRequest (#3842) @hardillb
+ - HTTP Request/Response: Support sortable list on property UI of http request and http response nodes (#3857) @kazuhitoyokoi
+ - HTTP Response: Ensure statusCode is a number (#3894) @hardillb
+ - Inject: Allow Inject node to work with async context stores (#4021) @knolleary
+ - Join/Batch: Add count to join and batch node labels (#4028) @dceejay
+ - MQTT: Fix birth topic handling in MQTT node (#3905) @Steve-Mcl
+ - MQTT: Fix pull-down menus of MQTT configuration node (#3890) @kazuhitoyokoi
+ - MQTT: Prevent invalid mqtt birth topic crashing node-red (#3869) @Steve-Mcl
+ - MQTT: ensure sessionExpiry(Interval) is applied (#3840) @Steve-Mcl
+ - MQTT: Fix mqtt nodes not reconnecting on modified-flows deploy (#3992) @knolleary
+ - MQTT: fix single subscription mqtt node status (#3966) @Steve-Mcl
+ - Range: Add drop mode to range node (#3935) @dceejay
+ - Remove done from describe (#3873) @HiroyasuNishiyama
+ - Split node: avoid duplicate done call for buffer split (#4000) @knolleary
+ - Status: Fix typo in 25-status.html (#3981) @kazuhitoyokoi
+ - TCP Node: ensure newline substitution applies to whole message (#4009) @dceejay
+ - Template: Add information about environment variable to template node (#3882) @kazuhitoyokoi
+ - Trigger: Hide trigger node repeat send option if sending nothing (#4023) @dceejay
+ - Watch: fix watch node test on MacOS/ARM (#3942) @HiroyasuNishiyama
+
 #### 3.0.2: Maintenance Release
 
 Editor

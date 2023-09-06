@@ -1,0 +1,40 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="inject">
+<p>Injeta uma mensagem em um fluxo manualmente ou em intervalos regulares. A carga útil da mensagem
+  pode ser de vários tipos, incluindo cadeia de caracteres, objetos JavaScript ou a hora atual.</p>
+<h3>Saídas</h3>
+<dl class="message-properties">
+    <dt>carga útil<span class="property-type">vários</span></dt>
+    <dd>A carga útil configurada da mensagem.</dd>
+    <dt class="optional">tópico <span class="property-type">cadeia de caracteres</span></dt>
+    <dd>Uma propriedade opcional que pode ser configurada no nó.</dd>
+</dl>
+<h3>Detalhes</h3>
+<p>O nó Inject pode iniciar um fluxo com um valor de carga útil específico.
+A carga útil padrão é um carimbo de data/hora da hora atual em milissegundos desde 1º de janeiro de 1970.</p>
+<p>O nó também oferece suporte à injeção de cadeia de caracteres, números, boolianos, objetos JavaScript ou valores de contexto de fluxo/global.</p>
+<p>Por padrão, o nó é acionado manualmente clicando em seu botão no editor. Também pode ser configurado para
+injetar em intervalos regulares ou de acordo com um cronograma.</p>
+<p>também pode ser configurado para injetar uma unica vez cada vez que os fluxos forem iniciados.</p>
+<p>O <i>Intervalo</i> máximo que pode ser especificado é de cerca de 596 horas / 24 dias. No entanto, se forem observados intervalos
+maiores do que um dia, você deve considerar o uso de um nó organizador que possa lidar com quedas de energia e reinicializações.</p>
+<p><b>Nota</b>: As opções<i>"Intervalo entre os tempos"</i> e <i>"em um horário específico"</i> usam o sistema cron padrão.
+Isso significa que 20 minutos estarão na próxima hora, 20 minutos atrás e 40 minutos atrás - não em tempos de 20 minutos.
+Se você quiser cada 20 minutos a partir de agora - use a opção <i> "intervalo"</i>.</p>
+<p><b>Nota</b>: para incluir uma nova linha em uma cadeia de caracteres, você deve usar um nó de Função para criar a carga útil.</p>
+</script>

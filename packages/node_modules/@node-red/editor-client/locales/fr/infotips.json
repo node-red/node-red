@@ -1,0 +1,23 @@
+{
+  "info": {
+    "tip0": "Vous pouvez supprimer les noeuds ou les liens sélectionnés avec {{core:delete-selection}}",
+    "tip1": "Rechercher des noeuds à l'aide de {{core:search}}",
+    "tip2": "{{core:toggle-sidebar}} basculera l'affichage de cette barre latérale",
+    "tip3": "Vous pouvez gérer votre palette de noeuds avec {{core:manage-palette}}",
+    "tip4": "Vos noeuds de configuration de flux sont répertoriés dans le panneau de la barre latérale. Ils sont accessibles depuis le menu ou avec {{core:show-config-tab}}",
+    "tip5": "Activer ou désactiver ces conseils à partir de l'option dans les paramètres",
+    "tip6": "Déplacer les noeuds sélectionnés à l'aide des touches [gauche] [haut] [bas] et [droite]. Maintenir la touche [shift] enfoncée pour les pousser plus loin",
+    "tip7": "Faire glisser un noeud sur un fil le raccordera au lien",
+    "tip8": "Exporter les noeuds sélectionnés, ou l'onglet actuel avec {{core:show-export-dialog}}",
+    "tip9": "Importer un flux en faisant glisser son JSON dans l'éditeur, ou avec {{core:show-import-dialog}}",
+    "tip10": "[majuscule] [clic] et faites glisser sur un port de noeud pour déplacer tous les fils attachés ou seulement celui sélectionné",
+    "tip11": "Afficher l'onglet Infos avec {{core:show-info-tab}} ou l'onglet Débogage avec {{core:show-debug-tab}}",
+    "tip12": "[ctrl] [clic] dans l'espace de travail pour ouvrir la boîte de dialogue d'ajout rapide",
+    "tip13": "Maintenir la touche [ctrl] enfoncée lorsque vous [cliquez] sur un port de noeud pour activer le câblage rapide",
+    "tip14": "Maintenir la touche [shift] enfoncée lorsque vous [cliquez] sur un noeud pour sélectionner également tous ses noeuds connectés",
+    "tip15": "Maintenir la touche [ctrl] enfoncée lorsque vous [cliquez] sur un noeud pour l'ajouter ou le supprimer de la sélection actuelle",
+    "tip16": "Changer d'onglet de flux avec {{core:show-previous-tab}} et {{core:show-next-tab}}",
+    "tip17": "Vous pouvez confirmer vos modifications dans le panneau d'édition du noeud avec {{core:confirm-edit-tray}} ou les annuler avec {{core:cancel-edit-tray}}",
+    "tip18": "Appuyer sur {{core:edit-selected-node}} modifiera le premier noeud de la sélection actuelle"
+  }
+}

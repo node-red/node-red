@@ -1,0 +1,170 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="split">
+    <p>Divide uma mensagem em uma sequência de mensagens.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>carga útil <span class="property-type"> objeto | cadeia de caracteres | matriz | armazenamento temporário </span></dt>
+        <dd> O comportamento do nó é determinado pelo tipo de<code>msg.payload</code>:
+            <ul>
+                <li><b>cadeia de caracteres</b>/<b>armazenamento temporário</b> - a mensagem é dividida usando o caractere especificado (padrão:<code>\n</code>), sequência de armazenamento temporário ou em comprimentos fixos.</li>
+                <li><b>matriz</b> - a mensagem é dividida em elementos de matriz individuais ou matrizes de comprimento fixo.</li>
+                <li><b>objeto</b> - uma mensagem é enviada para cada par chave/valor do objeto.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt>partes <span class="property-type"> objeto </span></dt>
+        <dd>Esta propriedade contém informações sobre como a mensagem foi dividida
+        a partir da mensagem original. Se passado para o nó de <b>junção</b>, a sequência pode ser
+        remontada em uma única mensagem. A propriedade possui as seguintes propriedades:
+        <ul>
+            <li><code>id</code> - um identificador para o grupo de mensagens</li>
+            <li><code>index</code> - a posição dentro do grupo</li>
+            <li><code>count</code> - se conhecido, o número total de mensagens no grupo. Consulte 'modo de transmissão' abaixo.</li>
+            <li><code>type</code> - o tipo de mensagem - cadeia de caracteres / matriz / objeto / armazenamento temporário</li>
+            <li><code>ch</code> - para uma cadeia de caracteres ou armazenamento temporário, os dados usados ​​para dividir a mensagem como cadeia de caracteres ou uma matriz de bytes</li>
+            <li><code>key</code> - para um objeto, a chave da propriedade a partir da qual esta mensagem foi criada. O nó pode ser configurado para também copiar este valor para outras propriedades de mensagem, como<code>msg.topic</code>.</li>
+            <li><code>len</code> - o comprimento de cada mensagem quando dividida usando um valor de comprimento fixo</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>Este nó facilita a criação de um fluxo que executa ações comuns em
+    uma sequência de mensagens, antes de, usando o nó de <b>junção</b>, recombinar a
+    seqüência em uma única mensagem.</p>
+    <p>Ele usa a propriedade<code>msg.parts</code> para rastrear as partes individuais
+    de uma sequência.</p>
+    <h4>Modo de transmissão</h4>
+    <p>O nó também pode ser usado para criar um refluxo de transmissão de mensagens. Por exemplo, um
+    dispositivo serial que envia comandos terminados em nova linha pode entregar uma única mensagem
+    com um comando parcial em seu final. No 'modo de trasminssão', este nó irá dividir
+    uma mensagem e enviar cada segmento completo. Se houver um segmento parcial no final,
+    o nó irá retê-lo e acrescentá-lo à próxima mensagem que for recebida.
+   </p>
+    <p>Ao operar neste modo, o nó não configurará a propriedade<code>msg.parts.count</code>
+    , pois não sabe quantas mensagens esperar no fluxo. Logo, não pode ser usado com o nó de <b>junção</b> em seu modo automático.</p>
+</script>
+
+<script type="text/html" data-help-name="join">
+    <p>Une sequências de mensagens em uma única mensagem.</p>
+    <p>Existem três modos disponíveis:</p>
+    <dl>
+        <dt>automático</dt>
+        <dd> Quando emparelhado com o nó de <b>divisão</b>, irá automaticamente juntar as mensagens para reverter a divisão que foi realizada.</dd>
+        <dt>manual</dt>
+        <dd> Junta as sequências de mensagens de várias maneiras.</dd>
+        <dt>reduzir a sequência</dt>
+        <dd> Aplica uma expressão a todas as mensagens em uma sequência para reduzi-la a uma única mensagem.</dd>
+    </dl>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional"> partes <span class="property-type"> objeto </span></dt>
+        <dd>Para unir automaticamente uma sequência de mensagens, todas devem ter
+        esta propriedade ativida. O nó de <b>divisão</b> gera esta propriedade, mas
+        pode ser criada manualmente. Possui as seguintes propriedades:
+        <ul>
+            <li><code>id</code> - um identificador para o grupo de mensagens</li>
+            <li><code>index</code> - a posição dentro do grupo</li>
+            <li><code>contagem</code> - o número total de mensagens no grupo</li>
+            <li><code>type</code> - o tipo de mensagem - cadeia de caracteres / matriz / objeto / armazenamento temporário</li>
+            <li><code>ch</code> - para uma cadeia de caracteres ou armazenamento temporário, os dados usados ​​para dividir a mensagem como cadeia de caracteres ou uma matriz de bytes</li>
+            <li><code>chave</code> - para um objeto, a chave da propriedade a partir da qual esta mensagem foi criada</li>
+            <li><code>len</code> - o comprimento de cada mensagem dividida usando um valor de comprimento fixo</li>
+        </ul>
+        </dd>
+        <dt class="optional">completo</dt>
+        <dd>Se definido, o nó acrescentará a carga útil e, em seguida, enviará a mensagem de saída em seu estado atual.
+            Se você não deseja anexar a carga útil, exclua-a da mensagem.</dd>
+            <dt class="optional">redefinir</dt>
+         <dd>Se definido, o nó limpará qualquer mensagem parcialmente completa e não a enviará.</dd>
+         <dt class="optional">restartTimeout</dt>
+         <dd>Se definido e o nó tiver um tempo limite configurado, esse tempo limite será reiniciado.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+
+    <h4>Modo automático</h4> 
+    <p>O modo automático usa a propriedade<code>parts</code> de mensagens recebidas para
+       determinar como a sequência deve ser unida. Isso permite que ele automaticamente
+       reverta a ação de um nó <b>dividido</b>.
+
+    <h4>Modo manual</h4>
+    <p>Quando configurado para ingressar no modo manual, o nó é capaz de unir sequências
+     de mensagens em vários resultados diferentes:</p>
+    <ul>
+        <li>uma <b>cadeia de caracteres</b> ou <b>armazenamento temporário</b> - É criada juntando-se a propriedade selecionada de cada mensagem com os caracteres de junção ou armazenamento temporário especificados.</li>
+        <li>uma <b>matriz</b> - É criada adicionando-se cada propriedade selecionada, ou mensagem inteira, à matriz de saída.</li>
+        <li>um <b>objeto chave/valor</b> - É criado usando uma propriedade de cada mensagem para determinar sob qual chave
+        o valor necessário é armazenado.</li>
+        <li>um <b>objeto mesclado</b> - É criado mesclando a propriedade de cada mensagem em um único objeto.</li>
+    </ul>
+    <p>As outras propriedades da mensagem de saída são obtidas a partir da última mensagem recebida antes do resultado ser enviado.</p>
+    <p>Uma <i>contagem</i> pode ser configurada para quantas mensagens devam ser recebidas antes de gerar a mensagem de saída.
+    Para saídas de objetos, uma vez que essa contagem tenha sido atingida, o nó pode ser configurado para enviar uma mensagem para cada mensagem subsequente
+    recebida.</p>
+    <p>Um <i>tempo limite</i> pode ser definido para acionar o envio da nova mensagem usando o que foi recebido até agora.</p>
+    <p>Se uma mensagem for recebida com a propriedade <code>msg.complete</code> definida, a mensagem de saída será finalizada e enviada.
+    Este tempo limite pode ser reiniciado pelo envio de uma mensagem com a propriedade <code>msg.restartTimeout</code> definida.</p>
+    <p>Se uma mensagem for recebida com a propriedade <code>msg.reset</code> definida, a mensagem parcialmente completa será excluída e não enviada.
+    Isso redefine qualquer contagem de peças.</p>
+
+    <h4>Modo Reduzir Sequência</h4>
+    <p>Quando configurado para unir no modo de redução, uma expressão é aplicada a cada
+       mensagem em uma sequência e o resultado acumulado para produzir uma única mensagem.</p>
+
+    <dl class="message-properties">
+    <dt>Valor inicial</dt>
+    <dd>O valor inicial do valor acumulado (<code>$A</code>).</dd>
+    <dt>Reduzir a expressão</dt>
+    <dd>Uma expressão JSONata que é chamada para cada mensagem na sequência.
+        O resultado é passado para a próxima chamada da expressão como o valor acumulado.
+        Na expressão em questão, as seguintes variáveis ​​especiais podem ser usadas:
+        <ul>
+            <li><code>$A</code>: o valor acumulado,</li>
+            <li><code>$I</code>: índice da mensagem na sequência,</li>
+            <li><code>$N</code>: número de mensagens na sequência.</li>
+        </ul>
+    </dd>
+    <dt>Expressão de correção</dt>
+    <dd>Uma expressão JSONata opcional que é aplicada depois que a expressão de redução
+        tiver sido aplicado a todas as mensagens na sequência.
+        Na expressão em questão, as seguintes variáveis ​​especiais podem ser usadas:
+        <ul>
+            <li><code>$A</code>: o valor acumulado,</li>
+            <li><code>$N</code>: número de mensagens na sequência.</li>
+        </ul>
+         </dd>
+         <p>Por padrão, a expressão de redução é aplicada em ordem, desde a primeira
+            até a última mensagem da sequência. Opcionalmente pode ser aplicada em
+            ordem inversa.</p>  
+         <p>$N é o número de mensagens que chegam - mesmo que sejam idênticas.</p>
+     </dl>
+     <p><b>Exemplo:</b> as configurações a seguir, dada uma sequência de valores numéricos,
+        calcula o valor médio:
+         <ul>
+             <li><b>Reduzir expressão</b>: <code>$A+payload</code></li>
+             <li><b>Valor inicial</b>: <code>0</code></li>
+             <li><b>Expressão de correção</b>: <code>$A/$N</code></li>
+         </ul>
+    </p>
+    <h4>Armazenando mensagens</h4>
+    <p>Este nó armazenará temporariamente de forma interna as mensagens para ir trabalhando através das sequências. 
+        A configuração de tempo de execução <code>nodeMessageBufferMaxLength</code> pode ser usada para limitar quantos nós de mensagens
+        serão armazenados temporariamente.</p>
+</script>

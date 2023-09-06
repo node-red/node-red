@@ -98,7 +98,7 @@ describe("api/editor/theme", function () {
                 },
                 header: {
                     title: "Test Header Title",
-                    url: "http://nodered.org",
+                    url: "https://nodered.org",
                     image: "/absolute/path/to/header/image" // or null to remove image
                 },
 
@@ -147,7 +147,7 @@ describe("api/editor/theme", function () {
         context.page.tabicon.should.have.a.property("colour", "#8f008f")
         context.should.have.a.property("header");
         context.header.should.have.a.property("title", "Test Header Title");
-        context.header.should.have.a.property("url", "http://nodered.org");
+        context.header.should.have.a.property("url", "https://nodered.org");
         context.header.should.have.a.property("image", "theme/header/image");
         context.page.should.have.a.property("css");
         context.page.css.should.have.lengthOf(1);

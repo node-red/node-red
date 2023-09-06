@@ -1,0 +1,23 @@
+{
+    "info": {
+        "tip0": "Você pode remover os nós ou links selecionados com {{core:delete-selection}}",
+        "tip1": "Procure por nós usando {{core:search}}",
+        "tip2": "{{core:toggle-sidebar}} irá alternar a visualização desta barra lateral",
+        "tip3": "Você pode gerenciar sua paleta de nós com {{core:manage-palette}}",
+        "tip4": "Seus nós de configuração de fluxo são listados no painel da barra lateral. Pode ser acessado a partir do menu ou com{{core:show-config-tab}}",
+        "tip5": "Habilite ou desabilite essas dicas na opção nas configurações",
+        "tip6": "Mova os nós selecionados usando o [left] [up] [down] e [right] chaves. Segure [shift] para empurrá-los ainda mais",
+        "tip7": "Arrastar um nó para um fio o unirá no link",
+        "tip8": "Exporte os nós selecionados ou a guia atual com {{core:show-export-dialog}}",
+        "tip9": "Importe um fluxo arrastando seu JSON para o editor ou com {{core:show-import-dialog}}",
+        "tip10": "[shift] [click] e arraste em uma porta de nó para mover todos os fios conectados ou apenas o selecionado",
+        "tip11": "Mostre a guia Informações com {{core:show-info-tab}} ou a guia Depurar com {{core:show-debug-tab}}",
+        "tip12": "[ctrl] [click] na área de trabalho para abrir a caixa de diálogo de adição rápida",
+        "tip13": "Mantenha pressionado [ctrl] enquanto você [click] em uma porta de nó para habilitar a ligação rápida",
+        "tip14": "Mantenha pressionado [shift] enquanto você [click] em um nó para também selecionar todos os seus nós conectados",
+        "tip15": "Mantenha pressionado [ctrl] enquanto você [click] em um nó para adicioná-lo ou removê-lo da seleção atual",
+        "tip16": "Alternar guias de fluxo com {{core:show-previous-tab}} e {{core:show-next-tab}}",
+        "tip17": "Você pode confirmar suas alterações na bandeja de edição do nó com {{core:confirm-edit-tray}} ou cancele-os com {{core:cancel-edit-tray}}",
+        "tip18": "Pressionando {{core:edit-selected-node}} irá editar o primeiro nó na seleção atual"
+    }
+}

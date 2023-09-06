@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="websocket in">
+  <p>Nó Websocket de entrada.</p>
+  <p>Por padrão, os dados recebidos do WebSocket estarão em <code>msg.payload</code>.
+  O soquete pode ser configurado para esperar uma cadeia de caracteres JSON formada corretamente, neste
+  caso, ele irá analisar sintaticamente o JSON e enviar o objeto resultante como a mensagem inteira.</p>
+</script>
+
+<script type="text/html" data-help-name="websocket out">
+  <p>Nó Websocket de saída.</p>
+  <p>Por padrão, <code>msg.payload</code> será enviado pelo WebSocket. O soquete
+  pode ser configurado para codificar todo o objeto <code>msg</code> como uma cadeia de caracteres JSON e enviar-lo
+  pelo WebSocket.</p>
+
+  <p>Se a mensagem que chega a este nó for iniciada em um nó WebSocket de entrada, a mensagem
+  será enviada de volta ao cliente que acionou o fluxo. Caso contrário, a mensagem
+  será transmitida para todos os clientes conectados.</p>
+  <p>Se quiser transmitir uma mensagem que começou em um nó WebSocket de entrada, você
+  deve excluir a propriedade <code>msg._session</code> dentro do fluxo.</p>
+</script>
+
+<script type="text/html" data-help-name="websocket-listener">
+  <p>Este nó de configuração cria uma extremidade do servidor WebSocket usando o caminho especificado.</p>
+</script>
+
+<script type="text/html" data-help-name="websocket-client">
+  <p>Este nó de configuração conecta um cliente WebSocket à URL especificada.</p>
+</script>

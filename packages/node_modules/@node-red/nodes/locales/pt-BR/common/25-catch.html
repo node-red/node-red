@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="catch">
+    <p>Capture erros lançados por nós na mesma guia.</p>
+    <h3>Saídas</h3>
+    <dl class = "message-properties">
+          <dt>error.message <span class="property-type">cadeia de caracteres</span></dt>
+          <dd>a mensagem de erro.</dd>
+          <dt>error.source.id <span class="property-type">cadeia de caracteres</span></dt>
+          <dd>o id do nó que gerou o erro.</dd>
+          <dt>error.source.type <span class="property-type">cadeia de caracteres</span></dt>
+          <dd>o tipo de nó que gerou o erro.</dd>
+          <dt>error.source.name <span class="property-type">cadeia de caracteres</span></dt>
+          <dd>o nome, se definido, do nó que gerou o erro.</dd>
+      </dl>
+      <h3>Detalhes</h3>
+      <p>Se um nó lançar um erro ao lidar com uma mensagem, o fluxo normalmente
+         para. Este nó pode ser usado para capturar esses erros e tratá-los com um
+         fluxo dedicado.</p>
+      <p>Por padrão, o nó irá capturar erros gerados por qualquer nó na mesma guia. Alternativamente
+      pode ser direcionado a nós específicos ou configurado para detectar apenas erros que
+      ainda não foram capturados por um nó de captura 'direcionado'.</p>
+      <p>Quando um erro é gerado, todos os nós de captura correspondentes receberão a mensagem.</p>
+      <p>Se um erro for gerado em um subfluxo, o erro será tratado por quaisquer
+         nós de captura dentro do subfluxo. Se nenhum existir, o erro será propagado
+         até a guia, a instância do subfluxo está ativada.</p>
+     <p>Se a mensagem já tiver uma propriedade <code>error</code>, ela será copiada para <code>_error</code>.</p> 
+</script>
