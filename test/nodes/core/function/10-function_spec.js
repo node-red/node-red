@@ -1718,9 +1718,10 @@ describe('function node', function() {
     describe("init function", function() {
 
         it('should delay handling messages until init completes', function(done) {
+            const timeout_ms = 200;
             var flow = [{id:"n1",type:"function",wires:[["n2"]],initialize: `
                 return new Promise((resolve,reject) => {
-                    setTimeout(resolve,200)
+                    setTimeout(resolve, ${timeout_ms});
                 })`,
                 func:"return msg;"
             },
@@ -1733,9 +1734,9 @@ describe('function node', function() {
                     msg.delta = Date.now() - msg.payload;
                     receivedMsgs.push(msg)
                     if (receivedMsgs.length === 5) {
-                        var errors = receivedMsgs.filter(msg => msg.delta < 200)
+                        var errors = receivedMsgs.filter(msg => msg.delta < timeout_ms)
                         if (errors.length > 0) {
-                            done(new Error(`Message received before init completed - was ${msg.delta} expected >300`))
+                            done(new Error(`Message received before init completed - was ${msg.delta} expected >${timeout_ms}`))
                         } else {
                             done();
                         }
