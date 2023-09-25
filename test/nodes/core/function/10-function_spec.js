@@ -1718,13 +1718,13 @@ describe('function node', function() {
     describe("init function", function() {
 
         it('should delay handling messages until init completes', function(done) {
-            const timeout_ms = 200;
+            const timeoutMS = 200;
             // Since helper.load uses process.nextTick timers might occasionally finish
             // a couple of milliseconds too early, so give some leeway to the check.
-            const timeout_check_margin = 5;
+            const timeoutCheckMargin = 5;
             var flow = [{id:"n1",type:"function",wires:[["n2"]],initialize: `
                 return new Promise((resolve,reject) => {
-                    setTimeout(resolve, ${timeout_ms});
+                    setTimeout(resolve, ${timeoutMS});
                 })`,
                 func:"return msg;"
             },
@@ -1738,9 +1738,9 @@ describe('function node', function() {
                     receivedMsgs.push(msg)
                     if (receivedMsgs.length === 5) {
                         let deltas = receivedMsgs.map(msg => msg.delta);
-                        var errors = deltas.filter(delta => delta < (timeout_ms - timeout_check_margin))
+                        var errors = deltas.filter(delta => delta < (timeoutMS - timeoutCheckMargin))
                         if (errors.length > 0) {
-                            done(new Error(`Message received before init completed - delta values ${JSON.stringify(deltas)} expected to be > ${timeout_ms - timeout_check_margin}`))
+                            done(new Error(`Message received before init completed - delta values ${JSON.stringify(deltas)} expected to be > ${timeoutMS - timeoutCheckMargin}`))
                         } else {
                             done();
                         }
