@@ -1,0 +1,67 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="file">
+    <p>Grava <code> msg.payload</code> em um arquivo, adicionando ao final ou substituindo o conteúdo existente.
+        Alternativamente, pode-se excluir o arquivo.</p>
+     <h3>Entradas</h3>
+     <dl class="message-properties">
+         <dt class="optional"> nome do arquivo <span class="property-type"> cadeia de caracteres</span></dt>
+         <dd> O nome do arquivo a ser atualizado pode ser fornecido na configuração do nó, ou como uma propriedade da mensagem.
+         Por padrão utilizará <code>msg.filename</code>. Mas, isso pode ser customizado no nó.</dd>
+         <dt class="optional"> codificação <span class="property-type"> cadeia de caracteres</span></dt>
+         <dd>Se a codificação estiver configurada para ser definida por msg, então esta propriedade opcional pode definir a codificação.</dt>
+    </dl>
+     <h3>Saída</h3>
+     <p>Ao concluir a gravação, a mensagem de entrada é enviada para a porta de saída.</p>
+     <h3>Detalhes</h3>
+     <p>Cada carga útil da mensagem será adicionada ao final do arquivo, opcionalmente anexando
+     um caractere de nova linha (\n) entre cada um.</p>
+     <p>Se <code>msg.filename</code> for utilizado, o arquivo será fechado após cada gravação.
+     Para melhor desempenho, use um nome de arquivo fixo.</p>
+     <p>Pode ser configurado para sobrescrever o arquivo todo ao invés de ser adicionado ao final. Por exemplo,
+     ao gravar dados binários em um arquivo, como uma imagem, esta opção deve ser usada 
+     e a opção de adicionar uma nova linha deve ser desativada.</p>
+     <p>A codificação de dados gravados em um arquivo pode ser especificada na lista de codificações.</p>
+     <p>Como alternativa, este nó pode ser configurado para excluir o arquivo.</p>
+</script>
+
+<script type="text/html" data-help-name="file in">
+    <p>Lê o conteúdo de um arquivo como cadeia de caracteres ou armazenamento temporário binário.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">nome do arquivo <span class="property-type">cadeia de caracteres</span></dt>
+        <dd>O nome do arquivo a ser lido pode ser fornecido na configuração, ou como uma propriedade da mensagem.
+        Por padrão utilizará <code>msg.filename</code>. Mas, isso pode ser customizado no nó.</dd>
+    </dl>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt>carga útil<span class="property-type"> cadeia de caracteres | armazenamento temporário</span></dt>
+        <dd>O conteúdo do arquivo como uma cadeia de caracteres ou armazenamento temporário binário.</dd>
+        <dt class="optional"> nome do arquivo <span class="property-type"> cadeia de caracteres</span></dt>
+        <dd>Se não estiver configurada no nó, esta propriedade opcional define o nome do arquivo a ser lido.</dd>
+   </dl>
+    <h3>Detalhes</h3>
+    <p>O nome do arquivo deve ser um caminho absoluto, caso contrário, será relativo ao
+    diretório de trabalho do processo Node-RED.</p>
+    <p>No Windows, os separadores de caminho podem precisar da sequência de escape, por exemplo: <code>\\Users\\myUser</code>.</p>
+    <p>Opcionalmente, um arquivo de texto pode ser dividido em linhas, gerando uma mensagem por linha ou um arquivo binário
+    dividido em blocos menores de armazenamento temporário - o tamanho do bloco depende do sistema operacional, mas normalmente 64k(Linux/Mac) ou 41k(Windows).</p>
+    <p>Quando dividida em várias mensagens, cada mensagem terá uma propriedade <code> partes</code>
+    definida, formando uma sequência de mensagem completa.</p>
+    <p>A codificação dos dados de entrada pode ser especificada na lista de codificações; se o formato de saída for cadeia de caracteres.</p>
+    <p>Os erros devem ser detectados e tratados usando um nó de Captura.</p>
+</script>

@@ -1,0 +1,50 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="trigger">
+  <p>Quando acionado, pode enviar uma mensagem e, opcionalmente, uma segunda mensagem, a menos que seja estendida ou redefinida.</p>
+
+  <h3>Entradas</h3>
+  <dl class="message-properties">
+      <dt class="optional">atraso<span class = "property-type"> número</span></dt>
+      <dd>Define o atraso, em milissegundos, a ser aplicado à mensagem. Esta opção se aplica apenas se o nó estiver configurado para permitir que a mensagem substitua o intervalo de atraso padrão configurado.</dd>
+      <dt class="optional">redefinir</dt>
+      <dd>Se for recebida uma mensagem com esta propriedade, qualquer tempo limite ou repetição
+      atualmente em andamento será apagado e nenhuma mensagem será acionada.</dd>
+  </dl>
+
+  <h3>Detalhes</h3>
+  <p>Este nó pode ser usado para criar um tempo limite dentro de um fluxo. Por padrão, quando
+  ele recebe uma mensagem, ele envia uma mensagem com uma <code>carga útil</code> de<code> 1</code>.
+  Em seguida, espera 250 ms antes de enviar uma segunda mensagem com uma <code>carga útil</code> de<code> 0</code>.
+  Isso pode ser usado, por exemplo, para piscar um LED conectado a um pino GPIO Raspberry Pi.</p>
+  <p>As cargas úteis de cada mensagem enviada podem ser configuradas com uma variedade de valores, incluindo
+  a opção de não enviar nada. Por exemplo, definir a mensagem inicial como <i>nada</i> e
+  selecionando a opção de estender o cronômetro com cada mensagem recebida, o nó irá
+  atuar como um cronômetro de vigilância; apenas enviando uma mensagem se nada for recebido dentro do
+  limite de intervalo.</p>
+  <p>Se definido como um tipo <i>cadeia de caractere</i>, o nó dá suporte a sintaxe de modelo bigode.</p>
+  <p>O atraso entre o envio de mensagens pode ser anulado por <code>msg.delay</code> se essa opção estiver habilitada no nó. O valor deve ser fornecido em milissegundos. </p>
+  <p>Se o nó receber uma mensagem com uma propriedade <code>reset</code> ou uma <code>carga útil</code>
+  que corresponda ao configurado no nó, qualquer tempo limite ou repetir atualmente em
+  o progresso será apagado e nenhuma mensagem será acionada. </p>
+  <p> O nó pode ser configurado para reenviar uma mensagem em um intervalo regular até que
+  seja redefinido por uma mensagem recebida.</p>
+  <p>Opcionalmente, o nó pode ser configurado para tratar as mensagens como se fossem fluxos separados,
+  usando uma propriedade msg para identificar cada fluxo. <code>msg.topic</code> padrão.</p>
+  <p>O estado indica que o nó está ativo no momento. Se vários fluxos forem usados, o estado 
+  indica o número de streams em espera.</p>
+</script>

@@ -15,5 +15,5 @@
     "shadow": true,     // allow variable shadowing (re-use of names...)
     "sub": true,        // don't warn that foo['bar'] should be written as foo.bar
     "proto": true,      // allow setting of __proto__ in node < v0.12,
-    "esversion": 6      // allow es6
+    "esversion": 11      // allow es11(ES2020)
 }

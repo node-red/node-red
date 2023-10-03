@@ -31,6 +31,9 @@ var multer = require("multer");
 var RED = require("nr-test-utils").require("node-red/lib/red");
 var fs = require('fs-extra');
 var auth = require('basic-auth');
+var crypto = require("crypto");
+const { version } = require("os");
+const net = require('net')
 
 describe('HTTP Request Node', function() {
     var testApp;
@@ -161,6 +164,100 @@ describe('HTTP Request Node', function() {
         delete process.env.NO_PROXY;
     }
 
+    function getDigestPassword() {
+        return 'digest-test-password';
+    }
+
+    function getDigest(algorithm, value) {
+        var hash;
+        if (algorithm === 'SHA-256') {
+            hash = crypto.createHash('sha256');
+        } else if (algorithm === 'SHA-512-256') {
+            hash = crypto.createHash('sha512');
+        } else {
+            hash = crypto.createHash('md5');
+        }
+        
+        var hex = hash.update(value).digest('hex');
+        if (algorithm === 'SHA-512-256') {
+            hex = hex.slice(0, 64);
+        }
+        return hex;
+    }
+
+    function getDigestResponse(req, algorithm, sess, realm, username, nonce, nc, cnonce, qop) {
+        var ha1 = getDigest(algorithm, username + ':' + realm + ':' + getDigestPassword());
+        if (sess) {
+            ha1 = getDigest(algorithm, ha1 + ':' + nonce + ':' + cnonce)
+        }
+        let ha2 = getDigest(algorithm, req.method + ':' + req.path);
+        return qop
+            ? getDigest(algorithm, ha1 + ':' + nonce + ':' + nc + ':' + cnonce + ':' + qop + ':' + ha2)
+            : getDigest(algorithm, ha1 + ':' + nonce + ':' + ha2);
+    }
+
+    function handleDigestResponse(req, res, algorithm, sess, qop) {
+        let realm = "node-red";
+        let nonce = "123456";
+        let nc = '00000001';
+        let algorithmValue = sess ? `${algorithm}-sess` : algorithm;
+
+        let authHeader = req.headers['authorization'];
+        if (!authHeader) {
+            let qopField = qop ? `qop="${qop}", ` : '';
+
+            res.setHeader(
+                'WWW-Authenticate',
+                `Digest ${qopField}realm="${realm}", nonce="${nonce}", algorithm="${algorithmValue}"`
+            );
+            res.status(401).end();
+            return;
+        }
+
+        var authFields = {};
+        let re = /([a-z0-9_-]+)=(?:"([^"]+)"|([a-z0-9_-]+))/gi;
+        for (;;) {
+            var match = re.exec(authHeader);
+            if (!match) {
+                break;
+            }
+            authFields[match[1]] = match[2] || match[3];
+        }
+        // console.log(JSON.stringify(authFields));
+
+        if (qop && authFields['qop'] != qop) {
+            console.log('test1');
+            res.status(401).end();
+            return;
+        }
+
+        if (
+            !authFields['username'] ||
+            !authFields['response'] ||
+            authFields['realm'] != realm ||
+            authFields['nonce'] != nonce ||
+            authFields['algorithm'] != algorithmValue
+        ) {
+            console.log('test2');
+            res.status(401).end();
+            return;
+        }
+
+        let username = authFields['username'];
+        let response = authFields['response'];
+        let cnonce = authFields['cnonce'] || '';
+        let expectedResponse = getDigestResponse(
+            req, algorithm, sess, realm, username, nonce, nc, cnonce, qop
+        );
+        if (!response || expectedResponse.toLowerCase() !== response.toLowerCase()) {
+            console.log('test3', response, expectedResponse);
+            res.status(401).end();
+            return;
+        }
+
+        res.status(201).end();
+    }
+
     before(function(done) {
 
         testApp = express();
@@ -219,6 +316,21 @@ describe('HTTP Request Node', function() {
                 }
             }
             res.json(result);
+        });
+        testApp.get('/authenticate-digest-md5', function(req, res){
+            handleDigestResponse(req, res, "MD5", false, false);
+        });
+        testApp.get('/authenticate-digest-md5-sess', function(req, res){
+            handleDigestResponse(req, res, "MD5", true, 'auth');
+        });
+        testApp.get('/authenticate-digest-md5-qop', function(req, res){
+            handleDigestResponse(req, res, "MD5", false, 'auth');
+        });
+        testApp.get('/authenticate-digest-sha-256', function(req, res){
+            handleDigestResponse(req, res, "SHA-256", false, 'auth');
+        });
+        testApp.get('/authenticate-digest-sha-512-256', function(req, res){
+            handleDigestResponse(req, res, "SHA-512-256", false, 'auth');
         });
         testApp.get('/proxyAuthenticate', function(req, res){
             // var user = auth.parse(req.headers['proxy-authorization']);
@@ -555,7 +667,7 @@ describe('HTTP Request Node', function() {
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
                     try {
-                        msg.should.have.property('payload','');
+                        msg.should.have.property('payload',{});
                         msg.should.have.property('statusCode',204);
                         done();
                     } catch(err) {
@@ -1527,7 +1639,7 @@ describe('HTTP Request Node', function() {
                         msg.payload.headers.should.have.property('Content-Type').which.startWith('application/json');
                         //msg.dynamicHeaderName should be present in headers with the value of msg.dynamicHeaderValue
                         msg.payload.headers.should.have.property('dyn-header-name').which.startWith('dyn-header-value');
-                        //static (custom) header set in Flow UI should be present 
+                        //static (custom) header set in Flow UI should be present
                         msg.payload.headers.should.have.property('static-header-name').which.startWith('static-header-value');
                         //msg.headers['location'] should be deleted because Flow UI "Location" header has a blank value
                         //ensures headers with matching characters but different case are eliminated
@@ -2016,6 +2128,100 @@ describe('HTTP Request Node', function() {
         });
         */
 
+        it('should authenticate on server - digest MD5', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"digest", url:getTestURL('/authenticate-digest-md5')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'xxxuser', password:getDigestPassword()};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',201);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on server - digest MD5 sess', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"digest", url:getTestURL('/authenticate-digest-md5-sess')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'xxxuser', password:getDigestPassword()};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',201);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on server - digest MD5 qop', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"digest", url:getTestURL('/authenticate-digest-md5-qop')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'xxxuser', password:getDigestPassword()};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',201);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on server - digest SHA-256', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"digest", url:getTestURL('/authenticate-digest-sha-256')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'xxxuser', password:getDigestPassword()};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',201);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
+
+        it('should authenticate on server - digest SHA-512-256', function(done) {
+            var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"obj",authType:"digest", url:getTestURL('/authenticate-digest-sha-512-256')},
+                {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n1.credentials = {user:'xxxuser', password:getDigestPassword()};
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('statusCode',201);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:"foo"});
+            });
+        });
     });
 
     describe('file-upload', function() {
@@ -2264,5 +2470,72 @@ describe('HTTP Request Node', function() {
                 });
             });
         });
+    });
+
+    describe('should parse broken headers', function() {
+
+        const versions = process.versions.node.split('.')
+
+        if (( versions[0] == 14 && versions[1] >= 20 ) ||
+            ( versions[0] == 16 && versions[1] >= 16 ) ||
+            ( versions[0] == 18 && versions[1] >= 5 ) ||
+            ( versions[0] > 18)) {
+            // only test if on new enough NodeJS version
+
+            let port = testPort++
+
+            let server;
+
+            before(function() {
+                server = net.createServer(function (socket) {
+                    socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
+                    socket.end()
+                })
+
+                server.listen(port,'127.0.0.1', function(err) {
+                })
+            });
+
+            after(function() {
+                server.close()
+            });
+
+            it('should accept broken headers', function (done) {
+                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
+                {id:"n2", type:"helper"}];
+                helper.load(httpRequestNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    n2.on('input', function(msg) {
+                        try {
+                            msg.payload.should.equal('HelloWorld')
+                            done()
+                        } catch (err) {
+                            done(err)
+                        }
+                    })
+                    n1.receive({payload: 'foo'})
+                });
+            });
+
+            it('should reject broken headers', function (done) {
+                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
+                {id:"n2", type:"helper"}];
+                helper.load(httpRequestNode, flow, function() {
+                    var n1 = helper.getNode("n1");
+                    var n2 = helper.getNode("n2");
+                    n2.on('input', function(msg) {
+                        try{
+                            msg.payload.should.match(/RequestError: Parse Error/)
+                            done()
+                        } catch (err) {
+                            done(err)
+                        }
+                    })
+                    n1.receive({payload: 'foo'})
+
+                });
+            });
+        }
     });
 });

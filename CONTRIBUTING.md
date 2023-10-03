@@ -16,6 +16,9 @@ behavior to the project's core team at team@nodered.org.
 Please raise any bug reports on the relevant project's issue tracker. Be sure to
 search the list to see if your issue has already been raised.
 
+If your issue is more of a question on how to do something with Node-RED, please
+consider using the [community forum](https://discourse.nodered.org/).
+
 A good bug report is one that make it easy for us to understand what you were
 trying to do and what went wrong.
 
@@ -35,13 +38,17 @@ For feature requests, please raise them on the [forum](https://discourse.nodered
 ## Pull-Requests
 
 If you want to raise a pull-request with a new feature, or a refactoring
-of existing code, it may well get rejected if you haven't discussed it on
-the [forum](https://discourse.nodered.org) first.
+of existing code, please come and discuss it with us first. We prefer to
+do it that way to make sure your time and effort is well spent on something
+that fits with our goals.
+
+If you've got a bug-fix or similar for us, then you are most welcome to
+get it raised - just make sure you link back to the issue it's fixing and
+try to include some tests!
 
 All contributors need to sign the OpenJS Foundation's Contributor License Agreement.
 It is an online process and quick to do. If you raise a pull-request without
 having signed the CLA, you will be prompted to do so automatically.
-
 
 ### Code Branches
 

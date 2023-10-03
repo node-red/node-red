@@ -1,0 +1,100 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http in">
+    <p>Crée un point de terminaison HTTP pour créer des services Web.</p>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>Pour une requête GET, cette propriété contient un objet de tous les paramètres de chaîne de requête.
+            Sinon, contient le corps de la requête HTTP.</dd>
+        <dt>req<span class="property-type">objet</span></dt>
+        <dd>Un objet de requête HTTP. Cet objet contient plusieurs propriétés qui
+            fournir des informations sur la demande.
+            <ul>
+             <li><code>body</code> - le corps de la requête entrante. Le format
+                dépendra de la demande.</li>
+             <li><code>headers</code> - un objet contenant les en-têtes de requête HTTP.</li>
+             <li><code>query</code> - un objet contenant les paramètres de chaîne de requête.</li>
+             <li><code>params</code> - un objet contenant tous les paramètres de routage.</li>
+             <li><code>cookies</code> - un objet contenant les cookies de la requête.</li>
+             <li><code>files</code> - s'il est activé dans le noeud, un objet contenant
+                tous les fichiers téléchargés dans le cadre d'une requête POST.</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">objet</span></dt>
+        <dd>Un objet de réponse HTTP. Cette propriété ne doit pas être utilisée directement;
+            le noeud <code>Réponse HTTP</code> documente comment répondre à une requête.
+            Cette propriété doit rester attachée au message transmis au noeud de réponse.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Le noeud écoutera sur le chemin configuré les requêtes d'un type particulier.
+        Le chemin peut être entièrement spécifié, tel que <code>/user</code>, ou inclure
+        des paramètres nommés qui acceptent n'importe quelle valeur, comme <code>/user/:name</code>.
+        Lorsque des paramètres nommés sont utilisés, leur valeur réelle dans une requête est accessible sous <code>msg.req.params</code>.</p>
+    <p>Pour les requêtes qui incluent un corps, tel qu'un POST ou un PUT, le contenu de
+        la demande est rendue disponible en tant que <code>msg.payload</code>.</p>
+    <p>Si le type de contenu de la requête peut être déterminé, le corps sera analysé pour
+        tout type approprié. Par exemple, <code>application/json</code> sera analysé en
+        tant que représentation d'objet JavaScript.</p>
+    <p><b>Remarque</b> : ce noeud n'envoie aucune réponse à la requête. Le flux
+        doit inclure un noeud de réponse HTTP pour terminer la requête.</p>
+</script>
+
+<script type="text/html" data-help-name="http response">
+    <p>Renvoie les réponses des requêtes reçues d'un noeud d'entrée HTTP.</p>
+
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">chaîne de caractères</span></dt>
+        <dd>Le corps de la réponse.</dd>
+        <dt class="optional">statusCode <span class="property-type">nombre</span></dt>
+        <dd>S'il est défini, il est utilisé comme code d'état de réponse. Par défaut : 200.</dd>
+        <dt class="optional">headers <span class="property-type">objet</span></dt>
+        <dd>Si défini, fournit les en-têtes HTTP à inclure dans la réponse.</dd>
+        <dt class="optional">cookies <span class="property-type">objet</span></dt>
+        <dd>Si défini, peut être utilisé pour définir ou supprimer les cookies.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Les <code>statusCode</code> et <code>headers</code> peuvent également être définis dans
+    le noeud lui-même. Si une propriété est définie dans le noeud, elle ne peut pas être remplacée
+    par la propriété de message correspondante.</p>
+    <h4>Gestion des cookies</h4>
+    <p>La propriété <code>cookies</code> doit être un objet de paires nom/valeur.
+    La valeur peut être soit une chaîne pour définir la valeur du cookie avec des
+    options par défaut, soit il peut être un objet d'options.</p>
+    <p>L'exemple suivant définit deux cookies - l'un appelé <code>name</code> avec
+    une valeur de <code>nick</code>, l'autre appelée <code>session</code> avec un
+    valeur de <code>1234</code> et une expiration fixée à 15 minutes.</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>Les options valides incluent :</p>
+    <ul>
+    <li><code>domain</code> - (Chaîne) nom de domaine pour le cookie</li>
+    <li><code>expires</code> - (Date) date d'expiration en GMT. S'il n'est pas spécifié ou défini sur 0, crée un cookie de session</li>
+    <li><code>maxAge</code> - (Chaîne) date d'expiration par rapport à l'heure actuelle en millisecondes</li>
+    <li><code>path</code> - (Chaîne) chemin du cookie. Par défaut à /</li>
+    <li><code>value</code> - (Chaîne) la valeur à utiliser pour le cookie</li>
+    </ul>
+    <p>Pour supprimer un cookie, définisser sa valeur <code>value</code> sur <code>null</code>.</p>
+
+</script>

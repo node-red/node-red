@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="batch">
+    <p>Crée des séquences de messages en fonction de diverses règles.</p>
+    <h3>Détails</h3>
+    <p>Il existe trois modes de création des séquences de messages :</p>
+    <dl>
+        <dt>Nombre de messages</dt>
+        <dd>regroupe les messages en séquences d'une longueur donnée. L'option <b>chevauchement</b>
+        spécifie combien de messages à la fin d'une séquence doivent être
+        répété au début de la séquence suivante.</dd>
+
+        <dt>Intervalle de temps</dt>
+        <dd>regroupe les messages qui arrivent dans l'intervalle spécifié. Si aucun message
+            arrive dans l'intervalle, le noeud peut éventuellement envoyer un message vide.</dd>
+
+        <dt>Concaténer des séquences</dt>
+        <dd>crée une séquence de messages en concaténant les séquences entrantes. Chaque message
+            doit avoir une propriété <code>msg.topic</code> et une propriété <code>msg.parts</code>
+            identifiant sa séquence. Le noeud est configuré avec une liste de <code>sujet</code>
+            afin d'identifier l'ordre des séquences concaténées.
+        </dd>
+    </dl>
+    <h4>Stocker des messages</h4>
+    <p>Ce noeud stocke les messages en mémoire tampon en interne afin de travailler sur plusieurs séquences. Le
+    paramètre d'exécution <code>nodeMessageBufferMaxLength</code> peut être utilisé pour limiter le nombre de messages
+    que mettra le noeud en mémoire tampon.</p>
+    <p>Si un message est reçu avec la propriété <code>msg.reset</code> définie, les messages mis en mémoire tampon sont supprimés et non envoyés.</p>
+</script>

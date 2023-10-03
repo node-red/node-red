@@ -1,0 +1,49 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="csv">
+    <p>Converte entre uma cadeia de caracteres formatada em CSV e sua representação de objeto JavaScript, em qualquer direção.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>carga útil <span class="property-type"> objeto | matriz | cadeia de caracteres</span></dt>
+        <dd>Um objeto JavaScript, matriz ou cadeia de caracteres CSV.</dd>
+    </dl>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt>carga útil <span class="property-type"> objeto | matriz | cadeia de caractere </span></dt>
+        <dd>
+        <ul>
+            <li>Se a entrada for uma cadeia de caracteres, tenta analisá-la sintaticamente como CSV e cria um objeto JavaScript de pares chave/valor para cada linha. O nó enviará então uma mensagem para cada linha, ou uma única mensagem contendo uma matriz de objetos.</li>
+            <li>Se a entrada for um objeto JavaScript, ela tenta construir uma cadeia de caracteres CSV.</li>
+            <li>Se a entrada for uma matriz de valores simples, ela cria uma cadeia de caracteres CSV de linha única.</li>
+            <li>Se a entrada for uma matriz de matrizes ou de objetos, uma cadeia de caracteres CSV de várias linhas é criada.</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>O modelo de coluna pode conter uma lista ordenada de nomes de coluna. Ao converter CSV em um objeto, os nomes das colunas
+    serão usados como os nomes das propriedades. Como alternativa, os nomes das colunas podem ser obtidos da primeira linha do CSV.</p>
+    <p>Ao converter para CSV, o modelo de colunas é usado para identificar quais propriedades extrair do objeto e em que ordem.</p>
+    <p>Se o modelo de colunas estiver em branco, você pode usar uma lista de propriedades simples separada por vírgulas fornecida em <code>msg.columns</code> para determinar o que extrair e em que ordem. Se nenhum estiver presente, todas as propriedades do objeto são exibidas no pedido
+    em que as propriedades são encontradas na primeira linha.</p>
+    <p>Se a entrada for uma matriz, o modelo de colunas será usado apenas para gerar opcionalmente uma linha de títulos de coluna.</p>
+    <p>Se a opção 'analisar valores numéricos' estiver marcada, os valores numéricos da cadeia de caracteres serão retornados como números, ou seja, valor médio '1, '1.5', 2'.</p>
+    <p>Se a opção 'incluir strings vazias' estiver marcada, strings vazias serão retornadas no resultado, ou seja, valor médio '"1","", 3'.</p>
+    <p>Se a opção 'incluir valores nulos' estiver marcada, os valores nulos serão retornados no resultado, ou seja, valor médio '"1",,3'.</p>
+    <p>O nó pode aceitar uma entrada de várias partes, desde que a propriedade <code>partes</code> seja definida corretamente, por exemplo, de um nó de entrada de arquivo ou nó de divisão.</p>
+    <p>Se forem enviadas várias mensagens de saída, estas terão suas propriedades <code>partes</code> definidas e formarão uma sequência de mensagens completa.</p>
+    <p><b>Nota:</b> o modelo de coluna deve ser separado por vírgulas - mesmo se um separador diferente for escolhido para os dados.</p>
+</script>

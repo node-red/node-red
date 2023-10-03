@@ -1,0 +1,160 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="mqtt in">
+<p>Se connecte à un courtier MQTT et s'abonne aux messages du sujet spécifié.</p>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+      <dt>payload <span class="property-type">chaîne de caractères | tampon</span></dt>
+      <dd>une chaîne à moins qu'elle ne soit détectée comme un tampon binaire.</dd>
+      <dt>topic <span class="property-type">chaîne de caractères</span></dt>
+      <dd>la rubrique MQTT, utilise / comme séparateur de hiérarchie.</dd>
+      <dt>qos <span class="property-type">nombre</span> </dt>
+      <dd>0, tirer et oublier - 1, au moins une fois - 2, une fois seulement.</dd>
+      <dt>retain <span class="property-type">booléen</span></dt>
+      <dd>true indique que le message a été conservé et peut être ancien.</dd>
+
+      <dt class="optional">responseTopic <span class="property-type">chaîne de caractères</span></dt>
+      <dd><b>MQTTv5</b>: le sujet de réponse MQTT pour le message</dd>
+      <dt class="optional">correlationData <span class="property-type">tampon</span></dt>
+      <dd><b>MQTTv5</b>: les données de corrélation pour le message</dd>
+      <dt class="optional">contentType <span class="property-type">chaîne de caractères</span></dt>
+      <dd><b>MQTTv5</b>: le type de contenu de la charge utile</dd>
+      <dt class="optional">userProperties <span class="property-type">objet</span></dt>
+      <dd><b>MQTTv5</b>: toutes les propriétés utilisateur du message</dd>
+      <dt class="optional">messageExpiryInterval <span class="property-type">nombre</span></dt>
+      <dd><b>MQTTv5</b>: le délai d'expiration, en secondes, du message</dd>
+    </dl>
+    <h3>Détails</h3>
+    Le sujet d'abonnement peut inclure des caractères génériques MQTT, + pour un niveau, # pour plusieurs niveaux.</p>
+    <p>Ce noeud nécessite une connexion à un courtier MQTT pour être configuré. Configurer en cliquant sur
+        l'icône du crayon.</p>
+    <p>Plusieurs noeuds MQTT (entrée ou sortie) peuvent partager la même connexion de courtier si nécessaire.</p>
+    <h4>Abonnement dynamique</h4>
+    Le noeud peut être configuré pour contrôler dynamiquement la connexion MQTT et ses abonnements. Lorsque cette option est activé, le noeud aura une entrée et pourra être contrôlé en lui transmettant des messages.
+    <h3>Entrées</h3>
+    <p>Celles-ci ne s'appliquent que lorsque le noeud a été configuré pour les abonnements dynamiques.</p>
+    <dl class="message-properties">
+       <dt>action <span class="property-type">chaîne de caractères</span></dt>
+       <dd>le nom de l'action que le noeud doit effectuer. Les actions disponibles sont : <code>"connect"</code>,
+       <code>"disconnect"</code>, <code>"subscribe"</code> and <code>"unsubscribe"</code>.</dd>
+       <dt class="optional">topic <span class="property-type">chaîne de caractères|objet|tableau</span></dt>
+       <dd>Pour les actions <code>"subscribe"</code> et <code>"unsubscribe"</code>, cette propriété
+            donne le sujet. Il peut être défini comme suit :<ul>
+            <li>une chaîne contenant le filtre de sujet</li>
+            <li>un objet contenant les propriétés <code>topic</code> et <code>qos</code></li>
+            <li>un tableau de chaînes ou d'objets pour gérer plusieurs sujets en un</li>
+            </ul>
+        </dd>
+       <dt class="optional">broker <span class="property-type">broker</span> </dt>
+       <dd>Pour l'action <code>"connect"</code>, cette propriété peut remplacer tout
+         les paramètres de configuration du courtier individuel, y compris:
+          <ul>
+              <li><code>broker</code></li>
+              <li><code>port</code></li>
+              <li><code>url</code> - remplace le courtier/port pour fournir une URL de connexion complète</li>
+              <li><code>nom d'utilisateur</code></li>
+              <li><code>mot de passe</code></li>
+          </ul>
+          <p>Si cette propriété est définie et que le courtier est déjà connecté, une erreur
+          sera enregistré à moins qu'il n'ait la propriété <code>force</code> définie - auquel cas il sera
+          déconnecté du courtier, appliquer les nouveaux paramètres et reconnectez-vous.</p>
+       </dd>
+    </dl>
+
+</script>
+
+<script type="text/html" data-help-name="mqtt out">
+    <p>Se connecte à un broker MQTT et publie des messages.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+      <dt>payload <span class="property-type">chaîne de caractères | tampon</span></dt>
+      <dd> la charge utile à publier. Si cette propriété n'est pas définie, aucun message ne sera envoyé. Pour envoyer un message vide, définisser cette propriété sur une chaîne vide.</dd>
+      <dt class="facultatif">topic <span class="property-type">chaîne de caractères</span></dt>
+      <dd> le sujet MQTT dans laquelle publier.</dd>
+      <dt class="facultatif">qos <span class="property-type">numéro</span></dt>
+      <dd>0, tirer et oublier - 1, au moins une fois - 2, une fois et une seule. Par défaut 0.</dd>
+      <dt class="facultatif">retain <span class="property-type">booléen</span></dt>
+      <dd>définir sur true pour conserver le message sur le courtier. Faux par défaut.</dd>
+      <dt class="facultatif">responseTopic <span class="property-type">chaîne de caractères</span></dt>
+      <dd><b>MQTTv5</b> : le sujet de réponse MQTT pour le message</dd>
+      <dt class="facultatif">correlationData <span class="property-type">Buffer</span></dt>
+      <dd><b>MQTTv5</b> : les données de corrélation pour le message</dd>
+      <dt class="optional">contentType <span class="property-type">chaîne de caractères</span></dt>
+      <dd><b>MQTTv5</b> : le type de contenu de la charge utile</dd>
+      <dt class="facultatif">userProperties <span class="property-type">objet</span></dt>
+      <dd><b>MQTTv5</b> : toutes les propriétés utilisateur du message</dd>
+      <dt class="facultatif">messageExpiryInterval <span class="property-type">numéro</span></dt>
+      <dd><b>MQTTv5</b> : le délai d'expiration, en secondes, du message</dd>
+      <dt class="facultatif">sujetAlias <span class="property-type">numéro</span></dt>
+      <dd><b>MQTTv5</b> : l'alias de rubrique MQTT à utiliser</dd>
+    </dl>
+    <h3>Détails</h3>
+    <code>msg.payload</code> est utilisé comme charge utile du message publié.
+    S'il contient un objet, il sera converti en chaîne JSON avant d'être envoyé.
+    S'il contient un tampon binaire, le message sera publié tel quel.</p>
+    <p>Le sujet utilisé peut être configuré dans le noeud ou, s'il est laissé vide, peut être défini dans le <code>msg.topic</code>.</p>
+    <p>De même, la QoS et les valeurs de conservation peuvent être configurées dans le noeud ou, si elles sont laissées
+      vide, défini dans <code>msg.qos</code> et <code>msg.retain</code> respectivement. Pour effacer un
+      sujet retenu du courtier, envoyer un message vide à ce sujet avec l'indicateur de conservation défini.</p>
+    <p>Ce noeud nécessite une connexion à un courtier MQTT pour être configuré. Pour configurer cliquer sur
+      l'icône du crayon.</p>
+    <p>Plusieurs noeuds MQTT (entrant ou sortant) peuvent partager la même connexion de courtier si nécessaire.</p>
+
+    <h4>Contrôle dynamique</h4>
+    La connexion partagée par le noeud peut être contrôlée dynamiquement. Si le noeud reçoit
+     l'un des messages de contrôle suivants, il ne publiera pas non plus la charge utile du message.
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+       <dt>action <span class="property-type">chaîne de caractères</span></dt>
+       <dd>le nom de l'action que le noeud doit effectuer. Les actions disponibles sont : <code>"connect"</code>,
+       et <code>"disconnect"</code>.</dd>
+       <dt class="optional">broker <span class="property-type">broker</span> </dt>
+       <dd>Pour l'action <code>"connect"</code>, cette propriété peut remplacer tous
+         les paramètres de configuration du courtier individuel, y compris : <ul>
+               <li><code>broker</code></li>
+               <li><code>port</code></li>
+               <li><code>url</code> - overrides broker/port to provide a complete connection url</li>
+               <li><code>nom d'utilisateur</code></li>
+               <li><code>mot de passe</code></li>
+           </ul>
+           <p>Si cette propriété est définie et que le courtier est déjà connecté, une erreur
+            sera enregistré à moins qu'il n'ait la propriété <code>force</code> définie - auquel cas il sera
+            déconnecté du courtier, appliquer les nouveaux paramètres et reconnectez-vous.</p>
+       </dd>
+    </dl>
+
+</script>
+
+<script type="text/html" data-help-name="mqtt-broker">
+   <p>Configuration d'une connexion à un broker MQTT.</p>
+   <p>Cette configuration créera une connexion unique au courtier qui peut
+      être réutilisée par les noeuds <code>MQTT in</code> et <code>MQTT out</code>.</p>
+   <p>Le noeud générera un ID client aléatoire si aucun n'est défini et le
+      noeud utilisera une connexion Clean Session. Si un ID client est défini,
+      il doit être unique pour le courtier auquel vous vous connectez.</p>
+   <h4>Message au démarrage</h4>
+   <p>Ceci est un message qui sera publié sur le sujet configuré chaque fois que le
+      la connexion est établie.</p>
+   <h4>Message à la fermeture</h4>
+   <p>Ceci est un message qui sera publié sur le sujet configuré avant que la
+      connexion soit fermée normalement, soit en redéployant le noeud, soit en s'arrêtant.</p>
+   <h4>Message à la perte de connexion</h4>
+   <p>Ceci est un message qui sera publié par le courtier dans le cas où le noeud
+      perd inopinément sa connexion.</p>
+   <h4>WebSockets</h4>
+   <p>Le noeud peut être configuré pour utiliser une connexion WebSocket. Pour ce faire, le Serveur
+      doit être configuré avec un URI complet pour la connexion. Par exemple :</p>
+   <pre>ws://example.com:4000/mqtt</pre>
+
+</script>

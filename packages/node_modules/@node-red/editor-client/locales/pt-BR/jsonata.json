@@ -1,0 +1,274 @@
+{
+    "$string": {
+        "args": "arg[, prettify]",
+        "desc": "Converte o tipo do parâmetro `arg` em uma cadeia de caracteres usando as seguintes regras de conversão de tipo:\n\n - Cadeia de caracteres não são alteradas\n - As funções são convertidas para uma cadeia de caracteres vazia\n - os tipos numérico infinito e NaN geram um erro porque não podem ser representados como um número JSON\n - Todos os outros valores são convertidos para uma cadeia de caracteres JSON usando a função `JSON.stringify`. Se `prettify` for verdadeira, então o JSON \"prettified\" é produzido. Isto é, uma linha por campo e as linhas serão indentadas com base na profundidade do campo."
+    },
+    "$length": {
+        "args": "str",
+        "desc": "Retorna o número de caracteres na cadeia de caracteres `str`. Um erro é gerado se `str` não for uma cadeia de caracteres."
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "Retorna uma cadeia de caracteres contendo os caracteres no primeiro parâmetro `str` começando na posição `start` (deslocamento zero). Se` length` for especificado, então a sub cadeia de caracteres conterá o máximo `length` de caracteres. Se` start` for negativo isso indica o número de caracteres a partir do fim de `str`."
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "Retorna a sub cadeia de caracteres antes da primeira ocorrência da sequência de caracteres `chars` em `string`. Se` string` não contiver `chars`, então retorna `str`."
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "Retorna a sub cadeia de caracteres após a primeira ocorrência da sequência de caracteres `chars` em `string`. Se `string` não contiver `chars`, então retorna `str`."
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "Retorna uma cadeia de caracteres com todos os caracteres de `string` convertidos em maiúsculas."
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "Retorna uma cadeia de caracteres com todos os caracteres de `string` convertidos em minúsculas."
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "Normaliza e retira todos os caracteres de espaço em branco em `str` aplicando as seguintes etapas:\n\n - Todas as tabulações, retornos de carro e avanços de linha são substituídos por espaços.\n- Sequências contíguas de espaços são reduzidas a um único espaço.\n- Espaços à direita e à esquerda são removidos.\n\n Se `str` não for especificado (isto é, esta função é chamada sem argumentos), então o valor do contexto é usado como o valor de `str`. Um erro é gerado se `str` não for uma cadeia de caracteres."
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "Retorna `true` se `str` tiver correspondente em `pattern`, caso contrário, retorna `false`. Se `str` não for especificado (isto é, esta função é chamada com um argumento), então o valor do contexto é usado como o valor de `str`. O parâmetro `pattern` pode ser uma cadeia de caracteres ou uma expressão regular."
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "Divide o parâmetro `str` em uma matriz de sub cadeia de caracteres. É um erro se `str` não for uma cadeia de caracteres. O parâmetro opcional `separator` especifica os caracteres dentro de `str` sobre os quais devem ser divididos como uma cadeia de caracteres ou expressão regular. Se `separator` não for especificado, a cadeia de caracteres vazia será assumida e `str` será dividido em uma matriz de caracteres únicos. É um erro se `separador` não for uma cadeia de caracteres. O parâmetro opcional `limit` é um número que especifica o número máximo de sub cadeia de caracteres a serem incluídas na matriz resultante. Quaisquer sub cadeia de caracteres adicionais são descartadas. Se `limit` não for especificado, então `str` será totalmente dividido sem limite para o tamanho da matriz resultante . É um erro se `limit` não for um número não negativo."
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "Une uma matriz de cadeias de caracteres de componentes em uma única cadeia de caracteres concatenada com cada cadeia de caracteres de componente separada pelo parâmetro opcional `separator`. É um erro se a `matriz` de entrada contiver um item que não seja uma cadeia de caracteres. Se `separator` for não especificado, assume-se que é uma cadeia de caracteres vazia, ou seja, nenhum `separator` entre as cadeias de caracteres do componente. É um erro se `separator` não for uma cadeia de caracteres."
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "Aplica a cadeia de caracteres `str` à expressão regular `pattern` e retorna uma matriz de objetos, com cada objeto contendo informações sobre cada ocorrência de uma correspondência dentro de `str`."
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "Encontra ocorrências de `pattern` dentro de `str` e as substitui por `replacement`.\n\nO parâmetro opcional `limit` é o número máximo de substituições."
+    },
+    "$now": {
+        "args": "$[picture [, timezone]]",
+        "desc": "Gera um carimbo de data/hora em formato compatível com ISO 8601 e o retorna como uma cadeia de caracteres. Se os parâmetros opcionais de imagem e fuso horário forem fornecidos, o carimbo de data/hora atual é formatado conforme descrito pela função `$fromMillis()`"
+    },
+    "$base64encode": {
+        "args": "string",
+        "desc": "Converte uma cadeia de caracteres ASCII em uma representação de base 64. Cada caractere na cadeia de caracteres é tratado como um byte de dados binários. Isso requer que todos os caracteres na cadeia de caracteres estejam no intervalo de 0x00 a 0xFF, o que inclui todos os caracteres em cadeias de caracteres codificadas em URI. Caracteres Unicode fora desse intervalo não são suportados."
+    },
+    "$base64decode": {
+        "args": "string",
+        "desc": "Converte bytes codificados de base 64 em uma cadeia de caracteres, usando uma página de código UTF-8 Unicode."
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "Converte o parâmetro `arg` em um número usando as seguintes regras de conversão:\n\n - Os números permanecem inalterados\n - Cadeias de caracteres que contêm uma sequência de caracteres que representam um número JSON válido são convertidos para esse número\n - Todos os outros valores causam a geração de um erro."
+    },
+    "$abs": {
+        "args": "number",
+        "desc": "Retorna o valor absoluto do parâmetro `number`."
+    },
+    "$floor": {
+        "args": "number",
+        "desc": "Retorna o valor de `number` arredondado para baixo para o inteiro mais próximo que seja menor ou igual a `number`."
+    },
+    "$ceil": {
+        "args": "number",
+        "desc": "Retorna o valor de `number` arredondado para o número inteiro mais próximo que é maior ou igual a `number`."
+    },
+    "$round": {
+        "args": "number [, precision]",
+        "desc": "Retorna o valor do parâmetro `number` arredondado para o número de casas decimais especificado pelo parâmetro opcional `precision`."
+    },
+    "$power": {
+        "args": "base, exponent",
+        "desc": "Retorna o valor de `base` elevado à potência de `exponent`."
+    },
+    "$sqrt": {
+        "args": "number",
+        "desc": "Retorna a raiz quadrada do valor do parâmetro `number`."
+    },
+    "$random": {
+        "args": "",
+        "desc": "Retorna um número pseudoaleatório maior ou igual a zero e menor que um."
+    },
+    "$millis": {
+        "args": "",
+        "desc": "Retorna o número de milissegundos desde o Unix Epoch (1º de janeiro de 1970 UTC) como um número. Todas as invocações de `$millis()` dentro de uma avaliação de uma expressão retornarão todas o mesmo valor."
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "Retorna a soma aritmética de uma `array` de números. É um erro se o `array` de entrada contiver um item que não seja um número."
+    },
+    "$max": {
+        "args": "array",
+        "desc": "Retorna o número máximo em uma `array` de números. É um erro se o `array` de entrada contiver um item que não seja um número."
+    },
+    "$min": {
+        "args": "array",
+        "desc": "Retorna o número mínimo em uma `array` de números. É um erro se o `array` de entrada contiver um item que não seja um número."
+    },
+    "$average": {
+        "args": "array",
+        "desc": "Retorna o valor médio de uma `array` de números. É um erro se o `array` de entrada contiver um item que não seja um número."
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "Converte o argumento em um booliano usando as seguintes regras:\n\n - `Boolean` : inalterado\n - `string`: vazio : `false`\n - `string`: não-vazio : `true`\n - `number`: `0` : `false`\n - `number`: não-zero : `true`\n - `null` : `false`\n - `array`: vazio : `false`\n - `array`: contém um membro que converte de tipo para `true` : `true`\n - `array`: todos os membros convertidos de tipo para `false` : `false`\n - `object`: vazio : `false`\n - `object`: não-vazio : `true`\n - `function` : `false`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "Retorna booliano NOT no argumento. `Arg` é convertido de tipo primeiro para um booliano"
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "Retorna booliano `true` se a expressão `arg` for avaliada como um valor, ou `false` se a expressão não corresponder a nada (por exemplo, um caminho para uma referência de campo inexistente)."
+    },
+    "$count": {
+        "args": "array",
+        "desc": "Retorna o número de itens na matriz"
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "Anexa duas matrizes"
+    },
+    "$sort": {
+        "args": "array [, function]",
+        "desc": "Retorna uma matriz contendo todos os valores no parâmetro `array`, mas classificados em ordem.\n\nSe um comparador `function` for fornecido, então deve ser uma função que leva dois parâmetros:\n\n`function(left, right)`\n\nEsta função é invocada pelo algoritmo de classificação para comparar dois valores à esquerda e à direita. Se o valor de esquerda deve ser colocado após o valor de direita na ordem de classificação desejada, a função deve retornar o booliano `true` para indicar uma troca. Caso contrário, deve retornar `false`."
+    },
+    "$reverse": {
+        "args": "array",
+        "desc": "Retorna uma matriz contendo todos os valores do parâmetro `array`, mas na ordem reversa."
+    },
+    "$shuffle": {
+        "args": "array",
+        "desc": "Retorna uma matriz contendo todos os valores do parâmetro `array`, mas misturados em ordem aleatória."
+    },
+    "$zip": {
+        "args": "array, ...",
+        "desc": "Retorna uma matriz convolucional (compactada) contendo matrizes agrupadas de valores dos argumentos `array1`… `arrayN` do índice 0, 1, 2 ...."
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "Retorna uma matriz contendo as chaves do objeto. Se o argumento for uma matriz de objetos, então a matriz retornada contém uma lista não duplicada de todas as chaves em todos os objetos."
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "Retorna o valor associado à chave no objeto. Se o primeiro argumento for uma matriz de objetos, todos os objetos na matriz são pesquisados e os valores associados a todas as ocorrências da chave são retornados."
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "Divide um objeto que contém pares de chave/valor em uma matriz de objetos, cada um com um único par de chave/valor do objeto de entrada. Se o parâmetro for uma matriz de objetos, a matriz resultante conterá um objeto para cada par de chave/valor em todo objeto na matriz fornecida."
+    },
+    "$merge": {
+        "args": "array&lt;object&gt;",
+        "desc": "Mescla uma matriz de `objects` em um único `object` contendo todos os pares de chave/valor de cada um dos objetos na matriz de entrada. Se qualquer um dos objetos de entrada contiver a mesma chave, então o `object` retornado conterá o valor do último na matriz. É um erro se a matriz de entrada contiver um item que não seja um objeto."
+    },
+    "$sift": {
+        "args": "object, function",
+        "desc": "Retorna um objeto que contém apenas os pares de chave/valor do parâmetro `object` que satisfazem o predicado `function` passado como o segundo parâmetro.\n\nA `function` que é fornecida como o segundo parâmetro deve ter o seguinte assinatura:\n\n`function(value [, key [, object]])`"
+    },
+    "$each": {
+        "args": "object, function",
+        "desc": "Retorna uma matriz contendo os valores retornados por `function` quando aplicado a cada par chave/valor no `object`."
+    },
+    "$map": {
+        "args": "array, function",
+        "desc": "Retorna uma matriz contendo os resultados da aplicação do parâmetro `function` a cada valor no parâmetro `array`.\n\nA `function` que é fornecido como o segundo parâmetro deve ter a seguinte assinatura:\n\n`function(value [, index [, array]])`"
+    },
+    "$filter": {
+        "args": "array, function",
+        "desc": "Retorna uma matriz contendo apenas os valores no parâmetro `array` que satisfazem o predicado `function`.\n\nThe `function` que é fornecido como o segundo parâmetro deve ter a seguinte assinatura:\n\n`function(value [, index [, array]])`"
+    },
+    "$reduce": {
+        "args": "array, function [, init]",
+        "desc": "Retorna um valor agregado derivado da aplicação do parâmetro `function` sucessivamente a cada valor em `array` em combinação com o resultado da aplicação anterior da função.\n\nA função deve aceitar dois argumentos e se comportar como um operador inserido entre cada valor dentro de `array`. A assinatura da `function` deve estar no formato: `myfunc($accumulator, $value[, $index[, $array]])`\n\nO parâmetro opcional `init` é usado como o valor inicial na agregação."
+    },
+    "$flowContext": {
+        "args": "string[, string]",
+        "desc": "Recupera uma propriedade de contexto de fluxo.\n\nEsta é uma função definida pelo Node-RED."
+    },
+    "$globalContext": {
+        "args": "string[, string]",
+        "desc": "Recupera uma propriedade de contexto global.\n\nEsta é uma função definida pelo Node-RED."
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "Retorna uma cópia da `string` com preenchimento extra, se necessário, de forma que seu número total de caracteres seja pelo menos o valor absoluto do parâmetro `width`.\n\nSe `width` for um número positivo, a cadeia de caracteres será preenchida à direita; se negativo, é preenchida à esquerda.\n\nO argumento opcional `char` especifica os caracteres de preenchimento a serem usados. Se não for especificado, o padrão é o caractere de espaço."
+    },
+    "$fromMillis": {
+        "args": "number, [, picture [, timezone]]",
+        "desc": "Converta o `number` que representa os milissegundos desde a época do Unix (1 January, 1970 UTC) em uma representação de cadeia de caracteres formatada do carimbo de data/hora conforme especificado pela cadeia de caracteres de imagem.\n\nSe o parâmetro opcional `image` for omitido, o carimbo de data/hora será formatado no formato ISO 8601.\n\nSe a cadeia de caracteresopcional `picture` for fornecida, o carimbo de data/hora é formatado de acordo com a representação especificada nessa cadeia de caracteres. O comportamento desta função é consistente com a versão de dois argumentos da função XPath/XQuery `format-dateTime` conforme definido na especificação XPath F&O 3.1. O parâmetro de cadeia de caracteres de imagem define como o carimbo de data/hora é formatado e tem a mesma sintaxe de `format-dateTime`.\n\nSe a cadeia de caracteres opcional `timezone` for fornecida, o carimbo de data/hora formatado estará nesse fuso horário. A cadeia de caracteres `timezone` deve estar no formato '± HHMM', onde ± é o sinal de mais ou menos e HHMM é o deslocamento em horas e minutos do UTC. Deslocamento positivo para fusos horários a leste do UTC, deslocamento negativo para fusos horários a oeste do UTC."
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "Converte o tipo de `number` em uma cadeia de caracteres e o formata em uma representação decimal conforme especificado pela cadeia de caracteres `picture`.\n\n O comportamento desta função é consistente com a função XPath/XQuery `fn:format-number` conforme definido na especificação XPath F&O 3.1. O parâmetro de cadeia de caracteres de imagem define como o número é formatado e tem a mesma sintaxe de `fn:format-number`.\n\nO terceiro argumento opcional `options` é usado para substituir os caracteres de formatação específicos da localidade padrão, como o separador decimal. Se fornecido, este argumento deve ser um objeto contendo pares de nome/valor especificados na seção de formato decimal da especificação XPath F&O 3.1."
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "Converte o `number` em uma cadeia de caracteres e o formata em um inteiro representado na base do número especificada pelo argumento `radix`. Se `radix` não for especificado, o padrão é a base 10. `radix` pode estar entre 2 e 36, caso contrário, um erro será gerado."
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "Converta o tipo de uma cadeia de caracteres `timestamp` no formato ISO 8601 para o número de milissegundos desde a época do Unix (1 January, 1970 UTC) como um número. Um erro é gerado se a cadeia de caracteres não estiver no formato correto."
+    },
+    "$env": {
+        "args": "arg",
+        "desc": "Retorna o valor de uma variável de ambiente.\n\nEsta é uma função definida pelo Node-RED."
+    },
+    "$eval": {
+        "args": "expr [, context]",
+        "desc": "Analisa e avalia a cadeia de caracteres `expr` que contém um JSON literal ou uma expressão JSONata usando o contexto atual como o contexto para avaliação."
+    },
+    "$formatInteger": {
+        "args": "number, picture",
+        "desc": "Converte o tipo de `number` em uma cadeia de caracteres e o formata em uma representação inteira conforme especificado pela cadeia de caracteres `picture`. O parâmetro da cadeia de caracteres de imagem define como o número é formatado e tem a mesma sintaxe de `fn:format-integer` do Especificação XPath F&O 3.1."
+    },
+    "$parseInteger": {
+        "args": "string, picture",
+        "desc": "Examina e troca o conteúdo do parâmetro `string` para um inteiro (como um número JSON) usando o formato especificado pela cadeia de caracteres `picture`. O parâmetro da cadeia de caracteres `picture` tem o mesmo formato que `$formatInteger`."
+    },
+    "$error": {
+        "args": "[str]",
+        "desc": "Gera um erro com uma mensagem. O (parâmetro) opcional `str` substituirá a mensagem padrão de `$error() function evaluated`"
+    },
+    "$assert": {
+        "args": "arg, str",
+        "desc": "Se `arg` for verdadeiro, a função retorna indefinido. Se `arg` for falso, uma exceção é gerada com `str` como a mensagem da exceção."
+    },
+    "$single": {
+        "args": "array, function",
+        "desc": "Retorna o único valor no parâmetro `array` que satisfaz o predicado `function` (isto é, O (parâmetro) `function` retorna o booliano `true` quando passado o valor). Gera uma exceção se o número de valores correspondentes não for exatamente um .\n\nA função deve ser fornecida na seguinte assinatura: `function(value [, index [, array]])` onde 'value' é cada entrada da matriz, 'index' é a posição desse valor e toda a matriz é passada como o terceiro argumento"
+    },
+    "$encodeUrlComponent": {
+        "args": "str",
+        "desc": "Codifica um componente Localizador Uniforme de Recursos (URL) substituindo cada instância de certos caracteres por uma, duas, três ou quatro sequências de escape que representam a codificação UTF-8 do caractere.\n\nExemplo: `$encodeUrlComponent(\"?x=test\")` => `\"%3Fx%3Dtest\"`"
+    },
+    "$encodeUrl": {
+        "args": "str",
+        "desc": "Codifica um Localizador Uniforme de Recursos (URL) substituindo cada instância de certos caracteres por uma, duas, três ou quatro sequências de escape que representam a codificação UTF-8 do caractere.\n\nExemplo: `$encodeUrl(\"https://mozilla.org/?x=шеллы\")` => `\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\"`"
+    },
+    "$decodeUrlComponent": {
+        "args": "str",
+        "desc": "Decodifica um componente Localizador Uniforme de Recursos (URL) criado anteriormente por encodeUrlComponent.\n\nExemplo: `$decodeUrlComponent(\"%3Fx%3Dtest\")` => `\"?x=test\"`"
+    },
+    "$decodeUrl": {
+        "args": "str",
+        "desc": "Decodifica um Localizador Uniforme de Recursos (URL) criado anteriormente por encodeUrl.\n\nExemplo: `$decodeUrl(\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\")` => `\"https://mozilla.org/?x=шеллы\"`"
+    },
+    "$distinct": {
+        "args": "array",
+        "desc": "Retorna uma matriz com valores duplicados removidos da `array`"
+    },
+    "$type": {
+        "args": "value",
+        "desc": "Retorna o tipo de `value` como uma cadeia de caracteres. Se `value` for indefinido, retornará `undefined`"
+    },
+    "$moment": {
+        "args": "[str]",
+        "desc": "Obtém um objeto de dados usando a biblioteca 'Moment'."
+    }
+}
