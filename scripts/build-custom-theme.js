@@ -13,7 +13,7 @@
 // 4. Edit your settings file to set the theme:
 //       editorTheme: {
 //           page: {
-//               css: "/path/to/file/generated/by/this/script"
+//               css: '/path/to/file/generated/by/this/script'
 //           }
 //       }
 //
@@ -22,92 +22,69 @@
 
 
 
-const os = require("os");
-const nopt = require("nopt");
-const path = require("path");
-const fs = require("fs-extra");
-const sass = require("sass");
+const os = require('os');
+const nopt = require('nopt');
+const path = require('path');
+const fs = require('fs-extra');
+const sass = require('sass');
 
 const knownOpts = {
-    "help": Boolean,
-    "long": Boolean,
-    "in": [path],
-    "out": [path]
+    'help': Boolean,
+    'long': Boolean,
+    'in': [path],
+    'out': [path]
 };
 const shortHands = {
-    "?":["--help"]
+    '?':['--help']
 };
 nopt.invalidHandler = function(k,v,t) {}
 
 const parsedArgs = nopt(knownOpts,shortHands,process.argv,2)
 
 if (parsedArgs.help) {
-    console.log("Usage: build-custom-theme [-?] [--in FILE] [--out FILE]");
-    console.log("");
-    console.log("Options:");
-    console.log("  --in  FILE  Custom colors sass file");
-    console.log("  --out FILE  Where you write the result");
-    console.log("  --long      Do not compress the output");
-    console.log("  -?, --help  Show this help");
-    console.log("");
-    process.exit();
+    showUsageAndExit(0)
 }
 
-
-const ruleRegex = /(\$.*?) *: *(\S[\S\s]*?);/g;
-var match;
-
-const customColors = {};
-
-if (parsedArgs.in && fs.existsSync(parsedArgs.in)) {
-    let customColorsFile = fs.readFileSync(parsedArgs.in,"utf-8");
-    while((match = ruleRegex.exec(customColorsFile)) !== null) {
-        customColors[match[1]] = match[2];
-    }
+if (!parsedArgs.in) {
+    console.warn('Missing argument: in')
+    showUsageAndExit(1)
 }
-
-// Load base colours
-let colorsFile = fs.readFileSync(path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/colors.scss"),"utf-8")
-let updatedColors = [];
-
-while((match = ruleRegex.exec(colorsFile)) !== null) {
-    updatedColors.push(match[1]+": "+(customColors[match[1]]||match[2])+";")
-}
-
 
 (async function() {
     const tmpDir = os.tmpdir();
     const workingDir = await fs.mkdtemp(`${tmpDir}${path.sep}`);
-    await fs.copy(path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/"),workingDir)
-    await fs.writeFile(path.join(workingDir,"colors.scss"),updatedColors.join("\n"))
 
-    const result = sass.renderSync({
-        outputStyle: "expanded",
-        file: path.join(workingDir,"style-custom-theme.scss"),
-    });
+    await fs.copy(path.join(__dirname, '../packages/node_modules/@node-red/editor-client/src/sass/'), workingDir);
+    await fs.copyFile(parsedArgs.in, path.join(workingDir,'colors.scss'));
 
-    const css = result.css.toString()
-    const lines = css.split("\n");
-    const colorCSS = []
+    const output = sass.compile(
+        path.join(workingDir, 'style-custom-theme.scss'),
+        {style: parsedArgs.long === true ? 'expanded' : 'compressed'}
+    );
 
-    lines.forEach(l => {
-        colorCSS.push(l);
-    });
-
-    const nrPkg = require("../package.json");
+    const nrPkg = require('../package.json');
     const now = new Date().toISOString();
+    const header = `/*\n* Theme generated with Node-RED ${nrPkg.version} on ${now}\n*/`;
 
-    const header = `/*
-    * Theme generated with Node-RED ${nrPkg.version} on ${now}
-    */`;
-
-    var output = sass.renderSync({outputStyle: parsedArgs.long?"expanded":"compressed",data:colorCSS.join("\n")});
     if (parsedArgs.out) {
-
-        await fs.writeFile(parsedArgs.out,header+"\n"+output.css);
+        await fs.writeFile(parsedArgs.out, header+'\n'+output.css);
     } else {
         console.log(header);
         console.log(output.css.toString());
     }
+
     await fs.remove(workingDir);
 })()
+
+function showUsageAndExit (exitCode) {
+    console.log('');
+    console.log('Usage: build-custom-theme [-?] [--in FILE] [--out FILE]');
+    console.log('');
+    console.log('Options:');
+    console.log('  --in  FILE  Custom colors sass file');
+    console.log('  --out FILE  Where you write the result');
+    console.log('  --long      Do not compress the output');
+    console.log('  -?, --help  Show this help');
+    console.log('');
+    process.exit(exitCode);
+}
