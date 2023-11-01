@@ -1237,11 +1237,12 @@ describe('Flow', function() {
     })
 
     describe("#env", function () {
+        afterEach(() => {
+            delete process.env.V0;
+            delete process.env.V1;
+            credentials.get.restore?.()
+        })
         it("can instantiate a node with environment variable property values of group and tab", async function () {
-            after(function() {
-                delete process.env.V0;
-                delete process.env.V1;
-            })
             process.env.V0 = "gv0";
             process.env.V1 = "gv1";
             process.env.V3 = "gv3";
@@ -1285,10 +1286,6 @@ describe('Flow', function() {
         });
 
         it("can access environment variable property using $parent", async function () {
-            after(function() {
-                delete process.env.V0;
-                delete process.env.V1;
-            })
             process.env.V0 = "gv0";
             process.env.V1 = "gv1";
             var config = flowUtils.parseConfig([
@@ -1323,9 +1320,6 @@ describe('Flow', function() {
         });
 
         it("can define environment variable using JSONata", async function () {
-            after(function() {
-                delete process.env.V0;
-            })
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab",env:[
                     {"name": "V0", value: "1+2", type: "jsonata"}
@@ -1348,9 +1342,6 @@ describe('Flow', function() {
         });
 
         it("can access global environment variables defined as JSONata values", async function () {
-            after(function() {
-                delete process.env.V0;
-            })
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab",env:[
                     {"name": "V0", value: "1+2", type: "jsonata"}
@@ -1372,11 +1363,6 @@ describe('Flow', function() {
             await flow.stop()
         });
         it("global flow can access global-config defined environment variables", async function () {
-            after(function() {
-                delete process.env.V0;
-                credentials.get.restore()
-            })
-
             sinon.stub(credentials,"get").callsFake(function(id) {
                 if (id === 'gc') {
                     return { map: { GC_CRED: 'gc_cred' }}
