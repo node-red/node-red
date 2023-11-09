@@ -6,9 +6,12 @@ To make a change to the node-red runtime being used by K4 avalanche:
 3. PR into this branch
 4. Merge on approval
 5. Manually bump the package version
-6. Run `npm run build`
+6. Run `npm run build` - note you need to run node 10 to do this, you also need to have xcode installed
 7. Manually publish to NPM with `npm publish` - Request creds from ops for this
 
+
+# Dev Work
+When doing dev work dont try to link into k4/k5 it just causes issue, instead just go into the node-modules of k4/k5 and make your changes in there
 
 # CHANGE-LOG
 
