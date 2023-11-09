@@ -97,7 +97,7 @@
     "grunt-jsonlint": "~1.1.0",
     "grunt-mocha-istanbul": "5.0.2",
     "grunt-nodemon": "~0.4.2",
-    "grunt-sass": "~2.0.0",
+    "grunt-sass": "^2.0.0",
     "grunt-simple-mocha": "~0.4.1",
     "grunt-webdriver": "^2.0.3",
     "http-proxy": "^1.16.2",
