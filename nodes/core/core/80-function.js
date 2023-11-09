@@ -247,7 +247,7 @@ module.exports = function (RED) {
 
           const {
             settings: {
-              api: { codefile = false }
+              api: { codefile = false },
             },
           } = RED;
 
