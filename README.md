@@ -14,6 +14,10 @@ To make a change to the node-red runtime being used by K4 avalanche:
 When doing dev work dont try to link into k4/k5 it just causes issue, instead just go into the node-modules of k4/k5 and make your changes in there
 
 # CHANGE-LOG
+## 0.18.7-patch-13
+2023-11-13
+- Small fix for codefile logic
+
 ## 0.18.7-patch-12
 2023-11-09
 - Added code file as an alternative to vm for function nodes

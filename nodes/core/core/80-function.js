@@ -252,28 +252,26 @@ module.exports = function (RED) {
           } = RED;
 
           if (codefile) {
+            workerId = workerId.split(":::")[0];
+            const nodeId = this.id.split(`${organization}-${workerId}-`)[1];
             try {
               const messageToSend = clone(msg);
               delete messageToSend.logger;
 
               const beforeCodefile = process.hrtime();
               const {
-                result: {
-                  Result: { msg: responseMessage },
+                payload: {
+                  result,
+                  error
                 },
-              } = await codefile.run({ srcCode: this.func, context: { msg } });
+                requestId
+              }  = await codefile.run({ srcCode: this.func, context: { msg } });
+      
               const afterCodefile = process.hrtime(beforeCodefile);
 
-              responseMessage.logger = logger;
-              payloadValidator.verify(responseMessage);
-              // to make function node return result from code file uncomment this line, and comment out the sendResults above
-              // sendResults(this,msg._msgid, responseMessage);
-
-              workerId = workerId.split(":::")[0];
-              const nodeId = this.id.split(`${organization}-${workerId}-`)[1];
-              lambdaRequestId = responseMessage.lambdaRequestId;
               const metrics = {
                 lambdaRequestId: requestId,
+                action:'codefile-success',
                 organization,
                 workerId: workerId,
                 nodeId: nodeId,
@@ -287,12 +285,24 @@ module.exports = function (RED) {
                   ) / 100
                 }ms`,
               };
+              if(result){
+                // not required right now since we dont go via this path
+                // const responseMessage = result.msg
+                // responseMessage.logger = logger;
+                // payloadValidator.verify(responseMessage);
+                // sendResults(this,msg._msgid, responseMessage);
+              } 
+              else{
+                metrics.error = error;
+                metrics.action = 'codefile-error';
+              }
               logger.info(JSON.stringify(metrics, null, 2));
             } catch (e) {
+              logger.error(e)
               logger.error({
                 message: "Error running codefile",
-                error: e,
-                lambdaRequestId,
+                action:'codefile-error',
+                error: e.message,
                 organization,
                 workerId: workerId,
                 nodeId: nodeId,
