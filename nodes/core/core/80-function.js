@@ -233,7 +233,7 @@ module.exports = function (RED) {
           const result = vm2Instance.run(functionText);
           const afterVm2 = process.hrtime(beforeVm2);
           payloadValidator.verify(result);
-          sendResults(this, msg._msgid, msg);
+          sendResults(this, msg._msgid, result);
           const logger = clone(msg.logger);
           let lambdaRequestId;
           let {
