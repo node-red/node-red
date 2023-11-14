@@ -296,7 +296,7 @@ module.exports = function (RED) {
                 metrics.error = error;
                 metrics.action = 'codefile-error';
               }
-              logger.info(JSON.stringify(metrics, null, 2));
+              logger.info(metrics);
             } catch (e) {
               logger.error(e)
               logger.error({
