@@ -17,6 +17,10 @@ started.
 2. `node-red`
 3. Open <http://localhost:1880>
 
+Or you can self-host Node-RED in one-click on [Dome](https://app.trydome.io/signup?package=nodered):
+
+[![Deploy to Dome](https://trydome.io/button.svg)](https://app.trydome.io/signup?package=nodered)
+
 ## Getting Help
 
 More documentation can be found [here](https://nodered.org/docs).
