@@ -1,3 +1,57 @@
+#### 3.1.1: Maintenance Release
+
+Editor
+
+ - Fix debug filter (#4461) @knolleary
+ - Fix various issues with debug pop-out window (#4459) @knolleary
+ - Ensure subflow instances keep track of their groups (#4457) @knolleary
+ - Fix `validateNodeProperty` without validator provided (#4455) @GogoVega
+ - Debounce node-removed notifications (#4453) @knolleary
+ - Don't try to load the parents of the first commit (#4448) @bonanitech
+ - Allow a theme to specifiy which theme mermaid should use (#4441) @knolleary
+ - Update browser title with flow name if set (#4427) @knolleary
+ - Ensure typeSearch handles undefined node definitions (#4423) @knolleary
+ - Ensure group w/h are imported if present (#4426) @knolleary
+ - Hide node status background when there is no status to show (#4425) @knolleary
+ - Add a close button to the restart-required notification (#4407) @knolleary
+ - Extend typedInput "num" type validity check to NaN, binary, octal & hex (#4371) @ralphwetzel
+ - Fix unintended new line in node name (#4399) @kazuhitoyokoi
+ - Ctrl-Enter does not close tray (Monaco) #4377 (#4382) @hazymat
+ - fix buffer viewer to handle 0b style binary (#4393) @dceejay
+ - Rework mermaid integration to support off-DOM rendering (#4364) @knolleary
+ - Add missing nls labels to context menu (#4365) @knolleary
+
+Runtime
+
+ - Bump the github-actions group with 2 updates (#4404) @app/dependabot
+ - Handle unknown node reference inside subflow module (#4460) @knolleary
+ - Add modules.install audit event when external module installed (#4452) @knolleary
+ - Allow import of modules with subpath in specifier (#4451) @knolleary
+ - Update node-red-admin version (#4438) @knolleary
+ - Handle false-like env vars properly (#4411) @knolleary
+ - Only save settings once during node load process (#4409) @knolleary
+ - Ensure global-config nodes lookup cred values properly (#4405) @knolleary
+ - Handle credential env var evaluation when no value set (#4362) @knolleary
+ - Don't commit package-lock.json (#4354) @bonanitech
+ - Fix env evaluation when one env references another in the same object (#4361) @knolleary
+ - Add dependabot for Github Actions (#4312) @Rotzbua
+ - Update outdated Github Actions (#4311) @Rotzbua
+ - github: Request `npm run test` in PR template (#4348) @ZJvandeWeg
+ - Add French translation of v3.1.0-beta.4 changes + slight improvements (#4329) @GogoVega
+ - Handle nodes with multiple input handlers properly (#4332) @knolleary
+ - Soften the language around unrequited PRs (#4351) @knolleary
+
+Nodes
+
+ - CSV: make CSV export way faster by not re-allocating and handling huge string (#4349) @Fadoli
+ - Delay: Fix regression in delay node to not pass on msg.reset (#4350) @dceejay
+ - Link Call: Handle undefined linkType value for existing link-call nodes (#4331) @knolleary
+ - MQTT: Guard against node.broker being undefined (#4454) @knolleary
+ - MQTT: check topic length > 0 before publish (#4416) @dceejay
+ - Switch/Change: Improve validation of switch/change node rules (#4368) @knolleary
+ - Template: Fix height of description editor in template node (#4346) @kazuhitoyokoi
+ - Various: Add validators to any fields using msg-typed Input (#4440) @knolleary
+
 #### 3.1.0: Milestone Release
 
 Editor
