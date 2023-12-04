@@ -379,10 +379,17 @@ describe("@node-red/util/util", function() {
             result = util.evaluateNodeProperty('','bool');
             result.should.be.false();
         });
-        it('returns date',function() {
+        it('returns date - default format',function() {
             var result = util.evaluateNodeProperty('','date');
             (Date.now() - result).should.be.approximately(0,50);
         });
+
+        it('returns date - iso format',function() {
+            var result = util.evaluateNodeProperty('iso','date');
+            // 2023-12-04T16:51:04.429Z
+            /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z$/.test(result).should.be.true()
+        });
+
         it('returns bin', function () {
             var result = util.evaluateNodeProperty('[1, 2]','bin');
             result[0].should.eql(1);
