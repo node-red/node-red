@@ -1,3 +1,17 @@
+#### 3.1.2: Maintenance Release
+
+Editor 
+
+ - Relax some node validators to allow undefined value (#4471) @knolleary
+ - Fix switch validation of typeof field (#4465) @knolleary
+ - Use move cursor when hovering on group border (#4467) @knolleary
+ - Added action list Chinese (Simplified and Traditional) translation + v3.1.1 changes (#4470) @wangyiyi2056
+ - Add French translation of `action-list` + v3.1.1 changes (#4466) @GogoVega
+ 
+ Runtime
+
+ - Ensure nested groups inside subflows have their g props remapped (#4472) @knolleary
+ 
 #### 3.1.1: Maintenance Release
 
 Editor
