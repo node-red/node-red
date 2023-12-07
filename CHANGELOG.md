@@ -1,3 +1,9 @@
+#### 3.1.3: Maintenance Release
+
+Editor
+
+ - Add missing en-us messages (#4475) @knolleary
+
 #### 3.1.2: Maintenance Release
 
 Editor 
