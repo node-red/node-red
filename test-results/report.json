@@ -1,0 +1,214 @@
+{
+  "config": {
+    "configFile": "E:\\Development\\node-red\\playwright.config.js",
+    "rootDir": "E:/Development/node-red/tests",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 2
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        {
+          "outputFile": "index.html",
+          "outputFolder": "playwright-report"
+        }
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/report.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "E:/Development/node-red/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "E:/Development/node-red/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "E:/Development/node-red/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "E:/Development/node-red/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "E:/Development/node-red/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "E:/Development/node-red/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.40.1",
+    "workers": 2,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "bw.spec.ts",
+      "file": "bw.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Written with Testmation Recorder",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "status": "passed",
+                  "duration": 14101,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-12-19T12:10:15.609Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df31e9e24deccc7f570a-5253974af1a1f224f0cf",
+          "file": "bw.spec.ts",
+          "line": 6,
+          "column": 7
+        },
+        {
+          "title": "Written with Testmation Recorder",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "firefox",
+              "projectName": "firefox",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "status": "passed",
+                  "duration": 19343,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-12-19T12:10:15.570Z",
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "df31e9e24deccc7f570a-45ea40b385464001b1d0",
+          "file": "bw.spec.ts",
+          "line": 6,
+          "column": 7
+        },
+        {
+          "title": "Written with Testmation Recorder",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "webkit",
+              "projectName": "webkit",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "status": "timedOut",
+                  "duration": 120009,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "E:\\Development\\node-red\\tests\\bw.spec.ts",
+                        "column": 14,
+                        "line": 24
+                      },
+                      "message": "Error: page.click: Test ended.\nCall log:\n  \u001b[2m- waiting for locator('.navbar')\u001b[22m\n\u001b[2m  -   locator resolved to <nav class=\"navbar navbar-expand-lg menu_one\">…</nav>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #1\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #2\u001b[22m\n\u001b[2m  -   waiting 20ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #3\u001b[22m\n\u001b[2m  -   waiting 100ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #4\u001b[22m\n\u001b[2m  -   waiting 100ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #5\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #6\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #7\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #8\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #9\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #10\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #11\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #12\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #13\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #14\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #15\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #16\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #17\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #18\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #19\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #20\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #21\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #22\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #23\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #24\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #25\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #26\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #27\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #28\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #29\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #30\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #31\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #32\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #33\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #34\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #35\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #36\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #37\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #38\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #39\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #40\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #41\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #42\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #43\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #44\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\u001b[2m  -   element is visible, enabled and stable\u001b[22m\n\u001b[2m  -   scrolling into view if needed\u001b[22m\n\u001b[2m  -   done scrolling\u001b[22m\n\u001b[2m  -   <div id=\"myModal\" role=\"dialog\" aria-modal=\"true\" cla…>…</div> from <section>…</section> subtree intercepts pointer events\u001b[22m\n\u001b[2m  - retrying click action, attempt #45\u001b[22m\n\u001b[2m  -   waiting 500ms\u001b[22m\n\u001b[2m  -   waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  -     element is not stable - waiting...\u001b[22m\n\n\n\u001b[0m \u001b[90m 22 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 23 |\u001b[39m   \u001b[90m// Click on <nav> \"Expertise Microsoft Dynam...\"\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 24 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'.navbar'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m    |\u001b[39m              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 25 |\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 26 |\u001b[39m   \u001b[90m// Click on <nav> \"Expertise Microsoft Dynam...\"\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 27 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'.navbar'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\n\u001b[2m    at E:\\Development\\node-red\\tests\\bw.spec.ts:24:14\u001b[22m"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2023-12-19T12:10:32.782Z",
+                  "attachments": []
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "df31e9e24deccc7f570a-fdc33bdcf32efeef4869",
+          "file": "bw.spec.ts",
+          "line": 6,
+          "column": 7
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2023-12-19T12:10:14.906Z",
+    "duration": 139769.21099999998,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
