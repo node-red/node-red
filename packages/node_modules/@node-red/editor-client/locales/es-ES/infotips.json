@@ -1,0 +1,26 @@
+{
+    "info": {
+        "tip0": "Puedes eliminar los nodos o enlaces seleccionados con {{core:delete-selection}}",
+        "tip1": "Busca nodos con {{core:search}}",
+        "tip2": "{{core:toggle-sidebar}} alternará la vista de esta barra lateral",
+        "tip3": "Puedes gestionar tu paleta de nodos con {{core:manage-palette}}",
+        "tip4": "Tus nodos de configuración de flujo aparecen en el panel de la barra lateral. Se puede acceder desde el menú o con {{core:show-config-tab}}",
+        "tip5": "Activa o desactiva estos consejos desde la opción en la configuración",
+        "tip6": "Mueve los nodos seleccionados usando las teclas [izquierda] [arriba] [abajo] y [derecha]. Mantén pulsada [Mayús] para desplazarlos más",
+        "tip7": "Arrastrar un nodo a un cable lo insertará en el enlace",
+        "tip8": "Exporta los nodos seleccionados, o la pestaña actual con {{core:show-export-dialog}}",
+        "tip9": "Importa un flujo arrastrando su JSON al editor, o con {{core:show-import-dialog}}",
+        "tip10": "[shift][clic] y arrastrar en un puerto de nodo para mover todos los cables conectados o sólo el seleccionado",
+        "tip11": "Mostrar la pestaña Información con {{core:show-info-tab}} o la pestaña Depuración con {{core:show-debug-tab}}",
+        "tip12": "[ctrl] [clic] en el área de trabajo para abrir el diálogo de adición rápida",
+        "tip13": "Mantén pulsada [ctrl] cuando [haces clic] en un puerto de nodo para habilitar el enlazado rápido",
+        "tip14": "Mantén pulsada [shift] cuando [haces clic] en un nodo para seleccionar también todos sus nodos conectados",
+        "tip15": "Mantén pulsada [ctrl] cuando [haces clic] en un nodo para añadirlo o eliminarlo de la selección actual",
+        "tip16": "Cambia de pestaña de flujo con {{core:show-previous-tab}} y {{core:show-next-tab}}",
+        "tip17": "Puedes confirmar tus cambios en la bandeja de edición de nodos con {{core:confirm-edit-tray}} o cancelarlos con {{core:cancel-edit-tray}}",
+        "tip18": "Al pulsar {{core:edit-selected-node}} se editará el primer nodo de la selección actual"
+    }
+}
+
+
+
