@@ -1,0 +1,41 @@
+<script type="text/html" data-help-name="rbe">
+    <p>Report by Exception (RBE) node - only passes on data if the payload has changed.
+       It can also block unless, or ignore if the value changes by a specified amount (Dead- and Narrowband mode).</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">number | string | (object)</span>
+        </dt>
+        <dd>RBE mode will accept numbers, strings, and simple objects.
+            Other modes must provide a parseable number.</dd>
+        <dt class="optional">topic <span class="property-type">string</span>
+        </dt>
+        <dd>if specified the function will work on a per topic basis. This property can be set by configuration.</dd>
+        <dt class="optional">reset<span class="property-type">any</span></dt>
+        <dd>if set clears the stored value for the specified msg.topic, or
+            all topics if msg.topic is not specified.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">as per input</span>
+        </dt>
+        <dd>If triggered the output will be the same as the input.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>In RBE mode this node will block until the <code>msg.payload</code>,
+       (or selected property) value is different to the previous one.
+       If required it can ignore the initial value, so as not to send anything at start.</p>
+    <p>The <a href="https://en.wikipedia.org/wiki/Deadband" target="_blank">Deadband</a> modes will block the incoming value
+       <i>unless</i> its change is greater or greater-equal than &plusmn; the band gap away from a previous value.</p>
+    <p>The Narrowband modes will block the incoming value,
+       <i>if</i> its change is greater or greater-equal than &plusmn; the band gap away from the previous value.
+       It is useful for ignoring outliers from a faulty sensor for example.</p>
+    <p>Both in Deadband and Narrowband modes the incoming value must contain a parseable number and
+       both also supports % - only sends if/unless the input differs by more than x% of the original value.</p>
+    <p>Both Deadband and Narrowband allow comparison against either the previous valid output value, thus
+    ignoring any values out of range, or the previous input value, which resets the set point, thus allowing
+    gradual drift (deadband), or a step change (narrowband).</p>
+    <p><b>Note:</b> This works on a per <code>msg.topic</code> basis, though this can be changed to another property if desired.
+       This means that a single filter node can handle multiple different topics at the same time.</p>
+</script>

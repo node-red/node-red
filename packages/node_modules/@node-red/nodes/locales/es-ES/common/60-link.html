@@ -1,0 +1,66 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="link in">
+    <p>Create virtual wires between flows.</p>
+    <h3>Details</h3>
+    <p>The node can be connected to any <code>link out</code> node that exists on any tab.
+       Once connected, they behave as if they were wired together.</p>
+    <p>The wires between link nodes are only displayed when a link node is selected.
+       If there are any wires to other tabs, a virtual node is shown that can be clicked
+       on to jump to the appropriate tab.</p>
+    <p><b>Note: </b>Links cannot be created going into, or out of, a subflow.</p>
+</script>
+
+<script type="text/html" data-help-name="link out">
+    <p>Create virtual wires between flows.</p>
+    <h3>Details</h3>
+    <p>This node can be configured to either send messages to all <code>link in</code>
+       nodes it is connected to, or to send a response back to the <code>link call</code>
+       node that triggered the flow.</p>
+    <p>When in 'send to all' mode, the wires between link nodes are only displayed when
+       the node is selected. If there are any wires to other tabs, a virtual node
+       is shown that can be clicked on to jump to the appropriate tab.</p>
+    <p><b>Note: </b>Links cannot be created going into, or out of, a subflow.</p>
+</script>
+
+<script type="text/html" data-help-name="link call">
+    <p>Calls a flow that starts with a <code>link in</code> node and passes on the response.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+      <dt class="optional">target<span class="property-type">string</span></dt>
+      <dd>When the option <b>Link Type</b> is set to "Dynamic target", set <code>msg.target</code> to the name of the
+          <code>link in</code> node you wish to call.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>This node can be connected to a <code>link in</code> node that exists on any tab.
+       The flow connected to that node must end with a <code>link out</code> node configured
+       in 'return' mode.</p>
+    <p>When this node receives a message, it is passed to the connected <code>link in</code> node.
+       It then waits for a response which it then sends on.</p>
+    <p>If no response is received within the configured timeout, default 30 seconds, the node
+       will log an error that can be caught using the <code>catch</code> node.</p>
+    <p>When the option <b>Link Type</b> is set to "Dynamic target" <code>msg.target</code> can be used to call a
+       <code>link in</code> by name or id. 
+    <ul>
+      <li>If there is a <code>link in</code> nodes with the same id, it will be called</li>
+      <li>If there are two or more <code>link in</code> nodes with the same name, an error will be raised</li>
+      <li>A <code>link call</code> cannot call a <code>link in</code> node inside a subflow</li>
+    </ul>
+    </p>
+    The flow connected to that node must end with a <code>link out</code> node configured
+    in 'return' mode.</p>
+</script>

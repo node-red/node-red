@@ -1,0 +1,64 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="function">
+    <p>A JavaScript function to run against the messages being received by the node.</p>
+    <p>The messages are passed in as a JavaScript object called <code>msg</code>.</p>
+    <p>By convention it will have a <code>msg.payload</code> property containing
+       the body of the message.</p>
+    <p>The function is expected to return a message object (or multiple message objects), but can choose
+       to return nothing in order to halt a flow.</p>
+    <p>The <b>On Start</b> tab contains code that will be run whenever the node is started.
+        The <b>On Stop</b> tab contains code that will be run when the node is stopped.</p>
+    <p>If the On Start code returns a Promise object, the node will not start handling messages
+        until the promise is resolved.</p>
+    <h3>Details</h3>
+    <p>See the <a target="_blank" href="https://nodered.org/docs/writing-functions.html">online documentation</a>
+    for more information on writing functions.</p>
+    <h4>Sending messages</h4>
+    <p>The function can either return the messages it wants to pass on to the next nodes
+    in the flow, or can call <code>node.send(messages)</code>.</p>
+    <p>It can return/send:</p>
+    <ul>
+      <li>a single message object - passed to nodes connected to the first output</li>
+      <li>an array of message objects - passed to nodes connected to the corresponding outputs</li>
+    </ul>
+    <p>Note: The setup code is executed during the initialization of nodes. Therefore, if <code>node.send</code> is called in the setup tab, subsequent nodes may not be able to receive the message.</p>
+    <p>If any element of the array is itself an array of messages, multiple
+          messages are sent to the corresponding output.</p>
+    <p>If null is returned, either by itself or as an element of the array, no
+          message is passed on.</p>
+    <h4>Logging and Error Handling</h4>
+    <p>To log any information, or report an error, the following functions are available:</p>
+      <ul>
+          <li><code>node.log("Log message")</code></li>
+          <li><code>node.warn("Warning")</code></li>
+          <li><code>node.error("Error")</code></li>
+      </ul>
+    </p>
+    <p>The Catch node can also be used to handle errors. To invoke a Catch node,
+    pass <code>msg</code> as a second argument to <code>node.error</code>:</p>
+    <pre>node.error("Error",msg);</pre>
+    <h4>Accessing Node Information</h4>
+    <p>The following properties are available to access information about the node:</p>
+    <ul>
+        <li><code>node.id</code> - id of the node</li>
+        <li><code>node.name</code> - name of the node</li>
+        <li><code>node.outputCount</code> - number of node outputs</li>
+    </ul>
+    <h4>Using environment variables</h4>
+    <p>Environment variables can be accessed using <code>env.get("MY_ENV_VAR")</code>.</p>
+</script>
