@@ -37,7 +37,7 @@ describe("storage/localfilesystem/projects/ssh", function() {
 
     beforeEach(function(done) {
         oldHOME = process.env.HOME;
-        process.env.HOME = "/tmp/doesnt/exist";
+        process.env.HOME = "/tmp/does not/exist";
         fs.remove(userDir,function(err) {
             fs.mkdir(userDir,done);
         });

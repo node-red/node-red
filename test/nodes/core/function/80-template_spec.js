@@ -387,7 +387,7 @@ describe('template node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
-                // mesage is intact
+                // message is intact
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'foo');
                 // result is in flow context
@@ -405,7 +405,7 @@ describe('template node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    // mesage is intact
+                    // message is intact
                     msg.should.have.property('topic', 'bar');
                     msg.should.have.property('payload', 'foo');
                     // result is in flow context
@@ -425,7 +425,7 @@ describe('template node', function() {
             var n1 = helper.getNode("n1");
             var n2 = helper.getNode("n2");
             n2.on("input", function(msg) {
-                // mesage is intact
+                // message is intact
                 msg.should.have.property('topic', 'bar');
                 msg.should.have.property('payload', 'foo');
                 // result is in global context
@@ -443,7 +443,7 @@ describe('template node', function() {
                 var n1 = helper.getNode("n1");
                 var n2 = helper.getNode("n2");
                 n2.on("input", function(msg) {
-                    // mesage is intact
+                    // message is intact
                     msg.should.have.property('topic', 'bar');
                     msg.should.have.property('payload', 'foo');
                     // result is in global context
