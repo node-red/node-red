@@ -1,34 +1,70 @@
 import { test, expect } from '@playwright/test';
 
     test.setTimeout(120000);
-    // test.use({storageState: {"cookies":[{"domain":".gurug.com","expires":1737041480.12831,"httpOnly":false,"name":"_ga_BQX88M1CPB","path":"/","secure":false,"value":"GS1.1.1702481480.8.0.1702481480.60.0.0"},{"domain":".gurug.com","expires":1737041480.722214,"httpOnly":false,"name":"_ga","path":"/","secure":false,"value":"GA1.2.832435228.1696946692"},{"domain":".gurug.com","expires":1702567880,"httpOnly":false,"name":"_gid","path":"/","secure":false,"value":"GA1.2.2102815360.1702481481"}],"origins":[{"localStorage":[],"origin":"https://gurug.com/"}]}});
+    test.use({storageState: {"cookies":[{"domain":"www.nu.edu.pk","httpOnly":true,"name":"ASP.NET_SessionId","path":"/","secure":false,"value":"r0yuuoulndwxkanx4teuygyu"}],"origins":[{"localStorage":[],"origin":"https://www.nu.edu.pk/#"}]}});
 
   test('Written with Testmation Recorder', async ({ browser }) => {
-  // Load and set cookies for"https://gurug.com/"
+  // Load and set cookies for"https://www.nu.edu.pk/#"
   const browserContext = await browser.newContext();
 
   const page = await browserContext.newPage();
 
-  await page.goto('https://gurug.com/');
-  
-  // Resize window to 1477 x 934
-  await page.setViewportSize({ width: 1477, height: 934 });
+  await page.goto('https://www.nu.edu.pk/#');
 
-  // Click on <nav> "Expertise Microsoft Dynam..."
-  await page.click('.navbar');
+  // Resize window to 1078 x 712
+  await page.setViewportSize({ width: 1078, height: 712 });
 
-  // Click on <nav> "Expertise Microsoft Dynam..."
-  await page.click('.navbar');
+  // Click on <a> "Home"
+  await page.click('[href="/Home"]');
 
-  // Click on <nav> "Expertise Microsoft Dynam..."
-  await page.click('.navbar');
+  // Click on <a> "Home"
+  await Promise.all([
+    page.click('[href="/Home"]'),
+    page.waitForLoadState()
+  ]);
 
-  // Click on <nav> "Expertise Microsoft Dynam..."
-  await page.click('.navbar');
+  // Click on <a> "Admissions"
+  await Promise.all([
+    page.click('.nav-links > .dropdown:nth-child(2) > [href="#"]'),
+    page.waitForLoadState()
+  ]);
 
-  // Click on <div> "Innovation Right Here  Gu..."
-  await page.click('.banner_top');
+  // Click on <a> "Offered Programs"
+  await Promise.all([
+    page.click('[href="/Degree-Programs"]:nth-child(1)'),
+    page.waitForLoadState()
+  ]);
 
-  // Click on <div> "Innovation Right Here  Gu..."
-  await page.click('.banner_top');
+  // Click on <a> "Home"
+  await Promise.all([
+    page.click('[href="/Home"]'),
+    page.waitForLoadState()
+  ]);
+
+  // Scroll wheel by X:0, Y:194
+  await page.mouse.wheel(0, 194);
+
+  // Scroll wheel by X:0, Y:-162
+  await page.mouse.wheel(0, -162);
+
+  // Scroll wheel by X:0, Y:0
+  await page.mouse.wheel(0, 0);
+
+  // Scroll wheel by X:0, Y:-85
+  await page.mouse.wheel(0, -85);
+
+  // Scroll wheel by X:0, Y:0
+  await page.mouse.wheel(0, 0);
+
+  // Scroll wheel by X:0, Y:-132
+  await page.mouse.wheel(0, -132);
+
+  // Scroll wheel by X:0, Y:0
+  await page.mouse.wheel(0, 0);
+
+  // Click on <div> .group-btn-slider > .btn-next
+  await page.click('.group-btn-slider > .btn-next');
+
+  // Click on <div> .group-btn-slider > .btn-next
+  await page.click('.group-btn-slider > .btn-next');
 });
