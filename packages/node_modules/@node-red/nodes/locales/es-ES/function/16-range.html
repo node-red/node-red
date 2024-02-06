@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="range">
+    <p>Asigna un valor numérico a un rango diferente.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">número</span></dt>
+        <dd>La carga <i>debe</i> ser un número. Cualquier otra cosa intentará analizarse como un número y rechazarse si falla.</dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">número</span></dt>
+        <dd>El valor asignado al nuevo rango.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Este nodo escalará linealmente el valor recibido. De forma predeterminada, el resultado no está restringido al rango definido en el nodo.</p>
+    <p><i>Escalar y limitar al rango objetivo</i> significa que el resultado nunca estará fuera del rango especificado dentro del rango objetivo.</p>
+    <p><i>Escalar y ajustar dentro del rango objetivo</i> significa que el resultado se ajustará dentro del rango objetivo.</p>
+    <p><i>Escalar, pero eliminar si está fuera del rango de entrada</i> significa que el resultado se escalará, pero cualquier entrada fuera del rango de entrada y salida se eliminará.</p>
+    <p>Por ejemplo, una entrada 0 - 10 asignada a 0 - 100.</p>
+    <table style="outline-width:#888 solid thin">
+        <tr><th width="80px">modo</th><th width="80px">entrada</th><th width="80px">salida</th></tr>
+        <tr><td><center>scale</center></td><td><center>12</center></td><td><center>120</center></td></tr>
+        <tr><td><center>limit</center></td><td><center>12</center></td><td><center>100</center></td></tr>
+        <tr><td><center>wrap</center></td><td><center>12</center></td><td><center>20</center></td></tr>
+        <tr><td><center>drop</center></td><td><center>12</center></td><td><center><i>(sin salida)</i></center></td></tr>
+    </table>
+</script>
