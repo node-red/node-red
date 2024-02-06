@@ -1,3 +1,42 @@
+#### 3.1.4: Maintenance Release
+
+Editor
+
+ - Highlight errors in config node sidebar (#4529) @knolleary
+ - Improve feedback in import dialog to show conflicted nodes (#4550) @knolleary
+ - Modify node users info in config editor footer (#4528) @knolleary
+ - Handle modified-nodes deploy after replacing unknown config node (#4556) @knolleary
+ - Handle undefined default export when importing module (#4539) @knolleary
+ - Fix icon scaling for non .svg icons (#4491) @ralphwetzel
+ - (convertNode) Do not create the credentials object if there is nothing to export (#4544) @GogoVega
+ - Ensure subflow instance node has g property set (#4538) @knolleary
+ - Handle importing flow with existing subflow and instance node (#4546) @knolleary
+ - Update index.mst (#4483) @gorenje
+ - Include top level property name when copying path from context (#4527) @knolleary
+ - Add handling to disable items on context menu (#4500) @kazuhitoyokoi
+ - Focus Quick Add dialog from context menu (#4516) @kazuhitoyokoi
+ - Fix subflow ports in Quick Add dialog (#4518) @kazuhitoyokoi
+ - Fix location of subflow ports in palette (#4502) @kazuhitoyokoi
+ - Client/Editor Events: fix off-in-on pattern emulating once (#4484) @gorenje
+ - Restore caching busting functionality without using explict version number (#4512) @knolleary
+ - Do not translate the list of available languages (#4531) @GogoVega
+ - Add French translation of v3.1.3 changes (#4477) @GogoVega
+ - i18n(es-ES) Spanish Spain translation (#4495) @joebordes
+ - Add missing validation messages (#4487) @GogoVega
+ - Add Japanese translations for v3.1.3 (#4498) @kazuhitoyokoi
+ - Replace `rename` by `edit` for the menu flow label (#4506) @GogoVega
+ - Update editor.json fix typo in German translation (#4552) @guidoffm
+
+Runtime
+
+ - Bump the github-actions group with 1 update (#4554) @app/dependabot
+ - Clone objects types when getting env values (#4519) @knolleary
+ - Ensure global-config credential env vars are merged on deploy (#4526) @knolleary
+
+Nodes
+
+ - 21-httprequest.js remove unused code, because of broken use of toLowercase (#4522) @gorenje
+
 #### 3.1.3: Maintenance Release
 
 Editor
