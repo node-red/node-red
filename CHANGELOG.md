@@ -1,3 +1,10 @@
+#### 3.1.5: Maintenance Release
+
+Runtime
+
+ - Fix require of dns module (#4562) @knolleary
+ - Ensure global creds object is initialised when adding first cred (#4561) @knolleary
+
 #### 3.1.4: Maintenance Release
 
 Editor
