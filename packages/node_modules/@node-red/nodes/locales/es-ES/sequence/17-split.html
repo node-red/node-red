@@ -1,0 +1,146 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="split">
+    <p>Divide un mensaje en una secuencia de mensajes.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objeto | texto | matriz | búfer</span></dt>
+        <dd>El comportamiento del nodo está determinado por el tipo de <code>msg.payload</code>:
+            <ul>
+                <li><b>texto</b>/<b>búfer</b> - el mensaje se divide utilizando el carácter especificado (predeterminado: <code>\n</code>), secuencia de búfer o en longitudes fijas.</li>
+                <li><b>matriz</b> - el mensaje se divide en elementos de matriz individuales o en matrices de longitud fija.</li>
+                <li><b>objeto</b> - Se envía un mensaje para cada par clave/valor del objeto.</li>
+            </ul>
+        </dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>parts<span class="property-type">objeto</span></dt>
+        <dd>Esta propiedad contiene información sobre cómo se dividió el mensaje original. Si se pasa al nodo <b>unir</b>, la secuencia se puede volver a ensamblar en un solo mensaje. Tiene las siguientes propiedades:
+        <ul>
+            <li><code>id</code> - un identificador para el grupo de mensajes</li>
+            <li><code>index</code> - la posición dentro del grupo</li>
+            <li><code>count</code> - si se conoce, el número total de mensajes en el grupo. Consulta 'modo de transmisión' a continuación.</li>
+            <li><code>type</code> - el tipo de mensaje: texto/matriz/objeto/búfer</li>
+            <li><code>ch</code> - para una cadena o un búfer, los datos utilizados para dividir el mensaje como una cadena o una matriz de bytes</li>
+            <li><code>key</code> - para un objeto, la clave de la propiedad desde la que se creó este mensaje. El nodo se puede configurar para copiar también este valor en otras propiedades del mensaje, como <code>msg.topic</code>.</li>
+            <li><code>len</code> - la longitud de cada mensaje cuando se divide utilizando un valor de longitud fija</li>
+        </ul>
+        </dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Este nodo facilita la creación de un flujo que realiza acciones comunes en una secuencia de mensajes antes de usar el nodo <b>unir</b> y recombinar la secuencia en un solo mensaje.</p>
+    <p>Utiliza la propiedad <code>msg.parts</code> para rastrear las partes individuales de una secuencia.</p>
+    <h4>Modo de transmisión</h4>
+    <p>El nodo también se puede utilizar para redistribuir un flujo de mensajes. Por ejemplo, un dispositivo serie que envía comandos terminados en nueva línea puede entregar un único mensaje con un comando parcial al final. En el 'modo de transmisión', este nodo dividirá un mensaje y enviará cada segmento completo. Si hay un segmento parcial al final, el nodo lo conservará y lo antepondrá al siguiente mensaje que se reciba.</p>
+    <p>Cuando se opera en este modo, el nodo no establecerá la propiedad <code>msg.parts.count</code> ya que no sabe cuántos mensajes esperar en la secuencia. Esto significa que no se puede utilizar con el nodo <b>unir</b> en su modo automático.</p>
+</script>
+
+<script type="text/html" data-help-name="join">
+    <p>Une secuencias de mensajes en un solo mensaje.</p>
+    <p>Hay tres modos disponibles:</p>
+    <dl>
+        <dt>automático</dt>
+        <dd>Cuando se empareja con el nodo <b>dividr</b>, unirá automáticamente los mensajes para revertir la división que se realizó.</dd>
+        <dt>manual</dt>
+        <dd>Une secuencias de mensajes de diversas formas.</dd>
+        <dt>reducir secuencia</dt>
+        <dd>Aplica una expresión a todos los mensajes de una secuencia para reducirla a un solo mensaje.</dd>
+    </dl>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">parts<span class="property-type">objeto</span></dt>
+        <dd>Para unir automáticamente una secuencia de mensajes, todos deben tener esta propiedad establecida. El nodo <b>dividr</b> genera esta propiedad pero se puede crear manualmente. Tiene las siguientes propiedades:
+        <ul>
+            <li><code>id</code> - un identificador para el grupo de mensajes</li>
+            <li><code>index</code> - la posición dentro del grupo</li>
+            <li><code>count</code> - el número total de mensajes en el grupo</li>
+            <li><code>type</code> - el tipo de mensaje: cadena/matriz/objeto/búfer</li>
+            <li><code>ch</code> - para una cadena o un búfer, los datos utilizados para dividir el mensaje como una cadena o una matriz de bytes</li>
+            <li><code>key</code> - para un objeto, la clave de la propiedad desde la que se creó este mensaje</li>
+            <li><code>len</code> - la longitud de cada mensaje cuando se divide utilizando un valor de longitud fija</li>
+        </ul>
+        </dd>
+        <dt class="optional">completa</dt>
+        <dd>Si está configurado, el nodo agregará la carga y luego enviará el mensaje de salida en su estado actual.
+            Si no quieres añadir la carga, elimínala del mensaje.</dd>
+        <dt class="optional">reset</dt>
+        <dd>Si se establece, el nodo borrará cualquier mensaje parcialmente completo y no lo enviará.</dd>
+        <dt class="optional">restartTimeout</dt>
+        <dd>Si está configurado y el nodo tiene un tiempo de espera configurado, ese tiempo de espera se reiniciará.</dd>
+    </dl>
+    <h3>Detalles</h3>
+
+    <h4>Modo Automático</h4>
+    <p>El modo automático utiliza la propiedad <code>parts</code> de los mensajes entrantes para determinar cómo se debe unir la secuencia. Esto te permite revertir automáticamente la acción de un nodo <b>dividido</b>.</p>
+
+    <h4>Modo Manual</h4>
+    <p>Cuando se configura para unirse en modo manual, el nodo puede unir secuencias de mensajes en varios resultados diferentes:</p>
+    <ul>
+        <li>a <b>texto</b> o <b>buffer</b> - creado uniendo la propiedad seleccionada de cada mensaje con los caracteres de unión o el búfer especificados.</li>
+        <li>an <b>matriz</b> - creado agregando cada propiedad seleccionada, o mensaje completo, a la matriz de salida.</li>
+        <li>a <b>objeto clave/valor</b> - creado utilizando una propiedad de cada mensaje para determinar la clave bajo la cual se almacena el valor requerido.</li>
+        <li>a <b>objeto combinado</b> - creado fusionando la propiedad de cada mensaje en un solo objeto.</li>
+    </ul>
+    <p>Las otras propiedades del mensaje de salida se toman del último mensaje recibido antes de enviar el resultado.</p>
+    <p>Se puede establecer un <i>count</i> para determinar cuántos mensajes se deben recibir antes de generar el mensaje de salida.
+    Para las salidas de objetos, una vez que se haya alcanzado este recuento, el nodo se puede configurar para enviar un mensaje por cada mensaje recibido a continuación.</p>
+    <p>Se puede establecer un <i>tiempo de espera</i> para activar el envío del nuevo mensaje utilizando lo que se haya recibido hasta el momento.
+     Este tiempo de espera se puede reiniciar enviando un mensaje con la propiedad <code>msg.restartTimeout</code> establecida.</p>
+    <p>Si se recibe un mensaje con la propiedad <code>msg.complete</code> configurada, el mensaje de salida se finaliza y se envía.
+    Esto restablece el recuento de segmentos.</p>
+    <p>Si se recibe un mensaje con la propiedad <code>msg.reset</code> configurada, el mensaje parcialmente completo se elimina y no se envía.
+    Esto restablece el recuento de segmentos.</p>
+
+    <h4>Modo Reducir Secuencia</h4>
+    <p>Cuando se configura para unirse en modo de reducción, se aplica una expresión a cada mensaje en una secuencia y el resultado se acumula para producir un solo mensaje.</p>
+
+    <dl class="message-properties">
+        <dt>Valor inicial</dt>
+        <dd>El valor inicial del valor acumulado. (<code>$A</code>).</dd>
+        <dt>Expresión de reducción</dt>
+        <dd>Una expresión JSONata que se llama para cada mensaje de la secuencia.
+            El resultado se pasa a la siguiente llamada de la expresión como valor acumulado.
+            En la expresión, se pueden utilizar las siguientes variables especiales:
+            <ul>
+                <li><code>$A</code>: el valor acumulado,</li>
+                <li><code>$I</code>: índice del mensaje en la secuencia,</li>
+                <li><code>$N</code>: número de mensajes en la secuencia.</li>
+            </ul>
+        </dd>
+        <dt>Expresión de reparación</dt>
+        <dd>Una expresión JSONata opcional que se aplica después de que la expresión de reducción se haya aplicado a todos los mensajes de la secuencia.
+            En la expresión, se pueden utilizar las siguientes variables especiales:
+            <ul>
+                <li><code>$A</code>: el valor acumulado,</li>
+                <li><code>$N</code>: número de mensajes en la secuencia.</li>
+            </ul>
+        </dd>
+        <p>De forma predeterminada, la expresión de reducción se aplica en orden, desde el primero hasta el último mensaje de la secuencia. Opcionalmente se puede aplicar en orden inverso.</p>
+        <p>$N es el número de mensajes que llegan, incluso si son idénticos.</p>
+    </dl>
+    <p><b>Ejemplo:</b> la siguiente configuración, dada una secuencia de valores numéricos, calcula el valor promedio:
+        <ul>
+            <li><b>Expresión de reducción</b>: <code>$A+payload</code></li>
+            <li><b>Valor inicial</b>: <code>0</code></li>
+            <li><b>Expresión de reparación</b>: <code>$A/$N</code></li>
+        </ul>
+    </p>
+    <h4>Almacenar mensajes</h4>
+    <p>Este nodo almacenará en el búfer los mensajes internamente para poder trabajar en secuencias. La configuración de tiempo de ejecución <code>nodeMessageBufferMaxLength</code> se puede utilizar para limitar cuántos mensajes se almacenarán en el buffer.</p>
+</script>

@@ -1,0 +1,32 @@
+<script type="text/html" data-help-name="rbe">
+    <p>Nodo Informe por excepción (RBE): solo transmite datos si la carga ha cambiado.
+        También puede bloquear o ignorar si el valor cambia en una cantidad específica (modo de banda muerta y de banda estrecha).</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">número | texto | (objeto)</span>
+        </dt>
+        <dd>El modo RBE aceptará números, cadenas y objetos simples.
+            Otros modos deben proporcionar un número analizable.</dd>
+        <dt class="optional">topic <span class="property-type">texto</span>
+        </dt>
+        <dd>Si se especifica, funcionará por tema. Esta propiedad se puede establecer mediante configuración.</dd>
+        <dt class="optional">reset<span class="property-type">cualquiera</span></dt>
+        <dd>si está configurado, borra el valor almacenado para el msg.topic especificado, o todos los temas si no se especifica msg.topic.</dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>carga <span class="property-type">según la entrada</span></dt>
+        <dd>Si se activa, la salida será la misma que la entrada.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>En modo RBE, este nodo se bloqueará hasta que el valor de <code>msg.payload</code> (o propiedad seleccionada) sea diferente al anterior.
+        Si es necesario, puede ignorar el valor inicial para no enviar nada al inicio.</p>
+     <p>El modo <a href="https://en.wikipedia.org/wiki/Deadband" target="_blank">Deadband</a> bloqueará el valor entrante <i>hasta</i> que el cambio sea mayor o igual que &plusmn; la banda dada.</p>
+     <p>El modo de banda estrecha bloqueará el valor entrante, <i>si</i> su cambio es mayor o igual que &plusmn; la banda dada.
+        Es útil para ignorar valores atípicos de un sensor defectuoso, por ejemplo.</p>
+     <p>Tanto en el modo Banda Muerta como en el Modo Banda Estrecha, el valor entrante debe contener un número analizable y ambos también admiten %: solo se envía si/a menos que la entrada difiera en más del x% del valor original.</p>
+     <p>Tanto la banda muerta como la banda estrecha permiten la comparación con el valor de salida válido anterior, ignorando así cualquier valor fuera de rango, o con el valor de entrada anterior, que restablece el punto de ajuste, permitiendo así una deriva gradual (banda muerta) o un cambio en pasos (banda estrecha).</p>
+     <p><b>Nota:</b> Esto funciona por <code>msg.topic</code>, aunque se puede cambiar a otra propiedad si se desea.
+        Esto significa que un único nodo de filtro puede manejar varios temas diferentes al mismo tiempo.</p>
+</script>

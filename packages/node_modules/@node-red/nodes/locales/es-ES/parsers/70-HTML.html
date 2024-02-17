@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="html">
+    <p>Extrae elementos de un documento HTML contenido en <code>msg.payload</code> usando un selector CSS.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+    <dt>payload <span class="property-type">texto</span></dt>
+    <dd>la cadena HTML de la que extraer elementos.</dd>
+    <dt class="optional">select <span class="property-type">texto</span></dt>
+    <dd>Si no está configurado en el panel de edición, el selector se puede configurar como esta propiedad de msg.</dd>
+</dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">matriz | texto</span></dt>
+        <dd>el resultado puede ser un único mensaje con una carga que contenga una matriz de elementos coincidentes o varios mensajes que contengan cada uno un elemento coincidente. Si se envían varios mensajes, también tendrán <code>parts</code> configuradas.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Este nodo admite una combinación de selectores CSS y jQuery. Consulta la <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">documentación de css-select</a> para obtener más información sobre la sintaxis admitida.</p>
+</script>
