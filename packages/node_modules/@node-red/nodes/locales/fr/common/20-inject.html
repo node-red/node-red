@@ -1,0 +1,40 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="inject">
+<p>Injecte un message dans un flux manuellement ou à intervalles réguliers. Le message payload
+  (charge utile) peut être de différents types, y compris des chaînes de caractères, des objets JavaScript ou l'heure actuelle.</p>
+<h3>Sorties</h3>
+<dl class="message-properties">
+    <dt>payload<span class="property-type">divers</span></dt>
+    <dd>La charge utile configurée du message.</dd>
+    <dt class="optional">topic <span class="property-type">chaîne de caractères</span></dt>
+    <dd>Une propriété facultative qui peut être configurée dans le noeud.</dd>
+</dl>
+<h3>Détails</h3>
+<p>Le noeud Injecter peut initier un flux avec une valeur de charge utile spécifique.
+  La charge utile par défaut est un horodatage de l'heure actuelle en millisecondes depuis le 1er janvier 1970.</p>
+<p>Le noeud prend également en charge l'injection de chaînes, de nombres, de booléens, d'objets JavaScript ou de valeurs de contexte de flux/global.</p>
+<p>Par défaut, le noeud est déclenché manuellement en cliquant sur son bouton dans l'éditeur. Il peut également être réglé sur
+  injecter à intervalles réguliers ou selon un horaire.</p>
+<p>Il peut également être configuré pour injecter une fois à chaque démarrage des flux.</p>
+<p>L'<i>Intervalle</i> maximum pouvant être spécifiée est d'environ 596 heures / 24 jours. Cependant, si vous regardez des intervalles
+  supérieur à un jour, vous devriez envisager d'utiliser un noeud de planificateur capable de faire face aux pannes de courant et aux redémarrages.</p>
+<p><b>Remarque</b> : Les options <i>"Intervalle entre les heures"</i> et <i>"à une heure précise"</i> utilisent le système cron standard.
+  Cela signifie que pour la première option, vous pouvez envoyer un message à intervalle régulier entre les heures voulues.
+  Si vous voulez envoyer un message toutes les minutes à partir de maintenant, utiliser l'option <i>"intervalle"</i>.</p>
+<p><b>Remarque</b> : Pour inclure une nouvelle ligne dans une chaîne, vous devez utiliser soit un noeud de fonction soit le noeud template pour créer la charge utile.</p>
+</script>

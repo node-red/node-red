@@ -1,0 +1,55 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="template">
+  <p>Define uma propriedade com base no modelo fornecido.</p>
+  <h3>Entradas</h3>
+  <dl class="message-properties">
+      <dt><span class="property-type">objeto</span>  msg</dt>
+      <dd>Um objeto msg contendo informações para preencher o modelo.</dd>
+      <dt class="optional">modelo <span class="property-type">string</span></dt>
+      <dd>Um modelo a ser preenchido em msg.payload. Se não estiver configurado no painel de edição,
+       o modelo pode ser definido como uma propriedade de msg.</dd>
+  </dl>
+  <h3>Saídas</h3>
+  <dl class="message-properties">
+      <dt><span class="property-type">objeto</span> msg</dt>
+      <dd>uma mensagem com uma propriedade definida preenchendo o modelo configurado com as propriedades da mensagem recebida.</dd>
+  </dl>
+  <h3>Detalhes</h3>
+  <p>Por padrão, usa o formato <i> <a href="http://mustache.github.io/mustache.5.html" target="_blank">bigode</a></i>
+  , mas pode ser desativado, se for necessário.</p>
+  <p>Por exemplo, quando um modelo de: 
+  <pre>Olá {{payload.name}}. Hoje é {{date}}</pre>
+  <p> recebe uma mensagem contendo: 
+  <pre> {
+date: "segunda-feira",
+payload:{
+  nome: "Fred"
+    }
+} </pre>
+  <p>A propriedade resultante será:
+  <pre> Olá Fred. Hoje é segunda-feira</pre>
+  <p> É possível usar uma propriedade do contexto de fluxo ou contexto global. Basta usar <code>{{flow.name}}</code> ou
+  <code>{{global.name}}</code>, ou para armazenamento persistente <code>armazenar</code> usando <code>{{flow [store] .name}}</code> ou
+  <code>{{global [store] .name}}</code>.
+  <p><b>Nota: </b>Por padrão, <i>bigode</i> usará códigos de escape de quaisquer entidades não alfanuméricas ou HTML nos valores que ele substitui. 
+  Para evitar isso, use colchetes <code>{{{triplos}}}</code>.</p>
+    <p>Se precisar usar <code>{{ }}</code> em seu conteúdo, você poderá alterar os caracteres
+        usados para marcar as seções do modelo. Por exemplo, ao invés de utilizar <code>[[ ]]</code>;
+        adicione a seguinte linha ao topo do modelo:</p>
+    <pre>{{=[[ ]]=}}</pre>
+</script>

@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="html">
+    <p>Extrait des éléments d'un document HTML contenu dans <code>msg.payload</code> à l'aide d'un sélecteur CSS.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+    <dt>payload <span class="property-type">chaîne de caractères</span></dt>
+    <dd>la chaîne html à partir de laquelle extraire les éléments.</dd>
+    <dt class="optional">select <span class="property-type">string</span></dt>
+    <dd>s'il n'est pas configuré dans le panneau d'édition, le sélecteur peut être défini comme une propriété du msg.</dd>
+</dl>
+    <h3>Sortie</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">tableau | chaîne de caractères</span></dt>
+        <dd>le résultat peut être soit un seul message avec une charge utile contenant un tableau des éléments correspondants, soit plusieurs
+            messages contenant chacun un élément correspondant. Si plusieurs messages sont envoyés, ils auront également des <code>parts</code> (parties) définies.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Ce noeud prend en charge une combinaison de sélecteurs CSS et jQuery. Voir la
+    <a href="https://github.com/fb55/CSSselect#user-content-supported-selectors" target="_blank">documentation css-select</a> pour plus d'informations
+    sur la syntaxe prise en charge.</p>
+</script>

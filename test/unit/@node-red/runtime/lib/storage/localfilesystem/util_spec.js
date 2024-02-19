@@ -14,11 +14,33 @@
  * limitations under the License.
  **/
 
-var should = require("should");
-var NR_TEST_UTILS = require("nr-test-utils");
-var util = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/util");
+const should = require("should");
+const NR_TEST_UTILS = require("nr-test-utils");
+const util = NR_TEST_UTILS.require("@node-red/runtime/lib/storage/localfilesystem/util");
+const { mkdtemp, readFile } = require('fs/promises');
+const { join } = require('path');
+const { tmpdir } = require('os');
 
 describe('storage/localfilesystem/util', function() {
+    describe('writeFile', function () {
+        it('manages concurrent calls to modify the same file', async function () {
+            const testDirectory = await mkdtemp(join(tmpdir(), 'nr-test-'));
+            const testFile = join(testDirectory, 'foo.txt')
+            const testBackupFile = testFile + '.$$$'
+
+            let counter = 0
+            const promises = [
+                util.writeFile(testFile, `update-${counter++}`, testBackupFile ),
+                util.writeFile(testFile, `update-${counter++}`, testBackupFile ),
+                util.writeFile(testFile, `update-${counter++}`, testBackupFile )
+            ]
+
+            await Promise.all(promises)
+
+            const result = await readFile(testFile, { encoding: 'utf-8' })
+            result.should.equal('update-2')
+        })
+    })
     describe('parseJSON', function() {
         it('returns parsed JSON', function() {
             var result = util.parseJSON('{"a":123}');

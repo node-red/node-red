@@ -1,0 +1,43 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="batch">
+    <p>Cria sequências de mensagens com base em várias regras.</p>
+    <h3>Detalhes</h3>
+    <p>Existem três modos para criar sequências de mensagens:</p>
+    <dl>
+        <dt>Número de mensagens</dt>
+        <dd>agrupa mensagens em sequências de um determinado comprimento. A opção <b>sobreposição</b>
+        especifica quantas mensagens no final de uma sequência devem ser
+        repetidas no início da próxima sequência.</dd>
+
+        <dt>Intervalo de tempo</dt>
+        <dd>agrupa mensagens que chegam dentro do intervalo especificado. Se não houver mensagens
+            que cheguem dentro do intervalo, o nó pode opcionalmente enviar uma mensagem vazia.</dd>
+
+        <dt>Sequências concatenadas</dt>
+        <dd>cria uma sequência de mensagens concatenando as sequências de entrada. Cada mensagem
+            deve ter uma propriedade <code>msg.topic</code> e uma propriedade <code>msg.parts</code>
+            identificando sua seqüência. O nó é configurado com uma lista de valores de <code>tópico</code>
+            para identificar em que ordem as sequências são concatenados.
+       </dd>
+    </dl>
+    <h4>Armazenamento de mensagens</h4>
+    <p>Este nó internamente armazenará de forma temporária as mensagens, para que se possam trabalhar as sequências. A
+       configuração do tempo de execução <code>nodeMessageBufferMaxLength</code> pode ser usada para limitar quantos nós de mensagens
+       irão criar este armazenamento temporário.</p>
+    <p>Se uma mensagem for recebida com a propriedade <code>msg.reset</code> definida, as mensagens no armazenamento temporário são excluídas e não enviadas.</p>
+</script>

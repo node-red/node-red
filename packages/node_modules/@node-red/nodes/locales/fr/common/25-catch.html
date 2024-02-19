@@ -1,0 +1,42 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="catch">
+    <p>Capture les erreurs générées par les noeuds sur le même onglet.</p>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>error.message <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le message d'erreur.</dd>
+        <dt>error.source.id <span class="property-type">chaîne de caractères</span></dt>
+        <dd>l'identifiant du noeud qui a lancé l'erreur.</dd>
+        <dt>error.source.type <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le type du noeud qui a lancé l'erreur.</dd>
+        <dt>error.source.name <span class="property-type">chaîne de caractères</span></dt>
+        <dd>le nom, s'il est défini, du noeud qui a lancé l'erreur.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Si un noeud génère une erreur lors du traitement d'un message, le flux sera généralement
+      arrêté. Ce noeud peut être utilisé pour intercepter ces erreurs et les gérer avec un
+      flux dédié.</p>
+    <p>Par défaut, le noeud interceptera les erreurs générées par n'importe quel noeud sur le même onglet. Alternativement
+      il peut être ciblé sur des noeuds spécifiques ou configuré pour ne détecter que les erreurs qui
+      n'ont pas déjà été capturés par un noeud de capture "ciblé".</p>
+    <p>Lorsqu'une erreur est générée, tous les noeuds Catch correspondants recevront le message.</p>
+    <p>Si une erreur est générée dans un sous-flux, l'erreur sera gérée par n'importe quel
+      noeud Catch dans le sous-flux. S'il n'en existe pas, l'erreur sera propagée
+      jusqu'à l'onglet sur lequel se trouve l'instance de sous-flux.</p>
+   <p>Si le message a déjà une propriété <code>error</code>, il est copié dans <code>_error</code>.</p>
+</script>

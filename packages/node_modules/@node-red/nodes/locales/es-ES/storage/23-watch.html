@@ -1,0 +1,30 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="watch">
+    <p>Observa un directorio o archivo en busca de cambios.</p>
+    <p>Puedes ingresar una lista de directorios y/o archivos separados por comas. Tendrás que
+      poner comillas "..." alrededor de cualquier nombre que tenga espacios</p>
+    <p>En Windows debes utilizar barras invertidas dobles \\ en cualquier nombre de directorio.</p>
+    <p>El nombre completo del archivo que realmente cambió se coloca en <code>msg.payload</code> y <code>msg.filename</code>,
+    mientras que en <code>msg.topic</code> se devuelve una versión en texto de la lista de vigilancia.</p>
+    <p><code>msg.file</code> contiene solo el nombre corto del archivo que cambió.
+    <code>msg.type</code> tiene el tipo de cosa cambiada, generalmente <i>archivo</i> o <i>directorio</i>,
+    mientras que <code>msg.size</code> contiene el tamaño del archivo en bytes.</p>
+    <p>Por supuesto, en Linux, <i>todo</i> es un archivo y, por lo tanto, se puede observar...</p>
+    <p><b>Nota: </b>El directorio o archivo debe existir para poder ser observado. Si el archivo
+    o el directorio se elimina, es posible que ya no se vigile incluso si se vuelve a crear.</p>
+</script>

@@ -1,0 +1,49 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="switch">
+    <p>Achemine les messages en fonction de leurs valeurs de propriété ou de leur position dans la séquence.</p>
+    <h3>Détails</h3>
+    <p>Lorsqu'un message arrive, le noeud évaluera chacune des règles définies
+        afin de transmettre le message aux sorties correspondantes.</p>
+    <p>Facultativement, le noeud peut être configuré pour arrêter d'évaluer les règles une fois qu'il en trouve une
+        qui correspond.</p>
+    <p>Les règles peuvent être évaluées par rapport à une propriété du message reçu, une propriété du flux ou 
+        du contexte global, variable d'environnement ou résultat d'une expression JSONata.</p>
+    <h4>Règles</h4>
+    <p>Il existe quatre types de règles :</p>
+    <ol>
+        <li><b>Les règles de valeur</b> sont évaluées par rapport à la propriété configurée</li>
+            Les règles de <li><b>séquence</b> peuvent être utilisées sur les séquences de messages, telles que celles
+            généré par le noeud Diviser</li>
+        <li>Une <b>expression</b> JSONata peut être fournie qui sera évaluée
+            par rapport à l'ensemble du message et correspondra si l'expression renvoie
+            une valeur vraie.</li>
+        <li>Une règle <b>Sinon</b> peut être utilisée si aucune des règles précédentes n'ont eu de correspondances.</li>
+    </ol>
+    <h4>Remarques</h4>
+    <p>Les règles <code>est vrai/faux</code> et <code>est nul</code> effectuent des
+        comparaisons avec ces types. Ils ne convertissent pas les types reçuent avec les types des règles.</p>
+    <p>Les règles <code>est vide</code> et <code>n'est pas vide</code> peuvent être utilisées pour tester la longueur des chaînes, des tableaux et des tampons, ou le nombre de propriétés d'un objet. Aucune règle ne passera si la propriété testée a un <code>booléen</code>, <code>null</code>
+        ou valeur <code>undefined</code>.</p>
+    <h4>Gestion des séquences de messages</h4>
+    <p>Par défaut, le noeud ne modifie pas la propriété <code>msg.parts</code> des messages
+        qui font partie d'une séquence.</p>
+    <p>L'option <b>recréer des séquences de messages</b> peut être activée pour générer de nouvelles séquences de messages
+        pour chaque règle qui correspond. Dans ce mode, le noeud mettra en mémoire tampon l'intégralité de
+        séquence avant d'envoyer les nouvelles séquences. Le paramètre d'exécution <code>nodeMessageBufferMaxLength</code>
+        peut être utilisé pour limiter le nombre de noeuds de messages mis en mémoire tampon.</p>
+</script>

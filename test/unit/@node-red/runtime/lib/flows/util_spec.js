@@ -149,7 +149,7 @@ describe('flows/util', function() {
                 {id:"t1",type:"tab"}
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"groups":{},"missingTypes":[]};
+            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"missingTypes":[]};
             parsedConfig.should.eql(expectedConfig);
         });
 
@@ -160,7 +160,7 @@ describe('flows/util', function() {
                 {id:"t1",type:"tab"}
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"groups":{},"missingTypes":[]};
+            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"},"t1":{"id":"t1","type":"tab"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"missingTypes":[]};
             parsedConfig.should.eql(expectedConfig);
         });
 
@@ -172,7 +172,7 @@ describe('flows/util', function() {
                 {id:"t2-1",x:10,y:10,z:"t2",type:"test",wires:[]}
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t2":{"id":"t2","type":"tab"},"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}},"t2":{"id":"t2","type":"tab","subflows":{},"configs":{},"nodes":{"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}}}},"groups":{},"missingTypes":[]};
+            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"t2":{"id":"t2","type":"tab"},"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}},"t2":{"id":"t2","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t2-1":{"id":"t2-1","x":10,"y":10,"z":"t2","type":"test","wires":[]}}}},"missingTypes":[]};
             parsedConfig.should.eql(expectedConfig);
         });
 
@@ -184,7 +184,7 @@ describe('flows/util', function() {
                 {id:"sf1-1",x:10,y:10,z:"sf1",type:"test",wires:[]}
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[]},"sf1":{"id":"sf1","type":"subflow"},"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"subflows":{"sf1":{"id":"sf1","type":"subflow","configs":{},"nodes":{"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"instances":[{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}]}},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}}}},"groups":{},"missingTypes":[]};
+            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[]},"sf1":{"id":"sf1","type":"subflow"},"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"subflows":{"sf1":{"id":"sf1","type":"subflow","configs":{},"groups":{},"nodes":{"sf1-1":{"id":"sf1-1","x":10,"y":10,"z":"sf1","type":"test","wires":[]}},"instances":[{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}]}},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"subflow:sf1","wires":[],"subflow":"sf1"}}}},"missingTypes":[]};
             parsedConfig.should.eql(expectedConfig);
         });
 
@@ -196,7 +196,7 @@ describe('flows/util', function() {
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
             parsedConfig.missingTypes.should.eql(['missing']);
-            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},"t1-2":{"id":"t1-2","x":10,"y":10,"z":"t1","type":"missing","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},'t1-2': { id: 't1-2', x: 10, y: 10, z: 't1', type: 'missing', wires: [] }}}},"groups":{},"missingTypes":["missing"]};
+            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},"t1-2":{"id":"t1-2","x":10,"y":10,"z":"t1","type":"missing","wires":[]}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"sf1","wires":[]},'t1-2': { id: 't1-2', x: 10, y: 10, z: 't1', type: 'missing', wires: [] }}}},"missingTypes":["missing"]};
             redUtil.compareObjects(parsedConfig,expectedConfig).should.be.true();
         });
 
@@ -206,7 +206,7 @@ describe('flows/util', function() {
                 {id:"cn",type:"test"},
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"groups":{},"missingTypes":[]};
+            var expectedConfig = {"allNodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]},"cn":{"id":"cn","type":"test"}},"subflows":{},"configs":{"cn":{"id":"cn","type":"test","_users":["t1-1"]}},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","foo":"cn","wires":[]}}}},"missingTypes":[]};
             parsedConfig.should.eql(expectedConfig);
         });
 
@@ -217,7 +217,7 @@ describe('flows/util', function() {
                 {id:"g1",type:"group",z:"t1"}
             ];
             var parsedConfig = flowUtil.parseConfig(originalConfig);
-            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"g1":{"id":"g1","type":"group","z":"t1"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"groups":{"g1":{"id":"g1","type":"group","z":"t1"}},"missingTypes":[]}
+            var expectedConfig = {"allNodes":{"t1":{"id":"t1","type":"tab"},"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]},"g1":{"id":"g1","type":"group","z":"t1"}},"subflows":{},"configs":{},"flows":{"t1":{"id":"t1","type":"tab","subflows":{},"configs":{},"groups":{"g1":{"id":"g1","type":"group","z":"t1"}},"nodes":{"t1-1":{"id":"t1-1","x":10,"y":10,"z":"t1","type":"test","wires":[]}}}},"missingTypes":[]}
             parsedConfig.should.eql(expectedConfig);
         });
 

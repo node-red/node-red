@@ -26,9 +26,9 @@ var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
 var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
+var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
 var hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
-
 
 describe('Flow', function() {
     var getType;
@@ -62,6 +62,7 @@ describe('Flow', function() {
         this.scope = n.scope;
         var node = this;
         this.foo = n.foo;
+        this.bar = n.bar;
         this.handled = 0;
         this.stopped = false;
         currentNodes[node.id] = node;
@@ -200,7 +201,7 @@ describe('Flow', function() {
     });
 
     describe('#start',function() {
-        it("instantiates an initial configuration and stops it",function(done) {
+        it("instantiates an initial configuration and stops it", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -209,49 +210,50 @@ describe('Flow', function() {
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
+            return new Promise((done) => {
+                Object.keys(flow.getActiveNodes()).should.have.length(4);
 
-            Object.keys(flow.getActiveNodes()).should.have.length(4);
+                flow.getNode('1').should.have.a.property('id','1');
+                flow.getNode('2').should.have.a.property('id','2');
+                flow.getNode('3').should.have.a.property('id','3');
+                flow.getNode('4').should.have.a.property('id','4');
 
-            flow.getNode('1').should.have.a.property('id','1');
-            flow.getNode('2').should.have.a.property('id','2');
-            flow.getNode('3').should.have.a.property('id','3');
-            flow.getNode('4').should.have.a.property('id','4');
+                currentNodes.should.have.a.property("1");
+                currentNodes.should.have.a.property("2");
+                currentNodes.should.have.a.property("3");
+                currentNodes.should.have.a.property("4");
 
-            currentNodes.should.have.a.property("1");
-            currentNodes.should.have.a.property("2");
-            currentNodes.should.have.a.property("3");
-            currentNodes.should.have.a.property("4");
+                currentNodes["1"].should.have.a.property("handled",0);
+                currentNodes["2"].should.have.a.property("handled",0);
+                currentNodes["3"].should.have.a.property("handled",0);
 
-            currentNodes["1"].should.have.a.property("handled",0);
-            currentNodes["2"].should.have.a.property("handled",0);
-            currentNodes["3"].should.have.a.property("handled",0);
+                currentNodes["3"].on("input", function() {
+                    currentNodes["1"].should.have.a.property("handled",1);
+                    currentNodes["2"].should.have.a.property("handled",1);
+                    currentNodes["3"].should.have.a.property("handled",1);
 
-            currentNodes["3"].on("input", function() {
-                currentNodes["1"].should.have.a.property("handled",1);
-                currentNodes["2"].should.have.a.property("handled",1);
-                currentNodes["3"].should.have.a.property("handled",1);
-
-                flow.stop().then(function() {
-                    try {
-                        currentNodes.should.not.have.a.property("1");
-                        currentNodes.should.not.have.a.property("2");
-                        currentNodes.should.not.have.a.property("3");
-                        currentNodes.should.not.have.a.property("4");
-                        stoppedNodes.should.have.a.property("1");
-                        stoppedNodes.should.have.a.property("2");
-                        stoppedNodes.should.have.a.property("3");
-                        stoppedNodes.should.have.a.property("4");
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
+                    flow.stop().then(function() {
+                        try {
+                            currentNodes.should.not.have.a.property("1");
+                            currentNodes.should.not.have.a.property("2");
+                            currentNodes.should.not.have.a.property("3");
+                            currentNodes.should.not.have.a.property("4");
+                            stoppedNodes.should.have.a.property("1");
+                            stoppedNodes.should.have.a.property("2");
+                            stoppedNodes.should.have.a.property("3");
+                            stoppedNodes.should.have.a.property("4");
+                            done();
+                        } catch(err) {
+                            done(err);
+                        }
+                    });
                 });
-            });
-            currentNodes["1"].receive({payload:"test"});
+                currentNodes["1"].receive({payload:"test"});
+            })
         });
 
-        it("instantiates config nodes in the right order",function(done) {
+        it("instantiates config nodes in the right order",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -261,11 +263,8 @@ describe('Flow', function() {
                 {id:"5",z:"t1",type:"test"}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
+            await flow.start();
             Object.keys(flow.getActiveNodes()).should.have.length(5);
-
-
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
@@ -278,7 +277,7 @@ describe('Flow', function() {
             currentNodes["4"].should.have.a.property("_index",1);
             currentNodes["5"].should.have.a.property("_index",0);
 
-            flow.stop().then(function() {
+            return flow.stop().then(function() {
                 currentNodes.should.not.have.a.property("1");
                 currentNodes.should.not.have.a.property("2");
                 currentNodes.should.not.have.a.property("3");
@@ -289,12 +288,11 @@ describe('Flow', function() {
                 stoppedNodes.should.have.a.property("3");
                 stoppedNodes.should.have.a.property("4");
                 stoppedNodes.should.have.a.property("5");
-                done();
             });
         });
 
 
-        it("detects dependency loops in config nodes",function() {
+        it("detects dependency loops in config nodes",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"node1",z:"t1",type:"test",foo:"node2"}, // This node depends on #5
@@ -302,12 +300,12 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
             /*jshint immed: false */
-            (function(){
-                flow.start();
-            }).should.throw("Circular config node dependency detected: node1");
+            return flow.start().catch(err => {
+                err.toString().should.equal("Error: Circular config node dependency detected: node1")
+            })
         });
 
-        it("rewires nodes specified by diff",function(done) {
+        it("rewires nodes specified by diff", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -317,16 +315,15 @@ describe('Flow', function() {
 
             var flow = Flow.create({},config,config.flows["t1"]);
             createCount.should.equal(0);
-            flow.start();
+            await flow.start();
             //TODO: use update to pass in new wiring and verify the change
             createCount.should.equal(3);
             flow.start({rewired:["2"]});
             createCount.should.equal(3);
             rewiredNodes.should.have.a.property("2");
-            done();
         });
 
-        it("instantiates a node with environment variable property values",function(done) {
+        it("instantiates a node with environment variable property values", async function() {
             after(function() {
                 delete process.env.NODE_RED_TEST_VALUE;
             })
@@ -341,7 +338,7 @@ describe('Flow', function() {
                 {id:"6",x:10,y:10,z:"t1",type:"test",foo:["$(NODE_RED_TEST_VALUE)"],wires:[]}
             ]);
             var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
 
@@ -352,12 +349,10 @@ describe('Flow', function() {
             activeNodes["5"].foo.should.equal("$(NODE_RED_TEST_VALUE_NONE)");
             activeNodes["6"].foo[0].should.equal("a-value");
 
-            flow.stop().then(function() {
-                done();
-            });
+            await flow.stop()
         });
 
-        it("ignores disabled nodes",function(done) {
+        it("ignores disabled nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -368,7 +363,7 @@ describe('Flow', function() {
 
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             Object.keys(flow.getActiveNodes()).should.have.length(3);
 
@@ -387,28 +382,20 @@ describe('Flow', function() {
             currentNodes["3"].should.have.a.property("handled",0);
 
             currentNodes["1"].receive({payload:"test"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["1"].should.have.a.property("handled",1);
+            // Message doesn't reach 3 as 2 is disabled
+            currentNodes["3"].should.have.a.property("handled",0);
 
-            setTimeout(function() {
-                currentNodes["1"].should.have.a.property("handled",1);
-                // Message doesn't reach 3 as 2 is disabled
-                currentNodes["3"].should.have.a.property("handled",0);
-
-                flow.stop().then(function() {
-                    try {
-                        currentNodes.should.not.have.a.property("1");
-                        currentNodes.should.not.have.a.property("2");
-                        currentNodes.should.not.have.a.property("3");
-                        currentNodes.should.not.have.a.property("4");
-                        stoppedNodes.should.have.a.property("1");
-                        stoppedNodes.should.not.have.a.property("2");
-                        stoppedNodes.should.have.a.property("3");
-                        stoppedNodes.should.have.a.property("4");
-                        done();
-                    } catch(err) {
-                        done(err);
-                    }
-                });
-            },50);
+            await flow.stop()
+            currentNodes.should.not.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.not.have.a.property("3");
+            currentNodes.should.not.have.a.property("4");
+            stoppedNodes.should.have.a.property("1");
+            stoppedNodes.should.not.have.a.property("2");
+            stoppedNodes.should.have.a.property("3");
+            stoppedNodes.should.have.a.property("4");
         });
 
     });
@@ -416,7 +403,7 @@ describe('Flow', function() {
     describe('#stop', function() {
 
 
-        it("stops all nodes",function(done) {
+        it("stops all nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -424,25 +411,21 @@ describe('Flow', function() {
                 {id:"3",x:10,y:10,z:"t1",type:"asyncTest",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
-
+            await flow.start();
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
 
-            flow.stop().then(function() {
-                currentNodes.should.not.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.not.have.a.property("3");
-                stoppedNodes.should.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-                done();
-            }).catch(done);
+            await flow.stop()
+            currentNodes.should.not.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.not.have.a.property("3");
+            stoppedNodes.should.have.a.property("1");
+            stoppedNodes.should.have.a.property("2");
+            stoppedNodes.should.have.a.property("3");
         });
 
-        it("stops specified nodes",function(done) {
+        it("stops specified nodes", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -450,24 +433,21 @@ describe('Flow', function() {
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
+            await flow.start();
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
 
-            flow.stop(["2"]).then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.have.a.property("3");
-                stoppedNodes.should.not.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.not.have.a.property("3");
-                done();
-            });
+            await flow.stop(["2"])
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.have.a.property("3");
+            stoppedNodes.should.not.have.a.property("1");
+            stoppedNodes.should.have.a.property("2");
+            stoppedNodes.should.not.have.a.property("3");
         });
 
-        it("stops config nodes last",function(done) {
+        it("stops config nodes last", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -478,7 +458,7 @@ describe('Flow', function() {
                 {id:"c3",z:"t1",type:"test"}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
@@ -488,14 +468,12 @@ describe('Flow', function() {
             currentNodes.should.have.a.property("c3");
             stoppedOrder.should.have.a.length(0);
 
-            flow.stop().then(function() {
-                stoppedOrder.should.eql([ '1', '2', '3', 'c1', 'c2', 'c3' ]);
-                done();
-            }).catch(done);
+            await flow.stop()
+            stoppedOrder.should.eql([ '1', '2', '3', 'c1', 'c2', 'c3' ]);
         });
 
 
-        it("Times out a node that fails to close", function(done) {
+        it("Times out a node that fails to close", async function() {
             Flow.init({settings:{nodeCloseTimeout:50},log:{
                 log: sinon.stub(),
                 debug: sinon.stub(),
@@ -512,31 +490,28 @@ describe('Flow', function() {
                 {id:"3",x:10,y:10,z:"t1",type:"test",foo:"a",wires:[]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             currentNodes.should.have.a.property("1");
             currentNodes.should.have.a.property("2");
             currentNodes.should.have.a.property("3");
 
-            flow.stop().then(function() {
-                currentNodes.should.have.a.property("1");
-                currentNodes.should.not.have.a.property("2");
-                currentNodes.should.not.have.a.property("3");
-                stoppedNodes.should.not.have.a.property("1");
-                stoppedNodes.should.have.a.property("2");
-                stoppedNodes.should.have.a.property("3");
-                setTimeout(function() {
-                    currentNodes.should.not.have.a.property("1");
-                    stoppedNodes.should.have.a.property("1");
-                    done();
-                },40)
-            });
+            await flow.stop()
+            currentNodes.should.have.a.property("1");
+            currentNodes.should.not.have.a.property("2");
+            currentNodes.should.not.have.a.property("3");
+            stoppedNodes.should.not.have.a.property("1");
+            stoppedNodes.should.have.a.property("2");
+            stoppedNodes.should.have.a.property("3");
+            await NR_TEST_UTILS.sleep(40)
+            currentNodes.should.not.have.a.property("1");
+            stoppedNodes.should.have.a.property("1");
         });
 
     });
 
     describe('#getNode',function() {
-        it("gets a node known to the flow",function(done) {
+        it("gets a node known to the flow", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -545,16 +520,13 @@ describe('Flow', function() {
                 {id:"4",z:"t1",type:"test",foo:"a"}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
+            await flow.start();
             Object.keys(flow.getActiveNodes()).should.have.length(4);
-
             flow.getNode('1').should.have.a.property('id','1');
-
-            flow.stop().then(() => { done() });
+            await flow.stop();
         });
 
-        it("passes to parent if node not known locally",function(done) {
+        it("passes to parent if node not known locally", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -565,19 +537,14 @@ describe('Flow', function() {
             var flow = Flow.create({
                 getNode: id => { return {id:id}}
             },config,config.flows["t1"]);
-            flow.start();
-
+            await flow.start();
             Object.keys(flow.getActiveNodes()).should.have.length(4);
-
             flow.getNode('1').should.have.a.property('id','1');
-
             flow.getNode('parentNode').should.have.a.property('id','parentNode');
-
-
-            flow.stop().then(() => { done() });
+            await flow.stop()
         });
 
-        it("does not pass to parent if cancelBubble set",function(done) {
+        it("does not pass to parent if cancelBubble set", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
@@ -588,19 +555,16 @@ describe('Flow', function() {
             var flow = Flow.create({
                 getNode: id => { return {id:id}}
             },config,config.flows["t1"]);
-            flow.start();
-
+            await flow.start();
             Object.keys(flow.getActiveNodes()).should.have.length(4);
-
             flow.getNode('1').should.have.a.property('id','1');
-
             should.not.exist(flow.getNode('parentNode',true));
-            flow.stop().then(() => { done() });
+            await flow.stop()
         });
     });
 
     describe("#handleStatus",function() {
-        it("passes a status event to the adjacent status node",function(done) {
+        it("passes a status event to the adjacent status node", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -611,44 +575,34 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
             Object.keys(activeNodes).should.have.length(5);
 
 
             flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status",random:"otherProperty"});
-
-            setTimeout(function() {
-
-                currentNodes["sn"].should.have.a.property("handled",1);
-                var statusMessage = currentNodes["sn"].messages[0];
-
-                statusMessage.should.have.a.property("status");
-                statusMessage.status.should.have.a.property("text","my-status");
-                statusMessage.status.should.have.a.property("source");
-                statusMessage.status.source.should.have.a.property("id","1");
-                statusMessage.status.source.should.have.a.property("type","test");
-                statusMessage.status.source.should.have.a.property("name","a");
-
-                currentNodes["sn2"].should.have.a.property("handled",1);
-                statusMessage = currentNodes["sn2"].messages[0];
-
-                statusMessage.should.have.a.property("status");
-                statusMessage.status.should.have.a.property("text","my-status");
-                statusMessage.status.should.have.a.property("random","otherProperty");
-                statusMessage.status.should.have.a.property("source");
-                statusMessage.status.source.should.have.a.property("id","1");
-                statusMessage.status.source.should.have.a.property("type","test");
-                statusMessage.status.source.should.have.a.property("name","a");
-
-
-                flow.stop().then(function() {
-                    done();
-                });
-            },50)
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            statusMessage = currentNodes["sn2"].messages[0];
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("random","otherProperty");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+            await flow.stop()
         });
-        it("passes a status event to the adjacent scoped status node ",function(done) {
+        it("passes a status event to the adjacent scoped status node ", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -659,37 +613,60 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
             Object.keys(activeNodes).should.have.length(5);
 
-
             flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
 
-            setTimeout(function() {
-                currentNodes["sn"].should.have.a.property("handled",0);
-                currentNodes["sn2"].should.have.a.property("handled",1);
-                var statusMessage = currentNodes["sn2"].messages[0];
-
-                statusMessage.should.have.a.property("status");
-                statusMessage.status.should.have.a.property("text","my-status");
-                statusMessage.status.should.have.a.property("source");
-                statusMessage.status.source.should.have.a.property("id","1");
-                statusMessage.status.source.should.have.a.property("type","test");
-                statusMessage.status.source.should.have.a.property("name","a");
-
-
-                flow.stop().then(function() {
-                    done();
-                });
-            },50);
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn2"].messages[0];
+            statusMessage.should.have.a.property("status");
+            statusMessage.status.should.have.a.property("text","my-status");
+            statusMessage.status.should.have.a.property("source");
+            statusMessage.status.source.should.have.a.property("id","1");
+            statusMessage.status.source.should.have.a.property("type","test");
+            statusMessage.status.source.should.have.a.property("name","a");
+            await flow.stop()
         });
 
+        it("passes a status event to the group scoped status node", async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3", z:"t1" },
+                {id: "g2", type: "group", z:"t1" },
+                {id: "g3", type: "group", z:"t1" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"status",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"status",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"status",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            flow.handleStatus(config.flows["t1"].nodes["1"],{text:"my-status"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",1);
+            currentNodes["sn2"].should.have.a.property("handled",0);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            await flow.stop()
+        });
     });
 
     describe("#handleError",function() {
-        it("passes an error event to the adjacent catch node",function(done) {
+        it("passes an error event to the adjacent catch node", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -701,45 +678,38 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
             Object.keys(activeNodes).should.have.length(6);
-
-
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
 
-            setTimeout(function() {
-                currentNodes["sn"].should.have.a.property("handled",1);
-                var statusMessage = currentNodes["sn"].messages[0];
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
 
-                statusMessage.should.have.a.property("error");
-                statusMessage.error.should.have.a.property("message","my-error");
-                statusMessage.error.should.have.a.property("source");
-                statusMessage.error.source.should.have.a.property("id","1");
-                statusMessage.error.source.should.have.a.property("type","test");
-                statusMessage.error.source.should.have.a.property("name","a");
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            statusMessage = currentNodes["sn2"].messages[0];
 
-                currentNodes["sn2"].should.have.a.property("handled",1);
-                statusMessage = currentNodes["sn2"].messages[0];
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
 
-                statusMessage.should.have.a.property("error");
-                statusMessage.error.should.have.a.property("message","my-error");
-                statusMessage.error.should.have.a.property("source");
-                statusMessage.error.source.should.have.a.property("id","1");
-                statusMessage.error.source.should.have.a.property("type","test");
-                statusMessage.error.source.should.have.a.property("name","a");
-
-                // Node sn3 has uncaught:true - so should not get called
-                currentNodes["sn3"].should.have.a.property("handled",0);
-
-
-                flow.stop().then(function() {
-                    done();
-                });
-            },50);
+            // Node sn3 has uncaught:true - so should not get called
+            currentNodes["sn3"].should.have.a.property("handled",0);
+            await flow.stop()
         });
-        it("passes an error event to the adjacent scoped catch node ",function(done) {
+
+        it("passes an error event to the adjacent scoped catch node ", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -752,51 +722,77 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
             Object.keys(activeNodes).should.have.length(7);
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn2"].messages[0];
 
-            setTimeout(function() {
-                currentNodes["sn"].should.have.a.property("handled",0);
-                currentNodes["sn2"].should.have.a.property("handled",1);
-                var statusMessage = currentNodes["sn2"].messages[0];
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
 
-                statusMessage.should.have.a.property("error");
-                statusMessage.error.should.have.a.property("message","my-error");
-                statusMessage.error.should.have.a.property("source");
-                statusMessage.error.source.should.have.a.property("id","1");
-                statusMessage.error.source.should.have.a.property("type","test");
-                statusMessage.error.source.should.have.a.property("name","a");
+            // Node sn3/4 have uncaught:true - so should not get called
+            currentNodes["sn3"].should.have.a.property("handled",0);
+            currentNodes["sn4"].should.have.a.property("handled",0);
 
-                // Node sn3/4 have uncaught:true - so should not get called
-                currentNodes["sn3"].should.have.a.property("handled",0);
-                currentNodes["sn4"].should.have.a.property("handled",0);
+            // Inject error that sn1/2 will ignore - so should get picked up by sn3
+            flow.handleError(config.flows["t1"].nodes["3"],"my-error-2",{a:"foo-2"});
 
-                // Inject error that sn1/2 will ignore - so should get picked up by sn3
-                flow.handleError(config.flows["t1"].nodes["3"],"my-error-2",{a:"foo-2"});
-                setTimeout(function() {
-                    currentNodes["sn"].should.have.a.property("handled",0);
-                    currentNodes["sn2"].should.have.a.property("handled",1);
-                    currentNodes["sn3"].should.have.a.property("handled",1);
-                    currentNodes["sn4"].should.have.a.property("handled",1);
-
-                    statusMessage = currentNodes["sn3"].messages[0];
-                    statusMessage.should.have.a.property("error");
-                    statusMessage.error.should.have.a.property("message","my-error-2");
-                    statusMessage.error.should.have.a.property("source");
-                    statusMessage.error.source.should.have.a.property("id","3");
-                    statusMessage.error.source.should.have.a.property("type","test");
-
-                    flow.stop().then(function() {
-                        done();
-                    });
-                },50);
-            },50);
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",0);
+            currentNodes["sn2"].should.have.a.property("handled",1);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            currentNodes["sn4"].should.have.a.property("handled",1);
+            statusMessage = currentNodes["sn3"].messages[0];
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error-2");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","3");
+            statusMessage.error.source.should.have.a.property("type","test");
+            await flow.stop()
         });
-        it("moves any existing error object sideways",function(done){
+        it("passes an error event to the group scoped catch node",async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id: "g1", type: "group", g: "g3", z:"t1" },
+                {id: "g2", type: "group", z:"t1" },
+                {id: "g3", type: "group", z:"t1" },
+                {id:"1",x:10,y:10,z:"t1",g:"g1", type:"test",name:"a",wires:["2"]},
+                // sn - in the same group as source node
+                {id:"sn",x:10,y:10,z:"t1",g:"g1", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy to the source node
+                {id:"sn2",x:10,y:10,z:"t1", g:"g2", type:"catch",scope:"group",wires:[]},
+                // sn3 - in a higher-level group to the source node
+                {id:"sn3",x:10,y:10,z:"t1", g:"g3", type:"catch",scope:"group",wires:[]},
+                // sn2 - in a different group hierarchy, but not scope to the group
+                {id:"sn4",x:10,y:10,z:"t1", g:"g2", type:"catch",wires:[]},
+                
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo"});
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",1);
+            currentNodes["sn2"].should.have.a.property("handled",0);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            currentNodes["sn3"].should.have.a.property("handled",1);
+            await flow.stop()
+        });
+
+        it("moves any existing error object sideways", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",name:"a",wires:["2"]},
@@ -806,33 +802,30 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
 
             flow.handleError(config.flows["t1"].nodes["1"],"my-error",{a:"foo",error:"existing"});
-            setTimeout(function() {
-                currentNodes["sn"].should.have.a.property("handled",1);
-                var statusMessage = currentNodes["sn"].messages[0];
+            await NR_TEST_UTILS.sleep(50)
+            currentNodes["sn"].should.have.a.property("handled",1);
+            var statusMessage = currentNodes["sn"].messages[0];
 
-                statusMessage.should.have.a.property("_error","existing");
-                statusMessage.should.have.a.property("error");
-                statusMessage.error.should.have.a.property("message","my-error");
-                statusMessage.error.should.have.a.property("source");
-                statusMessage.error.source.should.have.a.property("id","1");
-                statusMessage.error.source.should.have.a.property("type","test");
-                statusMessage.error.source.should.have.a.property("name","a");
+            statusMessage.should.have.a.property("_error","existing");
+            statusMessage.should.have.a.property("error");
+            statusMessage.error.should.have.a.property("message","my-error");
+            statusMessage.error.should.have.a.property("source");
+            statusMessage.error.source.should.have.a.property("id","1");
+            statusMessage.error.source.should.have.a.property("type","test");
+            statusMessage.error.source.should.have.a.property("name","a");
 
-                flow.stop().then(function() {
-                    done();
-                });
-            },50);
+            await flow.stop()
         });
         it("prevents an error looping more than 10 times",function(){});
     });
 
     describe("#handleComplete",function() {
-        it("passes a complete event to the adjacent Complete node",function(done) {
+        it("passes a complete event to the adjacent Complete node",async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"testDone",name:"a",wires:["2"]},
@@ -842,143 +835,154 @@ describe('Flow', function() {
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
 
-            flow.start();
+            await flow.start();
 
             var activeNodes = flow.getActiveNodes();
             Object.keys(activeNodes).should.have.length(4);
 
             var msg = {payload: "hello world"}
             var n1 = currentNodes["1"].receive(msg);
-            setTimeout(function() {
-                currentNodes["cn"].should.have.a.property("handled",2);
-                currentNodes["cn"].messages[0].should.have.a.property("handled",1);
-                currentNodes["cn"].messages[1].should.have.a.property("handled",2);
-                flow.stop().then(function() {
-                    done();
-                });
-            },50);
+            await NR_TEST_UTILS.sleep(50)
+
+            currentNodes["cn"].should.have.a.property("handled",2);
+            currentNodes["cn"].messages[0].should.have.a.property("handled",1);
+            currentNodes["cn"].messages[1].should.have.a.property("handled",2);
+            await flow.stop()
         });
     });
 
 
     describe("#send", function() {
-        it("sends a message - no cloning", function(done) {
-            var shutdownTest = function(err) {
-                hooks.clear();
-                flow.stop().then(() => { done(err) });
-            }
+        it("sends a message - no cloning", async function() {
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
                 {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             Object.keys(flow.getActiveNodes()).should.have.length(2);
 
             var n1 = flow.getNode('1');
             var n2 = flow.getNode('2');
             var messageReceived = false;
-            n2.receive = function(msg) {
-                messageReceived = true;
-                try {
-                    msg.should.be.exactly(message);
-                    shutdownTest();
-                } catch(err) {
-                    shutdownTest(err);
+
+            return new Promise((resolve, reject) => {
+                const shutdownTest = async function(err) {
+                    hooks.clear();
+                    await flow.stop()
+                    if (err) { reject(err) }
+                    else { resolve() }
                 }
-            }
-
-            var message = {payload:"hello"}
-            flow.send([{
-                msg: message,
-                source: { id:"1", node: n1 },
-                destination: { id:"2", node: undefined },
-                cloneMessage: false
-            }])
-            messageReceived.should.be.false()
-        })
-        it("sends a message - cloning", function(done) {
-            var shutdownTest = function(err) {
-                hooks.clear();
-                flow.stop().then(() => { done(err) });
-            }
-            var config = flowUtils.parseConfig([
-                {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
-            ]);
-            var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
-            Object.keys(flow.getActiveNodes()).should.have.length(2);
-
-            var n1 = flow.getNode('1');
-            var n2 = flow.getNode('2');
-
-            n2.receive = function(msg) {
-                try {
-                    // Message should be cloned
-                    msg.should.be.eql(message);
-                    msg.should.not.be.exactly(message);
-                    shutdownTest();
-                } catch(err) {
-                    shutdownTest(err);
-                }
-            }
-
-            var message = {payload:"hello"}
-            flow.send([{
-                msg: message,
-                source: { id:"1", node: n1 },
-                destination: { id:"2", node: undefined },
-                cloneMessage: true
-            }])
-        })
-        it("sends multiple messages", function(done) {
-            var shutdownTest = function(err) {
-                hooks.clear();
-                flow.stop().then(() => { done(err) });
-            }
-            var config = flowUtils.parseConfig([
-                {id:"t1",type:"tab"},
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
-                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
-            ]);
-            var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
-
-            Object.keys(flow.getActiveNodes()).should.have.length(2);
-
-            var n1 = flow.getNode('1');
-            var n2 = flow.getNode('2');
-
-            var messageCount = 0;
-            n2.receive = function(msg) {
-                try {
-                    msg.should.be.exactly(messages[messageCount++]);
-                    if (messageCount === 2) {
+                n2.receive = function(msg) {
+                    messageReceived = true;
+                    try {
+                        msg.should.be.exactly(message);
                         shutdownTest();
+                    } catch(err) {
+                        shutdownTest(err);
                     }
-                } catch(err) {
-                    shutdownTest(err);
                 }
-            }
 
-            var messages = [{payload:"hello"},{payload:"world"}];
-
-            flow.send([{
-                msg: messages[0],
-                source: { id:"1", node: n1 },
-                destination: { id:"2", node: undefined }
-            },{
-                msg: messages[1],
-                source: { id:"1", node: n1 },
-                destination: { id:"2", node: undefined }
-            }])
+                var message = {payload:"hello"}
+                flow.send([{
+                    msg: message,
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined },
+                    cloneMessage: false
+                }])
+                messageReceived.should.be.false()
+            })
         })
-        it("sends a message - triggers hooks", function(done) {
+        it("sends a message - cloning", async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            await flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+
+            return new Promise((resolve, reject) => {
+                const shutdownTest = async function(err) {
+                    hooks.clear();
+                    await flow.stop()
+                    if (err) { reject(err) }
+                    else { resolve() }
+                }
+                n2.receive = function(msg) {
+                    try {
+                        // Message should be cloned
+                        msg.should.be.eql(message);
+                        msg.should.not.be.exactly(message);
+                        shutdownTest();
+                    } catch(err) {
+                        shutdownTest(err);
+                    }
+                }
+
+                var message = {payload:"hello"}
+                flow.send([{
+                    msg: message,
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined },
+                    cloneMessage: true
+                }])
+            })
+        })
+        it("sends multiple messages", async function() {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab"},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
+                {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
+            ]);
+            var flow = Flow.create({},config,config.flows["t1"]);
+            await flow.start();
+
+            Object.keys(flow.getActiveNodes()).should.have.length(2);
+
+            var n1 = flow.getNode('1');
+            var n2 = flow.getNode('2');
+            return new Promise((resolve, reject) => {
+                const shutdownTest = async function(err) {
+                    hooks.clear();
+                    await flow.stop()
+                    if (err) { reject(err) }
+                    else { resolve() }
+                }
+                var messageCount = 0;
+                n2.receive = function(msg) {
+                    try {
+                        msg.should.be.exactly(messages[messageCount++]);
+                        if (messageCount === 2) {
+                            shutdownTest();
+                        }
+                    } catch(err) {
+                        shutdownTest(err);
+                    }
+                }
+
+                var messages = [{payload:"hello"},{payload:"world"}];
+
+                flow.send([{
+                    msg: messages[0],
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined }
+                },{
+                    msg: messages[1],
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined }
+                }])
+            })  
+        })
+        it("sends a message - triggers hooks", async function() {
+            const message = {payload:"hello"}
             var hookErrors = [];
             var messageReceived = false;
             var hooksCalled = [];
@@ -1026,45 +1030,49 @@ describe('Flow', function() {
                 }
 
             })
-            var shutdownTest = function(err) {
-                hooks.clear();
-                flow.stop().then(() => { done(err) });
-            }
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab"},
                 {id:"1",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["2"]},
                 {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
             ]);
             var flow = Flow.create({},config,config.flows["t1"]);
-            flow.start();
+            await flow.start();
 
             Object.keys(flow.getActiveNodes()).should.have.length(2);
 
             var n1 = flow.getNode('1');
             var n2 = flow.getNode('2');
-            n2.receive = function(msg) {
-                messageReceived = true;
-                try {
-                    msg.should.be.eql(message);
-                    msg.should.not.be.exactly(message);
-                    hooksCalled.should.eql(["onSend","preRoute","preDeliver","postDeliver"])
-                    if (hookErrors.length > 0) {
-                        shutdownTest(hookErrors[0])
-                    } else {
-                        shutdownTest();
-                    }
-                } catch(err) {
-                    shutdownTest(err);
+            return new Promise((resolve, reject) => {
+                const shutdownTest = async function(err) {
+                    hooks.clear();
+                    await flow.stop()
+                    if (err) { reject(err) }
+                    else { resolve() }
                 }
-            }
+                n2.receive = function(msg) {
+                    messageReceived = true;
+                    try {
+                        msg.should.be.eql(message);
+                        msg.should.not.be.exactly(message);
+                        hooksCalled.should.eql(["onSend","preRoute","preDeliver","postDeliver"])
+                        if (hookErrors.length > 0) {
+                            shutdownTest(hookErrors[0])
+                        } else {
+                            shutdownTest();
+                        }
+                    } catch(err) {
+                        shutdownTest(err);
+                    }
+                }
 
-            var message = {payload:"hello"}
-            flow.send([{
-                msg: message,
-                source: { id:"1", node: n1 },
-                destination: { id:"2", node: undefined },
-                cloneMessage: true
-            }])
+                
+                flow.send([{
+                    msg: message,
+                    source: { id:"1", node: n1 },
+                    destination: { id:"2", node: undefined },
+                    cloneMessage: true
+                }])
+            })
         })
 
         describe("errors thrown by hooks are reported to the sending node", function() {
@@ -1072,7 +1080,7 @@ describe('Flow', function() {
             var n1,n2;
             var messageReceived = false;
             var errorReceived = null;
-            before(function() {
+            before(async function() {
                 hooks.add("onSend", function(sendEvents) {
                     if (sendEvents[0].msg.payload === "trigger-onSend") {
                         throw new Error("onSend Error");
@@ -1099,7 +1107,7 @@ describe('Flow', function() {
                     {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
                 ]);
                 flow = Flow.create({},config,config.flows["t1"]);
-                flow.start();
+                await flow.start();
                 n1 = flow.getNode('1');
                 n2 = flow.getNode('2');
                 n2.receive = function(msg) {
@@ -1110,9 +1118,9 @@ describe('Flow', function() {
                 }
 
             })
-            after(function(done) {
+            after(async function() {
                 hooks.clear();
-                flow.stop().then(() => { done() });
+                await flow.stop()
             })
             beforeEach(function() {
                 messageReceived = false;
@@ -1149,7 +1157,7 @@ describe('Flow', function() {
             var n1,n2;
             var messageReceived = false;
             var errorReceived = false;
-            before(function() {
+            before(async function() {
                 hooks.add("onSend", function(sendEvents) {
                     if (sendEvents[0].msg.payload === "trigger-onSend") {
                         return false
@@ -1176,7 +1184,7 @@ describe('Flow', function() {
                     {id:"2",x:10,y:10,z:"t1",type:"test",foo:"a",wires:["3"]}
                 ]);
                 flow = Flow.create({},config,config.flows["t1"]);
-                flow.start();
+                await flow.start();
                 n1 = flow.getNode('1');
                 n2 = flow.getNode('2');
                 n2.receive = function(msg) {
@@ -1187,9 +1195,9 @@ describe('Flow', function() {
                 }
 
             })
-            after(function(done) {
+            after(async function() {
                 hooks.clear();
-                flow.stop().then(() => { done() });
+                await flow.stop()
             })
             function testSend(payload,messageReceivedExpected,errorReceivedExpected,done) {
                 messageReceived = false;
@@ -1229,99 +1237,163 @@ describe('Flow', function() {
     })
 
     describe("#env", function () {
-        it("can instantiate a node with environment variable property values of group and tab", function (done) {
-            try {
-                after(function() {
-                    delete process.env.V0;
-                    delete process.env.V1;
-                })
-                process.env.V0 = "gv0";
-                process.env.V1 = "gv1";
-                var config = flowUtils.parseConfig([
-                    {id:"t1",type:"tab",env:[
-                        {"name": "V0", value: "v0", type: "str"}
-                    ]},
-                    {id:"g1",type:"group",z:"t1",env:[
-                        {"name": "V0", value: "v1", type: "str"},
-                        {"name": "V1", value: "v2", type: "str"}
-                    ]},
-                    {id:"g2",type:"group",z:"t1",g:"g1",env:[
-                        {"name": "V1", value: "v3", type: "str"}
-                    ]},
-                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"$(V0)",wires:[]},
-                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
-                    {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
-                    {id:"4",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"$(V1)",wires:[]},
-                    {id:"5",x:10,y:10,z:"t1",type:"test",foo:"$(V1)",wires:[]},
-                ]);
-                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
-                flow.start();
+        afterEach(() => {
+            delete process.env.V0;
+            delete process.env.V1;
+            credentials.get.restore?.()
+        })
+        it("can instantiate a node with environment variable property values of group and tab", async function () {
+            process.env.V0 = "gv0";
+            process.env.V1 = "gv1";
+            process.env.V3 = "gv3";
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab",env:[
+                    {"name": "V0", value: "t1v0", type: "str"},
+                    {"name": "V2", value: "t1v2", type: "str"}
+                ]},
+                {id:"g1",type:"group",z:"t1",env:[
+                    {"name": "V0", value: "g1v0", type: "str"},
+                    {"name": "V1", value: "g1v1", type: "str"}
+                ]},
+                {id:"g2",type:"group",z:"t1",g:"g1",env:[
+                    {"name": "V1", value: "g2v1", type: "str"}
+                ]},
+                {id:"t1__V0",x:10,y:10,z:"t1",type:"test",foo:"${V0}",wires:[]}, // V0 will come from tab env V0
+                {id:"t1g1V0",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${V0}",wires:[]}, // V0 will come from group 1 env V0
+                {id:"t1g1V1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${V1}",wires:[]}, // V1 will come from group 1 env V1
+                {id:"t1g2V0",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V0}",wires:[]}, // V0 will come from group 1 env V0
+                {id:"t1g2V1",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V1}",wires:[]}, // V1 will come from group 2 env V1
+                {id:"t1g2V2",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V2}",wires:[]}, // V2 will come from tab 1 env V2
+                {id:"t1g2V3",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${V3}",wires:[]}, // V3 will come from process env V3
 
-                var activeNodes = flow.getActiveNodes();
+                {id:"t1__V1",x:10,y:10,z:"t1",type:"test",foo:"${V1}",wires:[]},
+            ]);
+            var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+            await flow.start();
 
-                activeNodes["1"].foo.should.equal("v0");
-                activeNodes["2"].foo.should.equal("v1");
-                activeNodes["3"].foo.should.equal("v2");
-                activeNodes["4"].foo.should.equal("v3");
-                activeNodes["5"].foo.should.equal("gv1");
+            var activeNodes = flow.getActiveNodes();
 
-                flow.stop().then(function() {
-                    done();
-                });
-            }
-            catch (e) {
-                console.log(e.stack);
-                done(e);
-            }
-                
-        });
-        it("can access environment variable property using $parent", function (done) {
-            try {
-                after(function() {
-                    delete process.env.V0;
-                    delete process.env.V1;
-                })
-                process.env.V0 = "gv0";
-                process.env.V1 = "gv1";
-                var config = flowUtils.parseConfig([
-                    {id:"t1",type:"tab",env:[
-                        {"name": "V0", value: "v0", type: "str"}
-                    ]},
-                    {id:"g1",type:"group",z:"t1",env:[
-                        {"name": "V0", value: "v1", type: "str"},
-                        {"name": "V1", value: "v2", type: "str"}
-                    ]},
-                    {id:"g2",type:"group",z:"t1",g:"g1",env:[
-                        {"name": "V1", value: "v3", type: "str"}
-                    ]},
-                    {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${$parent.V0}",wires:[]},
-                    {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${$parent.V0}",wires:[]},
-                    {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${$parent.V1}",wires:[]},
-                    {id:"4",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${$parent.V1}",wires:[]},
-                    {id:"5",x:10,y:10,z:"t1",type:"test",foo:"${$parent.V1}",wires:[]},
-                ]);
-                var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
-                flow.start();
+            activeNodes.t1__V0.foo.should.equal("t1v0"); // node in tab 1, get tab 1 env V0
+            activeNodes.t1__V1.foo.should.equal("gv1"); // node in tab 1, get V1, (tab 1 no V1) --> parent (global has V1)
+            activeNodes.t1g1V0.foo.should.equal("g1v0"); // node in group 1, get V0, (group 1 has V0)
+            activeNodes.t1g1V1.foo.should.equal("g1v1"); // node in group 1, get V1, (group 1 has V1)
+            activeNodes.t1g2V0.foo.should.equal("g1v0"); // node in group 2, get V0, (group 2 no V0) --> parent (group 1 has V0)
+            activeNodes.t1g2V1.foo.should.equal("g2v1"); // node in group 2, get V1, (group 2 has V1)
+            activeNodes.t1g2V2.foo.should.equal("t1v2"); // node in group 2, get V2, (group 2 no V2) --> parent (tab 1 has V2)
+            activeNodes.t1g2V3.foo.should.equal("gv3"); // node in group 2, get V3, (group 2 no V3) --> parent (tab 1 no V2) --> parent (global has V3)
 
-                var activeNodes = flow.getActiveNodes();
-
-                activeNodes["1"].foo.should.equal("gv0");
-                activeNodes["2"].foo.should.equal("v0");
-                activeNodes["3"].foo.should.equal("gv1");
-                activeNodes["4"].foo.should.equal("v2");
-                activeNodes["5"].foo.should.equal("gv1");
-
-                flow.stop().then(function() {
-                    done();
-                });
-            }
-            catch (e) {
-                console.log(e.stack);
-                done(e);
-            }
-                
+            await flow.stop()
         });
 
+        it("can access environment variable property using $parent", async function () {
+            process.env.V0 = "gv0";
+            process.env.V1 = "gv1";
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab",env:[
+                    {"name": "V0", value: "v0", type: "str"}
+                ]},
+                {id:"g1",type:"group",z:"t1",env:[
+                    {"name": "V0", value: "v1", type: "str"},
+                    {"name": "V1", value: "v2", type: "str"}
+                ]},
+                {id:"g2",type:"group",z:"t1",g:"g1",env:[
+                    {"name": "V1", value: "v3", type: "str"}
+                ]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${$parent.V0}",wires:[]},
+                {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${$parent.V0}",wires:[]},
+                {id:"3",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"${$parent.V1}",wires:[]},
+                {id:"4",x:10,y:10,z:"t1",g:"g2",type:"test",foo:"${$parent.V1}",wires:[]},
+                {id:"5",x:10,y:10,z:"t1",type:"test",foo:"${$parent.V1}",wires:[]},
+            ]);
+            var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].foo.should.equal("gv0");
+            activeNodes["2"].foo.should.equal("v0");
+            activeNodes["3"].foo.should.equal("gv1");
+            activeNodes["4"].foo.should.equal("v2");
+            activeNodes["5"].foo.should.equal("gv1");
+
+            await flow.stop()
+        });
+
+        it("can define environment variable using JSONata", async function () {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab",env:[
+                    {"name": "V0", value: "1+2", type: "jsonata"}
+                ]},
+                {id:"g1",type:"group",z:"t1",env:[
+                    {"name": "V1", value: "2+3", type: "jsonata"},
+                ]},
+                {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+            ]);
+            var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].foo.should.equal(3);
+            activeNodes["2"].foo.should.equal(5);
+
+            await flow.stop()
+        });
+
+        it("can access global environment variables defined as JSONata values", async function () {
+            var config = flowUtils.parseConfig([
+                {id:"t1",type:"tab",env:[
+                    {"name": "V0", value: "1+2", type: "jsonata"}
+                ]},
+                {id:"g1",type:"group",z:"t1",env:[
+                    {"name": "V1", value: "2+3", type: "jsonata"},
+                ]},
+                {id:"1",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V0)",wires:[]},
+                {id:"2",x:10,y:10,z:"t1",g:"g1",type:"test",foo:"$(V1)",wires:[]},
+            ]);
+            var flow = Flow.create({getSetting:v=>process.env[v]},config,config.flows["t1"]);
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+
+            activeNodes["1"].foo.should.equal(3);
+            activeNodes["2"].foo.should.equal(5);
+
+            await flow.stop()
+        });
+        it("global flow can access global-config defined environment variables", async function () {
+            sinon.stub(credentials,"get").callsFake(function(id) {
+                if (id === 'gc') {
+                    return { map: { GC_CRED: 'gc_cred' }}
+                }
+                return null
+            })
+
+            const config = flowUtils.parseConfig([
+                {id:"gc", type:"global-config", env:[
+                    {"name": "GC0", value: "3+4", type: "jsonata"},
+                    {"name": "GC_CRED", type: "cred"},
+                    
+                ]},
+                {id:"t1",type:"tab" },
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${GC0}", bar:"${GC_CRED}", wires:[]},
+            ]);
+            // Two-arg call - makes this the global flow that handles global-config nodes
+            const globalFlow = Flow.create({getSetting:v=>process.env[v]},config);
+            await globalFlow.start();
+
+            // Pass the globalFlow in as the parent flow to allow global-config lookup
+            const flow = Flow.create(globalFlow,config,config.flows["t1"]);
+            await flow.start();
+
+            var activeNodes = flow.getActiveNodes();
+            activeNodes["1"].foo.should.equal(7);
+            activeNodes["1"].bar.should.equal('gc_cred');
+
+            await flow.stop()
+            await globalFlow.stop()
+        });
     });
 
 });

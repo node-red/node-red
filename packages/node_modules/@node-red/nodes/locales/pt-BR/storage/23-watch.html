@@ -1,0 +1,30 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="watch">
+  <p>Observa um diretório ou arquivo em busca de alterações.</p>
+  <p>Você pode inserir uma lista de diretórios e/ou arquivos separados por vírgulas. Você irá
+  precisa colocar aspas "..." ao redor de qualquer um que tenha espaços.</p>
+  <p>No Windows, você deve usar barras invertidas duplas \\ em qualquer nome de diretório.</p>
+  <p>O nome completo do arquivo que realmente mudou é colocado em <code>msg.payload</code> e <code>msg.filename</code>,
+  enquanto uma versão, em forma de cadeia de caracteres, da lista de observação é retornada em <code>msg.topic</code>.</p>
+  <p> <code>msg.file</code> contém apenas o nome abreviado do arquivo que foi alterado.
+  <code>msg.type</code> contem o tipo alterado, geralmente <i>arquivo</i> ou <i>diretório</i>,
+  enquanto <code>msg.size</code> contém o tamanho do arquivo em bytes.</p>
+  <p>Claro que no Linux, <i>tudo</i> é um arquivo. Portanto, pode ser observado ... </p>
+  <p><b>Nota:</b> O diretório ou arquivo deve existir para ser monitorado. Se o arquivo
+  ou o diretório for excluído, ele não poderá mais ser monitorado, mesmo se for recriado.</p>
+</script>
