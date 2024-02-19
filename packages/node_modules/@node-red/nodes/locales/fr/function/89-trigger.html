@@ -1,0 +1,50 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="trigger">
+    <p>Lorsqu'il est déclenché, peut envoyer un message, puis éventuellement un deuxième message, sauf extension ou réinitialisation.</p>
+
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt class="optional">delay <span class="property-type">nombre</span></dt>
+        <dd>Définit le délai, en millisecondes, à appliquer au message. Cette option s'applique uniquement si le noeud est configuré pour permettre au message de remplacer l'intervalle de délai configuré par défaut.</dd>
+        <dt class="optional">reset</dt>
+        <dd>Si un message est reçu avec cette propriété, tout délai d'expiration ou répétition
+          actuellement en cours sera effacé et aucun message ne sera déclenché.</dd>
+    </dl>
+
+    <h3>Détails</h3>
+    <p>Ce noeud peut être utilisé pour créer un délai d'attente dans un flux. Par défaut, lorsque
+    il reçoit un message, il envoie un message avec une <code>charge utile</code> de <code>1</code>.
+    Il attend ensuite 250 ms avant d'envoyer un deuxième message avec une <code>charge utile</code> de <code>0</code>.
+    Cela pourrait être utilisé, par exemple, pour faire clignoter une LED attachée à une broche GPIO du Raspberry Pi.</p>
+    <p>Les charges utiles de chaque message envoyé peuvent être configurées sur une variété de valeurs, y compris
+    la possibilité de ne rien envoyer. Par exemple, définir le message initial sur <i>rien</i> et
+    en sélectionnant l'option pour prolonger la minuterie avec chaque message reçu, le noeud
+    agira en tant que minuteur de surveillance; n'envoie un message que si rien n'est reçu dans le délai
+    défini dans l'intervalle.</p>
+    <p>Si défini sur un type <i>chaîne</i>, le noeud prend en charge la syntaxe moustache.</p>
+    <p>Le délai entre l'envoi des messages peut être remplacé par <code>msg.delay</code> si cette option est activée dans le noeud. La valeur doit être fournie en millisecondes.</p>
+    <p>Si le noeud reçoit un message avec une propriété <code>reset</code>, ou une propriété <code>payload</code>
+    qui correspond à celle configurée dans le noeud, tout délai d'expiration ou répétition actuellement en cours
+    de progression sera effacé et aucun message ne sera déclenché.</p>
+    <p>Le noeud peut être configuré pour renvoyer un message à intervalle régulier jusqu'à ce qu'il
+    soit réinitialisé par un message reçu.</p>
+    <p>En option, le noeud peut être configuré pour traiter les messages comme s'il s'agissait de flux distincts,
+    en utilisant une propriété msg pour identifier chaque flux. <code>msg.topic</code> par défaut.</p>
+    <p>Le statut indique que le noeud est actuellement actif. Si plusieurs flux sont utilisés, l'état
+    indique le nombre de flux en cours.</p>
+</script>

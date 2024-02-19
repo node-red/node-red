@@ -1,0 +1,29 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="complete">
+    <p>Envoie un message lorsqu'un noeud termine sa gestion d'un message.</p>
+    <h3>Détails</h3>
+    <p>Si un noeud indique au runtime qu'il a fini de gérer un message,
+        ce noeud peut être utilisé pour déclencher un deuxième flux.</p>
+    <p>Par exemple, cela peut être utilisé avec un noeud sans port de sortie,
+        comme le noeud d'envoi d'e-mails, pour continuer le flux.</p>
+    <p>Ce noeud doit être configuré pour gérer l'événement pour les noeuds sélectionnés dans le
+        flux. Contrairement au noeud Catch, il ne fournit pas automatiquement un mode "gérer tout"
+        qui s'applique à tous les noeuds du flux.</p>
+    <p>Tous les noeuds ne déclencheront pas cet événement - cela dépendra s'ils
+        ont été implémentés pour prendre en charge cette fonctionnalité telle qu'introduite dans Node-RED 1.0.</p>
+</script>

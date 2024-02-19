@@ -1,0 +1,31 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="udp in">
+  <p>Um nó de entrada UDP, que produz um <code>msg.payload</code> contendo um
+    armazenamento temporário, cadeia de caracteres ou cadeia de caracteres codificada em base64. Suporta multidifusão.</p>
+    <p>também fornece <code>msg.ip</code> e <code>msg.port</code> definidos para o
+    endereço IP e porta de onde a mensagem foi recebida.</p>
+    <p><b>Nota:</b> Em alguns sistemas, você pode precisar de acesso root ou administrador para usar
+    portas abaixo de 1024 e/ou transmitir globalmente.</p>
+</script>
+
+<script type="text/html" data-help-name="udp out">
+  <p>Este nó envia <code>msg.payload</code> para o host e porta UDP designados. Suporta multidifusão.</p>
+  <p>Você também pode usar <code>msg.ip</code> e <code>msg.port</code> para definir os valores de destino, mas os valores configurados estaticamente têm precedência.</p>
+  <p>Se você selecionar transmistir globalmente, defina o endereço para o endereço IP de transmissão global local ou tente 255.255.255.255, que é o endereço de transmissão global padrão.</p>
+  <p><b>Nota:</b> Em alguns sistemas, você pode precisar ser root para usar portas abaixo de 1024 e/ou transmitir globalmente.</p>
+</script>

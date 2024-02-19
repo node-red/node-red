@@ -1,0 +1,44 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="range">
+    <p>Associe une valeur numérique à une plage différente.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">nombre</span></dt>
+        <dd>La charge utile <i>doit</i> être un nombre. Tout le reste essaiera d'être
+            analysé en un nombre et rejeté si cela échoue.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">nombre</span></dt>
+        <dd>La valeur mappée à la nouvelle plage.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Ce noeud mettra à l'échelle linéairement la valeur reçue. Par défaut, le résultat
+        n'est pas contraint à la plage définie dans le noeud.</p>
+    <p><i>L'échelle et la limite à la plage cible</i> signifient que le résultat ne sera jamais en dehors
+        de la plage spécifiée dans la plage cible.</p>
+    <p><i>Mettre à l'échelle et envelopper dans la plage cible</i> signifie que le résultat sera
+        être enveloppé dans la plage cible.</p>
+    <p>Par exemple, une entrée 0 - 10 mappée sur 0 - 100.</p>
+    <table style="outline-width:#888 solid thin">
+        <tr><th width="80px">mode</th><th width="80px">entrée</th><th width="80px">sortie</th></tr>
+        <tr><td><center>échelle</center></td><td><center>12</center></td><td><center>120</center></td></tr>
+        <tr><td><center>limite</center></td><td><center>12</center></td><td><center>100</center></td></tr>
+        <tr><td><center>enveloppe</center></td><td><center>12</center></td><td><center>20</center></td></tr>
+    </table>
+</script>

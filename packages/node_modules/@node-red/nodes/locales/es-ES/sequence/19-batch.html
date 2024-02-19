@@ -1,0 +1,35 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="batch">
+    <p>Crea secuencias de mensajes basadas en varias reglas.</p>
+    <h3>Detalles</h3>
+    <p>Hay tres modos para crear secuencias de mensajes:</p>
+    <dl>
+        <dt>Número de mensajes</dt>
+        <dd>agrupa mensajes en secuencias de una longitud determinada. La opción <b>superposición</b> especifica cuántos mensajes al final de una secuencia deben repetirse al comienzo de la siguiente secuencia.</dd>
+
+        <dt>Intervalo de tiempo</dt>
+        <dd>agrupa los mensajes que llegan dentro del intervalo especificado. Si no llega ningún mensaje dentro del intervalo, el nodo puede opcionalmente enviar un mensaje vacío.</dd>
+
+        <dt>Concatenar secuencias</dt>
+        <dd>crea una secuencia de mensajes concatenando secuencias entrantes. Cada mensaje debe tener una propiedad <code>msg.topic</code> y una propiedad <code>msg.parts</code> que identifique su secuencia. El nodo está configurado con una lista de valores de <code>topic</code> para identificar las secuencias de orden que están concatenadas.
+        </dd>
+    </dl>
+    <h4>Almacenar mensajes</h4>
+    <p>Este nodo almacenará en búfer los mensajes internamente para poder trabajar en secuencias. La configuración de tiempo de ejecución <code>nodeMessageBufferMaxLength</code> se puede utilizar para limitar cuántos nodos de mensajes almacenarán en el buffer.</p>
+    <p>Si se recibe un mensaje con la propiedad <code>msg.reset</code> configurada, los mensajes almacenados en el búfer se eliminan y no se envían.</p>
+</script>

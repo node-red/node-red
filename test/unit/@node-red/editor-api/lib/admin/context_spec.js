@@ -126,6 +126,26 @@ describe("api/admin/context", function () {
                 });
         });
 
+        it('should call context.getValue to get a node context value - url unsafe keyname', function (done) {
+            stub.returns(Promise.resolve(nContext));
+            request(app)
+                .get('/context/node/5678/foo%23123?store=file')
+                .set('Accept', 'application/json')
+                .expect(200)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'node');
+                    stub.args[0][0].should.have.property('id', '5678');
+                    stub.args[0][0].should.have.property('key', 'foo#123');
+                    stub.args[0][0].should.have.property('store', 'file');
+                    var body = res.body;
+                    body.should.eql(nContext);
+                    done();
+                });
+        });
         it('should handle error which context.getValue causes', function (done) {
             var stubbedResult = Promise.reject('error');
             stubbedResult.catch(function() {});
@@ -209,6 +229,24 @@ describe("api/admin/context", function () {
                     stub.args[0][0].should.have.property('scope', 'node');
                     stub.args[0][0].should.have.property('id', '5678');
                     stub.args[0][0].should.have.property('key', 'foo');
+                    stub.args[0][0].should.have.property('store', 'file');
+                    done();
+                });
+        });
+
+        it('should call context.delete to delete a node context - url unsafe keyname', function (done) {
+            stub.returns(Promise.resolve());
+            request(app)
+                .delete('/context/node/5678/foo%23123?store=file')
+                .expect(204)
+                .end(function (err, res) {
+                    if (err) {
+                        return done(err);
+                    }
+                    stub.args[0][0].should.have.property('user', undefined);
+                    stub.args[0][0].should.have.property('scope', 'node');
+                    stub.args[0][0].should.have.property('id', '5678');
+                    stub.args[0][0].should.have.property('key', 'foo#123');
                     stub.args[0][0].should.have.property('store', 'file');
                     done();
                 });
