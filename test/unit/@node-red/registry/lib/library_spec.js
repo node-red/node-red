@@ -33,16 +33,15 @@ describe("library api", function() {
         should.not.exist(library.getExampleFlowPath('foo','bar'));
     });
 
-    it('returns a valid example path', function(done) {
+    it('returns valid example paths', function(done) {
         library.init();
         library.addExamplesDir("test-module",path.resolve(__dirname+'/resources/examples')).then(function() {
             try {
                 var flows = library.getExampleFlows();
-                flows.should.deepEqual({"test-module":{"f":["one"]}});
+                flows.should.deepEqual({"test-module":{"f":["1.2.3","one"]}});
 
                 var examplePath = library.getExampleFlowPath('test-module','one');
-                examplePath.should.eql(path.resolve(__dirname+'/resources/examples/one.json'))
-
+                examplePath.should.eql(path.resolve(__dirname+'/resources/examples/one.json'));
 
                 library.removeExamplesDir('test-module');
 
@@ -57,6 +56,5 @@ describe("library api", function() {
                 done(err);
             }
         });
-
-    })
+    });
 });
