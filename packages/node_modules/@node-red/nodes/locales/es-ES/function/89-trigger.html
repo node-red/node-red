@@ -1,0 +1,37 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="trigger">
+    <p>Cuando se activa, puede enviar un mensaje y luego, opcionalmente, un segundo mensaje, a menos que se extienda o se restablezca.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">delay <span class="property-type">número</span></dt>
+        <dd>Establece el retraso, en milisegundos, que se aplicará al mensaje. Esta opción solo se aplica si el nodo está configurado para permitir que el mensaje anule el intervalo de retardo predeterminado configurado.</dd>
+        <dt class="optional">reset</dt>
+        <dd>Si se recibe un mensaje con esta propiedad, se borrará cualquier tiempo de espera o repetición actualmente en curso y no se activará ningún mensaje.</dd>
+    </dl>
+
+    <h3>Detalles</h3>
+    <p>Este nodo se puede utilizar para crear un tiempo de espera dentro de un flujo. De forma predeterminada, cuando recibe un mensaje, envía un mensaje con una <code>carga</code> de <code>1</code>. Luego espera 250 ms antes de enviar un segundo mensaje con una <code>carga</code> de <code>0</code>. Esto podría usarse, por ejemplo, para hacer parpadear un LED conectado a un pin GPIO de Raspberry Pi.</p>
+    <p>Las cargas de cada mensaje enviado se pueden configurar con una variedad de valores, incluida la opción de no enviar nada. Por ejemplo, configurando el mensaje inicial en <i>nada</i> y seleccionando la opción de extender el temporizador con cada mensaje recibido, el nodo actuará como un temporizador de vigilancia; solo enviar un mensaje si no se recibe nada dentro del intervalo establecido.</p>
+    <p>Si se establece en un tipo <i>cadena</i>, el nodo admite la sintaxis de plantilla mustache.</p>
+    <p>El retraso entre el envío de mensajes puede ser anulado por <code>msg.delay</code> si esa opción está habilitada en el nodo. El valor debe proporcionarse en milisegundos.</p>
+    <p>Si el nodo recibe un mensaje con una propiedad <code>reset</code> o una <code>carga</code> que coincide con la configurada en el nodo, cualquier tiempo de espera o repetición actualmente en curso se borrará y no se activa ningún mensaje.</p>
+    <p>El nodo se puede configurar para reenviar un mensaje a intervalos regulares hasta que se restablezca mediante un mensaje recibido.</p>
+    <p>Opcionalmente, el nodo se puede configurar para tratar los mensajes como si fueran secuencias separadas, utilizando una propiedad msg para identificar cada secuencia. <code>msg.topic</code> predeterminado.</p>
+    <p>El estado indica que el nodo está actualmente activo. Si se utilizan varias transmisiones, el estado indica la cantidad de transmisiones que se están realizando.</p>
+</script>

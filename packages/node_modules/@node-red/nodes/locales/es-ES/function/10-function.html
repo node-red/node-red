@@ -1,0 +1,55 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="function">
+  <p>Una función de JavaScript que se ejecuta en los mensajes que recibe el nodo.</p>
+  <p>Los mensajes se pasan como un objeto JavaScript llamado <code>msg</code>.</p>
+  <p>Por convención, tendrá una propiedad <code>msg.payload</code> que contiene el cuerpo del mensaje.</p>
+  <p>Se espera que la función devuelva un objeto de mensaje (o varios objetos de mensaje), pero puede optar por no devolver nada para detener un flujo.</p>
+  <p>La pestaña <b>Al iniciar</b> contiene código que se ejecutará cada vez que se inicie el nodo. La pestaña <b>Al detener</b> contiene código que se ejecutará cuando se detenga el nodo.</p>
+  <p>Si el código <b>Al iniciar</b> devuelve un objeto Promise, el nodo no comenzará a manejar mensajes hasta que se resuelva la promesa.</p>
+    <h3>Detalles</h3>
+    <p>Ver la <a target="_blank" href="https://nodered.org/docs/writing-functions.html">documentación online</a> para obtener más información sobre cómo escribir funciones.</p>
+    <h4>Enviando mensajes</h4>
+    <p>La función puede devolver los mensajes que quieras pasar a los siguientes nodos del flujo o puede llamar a <code>node.send(messages)</code>.</p>
+    <p>Puede devolver/enviar:</p>
+    <ul>
+      <li>un único objeto de mensaje - pasado a los nodos conectados a la primera salida</li>
+      <li>una matriz de objetos de mensaje - pasados a nodos conectados a las salidas correspondientes</li>
+    </ul>
+    <p>Nota: El código de configuración se ejecuta durante la inicialización de los nodos. Por lo tanto, si se llama a <code>node.send</code> en la pestaña de configuración, es posible que los nodos posteriores no puedan recibir el mensaje.</p>
+    <p>Si algún elemento de la matriz es en sí mismo una matriz de mensajes, se envían varios mensajes a la salida correspondiente.</p>
+    <p>Si se devuelve nulo, ya sea solo o como elemento de la matriz, no se transmite ningún mensaje.</p>
+    <h4>Registro y manejo de errores</h4>
+    <p>Para registrar cualquier información o informar de un error, están disponibles las siguientes funciones:</p>
+      <ul>
+          <li><code>node.log("Log message")</code></li>
+          <li><code>node.warn("Warning")</code></li>
+          <li><code>node.error("Error")</code></li>
+      </ul>
+    </p>
+    <p>El nodo Captura (Catch) también se puede utilizar para gestionar errores. Para invocar un nodo Catch, pasa <code>msg</code> como segundo argumento a <code>node.error</code>:</p>
+    <pre>node.error("Error",msg);</pre>
+    <h4>Accediendo a la información del nodo</h4>
+    <p>Las siguientes propiedades están disponibles para acceder a información sobre el nodo:</p>
+    <ul>
+        <li><code>node.id</code> - identificación del nodo</li>
+        <li><code>node.name</code> - nombre del nodo</li>
+        <li><code>node.outputCount</code> - número de salidas de nodo</li>
+    </ul>
+    <h4>Usar variables de entorno</h4>
+    <p>Se puede acceder a las variables de entorno utilizando <code>env.get("MY_ENV_VAR")</code>.</p>
+</script>
