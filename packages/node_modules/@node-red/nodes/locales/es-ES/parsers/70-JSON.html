@@ -1,0 +1,44 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="json">
+    <p>Convierte entre una cadena JSON y su representación de objeto JavaScript, en cualquier dirección.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objeto | texto</span></dt>
+        <dd>Un objeto JavaScript o una cadena JSON.</dd>
+        <dt>schema<span class="property-type">objeto</span></dt>
+        <dd>Un objeto de esquema JSON opcional para validar la carga.
+          La propiedad se eliminará antes de que el <code>msg</code> se envíe al siguiente nodo.</dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>payload<span class="property-type">objeto | texto</span></dt>
+        <dd>
+            <ul>
+                <li>Si la entrada es una cadena JSON, intenta analizarla en un objeto JavaScript.</li>
+                <li>Si la entrada es un objeto JavaScript, crea una cadena JSON. Opcionalmente, la cadena se puede formatear.</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">matriz</span></dt>
+        <dd>Si falla la validación del esquema JSON, el nodo cpatura (catch) tendrá una propiedad <code>schemaError</code> que contiene una serie de errores.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>De forma predeterminada, el nodo opera en <code>msg.payload</code>, pero se puede configurar para convertir cualquier propiedad de mensaje.</p>
+    <p>El nodo también se puede configurar para garantizar una codificación particular en lugar de alternar entre las dos. Esto se puede usar, por ejemplo, con el nodo <code>HTTP In</code> para garantizar que la carga sea un objeto analizado incluso si una solicitud entrante no configuró su tipo de contenido correctamente para que el nodo HTTP In realice la conversión.</p>
+    <p>Si el nodo está configurado para garantizar que la propiedad esté codificada como una cadena y recibe una cadena, no se realizarán más comprobaciones de la propiedad. No comprobará que la cadena sea JSON válida ni la reformateará si se selecciona la opción de formato.</p>
+    <p>Para más detalles sobre el esquema JSON puedes consultar la especificación <a href="http://json-schema.org/latest/json-schema-validation.html">aquí</a>.</p>
+</script>
