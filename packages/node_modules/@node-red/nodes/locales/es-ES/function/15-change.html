@@ -1,0 +1,33 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="change">
+    <p>Establecer, cambiar, eliminar o mover propiedades de un mensaje, contexto de flujo o contexto global.</p>
+    <p>El nodo puede especificar múltiples reglas que se aplicarán en el orden en que se definan.</p>
+    <h3>Detalles</h3>
+    <p>Las operaciones disponibles son:</p>
+    <dl class="message-properties">
+    <dt>Establecer</dt>
+    <dd>establecer una propiedad. El valor puede ser de varios tipos diferentes o puede tomarse de un mensaje existente o de una propiedad de contexto.</dd>
+    <dt>Cambiar</dt>
+    <dd>buscar y reemplazar partes de la propiedad. Si las expresiones regulares están habilitadas, la propiedad "reemplazar con" puede incluir grupos de captura, por ejemplo <code>$1</code>. Reemplazar solo cambiará el tipo si hay una coincidencia completa.</dd>
+    <dt>Eliminar</dt>
+    <dd>eliminar una propiedad.</dd>
+    <dt>Mover</dt>
+    <dd>mover o cambiar el nombre de una propiedad.</dd>
+    </dl>
+    <p>El tipo "expresión" utiliza el lenguaje de consulta y expresión <a href="http://jsonata.org/" target="_new">JSONata</a>.</p>
+</script>

@@ -1,0 +1,39 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="delay">
+    <p>Retrasa cada mensaje que pasa por el nodo o limita la velocidad a la que pueden pasar.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">delay <span class="property-type">número</span></dt>
+        <dd>Establece el retraso, en milisegundos, que se aplicará al mensaje. Esta opción solo se aplica si el nodo está configurado para permitir que el mensaje anule el intervalo de retardo predeterminado configurado.</dd>
+        <dt class="optional">rate <span class="property-type">número</span></dt>
+        <dd>Establece el valor de la tasa en milisegundos entre mensajes. Esta propiedad sobrescribe el valor de tasa existente definido en la configuración del nodo cuando recibe el mensaje que contiene el valor <code>msg.rate</code> en milisegundos. Esta opción solo se aplica si el nodo está configurado para permitir que el mensaje anule el intervalo de velocidad predeterminado configurado.</dd>
+        <dt class="optional">reset</dt>
+        <dd>Si el mensaje recibido tiene esta propiedad establecida en cualquier valor, todos los mensajes pendientes retenidos por el nodo se borran sin enviarse.</dd>
+        <dt class="optional">flush</dt>
+        <dd>Si el mensaje recibido tiene esta propiedad establecida en un valor numérico, esa cantidad de mensajes se publicará inmediatamente. Si se establece en cualquier otro tipo (por ejemplo, booleano), todos los mensajes pendientes retenidos por el nodo se envían inmediatamente.</dd>
+        <dt class="optional">toFront</dt>
+        <dd>Cuando está en modo de límite de velocidad, si el mensaje recibido tiene esta propiedad establecida en booleano <code>verdadero</code>, entonces el mensaje se envía al frente de la cola y se publicará a continuación. Esto se puede utilizar en combinación con <code>msg.flush=1</code> para reenviar inmediatamente.
+        </dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Cuando se configura para retrasar mensajes, el intervalo de retraso puede ser un valor fijo, un valor aleatorio dentro de un rango o establecerse dinámicamente para cada mensaje. Cada mensaje se retrasa independientemente de cualquier otro mensaje, según la hora de su llegada.</p>
+    <p>Cuando se configura para calificar los mensajes con límite, su entrega se distribuye durante el período de tiempo configurado. El estado muestra la cantidad de mensajes actualmente en la cola. Opcionalmente, puede descartar mensajes intermedios a medida que llegan.</p>
+    <p>Si se configura para permitir modificar la frecuencia, la nueva tasa se aplicará inmediatamente y permanecerá vigente hasta que se cambie nuevamente, se restablezca el nodo o se reinicie el flujo.</p>
+    <p>La limitación de velocidad se puede aplicar a todos los mensajes o agruparlos según su valor <code>msg.topic</code>. Al agrupar, los mensajes intermedios se eliminan automáticamente. En cada intervalo de tiempo, el nodo puede publicar el mensaje más reciente para todos los temas o publicar el mensaje más reciente para el siguiente tema.</p>
+    <p><b>Nota</b>: En el modo de límite de velocidad, la profundidad máxima de la cola se puede establecer mediante una propiedad en su archivo <i>settings.js</i>. Por ejemplo <code>nodeMessageBufferMaxLength: 1000,</code></p>
+</script>

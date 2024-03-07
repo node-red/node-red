@@ -1,0 +1,135 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="mqtt in">
+<p>Conecta a un gestor MQTT y se suscribe a mensajes del tema especificado.</p>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">texto | buffer</span></dt>
+       <dd>una cadena a menos que se detecte como un búfer binario.</dd>
+       <dt>topic <span class="property-type">texto</span></dt>
+       <dd>el tema MQTT, utiliza / como separador de jerarquía.</dd>
+       <dt>qos <span class="property-type">número</span> </dt>
+       <dd>0, dispara y olvida - 1, al menos una vez - 2, una vez y sólo una vez.</dd>
+       <dt>retain <span class="property-type">booleano</span></dt>
+       <dd>verdadero indica que el mensaje se retuvo y puede ser antiguo.</dd>
+
+       <dt class="optional">responseTopic <span class="property-type">texto</span></dt>
+       <dd><b>MQTTv5</b>: el tema de respuesta MQTT para el mensaje</dd>
+       <dt class="optional">correlationData <span class="property-type">Buffer</span></dt>
+       <dd><b>MQTTv5</b>: los datos de correlación para el mensaje</dd>
+       <dt class="optional">contentType <span class="property-type">texto</span></dt>
+       <dd><b>MQTTv5</b>: el tipo de contenido de la carga</dd>
+       <dt class="optional">userProperties <span class="property-type">objeto</span></dt>
+       <dd><b>MQTTv5</b>: cualquier propiedad de usuario del mensaje</dd>
+       <dt class="optional">messageExpiryInterval <span class="property-type">número</span></dt>
+       <dd><b>MQTTv5</b>: el tiempo de expiración, en segundos, del mensaje</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>El tema de suscripción puede incluir comodines MQTT, + para un nivel, # para múltiples niveles.</p>
+    <p>Este nodo requiere una conexión a un gestor MQTT para configurarse. Esto se configura haciendo clic en el icono del lápiz.</p>
+    <p>Varios nodos MQTT (dentro o fuera) pueden compartir la misma conexión de gestor si es necesario.</p>
+   <h4>Suscripción Dinámica</h4>
+      El nodo se puede configurar para controlar dinámicamente la conexión MQTT y sus suscripciones. Cuando esté habilitado, el nodo tendrá una entrada y podrá controlarse pasándole mensajes.
+    <h3>Entradas</h3>
+    <p>Estos solo se aplican cuando el nodo ha sido configurado para suscripciones dinámicas.</p>
+    <dl class="message-properties">
+       <dt>action <span class="property-type">texto</span></dt>
+       <dd>el nombre de la acción que debe realizar el nodo. Las acciones disponibles son: <code>"connect"</code>, <code>"disconnect"</code>, <code>"subscribe"</code> y <code>"unsubscribe"</code>.</dd>
+       <dt class="optional">topic <span class="property-type">texto|objeto|matriz</span></dt>
+       <dd>Para las acciones <code>"subscribe"</code> y <code>"unsubscribe"</code>, esta propiedad proporciona el tema. Se puede configurar como:<ul>
+           <li>una cadena que contiene el filtro de tema</li>
+           <li>un objeto que contiene las propiedades <code>topic</code> y <code>qos</code></li>
+           <li>una matriz de cadenas u objetos para manejar múltiples temas en uno</li>
+            </ul>
+        </dd>
+       <dt class="optional">broker <span class="property-type">gestor</span> </dt>
+       <dd>Para la acción <code>"connect"</code>, esta propiedad puede anular cualquiera de las configuraciones de gestor individuales, incluyendo: <ul>
+               <li><code>broker</code></li>
+               <li><code>port</code></li>
+               <li><code>url</code> - anula el gestor/puerto para proporcionar una URL de conexión completa</li>
+               <li><code>username</code></li>
+               <li><code>password</code></li>
+           </ul>
+           <p>Si esta propiedad está configurada y el intermediario ya está conectado, se registrará un error a menos que tenga establecida la propiedad <code>force</code>; en cuyo caso se desconectará del intermediario, aplicará la nueva configuración y se volverá a conectar.</p>
+       </dd>
+    </dl>
+</script>
+
+<script type="text/html" data-help-name="mqtt out">
+    <p>Conecta a un gestor MQTT y publica mensajes.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+       <dt>payload <span class="property-type">texto | buffer</span></dt>
+       <dd> la carga a publicar. Si esta propiedad no está configurada, no se enviará ningún mensaje. Para enviar un mensaje en blanco, establece esta propiedad a una cadena vacía.</dd>
+       <dt class="optional">topic <span class="property-type">texto</span></dt>
+       <dd>el tema MQTT para publicar.</dd>
+       <dt class="optional">qos <span class="property-type">número</span></dt>
+       <dd>0, dispara y olvida - 1, al menos una vez - 2, una vez y sólo una vez. Predeterminado 0.</dd>
+       <dt class="optional">retain <span class="property-type">booleano</span></dt>
+       <dd>configúralo en verdadero para retener el mensaje en el gestor. Por defecto es falso.</dd>
+       <dt class="optional">responseTopic <span class="property-type">texto</span></dt>
+       <dd><b>MQTTv5</b>: el tema de respuesta MQTT para el mensaje</dd>
+       <dt class="optional">correlationData <span class="property-type">Buffer</span></dt>
+       <dd><b>MQTTv5</b>: los datos de correlación para el mensaje</dd>
+       <dt class="optional">contentType <span class="property-type">texto</span></dt>
+       <dd><b>MQTTv5</b>: el tipo de contenido de la carga</dd>
+       <dt class="optional">userProperties <span class="property-type">objeto</span></dt>
+       <dd><b>MQTTv5</b>: cualquier propiedad de usuario del mensaje</dd>
+       <dt class="optional">messageExpiryInterval <span class="property-type">número</span></dt>
+       <dd><b>MQTTv5</b>: el tiempo de expiración, en segundos, del mensaje</dd>
+       <dt class="optional">topicAlias <span class="property-type">número</span></dt>
+       <dd><b>MQTTv5</b>: el alias del tema MQTT a utilizar</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <code>msg.payload</code> se utiliza como carga útil del mensaje publicado.
+    Si contiene un Objeto, se convertirá en una cadena JSON antes de enviarse.
+    Si contiene un búfer binario, el mensaje se publicará tal cual.</p>
+    <p>El tema utilizado se puede configurar en el nodo o, si se deja en blanco, se puede establecer mediante <code>msg.topic</code>.</p>
+    <p>Del mismo modo, los valores de QoS y retención se pueden configurar en el nodo o, si se dejan en blanco, establecer mediante <code>msg.qos</code> y <code>msg.retain</code> respectivamente. Para borrar un tema previamente retenido del gestor, envía un mensaje en blanco a ese tema con el indicador de retención configurado.</p>
+    <p>Este nodo requiere una conexión a un gestor MQTT para configurarse. Esto se configura haciendo clic en el icono del lápiz.</p>
+    <p>Varios nodos MQTT (dentro o fuera) pueden compartir la misma conexión de gestor si es necesario.</p>
+
+    <h4>Control Dinámico</h4>
+    La conexión compartida por el nodo se puede controlar dinámicamente. Si el nodo recibe uno de los siguientes mensajes de control, tampoco publicará la carga del mensaje.
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+       <dt>action <span class="property-type">texto</span></dt>
+       <dd>el nombre de la acción que debe realizar el nodo. Las acciones disponibles son: <code>"connect"</code> y <code>"disconnect"</code>.</dd>
+       <dt class="optional">broker <span class="property-type">gestor</span> </dt>
+       <dd>Para la acción <code>"connect"</code>, esta propiedad puede anular cualquiera de las configuraciones de gestor individuales, incluyendo: <ul>
+               <li><code>broker</code></li>
+               <li><code>port</code></li>
+               <li><code>url</code> - anula el gestor/puerto para proporcionar una URL de conexión completa</li>
+               <li><code>username</code></li>
+               <li><code>password</code></li>
+           </ul>
+           <p>Si esta propiedad está configurada y el gestor ya está conectado, se registrará un error a menos que tenga establecida la propiedad <code>force</code>; en cuyo caso se desconectará del gestor, aplicará la nueva configuración y se volverá a conectar.</p>
+       </dd>
+    </dl>
+</script>
+
+<script type="text/html" data-help-name="mqtt-broker">
+    <p>Configuración para una conexión a un gestor MQTT.</p>
+    <p>Esta configuración creará una conexión única con el gestor que luego podrá ser reutilizada por los nodos <code>MQTT In</code> y <code>MQTT Out</code>.</p>
+    <p>El nodo generará una ID de cliente aleatoria si no se establece ninguna y el nodo está configurado para utilizar una conexión de sesión limpia. Si se establece un ID de cliente, debe ser exclusivo del corredor al que se está conectando.</p>
+    <h4>Mensaje Inicial</h4>
+    <p>Este es un mensaje que se publicará en el tema configurado cada vez que se establezca la conexión.</p>
+    <h4>Mensaje Cierre</h4>
+    <p>Este es un mensaje que se publicará en el tema configurado antes de que la conexión se cierre normalmente, ya sea volviendo a implementar el nodo o apagándolo.</p>
+    <h4>Mensaje Voluntad</h4>
+    <p>Este es un mensaje que será publicado por el gestor en caso de que el nodo pierda inesperadamente su conexión.</p>
+    <h4>WebSockets</h4>
+    <p>El nodo se puede configurar para utilizar una conexión WebSocket. Para hacerlo, el campo Servidor debe configurarse con un URI completo para la conexión. Por ejemplo:</p>
+    <pre>ws://example.com:4000/mqtt</pre>
+</script>

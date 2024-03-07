@@ -1,0 +1,37 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="switch">
+    <p>Enruta mensajes según los valores de sus propiedades o la posición de la secuencia.</p>
+    <h3>Detalles</h3>
+    <p>Cuando llega un mensaje, el nodo evaluará cada una de las reglas definidas y reenviará el mensaje a las salidas correspondientes de cualquier regla coincidente.</p>
+    <p>Opcionalmente, se puede configurar el nodo para que deje de evaluar reglas una vez que encuentre una que coincida.</p>
+    <p>Las reglas se pueden evaluar en función de una propiedad de mensaje individual, una propiedad de flujo o contexto global, una variable de entorno o el resultado de una expresión JSONata.</p>
+    <h4>Reglas</h4>
+    <p>Hay cuatro tipos de reglas.:</p>
+    <ol>
+        Las reglas <li><b>valor</b> se evalúan con respecto a la propiedad configurada</li>
+        Las reglas <li><b>Secuencia</b> se pueden utilizar en secuencias de mensajes, como las generadas por el nodo Dividir</li>
+        <li>Se puede proporcionar una <b>expresión</b> JSONata que se evaluará en relación con todo el mensaje y coincidirá si la expresión devuelve un valor verdadero.</li>
+        <li>Se puede utilizar una regla <b>de lo contrario</b> para hacer coincidir si ninguna de las reglas anteriores coincide.</li>
+    </ol>
+    <h4>Notas</h4>
+    <p>Las reglas <code>verdadero/falso</code> y <code>es nulo</code> realizan comparaciones estrictas con esos tipos. No convierten entre tipos.</p>
+    <p>Las reglas <code>está vacío</code> y <code>no está vacío</code> se pueden utilizar para probar la longitud de cadenas, matrices y buffers, o el número de propiedades que tiene un objeto. Ninguna regla se aprobará si la propiedad que se está probando tiene un valor <code>booleano</code>, <code>null</code> o <code>indefinido</code>.</p>
+    <h4>Manejo de secuencias de mensajes</h4>
+    <p>De forma predeterminada, el nodo no modifica la propiedad <code>msg.parts</code> de los mensajes que forman parte de una secuencia.</p>
+    <p>La opción <b>recrear secuencias de mensajes</b> se puede habilitar para generar nuevas secuencias de mensajes para cada regla que coincida. En este modo, el nodo almacenará en buffer toda la secuencia entrante antes de enviar las nuevas secuencias. La configuración de tiempo de ejecución <code>nodeMessageBufferMaxLength</code> se puede utilizar para limitar cuántos nodos de mensajes almacenarán en el buffer.</p>
+</script>

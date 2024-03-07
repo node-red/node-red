@@ -1,3 +1,123 @@
+#### 3.1.5: Maintenance Release
+
+Runtime
+
+ - Fix require of dns module (#4562) @knolleary
+ - Ensure global creds object is initialised when adding first cred (#4561) @knolleary
+
+#### 3.1.4: Maintenance Release
+
+Editor
+
+ - Highlight errors in config node sidebar (#4529) @knolleary
+ - Improve feedback in import dialog to show conflicted nodes (#4550) @knolleary
+ - Modify node users info in config editor footer (#4528) @knolleary
+ - Handle modified-nodes deploy after replacing unknown config node (#4556) @knolleary
+ - Handle undefined default export when importing module (#4539) @knolleary
+ - Fix icon scaling for non .svg icons (#4491) @ralphwetzel
+ - (convertNode) Do not create the credentials object if there is nothing to export (#4544) @GogoVega
+ - Ensure subflow instance node has g property set (#4538) @knolleary
+ - Handle importing flow with existing subflow and instance node (#4546) @knolleary
+ - Update index.mst (#4483) @gorenje
+ - Include top level property name when copying path from context (#4527) @knolleary
+ - Add handling to disable items on context menu (#4500) @kazuhitoyokoi
+ - Focus Quick Add dialog from context menu (#4516) @kazuhitoyokoi
+ - Fix subflow ports in Quick Add dialog (#4518) @kazuhitoyokoi
+ - Fix location of subflow ports in palette (#4502) @kazuhitoyokoi
+ - Client/Editor Events: fix off-in-on pattern emulating once (#4484) @gorenje
+ - Restore caching busting functionality without using explict version number (#4512) @knolleary
+ - Do not translate the list of available languages (#4531) @GogoVega
+ - Add French translation of v3.1.3 changes (#4477) @GogoVega
+ - i18n(es-ES) Spanish Spain translation (#4495) @joebordes
+ - Add missing validation messages (#4487) @GogoVega
+ - Add Japanese translations for v3.1.3 (#4498) @kazuhitoyokoi
+ - Replace `rename` by `edit` for the menu flow label (#4506) @GogoVega
+ - Update editor.json fix typo in German translation (#4552) @guidoffm
+
+Runtime
+
+ - Bump the github-actions group with 1 update (#4554) @app/dependabot
+ - Clone objects types when getting env values (#4519) @knolleary
+ - Ensure global-config credential env vars are merged on deploy (#4526) @knolleary
+
+Nodes
+
+ - 21-httprequest.js remove unused code, because of broken use of toLowercase (#4522) @gorenje
+
+#### 3.1.3: Maintenance Release
+
+Editor
+
+ - Add missing en-us messages (#4475) @knolleary
+
+#### 3.1.2: Maintenance Release
+
+Editor 
+
+ - Relax some node validators to allow undefined value (#4471) @knolleary
+ - Fix switch validation of typeof field (#4465) @knolleary
+ - Use move cursor when hovering on group border (#4467) @knolleary
+ - Added action list Chinese (Simplified and Traditional) translation + v3.1.1 changes (#4470) @wangyiyi2056
+ - Add French translation of `action-list` + v3.1.1 changes (#4466) @GogoVega
+ 
+ Runtime
+
+ - Ensure nested groups inside subflows have their g props remapped (#4472) @knolleary
+ 
+#### 3.1.1: Maintenance Release
+
+Editor
+
+ - Fix debug filter (#4461) @knolleary
+ - Fix various issues with debug pop-out window (#4459) @knolleary
+ - Ensure subflow instances keep track of their groups (#4457) @knolleary
+ - Fix `validateNodeProperty` without validator provided (#4455) @GogoVega
+ - Debounce node-removed notifications (#4453) @knolleary
+ - Don't try to load the parents of the first commit (#4448) @bonanitech
+ - Allow a theme to specifiy which theme mermaid should use (#4441) @knolleary
+ - Update browser title with flow name if set (#4427) @knolleary
+ - Ensure typeSearch handles undefined node definitions (#4423) @knolleary
+ - Ensure group w/h are imported if present (#4426) @knolleary
+ - Hide node status background when there is no status to show (#4425) @knolleary
+ - Add a close button to the restart-required notification (#4407) @knolleary
+ - Extend typedInput "num" type validity check to NaN, binary, octal & hex (#4371) @ralphwetzel
+ - Fix unintended new line in node name (#4399) @kazuhitoyokoi
+ - Ctrl-Enter does not close tray (Monaco) #4377 (#4382) @hazymat
+ - fix buffer viewer to handle 0b style binary (#4393) @dceejay
+ - Rework mermaid integration to support off-DOM rendering (#4364) @knolleary
+ - Add missing nls labels to context menu (#4365) @knolleary
+
+Runtime
+
+ - Bump the github-actions group with 2 updates (#4404) @app/dependabot
+ - Handle unknown node reference inside subflow module (#4460) @knolleary
+ - Add modules.install audit event when external module installed (#4452) @knolleary
+ - Allow import of modules with subpath in specifier (#4451) @knolleary
+ - Update node-red-admin version (#4438) @knolleary
+ - Handle false-like env vars properly (#4411) @knolleary
+ - Only save settings once during node load process (#4409) @knolleary
+ - Ensure global-config nodes lookup cred values properly (#4405) @knolleary
+ - Handle credential env var evaluation when no value set (#4362) @knolleary
+ - Don't commit package-lock.json (#4354) @bonanitech
+ - Fix env evaluation when one env references another in the same object (#4361) @knolleary
+ - Add dependabot for Github Actions (#4312) @Rotzbua
+ - Update outdated Github Actions (#4311) @Rotzbua
+ - github: Request `npm run test` in PR template (#4348) @ZJvandeWeg
+ - Add French translation of v3.1.0-beta.4 changes + slight improvements (#4329) @GogoVega
+ - Handle nodes with multiple input handlers properly (#4332) @knolleary
+ - Soften the language around unrequited PRs (#4351) @knolleary
+
+Nodes
+
+ - CSV: make CSV export way faster by not re-allocating and handling huge string (#4349) @Fadoli
+ - Delay: Fix regression in delay node to not pass on msg.reset (#4350) @dceejay
+ - Link Call: Handle undefined linkType value for existing link-call nodes (#4331) @knolleary
+ - MQTT: Guard against node.broker being undefined (#4454) @knolleary
+ - MQTT: check topic length > 0 before publish (#4416) @dceejay
+ - Switch/Change: Improve validation of switch/change node rules (#4368) @knolleary
+ - Template: Fix height of description editor in template node (#4346) @kazuhitoyokoi
+ - Various: Add validators to any fields using msg-typed Input (#4440) @knolleary
+
 #### 3.1.0: Milestone Release
 
 Editor
