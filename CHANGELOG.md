@@ -1,3 +1,8 @@
+#### 3.1.7: Maintenance Release
+
+ - Add Japanese translation for v3.1.6 (#4603) @kazuhitoyokoi
+ - Update jsonata version (#4593) @hardillb
+
 #### 3.1.6: Maintenance Release
 
 Editor
