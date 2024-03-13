@@ -1,3 +1,26 @@
+#### 3.1.7: Maintenance Release
+
+ - Add Japanese translation for v3.1.6 (#4603) @kazuhitoyokoi
+ - Update jsonata version (#4593) @hardillb
+
+#### 3.1.6: Maintenance Release
+
+Editor
+
+ - Do not flag env var in num typedInput as error (#4582) @knolleary
+ - Fix example flow name in import dialog (#4578) @kazuhitoyokoi
+ - Fix missing node icons in workspace (#4570) @knolleary
+
+Runtime
+
+ - Handle undefined env vars (#4581) @knolleary
+ - fix: Removed offending MD5 crypto hash and replaced with SHA1 and SHA256 … (#4568) @JaysonHurst
+ - chore: remove never use import code (#4580) @giscafer
+
+Nodes
+
+ - fix: template node zh-CN translation (#4575) @giscafer
+
 #### 3.1.5: Maintenance Release
 
 Runtime
