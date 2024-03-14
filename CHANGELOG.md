@@ -1,4 +1,4 @@
-#### 4.0.0-beta.0: Beta Release
+#### 4.0.0-beta.1: Beta Release
 
 Editor
 
