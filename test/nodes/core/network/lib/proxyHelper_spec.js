@@ -70,11 +70,11 @@ function testProxyUrl(env, expected, input, options) {
     // the call of this function and the use of it below.
     env = JSON.parse(JSON.stringify(env));
 
-    var title = 'getProxyForUrl(' + JSON.stringify(input) + ')' +
+    const title = 'getProxyForUrl(' + JSON.stringify(input) + ')' +
         ' === ' + JSON.stringify(expected);
 
     // Save call stack for later use.
-    var stack = {};
+    const stack = {};
     Error.captureStackTrace(stack, testProxyUrl);
     // Only use the last stack frame because that shows where this function is
     // called, and that is sufficient for our purpose. No need to flood the logs
@@ -82,7 +82,7 @@ function testProxyUrl(env, expected, input, options) {
     stack = stack.stack.split('\n', 2)[1];
 
     it(title, function () {
-        var actual;
+        let actual;
         // runWithEnv(env, function () {
         //     actual = getProxyForUrl(input, options);
         // });
@@ -105,7 +105,7 @@ function testProxyUrl(env, expected, input, options) {
     });
 }
 
-describe('Proxy Helper', function () {
+describe.only('Proxy Helper', function () {
     describe('No proxy variables', function () {
         const env = {};
         testProxyUrl(env, '', 'http://example.com');
