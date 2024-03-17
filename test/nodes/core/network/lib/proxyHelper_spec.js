@@ -155,7 +155,7 @@ describe('Proxy Helper', function () {
             testProxyUrl(env, 'https://upper-case-proxy', 'https://example', null, 'returns HTTPS_PROXY because lowerCaseOnly is false by default');
         });
 
-        describe('favourLowerCase:false should cause *_PROXY to being used before *_proxy', function () {
+        describe('favourUpperCase:false should cause *_PROXY to being used before *_proxy', function () {
             const env = {};
             env.HTTP_PROXY = 'http://upper-case-proxy';
             env.http_proxy = 'http://lower-case-proxy';
