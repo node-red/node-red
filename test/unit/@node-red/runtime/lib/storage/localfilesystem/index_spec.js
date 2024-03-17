@@ -489,7 +489,7 @@ describe('storage/localfilesystem', function() {
         var rootdir = path.win32.resolve(userDir+'/some');
         // make it into a local UNC path
         flowFile = flowFile.replace('C:\\', '\\\\localhost\\c$\\');
-        localfilesystem.init({userDir:userDir, flowFile:flowFile}, mockRuntime).then(function() {
+        localfilesystem.init({userDir:userDir, flowFile:flowFile, getUserSettings: () => {{}}}, mockRuntime).then(function() {
             fs.existsSync(flowFile).should.be.false();
             localfilesystem.saveFlows(testFlow).then(function() {
                 fs.existsSync(flowFile).should.be.true();

@@ -1,0 +1,29 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="complete">
+    <p>Aciona um fluxo quando outro nó concluir o tratamento de uma mensagem.</p>
+    <h3>Detalhes</h3>
+    <p>Se um nó informar o tempo de execução quando terminar de lidar com uma mensagem,
+        este nó pode ser usado para acionar um segundo fluxo.</p>
+    <p>Por exemplo, isso pode ser usado junto com um nó sem porta de saída,
+        como o nó de envio de e-mail, para continuar o fluxo.</p>
+    <p>Este nó deve ser configurado para lidar com o evento para nós selecionados no
+        fluxo. Ao contrário do nó de captura, ele não fornece um modo 'manipular todos' automaticamente
+        que se aplica a todos os nós no fluxo.</p>
+    <p>Nem todos os nós irão acionar este evento - vai depender se eles
+        foram implementados para oferecer suporte a esse recurso, conforme introduzido no Node-RED 1.0.</p>
+</script>

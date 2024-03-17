@@ -1,0 +1,58 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="template">
+    <p>Définit une propriété basée sur le modèle fourni.</p>
+    <h3>Entrées</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">objet</span></dt>
+        <dd>Un objet msg contenant des informations pour remplir le modèle.</dd>
+        <dt class="optional">template <span class="property-type">chaîne de caractères</span></dt>
+        <dd>Un modèle à remplir à partir du message <code>msg.payload</code>. S'il n'est pas configuré dans le panneau d'édition,
+          cela peut être défini comme une propriété de msg.</dd>
+    </dl>
+    <h3>Sorties</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">objet</span></dt>
+        <dd>un msg avec une propriété définie en remplissant le modèle configuré avec les propriétés du msg entrant.</dd>
+    </dl>
+    <h3>Détails</h3>
+    <p>Par défaut, cela utilise le format <i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>,
+      mais cela peut être désactivé si nécessaire.</p>
+    <p>Par exemple, lorsqu'un modèle de :
+    <pre>Bonjour {{payload.name}}. Aujourd'hui nous sommes le {{date}}</pre>
+    <p>reçoit un message contenant :
+    <pre>{
+  date: "Lundi",
+  payload: {
+    name: "Kevin"
+  }
+}</pre>
+    <p>La propriété résultante sera :
+    <pre>Bonjour Kevin. Aujourd'hui nous sommes le lundi</pre>
+    <p>Il est possible d'utiliser une propriété du contexte de flux ou du contexte global. Utiliser simplement <code>{{flow.name}}</code> ou
+      <code>{{global.name}}</code>, ou pour le stockage persistant <code>store</code>, utiliser <code>{{flow[store].name}}</code> ou
+      <code>{{global[store].name}}</code>.
+    <p><b>Remarque : </b>Par défaut, <i>moustache</i> échappera toutes les entités non alphanumériques ou HTML dans les valeurs qu'il remplace.
+      Pour éviter cela, utiliser des accolades <code>{{{triple}}}</code>.</p>
+    <p>Si vous devez utiliser <code>{{ }}</code> dans votre contenu, vous pouvez modifier les caractères
+      utilisé pour marquer les sections de modèle. Par exemple, pour utiliser <code>[[ ]]</code>
+      à la place, ajouter la ligne suivante en haut du modèle :</p>
+    <pre>{{=[[ ]]=}}</pre>
+    <h4>Utilisation des variables d'environnement</h4>
+    <p>Le noeud de modèle peut accéder aux variables d'environnement en utilisant la syntaxe :</p>
+    <pre>Ma couleur préférée est {{env.COLOUR}}.</pre>
+</script>

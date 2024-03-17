@@ -1,0 +1,53 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="link in">
+    <p>Crea cables virtuales entre flujos.</p>
+    <h3>Detalles</h3>
+    <p>El nodo se puede conectar a cualquier nodo <code>enlace salida</code> que exista en cualquier pestaña. Una vez conectados, se comportan como si estuvieran conectados entre si.</p>
+    <p>Los cables entre los nodos de enlace solo se muestran cuando se selecciona un nodo de enlace. Si hay cables a otras pestañas, se muestra un nodo virtual en el que se puede hacer clic para saltar a la pestaña correspondiente.</p>
+    <p><b>Nota: </b>No se pueden crear enlaces que entren o salgan de un subflujo.</p>
+</script>
+
+<script type="text/html" data-help-name="link out">
+    <p>Crea cables virtuales entre flujos.</p>
+    <h3>Detalles</h3>
+    <p>Este nodo se puede configurar para enviar mensajes a todos los nodos <code>enlace entrada</code> a los que está conectado o para enviar una respuesta al nodo <code>enlace llamada</code> que activó el flujo.</p>
+    <p>Cuando está en modo 'enviar a todos', los cables entre los nodos de enlace solo se muestran cuando se selecciona el nodo. Si hay cables a otras pestañas, se muestra un nodo virtual en el que se puede hacer clic para saltar a la pestaña correspondiente.</p>
+    <p><b>Nota: </b>No se pueden crear enlaces que entren o salgan de un subflujo.</p>
+</script>
+
+<script type="text/html" data-help-name="link call">
+    <p>Llama a un flujo que comienza con un enlace <code>entrada</code> y transmite la respuesta.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+      <dt class="optional">target<span class="property-type">texto</span></dt>
+      <dd>Cuando la opción <b>Tipo de enlace</b> está configurada en "Destino dinámico", establece <code>msg.target</code> al nombre del nodo <code>enlace entrada</code> al que quieres llamar.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Este nodo se puede conectar a un nodo <code>enlace entrada</code> que existe en cualquier pestaña. El flujo conectado a ese nodo debe finalizar con un nodo <code>enlace salida</code> configurado en modo 'retorno'.</p>
+    <p>Cuando este nodo recibe un mensaje, se pasa al nodo <code>enlace entrada</code> conectado.
+       Luego espera una respuesta que enviará.</p>
+    <p>Si no se recibe respuesta dentro del tiempo de espera configurado, predeterminado de 30 segundos, el nodo registrará un error que se puede detectar utilizando el nodo <code>captura</code>.</p>
+    <p>Cuando la opción <b>Tipo de enlace</b> está configurada en "Destino dinámico", code>msg.target</code> puedes usarse para realizar una llamada al nodo <code>enlace entrada</code> por nombre o ID.
+    <ul>
+      <li>Si hay un nodo <code>enlace entrada</code> con el mismo ID, se llamará</li>
+      <li>Si hay dos o más nodos <code>enlace entrada</code> con el mismo nombre, se generará un error</li>
+      <li>Un <code>enlace llamada</code> no puede llamar a un nodo <code>enlace entrada</code> dentro de un subflujo</li>
+    </ul>
+    </p>
+    El flujo conectado a ese nodo debe finalizar con un nodo <code>enlace salida</code> configurado en modo 'retorno'.</p>
+</script>

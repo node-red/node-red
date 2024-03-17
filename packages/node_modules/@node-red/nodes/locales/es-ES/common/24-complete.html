@@ -1,0 +1,24 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="complete">
+    <p>Activar un flujo cuando otro nodo completa su manejo de un mensaje.</p>
+    <h3>Detalles</h3>
+    <p>Si un nodo informa cuando ha terminado de manejar un mensaje, este nodo se puede utilizar para desencadenar un segundo flujo.</p>
+    <p>Por ejemplo, esto se puede utilizar junto con un nodo sin puerto de salida, como el nodo de envío de correo electrónico, para continuar el flujo.</p>
+    <p>Este nodo debe configurarse para manejar el evento para los nodos seleccionados en el flujo. A diferencia del nodo Catch (Captura), no proporciona un modo de "manejar todo" que se aplica automáticamente a todos los nodos del flujo.</p>
+    <p>No todos los nodos activarán este evento; dependerá de si se han implementado para admitir esta característica tal como se introdujo en Node-RED 1.0.</p>
+</script>

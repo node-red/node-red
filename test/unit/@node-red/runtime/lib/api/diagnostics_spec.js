@@ -33,6 +33,11 @@ describe("runtime-api/diagnostics", function() {
                     flowFile: "flows.json",
                     mqttReconnectTime: 321,
                     serialReconnectTime: 432,
+                    socketReconnectTime: 2222,
+                    socketTimeout: 3333,
+                    tcpMsgQueueSize: 4444,
+                    inboundWebSocketTimeout: 5555,
+                    runtimeState: {enabled: true, ui: false},
                     adminAuth: {},//should be sanitised to "SET"
                     httpAdminRoot: "/admin/root/",
                     httpAdminCors: {},//should be sanitised to "SET"
@@ -45,6 +50,7 @@ describe("runtime-api/diagnostics", function() {
                     uiHost: "something.secret.com",//should be sanitised to "SET"
                     uiPort: 1337,//should be sanitised to "SET"
                     userDir: "/var/super/secret/",//should be sanitised to "SET",
+                    nodesDir: "/var/super/secret/",//should be sanitised to "SET",
                     contextStorage: {
                         default    : { module: "memory" },
                         file: { module: "localfilesystem" },
@@ -73,8 +79,9 @@ describe("runtime-api/diagnostics", function() {
 
                 //result.runtime.xxxxx
                 const runtimeCount = Object.keys(result.runtime).length;
-                runtimeCount.should.eql(4);//ensure no more than 4 keys are present in runtime 
+                runtimeCount.should.eql(5);//ensure 5 keys are present in runtime 
                 result.runtime.should.have.property('isStarted',true)
+                result.runtime.should.have.property('flows')
                 result.runtime.should.have.property('modules').type("object");
                 result.runtime.should.have.property('settings').type("object");
                 result.runtime.should.have.property('version','7.7.7');
@@ -87,7 +94,7 @@ describe("runtime-api/diagnostics", function() {
 
                 //result.runtime.settings.xxxxx
                 const settingsCount = Object.keys(result.runtime.settings).length;
-                settingsCount.should.eql(21);//ensure no more than the 21 settings listed below are present in the settings object
+                settingsCount.should.eql(27);//ensure no more than the 21 settings listed below are present in the settings object
                 result.runtime.settings.should.have.property('available',true);
                 result.runtime.settings.should.have.property('apiMaxLength', "UNSET");//deliberately disabled to ensure UNSET is returned
                 result.runtime.settings.should.have.property('debugMaxLength', 1111);
@@ -96,6 +103,11 @@ describe("runtime-api/diagnostics", function() {
                 result.runtime.settings.should.have.property('flowFile', "flows.json");
                 result.runtime.settings.should.have.property('mqttReconnectTime', 321);
                 result.runtime.settings.should.have.property('serialReconnectTime', 432);
+                result.runtime.settings.should.have.property('socketReconnectTime', 2222);
+                result.runtime.settings.should.have.property('socketTimeout', 3333);
+                result.runtime.settings.should.have.property('tcpMsgQueueSize', 4444);
+                result.runtime.settings.should.have.property('inboundWebSocketTimeout', 5555);
+                result.runtime.settings.should.have.property('runtimeState', {enabled: true, ui: false});
                 result.runtime.settings.should.have.property("adminAuth", "SET"); //should be sanitised to "SET"
                 result.runtime.settings.should.have.property("httpAdminCors", "SET"); //should be sanitised to "SET"
                 result.runtime.settings.should.have.property('httpAdminRoot', "/admin/root/");
@@ -109,6 +121,7 @@ describe("runtime-api/diagnostics", function() {
                 result.runtime.settings.should.have.property("uiPort", "SET"); //should be sanitised to "SET"
                 result.runtime.settings.should.have.property("userDir", "SET"); //should be sanitised to "SET"
                 result.runtime.settings.should.have.property('contextStorage').type("object");
+                result.runtime.settings.should.have.property('nodesDir', "SET")
 
                 //result.runtime.settings.contextStorage.xxxxx
                 const contextCount = Object.keys(result.runtime.settings.contextStorage).length;

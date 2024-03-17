@@ -34,7 +34,7 @@ describe("api/editor/sshkeys", function() {
         }
     }
     before(function() {
-        sshkeys.init(mockRuntime);
+        sshkeys.init({}, mockRuntime);
         app = express();
         app.use(bodyParser.json());
         app.use("/settings/user/keys", sshkeys.app());

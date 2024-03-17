@@ -1,0 +1,50 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="switch">
+    <p>Encaminhe mensagens com base em seus valores de propriedade ou posição de sequência.</p>
+    <h3>Detalhes</h3>
+    <p>Quando chega uma mensagem, o nó irá avaliar cada uma das regras definidas
+    e encaminhará a mensagem para as saídas correspondentes de quaisquer regras que combinem . </p>
+    <p>Opcionalmente, o nó pode ser configurado para parar de avaliar as regras assim que encontrar uma
+    que combine.</p>
+    <p> As regras podem ser avaliadas em relação a uma propriedade da mensagem individual, um fluxo (ou uma
+    propriedade de contexto global), variável de ambiente ou o resultado de uma expressão JSONata.</p>
+    <h4>Regras</h4>
+    <p>Existem quatro tipos de regras:</p>
+    <ol>
+        <li>Regras de <b>valor</b> são avaliadas em relação à propriedade configurada</li>
+        <li>Regras de <b>sequência</b> podem ser usadas em sequências de mensagens, como aquelas
+            gerado pelo nó Separador</li>
+        <li>Uma <b>Expressão</b> JSONata pode ser fornecida e avaliada,
+            em relação a toda mensagem; obtendo-se a correspondência se a expressão retornar
+            o valor booliano verdadeiro. </li>
+        <li>Uma regra <b>Caso contrário</b> pode ser usada para combinação se nenhuma das regras anteriores
+            encontrarem correspondentes.</li>
+    </ol>
+    <h4>Notas</h4>
+    <p> As regras <code>é verdadeiro/falso</code> e <code>é nulo</code> executam regras estritas
+        na comparaçao desses tipos e não fazem converção entre eles .</p>
+    <p> As regras <code>está vazio</code> e <code> não está vazio</code> podem ser usadas para testar o comprimento de: cadeia de caracteres, matrizes e armazenamentos temporários ou o número de propriedades que um Objeto possui. Nenhuma regra será aprovada se a propriedade que está sendo testada tiver um <code>booliano</code>, <code>mulo</code>
+        ou valor <code>indefinido</code>.</p>
+    <h4>Lidando com sequências de mensagens</h4>
+    <p>Por padrão, o nó não modifica a propriedade <code>msg.parts</code> das mensagens
+        que fazem parte de uma sequência.</p>
+    <p>A opção<b>recriar sequências de mensagens</b> pode ser habilitada para gerar novas sequências de mensagens
+        para cada regra que corresponda. Neste modo, o nó irá armazenar temporariamente toda a sequência de entrada
+        antes de enviar as novas sequências. A configuração de tempo de execução <code>nodeMessageBufferMaxLength</code>
+        pode ser usada para limitar o número de mensagens que os nós irão armazenar temporariamente.</p> 
+</script>

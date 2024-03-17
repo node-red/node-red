@@ -1,0 +1,64 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="function">
+  <p> Uma função JavaScript para abordar as mensagens recebidas pelo nó. </p>
+      <p> As mensagens são passadas como um objeto JavaScript chamado <code>msg</code>.</p>
+      <p> Por convenção, estas irão possuir uma propriedade <code>msg.payload</code> contendo
+         o corpo da mensagem.</p>
+      <p>Espera-se que a função retorne um objeto do tipo mensagem (ou vários objetos do tipo mensagem), mas a função pode escolher
+         não retornar nada visando interromper um fluxo.</p>
+      <p>A guia <b>On Start</b> contém um código que será executado sempre que o nó for iniciado.
+          A guia <b>On Stop</b> contém um código que será executado quando o nó for parado.</p>
+      <p>Se o código <b>On Start</b> retornar um objeto do tipo promessa, o nó não começará a tratar as mensagens
+          até que a promessa seja resolvida.</p>
+      <h3>Detalhes</h3>
+      <p>Consulte a <a target="_blank" href="https://nodered.org/docs/writing-functions.html">documentação online</a>
+      para obter maiores informações sobre funções de escrita.</p>
+      <h4>Enviando mensagens</h4>
+      <p>A função pode retornar as mensagens que deseja passar para os próximos nós
+      no fluxo ou pode chamar <code>node.send(messages)</code>.</p>
+      <p>A função pode retornar/enviar:</p>
+      <ul>
+        <li>um único objeto do tipo mensagem - passado para os nós conectados à primeira saída</li>
+        <li>uma matriz de objetos do tipo mensagem - passada para nós conectados às saídas correspondentes</li>
+      </ul>
+      <p>Nota: O código de configuração é executado durante a inicialização dos nós. Portanto, se <code>node.send</code> for chamado na guia de configuração, os nós subsequentes podem não serem capazes de receber a mensagem. </p>
+      <p>Se qualquer elemento da matriz é ele próprio uma matriz do tipo mensagens, múltiplas
+            mensagens são enviadas para a saída correspondente.</p>
+      <p>Se nulo for retornado, por si só ou como um elemento da matriz, nnehuma
+      mensagem é passada adiante.</p>
+      <h4>Registro e tratamento de erros</h4>
+      <p>Para registrar qualquer informação ou relatar um erro, as seguintes funções estão disponíveis: </p>
+        <ul>
+            <li> <code>node.log("Log message")</code> </li>
+            <li><code>node.warn("Warning"</code> </li>
+            <li><code>node.error("Error")</code> </li>
+        </ul>
+      </p>
+      <p> O nó de Captura também pode ser usado para lidar com erros. Para invocar um nó de Captura,
+      passe <code>msg</code> como um segundo argumento para <code>node.error</code>: </p>
+      <pre> node.error ("Erro", msg); </pre>
+      <h4>Acessando informações do nó</h4>
+      <p>As seguintes propriedades estão disponíveis para acessar informações sobre o nó:</p>
+      <ul>
+          <li> <code> node.id </code> - id do nó</li>
+          <li> <code> node.name </code> - nome do nó</li>
+          <li> <code> node.outputCount </code> - número de saídas de nós</li>
+      </ul>
+      <h4>Usando variáveis ​​de ambiente </h4>
+      <p> Variáveis ​​de ambiente podem ser acessadas usando <code>env.get("MY_ENV_VAR")</code>.</p> 
+</script>

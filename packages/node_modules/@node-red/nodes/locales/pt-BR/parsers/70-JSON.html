@@ -1,0 +1,53 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="json">
+    <p>Converte entre uma cadeia de caracteres JSON e sua representação de objeto JavaScript, em qualquer direção.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>carga útil<span class="property-type">objeto| cadeia de caracteres</span></dt>
+        <dd>Um objeto JavaScript ou cadeia de caracteres JSON.</dd>
+        <dt>esquema<span class="property-type">objeto</span></dt>
+        <dd>Um objeto de esquema JSON opcional para validar a carga útil.
+        A propriedade será excluída antes que a <code>msg</code> seja enviada para o próximo nó.</dd>
+    </dl>
+    <h3>Saídas</h3>
+    <dl class="message-properties">
+        <dt>carga útil<span class="property-type">objeto | cadeia de caracteres</span></dt>
+        <dd>
+            <ul>
+                <li>Se a entrada for uma cadeia de caracteres JSON, ela tentará analisá-la sintaticamente como um objeto JavaScript.</li>
+                <li>Se a entrada for um objeto JavaScript, ela cria uma cadeia de caracteres JSON. A cadeia de caracteres pode ser opcionalmente bem formatada.</li>
+            </ul>
+        </dd>
+        <dt>schemaError<span class="property-type">matriz</span></dt>
+        <dd>Se a validação do esquema JSON falhar, o nó de captura terá uma propriedade <code>schemaError</code>
+            contendo uma série de erros.</dd>
+    </dl>
+    <h3>Detalhes</h3>
+    <p>Por padrão, o nó opera em <code>msg.payload</code>, mas pode ser configurado
+       para converter qualquer propriedade de mensagem.</p>
+    <p>O nó também pode ser configurado para garantir uma codificação específica em vez de alternar
+       entre os dois. Isso pode ser usado, por exemplo, com o nó de entrada <code>HTTP</code>
+       para garantir que a carga útil seja um objeto analisadosintáticamente, mesmo se uma solicitação de entrada
+       não definir seu tipo de conteúdo corretamente para o nó de entrada HTTP para fazer a conversão.</p>
+    <p>Se o nó estiver configurado para garantir que a propriedade seja codificada como uma cadeia de caracteres e
+       que receba a cadeia de caracteres, nenhuma outra verificação será feita na propriedade. Não será 
+       verificado se a cadeia de caracteres é um JSON válido nem será reformatada se a opção de formatar
+       estive selecionada.</p>
+    <p> Para obter mais detalhes sobre o esquema JSON, você pode consultar a especificação
+    <a href="http://json-schema.org/latest/json-schema-validation.html"> aqui</a>.</p>
+</script>

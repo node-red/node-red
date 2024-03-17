@@ -1,0 +1,64 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="function">
+    <p>Une fonction JavaScript à exécuter sur les messages reçus par le noeud.</p>
+    <p>Les messages sont transmis sous la forme d'un objet JavaScript appelé <code>msg</code>.</p>
+    <p>Par convention, il aura une propriété <code>msg.payload</code> contenant
+      le corps du message.</p>
+    <p>La fonction est censée renvoyer un objet message (ou plusieurs objets message), mais peut choisir
+      de ne rien retourner pour stopper un flux.</p>
+    <p>L'onglet <b>Au démarrage</b> contient du code qui sera exécuté à chaque démarrage du noeud.
+      L'onglet <b>À l'arrêt</b> contient le code qui sera exécuté lorsque le noeud sera arrêté.</p>
+    <p>Si le code 'Au démarrage' renvoie un objet Promise (promesse), le noeud ne commencera pas à gérer les messages
+      jusqu'à ce que la promesse soit résolue.</p>
+    <h3>Détails</h3>
+    <p>Voir la <a target="_blank" href="https://nodered.org/docs/writing-functions.html">documentation en ligne</a>
+      pour plus d'informations sur les fonctions d'écriture.</p>
+    <h4>Envoi de messages</h4>
+    <p>La fonction peut envoyer les messages qu'elle souhaite transmettre aux noeuds suivants
+      dans le flux, soit avec <code>return msg</code> soit appeler la fonction <code>node.send(messages)</code>.</p>
+    <p>Il peut renvoyer/envoyer :</p>
+    <ul>
+      <li>un seul objet de message - transmis aux noeuds connectés à la première sortie</li>
+      <li>un tableau d'objets de message - transmis aux noeuds connectés aux sorties correspondantes</li>
+    </ul>
+    <p>Remarque : Le code 'Au démarrage' est exécuté lors de l'initialisation des noeuds. Par conséquent, si <code>node.send</code> est appelé dans l'onglet Au démarrage, les noeuds suivants peuvent ne pas être en mesure de recevoir le message.</p>
+    <p>Si un élément du tableau est lui-même un tableau de messages, plusieurs
+      messages sont envoyés à la sortie correspondante.</p>
+    <p>Si null est renvoyé, seul ou en tant qu'élément du tableau, aucun
+      message n'est envoyé.</p>
+    <h4>Journalisation et gestion des erreurs</h4>
+    <p>Pour enregistrer des informations ou signaler une erreur, les fonctions suivantes sont disponibles :</p>
+      <ul>
+          <li><code>node.log("Message pour le journal")</code></li>
+          <li><code>node.warn("Attention")</code></li>
+          <li><code>node.error("Erreur")</code></li>
+      </ul>
+    </p>
+    <p>Le noeud Catch peut également être utilisé pour gérer les erreurs. Pour invoquer un noeud Catch,
+      passer <code>msg</code> comme deuxième argument à <code>node.error</code> :</p>
+    <pre>node.error("Erreur",msg);</pre>
+    <h4>Accéder aux informations sur les noeuds</h4>
+    <p>Les propriétés suivantes sont disponibles pour accéder aux informations sur le noeud:</p>
+    <ul>
+        <li><code>node.id</code> - identifiant du noeud</li>
+        <li><code>node.name</code> - nom du noeud</li>
+        <li><code>node.outputCount</code> - nombre de sorties du noeud</li>
+    </ul>
+    <h4>Utilisation des variables d'environnement</h4>
+    <p>Les variables d'environnement sont accessibles à l'aide de <code>env.get("MA_VAR__ENV")</code>.</p>
+</script>

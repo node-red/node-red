@@ -66,6 +66,27 @@ describe('SPLIT node', function() {
         });
     });
 
+    it('should split an array on a sub-property into multiple messages', function(done) {
+        var flow = [{id:"sn1", type:"split", property:"foo", wires:[["sn2"]]},
+                    {id:"sn2", type:"helper"}];
+        helper.load(splitNode, flow, function() {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            sn2.on("input", function(msg) {
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("count",4);
+                msg.parts.should.have.property("type","array");
+                msg.parts.should.have.property("index");
+                msg.parts.should.have.property("property","foo");
+                if (msg.parts.index === 0) { msg.foo.should.equal(1); }
+                if (msg.parts.index === 1) { msg.foo.should.equal(2); }
+                if (msg.parts.index === 2) { msg.foo.should.equal(3); }
+                if (msg.parts.index === 3) { msg.foo.should.equal(4); done(); }
+            });
+            sn1.receive({foo:[1,2,3,4]});
+        });
+    });
+
     it('should split an array into multiple messages of a specified size', function(done) {
         var flow = [{id:"sn1", type:"split", wires:[["sn2"]], arraySplt:3, arraySpltType:"len"},
                     {id:"sn2", type:"helper"}];
@@ -105,6 +126,31 @@ describe('SPLIT node', function() {
                 if (msg.parts.index === 2) { msg.payload.should.equal(true); done(); }
             });
             sn1.receive({topic:"foo",payload:{a:1,b:"2",c:true}});
+        });
+    });
+
+    it('should split an object sub property into pieces', function(done) {
+        var flow = [{id:"sn1", type:"split", property:"foo.bar",wires:[["sn2"]]},
+                    {id:"sn2", type:"helper"}];
+        helper.load(splitNode, flow, function() {
+            var sn1 = helper.getNode("sn1");
+            var sn2 = helper.getNode("sn2");
+            var count = 0;
+            sn2.on("input", function(msg) {
+                msg.should.have.property("foo");
+                msg.foo.should.have.property("bar");
+                msg.should.have.property("parts");
+                msg.parts.should.have.property("type","object");
+                msg.parts.should.have.property("key");
+                msg.parts.should.have.property("count");
+                msg.parts.should.have.property("index");
+                msg.parts.should.have.property("property","foo.bar");
+                msg.topic.should.equal("foo");
+                if (msg.parts.index === 0) { msg.foo.bar.should.equal(1); }
+                if (msg.parts.index === 1) { msg.foo.bar.should.equal("2"); }
+                if (msg.parts.index === 2) { msg.foo.bar.should.equal(true); done(); }
+            });
+            sn1.receive({topic:"foo",foo:{bar:{a:1,b:"2",c:true}}});
         });
     });
 
@@ -516,6 +562,7 @@ describe('JOIN node', function() {
             n1.receive({payload:{a:1}});
         });
     });
+
     it('should join things into an array ignoring msg.parts.index in manual mode', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",",mode:"custom"},
                     {id:"n2", type:"helper"}];
@@ -561,6 +608,32 @@ describe('JOIN node', function() {
             n1.receive({payload:{a:1}});
         });
     });
+
+    it('should join things into an array on a sub property in auto mode', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:3, joiner:",", mode:"auto"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("foo");
+                    msg.foo.should.have.property("bar");
+                    msg.foo.bar.should.be.an.Array();
+                    msg.foo.bar[0].should.equal("A");
+                    msg.foo.bar[1].should.equal("B");
+                    //msg.payload[2].a.should.equal(1);
+                    done();
+                }
+                catch(e) {done(e);}
+            });
+            n1.receive({foo:{bar:"A"}, parts:{id:1, type:"array", len:1, index:0, count:4, property:"foo.bar"}});
+            n1.receive({foo:{bar:"B"}, parts:{id:1, type:"array", len:1, index:1, count:4, property:"foo.bar"}});
+            n1.receive({foo:{bar:"C"}, parts:{id:1, type:"array", len:1, index:2, count:4, property:"foo.bar"}});
+            n1.receive({foo:{bar:"D"}, parts:{id:1, type:"array", len:1, index:3, count:4, property:"foo.bar"}});
+        });
+    });
+
 
     it('should join strings into a buffer after a count', function(done) {
         var flow = [{id:"n1", type:"join", wires:[["n2"]], count:2, build:"buffer", joinerType:"bin", joiner:"", mode:"custom"},
@@ -636,6 +709,35 @@ describe('JOIN node', function() {
             n1.receive({payload:{c:3}, topic:"c"});
             n1.receive({payload:{d:4}, topic:"d"});
             n1.receive({payload:{e:5}, topic:"e"});
+        });
+    });
+
+    it('should merge sub property objects', function(done) {
+        var flow = [{id:"n1", type:"join", wires:[["n2"]], count:5, property:"foo.bar", build:"merged", mode:"custom"},
+                    {id:"n2", type:"helper"}];
+        helper.load(joinNode, flow, function() {
+            var n1 = helper.getNode("n1");
+            var n2 = helper.getNode("n2");
+            n2.on("input", function(msg) {
+                try {
+                    msg.should.have.property("foo");
+                    msg.foo.should.have.property("bar");
+                    msg.foo.bar.should.have.property("a",1);
+                    msg.foo.bar.should.have.property("b",2);
+                    msg.foo.bar.should.have.property("c",3);
+                    msg.foo.bar.should.have.property("d",4);
+                    msg.foo.bar.should.have.property("e",5);
+                    done();
+                }
+                catch(e) { done(e)}
+            });
+            n1.receive({foo:{bar:{a:9}, topic:"f"}});
+            n1.receive({foo:{bar:{a:1}, topic:"a"}});
+            n1.receive({foo:{bar:{b:9}, topic:"b"}});
+            n1.receive({foo:{bar:{b:2}, topic:"b"}});
+            n1.receive({foo:{bar:{c:3}, topic:"c"}});
+            n1.receive({foo:{bar:{d:4}, topic:"d"}});
+            n1.receive({foo:{bar:{e:5}, topic:"e"}});
         });
     });
 

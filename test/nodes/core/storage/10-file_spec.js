@@ -98,6 +98,29 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should write to a file using JSONata', function(done) {
+            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename": fileToTest4jsonata, "filenameType": "jsonata", "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function(msg) {
+                    try {
+                        var f = fs.readFileSync(fileToTest);
+                        f.should.have.length(4);
+                        fs.unlinkSync(fileToTest);
+                        msg.should.have.property("payload", "test");
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload:"test"});
+            });
+        });
+
         it('should write to a file using RED.settings.fileWorkingDirectory', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":relativePathToFile, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
@@ -120,7 +143,6 @@ describe('file Nodes', function() {
                 n1.receive({payload:"test"});
             });
         });
-
 
         it('should write multi-byte string to a file', function(done) {
             var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":false, "overwriteFile":true, wires: [["helperNode1"]]},
@@ -190,6 +212,55 @@ describe('file Nodes', function() {
                 },60);
                 setTimeout(function() {
                     n1.receive({payload:[2]});        // object (array)
+                },90);
+            });
+        });
+
+        it('should append to a file and add newline, except last line of multipart input', function(done) {
+            var flow = [{id:"fileNode1", type:"file", name: "fileNode", "filename":fileToTest, "appendNewline":true, "overwriteFile":false, wires: [["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            try {
+                fs.unlinkSync(fileToTest);
+            } catch(err) {
+            }
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                var count = 0;
+                //var data = ["Line1", "Line2"];
+
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property("payload");
+                        //data.should.containDeep([msg.payload]);
+                        if (count === 3) {
+                            var f = fs.readFileSync(fileToTest).toString();
+                            if (os.type() !== "Windows_NT") {
+                                f.should.have.length(23);
+                                f.should.equal("Line1\nLine2\nLine3\nLine4");
+                            }
+                            else {
+                                f.should.have.length(23);
+                                f.should.equal("Line1\r\nLine2\r\nLine3\r\nLine4");
+                            }
+                            done();
+                        }
+                        count++;
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+
+                n1.receive({payload:"Line1",parts:{index:0,type:"string"}});    // string
+                setTimeout(function() {
+                    n1.receive({payload:"Line2",parts:{index:1,type:"string"}});    // string
+                },30);
+                setTimeout(function() {
+                    n1.receive({payload:"Line3",parts:{index:2,type:"string"}});    // string
+                },60);
+                setTimeout(function() {
+                    n1.receive({payload:"Line4",parts:{index:3,type:"string",count:4}});    // string
                 },90);
             });
         });
@@ -374,6 +445,31 @@ describe('file Nodes', function() {
                 n1.receive({payload:"typedInput", _user_specified_filename:fileToTest});
             });
         });
+
+        it('should support number in msg._user_specified_filename', function (done) {
+            var flow = [{id:"fileNode1", type:"file", filename:"_user_specified_filename", filenameType:"msg", name:"fileNode", "appendNewline":false, "overwriteFile":true, wires:[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper"}];
+            helper.load(fileNode, flow, function () {
+                RED.settings.fileWorkingDirectory = resourcesDir;
+                var n1 = helper.getNode("fileNode1");
+                var n2 = helper.getNode("helperNode1");
+                n2.on("input", function (msg) {
+                    try {
+                        var fileToTest = path.join(resourcesDir, "123");
+                        var f = fs.readFileSync(fileToTest);
+                        f.should.have.length(4);
+                        fs.unlinkSync(fileToTest);
+                        msg.should.have.property("payload", "test");
+                        done();
+                    }
+                    catch (e) {
+                        done(e);
+                    }
+                });
+                n1.receive({payload: "test", _user_specified_filename: 123});
+            });
+        });
+
         it('should use env.TEST_FILE set in nodes typedInput', function(done) {
             var flow = [{id:"fileNode1", type:"file", filename:"TEST_FILE", filenameType: "env", name: "fileNode", "appendNewline":true, "overwriteFile":true, wires: [["helperNode1"]]},
                         {id:"helperNode1", type:"helper"}];
@@ -1188,6 +1284,27 @@ describe('file Nodes', function() {
             });
         });
 
+        it('should read in a file using JSONata and output a utf8 string', function(done) {
+            var fileToTest4jsonata = "'" + resourcesDir + "/'&(20+30)&'-file-test-file.txt'";
+            var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest4jsonata, "filenameType": "jsonata", "format":"utf8", wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            helper.load(fileNode, flow, function() {
+                var n1 = helper.getNode("fileInNode1");
+                var n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('payload');
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.have.length(40)
+                        msg.payload.should.equal("File message line 1\nFile message line 2\n");
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                n1.receive({payload:""});
+            });
+        });
 
         it('should read in a file using fileWorkingDirectory to set cwd', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":relativePathToFile, "format":"utf8", wires:[["n2"]]},

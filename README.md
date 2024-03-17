@@ -1,17 +1,16 @@
 # Node-RED
 
-http://nodered.org
+https://nodered.org
 
-[![Build Status](https://travis-ci.org/node-red/node-red.svg?branch=master)](https://travis-ci.org/node-red/node-red)
-[![Coverage Status](https://coveralls.io/repos/node-red/node-red/badge.svg?branch=master)](https://coveralls.io/r/node-red/node-red?branch=master)
+[![Build Status](https://github.com/node-red/node-red/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/node-red/node-red/actions?query=branch%3Amaster)
 
 Low-code programming for event-driven applications.
 
-![Node-RED: Low-code programming for event-driven applications](http://nodered.org/images/node-red-screenshot.png)
+![Node-RED: Low-code programming for event-driven applications](https://nodered.org/images/node-red-screenshot.png)
 
 ## Quick Start
 
-Check out http://nodered.org/docs/getting-started/ for full instructions on getting
+Check out https://nodered.org/docs/getting-started/ for full instructions on getting
 started.
 
 1. `sudo npm install -g --unsafe-perm node-red`
@@ -20,7 +19,7 @@ started.
 
 ## Getting Help
 
-More documentation can be found [here](http://nodered.org/docs).
+More documentation can be found [here](https://nodered.org/docs).
 
 For further help, or general discussion, please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
 
