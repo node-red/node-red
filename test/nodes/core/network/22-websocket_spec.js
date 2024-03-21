@@ -66,7 +66,7 @@ describe('websocket Node', function() {
 
     afterEach(function() {
         closeAll();
-        helper.unload();
+        return helper.unload();
     });
 
     describe('websocket-listener', function() {

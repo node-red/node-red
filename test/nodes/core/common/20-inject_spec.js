@@ -43,7 +43,7 @@ describe('inject node', function() {
         });
     }
 
-    afterEach(async function() {
+    afterEach(function(done) {
         helper.unload().then(function () {
             return Context.clean({allNodes: {}});
         }).then(function () {
