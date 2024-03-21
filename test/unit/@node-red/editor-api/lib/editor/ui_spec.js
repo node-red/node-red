@@ -29,7 +29,7 @@ describe("api/editor/ui", function() {
     var app;
 
     before(function() {
-        ui.init({
+        ui.init({}, {
             nodes: {
                 getIcon: function(opts) {
                     return new Promise(function(resolve,reject) {

@@ -26,6 +26,7 @@ var flowUtils = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/util");
 var Flow = NR_TEST_UTILS.require("@node-red/runtime/lib/flows/Flow");
 var flows = NR_TEST_UTILS.require("@node-red/runtime/lib/flows");
 var Node = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/Node");
+var credentials = NR_TEST_UTILS.require("@node-red/runtime/lib/nodes/credentials");
 var hooks = NR_TEST_UTILS.require("@node-red/util/lib/hooks");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry");
 
@@ -61,6 +62,7 @@ describe('Flow', function() {
         this.scope = n.scope;
         var node = this;
         this.foo = n.foo;
+        this.bar = n.bar;
         this.handled = 0;
         this.stopped = false;
         currentNodes[node.id] = node;
@@ -1235,11 +1237,12 @@ describe('Flow', function() {
     })
 
     describe("#env", function () {
+        afterEach(() => {
+            delete process.env.V0;
+            delete process.env.V1;
+            credentials.get.restore?.()
+        })
         it("can instantiate a node with environment variable property values of group and tab", async function () {
-            after(function() {
-                delete process.env.V0;
-                delete process.env.V1;
-            })
             process.env.V0 = "gv0";
             process.env.V1 = "gv1";
             process.env.V3 = "gv3";
@@ -1283,10 +1286,6 @@ describe('Flow', function() {
         });
 
         it("can access environment variable property using $parent", async function () {
-            after(function() {
-                delete process.env.V0;
-                delete process.env.V1;
-            })
             process.env.V0 = "gv0";
             process.env.V1 = "gv1";
             var config = flowUtils.parseConfig([
@@ -1321,9 +1320,6 @@ describe('Flow', function() {
         });
 
         it("can define environment variable using JSONata", async function () {
-            after(function() {
-                delete process.env.V0;
-            })
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab",env:[
                     {"name": "V0", value: "1+2", type: "jsonata"}
@@ -1346,9 +1342,6 @@ describe('Flow', function() {
         });
 
         it("can access global environment variables defined as JSONata values", async function () {
-            after(function() {
-                delete process.env.V0;
-            })
             var config = flowUtils.parseConfig([
                 {id:"t1",type:"tab",env:[
                     {"name": "V0", value: "1+2", type: "jsonata"}
@@ -1370,15 +1363,21 @@ describe('Flow', function() {
             await flow.stop()
         });
         it("global flow can access global-config defined environment variables", async function () {
-            after(function() {
-                delete process.env.V0;
+            sinon.stub(credentials,"get").callsFake(function(id) {
+                if (id === 'gc') {
+                    return { map: { GC_CRED: 'gc_cred' }}
+                }
+                return null
             })
+
             const config = flowUtils.parseConfig([
                 {id:"gc", type:"global-config", env:[
-                    {"name": "GC0", value: "3+4", type: "jsonata"}
+                    {"name": "GC0", value: "3+4", type: "jsonata"},
+                    {"name": "GC_CRED", type: "cred"},
+                    
                 ]},
                 {id:"t1",type:"tab" },
-                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${GC0}",wires:[]},
+                {id:"1",x:10,y:10,z:"t1",type:"test",foo:"${GC0}", bar:"${GC_CRED}", wires:[]},
             ]);
             // Two-arg call - makes this the global flow that handles global-config nodes
             const globalFlow = Flow.create({getSetting:v=>process.env[v]},config);
@@ -1390,6 +1389,7 @@ describe('Flow', function() {
 
             var activeNodes = flow.getActiveNodes();
             activeNodes["1"].foo.should.equal(7);
+            activeNodes["1"].bar.should.equal('gc_cred');
 
             await flow.stop()
             await globalFlow.stop()

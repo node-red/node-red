@@ -1,0 +1,75 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="exec">
+    <p>Ejecuta un comando del sistema y devuelve su salida.</p>
+    <p>El nodo se puede configurar para esperar hasta que se complete el comando o para enviar su salida a medida que el comando lo genera.</p>
+    <p>El comando que se ejecuta puede configurarse en el nodo o proporcionarse mediante el mensaje recibido.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">payload <span class="property-type">texto</span></dt>
+        <dd>si está configurado para hacerlo, se agregará al comando ejecutado.</dd>
+        <dt class="optional">kill <span class="property-type">texto</span></dt>
+        <dd>el tipo de señal de interrupción para enviar al proceso de ejecución existente.</dd>
+        <dt class="optional">pid <span class="property-type">número|texto</span></dt>
+        <dd>el ID de proceso del proceso de ejecución existente que se va a eliminar.</dd>
+    </dl>
+
+    <h3>Salidas</h3>
+    <ol class="node-ports">
+        <li>Salida estándar
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">texto</span></dt>
+                <dd>la salida estándar del comando.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">objeto</span></dt>
+                <dd>solo en modo ejecución, una copia del objeto de código de retorno (también disponible en el puerto 3)</dd>
+            </dl>
+        </li>
+        <li>Salida error
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">texto</span></dt>
+                <dd>el error estándar del comando.</dd>
+            </dl>
+            <dl class="message-properties">
+                <dt>rc <span class="property-type">objeto</span></dt>
+                <dd>solo en modo ejecución, una copia del objeto de código de retorno (también disponible en el puerto 3)</dd>
+            </dl>
+        </li>
+        <li>Código de retorno
+            <dl class="message-properties">
+                <dt>payload <span class="property-type">objeto</span></dt>
+                <dd>un objeto que contiene el código de retorno y posiblemente las propiedades <code>message</code>, <code>signal</code>.</dd>
+            </dl>
+        </li>
+    </ol>
+    <h3>Detalles</h3>
+    <p>De forma predeterminada, utiliza la llamada al sistema <code>exec</code> que llama al comando, espera a que se complete y luego devuelve el resultado. Por ejemplo, un comando exitoso debe tener un código de retorno de <code>{ code: 0 }</code>.</p>
+    <p>Opcionalmente, puedes usar <code>spawn</code> en su lugar, que devuelve la salida de stdout y stderr a medida que se ejecuta el comando, generalmente una línea a la vez. Al finalizar, devuelve un objeto en el tercer puerto. Por ejemplo, un comando exitoso debería devolver <code>{ code: 0 }</code>.</p>
+    <p>Los errores pueden devolver información adicional en el tercer puerto <code>msg.payload</code>, como una cadena <code>message</code>, <code>señal</code>.</p>
+    <p>El comando que se ejecuta se define dentro del nodo, con una opción para agregar <code>msg.payload</code> y un conjunto adicional de parámetros.</p>
+    <p>Los comandos o parámetros con espacios deben estar entre comillas - <code>"Este es un solo parámetro"</code></p>
+    <p>La <code>carga</code> devuelta suele ser una <i>cadena</i>, a menos que se detecten caracteres que no sean UTF8, en cuyo caso es un <i>búfer</i>.</p>
+    <p>El icono de estado del nodo y el PID serán visibles mientras el nodo esté activo. Los cambios a esto pueden ser leídos por el nodo <code>Estado</code>.</p>
+    <p>La opción <code>Ocultar consola</code> ocultará la consola de procesos que normalmente se muestra en los sistemas Windows.</p>
+    <h4>Eliminando Procesos</h4>
+    <p>Enviar <code>msg.kill</code> eliminará un único proceso activo. <code>msg.kill</code> debe ser una cadena que contenga el tipo de señal que se enviará, por ejemplo, <code>SIGINT</code>, <code>SIGQUIT</code> o <code>SIGHUP</code>.
+    El valor predeterminado es <code>SIGTERM</code> si se establece en una cadena vacía.</p>
+    <p>Si el nodo tiene más de un proceso en ejecución, entonces <code>msg.pid</code> también debe configurarse con el valor del PID que se va a eliminar.</p>
+    <p>Si se proporciona un valor en el campo <code>Timeout</code>, si el proceso no se ha completado cuando haya transcurrido el número de segundos especificado, el proceso se finalizará automáticamente</p>
+    <p>Consejo: si ejecutas una aplicación Python, es posible que necesites usar el parámetro <code>-u</code> para detener la salida que se almacena en el búfer.</p>
+</script>

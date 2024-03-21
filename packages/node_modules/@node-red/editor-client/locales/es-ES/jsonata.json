@@ -1,0 +1,278 @@
+{
+    "$string": {
+        "args": "arg[, prettify]",
+        "desc": "Convierte el parámetro `arg` a una cadena usando las siguientes reglas de conversión:\n\n - Las cadenas no cambian\n - Las funciones se convierten en una cadena vacía\n - El infinito numérico y NaN arrojan un error porque no se pueden representar como un número JSON\n: todos los demás valores se convierten a una cadena JSON usando la función `JSON.stringify`. Si `prettify` es verdadero, entonces se produce JSON \"prettified\". es decir, una línea por campo y las líneas se indentarán según la profundidad del campo."
+    },
+    "$length": {
+        "args": "str",
+        "desc": "Devuelve el número de caracteres de la cadena `str`. Se genera un error si `str` no es una cadena."
+    },
+    "$substring": {
+        "args": "str, start[, length]",
+        "desc": "Devuelve una cadena que contiene los caracteres del primer parámetro `str` comenzando en la posición `start` (desplazamiento cero). Si se especifica 'longitud', la subcadena contendrá el máximo de caracteres de 'longitud'. Si 'inicio' es negativo, indica el número de caracteres desde el final de 'cadena'."
+    },
+    "$substringBefore": {
+        "args": "str, chars",
+        "desc": "Devuelve la subcadena antes de la primera aparición de la secuencia de caracteres `chars` en `str`. Si `str` no contiene `caracteres`, entonces devuelve `str`."
+    },
+    "$substringAfter": {
+        "args": "str, chars",
+        "desc": "Devuelve la subcadena después de la primera aparición de la secuencia de caracteres `chars` en `str`. Si `str` no contiene `caracteres`, entonces devuelve `str`."
+    },
+    "$uppercase": {
+        "args": "str",
+        "desc": "Devuelve una cadena con todos los caracteres de `str` convertidos a mayúsculas."
+    },
+    "$lowercase": {
+        "args": "str",
+        "desc": "Devuelve una cadena con todos los caracteres de `str` convertidos a minúsculas."
+    },
+    "$trim": {
+        "args": "str",
+        "desc": "Normaliza y recorta todos los caracteres de espacio en blanco en `str` aplicando los siguientes pasos:\n\n - Todas las tabulaciones, retornos de carro y avances de línea se reemplazan con espacios.\n- Las secuencias contiguas de espacios se reducen a un solo espacio.\n- Se eliminan los espacios iniciales y finales.\n\n Si no se especifica `str` (es decir, esta función se invoca sin argumentos), entonces el valor de contexto se utiliza como el valor de `str`. Se genera un error si `str` no es una cadena."
+    },
+    "$contains": {
+        "args": "str, pattern",
+        "desc": "Devuelve 'verdadero' si 'cadena' coincide con 'patrón', de lo contrario, devuelve 'falso'. Si no se especifica `str` (es decir, esta función se invoca con un argumento), entonces el valor del contexto se utiliza como valor de `str`. El parámetro `patrón` puede ser una cadena o una expresión regular."
+    },
+    "$split": {
+        "args": "str[, separator][, limit]",
+        "desc": "Divide el parámetro `str` en una matriz de subcadenas. Es un error si `str` no es una cadena. El parámetro opcional `separador` especifica los caracteres dentro de la `cadena` sobre los cuales se debe dividir como una cadena o una expresión regular. Si no se especifica 'separador', se supone que la cadena está vacía y 'cadena' se dividirá en una matriz de caracteres individuales. Es un error si el 'separador' no es una cadena. El parámetro opcional 'límite' es un número que especifica el número máximo de subcadenas que se incluirán en la matriz resultante. Cualquier subcadena adicional se descarta. Si no se especifica `límite`, entonces `str` se divide completamente sin límite para el tamaño de la matriz resultante. Es un error si 'límite' no es un número positivo."
+    },
+    "$join": {
+        "args": "array[, separator]",
+        "desc": "Une una matriz de cadenas de componentes en una única cadena concatenada con cada cadena de componentes separada por el parámetro 'separador' opcional. Es un error si la 'matriz' de entrada contiene un elemento que no es una cadena. Si no se especifica 'separador', se supone que es una cadena vacía, es decir, que no hay 'separador' entre las cadenas componentes. Es un error si el 'separador' no es una cadena."
+    },
+    "$match": {
+        "args": "str, pattern [, limit]",
+        "desc": "Aplica la cadena `str` a la expresión regular `pattern` y devuelve una matriz de objetos, cada objeto contiene información sobre cada aparición de una coincidencia dentro de `str`."
+    },
+    "$replace": {
+        "args": "str, pattern, replacement [, limit]",
+        "desc": "Encuentra apariciones de `patrón` dentro de `str` y las reemplaza con `reemplazo`.\n\nEl parámetro opcional `límite` es el número máximo de reemplazos."
+    },
+    "$now": {
+        "args": "$[picture [, timezone]]",
+        "desc": "Genera una marca de tiempo en formato compatible con ISO 8601 y la devuelve como una cadena. Si se proporcionan los parámetros opcionales `picture` y `zona horaria`, entonces la marca de tiempo actual se formatea como se describe en la función `$fromMillis()`"
+    },
+    "$base64encode": {
+        "args": "string",
+        "desc": "Convierte una cadena ASCII a una representación base 64. Cada carácter de la cadena se trata como un byte de datos binarios. Esto requiere que todos los caracteres de la cadena estén en el rango de 0x00 a 0xFF, que incluye todos los caracteres de las cadenas codificadas con URI. No se admiten caracteres Unicode fuera de ese rango."
+    },
+    "$base64decode": {
+        "args": "string",
+        "desc": "Convierte bytes codificados en base 64 en una cadena, utilizando una página de códigos Unicode UTF-8."
+    },
+    "$number": {
+        "args": "arg",
+        "desc": "Convierte el parámetro `arg` a un número usando las siguientes reglas de conversión:\n\n - Los números no cambian\n - Las cadenas que contienen una secuencia de caracteres que representan un número JSON legal se convierten a ese número\n - Todos los demás valores provocar que se arroje un error."
+    },
+    "$abs": {
+        "args": "number",
+        "desc": "Devuelve el valor absoluto del parámetro 'número'."
+    },
+    "$floor": {
+        "args": "number",
+        "desc": "Devuelve el valor de 'número' redondeado hacia abajo al entero más cercano que sea menor o igual a 'número'."
+    },
+    "$ceil": {
+        "args": "number",
+        "desc": "Devuelve el valor de 'número' redondeado al número entero más cercano que sea mayor o igual a 'número'."
+    },
+    "$round": {
+        "args": "number [, precision]",
+        "desc": "Devuelve el valor del parámetro 'número' redondeado al número de decimales especificado por el parámetro opcional 'precisión'."
+    },
+    "$power": {
+        "args": "base, exponent",
+        "desc": "Devuelve el valor de 'base' elevado a la potencia de 'exponente'."
+    },
+    "$sqrt": {
+        "args": "number",
+        "desc": "Devuelve la raíz cuadrada del valor del parámetro 'número'."
+    },
+    "$random": {
+        "args": "",
+        "desc": "Devuelve un número pseudoaleatorio mayor o igual a cero y menor que uno."
+    },
+    "$millis": {
+        "args": "",
+        "desc": "Devuelve el número de milisegundos desde la época Unix (1 de enero de 1970 UTC) como un número. Todas las invocaciones de `$millis()` dentro de una evaluación de una expresión devolverán el mismo valor."
+    },
+    "$sum": {
+        "args": "array",
+        "desc": "Devuelve la suma aritmética de una 'matriz' de números. Es un error si la 'matriz' de entrada contiene un elemento que no es un número."
+    },
+    "$max": {
+        "args": "array",
+        "desc": "Devuelve el número máximo en una 'matriz' de números. Es un error si la 'matriz' de entrada contiene un elemento que no es un número."
+    },
+    "$min": {
+        "args": "array",
+        "desc": "Devuelve el número mínimo en una 'matriz' de números. Es un error si la 'matriz' de entrada contiene un elemento que no es un número."
+    },
+    "$average": {
+        "args": "array",
+        "desc": "Devuelve el valor medio de una 'matriz' de números. Es un error si la 'matriz' de entrada contiene un elemento que no es un número."
+    },
+    "$boolean": {
+        "args": "arg",
+        "desc": "Convierte el argumento a un booleano usando las siguientes reglas:\n\n - `Booleano`: sin cambios\n - `cadena`: vacía: `falso`\n - `cadena`: no vacía: `verdadero`\n - `número`: `0`: `falso`\n - `número`: distinto de cero: `verdadero`\n - `nulo`: `falso`\n - `matriz`: vacía: `falso`\n - `array`: contiene un miembro que se convierte en `true`: `true`\n - `array`: todos los miembros se convierten en `false`: `false`\n - `object`: vacío: `false`\n - `objeto`: no vacío: `verdadero`\n - `función`: `falso`"
+    },
+    "$not": {
+        "args": "arg",
+        "desc": "Devuelve booleano NEGADO del argumento. `arg` se convierte antes en un booleano"
+    },
+    "$exists": {
+        "args": "arg",
+        "desc": "Devuelve booleano 'verdadero' si la expresión 'arg' se evalúa como un valor, o 'falso' si la expresión no coincide con nada (por ejemplo, una ruta a una referencia de campo inexistente)."
+    },
+    "$count": {
+        "args": "array",
+        "desc": "Devuelve el número de elementos de la matriz."
+    },
+    "$append": {
+        "args": "array, array",
+        "desc": "Agrega dos matrices"
+    },
+    "$sort": {
+        "args": "array [, function]",
+        "desc": "Devuelve una matriz que contiene todos los valores en el parámetro `array`, pero ordenados.\n\nSi se proporciona una `función` de comparador, entonces debe ser una función que toma dos parámetros:\n\n`function(left , derecha)`\n\nEsta función es invocada por el algoritmo de clasificación para comparar dos valores `izquierda` y `derecha`. Si el valor de `izquierda` debe colocarse después del valor de `derecha` en el orden de clasificación deseado, entonces la función debe devolver un valor booleano 'verdadero' para indicar un intercambio. De lo contrario debe devolver 'falso'."
+    },
+    "$reverse": {
+        "args": "array",
+        "desc": "Devuelve una matriz que contiene todos los valores del parámetro `matriz`, pero en orden inverso."
+    },
+    "$shuffle": {
+        "args": "array",
+        "desc": "Devuelve una matriz que contiene todos los valores del parámetro `array`, pero mezclados en orden aleatorio."
+    },
+    "$zip": {
+        "args": "array, ...",
+        "desc": "Devuelve una matriz convolucionada (comprimida) que contiene matrices agrupadas de valores de los argumentos `matriz1`... `matrizN` del índice 0, 1, 2...."
+    },
+    "$keys": {
+        "args": "object",
+        "desc": "Devuelve una matriz que contiene las claves del objeto. Si el argumento es una matriz de objetos, entonces la matriz devuelta contiene una lista deduplicada de todas las claves de todos los objetos."
+    },
+    "$lookup": {
+        "args": "object, key",
+        "desc": "Devuelve el valor asociado con la clave en el objeto. Si el primer argumento es una matriz de objetos, entonces se buscan todos los objetos de la matriz y se devuelven los valores asociados con todas las apariciones de la clave."
+    },
+    "$spread": {
+        "args": "object",
+        "desc": "Divide un objeto que contiene pares clave/valor en una matriz de objetos, cada uno de los cuales tiene un único par clave/valor del objeto de entrada. Si el parámetro es una matriz de objetos, entonces la matriz resultante contiene un objeto para cada par clave/valor en cada objeto de la matriz proporcionada."
+    },
+    "$merge": {
+        "args": "array&lt;object&gt;",
+        "desc": "Fusiona una matriz de objetos en un único objeto que contiene todos los pares clave/valor de cada uno de los objetos en la matriz de entrada. Si alguno de los objetos de entrada contiene la misma clave, entonces el objeto devuelto contendrá el valor del último en la matriz. Es un error si la matriz de entrada contiene un elemento que no es un objeto."
+    },
+    "$sift": {
+        "args": "object, function",
+        "desc": "Devuelve un objeto que contiene solo los pares clave/valor del parámetro `objeto` que satisfacen el predicado `función` pasado como segundo parámetro.\n\nLa `función` que se proporciona como segundo parámetro debe tener la siguiente firma:\n\n`función(valor [, clave [, objeto]])`"
+    },
+    "$each": {
+        "args": "object, function",
+        "desc": "Devuelve una matriz que contiene los valores devueltos por la función cuando se aplica a cada par clave/valor en el objeto."
+    },
+    "$map": {
+        "args": "array, function",
+        "desc": "Devuelve una matriz que contiene los resultados de aplicar el parámetro `función` a cada valor en el parámetro `matriz`.\n\nLa `función` que se proporciona como segundo parámetro debe tener la siguiente firma:\n\n`función( valor [, índice [, matriz]])`"
+    },
+    "$filter": {
+        "args": "array, function",
+        "desc": "Devuelve una matriz que contiene solo los valores en el parámetro `matriz` que satisfacen el predicado `función`.\n\nLa `función` que se proporciona como segundo parámetro debe tener la siguiente firma:\n\n`función(valor [ , índice [, matriz]])`"
+    },
+    "$reduce": {
+        "args": "array, function [, init]",
+        "desc": "Devuelve un valor agregado derivado de aplicar el parámetro `función` sucesivamente a cada valor en `matriz` en combinación con el resultado de la aplicación anterior de la función.\n\nLa función debe aceptar dos argumentos y se comporta como un operador infijo entre cada valor dentro de la matriz. La firma de la `función` debe tener la forma: `myfunc($accumulator, $value[, $index[, $array]])`\n\nEl parámetro opcional `init` se utiliza como valor inicial en la agregación."
+    },
+    "$flowContext": {
+        "args": "string[, string]",
+        "desc": "Recupera una propiedad de contexto de flujo.\n\nEsta es una función definida por Node-RED."
+    },
+    "$globalContext": {
+        "args": "string[, string]",
+        "desc": "Recupera una propiedad de contexto global.\n\nEsta es una función definida por Node-RED."
+    },
+    "$pad": {
+        "args": "string, width [, char]",
+        "desc": "Devuelve una copia de la `cadena` con relleno adicional, si es necesario, de modo que su número total de caracteres sea al menos el valor absoluto del parámetro `ancho`.\n\nSi `ancho` es un número positivo, entonces la cadena está acolchado hacia la derecha; si es negativo, se rellena hacia la izquierda.\n\nEl argumento opcional `char` especifica los caracteres de relleno que se utilizarán. Si no se especifica, el valor predeterminado es el carácter de espacio."
+    },
+    "$fromMillis": {
+        "args": "number, [, picture [, timezone]]",
+        "desc": "Convierte el `número` que representa milisegundos desde la época Unix (1 de enero de 1970 UTC) en una representación de cadena formateada según la plantilla en picture.\n\nSi se omite el parámetro opcional `picture`, entonces la marca de tiempo es formateado en el formato ISO 8601.\n\nSi se proporciona la cadena opcional `picture`, entonces la marca de tiempo se formatea de acuerdo con la representación especificada en esa cadena. El comportamiento de esta función es consistente con la versión de dos argumentos de la función XPath/XQuery `format-dateTime` tal como se define en la especificación XPath F&O 3.1. El parámetro de plantilla define cómo se formatea la marca de tiempo y tiene la misma sintaxis que `format-dateTime`.\n\nSi se proporciona la cadena opcional `timezone`, entonces la marca de tiempo formateada estará en esa zona horaria. La cadena `timezone` debe tener el formato '±HHMM', donde ± es el signo más o menos y HHMM es el desplazamiento en horas y minutos desde UTC. Desplazamiento positivo para zonas horarias al este de UTC, desplazamiento negativo para zonas horarias al oeste de UTC."
+    },
+    "$formatNumber": {
+        "args": "number, picture [, options]",
+        "desc": "Convierte el `número` en una cadena y lo formatea en una representación decimal según lo especificado en la cadena `picture`.\n\n El comportamiento de esta función es coherente con la función XPath/XQuery `fn:format-number` tal como se define en la especificación XPath F&O 3.1. El parámetro de cadena `picture` define cómo se formatea el número y tiene la misma sintaxis que `fn:formato-número`.\n\nEl tercer argumento opcional `opciones` se utiliza para anular los caracteres de formato específicos de la configuración regional predeterminada, como el decimal. separador. Si se proporciona, este argumento debe ser un objeto que contenga pares de nombre/valor especificados en la sección de formato decimal de la especificación XPath F&O 3.1."
+    },
+    "$formatBase": {
+        "args": "number [, radix]",
+        "desc": "Convierte el número en una cadena y lo formatea como un número entero representado en la base numérica especificada por el argumento `radix`. Si no se especifica `radix`, el valor predeterminado es la base 10. `radix` puede estar entre 2 y 36; de lo contrario, se genera un error."
+    },
+    "$toMillis": {
+        "args": "timestamp",
+        "desc": "Convierte una cadena de `marca de tiempo` en el formato ISO 8601 al número de milisegundos desde la época Unix (1 de enero de 1970 UTC) como un número. Se genera un error si la cadena no tiene el formato correcto."
+    },
+    "$env": {
+        "args": "arg",
+        "desc": "Devuelve el valor de una variable de entorno.\n\nEsta es una función definida por Node-RED."
+    },
+    "$eval": {
+        "args": "expr [, context]",
+        "desc": "Analiza y evalúa la cadena `expr` que contiene JSON literal o una expresión JSONata utilizando el contexto actual como contexto para la evaluación."
+    },
+    "$formatInteger": {
+        "args": "number, picture",
+        "desc": "Convierte el número en una cadena y lo formatea en una representación entera como lo especifica la cadena `picture`. El parámetro de define cómo se formatea el número y tiene la misma sintaxis que `fn:format-integer` de la especificación XPath F&O 3.1."
+    },
+    "$parseInteger": {
+        "args": "string, picture",
+        "desc": "Analiza el contenido del parámetro cadena en un número entero (como un número JSON) utilizando el formato especificado por la cadena `picture`. El parámetro tiene el mismo formato que `$formatInteger`."
+    },
+    "$error": {
+        "args": "[str]",
+        "desc": "Lanza un error con un mensaje. El parámetro `str` opcional reemplazará el mensaje predeterminado de `$error() función evaluada`"
+    },
+    "$assert": {
+        "args": "arg, str",
+        "desc": "Si `arg` es `verdadero`, la función devuelve indefinido. Si `arg` es `falso`, se lanza una excepción con `str` como mensaje de excepción."
+    },
+    "$single": {
+        "args": "array, function",
+        "desc": "Devuelve el único valor en el parámetro `array` que satisface el predicado de `función` (es decir, la `función` devuelve booleano `verdadero` cuando se pasa el valor). Lanza una excepción si el número de valores coincidentes no es exactamente uno.\n\nLa función debe proporcionarse con la siguiente firma: `función(valor [, índice [, matriz]])` donde el valor es cada entrada de la matriz. El índice es la posición de ese valor y toda la matriz se pasa como tercer argumento."
+    },
+    "$encodeUrlComponent": {
+        "args": "str",
+        "desc": "Codifica un componente de URL reemplazando cada instancia de ciertos caracteres por una, dos, tres o cuatro secuencias de escape que representan la codificación UTF-8 del carácter.\n\nEjemplo: `$encodeUrlComponent(\"?x=prueba\")` => `\"%3Fx%3Dprueba\"`"
+    },
+    "$encodeUrl": {
+        "args": "str",
+        "desc": "Codifica una URL reemplazando cada instancia de ciertos caracteres por una, dos, tres o cuatro secuencias de escape que representan la codificación UTF-8 del carácter.\n\nEjemplo: `$encodeUrl(\"https://mozilla.org/?x=шеллы\")` => `\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\"`"
+    },
+    "$decodeUrlComponent": {
+        "args": "str",
+        "desc": "Decodifica un componente de URL creado previamente por encodeUrlComponent.\n\nEjemplo: `$decodeUrlComponent(\"%3Fx%3Dtest\")` => `\"?x=test\"`"
+    },
+    "$decodeUrl": {
+        "args": "str",
+        "desc": "Decodifica una URL creado previamente por encodeUrl.\n\nEjemplo: `$decodeUrl(\"https://mozilla.org/?x=%D1%88%D0%B5%D0%BB%D0%BB%D1%8B\")` => `\"https://mozilla.org/?x=шеллы\"`"
+    },
+    "$distinct": {
+        "args": "array",
+        "desc": "Devuelve una matriz con valores duplicados eliminados de `matriz`"
+    },
+    "$type": {
+        "args": "value",
+        "desc": "Devuelve el tipo de `valor` como una cadena. Si `valor` no está definido, esto devolverá indefinido."
+    },
+    "$moment": {
+        "args": "[str]",
+        "desc": "Obtiene un objeto de fecha usando la biblioteca Moment."
+    },
+    "$clone": {
+        "args": "value",
+        "desc": "Clona un objeto de forma segura."
+    }
+}

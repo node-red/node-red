@@ -1,0 +1,81 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http request">
+    <p>Envía solicitudes HTTP y devuelve la respuesta.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt class="optional">url <span class="property-type">texto</span></dt>
+        <dd>Si no está configurada en el nodo, esta propiedad opcional establece la URL de la solicitud.</dd>
+        <dt class="optional">method <span class="property-type">texto</span></dt>
+        <dd>Si no está configurada en el nodo, esta propiedad opcional establece el método HTTP de la solicitud.
+            Debe ser uno de los siguientes: <code>GET</code>, <code>PUT</code>, <code>POST</code>, <code>PATCH</code> o <code>DELETE</code>.</dd>
+        <dt class="optional">headers <span class="property-type">objeto</span></dt>
+        <dd>Establece los encabezados HTTP de la solicitud. NOTA: Cualquier encabezado establecido en la configuración del nodo sobrescribirá cualquier encabezado coincidente en <code>msg.headers</code> </dd>
+        <dt class="optional">cookies <span class="property-type">objeto</span></dt>
+        <dd>Si está configurado, se puede utilizar para enviar cookies con la solicitud.</dd>
+        <dt class="optional">payload</dt>
+        <dd>Enviado como cuerpo de la solicitud.</dd>
+        <dt class="optional">rejectUnauthorized</dt>
+        <dd>Si se establece en <code>falso</code>, permite realizar solicitudes a sitios https que utilizan certificados autofirmados.</dd>
+        <dt class="optional">followRedirects</dt>
+        <dd>Si se establece en <code>falso</code>, se impide seguir el redireccionamiento (HTTP 301).<code>verdadero</code> de forma predeterminada</dd>
+        <dt class="optional">requestTimeout</dt>
+        <dd>Si se establece en un número positivo de milisegundos, anulará el parámetro <code>httpRequestTimeout</code> establecido globalmente.</dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">texto | objeto | buffer</span></dt>
+        <dd>El cuerpo de la respuesta. El nodo se puede configurar para devolver el cuerpo como una cadena, intentar analizarlo como una cadena JSON o dejarlo como un búfer binario.</dd>
+        <dt>statusCode <span class="property-type">número</span></dt>
+        <dd>El código de estado de la respuesta o el código de error si no se pudo completar la solicitud.</dd>
+        <dt>headers <span class="property-type">objeto</span></dt>
+        <dd>Un objeto que contiene los encabezados de respuesta.</dd>
+        <dt>responseUrl <span class="property-type">texto</span></dt>
+        <dd>En caso de que se produzcan redirecciones durante el procesamiento de la solicitud, esta propiedad es la URL redirigida final.
+            De lo contrario, la URL de la solicitud original.</dd>
+        <dt>responseCookies <span class="property-type">objeto</span></dt>
+        <dd>Si la respuesta incluye cookies, esta propiedad es un objeto de pares de nombre/valor para cada cookie.</dd>
+        <dt>redirectList <span class="property-type">matriz</span></dt>
+        <dd>Si la solicitud fue redirigida una o más veces, la información acumulada se agregará en esta propiedad. `location` es el siguiente destino de redireccionamiento. `cookies` son las cookies devueltas por la fuente de redireccionamiento.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Cuando se configura dentro del nodo, la propiedad URL puede contener etiquetas <a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a>. Estos permiten construir la URL utilizando valores del mensaje entrante. Por ejemplo, si la URL está configurada en <code>example.com/{{{topic}}}</code>, se insertará automáticamente el valor de <code>msg.topic</code>.
+      Usar {{{...}}} evita que el mustache codifique caracteres como / & etc.</p>
+    <p>Opcionalmente, el nodo puede codificar automáticamente <code>msg.payload</code> como parámetros de cadena de consulta para una solicitud GET, en cuyo caso <code>msg.payload</code> tiene que ser un objeto.</p>
+    <p><b>Nota</b>: Si se ejecuta detrás de un proxy, se debe configurar la variable de entorno estándar <code>http_proxy=...</code> y reiniciar Node-RED, o usar la configuración de proxy. Si hay una configuración de proxy definidia, tiene prioridad sobre la variable de entorno.</p>
+    <h4>Usar múltiples nodos de solicitud HTTP</h4>
+    <p>Para utilizar más de uno de estos nodos en el mismo flujo, se debe tener cuidado con la propiedad <code>msg.headers</code>. El primer nodo establecerá esta propiedad con los encabezados de respuesta. El siguiente nodo utilizará esos encabezados para su solicitud; esto no suele ser lo correcto. Si la propiedad <code>msg.headers</code> no se modifica entre nodos, el segundo nodo la ignorará. Para configurar encabezados personalizados, primero se debe eliminar <code>msg.headers</code> o restablecerlo a un objeto vacío: <code>{}</code>.
+    <h4>Manejo de cookies</h4>
+    <p>La propiedad <code>cookies</code> pasada al nodo debe ser un objeto de pares nombre/valor.
+      El valor puede ser una cadena para establecer el valor de la cookie o puede ser un objeto con una única propiedad <code>value</code>.</p>
+    <p>Cualquier cookie devuelto por la solicitud se guarda en la propiedad <code>responseCookies</code>.</p>
+    <h4>Manejo del tipo de contenido</h4>
+    <p>Si <code>msg.payload</code> es un objeto, el nodo establecerá automáticamente el tipo de contenido de la solicitud en <code>application/json</code> y codificará el cuerpo como tal.</p >
+    <p>Para codificar la solicitud como datos de formulario, <code>msg.headers["content-type"]</code> debe establecerse en <code>application/x-www-form-urlencoded</code>.< /p>
+    <h4>Subir archivo</h4>
+    <p>Para realizar una carga de archivos, <code>msg.headers["content-type"]</code> debe configurarse en <code>multipart/form-data</code> y <code>msg.payload</code > pasado al nodo debe ser un objeto con la siguiente estructura:</p>
+    <pre><code>{
+    "KEY": {
+        "value": FILE_CONTENTS,
+        "options": {
+            "filename": "FILENAME"
+        }
+    }
+}</code></pre>
+    <p>Los valores de <code>KEY</code>, <code>FILE_CONTENTS</code> y <code>FILENAME</code> deben establecerse en los valores apropiados.</p>
+</script>
