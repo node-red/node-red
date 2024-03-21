@@ -81,6 +81,7 @@ describe('HTTP Request Node', function() {
                 */
             };
             testSslServer = stoppable(https.createServer(sslOptions,testApp));
+            console.log('> start testSslServer')
             testSslServer.listen(testSslPort, function(err){
                 if (err) {
                     console.log(err);
@@ -97,6 +98,7 @@ describe('HTTP Request Node', function() {
                 requestCert: true
             };
             testSslClientServer = stoppable(https.createServer(sslClientOptions, testApp));
+            console.log('> start testSslClientServer.listen')
             testSslClientServer.listen(testSslClientPort, function(err){
                 console.log("ssl-client", err)
             });
@@ -109,7 +111,10 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServer.listen(testProxyPort)
+            console.log('> testProxyServer')
+            testProxyServer.listen(testProxyPort, function(err) {
+                console.log('testProxyServer start', err)
+            })
 
             testProxyAuthPort += 1
             testProxyServerAuth = stoppable(httpProxy(http.createServer()))
@@ -131,7 +136,10 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServerAuth.listen(testProxyAuthPort)
+            console.log('> testProxyServerAuth')
+            testProxyServerAuth.listen(testProxyAuthPort, function(err) {
+                console.log('testProxyServerAuth start', err)
+            })
 
             done(err);
         });
@@ -429,7 +437,11 @@ describe('HTTP Request Node', function() {
             if (err) {
                 done(err);
             }
-            helper.startServer(done);
+            console.log('> helper.startServer')
+            helper.startServer(function(err) {
+                console.log('> helper started')
+                done(err)
+            });
         });
     });
 
