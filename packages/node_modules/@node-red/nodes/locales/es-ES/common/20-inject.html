@@ -1,0 +1,37 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="inject">
+<p>Inyecta un mensaje en un flujo ya sea manualmente o a intervalos regulares. La carga del mensaje puede ser de diversos tipos, incluidas cadenas, objetos JavaScript o la hora actual.</p>
+<h3>Salidas</h3>
+<dl class="message-properties">
+    <dt>payload<span class="property-type">varios</span></dt>
+    <dd>La carga útil configurada del mensaje.</dd>
+    <dt class="optional">topic <span class="property-type">texto</span></dt>
+    <dd>Una propiedad opcional que se puede configurar en el nodo.</dd>
+</dl>
+<h3>Detalles</h3>
+<p>El nodo Inject puede iniciar un flujo con un valor de carga específico.
+  La carga predeterminada es una marca de tiempo de la hora actual en milisegundos desde el 1 de enero de 1970.</p>
+<p>El nodo también admite la inyección de cadenas, números, valores booleanos, objetos JavaScript o valores de contexto global/de flujo.</p>
+<p>De forma predeterminada, el nodo se activa manualmente haciendo clic en su botón dentro del editor. También se puede configurar para inyectar a intervalos regulares o según un cronograma.</p>
+<p>También se puede configurar para inyectar una vez cuando se inician los flujos.</p>
+<p>El <i>intervalo</i> máximo que se puede especificar es de aproximadamente 596 horas/24 días. Sin embargo, si necesitas intervalos superiores a un día, deberías considerar el uso de un nodo programador que pueda hacer frente a cortes de energía y reinicios.</p>
+<p><b>Nota</b>: Las opciones <i>"Intervalo entre tiempos"</i> y <i>"en un momento específico"</i> utilizan el sistema cron estándar.
+  Esto significa que 20 minutos serán en la próxima hora, 20 minutos después y 40 minutos después, no dentro de 20 minutos.
+  Si quieres cada 20 minutos a partir de ahora, utiliza la opción <i>"intervalo"</i>.</p>
+  <p><b>Nota</b>: Para incluir una nueva línea en una cadena, debes usar el nodo Función o Plantilla para crear la carga.</p>
+</script>

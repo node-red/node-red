@@ -1,0 +1,51 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="template">
+    <p>Establece una propiedad basada en la plantilla proporcionada.</p>
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">objeto</span></dt>
+        <dd>Un objeto de mensaje que contiene información para completar la plantilla.</dd>
+        <dt class="optional">template <span class="property-type">texto</span></dt>
+        <dd>Una plantilla que se completará desde <code>msg.payload</code>. Si no está configurado en el panel de edición, esto se puede configurar como una propiedad de msg.</dd>
+    </dl>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>msg <span class="property-type">objeto</span></dt>
+        <dd>un mensaje con una propiedad establecida al completar la plantilla configurada con propiedades del mensaje entrante.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>De forma predeterminada, esto utiliza el formato <i><a href="http://mustache.github.io/mustache.5.html" target="_blank">mustache</a></i>, pero se puede desactivar si es necesario.</p>
+    <p>Por ejemplo, cuando una plantilla de:
+    <pre>Hola {{payload.name}}. Hoy es {{date}}</pre>
+    <p>recibe un mensaje que contiene:
+    <pre>{
+  date: "lunes",
+  payload: {
+    name: "Fred"
+  }
+}</pre>
+<p>La propiedad resultante será:
+  <pre>Hola Fred. Hoy es lunes</pre>
+  <p>Es posible utilizar una propiedad del contexto de flujo o del contexto global. Simplemente usa <code>{{flow.name}}</code> o <code>{{global.name}}</code>, o para el almacén persistente <code>store</code> usa <code>{{ flow[store].name}}</code> o <code>{{global[store].name}}</code>.
+  <p><b>Nota: </b>De forma predeterminada, <i>mustache</i> codificará cualquier entidad HTML o no alfanumérica en los valores que sustituye. Para evitar esto, utilice llaves <code>{{{triple}}}</code>.</p>
+  <p>Si necesita utilizar <code>{{ }}</code> en su contenido, puede cambiar los caracteres utilizados para marcar las secciones con plantilla. Por ejemplo, para usar <code>[[ ]]</code> en su lugar, agregue la siguiente línea en la parte superior de la plantilla:</p>
+   <pre>{{=[[ ]]=}}</pre>
+    <h4>Usando variables de entorno</h4>
+    <p>El nodo de plantilla puede acceder a variables de entorno utilizando la sintaxis:</p>
+    <pre>Mi color favorito es {{env.COLOUR}}.</pre>
+</script>

@@ -1,0 +1,83 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="http in">
+    <p>Crea un punto final HTTP para crear servicios web.</p>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>payload</dt>
+        <dd>Para una solicitud GET, contiene un objeto con cualquier parámetro de cadena de consulta.
+            De lo contrario, contiene el cuerpo de la solicitud HTTP.</dd>
+        <dt>req<span class="property-type">objeto</span></dt>
+        <dd>Un objeto de solicitud HTTP. Este objeto contiene varias propiedades que proporcionan información sobre la solicitud.
+            <ul>
+             <li><code>body</code> - el cuerpo de la solicitud entrante. El formato dependerá de la solicitud.</li>
+             <li><code>headers</code> - un objeto que contiene los encabezados de solicitud HTTP.</li>
+             <li><code>query</code> - un objeto que contiene cualquier parámetro de cadena de consulta.</li>
+             <li><code>params</code> - un objeto que contiene cualquier parámetro de ruta.</li>
+             <li><code>cookies</code> - un objeto que contiene las cookies para la solicitud.</li>
+             <li><code>files</code> - si está habilitado dentro del nodo, un objeto que contiene los archivos cargados como parte de una solicitud POST.</li>
+            </ul>
+        </dd>
+        <dt>res<span class="property-type">objeto</span></dt>
+        <dd>Un objeto de respuesta HTTP. Esta propiedad no debe usarse directamente; el nodo <code>Respuesta HTTP</code> documenta cómo responder a una solicitud.
+            Esta propiedad debe permanecer adjunta al mensaje pasado al nodo de respuesta.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>El nodo escuchará en la ruta configurada solicitudes de un tipo particular. La ruta se puede especificar completamente, como <code>/user</code>, o incluir parámetros con nombre que acepten cualquier valor, como <code>/user/:name</code>. Cuando se utilizan parámetros con nombre, se puede acceder a su valor real en una solicitud en <code>msg.req.params</code>.</p>
+    <p>Para solicitudes que incluyen un cuerpo, como POST o PUT, el contenido de la solicitud está disponible como <code>msg.payload</code>.</p>
+    <p>Si se puede determinar el tipo de contenido de la solicitud, el cuerpo se analizará a cualquier tipo apropiado. Por ejemplo, <code>application/json</code> se analizará según su representación de objeto JavaScript.</p>
+    <p><b>Nota:</b> este nodo no envía ninguna respuesta a la solicitud. El flujo debe incluir un nodo de respuesta HTTP para completar la solicitud.</p>
+</script>
+
+<script type="text/html" data-help-name="http response">
+    <p>Envía respuestas a las solicitudes recibidas desde un nodo de entrada HTTP.</p>
+
+    <h3>Entradas</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">texto</span></dt>
+        <dd>El cuerpo de la respuesta.</dd>
+        <dt class="optional">statusCode <span class="property-type">número</span></dt>
+        <dd>Si se establece, se utiliza como código de estado de respuesta. Predeterminado: 200.</dd>
+        <dt class="optional">headers <span class="property-type">objeto</span></dt>
+        <dd>Si está configurado, proporciona encabezados HTTP para incluirlos en la respuesta.</dd>
+        <dt class="optional">cookies <span class="property-type">objeto</span></dt>
+        <dd>Si está configurado, se puede utilizar para configurar o eliminar cookies.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>El <code>statusCode</code> y los <code>headers</code> también se pueden configurar dentro del propio nodo. Si una propiedad se establece dentro del nodo, la propiedad del mensaje correspondiente no puede anularla.</p>
+    <h4>Manejo de cookies</h4>
+    <p>La propiedad <code>cookies</code> debe ser un objeto de pares nombre/valor.
+    El valor puede ser una cadena para establecer el valor de la cookie con opciones predeterminadas o puede ser un objeto de opciones.</p>
+    <p>El siguiente ejemplo establece dos cookies: una llamada <code>name</code> con un valor de <code>nick</code>, la otra llamada <code>session</code> con un valor de <code >1234</code> y un vencimiento establecido en 15 minutos.</p>
+    <pre>
+msg.cookies = {
+    name: 'nick',
+    session: {
+        value: '1234',
+        maxAge: 900000
+    }
+}</pre>
+    <p>Las opciones válidas incluyen:</p>
+    <ul>
+    <li><code>domain</code> - (texto) nombre de dominio para la cookie</li>
+    <li><code>expires</code> - (fecha) fecha de vencimiento en GMT. Si no se especifica o se establece en 0, crea una cookie de sesión</li>
+    <li><code>maxAge</code> - (texto) fecha de vencimiento en relación con la hora actual en milisegundos</li>
+    <li><code>path</code> - (texto) ruta para la cookie. El valor predeterminado es /</li>
+    <li><code>value</code> - (texto) el valor a utilizar para la cookie</li>
+    </ul>
+    <p>Para eliminar una cookie, establece su <code>valor</code> en <code>null</code>.</p>
+</script>
