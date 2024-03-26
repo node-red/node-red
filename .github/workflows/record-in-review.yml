@@ -1,0 +1,43 @@
+name: Update Issue Status
+on:
+    pull_request:
+      types:
+        - opened
+        - reopened
+        - synchronize
+        - ready_for_review
+jobs:
+    mark_under_review:
+      if: ${{ !github.event.pull_request.draft }}
+      name: "Update Issue: Under Review"
+      runs-on: ubuntu-latest
+      steps:
+        - name: Get Linked Issues
+          id: get_linked_issues
+          env:
+            gh_token: ${{ secrets.PROJECT_ACCESS_TOKEN }}
+          run: |
+            linked_issues="$( gh api graphql -f query='
+              query($pr:ID!) {
+                node(id: $pr) {
+                  ... on PullRequest {
+                    closingIssuesReferences(first:5, userLinkedOnly:false) {
+                      totalCount
+                      nodes { 
+                        id 
+                        projectItems(first: 5) {
+                          nodes {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }' -f pr=$PR_ID --jq '.data.node.closingIssuesReferences.nodes[0].projectItems.nodes[0].id')"
+            echo "ISSUE IDs:"
+            echo "$linked_issues"
+            echo "PR_ID:"
+            echo "${{env.PR_ID}}"
+            echo "LINKED_ISSUE_ID=$linked_issue_id" >> $GITHUB_ENV
+        
