@@ -1,0 +1,42 @@
+name: Record Issue's Start Date
+on:
+  project_card:
+    types:
+      - moved
+jobs:
+  add_start_date:
+    if: github.event.project_card.column_id == '47fc9ee4'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Get Today's Date
+        run: echo "DATE=$(date +"%Y-%m-%d")" >> $GITHUB_ENV
+      - name: Record Start Date
+        env:
+          gh_token: ${{ secrets.PROJECT_ACCESS_TOKEN }}
+        run: |
+          gh api graphql -f query='
+            mutation (
+              $project: ID!
+              $item: ID!
+              $date_field: ID!
+              $date_value: Date!
+            ) {
+              updateProjectV2ItemFieldValue(
+                input: {
+                  projectId: $project
+                  itemId: $item
+                  fieldId: $date_field
+                  value: {
+                    text: $DATE
+                  }
+                }
+              ) {
+                projectV2Item {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f date_field="PVTF_lAHOBepif84AfH1xzgUjmpg" -f date_value=$DATE
+          
+  
