@@ -675,7 +675,7 @@ describe('switch Node', function() {
             switchNode1.receive({payload:undefined});
         });
     });
-    it('should treat non-existant msg property conditional as undefined', function(done) {
+    it('should treat non-existent msg property conditional as undefined', function(done) {
         var flow = [{"id":"switchNode1","type":"switch","z":"feee1df.c3263e","name":"","property":"payload","propertyType":"msg","rules":[{"t":"eq","v":"this.does.not.exist","vt":"msg"}],"checkall":"true","outputs":1,"x":190,"y":440,"wires":[["helperNode1"]]},
             {id:"helperNode1", type:"helper", wires:[]}];
 

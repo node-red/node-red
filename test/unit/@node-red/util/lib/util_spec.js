@@ -637,12 +637,12 @@ describe("@node-red/util/util", function() {
               var result = util.evaluateJSONataExpression(expr,{});
               result.should.eql('2013-11-18T19:55:00+08:00');
           });
-          it('handles non-existant flow context variable', function() {
+          it('handles non-existent flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);
           });
-          it('handles non-existant global context variable', function() {
+          it('handles non-existent global context variable', function() {
               var expr = util.prepareJSONataExpression('$globalContext("nonExistant")',{context:function() { return {global:{get: function(key) { return {'foo':'bar'}[key]}}}}});
               var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
               should.not.exist(result);

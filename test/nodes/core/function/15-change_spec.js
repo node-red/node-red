@@ -898,7 +898,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and doesnt change type of the message property for partial match', function(done) {
+        it('changes the value and does not change type of the message property for partial match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "msg", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
@@ -1336,7 +1336,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and doesnt change type of the flow context for partial match', function(done) {
+        it('changes the value and does not change type of the flow context for partial match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {
@@ -1356,7 +1356,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and doesnt change type of the persistable flow context for partial match', function(done) {
+        it('changes the value and does not change type of the persistable flow context for partial match', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "#:(memory1)::payload", "pt": "flow", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]],"z":"flow"},
                         {id:"helperNode1", type:"helper", wires:[],"z":"flow"}];
             helper.load(changeNode, flow, function() {

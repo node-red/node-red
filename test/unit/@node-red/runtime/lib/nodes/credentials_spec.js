@@ -158,7 +158,7 @@ describe('red/runtime/nodes/credentials', function() {
             settings: encryptionDisabledSettings,
             nodes: { getType: () => function(){} }
         });
-        var defintion = {
+        var definition = {
             user1:{type:"text"},
             password1:{type:"password"},
             user2:{type:"text"},
@@ -167,9 +167,9 @@ describe('red/runtime/nodes/credentials', function() {
             password3:{type:"password"}
 
         };
-        credentials.register("test",defintion);
+        credentials.register("test",definition);
         var def = credentials.getDefinition("test");
-        defintion.should.eql(def);
+        definition.should.eql(def);
 
         credentials.load({"node":{user1:"abc",password1:"123",user2:"def",password2:"456",user3:"ghi",password3:"789"}}).then(function() {
             var node = {id:"node",type:"test",credentials:{

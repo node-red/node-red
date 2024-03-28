@@ -499,7 +499,7 @@ describe("api/editor/comms", function() {
                 }
             });
         });
-        it('rejects connections for non-existant token',function(done) {
+        it('rejects connections for non-existent token',function(done) {
             var ws = new WebSocket(url);
             var received = 0;
             ws.on('open', function() {
