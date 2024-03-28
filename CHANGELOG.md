@@ -1,3 +1,12 @@
+#### 3.1.8: Maintenance Release
+
+ - Add validation and error handling on subflow instance properties (#4632) @knolleary
+ - Hide import/export context menu if disabled in theme (#4633) @knolleary
+ - Show change indicator on subflow tabs (#4631) @knolleary
+ - Bump dependencies (#4630) @knolleary
+ - Reset workspace index when clearing nodes (#4619) @knolleary
+ - Remove typo in global config (#4613) @kazuhitoyokoi
+
 #### 3.1.7: Maintenance Release
 
  - Add Japanese translation for v3.1.6 (#4603) @kazuhitoyokoi
