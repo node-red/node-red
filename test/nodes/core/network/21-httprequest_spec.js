@@ -2476,9 +2476,7 @@ describe('HTTP Request Node', function() {
 
         const versions = process.versions.node.split('.')
 
-        if (( versions[0] == 14 && versions[1] >= 20 ) ||
-            ( versions[0] == 16 && versions[1] >= 16 ) ||
-            ( versions[0] == 18 && versions[1] >= 5 ) ||
+        if (( versions[0] == 18 && versions[1] >= 5 ) ||
             ( versions[0] > 18)) {
             // only test if on new enough NodeJS version
 
