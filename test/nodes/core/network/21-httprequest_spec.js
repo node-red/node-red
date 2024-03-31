@@ -60,6 +60,7 @@ describe('HTTP Request Node', function() {
     function startServer(done) {
         testPort += 1;
         testServer = stoppable(http.createServer(testApp));
+        const promises = []
         testServer.listen(testPort,function(err) {
             testSslPort += 1;
             console.log("ssl port", testSslPort);
@@ -81,13 +82,17 @@ describe('HTTP Request Node', function() {
                 */
             };
             testSslServer = stoppable(https.createServer(sslOptions,testApp));
-            testSslServer.listen(testSslPort, function(err){
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("started testSslServer");
-                }
-            });
+            console.log('> start testSslServer')
+            promises.push(new Promise((resolve, reject) => {
+                testSslServer.listen(testSslPort, function(err){
+                    console.log(' done testSslServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                });
+            }))
 
             testSslClientPort += 1;
             var sslClientOptions = {
@@ -97,10 +102,17 @@ describe('HTTP Request Node', function() {
                 requestCert: true
             };
             testSslClientServer = stoppable(https.createServer(sslClientOptions, testApp));
-            testSslClientServer.listen(testSslClientPort, function(err){
-                console.log("ssl-client", err)
-            });
-
+            console.log('> start testSslClientServer')
+            promises.push(new Promise((resolve, reject) => {
+                testSslClientServer.listen(testSslClientPort, function(err){
+                    console.log(' done testSslClientServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                });
+            }))
             testProxyPort += 1;
             testProxyServer = stoppable(httpProxy(http.createServer()))
 
@@ -109,7 +121,17 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServer.listen(testProxyPort)
+            console.log('> testProxyServer')
+            promises.push(new Promise((resolve, reject) => {
+                testProxyServer.listen(testProxyPort, function(err) {
+                    console.log(' done testProxyServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                })
+            }))
 
             testProxyAuthPort += 1
             testProxyServerAuth = stoppable(httpProxy(http.createServer()))
@@ -131,9 +153,19 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServerAuth.listen(testProxyAuthPort)
+            console.log('> testProxyServerAuth')
+            promises.push(new Promise((resolve, reject) => {
+                testProxyServerAuth.listen(testProxyAuthPort, function(err) {
+                    console.log(' done testProxyServerAuth')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                })
+            }))
 
-            done(err);
+            Promise.all(promises).then(() => { done() }).catch(done)
         });
     }
 
@@ -429,7 +461,11 @@ describe('HTTP Request Node', function() {
             if (err) {
                 done(err);
             }
-            helper.startServer(done);
+            console.log('> helper.startServer')
+            helper.startServer(function(err) {
+                console.log('> helper started')
+                done(err)
+            });
         });
     });
 
