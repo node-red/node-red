@@ -1011,7 +1011,7 @@ describe('change Node', function() {
             });
         });
 
-        it.only('changes the value of the message property based on a regex', function(done) {
+        it('changes the value of the message property based on a regex', function(done) {
             const flow = [
                 {"id":"changeNode1","type":"change",rules:[
                     { "t": "change", "p": "payload.a", "pt": "msg", "from": "\\d+", "fromt": "re", "to": "NUMBER", "tot": "str" },
