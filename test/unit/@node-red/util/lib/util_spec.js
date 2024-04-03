@@ -379,10 +379,17 @@ describe("@node-red/util/util", function() {
             result = util.evaluateNodeProperty('','bool');
             result.should.be.false();
         });
-        it('returns date',function() {
+        it('returns date - default format',function() {
             var result = util.evaluateNodeProperty('','date');
             (Date.now() - result).should.be.approximately(0,50);
         });
+
+        it('returns date - iso format',function() {
+            var result = util.evaluateNodeProperty('iso','date');
+            // 2023-12-04T16:51:04.429Z
+            /^\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z$/.test(result).should.be.true()
+        });
+
         it('returns bin', function () {
             var result = util.evaluateNodeProperty('[1, 2]','bin');
             result[0].should.eql(1);
@@ -441,9 +448,16 @@ describe("@node-red/util/util", function() {
             },{});
             result.should.eql("123");
         });
-        it('returns jsonata result', function () {
-            var result = util.evaluateNodeProperty('$abs(-1)','jsonata',{},{});
-            result.should.eql(1);
+        it('returns jsonata result', function (done) {
+            util.evaluateNodeProperty('$abs(-1)','jsonata',{},{}, (err, result) => {
+                try {
+                    result.should.eql(1);
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+
+            });
         });
         it('returns null', function() {
             var result = util.evaluateNodeProperty(null,'null');
@@ -601,51 +615,105 @@ describe("@node-red/util/util", function() {
           });
       });
       describe('evaluateJSONataExpression', function() {
-          it('evaluates an expression', function() {
+          it('evaluates an expression', function(done) {
               var expr = util.prepareJSONataExpression('payload',{});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
-              result.should.eql("hello");
+              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+                try {
+                    result.should.eql("hello");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('evaluates a legacyMode expression', function() {
               var expr = util.prepareJSONataExpression('msg.payload',{});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
-              result.should.eql("hello");
+              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+                try {
+                    result.should.eql("hello");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('accesses flow context from an expression', function() {
               var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
-              result.should.eql("bar");
+              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+                try {
+                    result.should.eql("bar");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('accesses undefined environment variable from an expression', function() {
               var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
-              var result = util.evaluateJSONataExpression(expr,{});
-              result.should.eql('');
-          });
+              util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                try {
+                    result.should.eql("");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
+            });
           it('accesses environment variable from an expression', function() {
               process.env.UTIL_ENV = 'foo';
               var expr = util.prepareJSONataExpression('$env("UTIL_ENV")',{});
-              var result = util.evaluateJSONataExpression(expr,{});
-              result.should.eql('foo');
-          });
+              util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                try {
+                    result.should.eql("foo");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
+            });
           it('accesses moment from an expression', function() {
               var expr = util.prepareJSONataExpression('$moment("2020-05-27", "YYYY-MM-DD").add(7, "days").add(1, "months").format("YYYY-MM-DD")',{});
-              var result = util.evaluateJSONataExpression(expr,{});
-              result.should.eql('2020-07-03');
+              util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                try {
+                    result.should.eql("2020-07-03");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('accesses moment-timezone from an expression', function() {
               var expr = util.prepareJSONataExpression('$moment("2013-11-18 11:55Z").tz("Asia/Taipei").format()',{});
-              var result = util.evaluateJSONataExpression(expr,{});
-              result.should.eql('2013-11-18T19:55:00+08:00');
+              util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                try {
+                    result.should.eql("2013-11-18T19:55:00+08:00");
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('handles non-existant flow context variable', function() {
               var expr = util.prepareJSONataExpression('$flowContext("nonExistant")',{context:function() { return {flow:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
-              should.not.exist(result);
-          });
+              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+                try {
+                    should.not.exist(result);
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
+            });
           it('handles non-existant global context variable', function() {
               var expr = util.prepareJSONataExpression('$globalContext("nonExistant")',{context:function() { return {global:{get: function(key) { return {'foo':'bar'}[key]}}}}});
-              var result = util.evaluateJSONataExpression(expr,{payload:"hello"});
-              should.not.exist(result);
+              util.evaluateJSONataExpression(expr,{payload:"hello"}, (err, result) => {
+                try {
+                    should.not.exist(result);
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+              });
           });
           it('handles async flow context access', function(done) {
               var expr = util.prepareJSONataExpression('$flowContext("foo")',{context:function() { return {flow:{get: function(key,store,callback) { setTimeout(()=>{callback(null,{'foo':'bar'}[key])},10)}}}}});
