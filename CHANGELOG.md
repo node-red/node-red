@@ -1,3 +1,24 @@
+#### 4.0.0-beta.2: Beta Release
+
+Editor
+
+ - Introduce multiplayer feature (#4629) @knolleary
+ - Separate the "add new config-node" option into a new (+) button (#4627) @GogoVega
+ - Retain Palette categories collapsed and filter to localStorage (#4634) @knolleary
+ - Ensure palette filter reapplies and clear up unknown categories (#4637) @knolleary
+ - Add support for plugin (only) modules to the palette manager (#4620) @knolleary
+ - Update monaco to latest and node types to 18 LTS (#4615) @Steve-Mcl
+
+Runtime
+
+ - Fix handling of subflow config-node select type in sf module (#4643) @knolleary
+ - Comms API updates (#4628) @knolleary
+ - Add French translations for 4.0.0-beta.1 (#4621) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.1 (#4612) @kazuhitoyokoi
+
+Nodes
+ - Fix change node handling of replacing with boolean (#4639) @knolleary
+
 #### 4.0.0-beta.1: Beta Release
 
 Editor
