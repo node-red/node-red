@@ -1,3 +1,10 @@
+#### 3.1.9: Maintenance Release
+
+ - Prevent subflow being added to itself (#4654) @knolleary
+ - Fix use of spawn on windows with cmd files (#4652) @knolleary
+ - Guard refresh of unknown subflow (#4640) @knolleary
+ - Fix subflow module sending messages to debug sidebar (#4642) @knolleary
+
 #### 3.1.8: Maintenance Release
 
  - Add validation and error handling on subflow instance properties (#4632) @knolleary
