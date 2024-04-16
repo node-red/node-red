@@ -43,6 +43,7 @@ describe('file Nodes', function() {
 
         var relativePathToFile = "50-file-test-file.txt";
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
+        resourcesDir = resourcesDir.replace(/\\/g, '/'); // Windows
         var fileToTest = path.join(resourcesDir,relativePathToFile);
         var wait = 250;
 
@@ -240,7 +241,7 @@ describe('file Nodes', function() {
                                 f.should.equal("Line1\nLine2\nLine3\nLine4");
                             }
                             else {
-                                f.should.have.length(23);
+                                f.should.have.length(26);
                                 f.should.equal("Line1\r\nLine2\r\nLine3\r\nLine4");
                             }
                             done();
@@ -1220,6 +1221,7 @@ describe('file Nodes', function() {
 
         var relativePathToFile = "50-file-test-file.txt";
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
+        resourcesDir = resourcesDir.replace(/\\/g, '/'); // Windows
         var fileToTest = path.join(resourcesDir,relativePathToFile);
         var fileToTest2 = "\t"+path.join(resourcesDir,relativePathToFile)+"\r\n";
         var wait = 150;
