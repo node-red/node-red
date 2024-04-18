@@ -1,3 +1,62 @@
+#### 4.0.0-beta.2: Beta Release
+
+Editor
+
+ - Introduce multiplayer feature (#4629) @knolleary
+ - Separate the "add new config-node" option into a new (+) button (#4627) @GogoVega
+ - Retain Palette categories collapsed and filter to localStorage (#4634) @knolleary
+ - Ensure palette filter reapplies and clear up unknown categories (#4637) @knolleary
+ - Add support for plugin (only) modules to the palette manager (#4620) @knolleary
+ - Update monaco to latest and node types to 18 LTS (#4615) @Steve-Mcl
+
+Runtime
+
+ - Fix handling of subflow config-node select type in sf module (#4643) @knolleary
+ - Comms API updates (#4628) @knolleary
+ - Add French translations for 4.0.0-beta.1 (#4621) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.1 (#4612) @kazuhitoyokoi
+
+Nodes
+ - Fix change node handling of replacing with boolean (#4639) @knolleary
+
+#### 4.0.0-beta.1: Beta Release
+
+Editor
+
+ - Click on id in debug panel highlights node or flow (#4439) @ralphwetzel
+ - Support config selection in a subflow env var (#4587) @Steve-Mcl
+ - Add timestamp formatting options to TypedInput (#4468) @knolleary
+ - Allow RED.view.select to select links (#4553) @lgrkvst
+ - Add auto-complete to flow/global/env typedInput types (#4480) @knolleary
+ - Improve the appearance of the Node-RED primary header (#4598) @joepavitt
+
+Runtime
+
+ - let settings.httpNodeAuth accept single middleware or array of middlewares (#4572) @kevinGodell
+ - Upgrade to JSONata 2.x (#4590) @knolleary
+ - Bump minimum version to node 18 (#4571) @knolleary
+ - npm: Remove production flag on npm invocation (#4347) @ZJvandeWeg
+ - Timer testing fix (#4367) @hlovdal
+ - Bump to 4.0.0-dev (#4322) @knolleary
+
+Nodes
+
+ - TCP node - when resetting, if no payload, stay disconnected @dceejay
+ - HTML node: add option for collecting attributes and content (#4513) @gorenje
+ - let split node specify property to split on, and join auto join correctly (#4386) @dceejay
+ - Add RFC4180 compliant mode to CSV node (#4540) @Steve-Mcl
+ - Fix change node to return boolean if asked (#4525) @dceejay
+ - Let msg.reset reset Tcp request node connection when in stay connected mode (#4406) @dceejay
+ - Let debug node status msg length be settable via settings (#4402) @dceejay
+ - Feat: Add ability to set headers for WebSocket client (#4436) @marcus-j-davies
+
+#### 3.1.9: Maintenance Release
+
+ - Prevent subflow being added to itself (#4654) @knolleary
+ - Fix use of spawn on windows with cmd files (#4652) @knolleary
+ - Guard refresh of unknown subflow (#4640) @knolleary
+ - Fix subflow module sending messages to debug sidebar (#4642) @knolleary
+
 #### 3.1.8: Maintenance Release
 
  - Add validation and error handling on subflow instance properties (#4632) @knolleary
