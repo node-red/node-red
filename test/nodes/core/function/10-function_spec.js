@@ -390,7 +390,8 @@ describe('function node', function() {
                     msg.should.have.property('level', helper.log().ERROR);
                     msg.should.have.property('id', 'n1');
                     msg.should.have.property('type', 'function');
-                    msg.should.have.property('msg', 'ReferenceError: retunr is not defined (line 2, col 1)');
+                    msg.should.have.property('msg')
+                    msg.msg.message.should.equal('ReferenceError: retunr is not defined (line 2, col 1)');
                     done();
                 } catch(err) {
                     done(err);
@@ -659,7 +660,8 @@ describe('function node', function() {
                 msg.should.have.property('level', helper.log().ERROR);
                 msg.should.have.property('id', name);
                 msg.should.have.property('type', 'function');
-                msg.should.have.property('msg', 'Error: Callback must be a function');
+                msg.should.have.property('msg')
+                msg.msg.message.should.equal('Callback must be a function');
                 done();
             }
             catch (e) {
