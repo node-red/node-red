@@ -1,3 +1,36 @@
+#### 4.0.0-beta.3: Beta Release
+
+Editor
+
+ - Improve background-deploy notification handling (#4692) @knolleary
+ - Hide workspace tab on middle mouse click (#4657) @Steve-Mcl
+ - multiplayer: Add user presence indicators (#4666) @knolleary
+ - Enable updating dependency node of package.json in project feature (#4676) @kazuhitoyokoi
+ - Add French translations for 4.0.0-beta.2 (#4681) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.2 (#4674) @kazuhitoyokoi
+ - Fix saving of conf-type properties in module packaged subflows (#4658) @knolleary
+ - Add npm install timeout notification (#4662) @hardillb
+ - Fix undo of subflow env property edits (#4667) @knolleary
+ - Fix three error typos in monaco.js (#4660) @JoshuaCWebDeveloper
+ - docs: Add closing paragraph tag (#4664) @ZJvandeWeg
+ - Avoid login loops when autoLogin enabled but login fails (#4684) @knolleary
+
+Runtime
+
+ - Allow blank strings to be used for env var property substitutions (#4672) @knolleary
+ - Use rfdc for cloning pure JSON values (#4679) @knolleary
+ - fix: remove outdated Node 11+ check (#4314) @Rotzbua
+ - feat(ci): add new nodejs v22 (#4694) @Rotzbua
+ - fix(node): increase required node >=18.5 (#4690) @Rotzbua
+ - fix(dns): remove outdated node check (#4689) @Rotzbua
+ - fix(polyfill): remove import module polyfill (#4688) @Rotzbua
+ - Fix typo (#4686) @Rotzbua
+
+Nodes
+
+ - Pass full error object in Function node and copy over cause property (#4685) @knolleary
+ - Replacing vm.createScript in favour of vm.Script (#4534) @patlux
+
 #### 4.0.0-beta.2: Beta Release
 
 Editor
