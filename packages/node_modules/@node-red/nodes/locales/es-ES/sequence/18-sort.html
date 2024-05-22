@@ -1,0 +1,41 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="sort">
+    <p>Una función que ordena las propiedades del mensaje o una secuencia de mensajes.</p>
+    <p>Cuando se configura para ordenar la propiedad del mensaje, el nodo ordena los datos de la matriz a los que apunta la propiedad del mensaje especificado.</p>
+    <p>Cuando se configura para ordenar una secuencia de mensajes, reordenará los mensajes.</p>
+    <p>El orden de clasificación puede ser:</p>
+    <ul>
+        <li><b>ascendente</b>,</li>
+        <li><b>descendente</b>.</li>
+    </ul>
+    <p>Para números, el orden numérico se puede especificar mediante una casilla de verificación.</p>
+    <p>La clave de ordenación puede ser un valor de elemento o una expresión JSONata para ordenar el valor de una propiedad, o una propiedad de mensaje o una expresión JSONata para ordenar una secuencia de mensajes.<p>
+    <p>Al ordenar una secuencia de mensajes, el nodo de ordenación depende de que los mensajes recibidos tengan <code>msg.parts</code> configurado. El nodo dividido genera esta propiedad, pero se puede crear manualmente. Tiene las siguientes propiedades:</p>
+    <p>
+        <ul>
+            <li><code>id</code> - un identificador para el grupo de mensajes</li>
+            <li><code>index</code> - la posición dentro del grupo</li>
+            <li><code>count</code> - el número total de mensajes en el grupo</li>
+        </ul>
+    </p>
+    <p><b>Nota:</b> Este nodo guarda internamente mensajes para su funcionamiento. Para evitar un uso inesperado de la memoria, se puede especificar la cantidad máxima de mensajes conservados. El valor predeterminado no es límite en la cantidad de mensajes.
+        <ul>
+            Propiedad <li><code>nodeMessageBufferMaxLength</code> establecida en <b>settings.js</b>.</li>
+        </ul>
+    </p>
+</script>

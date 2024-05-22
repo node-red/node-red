@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "4.0.0-dev",
+    "version": "4.0.0-beta.3-1",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -41,7 +41,7 @@
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
         "denque": "2.1.0",
-        "express": "4.18.2",
+        "express": "4.19.2",
         "express-session": "1.17.3",
         "form-data": "4.0.0",
         "fs-extra": "11.1.1",
@@ -54,7 +54,7 @@
         "is-utf8": "0.2.1",
         "js-yaml": "4.1.0",
         "json-stringify-safe": "5.0.1",
-        "jsonata": "1.8.6",
+        "jsonata": "2.0.4",
         "lodash.clonedeep": "^4.5.0",
         "media-typer": "1.1.0",
         "memorystore": "1.6.7",
@@ -64,7 +64,7 @@
         "mqtt": "4.3.7",
         "multer": "1.4.5-lts.1",
         "mustache": "4.2.0",
-        "node-red-admin": "^3.1.1",
+        "node-red-admin": "^3.1.3",
         "node-watch": "0.7.4",
         "nopt": "5.0.0",
         "oauth2orize": "1.11.1",
@@ -73,8 +73,9 @@
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
         "raw-body": "2.5.2",
+        "rfdc": "^1.3.1",
         "semver": "7.5.4",
-        "tar": "6.1.13",
+        "tar": "6.2.1",
         "tough-cookie": "4.1.3",
         "uglify-js": "3.17.4",
         "uuid": "9.0.0",
@@ -112,7 +113,7 @@
         "mermaid": "^10.4.0",
         "minami": "1.2.3",
         "mocha": "9.2.2",
-        "node-red-node-test-helper": "^0.3.2",
+        "node-red-node-test-helper": "^0.3.3",
         "nodemon": "2.0.20",
         "proxy": "^1.0.2",
         "sass": "1.62.1",
@@ -122,6 +123,6 @@
         "supertest": "6.3.3"
     },
     "engines": {
-        "node": ">=14"
+        "node": ">=18.5"
     }
 }

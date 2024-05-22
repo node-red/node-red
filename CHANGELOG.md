@@ -1,3 +1,173 @@
+#### 4.0.0-beta.3: Beta Release
+
+Editor
+
+ - Improve background-deploy notification handling (#4692) @knolleary
+ - Hide workspace tab on middle mouse click (#4657) @Steve-Mcl
+ - multiplayer: Add user presence indicators (#4666) @knolleary
+ - Enable updating dependency node of package.json in project feature (#4676) @kazuhitoyokoi
+ - Add French translations for 4.0.0-beta.2 (#4681) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.2 (#4674) @kazuhitoyokoi
+ - Fix saving of conf-type properties in module packaged subflows (#4658) @knolleary
+ - Add npm install timeout notification (#4662) @hardillb
+ - Fix undo of subflow env property edits (#4667) @knolleary
+ - Fix three error typos in monaco.js (#4660) @JoshuaCWebDeveloper
+ - docs: Add closing paragraph tag (#4664) @ZJvandeWeg
+ - Avoid login loops when autoLogin enabled but login fails (#4684) @knolleary
+
+Runtime
+
+ - Allow blank strings to be used for env var property substitutions (#4672) @knolleary
+ - Use rfdc for cloning pure JSON values (#4679) @knolleary
+ - fix: remove outdated Node 11+ check (#4314) @Rotzbua
+ - feat(ci): add new nodejs v22 (#4694) @Rotzbua
+ - fix(node): increase required node >=18.5 (#4690) @Rotzbua
+ - fix(dns): remove outdated node check (#4689) @Rotzbua
+ - fix(polyfill): remove import module polyfill (#4688) @Rotzbua
+ - Fix typo (#4686) @Rotzbua
+
+Nodes
+
+ - Pass full error object in Function node and copy over cause property (#4685) @knolleary
+ - Replacing vm.createScript in favour of vm.Script (#4534) @patlux
+
+#### 4.0.0-beta.2: Beta Release
+
+Editor
+
+ - Introduce multiplayer feature (#4629) @knolleary
+ - Separate the "add new config-node" option into a new (+) button (#4627) @GogoVega
+ - Retain Palette categories collapsed and filter to localStorage (#4634) @knolleary
+ - Ensure palette filter reapplies and clear up unknown categories (#4637) @knolleary
+ - Add support for plugin (only) modules to the palette manager (#4620) @knolleary
+ - Update monaco to latest and node types to 18 LTS (#4615) @Steve-Mcl
+
+Runtime
+
+ - Fix handling of subflow config-node select type in sf module (#4643) @knolleary
+ - Comms API updates (#4628) @knolleary
+ - Add French translations for 4.0.0-beta.1 (#4621) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.1 (#4612) @kazuhitoyokoi
+
+Nodes
+ - Fix change node handling of replacing with boolean (#4639) @knolleary
+
+#### 4.0.0-beta.1: Beta Release
+
+Editor
+
+ - Click on id in debug panel highlights node or flow (#4439) @ralphwetzel
+ - Support config selection in a subflow env var (#4587) @Steve-Mcl
+ - Add timestamp formatting options to TypedInput (#4468) @knolleary
+ - Allow RED.view.select to select links (#4553) @lgrkvst
+ - Add auto-complete to flow/global/env typedInput types (#4480) @knolleary
+ - Improve the appearance of the Node-RED primary header (#4598) @joepavitt
+
+Runtime
+
+ - let settings.httpNodeAuth accept single middleware or array of middlewares (#4572) @kevinGodell
+ - Upgrade to JSONata 2.x (#4590) @knolleary
+ - Bump minimum version to node 18 (#4571) @knolleary
+ - npm: Remove production flag on npm invocation (#4347) @ZJvandeWeg
+ - Timer testing fix (#4367) @hlovdal
+ - Bump to 4.0.0-dev (#4322) @knolleary
+
+Nodes
+
+ - TCP node - when resetting, if no payload, stay disconnected @dceejay
+ - HTML node: add option for collecting attributes and content (#4513) @gorenje
+ - let split node specify property to split on, and join auto join correctly (#4386) @dceejay
+ - Add RFC4180 compliant mode to CSV node (#4540) @Steve-Mcl
+ - Fix change node to return boolean if asked (#4525) @dceejay
+ - Let msg.reset reset Tcp request node connection when in stay connected mode (#4406) @dceejay
+ - Let debug node status msg length be settable via settings (#4402) @dceejay
+ - Feat: Add ability to set headers for WebSocket client (#4436) @marcus-j-davies
+
+#### 3.1.9: Maintenance Release
+
+ - Prevent subflow being added to itself (#4654) @knolleary
+ - Fix use of spawn on windows with cmd files (#4652) @knolleary
+ - Guard refresh of unknown subflow (#4640) @knolleary
+ - Fix subflow module sending messages to debug sidebar (#4642) @knolleary
+
+#### 3.1.8: Maintenance Release
+
+ - Add validation and error handling on subflow instance properties (#4632) @knolleary
+ - Hide import/export context menu if disabled in theme (#4633) @knolleary
+ - Show change indicator on subflow tabs (#4631) @knolleary
+ - Bump dependencies (#4630) @knolleary
+ - Reset workspace index when clearing nodes (#4619) @knolleary
+ - Remove typo in global config (#4613) @kazuhitoyokoi
+
+#### 3.1.7: Maintenance Release
+
+ - Add Japanese translation for v3.1.6 (#4603) @kazuhitoyokoi
+ - Update jsonata version (#4593) @hardillb
+
+#### 3.1.6: Maintenance Release
+
+Editor
+
+ - Do not flag env var in num typedInput as error (#4582) @knolleary
+ - Fix example flow name in import dialog (#4578) @kazuhitoyokoi
+ - Fix missing node icons in workspace (#4570) @knolleary
+
+Runtime
+
+ - Handle undefined env vars (#4581) @knolleary
+ - fix: Removed offending MD5 crypto hash and replaced with SHA1 and SHA256 … (#4568) @JaysonHurst
+ - chore: remove never use import code (#4580) @giscafer
+
+Nodes
+
+ - fix: template node zh-CN translation (#4575) @giscafer
+
+#### 3.1.5: Maintenance Release
+
+Runtime
+
+ - Fix require of dns module (#4562) @knolleary
+ - Ensure global creds object is initialised when adding first cred (#4561) @knolleary
+
+#### 3.1.4: Maintenance Release
+
+Editor
+
+ - Highlight errors in config node sidebar (#4529) @knolleary
+ - Improve feedback in import dialog to show conflicted nodes (#4550) @knolleary
+ - Modify node users info in config editor footer (#4528) @knolleary
+ - Handle modified-nodes deploy after replacing unknown config node (#4556) @knolleary
+ - Handle undefined default export when importing module (#4539) @knolleary
+ - Fix icon scaling for non .svg icons (#4491) @ralphwetzel
+ - (convertNode) Do not create the credentials object if there is nothing to export (#4544) @GogoVega
+ - Ensure subflow instance node has g property set (#4538) @knolleary
+ - Handle importing flow with existing subflow and instance node (#4546) @knolleary
+ - Update index.mst (#4483) @gorenje
+ - Include top level property name when copying path from context (#4527) @knolleary
+ - Add handling to disable items on context menu (#4500) @kazuhitoyokoi
+ - Focus Quick Add dialog from context menu (#4516) @kazuhitoyokoi
+ - Fix subflow ports in Quick Add dialog (#4518) @kazuhitoyokoi
+ - Fix location of subflow ports in palette (#4502) @kazuhitoyokoi
+ - Client/Editor Events: fix off-in-on pattern emulating once (#4484) @gorenje
+ - Restore caching busting functionality without using explict version number (#4512) @knolleary
+ - Do not translate the list of available languages (#4531) @GogoVega
+ - Add French translation of v3.1.3 changes (#4477) @GogoVega
+ - i18n(es-ES) Spanish Spain translation (#4495) @joebordes
+ - Add missing validation messages (#4487) @GogoVega
+ - Add Japanese translations for v3.1.3 (#4498) @kazuhitoyokoi
+ - Replace `rename` by `edit` for the menu flow label (#4506) @GogoVega
+ - Update editor.json fix typo in German translation (#4552) @guidoffm
+
+Runtime
+
+ - Bump the github-actions group with 1 update (#4554) @app/dependabot
+ - Clone objects types when getting env values (#4519) @knolleary
+ - Ensure global-config credential env vars are merged on deploy (#4526) @knolleary
+
+Nodes
+
+ - 21-httprequest.js remove unused code, because of broken use of toLowercase (#4522) @gorenje
+
 #### 3.1.3: Maintenance Release
 
 Editor

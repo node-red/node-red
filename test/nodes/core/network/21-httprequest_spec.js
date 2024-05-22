@@ -60,6 +60,7 @@ describe('HTTP Request Node', function() {
     function startServer(done) {
         testPort += 1;
         testServer = stoppable(http.createServer(testApp));
+        const promises = []
         testServer.listen(testPort,function(err) {
             testSslPort += 1;
             console.log("ssl port", testSslPort);
@@ -81,13 +82,17 @@ describe('HTTP Request Node', function() {
                 */
             };
             testSslServer = stoppable(https.createServer(sslOptions,testApp));
-            testSslServer.listen(testSslPort, function(err){
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log("started testSslServer");
-                }
-            });
+            console.log('> start testSslServer')
+            promises.push(new Promise((resolve, reject) => {
+                testSslServer.listen(testSslPort, function(err){
+                    console.log(' done testSslServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                });
+            }))
 
             testSslClientPort += 1;
             var sslClientOptions = {
@@ -97,10 +102,17 @@ describe('HTTP Request Node', function() {
                 requestCert: true
             };
             testSslClientServer = stoppable(https.createServer(sslClientOptions, testApp));
-            testSslClientServer.listen(testSslClientPort, function(err){
-                console.log("ssl-client", err)
-            });
-
+            console.log('> start testSslClientServer')
+            promises.push(new Promise((resolve, reject) => {
+                testSslClientServer.listen(testSslClientPort, function(err){
+                    console.log(' done testSslClientServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                });
+            }))
             testProxyPort += 1;
             testProxyServer = stoppable(httpProxy(http.createServer()))
 
@@ -109,7 +121,17 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServer.listen(testProxyPort)
+            console.log('> testProxyServer')
+            promises.push(new Promise((resolve, reject) => {
+                testProxyServer.listen(testProxyPort, function(err) {
+                    console.log(' done testProxyServer')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                })
+            }))
 
             testProxyAuthPort += 1
             testProxyServerAuth = stoppable(httpProxy(http.createServer()))
@@ -131,9 +153,19 @@ describe('HTTP Request Node', function() {
                     res.setHeader("x-testproxy-header", "foobar")
                 }
             })
-            testProxyServerAuth.listen(testProxyAuthPort)
+            console.log('> testProxyServerAuth')
+            promises.push(new Promise((resolve, reject) => {
+                testProxyServerAuth.listen(testProxyAuthPort, function(err) {
+                    console.log(' done testProxyServerAuth')
+                    if (err) {
+                        reject(err)
+                    } else {
+                        resolve()
+                    }
+                })
+            }))
 
-            done(err);
+            Promise.all(promises).then(() => { done() }).catch(done)
         });
     }
 
@@ -429,7 +461,11 @@ describe('HTTP Request Node', function() {
             if (err) {
                 done(err);
             }
-            helper.startServer(done);
+            console.log('> helper.startServer')
+            helper.startServer(function(err) {
+                console.log('> helper started')
+                done(err)
+            });
         });
     });
 
@@ -2473,69 +2509,59 @@ describe('HTTP Request Node', function() {
     });
 
     describe('should parse broken headers', function() {
+        let port = testPort++
 
-        const versions = process.versions.node.split('.')
+        let server;
 
-        if (( versions[0] == 14 && versions[1] >= 20 ) ||
-            ( versions[0] == 16 && versions[1] >= 16 ) ||
-            ( versions[0] == 18 && versions[1] >= 5 ) ||
-            ( versions[0] > 18)) {
-            // only test if on new enough NodeJS version
+        before(function() {
+            server = net.createServer(function (socket) {
+                socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
+                socket.end()
+            })
 
-            let port = testPort++
+            server.listen(port,'127.0.0.1', function(err) {
+            })
+        });
 
-            let server;
+        after(function() {
+            server.close()
+        });
 
-            before(function() {
-                server = net.createServer(function (socket) {
-                    socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
-                    socket.end()
+        it('should accept broken headers', function (done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
+            {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg) {
+                    try {
+                        msg.payload.should.equal('HelloWorld')
+                        done()
+                    } catch (err) {
+                        done(err)
+                    }
                 })
+                n1.receive({payload: 'foo'})
+            });
+        });
 
-                server.listen(port,'127.0.0.1', function(err) {
+        it('should reject broken headers', function (done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
+            {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg) {
+                    try{
+                        msg.payload.should.match(/RequestError: Parse Error/)
+                        done()
+                    } catch (err) {
+                        done(err)
+                    }
                 })
-            });
+                n1.receive({payload: 'foo'})
 
-            after(function() {
-                server.close()
             });
-
-            it('should accept broken headers', function (done) {
-                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
-                {id:"n2", type:"helper"}];
-                helper.load(httpRequestNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    n2.on('input', function(msg) {
-                        try {
-                            msg.payload.should.equal('HelloWorld')
-                            done()
-                        } catch (err) {
-                            done(err)
-                        }
-                    })
-                    n1.receive({payload: 'foo'})
-                });
-            });
-
-            it('should reject broken headers', function (done) {
-                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
-                {id:"n2", type:"helper"}];
-                helper.load(httpRequestNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    n2.on('input', function(msg) {
-                        try{
-                            msg.payload.should.match(/RequestError: Parse Error/)
-                            done()
-                        } catch (err) {
-                            done(err)
-                        }
-                    })
-                    n1.receive({payload: 'foo'})
-
-                });
-            });
-        }
+        });
     });
 });

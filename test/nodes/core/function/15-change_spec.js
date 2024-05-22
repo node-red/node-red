@@ -918,7 +918,7 @@ describe('change Node', function() {
             });
         });
 
-        it('changes the value and type of the message property if a complete match', function(done) {
+        it('changes the value and type of the message property if a complete match - number', function(done) {
             var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload", "pt": "msg", "from": "123", "fromt": "str", "to": "456", "tot": "num" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
                         {id:"helperNode1", type:"helper", wires:[]}];
             helper.load(changeNode, flow, function() {
@@ -935,6 +935,25 @@ describe('change Node', function() {
                     }
                 });
                 changeNode1.receive({payload:"123"});
+            });
+        });
+
+        it('changes the value and type of the message property if a complete match - boolean', function(done) {
+            var flow = [{"id":"changeNode1","type":"change",rules:[{ "t": "change", "p": "payload.a", "pt": "msg", "from": "123", "fromt": "str", "to": "true", "tot": "bool" }, { "t": "change", "p": "payload.b", "pt": "msg", "from": "456", "fromt": "str", "to": "false", "tot": "bool" }],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                        {id:"helperNode1", type:"helper", wires:[]}];
+            helper.load(changeNode, flow, function() {
+                var changeNode1 = helper.getNode("changeNode1");
+                var helperNode1 = helper.getNode("helperNode1");
+                helperNode1.on("input", function(msg) {
+                    try {
+                        msg.payload.a.should.equal(true);
+                        msg.payload.b.should.equal(false);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                });
+                changeNode1.receive({payload: { a: "123", b: "456" }});
             });
         });
 
@@ -993,20 +1012,28 @@ describe('change Node', function() {
         });
 
         it('changes the value of the message property based on a regex', function(done) {
-            var flow = [{"id":"changeNode1","type":"change","action":"change","property":"payload","from":"\\d+","to":"NUMBER","reg":true,"name":"changeNode","wires":[["helperNode1"]]},
-                        {id:"helperNode1", type:"helper", wires:[]}];
+            const flow = [
+                {"id":"changeNode1","type":"change",rules:[
+                    { "t": "change", "p": "payload.a", "pt": "msg", "from": "\\d+", "fromt": "re", "to": "NUMBER", "tot": "str" },
+                    { "t": "change", "p": "payload.b", "pt": "msg", "from": "on", "fromt": "re", "to": "true", "tot": "bool" },
+                    { "t": "change", "p": "payload.c", "pt": "msg", "from": "off", "fromt": "re", "to": "false", "tot": "bool" }
+                ],"reg":false,"name":"changeNode","wires":[["helperNode1"]]},
+                {id:"helperNode1", type:"helper", wires:[]}
+            ];
             helper.load(changeNode, flow, function() {
                 var changeNode1 = helper.getNode("changeNode1");
                 var helperNode1 = helper.getNode("helperNode1");
                 helperNode1.on("input", function(msg) {
                     try {
-                        msg.payload.should.equal("Replace all numbers NUMBER and NUMBER");
+                        msg.payload.a.should.equal("Replace all numbers NUMBER and NUMBER");
+                        msg.payload.b.should.equal(true)
+                        msg.payload.c.should.equal(false)
                         done();
                     } catch(err) {
                         done(err);
                     }
                 });
-                changeNode1.receive({payload:"Replace all numbers 12 and 14"});
+                changeNode1.receive({payload:{ a: "Replace all numbers 12 and 14", b: 'on', c: 'off' } });
             });
         });
 
