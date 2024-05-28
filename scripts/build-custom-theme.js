@@ -81,10 +81,7 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
     await fs.copy(path.join(__dirname,"../packages/node_modules/@node-red/editor-client/src/sass/"),workingDir)
     await fs.writeFile(path.join(workingDir,"colors.scss"),updatedColors.join("\n"))
 
-    const result = sass.renderSync({
-        outputStyle: "expanded",
-        file: path.join(workingDir,"style-custom-theme.scss"),
-    });
+    const result = sass.compile(path.join(workingDir, "style-custom-theme.scss"), {style: "expanded"});
 
     const css = result.css.toString()
     const lines = css.split("\n");
@@ -119,7 +116,7 @@ while((match = ruleRegex.exec(colorsFile)) !== null) {
     * Theme generated with Node-RED ${nrPkg.version} on ${now}
     */`;
 
-    var output = sass.renderSync({outputStyle: parsedArgs.long?"expanded":"compressed",data:colorCSS.join("\n")});
+    const output = sass.compileString(colorCSS.join("\n"), {style: parsedArgs.long ? "expanded" : "compressed"});
     if (parsedArgs.out) {
 
         await fs.writeFile(parsedArgs.out,header+"\n"+output.css);
