@@ -1,3 +1,57 @@
+#### 4.0.0-beta.3: Beta Release
+
+Editor
+
+ - Improve background-deploy notification handling (#4692) @knolleary
+ - Hide workspace tab on middle mouse click (#4657) @Steve-Mcl
+ - multiplayer: Add user presence indicators (#4666) @knolleary
+ - Enable updating dependency node of package.json in project feature (#4676) @kazuhitoyokoi
+ - Add French translations for 4.0.0-beta.2 (#4681) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.2 (#4674) @kazuhitoyokoi
+ - Fix saving of conf-type properties in module packaged subflows (#4658) @knolleary
+ - Add npm install timeout notification (#4662) @hardillb
+ - Fix undo of subflow env property edits (#4667) @knolleary
+ - Fix three error typos in monaco.js (#4660) @JoshuaCWebDeveloper
+ - docs: Add closing paragraph tag (#4664) @ZJvandeWeg
+ - Avoid login loops when autoLogin enabled but login fails (#4684) @knolleary
+
+Runtime
+
+ - Allow blank strings to be used for env var property substitutions (#4672) @knolleary
+ - Use rfdc for cloning pure JSON values (#4679) @knolleary
+ - fix: remove outdated Node 11+ check (#4314) @Rotzbua
+ - feat(ci): add new nodejs v22 (#4694) @Rotzbua
+ - fix(node): increase required node >=18.5 (#4690) @Rotzbua
+ - fix(dns): remove outdated node check (#4689) @Rotzbua
+ - fix(polyfill): remove import module polyfill (#4688) @Rotzbua
+ - Fix typo (#4686) @Rotzbua
+
+Nodes
+
+ - Pass full error object in Function node and copy over cause property (#4685) @knolleary
+ - Replacing vm.createScript in favour of vm.Script (#4534) @patlux
+
+#### 4.0.0-beta.2: Beta Release
+
+Editor
+
+ - Introduce multiplayer feature (#4629) @knolleary
+ - Separate the "add new config-node" option into a new (+) button (#4627) @GogoVega
+ - Retain Palette categories collapsed and filter to localStorage (#4634) @knolleary
+ - Ensure palette filter reapplies and clear up unknown categories (#4637) @knolleary
+ - Add support for plugin (only) modules to the palette manager (#4620) @knolleary
+ - Update monaco to latest and node types to 18 LTS (#4615) @Steve-Mcl
+
+Runtime
+
+ - Fix handling of subflow config-node select type in sf module (#4643) @knolleary
+ - Comms API updates (#4628) @knolleary
+ - Add French translations for 4.0.0-beta.1 (#4621) @GogoVega
+ - Add Japanese translations for 4.0.0-beta.1 (#4612) @kazuhitoyokoi
+
+Nodes
+ - Fix change node handling of replacing with boolean (#4639) @knolleary
+
 #### 4.0.0-beta.1: Beta Release
 
 Editor
@@ -28,6 +82,22 @@ Nodes
  - Let msg.reset reset Tcp request node connection when in stay connected mode (#4406) @dceejay
  - Let debug node status msg length be settable via settings (#4402) @dceejay
  - Feat: Add ability to set headers for WebSocket client (#4436) @marcus-j-davies
+
+#### 3.1.9: Maintenance Release
+
+ - Prevent subflow being added to itself (#4654) @knolleary
+ - Fix use of spawn on windows with cmd files (#4652) @knolleary
+ - Guard refresh of unknown subflow (#4640) @knolleary
+ - Fix subflow module sending messages to debug sidebar (#4642) @knolleary
+
+#### 3.1.8: Maintenance Release
+
+ - Add validation and error handling on subflow instance properties (#4632) @knolleary
+ - Hide import/export context menu if disabled in theme (#4633) @knolleary
+ - Show change indicator on subflow tabs (#4631) @knolleary
+ - Bump dependencies (#4630) @knolleary
+ - Reset workspace index when clearing nodes (#4619) @knolleary
+ - Remove typo in global config (#4613) @kazuhitoyokoi
 
 #### 3.1.7: Maintenance Release
 
