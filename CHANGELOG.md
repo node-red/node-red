@@ -22,7 +22,14 @@ Runtime
  - Add httpAdminCookieOptions (#4718) @knolleary
  - chore: migrate deprecated `util.isArray` (#4724) @Rotzbua
  - Add --version cli args (#4707) @knolleary
- 
+ - feat(grunt): fail if files are missing (#4739) @Rotzbua
+ - fix(node-red-pi): node-red not started by path (#4736) @Rotzbua
+ - fix(editor): remove trailing slash (#4735) @Rotzbua
+ - fix: remove deprecated mqtt.js (#4733) @Rotzbua 
+
+Nodes
+
+ - Perform Proxy logic more like cURL (#4616) @Steve-Mcl
 
 #### 4.0.0-beta.3: Beta Release
 
