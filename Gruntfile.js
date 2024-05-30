@@ -221,7 +221,7 @@ module.exports = function(grunt) {
                             "node_modules/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js",
                             "node_modules/marked/marked.min.js",
                             "node_modules/dompurify/dist/purify.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
+                            "node_modules/d3/d3.min.js",
                             "node_modules/i18next/i18next.min.js",
                             "node_modules/i18next-http-backend/i18nextHttpBackend.min.js",
                             "node_modules/jquery-i18next/jquery-i18next.min.js",

@@ -86,6 +86,7 @@
         "@node-rs/bcrypt": "1.10.4"
     },
     "devDependencies": {
+        "d3": "3.0.3",
         "dompurify": "2.4.1",
         "grunt": "1.6.1",
         "grunt-chmod": "~1.1.1",
