@@ -218,7 +218,7 @@ module.exports = function(grunt) {
                             "node_modules/jquery/dist/jquery.min.js",
                             "node_modules/jquery-migrate/dist/jquery-migrate.min.js",
                             "node_modules/jquery-ui/dist/jquery-ui.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
+                            "node_modules/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js",
                             "node_modules/marked/marked.min.js",
                             "node_modules/dompurify/dist/purify.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
