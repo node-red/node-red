@@ -183,6 +183,35 @@ describe('Node', function() {
             n.receive(message);
         });
 
+
+        it('calls parent flow handleComplete when multiple callbacks provided', function(done) {
+            var n = new RedNode({id:'123',type:'abc', _flow: {
+                handleComplete: function(node,msg) {
+                    try {
+                        doneCount.should.equal(2)
+                        msg.should.deepEqual(message);
+                        done();
+                    } catch(err) {
+                        done(err);
+                    }
+                }
+            }});
+
+            var message = {payload:"hello world"};
+            let doneCount = 0
+            n.on('input',function(msg, nodeSend, nodeDone) {
+                doneCount++
+                nodeDone();
+            });
+            // Include a callback without explicit done signature
+            n.on('input',function(msg) { });
+            n.on('input',function(msg, nodeSend, nodeDone) {
+                doneCount++
+                nodeDone();
+            });
+            n.receive(message);
+        });
+
         it('triggers onComplete hook when done callback provided', function(done) {
             var handleCompleteCalled = false;
             var hookCalled = false;

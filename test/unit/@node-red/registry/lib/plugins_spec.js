@@ -115,38 +115,7 @@ test-module-config`)
 
             let pluginList = plugins.getPluginList();
             JSON.stringify(pluginList).should.eql(JSON.stringify(
-                [
-                    {
-                        "id": "test-module/test-set",
-                        "enabled": true,
-                        "local": false,
-                        "user": false,
-                        "plugins": [
-                            {
-                                "type": "foo",
-                                "id": "a-plugin",
-                                "module": "test-module"
-                            },
-                            {
-                                "type": "bar",
-                                "id": "a-plugin2",
-                                "module": "test-module"
-                            },
-                            {
-                                "type": "foo",
-                                "id": "a-plugin3",
-                                "module": "test-module"
-                            }
-                        ]
-                    },
-                    {
-                        "id": "test-module/test-disabled-set",
-                        "enabled": false,
-                        "local": false,
-                        "user": false,
-                        "plugins": []
-                    }
-                ]
+                [{"id":"test-module/test-set","enabled":true,"local":false,"user":false,"plugins":[{"id":"a-plugin","type":"foo","module":"test-module"},{"id":"a-plugin2","type":"bar","module":"test-module"},{"id":"a-plugin3","type":"foo","module":"test-module"}]},{"id":"test-module/test-disabled-set","enabled":false,"local":false,"user":false,"plugins":[]}]
             ))
         })
     })

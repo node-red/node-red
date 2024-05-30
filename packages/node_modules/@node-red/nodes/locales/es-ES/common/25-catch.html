@@ -1,0 +1,36 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="catch">
+    <p>Capturar errores arrojados por nodos en la misma pestaña.</p>
+    <h3>Salidas</h3>
+    <dl class="message-properties">
+        <dt>error.message <span class="property-type">texto</span></dt>
+        <dd>el mensaje de error.</dd>
+        <dt>error.source.id <span class="property-type">texto</span></dt>
+        <dd>la identificación del nodo que arrojó el error.</dd>
+        <dt>error.source.type <span class="property-type">texto</span></dt>
+        <dd>el tipo de nodo que arrojó el error.</dd>
+        <dt>error.source.name <span class="property-type">texto</span></dt>
+        <dd>el nombre, si está configurado, del nodo que arrojó el error.</dd>
+    </dl>
+    <h3>Detalles</h3>
+    <p>Si un nodo genera un error mientras maneja un mensaje, el flujo normalmente se detendrá. Este nodo se puede utilizar para detectar esos errores y manejarlos con un flujo dedicado.</p>
+    <p>De forma predeterminada, el nodo detectará los errores generados por cualquier nodo en la misma pestaña. Alternativamente, puede dirigirse a nodos específicos o configurarse para detectar solo errores que aún no hayan sido detectados por un nodo de captura "dirigido".</p>
+    <p>Cuando se produce un error, todos los nodos de captura coincidentes recibirán el mensaje.</p>
+    <p>Si se produce un error dentro de un subflujo, el error será manejado por cualquier nodo de captura dentro del subflujo. Si no existe ninguno, el error se propagará hasta la pestaña en la que se encuentra la instancia del subflujo.</p>
+    <p>Si el mensaje ya tiene una propiedad <code>error</code>, se copia a <code>_error</code>.</p>
+</script>

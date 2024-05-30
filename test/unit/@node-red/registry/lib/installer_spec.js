@@ -25,6 +25,7 @@ var NR_TEST_UTILS = require("nr-test-utils");
 var installer = NR_TEST_UTILS.require("@node-red/registry/lib/installer");
 var registry = NR_TEST_UTILS.require("@node-red/registry/lib/index");
 var typeRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/registry");
+let pluginRegistry = NR_TEST_UTILS.require("@node-red/registry/lib/plugins");
 const { events, exec, log, hooks } =  NR_TEST_UTILS.require("@node-red/util");
 
 describe('nodes/registry/installer', function() {
@@ -65,6 +66,9 @@ describe('nodes/registry/installer', function() {
         }
         if (typeRegistry.setModulePendingUpdated.restore) {
             typeRegistry.setModulePendingUpdated.restore();
+        }
+        if (pluginRegistry.removeModule.restore) {
+            pluginRegistry.removeModule.restore();
         }
         if (fs.statSync.restore) {
             fs.statSync.restore();
@@ -501,6 +505,9 @@ describe('nodes/registry/installer', function() {
             var nodeInfo = [{module:"foo",types:["a"]}];
             var removeModule = sinon.stub(typeRegistry,"removeModule").callsFake(function(md) {
                 return nodeInfo;
+            });
+            let removePluginModule = sinon.stub(pluginRegistry,"removeModule").callsFake(function(md) {
+                return [];
             });
             var getModuleInfo = sinon.stub(registry,"getModuleInfo").callsFake(function(md) {
                 return {nodes:[]};

@@ -1,0 +1,28 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<script type="text/html" data-help-name="udp in">
+    <p>Un nodo de entrada UDP que produce un <code>msg.payload</code> que contiene un búfer, una cadena o una cadena codificada en base64. Admite multidifusión.</p>
+    <p>También proporciona <code>msg.ip</code> y <code>msg.port</code> configurados para la dirección IP y el puerto desde el que se recibió el mensaje.</p>
+    <p><b>Nota</b>: En algunos sistemas, es posible que necesites acceso de administrador para usar puertos inferiores a 1024 y/o transmisión.</p>
+</script>
+
+<script type="text/html" data-help-name="udp out">
+  <p>Este nodo envía <code>msg.payload</code> al host y puerto UDP designado. Admite multidifusión.</p>
+  <p>También puede utilizar <code>msg.ip</code> y <code>msg.port</code> para establecer los valores de destino, pero los valores configurados estáticamente tienen prioridad.</p>
+  <p>Si seleccionas transmisión, establece la dirección IP de transmisión local o tal vez prueba con 255.255.255.255, que es la dirección de transmisión global.</p>
+  <p><b>Nota</b>: En algunos sistemas, es posible que necesites ser root para usar puertos inferiores a 1024 y/o transmisión.</p>
+</script>
