@@ -1,4 +1,4 @@
-#### 4.0 Milestone Release
+#### 4.0.0-beta.4: Beta Release
 
 Editor
 
