@@ -215,8 +215,8 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.5.1.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.3.0.min.js",
+                            "node_modules/jquery/dist/jquery.min.js",
+                            "node_modules/jquery-migrate/dist/jquery-migrate.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
                             "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
                             "node_modules/marked/marked.min.js",
