@@ -5,7 +5,6 @@ const fs = require("fs-extra");
 const should = require("should");
 
 const rootPackage = require(path.join("..","package.json"));
-const rootDependencies = rootPackage.dependencies;
 const packages = [
     "node-red",
     "@node-red/editor-api",
@@ -18,21 +17,23 @@ const packages = [
 
 const fixFlag = process.argv[2] === '--fix';
 
-function verifyDependencies() {
+async function verifyDependencies(depType = 'dependencies') {
+    const rootDependencies = rootPackage[depType];
+
     let failures = [];
     let packageUpdates = {};
     packages.forEach(package => {
         let modulePackage = require(path.join("../packages/node_modules",package,"package.json"));
-        let dependencies = Object.keys(modulePackage.dependencies||{});
+        let dependencies = Object.keys(modulePackage[depType]||{});
         dependencies.forEach(module => {
             try {
                 if (!/^@node-red\//.test(module)) {
-                    should.exist(rootDependencies[module],`[${package}] '${module}' missing from root package.json`);
+                    should.exist(rootDependencies[module],`[${package}] '${module}' missing from root package.json ${depType}`);
                     try {
-                        rootDependencies[module].should.eql(modulePackage.dependencies[module],`[${package}] '${module}' version mismatch. Expected '${modulePackage.dependencies[module]}' (got '${rootDependencies[module]}') `);
+                        rootDependencies[module].should.eql(modulePackage[depType][module],`[${package}] '${module}' version mismatch. Expected '${modulePackage.dependencies[module]}' (got '${rootDependencies[module]}') in ${depType} `);
                     } catch(err) {
                         if (fixFlag) {
-                            modulePackage.dependencies[module] = rootDependencies[module];
+                            modulePackage[depType][module] = rootDependencies[module];
                             packageUpdates[package] = modulePackage;
                         } else {
                             failures.push(err.toString());
@@ -56,12 +57,17 @@ function verifyDependencies() {
             process.exit(1);
         })
     } else {
-        return Promise.resolve(failures);
+        return failures;
     }
 }
 
 if (require.main === module) {
-    verifyDependencies().then(failures => {
+    let failures = []
+    verifyDependencies('dependencies').then(depFailures => {
+        failures = failures.concat(depFailures)
+        return verifyDependencies('optionalDependencies')
+    }).then(optDepFailures => {
+        failures = failures.concat(optDepFailures)
         if (failures.length > 0) {
             failures.forEach(f => console.log(` - ${f}`));
             console.log("Run with --fix option to fix up versions")
