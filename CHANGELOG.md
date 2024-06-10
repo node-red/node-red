@@ -1,3 +1,26 @@
+#### 3.1.10: Maintenance Release
+
+ - Include rewired nodes when calculating Modified Flows stop list (#4754) @knolleary
+ - Fix clone of group env var properties (#4753) @knolleary
+ - Fix losing links when importing a copy of links into a subflow (#4750) @GogoVega
+ - Ensure all CSS variables are in the output file (#3743) @bonanitech
+ - Fix the Sidebar Config is not refreshed after a deploy (#4734) @GogoVega
+ - Fix checkboxes are not updated when calling `typedInput("value", "")` (#4729) @GogoVega
+ - Fix panning with middle mouse button on windows 10/11 (#4716) @corentin-sodebo-voile
+ - Add Japanese translation for sidebar tooltip (#4727) @kazuhitoyokoi
+ - Translate the number of items selected in the options list (#4730) @GogoVega
+ - Fix a checkbox should return a Boolean value and not the string `on` (#4715) @GogoVega
+ - Deleting a grouped node should update the group (#4714) @GogoVega
+ - Change the Config Node cursor to `pointer` (#4711) @GogoVega
+ - Add missing tooltips to Sidebar (#4713) @GogoVega
+ - Allow nodes to return additional history entries in onEditSave (#4710) @knolleary
+ - Pass full error object in Function node and copy over cause property (#4685) @knolleary
+ - Replacing vm.createScript in favour of vm.Script (#4534) @patlux
+ - Avoid login loops when autoLogin enabled but login fails (#4684) @knolleary
+ - Fix undo of subflow env property edits (#4667) @knolleary
+ - Fix three error typos in monaco.js (#4660) @JoshuaCWebDeveloper
+ - docs: Add closing paragraph tag (#4664) @ZJvandeWeg
+
 #### 3.1.9: Maintenance Release
 
  - Prevent subflow being added to itself (#4654) @knolleary
