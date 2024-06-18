@@ -141,7 +141,7 @@ Editor
  - Fix `validateNodeProperty` without validator provided (#4455) @GogoVega
  - Debounce node-removed notifications (#4453) @knolleary
  - Don't try to load the parents of the first commit (#4448) @bonanitech
- - Allow a theme to specifiy which theme mermaid should use (#4441) @knolleary
+ - Allow a theme to specify which theme mermaid should use (#4441) @knolleary
  - Update browser title with flow name if set (#4427) @knolleary
  - Ensure typeSearch handles undefined node definitions (#4423) @knolleary
  - Ensure group w/h are imported if present (#4426) @knolleary
@@ -270,7 +270,7 @@ Runtime
  - Allow options object on each httpStatic configuration (#4109) @kevinGodell
  - Ensure non-zero exit codes for errors (#4181) @knolleary
  - Ensure external modules are installed synchronously (#4180) @knolleary
- - Update dependecies include got (#4155) @knolleary
+ - Update dependencies include got (#4155) @knolleary
  - Add Japanese translations for v3.1 beta.2 (#4158) @kazuhitoyokoi
  - Ensure express server options are applied consistently (#4178) @knolleary
  - Remove version info from theme endpoint (#4179) @knolleary

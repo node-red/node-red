@@ -188,7 +188,7 @@ describe("red/nodes/registry/registry",function() {
            moduleList["test-module"].nodes.should.have.a.property("test-name-2");
        });
 
-       it('doesnt add node set types if node set has an error', function() {
+       it('does not add node set types if node set has an error', function() {
            typeRegistry.init(settings,null);
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
@@ -204,7 +204,7 @@ describe("red/nodes/registry/registry",function() {
            should.not.exist(typeRegistry.getTypeId("test-c"));
        });
 
-       it('doesnt add node set if type already exists', function() {
+       it('does not add node set if type already exists', function() {
            typeRegistry.init(settings,null);
            typeRegistry.getNodeList().should.have.lengthOf(0);
            typeRegistry.getModuleList().should.eql({});
@@ -329,7 +329,7 @@ describe("red/nodes/registry/registry",function() {
                 typeRegistry.removeModule("test-module/unknown");
             }).should.throw("Unrecognised module: test-module/unknown");
         });
-        it('throws error for unavaiable settings', function() {
+        it('throws error for unavailable settings', function() {
             var s = stubSettings({},false,{});
             typeRegistry.init(s,null);
             /*jshint immed: false */

@@ -487,7 +487,7 @@ describe('rbe node', function() {
         });
     });
 
-    it('should send output if gap is 0 and input doesnt change (narrowband)', function(done) {
+    it('should send output if gap is 0 and input does not change (narrowband)', function(done) {
         var flow = [{"id":"n1", "type":"rbe", func:"narrowband", gap:"0", wires:[["n2"]] },
             {id:"n2", type:"helper"} ];
         helper.load(testNode, flow, function() {
