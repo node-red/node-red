@@ -1,3 +1,8 @@
+#### 3.1.11: Maintenance Release
+
+ - Add/Update German Translations for delay node (#4762) @dceejay
+ - Update ws dependency
+
 #### 3.1.10: Maintenance Release
 
  - Include rewired nodes when calculating Modified Flows stop list (#4754) @knolleary
