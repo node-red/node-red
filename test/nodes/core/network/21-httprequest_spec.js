@@ -1825,7 +1825,9 @@ describe('HTTP Request Node', function() {
 
         /* */
 
-        it('should use http_proxy when environment variable is invalid', function(done) {
+        // disabled with the introduction of proxyHelper. It is the responsibility of the user to enter a
+        // valid proxy URL
+        it.skip('should use http_proxy when environment variable is invalid', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect')},
                 {id:"n2", type:"helper"}];
             deleteProxySetting();
@@ -1944,7 +1946,9 @@ describe('HTTP Request Node', function() {
         });
         /* */
 
-        it('should not use http-proxy-config when invalid url is specified', function(done) {
+        // disabled with the introduction of proxyHelper. It is the responsibility of the user to enter a
+        // valid proxy URL
+        it.skip('should not use http-proxy-config when invalid url is specified', function(done) {
             var flow = [
                 {id:"n1",type:"http request",wires:[["n2"]],method:"POST",ret:"obj",url:getTestURL('/postInspect'),proxy:"n3"},
                 {id:"n2", type:"helper"},
@@ -2509,69 +2513,59 @@ describe('HTTP Request Node', function() {
     });
 
     describe('should parse broken headers', function() {
+        let port = testPort++
 
-        const versions = process.versions.node.split('.')
+        let server;
 
-        if (( versions[0] == 14 && versions[1] >= 20 ) ||
-            ( versions[0] == 16 && versions[1] >= 16 ) ||
-            ( versions[0] == 18 && versions[1] >= 5 ) ||
-            ( versions[0] > 18)) {
-            // only test if on new enough NodeJS version
+        before(function() {
+            server = net.createServer(function (socket) {
+                socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
+                socket.end()
+            })
 
-            let port = testPort++
+            server.listen(port,'127.0.0.1', function(err) {
+            })
+        });
 
-            let server;
+        after(function() {
+            server.close()
+        });
 
-            before(function() {
-                server = net.createServer(function (socket) {
-                    socket.write("HTTP/1.0 200\nContent-Type: text/plain\n\nHelloWorld")
-                    socket.end()
+        it('should accept broken headers', function (done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
+            {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg) {
+                    try {
+                        msg.payload.should.equal('HelloWorld')
+                        done()
+                    } catch (err) {
+                        done(err)
+                    }
                 })
+                n1.receive({payload: 'foo'})
+            });
+        });
 
-                server.listen(port,'127.0.0.1', function(err) {
+        it('should reject broken headers', function (done) {
+            var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
+            {id:"n2", type:"helper"}];
+            helper.load(httpRequestNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                n2.on('input', function(msg) {
+                    try{
+                        msg.payload.should.match(/RequestError: Parse Error/)
+                        done()
+                    } catch (err) {
+                        done(err)
+                    }
                 })
-            });
+                n1.receive({payload: 'foo'})
 
-            after(function() {
-                server.close()
             });
-
-            it('should accept broken headers', function (done) {
-                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`, insecureHTTPParser: true},
-                {id:"n2", type:"helper"}];
-                helper.load(httpRequestNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    n2.on('input', function(msg) {
-                        try {
-                            msg.payload.should.equal('HelloWorld')
-                            done()
-                        } catch (err) {
-                            done(err)
-                        }
-                    })
-                    n1.receive({payload: 'foo'})
-                });
-            });
-
-            it('should reject broken headers', function (done) {
-                var flow = [{id:'n1',type:'http request',wires:[['n2']],method:'GET',ret:'obj',url:`http://localhost:${port}/`},
-                {id:"n2", type:"helper"}];
-                helper.load(httpRequestNode, flow, function() {
-                    var n1 = helper.getNode("n1");
-                    var n2 = helper.getNode("n2");
-                    n2.on('input', function(msg) {
-                        try{
-                            msg.payload.should.match(/RequestError: Parse Error/)
-                            done()
-                        } catch (err) {
-                            done(err)
-                        }
-                    })
-                    n1.receive({payload: 'foo'})
-
-                });
-            });
-        }
+        });
     });
 });

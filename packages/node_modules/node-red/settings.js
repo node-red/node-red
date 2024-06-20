@@ -133,11 +133,13 @@ module.exports = {
  *  - httpServerOptions
  *  - httpAdminRoot
  *  - httpAdminMiddleware
+ *  - httpAdminCookieOptions
  *  - httpNodeRoot
  *  - httpNodeCors
  *  - httpNodeMiddleware
  *  - httpStatic
  *  - httpStaticRoot
+ *  - httpStaticCors
  ******************************************************************************/
 
     /** the tcp port that the Node-RED web server is listening on */
@@ -178,6 +180,11 @@ module.exports = {
     //    next();
     // },
 
+    /** The following property can be used to set addition options on the session
+     * cookie used as part of adminAuth authentication system
+     * Available options are documented here: https://www.npmjs.com/package/express-session#cookie
+     */
+    // httpAdminCookieOptions: { },
 
     /** Some nodes, such as HTTP In, can be used to listen for incoming http requests.
      * By default, these are served relative to '/'. The following property
@@ -227,6 +234,9 @@ module.exports = {
      *  OR multiple static sources can be created using an array of objects...
      *  Each object can also contain an options object for further configuration.
      *  See https://expressjs.com/en/api.html#express.static for available options.
+     *  They can also contain an option `cors` object to set specific Cross-Origin
+     *  Resource Sharing rules for the source. `httpStaticCors` can be used to
+     *  set a default cors policy across all static routes.
      */
     //httpStatic: [
     //    {path: '/home/nol/pics/',    root: "/img/"},
@@ -243,6 +253,21 @@ module.exports = {
      *      then "/home/nol/pics/" will be served at "/static/img/"
      */
     //httpStaticRoot: '/static/',
+
+    /** The following property can be used to configure cross-origin resource sharing
+     * in the http static routes.
+     * See https://github.com/troygoode/node-cors#configuration-options for
+     * details on its contents. The following is a basic permissive set of options:
+     */
+    //httpStaticCors: {
+    //    origin: "*",
+    //    methods: "GET,PUT,POST,DELETE"
+    //},
+
+    /** The following property can be used to modify proxy options */
+    // proxyOptions: {
+    //     mode: "legacy", // legacy mode is for non-strict previous proxy determination logic (node-red < v4 compatible)
+    // },
 
 /*******************************************************************************
  * Runtime Settings
@@ -437,6 +462,10 @@ module.exports = {
             }
         },
 
+        multiplayer: {
+            /** To enable the Multiplayer feature, set this value to true */
+            enabled: false
+        },
     },
 
 /*******************************************************************************
@@ -449,6 +478,7 @@ module.exports = {
  *  - ui (for use with Node-RED Dashboard)
  *  - debugUseColors
  *  - debugMaxLength
+ *  - debugStatusLength
  *  - execMaxBufferSize
  *  - httpRequestTimeout
  *  - mqttReconnectTime
@@ -503,6 +533,9 @@ module.exports = {
 
     /** The maximum length, in characters, of any message sent to the debug sidebar tab */
     debugMaxLength: 1000,
+
+    /** The maximum length, in characters, of status messages under the debug node */
+    //debugStatusLength: 32,
 
     /** Maximum buffer size for the exec node. Defaults to 10Mb */
     //execMaxBufferSize: 10000000,
