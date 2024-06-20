@@ -43,6 +43,7 @@ describe('file Nodes', function() {
 
         var relativePathToFile = "50-file-test-file.txt";
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
+        resourcesDir = resourcesDir.replace(/\\/g, '/'); // Windows
         var fileToTest = path.join(resourcesDir,relativePathToFile);
         var wait = 250;
 
@@ -240,7 +241,7 @@ describe('file Nodes', function() {
                                 f.should.equal("Line1\nLine2\nLine3\nLine4");
                             }
                             else {
-                                f.should.have.length(23);
+                                f.should.have.length(26);
                                 f.should.equal("Line1\r\nLine2\r\nLine3\r\nLine4");
                             }
                             done();
@@ -1220,6 +1221,7 @@ describe('file Nodes', function() {
 
         var relativePathToFile = "50-file-test-file.txt";
         var resourcesDir = path.join(__dirname,"..","..","..","resources");
+        resourcesDir = resourcesDir.replace(/\\/g, '/'); // Windows
         var fileToTest = path.join(resourcesDir,relativePathToFile);
         var fileToTest2 = "\t"+path.join(resourcesDir,relativePathToFile)+"\r\n";
         var wait = 150;
@@ -1237,11 +1239,12 @@ describe('file Nodes', function() {
             });
         });
 
-        it('should be loaded', function(done) {
+        it('should load with defaults', function(done) {
             var flow = [{id:"fileInNode1", type:"file in", name: "fileInNode", "filename":fileToTest, "format":"utf8"}];
             helper.load(fileNode, flow, function() {
                 var n1 = helper.getNode("fileInNode1");
                 n1.should.have.property('name', 'fileInNode');
+                n1.should.have.property('propertyOut', 'payload')
                 done();
             });
         });
@@ -1527,6 +1530,23 @@ describe('file Nodes', function() {
                 n1.receive({payload:""});
             });
         });
+
+        it('should read in a file and output to the message property specified in `propertyOut`', function (done) {
+            const flow = [{ id: "fileInNode1", type: "file in", name: "fileInNode", "filename": fileToTest, "format": "", propertyOut: "file-data", wires: [["n2"]] },
+            { id: "n2", type: "helper" }]
+            helper.load(fileNode, flow, function () {
+                const n1 = helper.getNode("fileInNode1")
+                const n2 = helper.getNode("n2")
+                n2.on("input", function (msg) {
+                    msg.should.have.property('file-data')
+                    Buffer.isBuffer(msg['file-data']).should.be.true()
+                    msg['file-data'].should.have.length(40)
+                    msg['file-data'].toString().should.equal('File message line 1\nFile message line 2\n')
+                    done()
+                })
+                n1.receive({ payload: "" })
+            })
+        })
 
         describe('encodings', function() {
 

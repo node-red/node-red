@@ -30,13 +30,19 @@ describe('range Node', function() {
         helper.stopServer(done);
     });
 
-    it('should load some defaults', function(done) {
+    it('should load with defaults', function(done) {
         var flow = [{"id":"rangeNode1","type":"range","name":"rangeNode"}];
         helper.load(rangeNode, flow, function() {
-            var rangeNode1 = helper.getNode("rangeNode1");
-            rangeNode1.should.have.property('name', 'rangeNode');
-            rangeNode1.should.have.property('round', false);
-            done();
+            try {
+                var rangeNode1 = helper.getNode("rangeNode1");
+                rangeNode1.should.have.property('name', 'rangeNode');
+                rangeNode1.should.have.property('round', false);
+                rangeNode1.should.have.property('property', 'payload')
+                rangeNode1.should.have.property('propertyOut', 'payload')
+                done();
+            } catch (error) {
+                done(error);
+            }
         });
     });
 
@@ -170,4 +176,23 @@ describe('range Node', function() {
             rangeNode1.receive({payload:"NOT A NUMBER"});
         });
     });
+
+    it('uses configured property to get input value and propertyOut to set output value', function (done) {
+        var flow = [{ "id": "rangeNode1", "type": "range", "minin": 0, "maxin": 10, "minout": 0, "maxout": 100, "action": "scale", "round": true, "name": "rangeNode", "property": "payload.sub.prop", "propertyOut": "result", "wires": [["helperNode1"]] },
+        { id: "helperNode1", type: "helper", wires: [] }]
+        helper.load(rangeNode, flow, function () {
+            var rangeNode1 = helper.getNode("rangeNode1")
+            var helperNode1 = helper.getNode("helperNode1")
+            helperNode1.on("input", function (msg) {
+                try {
+                    msg.should.have.property("result")
+                    msg.result.should.equal(50)
+                    done()
+                } catch (err) {
+                    done(err)
+                }
+            })
+            rangeNode1.receive({ payload: { sub: { prop: 5 } } })
+        });
+    })
 });

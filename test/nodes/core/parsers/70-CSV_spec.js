@@ -23,7 +23,7 @@ const delayNode = require("nr-test-utils").require("@node-red/nodes/core/functio
 const helper = require("node-red-node-test-helper");
 // const { neq } = require("semver");
 
-describe('CSV node (Legacy Mode)', function() {
+describe.only('CSV node (Legacy Mode)', function() {
 
     before(function(done) {
         helper.startServer(done);
@@ -51,6 +51,8 @@ describe('CSV node (Legacy Mode)', function() {
                 // n1.should.have.property('lineend', '\n');
                 n1.should.have.property('multi', 'one');
                 n1.should.have.property('hdrin', false);
+                n1.should.have.property('property', 'payload');
+                n1.should.have.property('propertyOut', 'payload');
                 done();
             } catch (error) {
                 done(error);
@@ -788,6 +790,26 @@ describe('CSV node (Legacy Mode)', function() {
             });
         });
 
+        it ('should use message properties specified for `property in` and `property out`', function(done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "a,b,c,d", property: 'payload.sub.prop', propertyOut: 'result.sub_prop', wires: [["n2"]] },
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function () {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('result').and.be.an.Object();
+                        msg.result.should.have.property('sub_prop', { a: 1, b: 2, c: 3, d: 4 });
+                        msg.should.have.property('columns', "a,b,c,d");
+                        check_parts(msg, 0, 1);
+                        done();
+                    }
+                    catch (e) { done(e); }
+                });
+                const testString = "1,2,3,4" + String.fromCharCode(10);
+                n1.emit("input", { payload: { sub: { prop: testString } } });
+            });
+        })
     });
 
     describe('json object to csv', function() {
@@ -1101,6 +1123,23 @@ describe('CSV node (Legacy Mode)', function() {
             });
         });
 
+        it ('should use message properties specified for `property in` and `property out`', function(done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "a,b,c,d", ret: '\n', property: 'payload.sub.prop', propertyOut: 'result', wires: [["n2"]] }, // RFC-vs-Legacy difference - use line separator \n to satisfy original test
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function() {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('result', '4,3,2,1\n');
+                        done();
+                    } catch(e) { done(e); }
+                });
+                const testJson = { d: 1, b: 3, c: 2, a: 4 };
+                n1.emit("input", { payload: { sub: { prop: testJson } } });
+            });
+        })
+
     });
 
     it('should just pass through if no payload provided', function(done) {
@@ -1190,7 +1229,7 @@ describe('CSV node (Legacy Mode)', function() {
     });
 });
 
-describe('CSV node (RFC Mode)', function () {
+describe.only('CSV node (RFC Mode)', function () {
 
     before(function (done) {
         helper.startServer(done);
@@ -1219,6 +1258,8 @@ describe('CSV node (RFC Mode)', function () {
                 n1.should.have.property('ret', '\r\n'); // RFC-Legacy difference
                 n1.should.have.property('multi', 'one');
                 n1.should.have.property('hdrin', false);
+                n1.should.have.property('property', 'payload');
+                n1.should.have.property('propertyOut', 'payload');
                 done();
             } catch (error) {
                 done(error);
@@ -1997,6 +2038,26 @@ describe('CSV node (RFC Mode)', function () {
             });
         });
 
+        it ('should use message properties specified for `property in` and `property out`', function(done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "a,b,c,d", property: 'payload.sub.prop', propertyOut: 'result.sub_prop', wires: [["n2"]] },
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function () {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('result').and.be.an.Object();
+                        msg.result.should.have.property('sub_prop', { a: 1, b: 2, c: 3, d: 4 });
+                        msg.should.have.property('columns', "a,b,c,d");
+                        check_parts(msg, 0, 1);
+                        done();
+                    }
+                    catch (e) { done(e); }
+                });
+                const testString = "1,2,3,4" + String.fromCharCode(10);
+                n1.emit("input", { payload: { sub: { prop: testString } } });
+            });
+        })
     });
 
     describe('json object to csv', function () {
@@ -2335,6 +2396,23 @@ describe('CSV node (RFC Mode)', function () {
                 n1.emit("input", { payload: testJson });
             });
         });
+
+        it ('should use message properties specified for `property in` and `property out`', function(done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "a,b,c,d", ret: '\n', property: 'payload.sub.prop', propertyOut: 'result', wires: [["n2"]] }, // RFC-vs-Legacy difference - use line separator \n to satisfy original test
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function() {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function(msg) {
+                    try {
+                        msg.should.have.property('result', '4,3,2,1\n');
+                        done();
+                    } catch(e) { done(e); }
+                });
+                const testJson = { d: 1, b: 3, c: 2, a: 4 };
+                n1.emit("input", { payload: { sub: { prop: testJson } } });
+            });
+        })
 
     });
 

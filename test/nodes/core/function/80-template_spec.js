@@ -60,6 +60,21 @@ describe('template node', function() {
         });
     });
 
+    it('should load with defaults', function (done) {
+        const flow = [{ id: "n1", type: "template", template: "payload={{payload}}" }]
+        helper.load(templateNode, flow, function () {
+            try {
+                const n1 = helper.getNode("n1")
+                n1.should.have.property('syntax', 'mustache')
+                n1.should.have.property('field', 'payload') // `propertyOut` on this node is `field`
+                n1.should.have.property('fieldType', 'msg')
+                n1.should.have.property('outputFormat', 'str')
+                done()
+            } catch (error) {
+                done(error)
+            }
+        })
+    })
 
     it('should modify payload using node-configured template', function(done) {
         var flow = [{id:"n1", type:"template", field:"payload", template:"payload={{payload}}",wires:[["n2"]]},{id:"n2",type:"helper"}];

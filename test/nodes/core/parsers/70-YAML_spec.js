@@ -32,12 +32,18 @@ describe('YAML node', function() {
         helper.unload();
     });
 
-    it('should be loaded', function(done) {
+    it('should load with defaults', function(done) {
         var flow = [{id:"yamlNode1", type:"yaml", name: "yamlNode" }];
         helper.load(yamlNode, flow, function() {
-            var yamlNode1 = helper.getNode("yamlNode1");
-            yamlNode1.should.have.property('name', 'yamlNode');
-            done();
+            try {
+                var yamlNode1 = helper.getNode("yamlNode1");
+                yamlNode1.should.have.property('name', 'yamlNode');
+                yamlNode1.should.have.property('property', 'payload')
+                yamlNode1.should.have.property('propertyOut', 'payload')
+                done();
+            } catch (error) {
+                done(error);
+            }
         });
     });
 
@@ -192,4 +198,36 @@ describe('YAML node', function() {
         });
     });
 
+    it('should convert a valid yaml string to a javascript object using message properties specified for `property in` and `property out`', function (done) {
+        const flow = [{ id: "yn1", type: "yaml", property: "payload.sub.prop", propertyOut: "result", wires: [["yn2"]], func: "return msg;" },
+        { id: "yn2", type: "helper" }]
+        helper.load(yamlNode, flow, function () {
+            const yn1 = helper.getNode("yn1")
+            const yn2 = helper.getNode("yn2")
+            yn2.on("input", function (msg) {
+                msg.should.have.property('topic', 'bar')
+                msg.result.should.have.property('employees')
+                msg.result.employees[0].should.have.property('firstName', 'John')
+                msg.result.employees[0].should.have.property('lastName', 'Smith')
+                done()
+            })
+            const yamlString = "employees:\n  - firstName: John\n    lastName: Smith\n"
+            yn1.receive({ topic: "bar", payload: { sub: { prop: yamlString } } })
+        })
+    })
+
+    it('should convert a javascript object to a yaml string using message properties specified for `property in` and `property out`', function (done) {
+        const flow = [{ id: "yn1", type: "yaml", property: "payload.sub.prop", propertyOut: "result", wires: [["yn2"]], func: "return msg;" },
+        { id: "yn2", type: "helper" }]
+        helper.load(yamlNode, flow, function () {
+            const yn1 = helper.getNode("yn1")
+            const yn2 = helper.getNode("yn2")
+            yn2.on("input", function (msg) {
+                should.equal(msg.result, "employees:\n  - firstName: John\n    lastName: Smith\n")
+                done()
+            })
+            const obj = { employees: [{ firstName: "John", lastName: "Smith" }] }
+            yn1.receive({ payload: { sub: { prop: obj } } })
+        })
+    })
 });
