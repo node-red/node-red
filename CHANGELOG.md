@@ -1,3 +1,23 @@
+#### 4.0.0: Milestone Release
+
+This marks the next major release of Node-RED. The following changes represent
+those added since the last beta. Check the beta release details below for the complete
+list.
+
+Breaking Changes
+
+ - Node-RED now requires Node 18.x or later. At the time of release, we recommend
+   using Node 20.
+
+Editor
+
+ - Add `httpStaticCors` (#4761) @knolleary
+ - Update dependencies (#4763) @knolleary
+ - Sync master to dev (#4756) @knolleary
+ - Add tooltip and message validation to `typedInput` (#4747) @GogoVega
+ - Replace bcrypt with @node-rs/bcrypt (#4744) @knolleary
+ - Export Nodes dialog refinement (#4746) @Steve-Mcl
+
 #### 4.0.0-beta.4: Beta Release
 
 Editor
