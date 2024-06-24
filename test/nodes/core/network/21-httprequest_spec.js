@@ -37,7 +37,7 @@ var crypto = require("crypto");
 const { version } = require("os");
 const net = require('net')
 
-describe.only('HTTP Request Node', function() {
+describe('HTTP Request Node', function() {
     var testApp;
     var testServer;
     var testPort = 10234;
