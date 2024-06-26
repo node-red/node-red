@@ -1,3 +1,23 @@
+#### 4.0.1: Maintenance Release
+
+Editor
+
+ - Ensure subflow instance credential property values are extracted (#4802) @knolleary
+ - Use `_ADD_` value for both `add new...` and `none` options (#4800) @GogoVega
+ - Fix the config node select value assignment (#4788) @GogoVega
+ - Add tooltip for number of subflow instance on info tab (#4786) @kazuhitoyokoi
+ - Add Japanese translations for v4.0.0 (#4785) @kazuhitoyokoi
+
+Runtime
+
+ - Ensure group nodes are properly exported in /flow api (#4803) @knolleary
+
+ Nodes
+
+ - Joins: make using msg.parts optional in join node (#4796) @dceejay
+ - HTTP Request: UI proxy should setup agents for both http_proxy and https_proxy (#4794) @Steve-Mcl
+ - HTTP Request: Remove default user agent (#4791) @Steve-Mcl
+
 #### 4.0.0: Milestone Release
 
 This marks the next major release of Node-RED. The following changes represent
