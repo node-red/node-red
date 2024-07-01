@@ -1,3 +1,18 @@
+#### 4.0.2: Maintenance Release
+
+Editor
+
+ - Use a more subtle border on the header (#4818) @bonanitech
+ - Improve the editor's French translations (#4824) @GogoVega
+ - Clean up orphaned editors (#4821) @Steve-Mcl
+ - Fix node validation if the property is not required (#4812) @GogoVega
+ - Ensure mermaid.min.js is cached properly between loads of the editor (#4817) @knolleary
+
+Runtime
+
+ - Allow auth cookie name to be customised (#4815) @knolleary
+ - Guard against undefined sessions in multiplayer (#4816) @knolleary
+
 #### 4.0.1: Maintenance Release
 
 Editor
