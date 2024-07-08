@@ -143,6 +143,7 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/user.js",
                     "packages/node_modules/@node-red/editor-client/src/js/comms.js",
                     "packages/node_modules/@node-red/editor-client/src/js/runtime.js",
+                    "packages/node_modules/@node-red/editor-client/src/js/multiplayer.js",
                     "packages/node_modules/@node-red/editor-client/src/js/text/bidi.js",
                     "packages/node_modules/@node-red/editor-client/src/js/text/format.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/state.js",
@@ -207,38 +208,52 @@ module.exports = function(grunt) {
                     "packages/node_modules/@node-red/editor-client/src/js/ui/touch/radialMenu.js",
                     "packages/node_modules/@node-red/editor-client/src/js/ui/tour/*.js"
                 ],
+                nonull: true,
                 dest: "packages/node_modules/@node-red/editor-client/public/red/red.js"
             },
             vendor: {
-                files: {
-                    "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js": [
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.5.1.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.3.0.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
-                        "node_modules/marked/marked.min.js",
-                        "node_modules/dompurify/dist/purify.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
-                        "node_modules/i18next/i18next.min.js",
-                        "node_modules/i18next-http-backend/i18nextHttpBackend.min.js",
-                        "node_modules/jquery-i18next/jquery-i18next.min.js",
-                        "node_modules/jsonata/jsonata-es5.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js"
-                    ],
-                    // "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css": [
-                    //     // TODO: resolve relative resource paths in
-                    //     //       bootstrap/FA/jquery
-                    // ],
-                    "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js": [
-                        "node_modules/jsonata/jsonata-es5.min.js",
-                        "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
-                    ],
-                    "packages/node_modules/@node-red/editor-client/public/vendor/mermaid/mermaid.min.js": [
-                        "node_modules/mermaid/dist/mermaid.min.js"
-                    ]
-                }
+                files: [
+                    {
+                        src: [
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.5.1.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.3.0.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
+                            "node_modules/marked/marked.min.js",
+                            "node_modules/dompurify/dist/purify.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
+                            "node_modules/i18next/i18next.min.js",
+                            "node_modules/i18next-http-backend/i18nextHttpBackend.min.js",
+                            "node_modules/jquery-i18next/jquery-i18next.min.js",
+                            "node_modules/jsonata/jsonata-es5.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/formatter.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/ace/ace.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/ace/ext-language_tools.js"
+                        ],
+                        nonull: true,
+                        dest: "packages/node_modules/@node-red/editor-client/public/vendor/vendor.js"
+                    },
+                    // {
+                    //     src: [
+                    //         // TODO: resolve relative resource paths in
+                    //         //       bootstrap/FA/jquery
+                    //     ],
+                    //     dest: "packages/node_modules/@node-red/editor-client/public/vendor/vendor.css"
+                    // },
+                    {
+                        src: [
+                            "node_modules/jsonata/jsonata-es5.min.js",
+                            "packages/node_modules/@node-red/editor-client/src/vendor/jsonata/worker-jsonata.js"
+                        ],
+                        nonull: true,
+                        dest: "packages/node_modules/@node-red/editor-client/public/vendor/ace/worker-jsonata.js",
+                    },
+                    {
+                        src: "node_modules/mermaid/dist/mermaid.min.js",
+                        nonull: true,
+                        dest: "packages/node_modules/@node-red/editor-client/public/vendor/mermaid/mermaid.min.js",
+                    },
+                ]
             }
         },
         uglify: {

@@ -16,6 +16,31 @@ describe('Group', function () {
             group.getSetting("NR_GROUP_NAME").should.equal("g1")
             group.getSetting("NR_GROUP_ID").should.equal("group1")
         })
+        it("returns cloned env var property", async function () {
+            const group = new Group({
+                getSetting: v => v+v
+            }, {
+                name: "g1",
+                id: "group1",
+                env: [
+                    {
+                        name: 'jsonEnvVar',
+                        type: 'json',
+                        value: '{"a":1}'
+                    }
+                ]
+            })
+            await group.start()
+            const result = group.getSetting('jsonEnvVar')
+            result.should.have.property('a', 1)
+            result.a = 2
+            result.b = 'hello'
+
+            const result2 = group.getSetting('jsonEnvVar')
+            result2.should.have.property('a', 1)
+            result2.should.not.have.property('b')
+
+        })
         it("delegates to parent if not found", async function () {
             const group = new Group({
                 getSetting: v => v+v
