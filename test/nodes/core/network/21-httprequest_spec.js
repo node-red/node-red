@@ -518,6 +518,45 @@ describe('HTTP Request Node', function() {
     });
 
     describe('request', function() {
+        it('should load with defaults', function(done) {
+            const flow = [{id:"n1",type:"http request", name: "my http request",wires:[["n2"]]}]
+            helper.load(httpRequestNode, flow, function() {
+                try {
+                    const n1 = helper.getNode("n1")
+                    n1.should.have.property('name', 'my http request')
+                    n1.should.not.have.property('method')
+                    n1.should.have.property('property', 'payload')
+                    n1.should.have.property('propertyOut', 'payload')
+                    n1.should.have.property('ret', 'txt')
+                    n1.should.have.property('reqTimeout', 120000)
+                    n1.should.have.property('headers').and.be.an.Array().and.have.length(0)
+                    n1.should.have.property('authType', 'basic')
+                    done()
+                } catch (error) {
+                    done(error)
+                }
+            })
+        })
+
+        it('should get using message properties specified for `property in` and `property out`', function (done) {
+            const flow = [{ id: "n1", type: "http request", wires: [["n2"]], method: "GET", ret: "txt", property: 'body.data.in', propertyOut: 'result', url: getTestURL('/text') },
+            { id: "n2", type: "helper" }]
+            helper.load(httpRequestNode, flow, function () {
+                const n1 = helper.getNode("n1")
+                const n2 = helper.getNode("n2")
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('result', 'hello')
+                        msg.should.have.property('statusCode', 200)
+                        done()
+                    } catch (err) {
+                        done(err)
+                    }
+                })
+                n1.receive({ body: { data: { in: 'foo' } } })
+            })
+        })
+
         it('should get plain text content', function(done) {
             var flow = [{id:"n1",type:"http request",wires:[["n2"]],method:"GET",ret:"txt",url:getTestURL('/text')},
                 {id:"n2", type:"helper"}];

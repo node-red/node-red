@@ -32,12 +32,18 @@ describe('XML node', function() {
         helper.unload();
     });
 
-    it('should be loaded', function(done) {
+    it('should load with defaults', function(done) {
         var flow = [{id:"xmlNode1", type:"xml", name: "xmlNode" }];
         helper.load(xmlNode, flow, function() {
-            var xmlNode1 = helper.getNode("xmlNode1");
-            xmlNode1.should.have.property('name', 'xmlNode');
-            done();
+            try {
+                var xmlNode1 = helper.getNode("xmlNode1");
+                xmlNode1.should.have.property('name', 'xmlNode');
+                xmlNode1.should.have.property('property', 'payload')
+                xmlNode1.should.have.property('propertyOut', 'payload')
+                done();
+            } catch (error) {
+                done(error);
+            }
         });
     });
 
@@ -195,4 +201,41 @@ describe('XML node', function() {
         });
     });
 
+    it('should convert a valid xml string to a javascript object using message properties specified for `property in` and `property out`', function(done) {
+        const flow = [{ id: "n1", type: "xml", property: "payload.sub.prop", propertyOut: 'result', wires: [["n2"]], func: "return msg;" },
+        { id: "n2", type: "helper" }]
+        helper.load(xmlNode, flow, function () {
+            const n1 = helper.getNode("n1")
+            const n2 = helper.getNode("n2")
+            n2.on("input", function (msg) {
+                msg.should.have.property('topic', 'bar')
+                msg.should.have.property('result').and.be.an.Object()
+                msg.result.should.have.property('employees')
+                msg.result.employees.should.have.property('firstName')
+                should.equal(msg.result.employees.firstName[0], 'John')
+                msg.result.employees.should.have.property('lastName')
+                should.equal(msg.result.employees.lastName[0], 'Smith')
+                done()
+            })
+            const string = '  <employees><firstName>John</firstName><lastName>Smith</lastName></employees>\r\n  '
+            n1.receive({ topic: "bar", payload: { sub: { prop: string } } })
+        })
+    })
+
+    it('should convert a javascript object to an xml string using message properties specified for `property in` and `property out`', function (done) {
+        const flow = [{ id: "n1", type: "xml", property: "payload.sub.prop", propertyOut: 'result', wires: [["n2"]], func: "return msg" },
+        { id: "n2", type: "helper" }]
+        helper.load(xmlNode, flow, function () {
+            const n1 = helper.getNode("n1")
+            const n2 = helper.getNode("n2")
+            n2.on("input", function (msg) {
+                msg.should.have.property('topic', 'bar')
+                const index = msg.result.indexOf('<employees><firstName>John</firstName><lastName>Smith</lastName></employees>')
+                index.should.be.above(-1)
+                done()
+            })
+            const obj = { "employees": { "firstName": ["John"], "lastName": ["Smith"] } }
+            n1.receive({ topic: "bar", payload: { sub: { prop: obj } } })
+        })
+    })
 });

@@ -32,6 +32,25 @@ describe('JSON node', function() {
         helper.unload();
     });
 
+    it('should be loaded with defaults', function(done) {
+        const flow = [{id:"jn1",type:"json", name: 'json node',wires:[["jn2"]]}]
+        helper.load(jsonNode, flow, function() {
+            const n1 = helper.getNode("jn1")
+            try {
+                n1.should.have.property('name', 'json node')
+                n1.should.have.property('property','payload')
+                n1.should.have.property('propertyOut','payload')
+                n1.should.have.property('schema', null)
+                n1.should.have.property('compiledSchema', null)
+                n1.should.have.property('action', '')
+                n1.should.have.property('indent', 0)
+                done();
+            } catch (error) {
+                done(error)
+            }
+        })
+    })
+
     it('should convert a valid json string to a javascript object', function(done) {
         var flow = [{id:"jn1",type:"json",wires:[["jn2"]]},
                     {id:"jn2", type:"helper"}];
@@ -587,4 +606,56 @@ describe('JSON node', function() {
             jn1.receive({payload:jsonObject, schema:schema});
         });
     });
+
+    it('should convert a valid json string to a javascript object using message properties specified for `property in` and `property out`', function (done) {
+        const flow = [{ id: "jn1", type: "json", property: "payload.sub.prop", propertyOut: "result", wires: [["jn2"]] },
+        { id: "jn2", type: "helper" }]
+        helper.load(jsonNode, flow, function () {
+            const jn1 = helper.getNode("jn1")
+            const jn2 = helper.getNode("jn2")
+            jn2.on("input", function (msg) {
+                msg.should.have.property('topic', 'bar')
+                msg.should.have.property('result').and.be.an.Object()
+                msg.result.should.have.property('employees')
+                msg.result.employees[0].should.have.property('firstName', 'John')
+                msg.result.employees[0].should.have.property('lastName', 'Smith')
+                done()
+            })
+            const jsonString = ' {"employees":[{"firstName":"John", "lastName":"Smith"}]}\r\n '
+            jn1.receive({ topic: "bar", payload: { sub: { prop: jsonString } } })
+        })
+    })
+
+    it('should convert a javascript object to a json string using message properties specified for `property in` and `property out`', function (done) {
+        const flow = [{ id: "jn1", type: "json", property: "payload.sub.prop", propertyOut: "result", wires: [["jn2"]] },
+        { id: "jn2", type: "helper" }]
+        helper.load(jsonNode, flow, function () {
+            const jn1 = helper.getNode("jn1")
+            const jn2 = helper.getNode("jn2")
+            jn2.on("input", function (msg) {
+                msg.should.have.property('result').and.be.a.String()
+                should.equal(msg.result, '{"employees":[{"firstName":"John","lastName":"Smith"}]}')
+                done()
+            })
+            const obj = { employees: [{ firstName: "John", lastName: "Smith" }] }
+            jn1.receive({ payload: { sub: { prop: obj } } })
+        })
+    })
+
+    it('should pass through if property specified for `property in` is missing', function (done) {
+        const flow = [{ id: "jn1", type: "json", property: "payload.sub.prop", propertyOut: "result", wires: [["jn2"]] },
+        { id: "jn2", type: "helper" }]
+        helper.load(jsonNode, flow, function () {
+            const jn1 = helper.getNode("jn1")
+            const jn2 = helper.getNode("jn2")
+            const obj = { employees: [{ firstName: "John", lastName: "Smith" }] }
+            jn2.on("input", function (msg) {
+                msg.should.not.have.property('result') // never set
+                msg.should.have.propertyByPath('payload', 'sub', 'propBAD').and.be.an.Object() // unchanged
+                msg.payload.sub.propBAD.should.deepEqual(obj)
+                done()
+            })
+            jn1.receive({ payload: { sub: { propBAD: obj } } })
+        })
+    })
 });
