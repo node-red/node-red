@@ -1,3 +1,38 @@
+#### 4.0.2: Maintenance Release
+
+Editor
+
+ - Use a more subtle border on the header (#4818) @bonanitech
+ - Improve the editor's French translations (#4824) @GogoVega
+ - Clean up orphaned editors (#4821) @Steve-Mcl
+ - Fix node validation if the property is not required (#4812) @GogoVega
+ - Ensure mermaid.min.js is cached properly between loads of the editor (#4817) @knolleary
+
+Runtime
+
+ - Allow auth cookie name to be customised (#4815) @knolleary
+ - Guard against undefined sessions in multiplayer (#4816) @knolleary
+
+#### 4.0.1: Maintenance Release
+
+Editor
+
+ - Ensure subflow instance credential property values are extracted (#4802) @knolleary
+ - Use `_ADD_` value for both `add new...` and `none` options (#4800) @GogoVega
+ - Fix the config node select value assignment (#4788) @GogoVega
+ - Add tooltip for number of subflow instance on info tab (#4786) @kazuhitoyokoi
+ - Add Japanese translations for v4.0.0 (#4785) @kazuhitoyokoi
+
+Runtime
+
+ - Ensure group nodes are properly exported in /flow api (#4803) @knolleary
+
+ Nodes
+
+ - Joins: make using msg.parts optional in join node (#4796) @dceejay
+ - HTTP Request: UI proxy should setup agents for both http_proxy and https_proxy (#4794) @Steve-Mcl
+ - HTTP Request: Remove default user agent (#4791) @Steve-Mcl
+
 #### 4.0.0: Milestone Release
 
 This marks the next major release of Node-RED. The following changes represent
