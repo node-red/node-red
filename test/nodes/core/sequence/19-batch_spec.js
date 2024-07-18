@@ -98,7 +98,7 @@ describe('BATCH node', function() {
                 var n2 = helper.getNode("n2");
                 check_data(n1, n2, results, done);
                 for(var i = 0; i < 6; i++) {
-                    n1.receive({payload: i});
+                    n1.receive({payload: i, parts: { count:6, index:i }});
                 }
             });
         }
@@ -163,6 +163,25 @@ describe('BATCH node', function() {
             var results = [
                 [0, 1],
                 [2, 3],
+                [4, 5]
+            ];
+            check_count(flow, results, done);
+        });
+
+        it('should create seq. with count (more sent than count)', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 4, overlap: 0, interval: 10, allowEmptySequence: false, topics: [], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            var results = [
+                [0, 1, 2, 3]
+            ];
+            check_count(flow, results, done);
+        });
+
+        it('should create seq. with count and terminate early if parts honoured', function(done) {
+            var flow = [{id:"n1", type:"batch", name: "BatchNode", mode: "count", count: 4, overlap: 0, interval: 10, allowEmptySequence:false, honourParts:true, topics: [], wires:[["n2"]]},
+                        {id:"n2", type:"helper"}];
+            var results = [
+                [0, 1, 2, 3],
                 [4, 5]
             ];
             check_count(flow, results, done);
@@ -455,7 +474,7 @@ describe('BATCH node', function() {
         function mapiDoneTestHelper(done, mode, count, overlap, interval, allowEmptySequence, msgAndTimings) {
             const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
             const catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-catch.js");
-            const flow = [{id:"batchNode1", type:"batch", name: "BatchNode", mode, count, overlap, interval, 
+            const flow = [{id:"batchNode1", type:"batch", name: "BatchNode", mode, count, overlap, interval,
                            allowEmptySequence, topics: [{topic: "TA"}], wires:[[]]},
                           {id:"completeNode1",type:"complete",scope: ["batchNode1"],uncaught:false,wires:[["helperNode1"]]},
                           {id:"catchNode1", type:"catch",scope: ["batchNode1"],uncaught:false,wires:[["helperNode1"]]},
@@ -482,13 +501,13 @@ describe('BATCH node', function() {
         }
 
         it('should call done() when message is sent (mode: count)', function(done) {
-            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [ 
+            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [
                 { msg: {payload: 0}, delay: 0, avr: 0, var: 100},
                 { msg: {payload: 1}, delay: 0, avr: 0, var: 100}
             ]);
         });
         it('should call done() when reset (mode: count)', function(done) {
-            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [ 
+            mapiDoneTestHelper(done, "count", 2, 0, 2, false, [
                 { msg: {payload: 0}, delay: 0, avr: 200, var: 100},
                 { msg: {payload: 1, reset:true}, delay: 200, avr: 200, var: 100}
             ]);
