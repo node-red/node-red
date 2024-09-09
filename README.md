@@ -17,6 +17,12 @@ started.
 2. `node-red`
 3. Open <http://localhost:1880>
 
+## One-click Deployment
+
+You can deploy Node-red on Elestio using one-click deployment.
+
+[![Deploy on Elestio](https://elest.io/images/logos/deploy-to-elestio-btn.png)](https://elest.io/open-source/node-red)
+
 ## Getting Help
 
 More documentation can be found [here](https://nodered.org/docs).
