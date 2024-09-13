@@ -24,38 +24,38 @@ var log = NR_TEST_UTILS.require("@node-red/util").log;
 
 describe("@node-red/util/log", function() {
     beforeEach(function () {
-        var spy = sinon.stub(util, 'log').callsFake(function(arg){});
+        var spy = sinon.stub(console, 'log').callsFake(function(arg){});
         var settings = {logging: { console: { level: 'metric', metrics: true } } };
         log.init(settings);
     });
 
     afterEach(function() {
-        util.log.restore();
+        console.log.restore();
     });
 
     it('it can raise an error', function() {
         var ret = log.error("This is an error");
-        sinon.assert.calledWithMatch(util.log,"[error] This is an error");
+        sinon.assert.calledWithMatch(console.log,"[error] This is an error");
     });
 
     it('it can raise a trace', function() {
         var ret = log.trace("This is a trace");
-        sinon.assert.calledWithMatch(util.log,"[trace] This is a trace");
+        sinon.assert.calledWithMatch(console.log,"[trace] This is a trace");
     });
 
     it('it can raise a debug', function() {
         var ret = log.debug("This is a debug");
-        sinon.assert.calledWithMatch(util.log,"[debug] This is a debug");
+        sinon.assert.calledWithMatch(console.log,"[debug] This is a debug");
     });
 
     it('it can raise a info', function() {
         var ret = log.info("This is an info");
-        sinon.assert.calledWithMatch(util.log,"[info] This is an info");
+        sinon.assert.calledWithMatch(console.log,"[info] This is an info");
     });
 
     it('it can raise a warn', function() {
         var ret = log.warn("This is a warn");
-        sinon.assert.calledWithMatch(util.log,"[warn] This is a warn");
+        sinon.assert.calledWithMatch(console.log,"[warn] This is a warn");
     });
 
     it('it can raise a metric', function() {
@@ -66,9 +66,10 @@ describe("@node-red/util/log", function() {
         metrics.msgid = "12345";
         metrics.value = "the metric payload";
         var ret = log.log(metrics);
-        util.log.calledOnce.should.be.true();
-        util.log.firstCall.args[0].indexOf("[metric] ").should.equal(0);
-        var body = JSON.parse(util.log.firstCall.args[0].substring(9));
+        console.log.calledOnce.should.be.true();
+        console.log.firstCall.args[0].indexOf("[metric]").should.not.equal(-1);
+        const parts = console.log.firstCall.args[0].split("[metric] ")
+        var body = JSON.parse(parts[1])
         body.should.have.a.property("nodeid","testid");
         body.should.have.a.property("event","node.test.testevent");
         body.should.have.a.property("msgid","12345");
@@ -86,13 +87,13 @@ describe("@node-red/util/log", function() {
 
     it('it logs node type and name if provided',function() {
         log.log({level:log.INFO,type:"nodeType",msg:"test",name:"nodeName",id:"nodeId"});
-        util.log.calledOnce.should.be.true();
-        util.log.firstCall.args[0].indexOf("[nodeType:nodeName]").should.not.equal(-1);
+        console.log.calledOnce.should.be.true();
+        console.log.firstCall.args[0].indexOf("[nodeType:nodeName]").should.not.equal(-1);
     });
     it('it logs node type and id if no name provided',function() {
         log.log({level:log.INFO,type:"nodeType",msg:"test",id:"nodeId"});
-        util.log.calledOnce.should.be.true();
-        util.log.firstCall.args[0].indexOf("[nodeType:nodeId]").should.not.equal(-1);
+        console.log.calledOnce.should.be.true();
+        console.log.firstCall.args[0].indexOf("[nodeType:nodeId]").should.not.equal(-1);
     });
 
     it('ignores lower level messages and metrics', function() {
@@ -104,12 +105,12 @@ describe("@node-red/util/log", function() {
         log.debug("This is a debug");
         log.trace("This is a trace");
         log.log({level:log.METRIC,msg:"testMetric"});
-        sinon.assert.calledWithMatch(util.log,"[error] This is an error");
-        sinon.assert.calledWithMatch(util.log,"[warn] This is a warn");
-        sinon.assert.neverCalledWithMatch(util.log,"[info] This is an info");
-        sinon.assert.neverCalledWithMatch(util.log,"[debug] This is a debug");
-        sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
-        sinon.assert.neverCalledWithMatch(util.log,"[metric] ");
+        sinon.assert.calledWithMatch(console.log,"[error] This is an error");
+        sinon.assert.calledWithMatch(console.log,"[warn] This is a warn");
+        sinon.assert.neverCalledWithMatch(console.log,"[info] This is an info");
+        sinon.assert.neverCalledWithMatch(console.log,"[debug] This is a debug");
+        sinon.assert.neverCalledWithMatch(console.log,"[trace] This is a trace");
+        sinon.assert.neverCalledWithMatch(console.log,"[metric] ");
     });
     it('ignores lower level messages but accepts metrics', function() {
         var settings = {logging: { console: { level: 'log', metrics: true } } };
@@ -120,12 +121,12 @@ describe("@node-red/util/log", function() {
         log.debug("This is a debug");
         log.trace("This is a trace");
         log.log({level:log.METRIC,msg:"testMetric"});
-        sinon.assert.calledWithMatch(util.log,"[error] This is an error");
-        sinon.assert.calledWithMatch(util.log,"[warn] This is a warn");
-        sinon.assert.calledWithMatch(util.log,"[info] This is an info");
-        sinon.assert.neverCalledWithMatch(util.log,"[debug] This is a debug");
-        sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
-        sinon.assert.calledWithMatch(util.log,"[metric] ");
+        sinon.assert.calledWithMatch(console.log,"[error] This is an error");
+        sinon.assert.calledWithMatch(console.log,"[warn] This is a warn");
+        sinon.assert.calledWithMatch(console.log,"[info] This is an info");
+        sinon.assert.neverCalledWithMatch(console.log,"[debug] This is a debug");
+        sinon.assert.neverCalledWithMatch(console.log,"[trace] This is a trace");
+        sinon.assert.calledWithMatch(console.log,"[metric] ");
     });
 
     it('default settings set to INFO and metrics off', function() {
@@ -136,12 +137,12 @@ describe("@node-red/util/log", function() {
         log.debug("This is a debug");
         log.trace("This is a trace");
         log.log({level:log.METRIC,msg:"testMetric"});
-        sinon.assert.calledWithMatch(util.log,"[error] This is an error");
-        sinon.assert.calledWithMatch(util.log,"[warn] This is a warn");
-        sinon.assert.calledWithMatch(util.log,"[info] This is an info");
-        sinon.assert.neverCalledWithMatch(util.log,"[debug] This is a debug");
-        sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
-        sinon.assert.neverCalledWithMatch(util.log,"[metric] ");
+        sinon.assert.calledWithMatch(console.log,"[error] This is an error");
+        sinon.assert.calledWithMatch(console.log,"[warn] This is a warn");
+        sinon.assert.calledWithMatch(console.log,"[info] This is an info");
+        sinon.assert.neverCalledWithMatch(console.log,"[debug] This is a debug");
+        sinon.assert.neverCalledWithMatch(console.log,"[trace] This is a trace");
+        sinon.assert.neverCalledWithMatch(console.log,"[metric] ");
     });
     it('no logger used if custom logger handler does not exist', function() {
         var settings = {logging: { customLogger: { level: 'trace', metrics: true } } };
@@ -152,12 +153,12 @@ describe("@node-red/util/log", function() {
         log.debug("This is a debug");
         log.trace("This is a trace");
         log.log({level:log.METRIC,msg:"testMetric"});
-        sinon.assert.neverCalledWithMatch(util.log,"[error] This is an error");
-        sinon.assert.neverCalledWithMatch(util.log,"[warn] This is a warn");
-        sinon.assert.neverCalledWithMatch(util.log,"[info] This is an info");
-        sinon.assert.neverCalledWithMatch(util.log,"[debug] This is a debug");
-        sinon.assert.neverCalledWithMatch(util.log,"[trace] This is a trace");
-        sinon.assert.neverCalledWithMatch(util.log,"[metric] ");
+        sinon.assert.neverCalledWithMatch(console.log,"[error] This is an error");
+        sinon.assert.neverCalledWithMatch(console.log,"[warn] This is a warn");
+        sinon.assert.neverCalledWithMatch(console.log,"[info] This is an info");
+        sinon.assert.neverCalledWithMatch(console.log,"[debug] This is a debug");
+        sinon.assert.neverCalledWithMatch(console.log,"[trace] This is a trace");
+        sinon.assert.neverCalledWithMatch(console.log,"[metric] ");
     });
 
     it('add a custom log handler directly', function() {
@@ -244,7 +245,7 @@ describe("@node-red/util/log", function() {
             },
         };
         var ret = log.info(msg.msg);
-        sinon.assert.calledWithMatch(util.log,"my special message");
+        sinon.assert.calledWithMatch(console.log,"my special message");
     });
 
     
