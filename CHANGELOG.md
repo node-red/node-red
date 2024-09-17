@@ -1,3 +1,7 @@
+#### 3.1.12: Maintenance Release
+
+ - Update express/body-parser dependencies
+
 #### 3.1.11: Maintenance Release
 
  - Add/Update German Translations for delay node (#4762) @dceejay
