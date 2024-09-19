@@ -1,3 +1,38 @@
+#### 4.0.3: Maintenance Release
+
+Editor
+
+ - Refresh page title after changing tab name (#4850) @kazuhitoyokoi
+ - Add Japanese translations for v4.0.2 (again) (#4853) @kazuhitoyokoi
+ - Stay in quick-add mode following context menu insert (#4883) @knolleary
+ - Do not include Junction type in quick-add for virtual links (#4879) @knolleary
+ - Multiplayer cursor tracking (#4845) @knolleary
+ - Hide add-flow options when disabled via editorTheme (#4869) @knolleary
+ - Fix env-var config select when multiple defined (#4872) @knolleary
+ - Fix subflow outbound-link filter (#4857) @GogoVega
+ - Add French translations for v4.0.2 (#4856) @GogoVega
+ - Fix moving link wires (#4851) @knolleary
+ - Adjust type search dialog position to prevent x-overflow (#4844) @Steve-Mcl
+ - fix: modulesInUse might be undefined (#4838) @lorenz-maurer
+ - Add Japanese translations for v4.0.2 (#4849) @kazuhitoyokoi
+ - Fix menu to enable/disable selection when it's a group (#4828) @GogoVega
+
+Runtime
+
+ - Update dependencies (#4874) @knolleary
+ - GitHub: Add citation file to enable "Cite this repository" feature (#4861) @lobis
+ - Remove use of util.log (#4875) @knolleary
+
+Nodes
+
+ - Fix invalid property error in range node example (#4855)
+ - Fix typo in flow example name (#4854) @kazuhitoyokoi
+ - Move SNI, ALPN and Verify Server cert out of check (#4882) @hardillb
+ - Set status of mqtt nodes to "disconnected" when deregistered from broker (#4878) @Steve-Mcl
+ - MQTT: Ensure will payload is a string (#4873) @knolleary
+ - Let batch node terminate "early" if msg.parts set to end of sequence (#4829) @dceejay
+ - Fix unintentional Capitalisation in Split node name (#4835) @dceejay
+
 #### 4.0.2: Maintenance Release
 
 Editor
