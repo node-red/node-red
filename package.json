@@ -86,6 +86,7 @@
         "@node-rs/bcrypt": "1.10.4"
     },
     "devDependencies": {
+        "d3": "3.0.3",
         "dompurify": "2.4.1",
         "grunt": "1.6.1",
         "grunt-chmod": "~1.1.1",
@@ -107,7 +108,11 @@
         "grunt-simple-mocha": "~0.4.1",
         "grunt-simple-nyc": "^3.0.1",
         "i18next-http-backend": "1.4.1",
+        "jquery": "3.5.1",
         "jquery-i18next": "1.2.1",
+        "jquery-migrate": "3.3.0",
+        "jquery-ui":"1.13.2",
+        "jquery-ui-touch-punch": "0.2.3",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
         "marked": "4.3.0",
         "mermaid": "^10.4.0",
