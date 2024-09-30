@@ -80,7 +80,8 @@
         "uglify-js": "3.17.4",
         "uuid": "9.0.1",
         "ws": "7.5.10",
-        "xml2js": "0.6.2"
+        "xml2js": "0.6.2",
+        "dayjs": "1.11.13"
     },
     "optionalDependencies": {
         "@node-rs/bcrypt": "1.10.4"
