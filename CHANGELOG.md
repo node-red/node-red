@@ -1,3 +1,20 @@
+#### 4.0.4: Maintenance Release
+
+Editor
+
+ - Fix `link call` node can call out of a subflow (#4892) @GogoVega
+ - Fix wrong unlock state when event is triggered after deployment (#4889) @GogoVega
+ - i18n(App) update with latest language file changes (#4903) @joebordes
+ - fix typo: depreciated (#4895) @dxdc
+
+Runtime
+
+ - Update dev dependencies (#4893) @knolleary
+
+Nodes
+ 
+ - MQTT: Allow msg.userProperties to have number values (#4900) @hardillb
+
 #### 4.0.3: Maintenance Release
 
 Editor
