@@ -1,3 +1,7 @@
+#### 3.1.13: Maintenance Release
+
+ - Update cookie/DOMPurify dependencies
+
 #### 3.1.12: Maintenance Release
 
  - Update express/body-parser dependencies
