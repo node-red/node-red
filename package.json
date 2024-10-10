@@ -1,6 +1,6 @@
 {
     "name": "node-red",
-    "version": "3.1.13",
+    "version": "3.1.14",
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
@@ -109,7 +109,7 @@
         "jquery-i18next": "1.2.1",
         "jsdoc-nr-template": "github:node-red/jsdoc-nr-template",
         "marked": "4.3.0",
-        "mermaid": "^10.4.0",
+        "mermaid": "11.3.0",
         "minami": "1.2.3",
         "mocha": "9.2.2",
         "node-red-node-test-helper": "^0.3.3",

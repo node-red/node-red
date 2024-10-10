@@ -1,3 +1,7 @@
+#### 3.1.14: Maintenance Release
+
+ - Update mermaid version
+
 #### 3.1.13: Maintenance Release
 
  - Update cookie/DOMPurify dependencies
