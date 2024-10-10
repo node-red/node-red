@@ -1,3 +1,9 @@
+#### 4.0.5: Maintenance Release
+
+Editor
+
+ - Refix link call node can call out of a subflow (#4908) @GogoVega
+
 #### 4.0.4: Maintenance Release
 
 Editor
