@@ -112,7 +112,7 @@ describe('trigger node', function() {
                         if (rval) {
                             msg.should.have.property("payload");
                             if (type == "date" && val == "1") {
-                                should.deepEqual(Math.round(msg.payload/10000), Math.round(rval/10000));
+                                should.deepEqual(Math.round(msg.payload/1000000), Math.round(Date.now()/1000000));
                             }
                             else if (type == "date" && val == "iso") {
                                 should.deepEqual(msg.payload.substr(0,11), rval.substr(0,11));
@@ -152,7 +152,7 @@ describe('trigger node', function() {
                             if (rval) {
                                 msg.should.have.property("payload");
                                 if (type == "date" && val == "0") {
-                                    should.deepEqual(Math.round(msg.payload/10000), Math.round(rval/10000));
+                                    should.deepEqual(Math.round(msg.payload/1000000), parseInt(Date.now()/1000000));
                                 }
                                 else if (type == "date" && val == "iso") {
                                     should.deepEqual(msg.payload.substr(0,11), rval.substr(0,11));
