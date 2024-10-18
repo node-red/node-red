@@ -774,6 +774,84 @@ describe("@node-red/util/util", function() {
                   done();
               });
           });
+
+          describe('$has', function(){
+              it('verifies if a key belongs to a Set stored in the flow context', function() {
+                var expr = util.prepareJSONataExpression('$has($flowContext("test"),"a")',{context:function() { return {flow:{get: function(key) { return {'test': new Set(['a'])}[key]}}}}});
+                util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies if a key belongs to a Map stored in the flow context', function() {
+                var expr = util.prepareJSONataExpression('$has($flowContext("test"),"a")',{context:function() { return {flow:{get: function(key) { return {'test': new Map([['a', 'value']])}[key]}}}}});
+                util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies if a key belongs to a Set stored in the global context', function() {
+                var expr = util.prepareJSONataExpression('$has($globalContext("test"),"a")',{context:function() { return {flow:{get: function(key) { return {'test': new Set(['a'])}[key]}}}}});
+                util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies if a key belongs to a Map stored in the global context', function() {
+                var expr = util.prepareJSONataExpression('$has($globalContext("test"),"a")',{context:function() { return {flow:{get: function(key) { return {'test': new Map([['a', 'value']])}[key]}}}}});
+                util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies if a key belongs to a Set from msg', function() {
+                var expr = util.prepareJSONataExpression('$has(myProp,"a")',{});
+                util.evaluateJSONataExpression(expr,{ payload: { myProp: new Set(['a'])}}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies if a key belongs to a Map from msg', function() {
+                var expr = util.prepareJSONataExpression('$has(myProp,"a")',{});
+                util.evaluateJSONataExpression(expr,{ payload: { myProp: new Map([['a', 'value']])}}, (err, result) => {
+                  try {
+                      result.should.eql(true);
+                      done()
+                  } catch (error) {
+                      done(error)
+                  }
+                });
+              });
+              it('verifies an exception is thrown when first arg is not a Set or Map', function() {
+                var expr = util.prepareJSONataExpression('$has($flowContext("test"),"a")',{context:function() { return {flow:{get: function(key) { return {'test': "a"}[key]}}}}});
+                util.evaluateJSONataExpression(expr,{}, (err, result) => {
+                    expect(err).to.exist;
+                    expect(err.message).to.equal('$has expects a Set or Map as the first argument');
+                    done();
+                });
+              });
+          })
+          
       });
 
     describe('encodeObject', function () {
