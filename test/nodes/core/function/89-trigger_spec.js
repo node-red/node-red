@@ -111,7 +111,15 @@ describe('trigger node', function() {
                     try {
                         if (rval) {
                             msg.should.have.property("payload");
-                            should.deepEqual(msg.payload, rval);
+                            if (type == "date" && val == "1") {
+                                should.deepEqual(Math.round(msg.payload/1000000), Math.round(Date.now()/1000000));
+                            }
+                            else if (type == "date" && val == "iso") {
+                                should.deepEqual(msg.payload.substr(0,11), rval.substr(0,11));
+                            }
+                            else {
+                                should.deepEqual(msg.payload, rval);
+                            }
                         }
                         else {
                             msg.should.have.property("payload", val);
@@ -126,6 +134,7 @@ describe('trigger node', function() {
         });
 
         it('should output 2st value when triggered ('+type+')', function(done) {
+            if (type == "date" && val == "1") { val = "0"; }
             var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", op1:"foo", op1type:"str", op2:val, op2type:type, duration:"20", wires:[["n2"]] },
                 {id:"n2", type:"helper"} ];
             process.env[val] = rval;
@@ -142,7 +151,15 @@ describe('trigger node', function() {
                         else {
                             if (rval) {
                                 msg.should.have.property("payload");
-                                should.deepEqual(msg.payload, rval);
+                                if (type == "date" && val == "0") {
+                                    ;(Math.round(msg.payload/1000000)).should.be.approximately(parseInt(Date.now()/1000000), 1);
+                                }
+                                else if (type == "date" && val == "iso") {
+                                    should.deepEqual(msg.payload.substr(0,11), rval.substr(0,11));
+                                }
+                                else {
+                                    should.deepEqual(msg.payload, rval);
+                                }
                             }
                             else {
                                 msg.should.have.property("payload", val);
@@ -166,6 +183,9 @@ describe('trigger node', function() {
     var val_buf = "[1,2,3,4,5]";
     basicTest("bin", val_buf, Buffer.from(JSON.parse(val_buf)));
     basicTest("env", "NR-TEST", "env-val");
+    basicTest("date", "1", Date.now());
+    basicTest("date", "iso", (new Date()).toISOString());
+    // basicTest("date", "object", Date.now());
 
     it('should output 1 then 0 when triggered (default)', function(done) {
         var flow = [{"id":"n1", "type":"trigger", "name":"triggerNode", duration:"20", wires:[["n2"]] },
