@@ -1,0 +1,41 @@
+[
+    {
+        "id": "text_node",
+        "type": "ui_text",
+        "z": "dashboard_flow",
+        "group": "ui_group_1",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "Presión Actual",
+        "label": "PRESIÓN ACTUAL",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 440,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "ui_group_1",
+        "type": "ui_group",
+        "name": "Control Panel",
+        "tab": "ui_tab_1",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "ui_tab_1",
+        "type": "ui_tab",
+        "name": "Dashboard",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
