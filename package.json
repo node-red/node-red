@@ -41,7 +41,7 @@
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
         "denque": "2.1.0",
-        "express": "4.21.1",
+        "express": "4.21.2",
         "express-session": "1.18.1",
         "form-data": "4.0.0",
         "fs-extra": "11.2.0",
