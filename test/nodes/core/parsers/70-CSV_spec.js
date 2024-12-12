@@ -2077,6 +2077,26 @@ describe('CSV node (RFC Mode)', function () {
             });
         });
 
+        it('should convert a simple object back to a tsv with headers using a tab as a separator', function (done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "", sep: "\t", ret: '\n', hdrout: "all", wires: [["n2"]] }, // RFC-vs-Legacy difference - use line separator \n to satisfy original test
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function () {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('payload', 'd\tb\tc\ta\n1\tfoo\t"ba""r"\tdi,ng\n');
+                        msg.should.have.property('columns', 'd,b,c,a'); // Strict RFC columns
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
+                });
+                const testJson = { d: 1, b: "foo", c: "ba\"r", a: "di,ng" };
+                n1.emit("input", { payload: testJson });
+            });
+        });
+
         it('should handle a template with spaces in the property names', function (done) {
             const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "a,b o,c p,,e", ret: '\n', wires: [["n2"]] }, // RFC-vs-Legacy difference - use line separator \n to satisfy original test
             { id: "n2", type: "helper" }];
