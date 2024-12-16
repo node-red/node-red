@@ -1,3 +1,7 @@
+#### 3.1.15: Maintenance Release
+
+ - Bump express 3.1.x (#4988) @hardillb
+
 #### 3.1.14: Maintenance Release
 
  - Update mermaid version
