@@ -1,3 +1,36 @@
+#### 4.0.6: Maintenance Release
+
+Editor
+
+ - Roll up various fixes on config node change history (#4975) @knolleary
+ - Add quotes when installing local tgz to fix spacing in the file path (#4949) @AGhorab-upland
+ - Validate json dropped into editor to avoid unhelpful error messages (#4964) @knolleary
+ - Fix junction insert position via context menu (#4974) @knolleary
+ - Apply zoom scale when calculating annotation positions (#4981) @knolleary
+ - Handle the import of an incomplete Subflow (#4811) @GogoVega
+ - Fix updating the Subflow name during a copy (#4809) @GogoVega
+ - Rename variable to avoid confusion in view.js (#4963) @knolleary
+ - Change groups.length to groups.size (#4959) @hungtcs
+ - Remove disabled node types from QuickAddDialog list (#4946) @GogoVega
+ - Fix `setModulePendingUpdated` with plugins (#4939) @GogoVega
+ - Missing getSubscriptions in the docs while its implemented (#4934) @ersinpw
+ - Apply `envVarExcludes` setting to `util.getSetting` into the function node (#4925) @GogoVega
+ - Fix `envVar` editable list should be sortable (#4932) @GogoVega
+ - Improve the node name auto-generated with the first available number (#4912) @GogoVega
+
+Runtime
+
+ - Get the env config node from the parent subflow (#4960) @GogoVega
+ - Update dependencies (#4987) @knolleary
+
+Nodes
+
+ - Performance : make reading single buffer / string file faster by not re-allocating and handling huge buffers (#4980) @Fadoli
+ - Make delay node rate limit reset consistent - not send on reset. (#4940) @dceejay
+ - Fix trigger node date handling for latest time type input (#4915) @dceejay
+ - Fix delay node not dropping when nodeMessageBufferMaxLength is set (#4973)
+ - Ensure node.sep is honoured when generating CSV (#4982) @knolleary
+
 #### 4.0.5: Maintenance Release
 
 Editor
