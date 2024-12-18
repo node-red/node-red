@@ -1,3 +1,11 @@
+#### 4.0.7: Maintenance Release
+
+Editor
+
+ - Fix def can be undefined if the type is missing (#4997) @GogoVega
+ - Fix the user list of nested config node (#4995) @GogoVega
+ - Support custom login message and button (#4993) @knolleary
+
 #### 4.0.6: Maintenance Release
 
 Editor
