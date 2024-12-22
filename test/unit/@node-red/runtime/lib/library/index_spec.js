@@ -84,7 +84,7 @@ describe("runtime/library", function() {
             libs[0].should.have.property('id', 'local');
             libs[0].should.have.property('label','editor:library.types.local');
             libs[0].should.have.property("user", false);
-            libs[0].should.have.property('icon', 'font-awesome/fa-hdd-o');
+            libs[0].should.have.property('icon', 'fa fa-hdd-o');
 
             libs[1].should.have.property('id', 'examples');
             libs[1].should.have.property('label','editor:library.types.examples');
