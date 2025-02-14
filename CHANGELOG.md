@@ -1,3 +1,29 @@
+#### 4.0.9: Maintenance Release
+
+ Editor
+ 
+ - Add details for the dynamic subscription to match the English docs (#5050) @aikitori
+ - Fix tooltip snapping based on `typedInput` type (#5051) @GogoVega
+ - Prevent symbol usage warning in monaco (#5049) @Steve-Mcl
+ - Show subflow flow context under node section of sidebar (#5025) @knolleary
+ - feat: Add custom label for default deploy button in settings.editorTheme (#5030) @matiseni51
+ - Handle long auto-complete suggests (#5042) @knolleary
+ - Handle undefined username when generating user icon (#5043) @knolleary
+ - Handle dragging node into group and splicing link at same time (#5027) @knolleary
+ - Remember context sidebar tree state when refreshing (#5021) @knolleary
+ - Update sf instance env vars when removed from template (#5023) @knolleary
+ - Do not select group when triggering quick-add within it (#5022) @knolleary
+ - Fix library icon handling within library browser component (#5017) @knolleary
+ 
+Runtime
+ - Allow env var access to context (#5016) @knolleary
+ - fix debug status reporting if null (#5018) @dceejay
+ - Fix grunt dev via better ndoemon ignore rules (#5015) @knolleary
+ - Fix typo in CHANGELOG (4.0.7-->4.0.8) (#5007) @natcl
+
+Nodes
+ - Switch: Avoid exceeding call stack when draining message group in Switch (#5014) @knolleary
+
 #### 4.0.8: Maintenance Release
 
 Editor
