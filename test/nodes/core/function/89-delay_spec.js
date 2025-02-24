@@ -1009,6 +1009,29 @@ describe('delay Node', function() {
         });
     });
 
+    it('sending a msg with reset to empty queue doesnt send anything', function(done) {
+        this.timeout(2000);
+        var flow = [{"id":"delayNode1","type":"delay","name":"delayNode","pauseType":"rate","timeout":1,"timeoutUnits":"seconds","rate":2,"rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"wires":[["helperNode1"]]},
+                    {id:"helperNode1", type:"helper", wires:[]}];
+        helper.load(delayNode, flow, function() {
+            var delayNode1 = helper.getNode("delayNode1");
+            var helperNode1 = helper.getNode("helperNode1");
+            var t = Date.now();
+            var c = 0;
+            helperNode1.on("input", function(msg) {
+                console.log("Shold not get here")
+                done(e);
+            });
+
+            setTimeout( function() {
+                if (c === 0) { done(); }
+            }, 250);
+
+            // send test messages
+            delayNode1.receive({payload:1,topic:"foo",reset:true});            // send something with blank topic
+        });
+    });
+
     /* Messaging API support */
     function mapiDoneTestHelper(done, pauseType, drop, msgAndTimings) {
         const completeNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
