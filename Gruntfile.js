@@ -214,13 +214,13 @@ module.exports = function(grunt) {
                 files: [
                     {
                         src: [
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-3.5.1.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-migrate-3.3.0.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery-ui.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/jquery/js/jquery.ui.touch-punch.min.js",
+                            "node_modules/jquery/dist/jquery.min.js",
+                            "node_modules/jquery-migrate/dist/jquery-migrate.min.js",
+                            "node_modules/jquery-ui/dist/jquery-ui.min.js",
+                            "node_modules/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js",
                             "node_modules/marked/marked.min.js",
                             "node_modules/dompurify/dist/purify.min.js",
-                            "packages/node_modules/@node-red/editor-client/src/vendor/d3/d3.v3.min.js",
+                            "node_modules/d3/d3.min.js",
                             "node_modules/i18next/i18next.min.js",
                             "node_modules/i18next-http-backend/i18nextHttpBackend.min.js",
                             "node_modules/jquery-i18next/jquery-i18next.min.js",
@@ -408,7 +408,6 @@ module.exports = function(grunt) {
                         cwd: 'packages/node_modules/@node-red/editor-client/src/vendor',
                         src: [
                             'ace/**',
-                            'jquery/css/base/**',
                             'font-awesome/**',
                             'monaco/dist/**',
                             'monaco/types/extraLibs.js',
@@ -417,6 +416,14 @@ module.exports = function(grunt) {
                         ],
                         expand: true,
                         dest: 'packages/node_modules/@node-red/editor-client/public/vendor/'
+                    },
+                    {
+                        cwd: 'node_modules/jquery-ui/dist/themes',
+                        src: [
+                            'base/**',
+                        ],
+                        expand: true,
+                        dest: 'packages/node_modules/@node-red/editor-client/public/vendor/jquery/css/'
                     },
                     {
                         cwd: 'packages/node_modules/@node-red/editor-client/src',
