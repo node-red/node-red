@@ -28,3 +28,4 @@ docs
 .nyc_output
 sync.ffs_db
 package-lock.json
+.editorconfig

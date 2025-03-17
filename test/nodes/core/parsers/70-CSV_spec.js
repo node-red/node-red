@@ -2067,6 +2067,27 @@ describe('CSV node (RFC Mode)', function () {
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property('payload', '1\tfoo\t"ba""r"\tdi,ng\n');
+                        msg.should.have.property('columns', 'd,b,c,a'); // Strict RFC columns
+                        done();
+                    } catch (e) {
+                        done(e);
+                    }
+                });
+                const testJson = { d: 1, b: "foo", c: "ba\"r", a: "di,ng" };
+                n1.emit("input", { payload: testJson });
+            });
+        });
+
+        it('should convert a simple object back to a tsv with headers using a tab as a separator', function (done) {
+            const flow = [{ id: "n1", type: "csv", spec: "rfc", temp: "", sep: "\t", ret: '\n', hdrout: "all", wires: [["n2"]] }, // RFC-vs-Legacy difference - use line separator \n to satisfy original test
+            { id: "n2", type: "helper" }];
+            helper.load(csvNode, flow, function () {
+                const n1 = helper.getNode("n1");
+                const n2 = helper.getNode("n2");
+                n2.on("input", function (msg) {
+                    try {
+                        msg.should.have.property('payload', 'd\tb\tc\ta\n1\tfoo\t"ba""r"\tdi,ng\n');
+                        msg.should.have.property('columns', 'd,b,c,a'); // Strict RFC columns
                         done();
                     } catch (e) {
                         done(e);
@@ -2086,6 +2107,7 @@ describe('CSV node (RFC Mode)', function () {
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property('payload', '4,foo,true,,0\n');
+                        msg.should.have.property('columns', 'a,b o,c p,e'); // Strict RFC columns
                         done();
                     } catch (e) {
                         done(e);
@@ -2106,6 +2128,7 @@ describe('CSV node (RFC Mode)', function () {
                     try {
                         //                       'payload', 'a"a,b\'b\nA1,B1\nA2,B2\n'); // Legacy
                         msg.should.have.property('payload', '"a""a",b\'b\nA1,B1\nA2,B2\n'); // RFC-vs-Legacy difference - RFC4180 Section 2.6, 2.7 quote handling
+                        msg.should.have.property('columns', '"a""a",b\'b'); // RCF compliant column names
                         done();
                     } catch (e) {
                         done(e);
@@ -2171,6 +2194,7 @@ describe('CSV node (RFC Mode)', function () {
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property('payload', '1,3,2,4\n4,2,3,1\n');
+                        msg.should.have.property('columns', 'd,b,c,a'); // Strict RFC columns
                         done();
                     }
                     catch (e) { done(e); }
@@ -2189,6 +2213,7 @@ describe('CSV node (RFC Mode)', function () {
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property('payload', 'd,b,c,a\n1,3,2,4\n4,"f\ng",3,1\n');
+                        msg.should.have.property('columns', 'd,b,c,a'); // Strict RFC columns
                         done();
                     }
                     catch (e) { done(e); }
@@ -2208,6 +2233,7 @@ describe('CSV node (RFC Mode)', function () {
                     try {
                         //                       'payload', ',0,1,foo,"ba""r","di,ng","fa\nba"\n');
                         msg.should.have.property('payload', ',0,1,foo\n'); // RFC-vs-Legacy difference - respect that user has specified a template with 4 columns
+                        msg.should.have.property('columns', 'a,b,c,d');
                         done();
                     }
                     catch (e) { done(e); }
@@ -2327,6 +2353,7 @@ describe('CSV node (RFC Mode)', function () {
                 n2.on("input", function (msg) {
                     try {
                         msg.should.have.property('payload', '{},"text,with,commas","This ""is"" a banana","{""sub"":""object""}"\n');
+                        msg.should.have.property('columns', 'a,b,c,d');
                         done();
                     }
                     catch (e) { done(e); }

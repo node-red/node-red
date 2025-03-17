@@ -258,6 +258,29 @@ describe('nodes/registry/installer', function() {
             }).catch(done);
         });
 
+        it("succeeds when file path is valid node-red module", function(done) {
+            var nodeInfo = {nodes:{module:"foo",types:["a"]}};
+
+            var res = {
+                code: 0,
+                stdout:"",
+                stderr:""
+            }
+            var p = Promise.resolve(res);
+            p.catch((err)=>{});
+            execResponse = p;
+
+            var addModule = sinon.stub(registry,"addModule").callsFake(function(md) {
+                return Promise.resolve(nodeInfo);
+            });
+
+            installer.installModule("foo",null,"/example path/foo-0.1.1.tgz").then(function(info) {
+                exec.run.lastCall.args[1].should.eql([ 'install', '--no-audit', '--no-update-notifier', '--no-fund', '--save', '--save-prefix=~', '--omit=dev', '--engine-strict', '"/example path/foo-0.1.1.tgz"' ]);
+                info.should.eql(nodeInfo);
+                done();
+            }).catch(done);
+        });
+
         it("triggers preInstall and postInstall hooks", function(done) {
             let receivedPreEvent,receivedPostEvent;
             hooks.add("preInstall", function(event) { event.args = ["a"]; receivedPreEvent = event; })
