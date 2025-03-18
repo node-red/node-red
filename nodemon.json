@@ -1,0 +1,16 @@
+{
+    "ignoreRoot": [
+        ".git",
+        ".nyc_output",
+        ".sass-cache",
+        "bower-components",
+        "coverage"
+    ],
+    "ignore": [
+        "/Gruntfile.js",
+        "/.git/*",
+        "*.backup",
+        "/public/*"
+    ]
+}
+

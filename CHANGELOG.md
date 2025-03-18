@@ -1,3 +1,134 @@
+#### 4.0.9: Maintenance Release
+
+ Editor
+ 
+ - Add details for the dynamic subscription to match the English docs (#5050) @aikitori
+ - Fix tooltip snapping based on `typedInput` type (#5051) @GogoVega
+ - Prevent symbol usage warning in monaco (#5049) @Steve-Mcl
+ - Show subflow flow context under node section of sidebar (#5025) @knolleary
+ - feat: Add custom label for default deploy button in settings.editorTheme (#5030) @matiseni51
+ - Handle long auto-complete suggests (#5042) @knolleary
+ - Handle undefined username when generating user icon (#5043) @knolleary
+ - Handle dragging node into group and splicing link at same time (#5027) @knolleary
+ - Remember context sidebar tree state when refreshing (#5021) @knolleary
+ - Update sf instance env vars when removed from template (#5023) @knolleary
+ - Do not select group when triggering quick-add within it (#5022) @knolleary
+ - Fix library icon handling within library browser component (#5017) @knolleary
+ 
+Runtime
+ - Allow env var access to context (#5016) @knolleary
+ - fix debug status reporting if null (#5018) @dceejay
+ - Fix grunt dev via better ndoemon ignore rules (#5015) @knolleary
+ - Fix typo in CHANGELOG (4.0.7-->4.0.8) (#5007) @natcl
+
+Nodes
+ - Switch: Avoid exceeding call stack when draining message group in Switch (#5014) @knolleary
+
+#### 4.0.8: Maintenance Release
+
+Editor
+
+ - Fix config node sort order when importing (#5000) @knolleary
+
+#### 4.0.7: Maintenance Release
+
+Editor
+
+ - Fix def can be undefined if the type is missing (#4997) @GogoVega
+ - Fix the user list of nested config node (#4995) @GogoVega
+ - Support custom login message and button (#4993) @knolleary
+
+#### 4.0.6: Maintenance Release
+
+Editor
+
+ - Roll up various fixes on config node change history (#4975) @knolleary
+ - Add quotes when installing local tgz to fix spacing in the file path (#4949) @AGhorab-upland
+ - Validate json dropped into editor to avoid unhelpful error messages (#4964) @knolleary
+ - Fix junction insert position via context menu (#4974) @knolleary
+ - Apply zoom scale when calculating annotation positions (#4981) @knolleary
+ - Handle the import of an incomplete Subflow (#4811) @GogoVega
+ - Fix updating the Subflow name during a copy (#4809) @GogoVega
+ - Rename variable to avoid confusion in view.js (#4963) @knolleary
+ - Change groups.length to groups.size (#4959) @hungtcs
+ - Remove disabled node types from QuickAddDialog list (#4946) @GogoVega
+ - Fix `setModulePendingUpdated` with plugins (#4939) @GogoVega
+ - Missing getSubscriptions in the docs while its implemented (#4934) @ersinpw
+ - Apply `envVarExcludes` setting to `util.getSetting` into the function node (#4925) @GogoVega
+ - Fix `envVar` editable list should be sortable (#4932) @GogoVega
+ - Improve the node name auto-generated with the first available number (#4912) @GogoVega
+
+Runtime
+
+ - Get the env config node from the parent subflow (#4960) @GogoVega
+ - Update dependencies (#4987) @knolleary
+
+Nodes
+
+ - Performance : make reading single buffer / string file faster by not re-allocating and handling huge buffers (#4980) @Fadoli
+ - Make delay node rate limit reset consistent - not send on reset. (#4940) @dceejay
+ - Fix trigger node date handling for latest time type input (#4915) @dceejay
+ - Fix delay node not dropping when nodeMessageBufferMaxLength is set (#4973)
+ - Ensure node.sep is honoured when generating CSV (#4982) @knolleary
+
+#### 4.0.5: Maintenance Release
+
+Editor
+
+ - Refix link call node can call out of a subflow (#4908) @GogoVega
+
+#### 4.0.4: Maintenance Release
+
+Editor
+
+ - Fix `link call` node can call out of a subflow (#4892) @GogoVega
+ - Fix wrong unlock state when event is triggered after deployment (#4889) @GogoVega
+ - i18n(App) update with latest language file changes (#4903) @joebordes
+ - fix typo: depreciated (#4895) @dxdc
+
+Runtime
+
+ - Update dev dependencies (#4893) @knolleary
+
+Nodes
+ 
+ - MQTT: Allow msg.userProperties to have number values (#4900) @hardillb
+
+#### 4.0.3: Maintenance Release
+
+Editor
+
+ - Refresh page title after changing tab name (#4850) @kazuhitoyokoi
+ - Add Japanese translations for v4.0.2 (again) (#4853) @kazuhitoyokoi
+ - Stay in quick-add mode following context menu insert (#4883) @knolleary
+ - Do not include Junction type in quick-add for virtual links (#4879) @knolleary
+ - Multiplayer cursor tracking (#4845) @knolleary
+ - Hide add-flow options when disabled via editorTheme (#4869) @knolleary
+ - Fix env-var config select when multiple defined (#4872) @knolleary
+ - Fix subflow outbound-link filter (#4857) @GogoVega
+ - Add French translations for v4.0.2 (#4856) @GogoVega
+ - Fix moving link wires (#4851) @knolleary
+ - Adjust type search dialog position to prevent x-overflow (#4844) @Steve-Mcl
+ - fix: modulesInUse might be undefined (#4838) @lorenz-maurer
+ - Add Japanese translations for v4.0.2 (#4849) @kazuhitoyokoi
+ - Fix menu to enable/disable selection when it's a group (#4828) @GogoVega
+
+Runtime
+
+ - Update dependencies (#4874) @knolleary
+ - GitHub: Add citation file to enable "Cite this repository" feature (#4861) @lobis
+ - Remove use of util.log (#4875) @knolleary
+
+Nodes
+
+ - Fix invalid property error in range node example (#4855)
+ - Fix typo in flow example name (#4854) @kazuhitoyokoi
+ - Move SNI, ALPN and Verify Server cert out of check (#4882) @hardillb
+ - Set status of mqtt nodes to "disconnected" when deregistered from broker (#4878) @Steve-Mcl
+ - MQTT: Ensure will payload is a string (#4873) @knolleary
+ - Let batch node terminate "early" if msg.parts set to end of sequence (#4829) @dceejay
+ - Fix unintentional Capitalisation in Split node name (#4835) @dceejay
+
 #### 4.0.2: Maintenance Release
 
 Editor

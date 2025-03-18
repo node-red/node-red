@@ -518,8 +518,8 @@ describe("@node-red/util/util", function() {
         }
         function testToString(input,msg,expected) {
             var result = util.normalisePropertyExpression(input,msg,true);
-            console.log("+",input);
-            console.log(result);
+            // console.log("+",input);
+            // console.log(result);
             result.should.eql(expected);
         }
         it('pass a.b.c',function() { testABC('a.b.c',['a','b','c']); })
@@ -784,9 +784,14 @@ describe("@node-red/util/util", function() {
             var result = util.encodeObject(msg);
             result.format.should.eql("error");
             var resultJson = JSON.parse(result.msg);
-            resultJson.name.should.eql('encodeError');
-            resultJson.message.should.eql('encode error');
+            resultJson.should.have.property("__enc__",true);
+            resultJson.should.have.property("type","error");
+            resultJson.should.have.property("data");
+            resultJson.data.should.have.property("name","encodeError")
+            resultJson.data.should.have.property("message","encode error")
+            resultJson.data.should.have.property("stack")
         });
+
         it('encodes Error without message', function() {
             var err = new Error();
             err.name = 'encodeError';
@@ -795,8 +800,12 @@ describe("@node-red/util/util", function() {
             var result = util.encodeObject(msg);
             result.format.should.eql("error");
             var resultJson = JSON.parse(result.msg);
-            resultJson.name.should.eql('encodeError');
-            resultJson.message.should.eql('error message');
+            resultJson.should.have.property("__enc__",true);
+            resultJson.should.have.property("type","error");
+            resultJson.should.have.property("data");
+            resultJson.data.should.have.property("name","encodeError")
+            resultJson.data.should.have.property("message","error message")
+            resultJson.data.should.have.property("stack")
         });
         it('encodes Buffer', function() {
             var msg = {msg:Buffer.from("abc")};
@@ -988,7 +997,13 @@ describe("@node-red/util/util", function() {
                 var result = util.encodeObject(msg);
                 result.format.should.eql("array[1]");
                 var resultJson = JSON.parse(result.msg);
-                resultJson[0].should.eql('Error: encode error');
+                resultJson[0].should.have.property("__enc__",true);
+                resultJson[0].should.have.property("type","error");
+                resultJson[0].should.have.property("data");
+                resultJson[0].data.should.have.property("name","Error")
+                resultJson[0].data.should.have.property("message","encode error")
+                resultJson[0].data.should.have.property("stack")
+
             });
             it('long array in msg', function() {
                 var msg = {msg:{array:[1,2,3,4]}};
@@ -1074,7 +1089,7 @@ describe("@node-red/util/util", function() {
                 var resultJson = JSON.parse(result.msg);
                 resultJson.socket.should.eql('[internal]');
             });
-            it('object which fails to serialise', function(done) {
+            it('object which fails to serialise', function() {
                 var msg = {
                     msg: {
                         obj:{
@@ -1093,13 +1108,13 @@ describe("@node-red/util/util", function() {
                 };
                 var result = util.encodeObject(msg);
                 result.format.should.eql("error");
-                var success = (result.msg.indexOf('cantserialise') > 0);
-                success &= (result.msg.indexOf('this exception should have been caught') > 0);
-                success &= (result.msg.indexOf('canserialise') > 0);
-                success.should.eql(1);
-                done();
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__",true);
+                resultJson.should.have.property("type","error");
+                resultJson.should.have.property("data");
+                resultJson.data.should.have.property("message","encodeObject Error: this exception should have been caught")
             });
-            it('object which fails to serialise - different error type', function(done) {
+            it('object which fails to serialise - different error type', function() {
                 var msg = {
                     msg: {
                         obj:{
@@ -1116,45 +1131,15 @@ describe("@node-red/util/util", function() {
                         },
                     }
                 };
-                var result = util.encodeObject(msg);
+                const result = util.encodeObject(msg);
                 result.format.should.eql("error");
-                var success = (result.msg.indexOf('cantserialise') > 0);
-                success &= (result.msg.indexOf('this exception should have been caught') > 0);
-                success &= (result.msg.indexOf('canserialise') > 0);
-                success.should.eql(1);
-                done();
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__",true);
+                resultJson.should.have.property("type","error");
+                resultJson.should.have.property("data");
+                resultJson.data.should.have.property("message","encodeObject Error: this exception should have been caught")
             });
-            it('very large object which fails to serialise should be truncated', function(done) {
-                var msg = {
-                    msg: {
-                        obj:{
-                            big:"",
-                            cantserialise:{
-                                message:'this will not be displayed',
-                                toJSON: function(val) {
-                                    throw new Error('this exception should have been caught');
-                                    return 'should not display because we threw first';
-                                },
-                            },
-                            canserialise:{
-                                message:'this should be displayed',
-                            }
-                        },
-                    }
-                };
-
-                for (var i = 0; i < 1000; i++) {
-                    msg.msg.obj.big += 'some more string ';
-                }
-
-                var result = util.encodeObject(msg);
-                result.format.should.eql("error");
-                var resultJson = JSON.parse(result.msg);
-                var success = (resultJson.message.length <= 1000);
-                success.should.eql(true);
-                done();
-            });
-            it('test bad toString', function(done) {
+            it('test bad toString', function() {
                 var msg = {
                     msg: {
                         mystrangeobj:"hello",
@@ -1166,25 +1151,12 @@ describe("@node-red/util/util", function() {
                 msg.msg.constructor = { name: "strangeobj" };
 
                 var result = util.encodeObject(msg);
-                var success = (result.msg.indexOf('[Type not printable]') >= 0);
-                success.should.eql(true);
-                done();
+                const resultJson = JSON.parse(result.msg);
+                resultJson.should.have.property("__enc__",true);
+                resultJson.should.have.property("type","error");
+                resultJson.should.have.property("data");
+                resultJson.data.should.have.property("message","[Type not serializable]")
             });
-            it('test bad object constructor', function(done) {
-                var msg = {
-                    msg: {
-                        mystrangeobj:"hello",
-                        constructor: {
-                            get name(){
-                                throw new Error('Exception in constructor name');
-                            }
-                        }
-                    },
-                };
-                var result = util.encodeObject(msg);
-                done();
-            });
-
         });
     });
 

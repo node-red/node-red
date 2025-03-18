@@ -173,9 +173,19 @@ describe('debug node', function() {
             websocket_test(function() {
                 n1.emit("input", {payload: new Error("oops")});
             }, function(msg) {
-                JSON.parse(msg).should.eql([{
-                    topic:"debug",data:{id:"n1",msg:'{"name":"Error","message":"oops"}',property:"payload",format:"error",path:"global"}
-                }]);
+                const fullMsg = JSON.parse(msg)
+                fullMsg[0].should.have.property('topic', 'debug')
+                fullMsg[0].should.have.property('data')
+                fullMsg[0].data.should.have.property('id', 'n1')
+                fullMsg[0].data.should.have.property('property', 'payload')
+                fullMsg[0].data.should.have.property('format', 'error')
+                fullMsg[0].data.should.have.property('path', 'global')
+                fullMsg[0].data.should.have.property('msg')
+                const msgData = JSON.parse(fullMsg[0].data.msg)
+                msgData.should.have.property('__enc__', true)
+                msgData.should.have.property('type', 'error')
+                msgData.data.should.have.property('name', 'Error')
+                msgData.data.should.have.property('message', 'oops')
             }, done);
         });
     });
