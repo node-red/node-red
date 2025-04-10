@@ -125,4 +125,8 @@
     "engines": {
         "node": ">=18.5"
     }
+    "scripts": {
+  "start": "node-red -s settings.js"
+}
+
 }
