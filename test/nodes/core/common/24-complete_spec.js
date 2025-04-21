@@ -15,17 +15,17 @@
  **/
 
 var should = require("should");
-var catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/25-status.js");
+var catchNode = require("nr-test-utils").require("@node-red/nodes/core/common/24-complete.js");
 var helper = require("node-red-node-test-helper");
 
-describe('status Node', function() {
+describe('complete Node', function() {
 
     afterEach(function() {
         helper.unload();
     });
 
     it('should output a message when called', function(done) {
-        var flow = [ { id:"n1", type:"status", name:"status", wires:[["n2"]], scope:[] },
+        var flow = [ { id:"n1", type:"complete", name:"status", wires:[["n2"]], scope:[] },
             {id:"n2", type:"helper"} ];
         helper.load(catchNode, flow, function() {
             var n1 = helper.getNode("n1");
