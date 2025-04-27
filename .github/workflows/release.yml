@@ -1,6 +1,7 @@
 name: Publish Release
 env:
   ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+  newVersion: '1.0.0' # Replace '1.0.0' with the actual version
 on:
   release:
     types: [published]
