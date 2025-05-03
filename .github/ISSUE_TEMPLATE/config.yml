@@ -1,5 +1,23 @@
-blank_issues_enabled: true
-contact_links:
+issue-templates:
+  - name: Bug Report
+    description: Report a bug in Node-RED
+    body: |
+      **Describe the bug**
+      A clear and concise description of what the bug is.
+
+      **To Reproduce**
+      Steps to reproduce the behavior.
+
+      **Expected behavior**
+      A clear and concise description of what you expected to happen.
+
+  - name: Feature Request
+    description: Suggest a new feature for Node-RED
+    body: |
+      **Describe the feature**
+      A clear and concise description of the feature you are requesting.
+
+links:
   - name: ❓ Questions
     url: https://discourse.nodered.org
     about: Ask your question on the Node-RED forum
