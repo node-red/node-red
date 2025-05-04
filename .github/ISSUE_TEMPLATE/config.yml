@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: "Issue Template Configuration"
 description: Configuration for issue templates
 body:
@@ -5,3 +6,37 @@ body:
     attributes:
       value: |
         This file defines the issue templates and contact links for the repository.
+=======
+issue-templates:
+  - name: Bug Report
+    description: Report a bug in Node-RED
+    body: |
+      **Describe the bug**
+      A clear and concise description of what the bug is.
+
+      **To Reproduce**
+      Steps to reproduce the behavior.
+
+      **Expected behavior**
+      A clear and concise description of what you expected to happen.
+
+  - name: Feature Request
+    description: Suggest a new feature for Node-RED
+    body: |
+      **Describe the feature**
+      A clear and concise description of the feature you are requesting.
+
+links:
+  - name: ❓ Questions
+    url: https://discourse.nodered.org
+    about: Ask your question on the Node-RED forum
+  - name: ⭐️ Feature Request
+    url: https://discourse.nodered.org/c/development/feature-requests
+    about: Discuss your request with the community
+  - name: 🗂 Documentation
+    url: https://nodered.org/docs
+    about: Go straight to the documentation
+  - name: 💬 Slack
+    url: https://nodered.org/slack
+    about: Chat about the project on our slack team
+>>>>>>> aeee9e2ee70ae8f4e340c9e106ea3e828ebc17af
