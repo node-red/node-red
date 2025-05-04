@@ -7,7 +7,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate:
@@ -35,7 +35,7 @@ jobs:
       - name: Create Docker Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.NR_REPO_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           path: 'node-red-docker'
@@ -51,7 +51,7 @@ jobs:
       - name: Create Website Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.NR_REPO_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           path: 'node-red.github.io'
