@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-name: "Issue Template Configuration"
+name: Issue Template Configuration
 description: Configuration for issue templates
-body:
-  - type: markdown
-    attributes:
-      value: |
-        This file defines the issue templates and contact links for the repository.
-=======
 issue-templates:
   - name: Bug Report
     description: Report a bug in Node-RED
@@ -39,4 +32,3 @@ links:
   - name: 💬 Slack
     url: https://nodered.org/slack
     about: Chat about the project on our slack team
->>>>>>> aeee9e2ee70ae8f4e340c9e106ea3e828ebc17af
