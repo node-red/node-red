@@ -1451,7 +1451,7 @@ describe('function node', function() {
         });
     });
 
-    it('check if default function timeout settings are recognized', function (done) {
+    it('check if function timeout settings are recognized', function (done) {
         RED.settings.functionTimeout = 0.01;
         var flow = [{id: "n1",type: "function",timeout: RED.settings.functionTimeout,wires: [["n2"]],func: "while(1==1){};\nreturn msg;"}];
         helper.load(functionNode, flow, function () {
@@ -1471,6 +1471,65 @@ describe('function node', function() {
                     should.equal(RED.settings.functionTimeout, 0.01);
                     should.equal(msg.msg.message, 'Script execution timed out after 10ms');
                     delete RED.settings.functionTimeout;
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, 500);
+        });
+    });
+
+    it('check if default function timeout settings are recognized', function (done) {
+        RED.settings.globalFunctionTimeout = 0.01;
+        var flow = [{id: "n1",type: "function",wires: [["n2"]],func: "while(1==1){};\nreturn msg;"}];
+        helper.load(functionNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            n1.receive({ payload: "foo", topic: "bar" });
+            setTimeout(function () {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    should.equal(RED.settings.globalFunctionTimeout, 0.01);
+                    should.equal(msg.msg.message, 'Script execution timed out after 10ms');
+                    delete RED.settings.globalFunctionTimeout;
+                    done();
+                } catch (err) {
+                    done(err);
+                }
+            }, 500);
+        });
+    });
+
+    it('check if functionTimeout has higher precedence over default function timeout setting', function (done) {
+        RED.settings.globalFunctionTimeout = 0.02;
+        RED.settings.functionTimeout = 0.01;
+        var flow = [{id: "n1",type: "function",timeout: RED.settings.functionTimeout,wires: [["n2"]],func: "while(1==1){};\nreturn msg;"}];
+        helper.load(functionNode, flow, function () {
+            var n1 = helper.getNode("n1");
+            n1.receive({ payload: "foo", topic: "bar" });
+            setTimeout(function () {
+                try {
+                    helper.log().called.should.be.true();
+                    var logEvents = helper.log().args.filter(function (evt) {
+                        return evt[0].type == "function";
+                    });
+                    logEvents.should.have.length(1);
+                    var msg = logEvents[0][0];
+                    msg.should.have.property('level', helper.log().ERROR);
+                    msg.should.have.property('id', 'n1');
+                    msg.should.have.property('type', 'function');
+                    should.equal(RED.settings.functionTimeout, 0.01);
+                    should.equal(RED.settings.globalFunctionTimeout, 0.02);
+                    should.equal(msg.msg.message, 'Script execution timed out after 10ms');
+                    delete RED.settings.functionTimeout;
+                    delete RED.settings.globalFunctionTimeout;
                     done();
                 } catch (err) {
                     done(err);
