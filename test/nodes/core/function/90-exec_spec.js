@@ -970,4 +970,248 @@ describe('exec node', function() {
         });
 
     });
+
+    describe('calling exec with addpayTo', function() {
+        it('handle buffer payloads', function(done) {
+            var flow = [{
+                id:"n1",
+                type:"exec",
+                wires:[["n2"],["n3"],["n4"]],
+                command: undefined,
+                addpay: "payload",
+                addpayTo: "stdin",
+                append:"",
+                useSpawn:"false",
+                oldrc:"false"
+            },{
+                id:"n2",
+                type:"helper"
+            },{
+                id:"n3",
+                type:"helper"
+            },{
+                id:"n4",
+                type:"helper"
+            }];
+
+            var expected;
+            if (osType === "Windows_NT") {
+                flow[0].command = "cmd /C cat"
+                expected = "this payload goes to stdin\r\n";
+            } else {
+                flow[0].command = "cat"
+                expected = "this payload goes to stdin\n";
+            }
+
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null];
+
+                var completeTest = function() {
+                    received = received + 1;
+                    if (received < 2) {
+                        return;
+                    }
+
+                    try {
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        Buffer.isBuffer(msg.payload).should.be.true();
+
+                        msg.payload[0].should.be.eql(0x01)
+                        msg.payload[1].should.be.eql(0x02)
+                        msg.payload[2].should.be.eql(0x03)
+                        msg.payload[3].should.be.eql(0x88)
+
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",0);
+
+                        done();
+                    }
+                    catch(err) {
+                        done(err);
+                    }
+                };
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
+                n3.on("input", function(msg) {
+                    // stderr wire should not receive msg
+                    expect("should not be").to.eql("called")
+                });
+                n4.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
+                });
+
+                n1.receive({payload:Buffer.from([0x01,0x02,0x03,0x88])});
+            })
+        })
+
+        it('handle string payloads', function(done) {
+            var flow = [{
+                id:"n1",
+                type:"exec",
+                wires:[["n2"],["n3"],["n4"]],
+                command: undefined,
+                addpay: "payload",
+                addpayTo: "stdin",
+                append:"",
+                useSpawn:"false",
+                oldrc:"false"
+            },{
+                id:"n2",
+                type:"helper"
+            },{
+                id:"n3",
+                type:"helper"
+            },{
+                id:"n4",
+                type:"helper"
+            }];
+
+            var expected;
+            if (osType === "Windows_NT") {
+                flow[0].command = "cmd /C cat"
+                expected = "this payload goes to stdin\r\n";
+            } else {
+                flow[0].command = "cat"
+                expected = "this payload goes to stdin\n";
+            }
+
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null];
+
+                var completeTest = function() {
+                    received = received + 1;
+                    if (received < 2) {
+                        return;
+                    }
+
+                    try {
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal("this payload goes to stdin");
+
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",0);
+
+                        done();
+                    }
+                    catch(err) {
+                        done(err);
+                    }
+                };
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
+                n3.on("input", function(msg) {
+                    // stderr wire should not receive msg
+                    expect("should not be").to.eql("called")
+                });
+                n4.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
+                });
+
+                n1.receive({payload:"this payload goes to stdin"});
+            })
+
+
+        })
+
+        it('handle array as type for payload', function(done) {
+            var flow = [{
+                id:"n1",
+                type:"exec",
+                wires:[["n2"],["n3"],["n4"]],
+                command: undefined,
+                addpay: "payload",
+                addpayTo: "stdin",
+                append:"",
+                useSpawn:"false",
+                oldrc:"false"
+            },{
+                id:"n2",
+                type:"helper"
+            },{
+                id:"n3",
+                type:"helper"
+            },{
+                id:"n4",
+                type:"helper"
+            }];
+
+            var expected;
+            if (osType === "Windows_NT") {
+                flow[0].command = "cmd /C cat"
+                expected = "this payload goes to stdin\r\n";
+            } else {
+                flow[0].command = "cat"
+                expected = "this payload goes to stdin\n";
+            }
+
+            helper.load(execNode, flow, function() {
+                var n1 = helper.getNode("n1");
+                var n2 = helper.getNode("n2");
+                var n3 = helper.getNode("n3");
+                var n4 = helper.getNode("n4");
+                var received = 0;
+                var messages = [null,null];
+
+                var completeTest = function() {
+                    received = received + 1;
+                    if (received < 2) {
+                        return;
+                    }
+
+                    try {
+                        var msg = messages[0];
+                        msg.should.have.property("payload");
+                        msg.payload.should.be.a.String();
+                        msg.payload.should.equal('[1,2,3,136]');
+
+                        msg = messages[1];
+                        msg.should.have.property("payload");
+                        msg.payload.should.have.property("code",0);
+
+                        done();
+                    }
+                    catch(err) {
+                        done(err);
+                    }
+                };
+                n2.on("input", function(msg) {
+                    messages[0] = msg;
+                    completeTest();
+                });
+                n3.on("input", function(msg) {
+                    // stderr wire should not receive msg
+                    expect("should not be").to.eql("called")
+                });
+                n4.on("input", function(msg) {
+                    messages[1] = msg;
+                    completeTest();
+                });
+
+                n1.receive({payload:[0x01,0x02,0x03,0x88]});
+            })
+
+        })
+
+    })
 });
