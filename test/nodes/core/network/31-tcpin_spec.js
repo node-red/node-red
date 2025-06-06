@@ -157,7 +157,7 @@ describe('TCP in Node', function() {
         testTCP0(flow, ["foo\nbar\nbaz"], ["foo\nbar\nbaz"], done);
     });
 
-    it('should recv data (Stream/Base64)', function(done) {
+    it('should recv data (Single/Base64)', function(done) {
         var flow = [{id:"n1", type:"tcp in", server:"server", host:"localhost", port:port, datamode:"single", datatype:"base64", newline:"", topic:"", base64:false, wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
         testTCP0(flow, ["foo"], [Buffer("foo").toString('base64')], done);
@@ -227,7 +227,7 @@ describe('TCP in Node', function() {
         testTCP1(flow, ["foo\nbar\nbaz"], ["foo\nbar\nbaz"], done);
     });
 
-    it('should connect & recv data (Stream/Base64)', function(done) {
+    it('should connect & recv data (Single/Base64)', function(done) {
         var flow = [{id:"n1", type:"tcp in", server:"client", host:"localhost", port:server_port, datamode:"single", datatype:"base64", newline:"", topic:"", base64:false, wires:[["n2"]] },
                     {id:"n2", type:"helper"}];
         testTCP1(flow, ["foo"], [Buffer("foo").toString('base64')], done);
