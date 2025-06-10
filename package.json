@@ -26,7 +26,7 @@
         }
     ],
     "dependencies": {
-        "acorn": "8.14.1",
+        "acorn": "8.15.0",
         "acorn-walk": "8.3.4",
         "ajv": "8.17.1",
         "async-mutex": "0.5.0",
@@ -65,7 +65,7 @@
         "mqtt": "5.11.0",
         "multer": "2.0.1",
         "mustache": "4.2.0",
-        "node-red-admin": "^4.0.2",
+        "node-red-admin": "^4.1.0",
         "node-watch": "0.7.4",
         "nopt": "5.0.0",
         "oauth2orize": "1.12.0",
