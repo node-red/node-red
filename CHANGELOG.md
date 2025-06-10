@@ -1,3 +1,77 @@
+#### 4.1.0-beta.1: Beta Release
+
+Editor
+
+ - Add update notification (#5117) @knolleary
+ - Add a node annotation if the info property is set (#4955) @knolleary
+ - Add node suggestion api to editor and apply to typeSearch (#5135) @knolleary
+ - Node filter support for typedInput's builtin node (#5154) @GogoVega
+ - Import `got` module only once when sending metrics (#5152) @GogoVega
+ - Trigger button action of the selected nodes with new Hotkey (#4924) @GogoVega
+ - Handle deleting of subflow context entries (#5071) @knolleary
+ - Add the `changed` badge to the config node (#5062) @GogoVega
+ - Default Palette Search: Sort by Downloads (#5108) @joepavitt
+ - Show deprecated message if module flagged (#5134) @knolleary
+ - Add link icon to node docs and warn for major update (#5143) @GogoVega
+ - Support for a module with nodes and plugins in the palette (#4945) @GogoVega
+ - Include module list in global-config node when importing/exporting flows (#4599) @knolleary
+ - Add `Install all` button to the module list feature (#5123) @GogoVega
+ - Fix node tab filtering (#5119) @knolleary
+ - Cleanup global Palette Manager variables (#4958) @GogoVega
+ - Add a new `update available` widget to statusBar (#4948) @knolleary
+ - Add a queue while installing or removing a module from the Palette Manager (#4937) @GogoVega
+ - Ignore state of disabled nodes/flows during deployment (#5054) @GogoVega
+ - Exclude internal properties from node definition (#5144) @GogoVega
+ - Refresh config node sidebar when changing lock state of a flow (#5072) @knolleary
+ - Add a border to better distinguish typedInput type/option dropdowns (#5078) @knolleary
+ - Fix undo of subflow color change not applying to instances (#5012) @GogoVega
+ - Properly handle scale factor in getLinksAtPoint for firefox (#5087) @knolleary
+ - Update markdown drop-target appearance (#5059) @knolleary
+ - Support for disabled flows in Sidebar Config (#5061) @GogoVega
+ - Support text drag & drop into markdown editor (#5056) @gorenje
+ - Truncate long messages from the Debug Sidebar (#4944) @GogoVega
+ - Handle link nodes with show/hide label action (#5106) @knolleary
+ - Update the Node-RED logo to use the hex variant (#5103) @joepavitt
+ - Add the vertical marker to the palette hand (#4954) @GogoVega
+ - Monaco Latest (0.52.0) (#4930) @Steve-Mcl
+ - Updates monaco to 0.52.0 for action widget sizing fix (#5110) @Steve-Mcl
+ - Bump Multer to 2.0.1 (#5151) @hardillb
+ - Upgrade multer to 2.0.0 (#5148) @hardillb
+ - Update dompurify (#5120) @knolleary
+ - Colourise the Node-RED logs (#5109) @hardillb
+ - Only apply colours for non-default log lines (#5129) @knolleary
+ - feat: import default export if plugin is a transpiled es module (#5137) @dschmidt
+ - Add an additional git_auth_failed condition (#5145) @sonnyp
+ - Fix Sass deprecation warnings (#4922) @bonanitech
+ - chore(editor)!: remove Internet Explorer polyfill (#5070) @Rotzbua
+ - Remove Internet Explorer CSS hacks (#5142) @bonanitech
+
+Runtime
+
+ - fix: set label in themeSettings.deployButton despite type attribute (#5053) @matiseni51
+ - fix(html): correct buggy html (#4768) @Rotzbua
+ - Update dev (#4836) @knolleary
+ - Update dependencies (#5107) @knolleary
+ - Bump i18next to 24.x and auto-migrate message catalog format (#5088) @knolleary
+ - chore(editor): update `DOMPurify` flag (#5073) @Rotzbua
+ - Add .editorconfig to .gitignore (#5060) @gorenje
+
+Nodes
+
+ - Complete/Status: Fix complete node to not feedback immediately connected nodes (#5114) @dceejay
+ - Function: Add URL/URLSearchParams to Function sandbox (#5159) @knolleary
+ - Function: Add support for node: prefixed modules in function node (#5067) @knolleary
+ - Function: Add globalFunctionTimeout (#4985) @vasuvanka
+ - Exec: Make encoding handling consistent between stdout and err (#5158) @knolleary
+ - Split: Let split node send original msg to complete node (#5113) @dceejay
+ - Split: Rename Split The field (#5130) @dceejay
+ - MQTT: Ensure generated mqtt clientId uses only valid chars (#5156) @knolleary
+ - HTTP Request: Fix the capitisation for ALPN settings in http-request (#5105) @hardillb
+ - HTTP Request: (docs) Recommend HTTPS over HTTP (#5141) @ZJvandeWeg
+ - HTTP Request: Include URL query params in HTTP Digest (#5166) @hardillb
+ - Catch: Add code to error object sent by Catch node (#5081) @knolleary
+ - Debug: Improve debug display of error objects (#5079) @knolleary
+
 #### 4.0.9: Maintenance Release
 
  Editor
