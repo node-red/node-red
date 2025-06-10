@@ -68,6 +68,7 @@ Nodes
  - MQTT: Ensure generated mqtt clientId uses only valid chars (#5156) @knolleary
  - HTTP Request: Fix the capitisation for ALPN settings in http-request (#5105) @hardillb
  - HTTP Request: (docs) Recommend HTTPS over HTTP (#5141) @ZJvandeWeg
+ - HTTP Request: Include URL query params in HTTP Digest (#5166) @hardillb
  - Catch: Add code to error object sent by Catch node (#5081) @knolleary
  - Debug: Improve debug display of error objects (#5079) @knolleary
 
