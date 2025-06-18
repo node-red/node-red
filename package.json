@@ -28,21 +28,21 @@
     "dependencies": {
         "acorn": "8.7.1",
         "acorn-walk": "8.2.0",
-        "ajv": "8.11.0",
+        "ajv": "^8.12.0",
         "async-mutex": "0.3.2",
         "basic-auth": "2.0.1",
         "bcryptjs": "2.4.3",
-        "body-parser": "1.20.0",
+        "body-parser": "^1.20.3",
         "cheerio": "1.0.0-rc.10",
         "clone": "2.1.2",
         "content-type": "1.0.4",
-        "cookie": "0.5.0",
-        "cookie-parser": "1.4.6",
+        "cookie": "^1.0.2",
+        "cookie-parser": "^1.4.6",
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
         "denque": "2.1.0",
-        "express": "4.18.1",
-        "express-session": "1.17.3",
+        "express": "^4.21.2",
+        "express-session": "^1.17.3",
         "form-data": "4.0.0",
         "fs-extra": "10.1.0",
         "got": "11.8.5",
@@ -54,13 +54,13 @@
         "is-utf8": "0.2.1",
         "js-yaml": "4.1.0",
         "json-stringify-safe": "5.0.1",
-        "jsonata": "1.8.6",
+        "jsonata": "^1.8.7",
         "lodash.clonedeep": "^4.5.0",
         "media-typer": "1.1.0",
         "memorystore": "1.6.7",
         "mime": "3.0.0",
         "moment": "2.29.4",
-        "moment-timezone": "0.5.34",
+        "moment-timezone": "^0.5.48",
         "mqtt": "4.3.7",
         "multer": "1.4.5-lts.1",
         "mustache": "4.2.0",
@@ -73,19 +73,19 @@
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
         "raw-body": "2.5.1",
-        "semver": "7.3.7",
-        "tar": "6.1.11",
-        "tough-cookie": "4.0.0",
+        "semver": "^7.5.2",
+        "tar": "^6.2.1",
+        "tough-cookie": "^4.1.4",
         "uglify-js": "3.16.3",
         "uuid": "8.3.2",
-        "ws": "7.5.6",
-        "xml2js": "0.4.23"
+        "ws": "^7.5.10",
+        "xml2js": "^0.6.2"
     },
     "optionalDependencies": {
         "bcrypt": "5.0.1"
     },
     "devDependencies": {
-        "dompurify": "2.3.10",
+        "dompurify": "^3.2.5",
         "grunt": "1.5.3",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.4.3",
@@ -122,5 +122,22 @@
     },
     "engines": {
         "node": ">=14"
+    },
+    "overrides": {
+        "grunt-jsonlint": {
+            "ajv": "^6.12.4"
+        },
+        "cross-spawn": "^7.0.6",
+        "nanoid": "^3.3.9",
+        "serialize-javascript": "^6.0.2",
+        "shelljs": "^0.8.5",
+        "cookie": "^1.0.2",
+        "jsonata": "^1.8.7",
+        "moment-timezone": "^0.5.48",
+        "semver": "^7.5.2",
+        "tar": "^6.2.1",
+        "tough-cookie": "^4.1.4",
+        "ws": "^7.5.10",
+        "xml2js": "^0.6.2"
     }
 }
