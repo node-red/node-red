@@ -1,3 +1,33 @@
+#### 4.1.0-beta.2: Beta Release
+
+Editor
+
+ - feat: tray's primary button function will no longer run when clicking anywhere in #red-ui-editor-shade (#5122) @AllanOricil
+ - Truncate topic of debug message and add tooltip (#5168) @GogoVega
+ - Add event-log widget to status bar (#5181) @knolleary
+ - Add `splice` property to nodes:add event context (#5195) @knolleary
+ - Add support for plugin sources of autoComplete fields (#5194) @knolleary
+ - setSuggestedFlow api improvements (#5180) @knolleary
+ - Do not update suggestion whilst typeSearch hiding (#5193) @knolleary
+ - Update jquery (#5192) @knolleary
+ - Hide event log status widget by default (#5191) @knolleary
+ - Swap manage/install-all buttons in dependency notification (#5189) @knolleary
+ - Follow-up tweaks to HTTP In skip body parser (#5188) @knolleary
+ - Fixes infotip handling of cursor keys and updates english tip (#5187) @knolleary
+ - Add Japanese translations for 4.1.0-beta.1 (#5173) @kazuhitoyokoi
+ - Do not use css display when counting filtered palette nodes (#5178) @knolleary
+ - Fix `pending_version` not set after module update (#5169) @GogoVega
+
+Runtime
+
+ - Prevent library leaking full local paths (#5186) @hardillb
+
+Nodes
+
+ - HTTP In: feat: Add an option to the HTTP In to include the raw body. (#5037) @debadutta98
+ - HTTP Request: Allow limited Strings for msg.rejectUnauthorized (#5172) @hardillb
+
+
 #### 4.1.0-beta.1: Beta Release
 
 Editor
