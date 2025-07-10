@@ -1,0 +1,219 @@
+<script type="text/html" data-template-name="neuron-p2p">
+    <div class="form-row">
+        <label for="node-input-name"><span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Neuron P2P">
+    </div>
+    <div class="form-row">
+        <label for="node-input-selectedNode"> <span>Selected Node</span></label>
+        <input type="text" id="node-input-selectedNode" placeholder="Select a node">
+        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
+            Select node
+        </button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-description"><span>Description</span></label>
+        <input type="text" id="node-input-description" placeholder="Optional description">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('neuron-p2p', {
+        category: 'Neuron',
+        color: '#489cb5',
+        defaults: {
+            name: { value: "" },
+            selectedNode: { value: "", required: true },
+            description: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "radio-antenna.svg",
+        label: function() {
+            return this.name || "Neuron P2P Out";
+        },
+        oneditprepare: function() {
+            const node = this;
+            const selectedNodeInput = $('#node-input-selectedNode');
+            
+            // Add custom styles
+            $('<style>')
+                .text(`
+                    .node-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                    }
+                    .node-table th {
+                        padding: 8px;
+                        text-align: left;
+                        border-bottom: 2px solid #ddd;
+                        font-weight: bold;
+                    }
+                    .node-table td {
+                        padding: 8px;
+                        border-bottom: 1px solid #ddd;
+                        vertical-align: middle;
+                    }
+                    .node-table tr:hover {
+                        background-color: #f5f5f5;
+                        color: black;
+                        cursor: pointer;
+                    }
+                    .node-table .select-btn {
+                        padding: 4px 8px;
+                        background-color: #489cb5;
+                        color: white;
+                        border: none;
+                        border-radius: 3px;
+                        cursor: pointer;
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                    }
+                    .node-table tr:hover .select-btn {
+                        opacity: 1;
+                    }
+                    .node-table .select-btn:hover {
+                        background-color: #3a7a8c;
+                    }
+                    .node-table .node-name {
+                        font-weight: 500;
+                    }
+                    .node-table .node-type {
+                        color: #666;
+                        font-size: 0.9em;
+                    }
+                `)
+                .appendTo('head');
+            
+            // Function to update the input field with selected node info
+            function updateNodeInput(nodeId, nodeName) {
+                selectedNodeInput.val(nodeName);
+                $('#node-input-selectedNode').val(nodeId);
+            }
+
+            // Set initial values
+            if (node.name) {
+                $('#node-input-name').val(node.name);
+            }
+            if (node.description) {
+                $('#node-input-description').val(node.description);
+            }
+
+            // Handle the search button click
+            $('#node-input-selectNode-btn').click(function() {
+                const dialog = $('<div>').dialog({
+                    title: 'Select Node',
+                    width: 600,
+                    height: 400,
+                    modal: true,
+                    buttons: [
+                        {
+                            text: "Cancel",
+                            click: function() {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ]
+                });
+
+                // Create a table to show available nodes
+                const table = $('<table>').addClass('node-table');
+                const thead = $('<thead>').append(
+                    $('<tr>').append(
+                        $('<th>').text("Name").css('width', '70%'),
+                        $('<th>').text("Type").css('width', '20%'),
+                        $('<th>').css('width', '10%')
+                    )
+                );
+                table.append(thead);
+
+                const tbody = $('<tbody>');
+                
+                // Find all buyer and seller nodes in the workspace and sort them by name
+                const nodes = [];
+                RED.nodes.eachNode(function(n) {
+                    if (n.type === 'buyer' || n.type === 'seller') {
+                        nodes.push(n);
+                    }
+                });
+                
+                // Sort nodes by name
+                nodes.sort((a, b) => {
+                    const nameA = (a.name || a.id).toLowerCase();
+                    const nameB = (b.name || b.id).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
+
+                // Add sorted nodes to table
+                nodes.forEach(function(n) {
+                    const row = $('<tr>').append(
+                        $('<td>').addClass('node-name').text(n.name || n.id),
+                        $('<td>').addClass('node-type').text(n.type),
+                        $('<td>').append(
+                            $('<button>')
+                                .addClass('select-btn')
+                                .text('Select')
+                                .click(function(e) {
+                                    e.stopPropagation();
+                                    updateNodeInput(n.id, n.name || n.id);
+                                    dialog.dialog("close");
+                                })
+                        )
+                    );
+                    
+                    // Add click handler for the entire row
+                    row.click(function() {
+                        updateNodeInput(n.id, n.name || n.id);
+                        dialog.dialog("close");
+                    });
+                    
+                    tbody.append(row);
+                });
+
+                table.append(tbody);
+                dialog.append(table);
+
+                // Set initial value if exists
+                if (node.selectedNode) {
+                    const selectedNode = RED.nodes.getNode(node.selectedNode);
+                    if (selectedNode) {
+                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
+                    }
+                }
+            });
+
+            // Make the input field read-only
+            selectedNodeInput.prop('readonly', true);
+            
+            // Add help text
+            const helpText = $('<div>')
+                .addClass('form-row')
+                .html(`
+                    <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
+                        <strong>Usage:</strong><br>
+                        This node sends messages to the WebSocket of a selected buyer or seller node.<br><br>
+                        <strong>Dynamic WebSocket URL:</strong><br>
+                        The node automatically constructs the WebSocket URL as:<br>
+                        <code>ws://localhost:{wsPort}/{nodeType}/p2p</code><br><br>
+                        Where:<br>
+                        • <code>{wsPort}</code> - WebSocket port from the selected node's deviceInfo<br>
+                        • <code>{nodeType}</code> - 'buyer' or 'seller' based on the selected node type<br><br>
+                        <strong>Input message format:</strong><br>
+                        • <code>msg.payload</code> or <code>msg.message</code> or <code>msg.data</code> - The message content<br>
+                        • <code>msg.to</code> or <code>msg.publicKey</code> - Target peer's public key (required)<br>
+                        • <code>msg.type</code> - Message type (default: "p2p")<br>
+                        • <code>msg.timestamp</code> - Timestamp (default: current time)<br><br>
+                        <strong>Output format:</strong><br>
+                        <code>{ "type": "p2p", "data": "message", "timestamp": 1234567890, "publicKey": "target_key" }</code>
+                    </div>
+                `);
+            
+            $('.form-row').last().after(helpText);
+        },
+        oneditsave: function() {
+            this.name = $('#node-input-name').val();
+            this.selectedNode = $('#node-input-selectedNode').val();
+            this.description = $('#node-input-description').val();
+        }
+    });
+</script> 

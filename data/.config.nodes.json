@@ -1,0 +1,430 @@
+{
+    "node-red": {
+        "name": "node-red",
+        "version": "4.0.9",
+        "local": false,
+        "user": false,
+        "nodes": {
+            "junction": {
+                "name": "junction",
+                "types": [
+                    "junction"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/05-junction.js"
+            },
+            "inject": {
+                "name": "inject",
+                "types": [
+                    "inject"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/20-inject.js"
+            },
+            "debug": {
+                "name": "debug",
+                "types": [
+                    "debug"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/21-debug.js"
+            },
+            "complete": {
+                "name": "complete",
+                "types": [
+                    "complete"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/24-complete.js"
+            },
+            "catch": {
+                "name": "catch",
+                "types": [
+                    "catch"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/25-catch.js"
+            },
+            "status": {
+                "name": "status",
+                "types": [
+                    "status"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/25-status.js"
+            },
+            "link": {
+                "name": "link",
+                "types": [
+                    "link in",
+                    "link out",
+                    "link call"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/60-link.js"
+            },
+            "comment": {
+                "name": "comment",
+                "types": [
+                    "comment"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/90-comment.js"
+            },
+            "global-config": {
+                "name": "global-config",
+                "types": [
+                    "global-config"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/91-global-config.js"
+            },
+            "unknown": {
+                "name": "unknown",
+                "types": [
+                    "unknown"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/common/98-unknown.js"
+            },
+            "function": {
+                "name": "function",
+                "types": [
+                    "function"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/10-function.js"
+            },
+            "switch": {
+                "name": "switch",
+                "types": [
+                    "switch"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/10-switch.js"
+            },
+            "change": {
+                "name": "change",
+                "types": [
+                    "change"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/15-change.js"
+            },
+            "range": {
+                "name": "range",
+                "types": [
+                    "range"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/16-range.js"
+            },
+            "template": {
+                "name": "template",
+                "types": [
+                    "template"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/80-template.js"
+            },
+            "delay": {
+                "name": "delay",
+                "types": [
+                    "delay"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/89-delay.js"
+            },
+            "trigger": {
+                "name": "trigger",
+                "types": [
+                    "trigger"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/89-trigger.js"
+            },
+            "exec": {
+                "name": "exec",
+                "types": [
+                    "exec"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/90-exec.js"
+            },
+            "rbe": {
+                "name": "rbe",
+                "types": [
+                    "rbe"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/function/rbe.js"
+            },
+            "tls": {
+                "name": "tls",
+                "types": [
+                    "tls-config"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/05-tls.js"
+            },
+            "httpproxy": {
+                "name": "httpproxy",
+                "types": [
+                    "http proxy"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/06-httpproxy.js"
+            },
+            "mqtt": {
+                "name": "mqtt",
+                "types": [
+                    "mqtt in",
+                    "mqtt out",
+                    "mqtt-broker"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/10-mqtt.js"
+            },
+            "httpin": {
+                "name": "httpin",
+                "types": [
+                    "http in",
+                    "http response"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/21-httpin.js"
+            },
+            "httprequest": {
+                "name": "httprequest",
+                "types": [
+                    "http request"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/21-httprequest.js"
+            },
+            "websocket": {
+                "name": "websocket",
+                "types": [
+                    "websocket in",
+                    "websocket out",
+                    "websocket-listener",
+                    "websocket-client"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/22-websocket.js"
+            },
+            "tcpin": {
+                "name": "tcpin",
+                "types": [
+                    "tcp in",
+                    "tcp out",
+                    "tcp request"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/31-tcpin.js"
+            },
+            "udp": {
+                "name": "udp",
+                "types": [
+                    "udp in",
+                    "udp out"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/network/32-udp.js"
+            },
+            "CSV": {
+                "name": "CSV",
+                "types": [
+                    "csv"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/parsers/70-CSV.js"
+            },
+            "HTML": {
+                "name": "HTML",
+                "types": [
+                    "html"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/parsers/70-HTML.js"
+            },
+            "JSON": {
+                "name": "JSON",
+                "types": [
+                    "json"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/parsers/70-JSON.js"
+            },
+            "XML": {
+                "name": "XML",
+                "types": [
+                    "xml"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/parsers/70-XML.js"
+            },
+            "YAML": {
+                "name": "YAML",
+                "types": [
+                    "yaml"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/parsers/70-YAML.js"
+            },
+            "split": {
+                "name": "split",
+                "types": [
+                    "split",
+                    "join"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/sequence/17-split.js"
+            },
+            "sort": {
+                "name": "sort",
+                "types": [
+                    "sort"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/sequence/18-sort.js"
+            },
+            "batch": {
+                "name": "batch",
+                "types": [
+                    "batch"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/sequence/19-batch.js"
+            },
+            "file": {
+                "name": "file",
+                "types": [
+                    "file",
+                    "file in"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/storage/10-file.js"
+            },
+            "watch": {
+                "name": "watch",
+                "types": [
+                    "watch"
+                ],
+                "enabled": true,
+                "local": false,
+                "user": false,
+                "module": "node-red",
+                "file": "/Users/abubakarhassan/Documents/neuron-green/packages/node_modules/@node-red/nodes/core/storage/23-watch.js"
+            }
+        }
+    }
+}

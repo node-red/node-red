@@ -1,0 +1,193 @@
+<script type="text/html" data-template-name="stderr">
+    <div class="form-row">
+        <label for="node-input-name"><span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Stderr">
+    </div>
+    <div class="form-row">
+        <label for="node-input-nodeType"> <span>Node Type</span></label>
+        <select id="node-input-nodeType" style="width: 100%;">
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-selectedNode"> <span>Selected Node</span></label>
+        <input type="text" id="node-input-selectedNode" placeholder="Select a node">
+        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
+            Select node
+        </button>
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('stderr', {
+        category: 'Neuron',
+        color: '#1DA665',
+        defaults: {
+            name: { value: "" },
+            selectedNode: { value: "", required: true },
+            nodeType: { value: "buyer" }
+        },
+        inputs: 1,
+        outputs: 0,
+        icon: "error.svg",
+        label: function() {
+            return this.name || "Stderr";
+        },
+        oneditprepare: function() {
+            const node = this;
+            const selectedNodeInput = $('#node-input-selectedNode');
+            
+            // Add custom styles
+            $('<style>')
+                .text(`
+                    .buyer-node-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                    }
+                    .buyer-node-table th {
+                        padding: 8px;
+                        text-align: left;
+                        border-bottom: 2px solid #ddd;
+                        font-weight: bold;
+                    }
+                    .buyer-node-table td {
+                        padding: 8px;
+                        border-bottom: 1px solid #ddd;
+                        vertical-align: middle;
+                    }
+                    .buyer-node-table tr:hover {
+                        background-color: #f5f5f5;
+                        color: black;
+                        cursor: pointer;
+                    }
+                    .buyer-node-table .select-btn {
+                        padding: 4px 8px;
+                        background-color: #1DA665;
+                        color: black;
+                        border: none;
+                        border-radius: 3px;
+                        cursor: pointer;
+                        opacity: 0;
+                        transition: opacity 0.2s;
+                    }
+                    .buyer-node-table tr:hover .select-btn {
+                        opacity: 1;
+                    }
+                    .buyer-node-table .select-btn:hover {
+                        background-color: #189c5a;
+                    }
+                    .buyer-node-table .node-name {
+                        font-weight: 500;
+                    }
+                    .buyer-node-table .node-type {
+                        color: #666;
+                        font-size: 0.9em;
+                    }
+                `)
+                .appendTo('head');
+            
+            // Function to update the input field with selected node info
+            function updateNodeInput(nodeId, nodeName) {
+                selectedNodeInput.val(nodeName);
+                $('#node-input-selectedNode').val(nodeId);
+            }
+
+            // Set initial node type
+            if (node.nodeType) {
+                $('#node-input-nodeType').val(node.nodeType);
+            }
+
+            // Handle the search button click
+            $('#node-input-selectNode-btn').click(function() {
+                const selectedType = $('#node-input-nodeType').val();
+                const dialog = $('<div>').dialog({
+                    title: `Select ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Node`,
+                    width: 600,
+                    height: 400,
+                    modal: true,
+                    buttons: [
+                        {
+                            text: "Cancel",
+                            click: function() {
+                                $(this).dialog("close");
+                            }
+                        }
+                    ]
+                });
+
+                // Create a table to show available nodes
+                const table = $('<table>').addClass('buyer-node-table');
+                const thead = $('<thead>').append(
+                    $('<tr>').append(
+                        $('<th>').text("Name").css('width', '70%'),
+                        $('<th>').text("Type").css('width', '20%'),
+                        $('<th>').css('width', '10%')
+                    )
+                );
+                table.append(thead);
+
+                const tbody = $('<tbody>');
+                
+                // Find all nodes of selected type in the workspace and sort them by name
+                const nodes = [];
+                RED.nodes.eachNode(function(n) {
+                    if (n.type === selectedType) {
+                        nodes.push(n);
+                    }
+                });
+                
+                // Sort nodes by name
+                nodes.sort((a, b) => {
+                    const nameA = (a.name || a.id).toLowerCase();
+                    const nameB = (b.name || b.id).toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
+
+                // Add sorted nodes to table
+                nodes.forEach(function(n) {
+                    const row = $('<tr>').append(
+                        $('<td>').addClass('node-name').text(n.name || n.id),
+                        $('<td>').addClass('node-type').text(n.type),
+                        $('<td>').append(
+                            $('<button>')
+                                .addClass('select-btn')
+                                .text('Select')
+                                .click(function(e) {
+                                    e.stopPropagation();
+                                    updateNodeInput(n.id, n.name || n.id);
+                                    dialog.dialog("close");
+                                })
+                        )
+                    );
+                    
+                    // Add click handler for the entire row
+                    row.click(function() {
+                        updateNodeInput(n.id, n.name || n.id);
+                        dialog.dialog("close");
+                    });
+                    
+                    tbody.append(row);
+                });
+
+                table.append(tbody);
+                dialog.append(table);
+
+                // Set initial value if exists
+                if (node.selectedNode) {
+                    const selectedNode = RED.nodes.getNode(node.selectedNode);
+                    if (selectedNode) {
+                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
+                    }
+                }
+            });
+
+            // Make the input field read-only
+            selectedNodeInput.prop('readonly', true);
+        },
+        oneditsave: function() {
+            this.nodeType = $('#node-input-nodeType').val();
+        }
+    });
+</script> 

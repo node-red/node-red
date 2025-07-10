@@ -1,0 +1,408 @@
+<script type="text/html" data-template-name="seller">
+    <div class="form-row">
+        <label for="node-input-name"> <span>Name</span></label>
+        <input type="text" id="node-input-name" placeholder="Node name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-deviceName"><span>Device Name</span></label>
+        <input type="text" id="node-input-deviceName" placeholder="Enter Device Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-deviceRole"><span>Device Role</span></label>
+        <input type="text" id="node-input-deviceRole" placeholder="Enter Device Role">
+    </div>
+    <div class="form-row">
+        <label for="node-input-smartContract"><i class="fa fa-file-contract"></i> <span>Smart Contract</span></label>
+        <select id="node-input-smartContract">
+            <option value="jetvision" selected>JETVISION DEMO</option>
+            <option value="chat">P2P CHAT DEMO</option>
+            <option value="challenges">DEVELOPER OPEN CHALLENGES</option>
+           <!-- <option value="Weather">Weather</option> -->
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-serialNumber"> <span>Serial Number</span></label>
+        <input type="text" id="node-input-serialNumber" placeholder="Enter Serial Number">
+    </div>
+    <div class="form-row">
+        <label for="node-input-deviceType"> <span>Device Type</span></label>
+        <input type="text" id="node-input-deviceType" placeholder="Enter Device Type">
+    </div>
+    <div class="form-row">
+        <label for="node-input-price"><span>Price</span></label>
+        <input type="number" id="node-input-price" placeholder="Enter Price" min="0" step="any">
+    </div>
+    <div class="form-row">
+        <label> <span>Buyer EVM Addresses</span></label>
+        <input type="hidden" id="node-input-buyerEvmAddress" />
+        <button type="button" id="select-buyers-btn" class="red-ui-button">Select Buyers</button>
+    </div>
+    <div class="form-row">
+        <label for="node-input-selectedAddresses"> <span>Selected Buyers</span></label>
+        <textarea id="node-input-selectedAddresses" rows="3" readonly style="width: 100%;"></textarea>
+    </div>
+    <div class="form-row">
+        <label for="node-input-description"><span>Description</span></label>
+        <input type="text" id="node-input-description" placeholder="Description (optional)">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('seller',{
+        category: 'Neuron',
+        color: '#b3e6ff',
+        defaults: {
+            name: { value: "Seller"},
+            deviceRole: { value: null,required: true },
+            deviceName: { value: null,required: true  },
+            smartContract: { value: "jetvision",required: true  },
+            serialNumber: { value: null,required: true  },
+            deviceType: { value: null ,required: true },
+            price: { value: 0,required: true  },
+            description: { value: "" },
+            buyerEvmAddress: { value: [] },
+            buyerDevices: { value: [] }
+        },
+        inputs: 0,
+        outputs: 0,
+        icon: "sensor.svg",
+        label: function() {
+            return this.name || "seller";
+        },
+        labelStyle: function() {
+            return this.name ? "node_label_italic" : "";
+        },
+        oneditprepare: function() {
+            const node = this;
+            const selectedDevices = [];
+            
+            // Add custom styles
+            $('<style>')
+                .text(`
+                    .buyer-table tr.selected {
+                        background-color: #DDD;
+                        color: black;
+                    }
+                    .buyer-table tr:hover {
+                        outline: 2px solid #4d90fe;
+                    }
+                    .buyer-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                    }
+                    .buyer-table th {
+                        padding: 8px;
+                        text-align: left;
+                        border-bottom: 2px solid #ddd;
+                        font-weight: bold;
+                    }
+                    .buyer-table td {
+                        padding: 8px;
+                        border-bottom: 1px solid #ddd;
+                        vertical-align: middle;
+                    }
+                `)
+                .appendTo('head');
+
+            // Create modal dialog
+            const modal = $('<div id="buyer-modal" class="red-ui-dialog" style="display: none;" title="Select Buyer Devices">' +
+                '<div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">' +
+                    '<div style="margin-bottom: 15px;">' +
+                        '<label for="buyer-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>' +
+                        '<input type="text" id="buyer-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">' +
+                    '</div>' +
+                    '<div style="flex: 1; overflow: auto; margin-bottom: 15px;">' +
+                        '<table id="buyer-table" class="buyer-table">' +
+                            '<colgroup>' +
+                                '<col style="width: 80px;">' +
+                                '<col style="width: 25%;">' +
+                                '<col style="width: 25%;">' +
+                                '<col style="width: 25%;">' +
+                                '<col style="width: 25%;">' +
+                            '</colgroup>' +
+                            '<thead>' +
+                                '<tr>' +
+                                    '<th>Select</th>' +
+                                    '<th>Contract</th>' +
+                                    '<th>StdOutTopic</th>' +
+                                    '<th>StdInTopic</th>' +
+                                    '<th>StdErrTopic</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody></tbody>' +
+                        '</table>' +
+                    '</div>' +
+                    '<div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">' +
+                        '<button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>' +
+                        '<button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection">OK</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>').appendTo('body');
+
+            // Initialize selected addresses
+            const selectedAddresses = typeof node.buyerEvmAddress === 'string'
+                ? JSON.parse(node.buyerEvmAddress)
+                : [];
+            if (Array.isArray(selectedAddresses)) {
+                $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
+            }
+
+            // Function to load devices for the selected contract
+            function loadDevicesForCurrentContract() {
+                const selectedContract = $('#node-input-smartContract').val();
+                console.log('Loading devices for contract:', selectedContract);
+                
+                $.get(`/seller/devices?contract=${selectedContract}`)
+                    .done(function(data) {
+                        console.log('Devices loaded:', data);
+                        const tableBody = $('#buyer-table tbody');
+                        tableBody.empty();
+                        
+                        if (data.loading) {
+                            // Show loading message
+                            tableBody.html(`
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: #4d90fe;">
+                                        <i class="fa fa-spinner fa-spin"></i> Loading devices for ${selectedContract} contract...
+                                        <br><small>The global contract monitor is currently fetching data for this contract.</small>
+                                    </td>
+                                </tr>
+                            `);
+                            return;
+                        }
+                        
+                        if (!data.monitoringActive) {
+                            // Show monitoring inactive message
+                            tableBody.html(`
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: orange;">
+                                        <i class="fa fa-exclamation-triangle"></i> Global contract monitoring is not active.
+                                        <br><small>Please restart Node-RED to initialize the global contract monitor.</small>
+                                    </td>
+                                </tr>
+                            `);
+                            return;
+                        }
+                        
+                        if (data.devices && data.devices.length > 0) {
+                            // Show devices in the table - all devices from global contract monitor are potential buyers
+                            data.devices.forEach(device => {
+                                console.log('Processing device:', device);
+                                // Use the contract field (which is the owner address) for selection
+                                const isChecked = node.buyerEvmAddress?.includes(device.contract);
+                                const row = $(`
+                                    <tr class="${isChecked ? "selected" : "not-selected"}" data-contract="${device.contract}">
+                                        <td style="width: 50px; overflow: hidden; text-overflow: ellipsis;">
+                                            <input type="checkbox" ${isChecked ? "checked" : ""}>
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.contract}">
+                                            ${device.contract}
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdOutTopic}">
+                                            ${device.stdOutTopic}
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdInTopic}">
+                                            ${device.stdInTopic}
+                                        </td>
+                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdErrTopic}">
+                                            ${device.stdErrTopic}
+                                        </td>
+                                    </tr>
+                                `);
+
+                                row.data('address', device.contract);
+                                row.data('device', device);
+                                tableBody.append(row);
+                            });
+                            
+                            console.log(`Populated table with ${data.devices.length} devices for contract ${selectedContract}`);
+                            
+                            $('#buyer-table tbody input[type="checkbox"]').change(function () {
+                                const row = $(this).closest('tr');
+                                if ($(this).is(':checked')) {
+                                    row.addClass('selected');
+                                } else {
+                                    row.removeClass('selected');
+                                }
+                            });
+                            
+                            // restore from previous config
+                            if (Array.isArray(node.buyerDevices)) {
+                                node.selectedDevices.push(...node.buyerDevices);
+                            }
+
+                            if (Array.isArray(node.buyerEvmAddress)) {
+                                $('#node-input-buyerEvmAddress').val(JSON.stringify(node.buyerEvmAddress));
+                                $('#node-input-selectedAddresses').val(node.buyerEvmAddress.join('\n'));
+                            }
+                        } else {
+                            // Show no devices message
+                            tableBody.html(`
+                                <tr>
+                                    <td colspan="5" style="text-align: center; color: orange;">
+                                        <i class="fa fa-info-circle"></i> No devices found for the selected contract.
+                                        <br><small>There are no devices registered for the ${selectedContract} contract.</small>
+                                        <br><small>Debug: Received ${data.devices ? data.devices.length : 0} devices from server.</small>
+                                    </td>
+                                </tr>
+                            `);
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        console.error('Failed to load devices:', error);
+                        const tableBody = $('#buyer-table tbody');
+                        tableBody.html(`
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: red;">
+                                    <i class="fa fa-exclamation-triangle"></i> Failed to load devices.
+                                    <br><small>Error: ${error}</small>
+                                </td>
+                            </tr>
+                        `);
+                    });
+            }
+
+            // Function to filter table rows based on search input
+            function filterTableBySearch() {
+                const searchTerm = $('#buyer-search-input').val().toLowerCase().trim();
+                const tableRows = $('#buyer-table tbody tr');
+                
+                if (searchTerm === '') {
+                    // Show all rows if search is empty
+                    tableRows.show();
+                    return;
+                }
+                
+                let visibleCount = 0;
+                tableRows.each(function() {
+                    const row = $(this);
+                    const contractAddress = row.data('contract') || '';
+                    
+                    if (contractAddress.toLowerCase().includes(searchTerm)) {
+                        row.show();
+                        visibleCount++;
+                    } else {
+                        row.hide();
+                    }
+                });
+                
+                // Show message if no results found
+                if (visibleCount === 0) {
+                    $('#buyer-table tbody').append(`
+                        <tr id="no-results-row" style="display: table-row;">
+                            <td colspan="5" style="text-align: center; color: orange;">
+                                <i class="fa fa-search"></i> No devices found matching "${searchTerm}"
+                            </td>
+                        </tr>
+                    `);
+                } else {
+                    $('#no-results-row').remove();
+                }
+            }
+
+            // Handle select buyers button click
+            $('#select-buyers-btn').click(function () {
+                $("#buyer-modal").dialog({
+                    autoOpen: false,
+                    modal: true,
+                    width: '80%',
+                    maxWidth: 700,
+                    height: 'auto',
+                    maxHeight: 600,
+                    resizable: true,
+                    title: 'Select Buyers',
+                    open: function () {
+                        // Load devices for current contract when modal opens
+                        loadDevicesForCurrentContract();
+                        
+                        // Attach event handlers for modal buttons
+                        $('#cancel-buyer-selection').off('click').on('click', function() {
+                            console.log('Cancel button clicked - closing modal');
+                            $("#buyer-modal").dialog("close");
+                        });
+
+                        $('#confirm-buyer-selection').off('click').on('click', function() {
+                            console.log('Confirm button clicked - processing selection');
+                            const selectedAddresses = [];
+                            const selectedDeviceObjects = [];
+
+                            $('#buyer-table tbody input[type=checkbox]:checked').each(function() {
+                                const row = $(this).closest('tr');
+                                const address = row.data('address');
+                                const device = row.data('device');
+                                selectedAddresses.push(address);
+                                selectedDeviceObjects.push(device);
+                            });
+
+                            console.log('Selected addresses:', selectedAddresses);
+                            console.log('Selected devices:', selectedDeviceObjects);
+
+                            $('#node-input-buyerEvmAddress').val(JSON.stringify(selectedAddresses));
+                            $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
+                            selectedDevices.splice(0, selectedDevices.length, ...selectedDeviceObjects);
+                            console.log('Updated form fields and closing modal');
+                            $("#buyer-modal").dialog("close");
+                        });
+
+                        // Attach search functionality
+                        $('#buyer-search-input').off('input').on('input', function() {
+                            filterTableBySearch();
+                        });
+                        
+                        $(window).on('resize.buyerDialog', function () {
+                            const dialogContent = $('#buyer-modal .red-ui-dialog-content');
+                            const tableContainer = $('#buyer-table-container');
+                            const headerHeight = $('#buyer-table thead').outerHeight();
+                            const buttonAreaHeight = $('#buyer-modal-buttons').outerHeight();
+                            const padding = 20;
+
+                            tableContainer.css('max-height',
+                                Math.max(100, dialogContent.height() - headerHeight - buttonAreaHeight - padding)
+                            );
+                        }).trigger('resize.buyerDialog');
+                    },
+                    close: function () {
+                        $(window).off('resize.buyerDialog');
+                        $(this).dialog("destroy");
+                    }
+                }).dialog('open');
+            });
+
+            // Add event listener for smart contract changes
+            $('#node-input-smartContract').change(function() {
+                console.log('Smart contract changed to:', $(this).val());
+                // Refresh device list when contract changes
+                if ($("#buyer-modal").data("ui-dialog") && $("#buyer-modal").dialog("isOpen")) {
+                    // If modal is open, refresh the device list
+                    loadDevicesForCurrentContract();
+                }
+            });
+
+            // Add event listener for search input changes
+            // $('#buyer-search-input').off('input').on('input', filterTableBySearch); // This line is removed as per the edit hint
+        },
+        oneditsave: function() {
+            const selectedAddresses = [];
+            const selectedDevices = [];
+            $('#node-input-buyerEvmAddress option:selected').each(function() {
+                const addr = $(this).val();
+                const device = JSON.parse($(this).attr('data-device') || "{}");
+                selectedAddresses.push(addr);
+                selectedDevices.push(device);
+            });
+            this.buyerEvmAddress = selectedAddresses;
+            this.buyerDevices = selectedDevices;
+        }
+    });
+</script>
+
+<style>
+.buyer-table tr.selected {
+    background-color: #DDD;
+    color: black;
+}
+.buyer-table tr:hover {
+    outline: 2px solid #4d90fe;
+}
+</style> 

@@ -10,7 +10,7 @@
     },
     "private": "true",
     "scripts": {
-        "start": "node packages/node_modules/node-red/red.js",
+        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js",
         "test": "grunt",
         "build": "grunt build",
         "dev": "grunt dev",
@@ -26,6 +26,7 @@
         }
     ],
     "dependencies": {
+        "@node-red-contrib-themes/theme-collection": "^4.0.11",
         "acorn": "8.14.1",
         "acorn-walk": "8.3.4",
         "ajv": "8.17.1",
@@ -41,9 +42,11 @@
         "cors": "2.8.5",
         "cronosjs": "1.7.1",
         "denque": "2.1.0",
+        "dotenv": "^17.2.0",
         "express": "4.21.2",
         "express-session": "1.18.1",
         "form-data": "4.0.2",
+        "fs": "^0.0.1-security",
         "fs-extra": "11.3.0",
         "got": "12.6.1",
         "hash-sum": "2.0.0",
@@ -87,7 +90,7 @@
     },
     "devDependencies": {
         "dompurify": "2.5.8",
-        "grunt": "1.6.1",
+        "grunt": "^1.6.1",
         "grunt-chmod": "~1.1.1",
         "grunt-cli": "~1.5.0",
         "grunt-concurrent": "3.0.0",

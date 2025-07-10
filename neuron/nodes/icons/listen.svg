@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background circle -->
+    <circle cx="12" cy="12" r="11" fill="#000000" opacity="0.9"/>
+    
+    <!-- Sound waves -->
+    <path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z" 
+          fill="white" opacity="0.8"/>
+    
+    <!-- Incoming arrow -->
+    <path d="M16 8l4 4-4 4" 
+          stroke="white" 
+          stroke-width="2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    
+    <!-- Sound wave arcs -->
+    <path d="M4 12c0-4.4 3.6-8 8-8" 
+          stroke="white" 
+          stroke-width="1.5" 
+          stroke-linecap="round" 
+          fill="none" 
+          opacity="0.6"/>
+    <path d="M4 12c0-2.2 1.8-4 4-4" 
+          stroke="white" 
+          stroke-width="1.5" 
+          stroke-linecap="round" 
+          fill="none" 
+          opacity="0.4"/>
+</svg> 

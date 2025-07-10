@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base/stand -->
+  <rect x="10" y="18" width="4" height="6" fill="#666" rx="1"/>
+  
+  <!-- Main antenna pole -->
+  <rect x="11" y="8" width="2" height="10" fill="#333"/>
+  
+  <!-- Antenna elements -->
+  <line x1="4" y1="8" x2="20" y2="8" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+  <line x1="6" y1="6" x2="18" y2="6" stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="8" y1="4" x2="16" y2="4" stroke="#333" stroke-width="1" stroke-linecap="round"/>
+  
+  <!-- Signal waves -->
+  <circle cx="12" cy="8" r="3" fill="none" stroke="#1DA665" stroke-width="1" opacity="0.6"/>
+  <circle cx="12" cy="8" r="5" fill="none" stroke="#1DA665" stroke-width="1" opacity="0.4"/>
+  <circle cx="12" cy="8" r="7" fill="none" stroke="#1DA665" stroke-width="1" opacity="0.2"/>
+</svg> 

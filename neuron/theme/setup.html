@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neuron - Hedera Credentials Setup</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1e1e1e; color: #ffffff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { background: #2d2d2d; padding: 40px; border-radius: 15px; max-width: 600px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid #404040; }
+        h1 { color: #4CAF50; text-align: center; margin-bottom: 30px; font-size: 28px; }
+        .subtitle { text-align: center; color: #b0b0b0; margin-bottom: 30px; font-size: 16px; }
+        .notice { background: rgba(76, 175, 80, 0.1); border: 1px solid #4CAF50; color: #4CAF50; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; }
+        .form-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #e0e0e0; font-weight: 500; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 12px 15px; border: 2px solid #404040; border-radius: 8px; background: #1a1a1a; color: #ffffff; font-size: 14px; box-sizing: border-box; }
+        input[type="text"]:focus, input[type="password"]:focus { outline: none; border-color: #4CAF50; }
+        .help-text { font-size: 12px; color: #888; margin-top: 5px; }
+        .btn { background: #4CAF50; color: white; padding: 14px 30px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #45a049; }
+        .btn:disabled { background: #666; cursor: not-allowed; }
+        .status { padding: 15px; border-radius: 8px; margin: 20px 0; display: none; }
+        .status.success { background: rgba(76, 175, 80, 0.1); border: 1px solid #4CAF50; color: #4CAF50; }
+        .status.error { background: rgba(244, 67, 54, 0.1); border: 1px solid #f44336; color: #f44336; }
+        .loading { display: none; text-align: center; margin: 20px 0; }
+        .example { background: #1a1a1a; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4CAF50; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Neuron Setup</h1>
+        <p class="subtitle">Configure your Hedera credentials to get started</p>
+        
+        <div class="notice">
+            <strong>Welcome to Neuron!</strong><br>
+            You've been automatically redirected here because your Hedera credentials need to be configured.
+        </div>
+        
+        <div class="example">
+            <h4>📋 What you need:</h4>
+            <pre>• Hedera Account ID (e.g., 0.0.123456)
+• Private Key (DER format)
+• EVM Address (0x format)</pre>
+        </div>
+        
+        <div class="example">
+            <h4>🔄 What happens after saving:</h4>
+            <pre>• Your credentials will be saved to the .env file
+• Environment variables will be reloaded automatically
+• You'll be redirected to the normal Node-RED interface
+• All Neuron nodes will be ready to use!</pre>
+        </div>
+        
+        <form id="credentialsForm">
+            <div class="form-group">
+                <label for="operatorId">Hedera Account ID *</label>
+                <input type="text" id="operatorId" name="operatorId" placeholder="0.0.123456" required>
+                <div class="help-text">Your Hedera account ID in the format 0.0.XXXXXX</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="operatorKey">Private Key *</label>
+                <input type="password" id="operatorKey" name="operatorKey" placeholder="Enter your private key" required>
+                <div class="help-text">Your Hedera private key in DER format (starts with 302e...)</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="operatorEvm">EVM Address *</label>
+                <input type="text" id="operatorEvm" name="operatorEvm" placeholder="0x1234567890abcdef..." required>
+                <div class="help-text">Your Hedera account's EVM address (starts with 0x)</div>
+            </div>
+            
+            <button type="submit" class="btn" id="saveBtn">💾 Save Credentials & Continue</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <p>Saving credentials...</p>
+        </div>
+        
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        document.getElementById('credentialsForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const credentials = {
+                HEDERA_OPERATOR_ID: formData.get('operatorId'),
+                HEDERA_OPERATOR_KEY: formData.get('operatorKey'),
+                HEDERA_OPERATOR_EVM: formData.get('operatorEvm')
+            };
+            
+            console.log('📤 Sending credentials:', {
+                HEDERA_OPERATOR_ID: credentials.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Empty',
+                HEDERA_OPERATOR_KEY: credentials.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Empty',
+                HEDERA_OPERATOR_EVM: credentials.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Empty'
+            });
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('status').style.display = 'none';
+            
+            try {
+                const response = await fetch('/neuron/setup/save-credentials', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(credentials)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Credentials saved successfully! Redirecting to Node-RED...', 'success');
+                    // Redirect immediately since we're reading the file directly
+                    window.location.href = '/';
+                } else {
+                    showStatus('❌ Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('saveBtn').disabled = false;
+            }
+        });
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

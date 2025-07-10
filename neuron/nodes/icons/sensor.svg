@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <!-- Base circle -->
+        <circle cx="12" cy="12" r="8" fill="#000000" fill-opacity="0.1"/>
+        <!-- Sensor body -->
+        <rect x="10" y="10" width="4" height="4" rx="1" fill="#000000"/>
+        <!-- WiFi waves -->
+        <path d="M12,4 C12,4 16,8 16,12 C16,16 12,20 12,20 C12,20 8,16 8,12 C8,8 12,4 12,4 Z" fill="#000000" fill-opacity="0.1"/>
+        <path d="M12,6 C12,6 14,8 14,12 C14,16 12,18 12,18 C12,18 10,16 10,12 C10,8 12,6 12,6 Z" fill="#000000" fill-opacity="0.2"/>
+        <path d="M12,8 C12,8 13,9 13,12 C13,15 12,16 12,16 C12,16 11,15 11,12 C11,9 12,8 12,8 Z" fill="#000000" fill-opacity="0.3"/>
+        <!-- Center dot -->
+        <circle cx="12" cy="12" r="1" fill="#000000"/>
+    </g>
+</svg> 

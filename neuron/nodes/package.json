@@ -1,0 +1,31 @@
+{
+    "name": "node-red-contrib-neuron",
+    "version": "1.0.0",
+    "description": "Node-RED custom nodes for Neuron",
+    "main": "buyer.js",
+    "scripts": {},
+    "keywords": [
+        "node-red",
+        "neuron",
+        "buyer",
+        "seller"
+    ],
+    "node-red": {
+        "nodes": {
+            "buyer": "buyer.js",
+            "stdout": "stdout.js",
+            "stdin": "stdin.js",
+            "stderr": "stderr.js",
+            "stdin-w": "stdin-w.js",
+            "seller": "seller.js",
+            "neuron-p2p": "neuron-p2p.js",
+            "global-contract-monitor": "global-contract-monitor.js"
+        }
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "ws": "^8.18.2",
+        "dotenv": "^16.0.3"
+    }
+}

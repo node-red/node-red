@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background circle -->
+    <circle cx="12" cy="12" r="11" fill="#ffffff" stroke="#666666" stroke-width="1"/>
+    
+    <!-- Data flow lines -->
+    <path d="M4 12 L8 12" stroke="#666666" stroke-width="2" stroke-linecap="round"/>
+    <path d="M4 9 L8 9" stroke="#666666" stroke-width="2" stroke-linecap="round"/>
+    <path d="M4 15 L8 15" stroke="#666666" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Arrow -->
+    <path d="M8 12 L12 12" stroke="#666666" stroke-width="2" stroke-linecap="round"/>
+    <path d="M10 10 L12 12 L10 14" fill="none" stroke="#666666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Node -->
+    <circle cx="16" cy="12" r="4" fill="#ffffff" stroke="#666666" stroke-width="1"/>
+</svg> 
