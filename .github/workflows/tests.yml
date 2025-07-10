@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [14, 16]
+        node-version: [22]
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -30,7 +30,7 @@ jobs:
       run: |
         npm run test
     - name: Publish to coveralls.io
-      if: ${{ matrix.node-version == 14 }}
+      if: ${{ matrix.node-version == 22 }}
       uses: coverallsapp/github-action@v1.1.2
       with:
         github-token: ${{ github.token }}
