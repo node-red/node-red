@@ -40,6 +40,51 @@
         <input type="text" id="node-input-description" placeholder="Description (optional)">
     </div>
 
+    <!-- Connection Status Section - moved to bottom -->
+    <div class="form-row">
+        <label><span>Connection Status</span></label>
+        <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
+            <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
+            <span id="status-text" style="color: white;">Unknown</span>
+        </div>
+        <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
+            <i class="fa fa-refresh"></i> Refresh
+        </button>
+    </div>
+    
+    <div class="form-row">
+        <label><span>Connected Peers</span></label>
+        <div id="connected-peers-container" style="margin-top: 10px;">
+            <div id="peers-loading" style="text-align: center; color: black; padding: 20px;">
+                <i class="fa fa-spinner fa-spin"></i> Loading connection status...
+            </div>
+            <div id="peers-content" style="display: none;">
+                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white;">
+                    <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
+                </div>
+                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
+                    <div id="no-peers-message" style="text-align: center; color: black; font-style: italic;">
+                        No peers connected
+                    </div>
+                    <table id="peers-table" style="width: 100%; display: none; color: black;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Public Key</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Status</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peers-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="last-update-info" style="margin-top: 5px; font-size: 12px; color: black;">
+                    Last updated: <span id="last-update-time">Never</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div id="seller-modal" class="red-ui-dialog" style="display: none;" title="Select Seller Devices">
         <div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
@@ -71,6 +116,53 @@
             <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
                 <button type="button" class="red-ui-button" id="cancel-seller-selection">Cancel</button>
                 <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-seller-selection">OK</button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- Include connection status template -->
+<script type="text/html" data-template-name="connection-status">
+    <div class="form-row">
+        <label><span>Connection Status</span></label>
+        <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
+            <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
+            <span id="status-text">Unknown</span>
+        </div>
+        <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
+            <i class="fa fa-refresh"></i> Refresh
+        </button>
+    </div>
+    
+    <div class="form-row">
+        <label><span>Connected Peers</span></label>
+        <div id="connected-peers-container" style="margin-top: 10px;">
+            <div id="peers-loading" style="text-align: center; color: #666; padding: 20px;">
+                <i class="fa fa-spinner fa-spin"></i> Loading connection status...
+            </div>
+            <div id="peers-content" style="display: none;">
+                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white;">
+                    <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
+                </div>
+                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
+                    <div id="no-peers-message" style="text-align: center; color: #666; font-style: italic;">
+                        No peers connected
+                    </div>
+                    <table id="peers-table" style="width: 100%; display: none;">
+                        <thead>
+                            <tr>
+                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">Public Key</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Status</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Last Update</th>
+                            </tr>
+                        </thead>
+                        <tbody id="peers-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="last-update-info" style="margin-top: 5px; font-size: 12px; color: #666;">
+                    Last updated: <span id="last-update-time">Never</span>
+                </div>
             </div>
         </div>
     </div>
@@ -361,6 +453,12 @@
                     loadDevicesForCurrentContract();
                 }
             });
+
+            // Initialize connection status display
+            if (node.id) {
+                // Initialize connection status functionality
+                initializeBuyerConnectionStatus(node.id);
+            }
         },
         
 
@@ -383,8 +481,180 @@
             this.sellerDevices = this.selectedDevices;
         }
     });     
+
+    // Connection status initialization function
+    function initializeBuyerConnectionStatus(nodeId) {
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const refreshBtn = document.getElementById('refresh-connections-btn');
+        const peersLoading = document.getElementById('peers-loading');
+        const peersContent = document.getElementById('peers-content');
+        const connectedCount = document.getElementById('connected-count');
+        const totalCount = document.getElementById('total-count');
+        const noPeersMessage = document.getElementById('no-peers-message');
+        const peersTable = document.getElementById('peers-table');
+        const peersTableBody = document.getElementById('peers-table-body');
+        const lastUpdateTime = document.getElementById('last-update-time');
+
+        let isRefreshing = false;
+
+        function updateStatusIndicator(status) {
+            // Remove all status classes
+            statusDot.classList.remove('connection-status-connected', 'connection-status-disconnected', 'connection-status-connecting', 'connection-status-unknown');
+            
+            if (status.isConnected) {
+                statusDot.classList.add('connection-status-connected');
+                statusText.textContent = `Connected (${status.connectedPeers}/${status.totalPeers} peers)`;
+            } else if (status.reconnectAttempts > 0) {
+                statusDot.classList.add('connection-status-connecting');
+                statusText.textContent = `Connecting... (${status.reconnectAttempts} attempts)`;
+            } else {
+                statusDot.classList.add('connection-status-disconnected');
+                statusText.textContent = 'Disconnected';
+            }
+        }
+
+        function updatePeersDisplay(status) {
+            const peers = status.peers || [];
+            const connectedPeers = peers.filter(p => p.connectionStatus === 'connected');
+            
+            // Update summary
+            connectedCount.textContent = connectedPeers.length;
+            totalCount.textContent = peers.length;
+            
+            // Show/hide content
+            peersLoading.style.display = 'none';
+            peersContent.style.display = 'block';
+            
+            if (peers.length === 0) {
+                noPeersMessage.style.display = 'block';
+                peersTable.style.display = 'none';
+            } else {
+                noPeersMessage.style.display = 'none';
+                peersTable.style.display = 'table';
+                
+                // Clear existing rows
+                peersTableBody.innerHTML = '';
+                
+                // Add peer rows
+                peers.forEach(peer => {
+                    const row = document.createElement('tr');
+                    row.className = 'peers-table-row';
+                    
+                    const publicKeyCell = document.createElement('td');
+                    publicKeyCell.className = 'peers-table-cell peer-public-key';
+                    publicKeyCell.textContent = peer.publicKey || 'Unknown';
+                    publicKeyCell.title = peer.publicKey || 'Unknown';
+                    
+                    const statusCell = document.createElement('td');
+                    statusCell.className = 'peers-table-cell';
+                    statusCell.style.textAlign = 'center';
+                    const statusSpan = document.createElement('span');
+                    statusSpan.textContent = peer.connectionStatus || 'unknown';
+                    statusSpan.className = `peer-status-${peer.connectionStatus || 'unknown'}`;
+                    statusCell.appendChild(statusSpan);
+                    
+                    const lastUpdateCell = document.createElement('td');
+                    lastUpdateCell.className = 'peers-table-cell';
+                    lastUpdateCell.style.textAlign = 'center';
+                    lastUpdateCell.textContent = peer.lastUpdate ? new Date(peer.lastUpdate).toLocaleTimeString() : 'N/A';
+                    
+                    row.appendChild(publicKeyCell);
+                    row.appendChild(statusCell);
+                    row.appendChild(lastUpdateCell);
+                    peersTableBody.appendChild(row);
+                });
+            }
+            
+            // Update last update time
+            if (status.lastUpdate) {
+                lastUpdateTime.textContent = new Date(status.lastUpdate).toLocaleString();
+            } else {
+                lastUpdateTime.textContent = 'Never';
+            }
+        }
+
+        async function loadConnectionStatus() {
+            try {
+                const response = await fetch(`/buyer/connection-status/${nodeId}`);
+                if (response.ok) {
+                    const status = await response.json();
+                    updateStatusIndicator(status);
+                    updatePeersDisplay(status);
+                } else {
+                    console.error('Failed to load connection status:', response.statusText);
+                    statusText.textContent = 'Error loading status';
+                    statusDot.classList.add('connection-status-unknown');
+                }
+            } catch (error) {
+                console.error('Error loading connection status:', error);
+                statusText.textContent = 'Error loading status';
+                statusDot.classList.add('connection-status-unknown');
+            }
+        }
+
+        async function refreshConnections() {
+            if (isRefreshing) return;
+            
+            isRefreshing = true;
+            refreshBtn.classList.add('refresh-button-loading');
+            
+            try {
+                const response = await fetch(`/buyer/refresh-connections/${nodeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    updateStatusIndicator(result.status);
+                    updatePeersDisplay(result.status);
+                } else {
+                    console.error('Failed to refresh connections:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error refreshing connections:', error);
+            } finally {
+                isRefreshing = false;
+                refreshBtn.classList.remove('refresh-button-loading');
+            }
+        }
+
+        // Set up event listeners
+        refreshBtn.addEventListener('click', refreshConnections);
+
+        // Load initial status
+        loadConnectionStatus();
+
+        // Set up periodic refresh every 30 seconds
+        const statusInterval = setInterval(loadConnectionStatus, 30000);
+
+        // Cleanup function
+        return () => {
+            clearInterval(statusInterval);
+            refreshBtn.removeEventListener('click', refreshConnections);
+        };
+    }
 </script>
 
+<style>
+.connection-status-connected { background-color: #4CAF50 !important; }
+.connection-status-disconnected { background-color: #f44336 !important; }
+.connection-status-connecting { background-color: #ff9800 !important; }
+.connection-status-unknown { background-color: #9e9e9e !important; }
+.peer-status-connected { color: #4CAF50; font-weight: bold; }
+.peer-status-disconnected { color: #f44336; font-weight: bold; }
+.peer-status-unknown { color: #9e9e9e; font-weight: bold; }
+.peers-table-row { border-bottom: 1px solid #eee; color: black; }
+.peers-table-row:hover { background-color: #f5f5f5; }
+.peers-table-cell { padding: 8px 5px; vertical-align: middle; color: black; }
+.peer-public-key { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: black; }
+.refresh-button-loading { opacity: 0.6; pointer-events: none; }
+.refresh-button-loading i { animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
 
 
 <script type="text/x-red" data-help-name="buyer">

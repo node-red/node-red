@@ -16,6 +16,7 @@ const {
     isContractLoading,
     isMonitoringActive
 } = require('./global-contract-monitor.js');
+const { getConnectionMonitor, removeConnectionMonitor } = require('./connection-monitor.js');
 
 // Global process tracking for cleanup (outside module.exports but needs helper from inside)
 const globalProcesses = new Set();
@@ -393,7 +394,28 @@ module.exports = function (RED) {
                 const isReady = await testWebSocketConnection(node, wsPort);
                 if (isReady) {
                     console.log(`Buyer process for node ${node.id} successfully connected on port ${uniquePort}.`);
-                    node.status({ fill: "green", shape: "dot", text: `Connected to Neuron Network as ${node.deviceInfo.adminAddress} on ${uniquePort}` });
+                    node.status({ fill: "green", shape: "dot", text: `Connected as ${node.deviceInfo.evmAddress}.  Getting peers...` });
+                    
+                    // Initialize connection monitoring
+                    try {
+                        const connectionMonitor = getConnectionMonitor(node.id, 'buyer', wsPort);
+                        await connectionMonitor.connect();
+                        
+                        // Set up status update callback to update node status
+                        connectionMonitor.onStatusUpdate((status) => {
+                            if (status.isConnected) {
+                                const peerText = status.totalPeers > 0 ? ` (${status.connectedPeers}/${status.totalPeers} peers)` : '';
+                                node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
+                            } else {
+                                node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
+                            }
+                        });
+                        
+                        console.log(`Connection monitoring initialized for buyer node ${node.id}`);
+                    } catch (error) {
+                        console.error(`Failed to initialize connection monitoring for buyer node ${node.id}:`, error.message);
+                    }
+                    
                     resolve(goProcess);
                 } else {
                     console.error(`Buyer process for node ${node.id} failed to become ready on port ${uniquePort}. Terminating.`);
@@ -526,6 +548,14 @@ module.exports = function (RED) {
 
         node.on('close', function (done) {
             console.log(`Closing buyer node ${node.id}.`);
+            
+            // Clean up connection monitor
+            try {
+                removeConnectionMonitor(node.id);
+            } catch (error) {
+                console.error(`Error cleaning up connection monitor for node ${node.id}:`, error.message);
+            }
+            
             if (node.goProcess && !node.goProcess.killed) {
                 console.log(`Terminating Go process for node ${node.id} (PID: ${node.goProcess.pid}).`);
                 globalProcesses.delete(node.goProcess);
@@ -809,58 +839,8 @@ module.exports = function (RED) {
                 }
             }
 
-            $('#select-sellers-btn').click(function () {
-                $("#seller-modal").dialog({
-                    autoOpen: false,
-                    modal: true,
-                    width: '80%',
-                    maxWidth: 700,
-                    height: 'auto',
-                    maxHeight: 600,
-                    resizable: true,
-                    title: 'Select Sellers',
-                    open: function () {
-                        $(window).on('resize.sellerDialog', function () {
-                            const dialogContent = $('#seller-modal .red-ui-dialog-content');
-                            const tableContainer = $('#seller-table-container');
-                            const headerHeight = $('#seller-table thead').outerHeight();
-                            const buttonAreaHeight = $('#seller-modal-buttons').outerHeight();
-                            const padding = 20;
-
-                            tableContainer.css('max-height',
-                                Math.max(100, dialogContent.height() - headerHeight - buttonAreaHeight - padding)
-                            );
-                        }).trigger('resize.sellerDialog');
-                    },
-                    close: function () {
-                        $(window).off('resize.sellerDialog');
-                        $(this).dialog("destroy");
-                    }
-                }).dialog('open');
-            });
-
-            $('#cancel-seller-selection').click(function () {
-                $("#seller-modal").dialog("close");
-            });
-
-            $('#confirm-seller-selection').click(function () {
-                const selectedAddresses = [];
-                const currentSelectedDeviceObjects = [];
-
-                $('#seller-table tbody input[type=checkbox]:checked').each(function () {
-                    const row = $(this).closest('tr');
-                    const address = row.data('address');
-                    const device = row.data('device');
-                    selectedAddresses.push(address);
-                    currentSelectedDeviceObjects.push(device);
-                });
-
-                $('#node-input-sellerEvmAddress').val(JSON.stringify(selectedAddresses));
-                $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
-                selectedDevices = currentSelectedDeviceObjects;
-
-                $("#seller-modal").dialog("close");
-            });
+            // Note: The button click handlers and modal functionality are now handled in buyer.html
+            // to avoid conflicts and ensure search functionality works properly
 
             const helpText = $('<div>')
                 .addClass('form-row')
@@ -1021,6 +1001,59 @@ module.exports = function (RED) {
             monitoringActive: isMonitoringActive(),
             lastUpdate: new Date().toISOString()
         });
+    });
+
+    // Connection status endpoints
+    RED.httpAdmin.get('/buyer/connection-status/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        const { getConnectionMonitor } = require('./connection-monitor.js');
+        
+        try {
+            const buyerNode = RED.nodes.getNode(nodeId);
+            if (!buyerNode || buyerNode.type !== 'buyer') {
+                return res.status(404).json({ error: 'Buyer node not found' });
+            }
+
+            if (!buyerNode.deviceInfo || !buyerNode.deviceInfo.wsPort) {
+                return res.status(400).json({ error: 'Node not ready - no WebSocket port available' });
+            }
+
+            const connectionMonitor = getConnectionMonitor(nodeId, 'buyer', buyerNode.deviceInfo.wsPort);
+            const status = connectionMonitor.getStatus();
+            
+            res.json(status);
+        } catch (error) {
+            console.error(`Error getting connection status for buyer node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to get connection status: ' + error.message });
+        }
+    });
+
+    RED.httpAdmin.post('/buyer/refresh-connections/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        const { getConnectionMonitor } = require('./connection-monitor.js');
+        
+        try {
+            const buyerNode = RED.nodes.getNode(nodeId);
+            if (!buyerNode || buyerNode.type !== 'buyer') {
+                return res.status(404).json({ error: 'Buyer node not found' });
+            }
+
+            if (!buyerNode.deviceInfo || !buyerNode.deviceInfo.wsPort) {
+                return res.status(400).json({ error: 'Node not ready - no WebSocket port available' });
+            }
+
+            const connectionMonitor = getConnectionMonitor(nodeId, 'buyer', buyerNode.deviceInfo.wsPort);
+            connectionMonitor.refresh()
+                .then(() => {
+                    res.json({ success: true, status: connectionMonitor.getStatus() });
+                })
+                .catch(error => {
+                    res.status(500).json({ error: 'Failed to refresh connections: ' + error.message });
+                });
+        } catch (error) {
+            console.error(`Error refreshing connections for buyer node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to refresh connections: ' + error.message });
+        }
     });
 
     RED.httpAdmin.post('/buyer/update-sellers/:nodeId', function (req, res) {

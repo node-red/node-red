@@ -113,18 +113,18 @@ module.exports = function(RED) {
                         reconnectAttempts++;
                     } else {
                         node.status({ fill: "red", shape: "ring", text: "Disconnected" });
-                        node.error(`Failed to reconnect after ${maxReconnectAttempts} attempts`);
+                       // node.error(`Failed to reconnect after ${maxReconnectAttempts} attempts`);
                     }
                 });
 
                 ws.on('error', (err) => {
                     logDebug('WebSocket error:', err);
-                    node.error('WebSocket error', err);
+                   // node.error('WebSocket error', err);
                 });
 
             } catch (err) {
                 logDebug('Connection error:', err);
-                node.error('Connection error', err);
+               // node.error('Connection error', err);
                 node.status({ fill: "red", shape: "ring", text: "Connection failed" });
             }
         }
@@ -143,7 +143,7 @@ module.exports = function(RED) {
             if (!ws || ws.readyState !== WebSocket.OPEN) {
                 const errorMsg = 'No active connection - cannot send message';
                 logDebug(errorMsg);
-                node.error(errorMsg);
+               // node.error(errorMsg);
                 node.status({ fill: "red", shape: "ring", text: "No connection" });
                 return;
             }
