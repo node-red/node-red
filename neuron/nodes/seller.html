@@ -358,6 +358,7 @@
                     maxHeight: 600,
                     resizable: true,
                     title: 'Select Buyers',
+                    position: { my: "center", at: "center", of: window }, // Add this line
                     open: function () {
                         // Load devices for current contract when modal opens
                         loadDevicesForCurrentContract();
