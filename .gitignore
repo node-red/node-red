@@ -34,4 +34,4 @@ neuron/nodes/devices/*
 neuron/nodes/sdk_env_files/*
 neuron/sdk/*
 data/*
-neuron/nodes/neuron-registration/*
+neuron/nodes/neuron-registration/

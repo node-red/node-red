@@ -328,7 +328,7 @@ module.exports = function (RED) {
                 // Construct the complete path for the environment file
                 const envFilePath = path.resolve(__dirname, 'sdk_env_files', `.buyer-env-${node.id}`);
 
-                const goProcess = spawn(executablePath, [`--port=${uniquePort}`, '--mode=peer', '--buyer-or-seller=buyer','--list-of-sellers-source=env', `--envFile=${envFilePath}`, '--use-local-address', `--ws-port=${wsPort}`], {
+                const goProcess = spawn(executablePath, [`--port=${uniquePort}`, '--mode=peer', '--buyer-or-seller=buyer','--list-of-sellers-source=env', `--envFile=${envFilePath}`, /*'--use-local-address',*/ `--ws-port=${wsPort}`], {
                     cwd: path.join(__dirname, 'sdk_env_files'),
                     stdio: ['pipe', 'pipe', 'pipe']
                 });
