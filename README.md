@@ -1,6 +1,6 @@
-# Neuron Green
+# Neuron Node Builder
 
-A Node-RED package for machine-to-machine commerce powered by Hedera blockchain technology. This package provides custom nodes for buyers and sellers to interact with the Neuron network.
+A Node-RED fork for machine-to-machine commerce powered by Hedera blockchain technology. This package provides custom nodes for buyers and sellers to interact with the Neuron network.
 
 ## Prerequisites
 
