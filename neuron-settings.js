@@ -12,11 +12,11 @@
  *
  **/
 
-// Load environment variables from .env file
+// Load environment variables with configurable path
+const envPath = process.env.NEURON_ENV_PATH || require('path').resolve(__dirname, '.env');
 require('dotenv').config({
-    path: require('path').resolve(__dirname, '.env')
+    path: envPath
 });
-
 // Import required modules
 const fs = require('fs');
 const path = require('path');
@@ -700,7 +700,15 @@ module.exports = {
         login: {
             image: require('path').resolve(__dirname, "neuron/theme/neuronLogo.png") // Login page logo
         },
-
+        page: {
+            title: "Neuron Dashboard",
+            css: [
+                require("path").resolve(__dirname, "neuron/theme/header-balance.css")
+            ],
+            scripts: [
+                require("path").resolve(__dirname, "neuron/theme/balance-service.js")
+            ]
+        },     
         palette: {
             /** The following property can be used to order the categories in the editor
              * palette. If a node's category is not in the list, the category will get
@@ -758,14 +766,7 @@ module.exports = {
             /** To enable the Multiplayer feature, set this value to true */
             enabled: false
         },
-
-        page: {
-            title: "Neuron Dashboard",
-            //css: ["/public/custom.css"]
-        }
-
-    },
-
+        },
     /*******************************************************************************
      * Node Settings
      *  - fileWorkingDirectory

@@ -5,10 +5,11 @@
     </div>
     <div class="form-row">
         <label for="node-input-selectedNode"> <span>Selected Node</span></label>
-        <input type="text" id="node-input-selectedNode" placeholder="Select a node">
+       
         <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
             Select node
         </button>
+        <input type="text" id="node-input-selectedNode" placeholder="Selected  node">
     </div>
     <div class="form-row">
         <label for="node-input-description"><span>Description</span></label>
@@ -22,7 +23,7 @@
         color: '#489cb5',
         defaults: {
             name: { value: "" },
-            selectedNode: { value: "", required: true },
+            selectedNode: { value: "" },
             description: { value: "" }
         },
         inputs: 1,

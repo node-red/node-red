@@ -1,9 +1,12 @@
 const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
-require('dotenv').config({
-    path: require('path').resolve(__dirname, '../../.env')
-});
+// Load environment variables with configurable path
 const fs = require('fs');
 const path = require('path');
+const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
+require('dotenv').config({
+    path: envPath
+});
+
 
 module.exports = function (RED) {
     function StdinNode(config) {

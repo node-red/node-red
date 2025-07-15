@@ -1,6 +1,8 @@
 const path = require('path');
+// Load environment variables with configurable path
+const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
 require('dotenv').config({
-    path: path.resolve(__dirname, '../../.env')
+    path: envPath
 });
 const fs = require('fs');
 const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');

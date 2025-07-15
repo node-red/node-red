@@ -1,0 +1,11 @@
+nodeid=###
+hedera_evm_id=###
+hedera_id=###
+private_key=###
+smart_contract_address=###
+list_of_sellers=###
+unique_port=###
+ws_port=###
+eth_rpc_url=https://testnet.hashio.io/api
+location={"lat":-2.1574851,"lon":101.7108034,"alt":0.000000}
+mirror_api_url=https://testnet.mirrornode.hedera.com/api/v1

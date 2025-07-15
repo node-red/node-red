@@ -25,7 +25,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "ws": "^8.18.2",
-        "dotenv": "^16.0.3"
+        "@hashgraph/sdk": "^2.49.2",
+        "dotenv": "^16.0.3",
+        "ethers": "^6.13.4",
+        "ws": "^8.18.2"
     }
 }

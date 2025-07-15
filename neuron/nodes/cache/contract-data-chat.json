@@ -1,5 +1,5 @@
 {
-  "peerCount": 39,
+  "peerCount": 41,
   "allDevices": [
     {
       "contract": "0x168505bED28c452992B290315802789f7721C90C",
@@ -520,7 +520,33 @@
           "price": "0"
         }
       ]
+    },
+    {
+      "contract": "0xbf5B2A78CeD843b202B978f4B17cCa9B1e7d40c6",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06352767",
+      "stdInTopic": "6352768",
+      "stdErrTopic": "6352766",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
+    },
+    {
+      "contract": "0x1e4b0e4378aac2E97CaFC7D43a2B4999340BE5d3",
+      "peerID": "test",
+      "stdOutTopic": "0.06352778",
+      "stdInTopic": "6352780",
+      "stdErrTopic": "6352779",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2025-07-15T09:23:13.252Z"
+  "lastUpdated": "2025-07-15T22:52:07.348Z"
 }

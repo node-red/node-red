@@ -1,6 +1,8 @@
 const path = require('path');
+// Load environment variables with configurable path
+const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
 require('dotenv').config({
-    path: path.resolve(__dirname, '../../.env')
+    path: envPath
 });
 const fs = require('fs');
 const { spawn, exec } = require('child_process');
@@ -41,8 +43,8 @@ process.on('exit', globalProcessCleanup);
 
 module.exports = function (RED) {
     // --- GLOBAL STATE FOR PORT MANAGEMENT AND SPAWNING QUEUE (moved inside module.exports) ---
-    const PORT_RANGE_START = 50000;
-    const PORT_RANGE_END = 65535;
+    const PORT_RANGE_START = 61330;
+    const PORT_RANGE_END = 61360;
 
     let usedPorts = new Set();
     let spawnQueue = [];
@@ -67,16 +69,26 @@ module.exports = function (RED) {
         globalProcesses.clear();
 
         try {
-            console.log("Attempting to find and terminate any lingering 'go run . --port=' processes via pkill...");
-            exec("pkill -f 'go run . --port='", (error, stdout, stderr) => {
+            console.log("Attempting to find and terminate any lingering 'go run . --port=' processes via platform-specific command...");
+            
+            // Cross-platform process cleanup
+            const isWindows = process.platform === 'win32';
+            const killCommand = isWindows 
+                ? 'taskkill /F /IM go.exe'  // Windows: Force kill all go.exe processes
+                : "pkill -f 'go run . --port='";  // Unix/Linux: Kill processes matching the pattern
+            
+            exec(killCommand, (error, stdout, stderr) => {
                 if (error) {
-                    if (!error.message.includes('No processes found')) {
-                        console.warn(`pkill error (likely no matching processes): ${error.message}`);
-                    } else {
+                    if (isWindows && error.message.includes('not found')) {
+                        console.log('No additional Go processes found to terminate via taskkill.');
+                    } else if (!isWindows && error.message.includes('No processes found')) {
                         console.log('No additional Go processes found to terminate via pkill.');
+                    } else {
+                        console.warn(`Process cleanup error (likely no matching processes): ${error.message}`);
                     }
                 } else {
-                    console.log('Additional Go processes terminated via pkill.');
+                    const command = isWindows ? 'taskkill' : 'pkill';
+                    console.log(`Additional Go processes terminated via ${command}.`);
                 }
                 usedPorts.clear(); // Clear all Node-RED tracked ports at the very end of cleanup
             });
@@ -403,8 +415,12 @@ module.exports = function (RED) {
                         // Set up status update callback to update node status
                         connectionMonitor.onStatusUpdate((status) => {
                             if (status.isConnected) {
-                                const peerText = status.totalPeers > 0 ? ` (${status.connectedPeers}/${status.totalPeers} peers)` : '';
-                                node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
+                                const peerText =  ` (${status.connectedPeers}/${status.totalPeers} peers)` ;
+                                if(status.totalPeers > 0) {
+                                    node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
+                                } else {
+                                    node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
+                                }
                             } else {
                                 node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
                             }
@@ -705,6 +721,7 @@ module.exports = function (RED) {
                         console.error("Error stack:", createError.stack);
                         throw createError;
                     }
+                    
 
                     device.smartContract = contracts[config.smartContract.toLowerCase()];
                     device.extractedPrivateKey = extractPrivateKeyFromDer(device.privateKey);

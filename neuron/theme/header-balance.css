@@ -1,0 +1,24 @@
+/* Add Balance text to the header toolbar using CSS */
+:root {
+    --balance-text: "Balance: Loading...";
+}
+
+.red-ui-header-toolbar::before {
+    content: var(--balance-text);
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #888888 !important;
+    font-weight: bold !important;
+    padding: 0 15px !important;
+    margin: 0 5px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 3px !important;
+    order: -1 !important;
+    transition: content 0.3s ease !important;
+}
+
+/* Force visibility */
+body .red-ui-header-toolbar::before {
+    visibility: visible !important;
+    opacity: 1 !important;
+} 

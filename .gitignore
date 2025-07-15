@@ -31,7 +31,8 @@ package-lock.json
 .editorconfig
 .env
 neuron/nodes/devices/*
-neuron/nodes/sdk_env_files/*
+neuron/nodes/sdk_env_files/.buyer*
+neuron/nodes/sdk_env_files/.seller*
 neuron/sdk/*
 data/*
 neuron/nodes/neuron-registration/
