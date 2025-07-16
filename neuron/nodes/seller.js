@@ -447,10 +447,19 @@ module.exports = function (RED) {
             console.error(`Error during spawning process for node ${node.id}: ${error.message}`);
             node.error(`Go process spawning failed for node ${node.id}: ${error.message}`);
             node.status({ fill: "red", shape: "ring", text: "Spawn failed" });
-            reject(error);
+            // Safely reject without causing uncaught exceptions
+            try {
+                reject(error);
+            } catch (rejectError) {
+                console.error('Error during promise rejection:', rejectError.message);
+            }
         } finally {
             isSpawningInProgress = false;
-            processSpawnQueue();
+            // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
+            processSpawnQueue().catch(error => {
+                console.error('Error in processSpawnQueue:', error.message);
+                // Don't rethrow - just log the error to prevent Node-RED crash
+            });
         }
     }
 
@@ -884,25 +893,57 @@ module.exports = function (RED) {
                 `);
 
             $('#node-input-buyerEvmAddress').closest('.form-row').after(helpText);
-        },
-        oneditsave: function () {
-            this.name = $('#node-input-name').val();
-            this.buyerEvmAddress = $('#node-input-buyerEvmAddress').val() || '[]';
-            this.description = $('#node-input-description').val();
-            this.deviceName = $('#node-input-deviceName').val();
-            this.smartContract = $('#node-input-smartContract').val();
-            this.deviceRole = $('#node-input-deviceRole').val();
-            this.serialNumber = $('#node-input-serialNumber').val();
-            this.deviceType = $('#node-input-deviceType').val();
-            this.price = $('#node-input-price').val();
 
-            const node = RED.nodes.getNode(this.id);
-            if (node && node.deviceInfo) {
-                const newBuyerEvmAddresses = JSON.parse(this.buyerEvmAddress);
-                updateSelectedBuyers(node, newBuyerEvmAddresses)
-                    .then(() => console.log(`Node ${node.id}: Buyers updated via oneditsave.`))
-                    .catch(error => console.error(`Node ${node.id}: Error updating buyers via oneditsave:`, error.message));
+            // Fetch and populate device balance if available
+            function updateDeviceBalance() {
+                if (node.id) {
+                    $.get(`/seller/device-balance/${node.id}`)
+                        .done(function(data) {
+                            if (data.success && data.balance) {
+                                $('#node-input-balance').val(data.balance + ' USDC');
+                            } else {
+                                $('#node-input-balance').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function() {
+                            $('#node-input-balance').val('Error loading balance');
+                        });
+                } else {
+                    $('#node-input-balance').val('New node - balance will be available after deployment');
+                }
             }
+
+            // Update balance on dialog open
+            updateDeviceBalance();
+
+            // Refresh balance every 10 seconds in case it changes while dialog is open
+            const balanceRefreshInterval = setInterval(updateDeviceBalance, 10000);
+
+            // Clean up interval when dialog closes
+            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
+                clearInterval(balanceRefreshInterval);
+            });
+        },
+        oneditsave: function() {
+            // Get the selected buyer addresses from the hidden input field
+            const buyerEvmAddressValue = $('#node-input-buyerEvmAddress').val();
+            
+            if (buyerEvmAddressValue) {
+                try {
+                    this.buyerEvmAddress = JSON.parse(buyerEvmAddressValue);
+                } catch (e) {
+                    console.error('Error parsing buyer EVM addresses on save:', e);
+                    this.buyerEvmAddress = [];
+                }
+            } else {
+                this.buyerEvmAddress = [];
+            }
+            
+            // Save the current EVM address and balance
+            this.evmAddress = $('#node-input-evmAddress').val();
+            this.balance = $('#node-input-balance').val();
+            
+            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
         }
     });
 
@@ -1077,6 +1118,73 @@ module.exports = function (RED) {
             });
     });
 
+    RED.httpAdmin.get('/seller/device-info/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        console.log(`[DEBUG] Seller device info requested for node ID: ${nodeId}`); // Debug log
+        
+        try {
+            const sellerNode = RED.nodes.getNode(nodeId);
+            if (!sellerNode || sellerNode.type !== 'seller config') {
+                console.log(`[DEBUG] Seller node ${nodeId} not found or wrong type`); // Debug log
+                return res.status(404).json({ error: 'Seller node not found' });
+            }
+
+            if (!sellerNode.deviceInfo) {
+                console.log(`[DEBUG] Seller node ${nodeId} has no deviceInfo`); // Debug log
+                return res.status(400).json({ error: 'Node not initialized - no device info available' });
+            }
+
+            const response = {
+                evmAddress: sellerNode.deviceInfo.evmAddress || '',
+                wsPort: sellerNode.deviceInfo.wsPort || null,
+                publicKey: sellerNode.deviceInfo.publicKey || '',
+                initialized: !!sellerNode.deviceInfo.evmAddress,
+                nodeId: nodeId // Add this for debugging
+            };
+            
+            console.log(`[DEBUG] Returning seller device info for ${nodeId}:`, response); // Debug log
+            res.json(response);
+        } catch (error) {
+            console.error(`Error getting device info for seller node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to get device info: ' + error.message });
+        }
+    });
+
+    RED.httpAdmin.get('/seller/device-balance/:nodeId', async function (req, res) {
+        const nodeId = req.params.nodeId;
+        
+        try {
+            const sellerNode = RED.nodes.getNode(nodeId);
+            if (!sellerNode || sellerNode.type !== 'seller config') {
+                return res.status(404).json({ error: 'Seller node not found' });
+            }
+
+            if (!sellerNode.deviceInfo || !sellerNode.deviceInfo.accountId) {
+                return res.status(400).json({ error: 'Node not initialized - no account ID available' });
+            }
+
+            if (!hederaService) {
+                return res.status(500).json({ error: 'Hedera service not initialized' });
+            }
+
+            const balanceTinybars = await hederaService.getAccountBalanceTinybars(sellerNode.deviceInfo.accountId);
+            
+            // Convert tinybars to Hbars (1 Hbar = 100,000,000 tinybars)
+            const balanceHbars = (balanceTinybars / 100000000).toFixed(2);
+            
+            res.json({
+                success: true,
+                balance: balanceHbars,
+                balanceTinybars: balanceTinybars.toString(),
+                accountId: sellerNode.deviceInfo.accountId,
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error(`Error getting device balance for seller node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to get device balance: ' + error.message });
+        }
+    });
+
     async function updateSelectedBuyers(node, newBuyerEvmAddresses, isInitialSpawn = false) {
         try {
             console.log(`Updating selected buyers for seller node: ${node.id}`);
@@ -1134,7 +1242,11 @@ module.exports = function (RED) {
             // Enqueue the spawn request
             await new Promise((resolve, reject) => {
                 spawnQueue.push({ node, deviceInfo: node.deviceInfo, resolve, reject });
-                processSpawnQueue(); // Trigger processing the queue
+                // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
+                processSpawnQueue().catch(error => {
+                    console.error('Error triggering spawn queue processing:', error.message);
+                    // Don't rethrow - just log the error to prevent Node-RED crash
+                });
             });
 
             console.log(`Node ${node.id}: Buyer update complete and new Go process spawned.`);

@@ -45,6 +45,18 @@
         <label for="node-input-description"><span>Description</span></label>
         <input type="text" id="node-input-description" placeholder="Description (optional)">
     </div>
+    
+    <!-- Separator line between configuration and runtime information -->
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
+    
+    <div class="form-row">
+        <label for="node-input-evmAddress"><span>EVM</span></label>
+        <input type="text" id="node-input-evmAddress" placeholder="EVM Address will appear here after initialization" readonly>
+    </div>
+    <div class="form-row">
+        <label for="node-input-balance"><span>Balance</span></label>
+        <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
+    </div>
 
     <!-- Connection Status Section - moved to bottom -->
     <div class="form-row">
@@ -106,6 +118,8 @@
             deviceType: { value: null ,required: true },
             price: { value: 0,required: true  },
             description: { value: "" },
+            evmAddress: { value: "" },
+            balance: { value: "" },
             buyerEvmAddress: { value: [] },
             buyerDevices: { value: [] }
         },
@@ -441,6 +455,66 @@
                 // Initialize connection status functionality
                 initializeSellerConnectionStatus(node.id);
             }
+
+            // Fetch and populate EVM address if available
+            function updateEvmAddress() {
+                if (node.id) {
+                    $.get(`/seller/device-info/${node.id}`)
+                        .done(function(data) {
+                            if (data.evmAddress) {
+                                $('#node-input-evmAddress').val(data.evmAddress);
+                            } else {
+                                $('#node-input-evmAddress').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function() {
+                            $('#node-input-evmAddress').val('Error loading EVM address');
+                        });
+                } else {
+                    $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
+                }
+            }
+
+            // Update EVM address on dialog open
+            updateEvmAddress();
+
+            // Refresh EVM address every 5 seconds in case it gets initialized while dialog is open
+            const evmRefreshInterval = setInterval(updateEvmAddress, 5000);
+
+            // Clean up interval when dialog closes
+            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
+                clearInterval(evmRefreshInterval);
+            });
+
+            // Fetch and populate device balance if available
+            function updateDeviceBalance() {
+                if (node.id) {
+                    $.get(`/seller/device-balance/${node.id}`)
+                        .done(function(data) {
+                            if (data.success && data.balance) {
+                                $('#node-input-balance').val(data.balance + ' USDC');
+                            } else {
+                                $('#node-input-balance').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function() {
+                            $('#node-input-balance').val('Error loading balance');
+                        });
+                } else {
+                    $('#node-input-balance').val('New node - balance will be available after deployment');
+                }
+            }
+
+            // Update balance on dialog open
+            updateDeviceBalance();
+
+            // Refresh balance every 10 seconds in case it changes while dialog is open
+            const balanceRefreshInterval = setInterval(updateDeviceBalance, 10000);
+
+            // Clean up interval when dialog closes
+            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
+                clearInterval(balanceRefreshInterval);
+            });
         },
         oneditsave: function() {
             // Get the selected buyer addresses from the hidden input field
@@ -457,10 +531,11 @@
                 this.buyerEvmAddress = [];
             }
             
-            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
+            // Save the current EVM address and balance
+            this.evmAddress = $('#node-input-evmAddress').val();
+            this.balance = $('#node-input-balance').val();
             
-            // Clean up modal on save
-            $('#buyer-modal').remove();
+            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
         }
     });
 </script>

@@ -451,7 +451,11 @@ module.exports = function (RED) {
             reject(error);
         } finally {
             isSpawningInProgress = false;
-            processSpawnQueue();
+            // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
+            processSpawnQueue().catch(error => {
+                console.error('Error in processSpawnQueue:', error.message);
+                // Don't rethrow - just log the error to prevent Node-RED crash
+            });
         }
     }
 
@@ -764,10 +768,13 @@ module.exports = function (RED) {
             }
 
             if (node.deviceInfo) {
-                // Enqueue the spawn request directly since initial seller admin keys are already set up
                 await new Promise((resolve, reject) => {
                     spawnQueue.push({ node, deviceInfo: node.deviceInfo, resolve, reject });
-                    processSpawnQueue(); // Trigger processing the queue
+                    // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
+                    processSpawnQueue().catch(error => {
+                        console.error('Error triggering spawn queue processing:', error.message);
+                        // Don't rethrow - just log the error to prevent Node-RED crash
+                    });
                 });
                 console.log(`Node ${node.id}: Go process spawn requested and queued.`);
             } else {
@@ -1062,10 +1069,10 @@ module.exports = function (RED) {
                 });
             }
 
-            console.log(`Fetching balance for operator account: ${operatorId}`);
+           // console.log(`Fetching balance for operator account: ${operatorId}`);
             const balanceTinybars = await hederaService.getAccountBalanceTinybars(operatorId);
             
-            console.log(`Balance retrieved: ${balanceTinybars} tinybars`);
+            //console.log(`Balance retrieved: ${balanceTinybars} tinybars`);
             
             res.json({
                 success: true,
@@ -1202,7 +1209,11 @@ module.exports = function (RED) {
             // Enqueue the spawn request
             await new Promise((resolve, reject) => {
                 spawnQueue.push({ node, deviceInfo: node.deviceInfo, resolve, reject });
-                processSpawnQueue(); // Trigger processing the queue
+                // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
+                processSpawnQueue().catch(error => {
+                    console.error('Error triggering spawn queue processing:', error.message);
+                    // Don't rethrow - just log the error to prevent Node-RED crash
+                });
             });
 
             console.log(`Node ${node.id}: Seller update complete and new Go process spawned.`);
@@ -1215,4 +1226,71 @@ module.exports = function (RED) {
             throw error;
         }
     }
+
+    RED.httpAdmin.get('/buyer/device-info/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`); // Debug log
+        
+        try {
+            const buyerNode = RED.nodes.getNode(nodeId);
+            if (!buyerNode || buyerNode.type !== 'buyer config') {
+                console.log(`[DEBUG] Node ${nodeId} not found or wrong type`); // Debug log
+                return res.status(404).json({ error: 'Buyer node not found' });
+            }
+
+            if (!buyerNode.deviceInfo) {
+                console.log(`[DEBUG] Node ${nodeId} has no deviceInfo`); // Debug log
+                return res.status(400).json({ error: 'Node not initialized - no device info available' });
+            }
+
+            const response = {
+                evmAddress: buyerNode.deviceInfo.evmAddress || '',
+                wsPort: buyerNode.deviceInfo.wsPort || null,
+                publicKey: buyerNode.deviceInfo.publicKey || '',
+                initialized: !!buyerNode.deviceInfo.evmAddress,
+                nodeId: nodeId // Add this for debugging
+            };
+            
+            console.log(`[DEBUG] Returning device info for ${nodeId}:`, response); // Debug log
+            res.json(response);
+        } catch (error) {
+            console.error(`Error getting device info for buyer node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to get device info: ' + error.message });
+        }
+    });
+
+    RED.httpAdmin.get('/buyer/device-balance/:nodeId', async function (req, res) {
+        const nodeId = req.params.nodeId;
+        
+        try {
+            const buyerNode = RED.nodes.getNode(nodeId);
+            if (!buyerNode || buyerNode.type !== 'buyer config') {
+                return res.status(404).json({ error: 'Buyer node not found' });
+            }
+
+            if (!buyerNode.deviceInfo || !buyerNode.deviceInfo.accountId) {
+                return res.status(400).json({ error: 'Node not initialized - no account ID available' });
+            }
+
+            if (!hederaService) {
+                return res.status(500).json({ error: 'Hedera service not initialized' });
+            }
+
+            const balanceTinybars = await hederaService.getAccountBalanceTinybars(buyerNode.deviceInfo.accountId);
+            
+            // Convert tinybars to Hbars (1 Hbar = 100,000,000 tinybars)
+            const balanceHbars = (balanceTinybars / 100000000).toFixed(2);
+            
+            res.json({
+                success: true,
+                balance: balanceHbars,
+                balanceTinybars: balanceTinybars.toString(),
+                accountId: buyerNode.deviceInfo.accountId,
+                timestamp: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error(`Error getting device balance for buyer node ${nodeId}:`, error);
+            res.status(500).json({ error: 'Failed to get device balance: ' + error.message });
+        }
+    });
 };

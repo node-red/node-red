@@ -36,8 +36,20 @@
         <textarea id="node-input-selectedAddresses" rows="3" readonly style="width: 100%;"></textarea>
     </div>
     <div class="form-row">
-        <label for="node-input-description"><i class="fa fa-info-circle"></i> <span>Description</span></label>
+        <label for="node-input-description"> <span>Description</span></label>
         <input type="text" id="node-input-description" placeholder="Description (optional)">
+    </div>
+    
+    <!-- Separator line between configuration and runtime information -->
+    <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
+    
+    <div class="form-row">
+        <label for="node-input-evmAddress"><span>EVM</span></label>
+        <input type="text" id="node-input-evmAddress" placeholder="EVM Address will appear here after initialization" readonly>
+    </div>
+    <div class="form-row">
+        <label for="node-input-balance"><span>Balance</span></label>
+        <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
     </div>
 
     <!-- Connection Status Section - moved to bottom -->
@@ -181,7 +193,9 @@
             sellerDevices: { value: [] },
             smartContract: { value: "jetvision" },
             deviceType: { value: null, required: true },
-            description: { value: "" }
+            description: { value: "" },
+            evmAddress: { value: "" },
+            balance: { value: "" }
         },
         inputs: 0,
         outputs: 0,
@@ -460,6 +474,61 @@
                 // Initialize connection status functionality
                 initializeBuyerConnectionStatus(node.id);
             }
+
+            // Fetch and populate EVM address if available (ONE TIME ONLY - NO REFRESH)
+            function updateEvmAddress() {
+                if (node.id) {
+                    console.log(`Fetching EVM address for node ID: ${node.id}`); // Debug log
+                    $.get(`/buyer/device-info/${node.id}`)
+                        .done(function(data) {
+                            console.log(`EVM data received for ${node.id}:`, data); // Debug log
+                            if (data.evmAddress) {
+                                $('#node-input-evmAddress').val(data.evmAddress);
+                            } else {
+                                $('#node-input-evmAddress').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function(xhr, status, error) {
+                            console.error(`Failed to fetch EVM for ${node.id}:`, error); // Debug log
+                            $('#node-input-evmAddress').val('Error loading EVM address');
+                        });
+                } else {
+                    $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
+                }
+            }
+
+            // Fetch and populate device balance if available
+            function updateDeviceBalance() {
+                if (node.id) {
+                    $.get(`/buyer/device-balance/${node.id}`)
+                        .done(function(data) {
+                            if (data.success && data.balance) {
+                                $('#node-input-balance').val(data.balance + ' ℏ');
+                            } else {
+                                $('#node-input-balance').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function() {
+                            $('#node-input-balance').val('Error loading balance');
+                        });
+                } else {
+                    $('#node-input-balance').val('New node - balance will be available after deployment');
+                }
+            }
+
+            // Update EVM address ONCE on dialog open (NO REFRESH EVER)
+            updateEvmAddress();
+            
+            // Update balance on dialog open
+            updateDeviceBalance();
+
+            // Refresh ONLY balance every 10 seconds (EVM address NEVER refreshes)
+            const balanceRefreshInterval = setInterval(updateDeviceBalance, 10000);
+
+            // Clean up interval when dialog closes
+            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
+                clearInterval(balanceRefreshInterval);
+            });
         },
         
 
@@ -480,6 +549,10 @@
             // Update the node configuration
             this.sellerEvmAddress = selectedAddresses;
             this.sellerDevices = this.selectedDevices;
+            
+            // Save the current EVM address and balance
+            this.evmAddress = $('#node-input-evmAddress').val();
+            this.balance = $('#node-input-balance').val();
         }
     });     
 
