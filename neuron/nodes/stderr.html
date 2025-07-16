@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="stderr">
+<script type="text/html" data-template-name="stderr r">
     <div class="form-row">
         <label for="node-input-name"><span>Name</span></label>
         <input type="text" id="node-input-name" placeholder="Stderr">
@@ -6,8 +6,8 @@
     <div class="form-row">
         <label for="node-input-nodeType"> <span>Node Type</span></label>
         <select id="node-input-nodeType" style="width: 100%;">
-            <option value="buyer">Buyer</option>
-            <option value="seller">Seller</option>
+            <option value="buyer config">Buyer</option>
+            <option value="seller config">Seller</option>
         </select>
     </div>
     <div class="form-row">
@@ -20,17 +20,18 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('stderr', {
+    RED.nodes.registerType('stderr r', {
         category: 'Neuron',
         color: '#1DA665',
         defaults: {
             name: { value: "" },
             selectedNode: { value: "", required: true },
-            nodeType: { value: "buyer" }
+            nodeType: { value: "buyer config" }
         },
         inputs: 1,
         outputs: 0,
         icon: "error.svg",
+        align: "left",
         label: function() {
             return this.name || "Stderr";
         },

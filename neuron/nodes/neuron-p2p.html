@@ -5,11 +5,14 @@
     </div>
     <div class="form-row">
         <label for="node-input-selectedNode"> <span>Selected Node</span></label>
-       
-        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
+        <input type="hidden" id="node-input-selectedNode" />
+        <input type="text" id="node-input-selectedNodeDisplay" placeholder="No node selected" readonly disabled>
+        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px; background-color: #489cb5; color: white;">
             Select node
         </button>
-        <input type="text" id="node-input-selectedNode" placeholder="Selected  node">
+        <button type="button" id="node-input-clearNode-btn" class="red-ui-button" style="margin-left: 5px;" title="Clear selection">
+            Clear
+        </button>
     </div>
     <div class="form-row">
         <label for="node-input-description"><span>Description</span></label>
@@ -34,7 +37,8 @@
         },
         oneditprepare: function() {
             const node = this;
-            const selectedNodeInput = $('#node-input-selectedNode');
+            const selectedNodeInput = $('#node-input-selectedNode'); // Hidden field for ID
+            const selectedNodeDisplayInput = $('#node-input-selectedNodeDisplay'); // Visible field for name
             
             // Add custom styles
             $('<style>')
@@ -88,8 +92,8 @@
             
             // Function to update the input field with selected node info
             function updateNodeInput(nodeId, nodeName) {
-                selectedNodeInput.val(nodeName);
-                $('#node-input-selectedNode').val(nodeId);
+                selectedNodeInput.val(nodeId); // Store the actual node ID in hidden field
+                selectedNodeDisplayInput.val(nodeName); // Show the friendly name to user in visible field
             }
 
             // Set initial values
@@ -99,9 +103,23 @@
             if (node.description) {
                 $('#node-input-description').val(node.description);
             }
+            
+            // Initialize selected node display
+            if (node.selectedNode) {
+                const selectedNode = RED.nodes.node(node.selectedNode);
+                if (selectedNode) {
+                    updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
+                } else {
+                    // Node no longer exists, clear the selection
+                    selectedNodeInput.val('');
+                    selectedNodeDisplayInput.val('Node not found');
+                }
+            }
 
             // Handle the search button click
             $('#node-input-selectNode-btn').click(function() {
+                console.log('Select node button clicked'); // Debug log
+                
                 const dialog = $('<div>').dialog({
                     title: 'Select Node',
                     width: 600,
@@ -133,7 +151,7 @@
                 // Find all buyer and seller nodes in the workspace and sort them by name
                 const nodes = [];
                 RED.nodes.eachNode(function(n) {
-                    if (n.type === 'buyer' || n.type === 'seller') {
+                    if (n.type === 'buyer config' || n.type === 'seller config') {
                         nodes.push(n);
                     }
                 });
@@ -173,18 +191,19 @@
 
                 table.append(tbody);
                 dialog.append(table);
-
-                // Set initial value if exists
-                if (node.selectedNode) {
-                    const selectedNode = RED.nodes.getNode(node.selectedNode);
-                    if (selectedNode) {
-                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
-                    }
-                }
+                dialog.dialog('open'); // Open the dialog
             });
 
-            // Make the input field read-only
-            selectedNodeInput.prop('readonly', true);
+            // Handle clear button click
+            $('#node-input-clearNode-btn').click(function() {
+                console.log('Clear node button clicked'); // Debug log
+                selectedNodeInput.val('');
+                selectedNodeDisplayInput.val('No node selected');
+            });
+
+            // Make the display input field read-only and disabled (not the hidden field)
+            selectedNodeDisplayInput.prop('readonly', true);
+            selectedNodeDisplayInput.prop('disabled', true);
             
             // Add help text
             const helpText = $('<div>')
@@ -198,7 +217,10 @@
                         <code>ws://localhost:{wsPort}/{nodeType}/p2p</code><br><br>
                         Where:<br>
                         • <code>{wsPort}</code> - WebSocket port from the selected node's deviceInfo<br>
-                        • <code>{nodeType}</code> - 'buyer' or 'seller' based on the selected node type<br><br>
+                        • <code>{nodeType}</code> - 'buyer' (from "buyer config" nodes) or 'seller' (from "seller config" nodes)<br><br>
+                        <strong>Node Type Conversion:</strong><br>
+                        • "buyer config" nodes → WebSocket endpoint: <code>/buyer/p2p</code><br>
+                        • "seller config" nodes → WebSocket endpoint: <code>/seller/p2p</code><br><br>
                         <strong>Input message format:</strong><br>
                         • <code>msg.payload</code> or <code>msg.message</code> or <code>msg.data</code> - The message content<br>
                         • <code>msg.to</code> or <code>msg.publicKey</code> - Target peer's public key (required)<br>
@@ -213,7 +235,7 @@
         },
         oneditsave: function() {
             this.name = $('#node-input-name').val();
-            this.selectedNode = $('#node-input-selectedNode').val();
+            this.selectedNode = $('#node-input-selectedNode').val(); // Read from hidden field
             this.description = $('#node-input-description').val();
         }
     });

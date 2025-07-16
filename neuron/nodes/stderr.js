@@ -110,5 +110,5 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType("stderr", StderrNode);
+    RED.nodes.registerType("stderr r", StderrNode);
 }; 

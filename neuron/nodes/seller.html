@@ -1,4 +1,4 @@
-<script type="text/html" data-template-name="seller">
+<script type="text/html" data-template-name="seller config">
     <div class="form-row">
         <label for="node-input-name"> <span>Name</span></label>
         <input type="text" id="node-input-name" placeholder="Node name">
@@ -94,7 +94,7 @@
 </script>
 
 <script type="text/javascript">
-    RED.nodes.registerType('seller',{
+    RED.nodes.registerType('seller config',{
         category: 'Neuron',
         color: '#b3e6ff',
         defaults: {
@@ -120,7 +120,7 @@
         },
         oneditprepare: function() {
             const node = this;
-            const selectedDevices = [];
+            node.selectedDevices = node.selectedDevices || []; // Ensure selectedDevices exists on the node
             
             // Add custom styles
             $('<style>')
@@ -151,8 +151,12 @@
                 `)
                 .appendTo('head');
 
+            // Clean up any existing modal and event handlers to ensure fresh state
+            $('#buyer-modal').remove();
+            $('#select-buyers-btn').off('click');
+
             // Create modal dialog
-            const modal = $('<div id="buyer-modal" class="red-ui-dialog" style="display: none;" title="Select Buyer Devices">' +
+            const modal = $('<div id="buyer-modal" class="red-ui-dialog" style="display: none;">' +
                 '<div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">' +
                     '<div style="margin-bottom: 15px;">' +
                         '<label for="buyer-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>' +
@@ -179,20 +183,24 @@
                             '<tbody></tbody>' +
                         '</table>' +
                     '</div>' +
-                    '<div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">' +
-                        '<button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>' +
-                        '<button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection">OK</button>' +
-                    '</div>' +
                 '</div>' +
             '</div>').appendTo('body');
 
-            // Initialize selected addresses
-            const selectedAddresses = typeof node.buyerEvmAddress === 'string'
-                ? JSON.parse(node.buyerEvmAddress)
-                : [];
-            if (Array.isArray(selectedAddresses)) {
-                $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
+            // Initialize selected addresses for both new and existing nodes
+            let selectedAddresses = [];
+            if (typeof node.buyerEvmAddress === 'string') {
+                try {
+                    selectedAddresses = JSON.parse(node.buyerEvmAddress);
+                } catch (e) {
+                    console.error('Error parsing buyerEvmAddress:', e);
+                    selectedAddresses = [];
+                }
+            } else if (Array.isArray(node.buyerEvmAddress)) {
+                selectedAddresses = node.buyerEvmAddress;
             }
+            
+            console.log('Initializing with selected addresses:', selectedAddresses);
+            $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
 
             // Function to load devices for the selected contract
             function loadDevicesForCurrentContract() {
@@ -358,18 +366,13 @@
                     maxHeight: 600,
                     resizable: true,
                     title: 'Select Buyers',
-                    position: { my: "center", at: "center", of: window }, // Add this line
-                    open: function () {
-                        // Load devices for current contract when modal opens
-                        loadDevicesForCurrentContract();
-                        
-                        // Attach event handlers for modal buttons
-                        $('#cancel-buyer-selection').off('click').on('click', function() {
+                    position: { my: "center", at: "center", of: window },
+                    buttons: {
+                        "Cancel": function() {
                             console.log('Cancel button clicked - closing modal');
-                            $("#buyer-modal").dialog("close");
-                        });
-
-                        $('#confirm-buyer-selection').off('click').on('click', function() {
+                            $(this).dialog("close");
+                        },
+                        "OK": function() {
                             console.log('Confirm button clicked - processing selection');
                             const selectedAddresses = [];
                             const selectedDeviceObjects = [];
@@ -387,10 +390,14 @@
 
                             $('#node-input-buyerEvmAddress').val(JSON.stringify(selectedAddresses));
                             $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
-                            selectedDevices.splice(0, selectedDevices.length, ...selectedDeviceObjects);
+                            node.selectedDevices.splice(0, node.selectedDevices.length, ...selectedDeviceObjects);
                             console.log('Updated form fields and closing modal');
-                            $("#buyer-modal").dialog("close");
-                        });
+                            $(this).dialog("close");
+                        }
+                    },
+                    open: function () {
+                        // Load devices for current contract when modal opens
+                        loadDevicesForCurrentContract();
 
                         // Attach search functionality
                         $('#buyer-search-input').off('input').on('input', function() {
@@ -401,7 +408,7 @@
                             const dialogContent = $('#buyer-modal .red-ui-dialog-content');
                             const tableContainer = $('#buyer-table-container');
                             const headerHeight = $('#buyer-table thead').outerHeight();
-                            const buttonAreaHeight = $('#buyer-modal-buttons').outerHeight();
+                            const buttonAreaHeight = $('.ui-dialog-buttonpane').outerHeight();
                             const padding = 20;
 
                             tableContainer.css('max-height',
@@ -436,16 +443,24 @@
             }
         },
         oneditsave: function() {
-            const selectedAddresses = [];
-            const selectedDevices = [];
-            $('#node-input-buyerEvmAddress option:selected').each(function() {
-                const addr = $(this).val();
-                const device = JSON.parse($(this).attr('data-device') || "{}");
-                selectedAddresses.push(addr);
-                selectedDevices.push(device);
-            });
-            this.buyerEvmAddress = selectedAddresses;
-            this.buyerDevices = selectedDevices;
+            // Get the selected buyer addresses from the hidden input field
+            const buyerEvmAddressValue = $('#node-input-buyerEvmAddress').val();
+            
+            if (buyerEvmAddressValue) {
+                try {
+                    this.buyerEvmAddress = JSON.parse(buyerEvmAddressValue);
+                } catch (e) {
+                    console.error('Error parsing buyer EVM addresses on save:', e);
+                    this.buyerEvmAddress = [];
+                }
+            } else {
+                this.buyerEvmAddress = [];
+            }
+            
+            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
+            
+            // Clean up modal on save
+            $('#buyer-modal').remove();
         }
     });
 </script>

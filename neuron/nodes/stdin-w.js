@@ -110,5 +110,5 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType("stdin-w", StdinWNode);
+    RED.nodes.registerType("stdin w", StdinWNode);
 }; 

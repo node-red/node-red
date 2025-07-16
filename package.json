@@ -10,7 +10,7 @@
     },
     "private": "true",
     "scripts": {
-        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js",
+        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js --userDir ./neuron/userdir",
         "test": "grunt",
         "build": "grunt build",
         "dev": "grunt dev",
@@ -27,6 +27,7 @@
     ],
     "dependencies": {
         "@node-red-contrib-themes/theme-collection": "^4.0.11",
+        "node-red-dashboard": "^3.1.0",
         "acorn": "8.14.1",
         "acorn-walk": "8.3.4",
         "ajv": "8.17.1",

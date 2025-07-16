@@ -36,3 +36,11 @@ neuron/nodes/sdk_env_files/.seller*
 neuron/sdk/*
 data/*
 neuron/nodes/neuron-registration/
+node
+node-red@4.0.9
+neuron/userdir/.config.nodes.json
+neuron/userdir/.config.*
+neuron/userdir/lib/*
+neuron/userdir/node_modules/*
+neuron/userdir/.flows.json
+neuron/userdir/package.json

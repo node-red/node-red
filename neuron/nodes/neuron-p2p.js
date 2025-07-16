@@ -22,22 +22,43 @@ module.exports = function(RED) {
             }
         }
 
+        // Helper function to convert full node type names to simplified WebSocket endpoint names
+        function getWebSocketNodeType(fullNodeType) {
+            if (fullNodeType === 'buyer config') {
+                return 'buyer';
+            } else if (fullNodeType === 'seller config') {
+                return 'seller';
+            }
+            // Fallback for any unexpected types
+            return fullNodeType;
+        }
+
         function getTargetInfo() {
             try {
+                logDebug('Looking for target node with ID:', node.selectedNodeId);
+                
+                if (!node.selectedNodeId) {
+                    throw new Error('No target node selected. Please edit the node and select a buyer or seller node.');
+                }
+                
                 const targetNode = RED.nodes.getNode(node.selectedNodeId);
                 if (!targetNode) {
-                    throw new Error('Target node not found');
+                    throw new Error(`Target node not found (ID: ${node.selectedNodeId}). The selected node may have been deleted or the node configuration is corrupted.`);
                 }
+                
+                logDebug('Found target node:', { id: targetNode.id, type: targetNode.type, name: targetNode.name });
+                
                 if (!targetNode.deviceInfo) {
-                    throw new Error('Target node missing deviceInfo');
+                    throw new Error(`Target node missing deviceInfo (ID: ${node.selectedNodeId}). The selected node may not be fully initialized yet.`);
                 }
                 if (!targetNode.deviceInfo.wsPort) {
-                    throw new Error('Target node missing wsPort in deviceInfo');
+                    throw new Error(`Target node missing wsPort in deviceInfo (ID: ${node.selectedNodeId}). The selected node may not be running.`);
                 }
                 
                 const info = {
                     wsPort: targetNode.deviceInfo.wsPort,
-                    nodeType: targetNode.type,
+                    nodeType: getWebSocketNodeType(targetNode.type), // Convert to simplified type
+                    fullNodeType: targetNode.type, // Keep original for other logic
                     publicKey: targetNode.deviceInfo.publicKey
                 };
                 
@@ -124,15 +145,30 @@ module.exports = function(RED) {
 
             } catch (err) {
                 logDebug('Connection error:', err);
-               // node.error('Connection error', err);
-                node.status({ fill: "red", shape: "ring", text: "Connection failed" });
+                // Provide more specific error messages based on the error type
+                let statusText = "Connection failed";
+                if (err.message.includes('Target node not found')) {
+                    statusText = "Node not found";
+                } else if (err.message.includes('No target node selected')) {
+                    statusText = "No node selected";
+                } else if (err.message.includes('missing deviceInfo')) {
+                    statusText = "Node not initialized";
+                } else if (err.message.includes('missing wsPort')) {
+                    statusText = "Node not running";
+                }
+                node.status({ fill: "red", shape: "ring", text: statusText });
             }
         }
 
         // Initial connection attempt
         if (node.selectedNodeId) {
             logDebug('Initializing with node ID:', node.selectedNodeId);
-            connect();
+            try {
+                connect();
+            } catch (err) {
+                logDebug('Failed to initialize connection:', err.message);
+                node.status({ fill: "red", shape: "ring", text: "Node not found" });
+            }
         } else {
             node.status({ fill: "red", shape: "ring", text: "No node selected" });
         }
@@ -155,8 +191,8 @@ module.exports = function(RED) {
                 
                 if (!targetKey) {
                     // Broadcast to all available peers based on node type
-                    const nodeType = targetNode.type; // 'buyer' or 'seller'
-                    const adminKeys = nodeType === 'buyer' 
+                    const nodeType = targetNode.type; // 'buyer config' or 'seller config'
+                    const adminKeys = nodeType === 'buyer config' 
                         ? targetNode.deviceInfo.sellerAdminKeys 
                         : targetNode.deviceInfo.buyerAdminKeys;
                     
@@ -172,7 +208,7 @@ module.exports = function(RED) {
                         const availablePeers = adminKeys.filter(key => key !== null && key !== undefined);
                         
                         if (availablePeers.length > 0) {
-                            node.status({ fill: "yellow", shape: "ring", text: `Broadcasting to ${availablePeers.length} ${nodeType === 'buyer' ? 'sellers' : 'buyers'}...` });
+                            node.status({ fill: "yellow", shape: "ring", text: `Broadcasting to ${availablePeers.length} ${nodeType === 'buyer config' ? 'sellers' : 'buyers'}...` });
                             
                             // Send message to all available peers
                             availablePeers.forEach((peerKey, index) => {
@@ -206,12 +242,12 @@ module.exports = function(RED) {
                             }, 1000);
                             
                         } else {
-                            node.status({ fill: "red", shape: "ring", text: `No available ${nodeType === 'buyer' ? 'sellers' : 'buyers'}` });
-                            node.error(`No available ${nodeType === 'buyer' ? 'sellers' : 'buyers'} to broadcast to`);
+                            node.status({ fill: "red", shape: "ring", text: `No available ${nodeType === 'buyer config' ? 'sellers' : 'buyers'}` });
+                            node.error(`No available ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} to broadcast to`);
                         }
                     } else {
-                        node.status({ fill: "red", shape: "ring", text: `No ${nodeType === 'buyer' ? 'sellers' : 'buyers'} configured` });
-                        node.error(`No ${nodeType === 'buyer' ? 'sellers' : 'buyers'} configured for broadcasting`);
+                        node.status({ fill: "red", shape: "ring", text: `No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured` });
+                        node.error(`No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured for broadcasting`);
                     }
                     return; // Exit early for broadcast
                 }

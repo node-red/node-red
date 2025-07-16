@@ -97,5 +97,5 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType("stdin", StdinNode);
+    RED.nodes.registerType("stdin r", StdinNode);
 }; 

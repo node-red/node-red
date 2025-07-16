@@ -792,7 +792,7 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType('buyer', NeuronBuyerNode, {
+    RED.nodes.registerType('buyer config', NeuronBuyerNode, {
         oneditprepare: function () {
             const node = this;
             let selectedDevices = [];
@@ -1026,7 +1026,7 @@ module.exports = function (RED) {
         
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
-            if (!buyerNode || buyerNode.type !== 'buyer') {
+            if (!buyerNode || buyerNode.type !== 'buyer config') {
                 return res.status(404).json({ error: 'Buyer node not found' });
             }
 
@@ -1089,7 +1089,7 @@ module.exports = function (RED) {
         
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
-            if (!buyerNode || buyerNode.type !== 'buyer') {
+            if (!buyerNode || buyerNode.type !== 'buyer config') {
                 return res.status(404).json({ error: 'Buyer node not found' });
             }
 
@@ -1127,7 +1127,7 @@ module.exports = function (RED) {
 
         const buyerNode = RED.nodes.getNode(nodeId);
 
-        if (!buyerNode || buyerNode.type !== 'buyer') {
+        if (!buyerNode || buyerNode.type !== 'buyer config') {
             return res.status(404).json({ error: 'Buyer node not found or not a "buyer" type.' });
         }
 
