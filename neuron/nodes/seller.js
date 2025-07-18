@@ -19,9 +19,10 @@ const {
     isMonitoringActive
 } = require('./global-contract-monitor.js');
 const { getConnectionMonitor, removeConnectionMonitor } = require('./connection-monitor.js');
+const ProcessManager = require('./process-manager.js');
 
-// Global process tracking for cleanup (outside module.exports but needs helper from inside)
-const globalProcesses = new Set();
+// Global process manager instance
+const processManager = new ProcessManager();
 
 // Placeholder for the cleanup function that will be provided by module.exports
 let performCleanup = () => {
@@ -42,187 +43,63 @@ process.on('exit', globalProcessCleanup);
 
 
 module.exports = function (RED) {
-    // --- GLOBAL STATE FOR PORT MANAGEMENT AND SPAWNING QUEUE (moved inside module.exports) ---
-    const PORT_RANGE_START = 61330;
-    const PORT_RANGE_END = 61360;
-
-    let usedPorts = new Set();
-    let spawnQueue = [];
-    let isSpawningInProgress = false;
-
     // --- INTERNAL CLEANUP LOGIC (accessible by globalProcessCleanup) ---
-    performCleanup = () => {
-        console.log(`Terminating ${globalProcesses.size} Go processes managed by Node-RED...`);
-        globalProcesses.forEach(process => {
-            try {
-                if (process && !process.killed) {
-                    console.log(`Sending SIGTERM to Go process (PID: ${process.pid}) for cleanup.`);
-                    process.kill('SIGTERM');
-                    if (process._assignedPort) {
-                        releasePort(process._assignedPort);
-                    }
+    function performCleanup() {
+        console.log('Terminating seller processes via ProcessManager cleanup...');
+        
+        try {
+            // Use ProcessManager's cross-platform emergency cleanup
+            const ProcessManager = require('./process-manager');
+            const processManager = new ProcessManager();
+            
+            processManager.emergencyCleanupAllProcesses().then(() => {
+                console.log('Emergency cleanup completed successfully');
+            }).catch(error => {
+                console.error('Emergency cleanup error:', error.message);
+                
+                // Fallback to legacy cleanup if ProcessManager fails
+                console.log("Falling back to legacy cleanup method...");
+                legacyCleanup();
+            });
+            
+        } catch (error) {
+            console.error('Error during ProcessManager cleanup:', error.message);
+            
+            // Fallback to legacy cleanup
+            console.log("Falling back to legacy cleanup method...");
+            legacyCleanup();
+        }
+    }
+    
+    // Legacy cleanup method as fallback
+    function legacyCleanup() {
+        const { exec } = require('child_process');
+        
+        console.log("Attempting legacy cleanup of 'go run . --port=' processes...");
+        
+        // Cross-platform process cleanup (legacy method)
+        const isWindows = process.platform === 'win32';
+        const killCommand = isWindows 
+            ? 'taskkill /F /IM go.exe'  // Windows: Force kill all go.exe processes
+            : "pkill -f 'go run . --port='";  // Unix/Linux: Kill processes matching the pattern
+        
+        exec(killCommand, (error, stdout, stderr) => {
+            if (error) {
+                if (isWindows && error.message.includes('not found')) {
+                    console.log('No additional Go processes found to terminate via taskkill.');
+                } else if (!isWindows && error.message.includes('No processes found')) {
+                    console.log('No additional Go processes found to terminate via pkill.');
+                } else {
+                    console.warn(`Legacy cleanup error (likely no matching processes): ${error.message}`);
                 }
-            } catch (error) {
-                console.error('Error terminating process during cleanup:', error.message);
+            } else {
+                const command = isWindows ? 'taskkill' : 'pkill';
+                console.log(`Additional Go processes terminated via legacy ${command}.`);
             }
         });
-        globalProcesses.clear();
-
-        try {
-            console.log("Attempting to find and terminate any lingering 'go run . --port=' processes via platform-specific command...");
-            
-            // Cross-platform process cleanup
-            const isWindows = process.platform === 'win32';
-            const killCommand = isWindows 
-                ? 'taskkill /F /IM go.exe'  // Windows: Force kill all go.exe processes
-                : "pkill -f 'go run . --port='";  // Unix/Linux: Kill processes matching the pattern
-            
-            exec(killCommand, (error, stdout, stderr) => {
-                if (error) {
-                    if (isWindows && error.message.includes('not found')) {
-                        console.log('No additional Go processes found to terminate via taskkill.');
-                    } else if (!isWindows && error.message.includes('No processes found')) {
-                        console.log('No additional Go processes found to terminate via pkill.');
-                    } else {
-                        console.warn(`Process cleanup error (likely no matching processes): ${error.message}`);
-                    }
-                } else {
-                    const command = isWindows ? 'taskkill' : 'pkill';
-                    console.log(`Additional Go processes terminated via ${command}.`);
-                }
-                usedPorts.clear(); // Clear all Node-RED tracked ports at the very end of cleanup
-            });
-        } catch (error) {
-            console.error('Error during pkill cleanup:', error.message);
-            usedPorts.clear();
-        }
-    };
+    }
 
     // --- HELPER FUNCTIONS (moved inside module.exports) ---
-    async function findAvailablePort(node) {
-        node.status({ fill: "blue", shape: "dot", text: "Finding available port..." });
-        const maxAttempts = 200;
-        let attempts = 0;
-
-        while (attempts < maxAttempts) {
-            let port;
-            do {
-                port = Math.floor(Math.random() * (PORT_RANGE_END - PORT_RANGE_START + 1)) + PORT_RANGE_START;
-            } while (usedPorts.has(port));
-
-            attempts++;
-
-            try {
-                const server = net.createServer();
-                await new Promise((resolve, reject) => {
-                    server.once('error', (err) => {
-                        server.close();
-                        if (err.code === 'EADDRINUSE') {
-                            reject(new Error('EADDRINUSE'));
-                        } else {
-                            reject(err);
-                        }
-                    });
-                    server.listen(port, '127.0.0.1', () => {
-                        server.close(() => {
-                            usedPorts.add(port);
-                            resolve();
-                        });
-                    });
-                });
-                console.log(`Found available port: ${port}`);
-                return port;
-
-            } catch (error) {
-                if (error.message === 'EADDRINUSE') {
-                    await new Promise(r => setTimeout(r, 20));
-                    continue;
-                } else {
-                    node.error(`Error checking port ${port}: ${error.message}`);
-                    throw error;
-                }
-            }
-        }
-        throw new Error(`Could not find an available port after ${maxAttempts} attempts.`);
-    }
-
-    function releasePort(port) {
-        if (port) {
-            usedPorts.delete(port);
-            console.log(`Port ${port} released from Node-RED internal tracking.`);
-        }
-    }
-
-    async function testWebSocketConnection(node, port, retryCount = 0) {
-        const maxRetries = 60;
-        const retryDelayMs = 500;
-        const singleAttemptTimeout = 2000;
-
-        return new Promise((resolve) => {
-            if (retryCount >= maxRetries) {
-                console.error(`WebSocket connection failed on port ${port} after ${maxRetries} attempts. Giving up.`);
-                node.status({ fill: "red", shape: "ring", text: `Failed to connect to ${port}` });
-                return resolve(false);
-            }
-
-            const testWs = new WebSocket(`ws://localhost:${port}/seller/p2p`);
-            let connectAttemptTimer = null;
-            let success = false;
-
-            const cleanUp = () => {
-                if (connectAttemptTimer) clearTimeout(connectAttemptTimer);
-                connectAttemptTimer = null;
-                testWs.removeAllListeners();
-                if (testWs.readyState === WebSocket.OPEN || testWs.readyState === WebSocket.CONNECTING) {
-                    testWs.close();
-                }
-            };
-
-            connectAttemptTimer = setTimeout(() => {
-                if (!success) {
-                    cleanUp();
-                    console.log(`WebSocket connection attempt timed out for port ${port} (Attempt ${retryCount + 1}).`);
-                    setTimeout(() => {
-                        resolve(testWebSocketConnection(node, port, retryCount + 1));
-                    }, retryDelayMs);
-                }
-            }, singleAttemptTimeout);
-
-            testWs.on('open', () => {
-                success = true;
-                cleanUp();
-                console.log(`WebSocket connection test successful on port ${port}.`);
-                resolve(true);
-            });
-
-            testWs.on('error', (error) => {
-                if (!success) {
-                    cleanUp();
-                    if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-                        console.log(`WebSocket connection refused/timed out for port ${port} (Attempt ${retryCount + 1}).`);
-                    } else {
-                        console.error(`WebSocket connection error on port ${port} (Attempt ${retryCount + 1}): ${error.message}.`);
-                    }
-                    setTimeout(() => {
-                        resolve(testWebSocketConnection(node, port, retryCount + 1));
-                    }, retryDelayMs);
-                }
-            });
-
-            testWs.on('close', (code, reason) => {
-                if (!success) {
-                    cleanUp();
-                    console.log(`WebSocket connection closed unexpectedly for port ${port} (Code: ${code}, Reason: ${reason}). Retrying...`);
-                    setTimeout(() => {
-                        resolve(testWebSocketConnection(node, port, retryCount + 1));
-                    }, retryDelayMs);
-                }
-            });
-
-            node.status({ fill: "yellow", shape: "dot", text: `Probing ${port}... (${retryCount + 1}/${maxRetries})` });
-        });
-    }
-
     // New helper to extract public key bytes (moved inside module.exports)
     function extractPublicKeyBytes(derEncodedKey) {
         if (!derEncodedKey) {
@@ -262,290 +139,6 @@ module.exports = function (RED) {
         console.warn("Could not extract 32-byte private key from DER. Length:", buffer.length);
         return null;
     }
-
-    async function processSpawnQueue() {
-        if (isSpawningInProgress || spawnQueue.length === 0) {
-            return;
-        }
-
-        isSpawningInProgress = true;
-        const { node, deviceInfo, resolve, reject } = spawnQueue.shift();
-
-        try {
-            if (node.goProcess && !node.goProcess.killed) {
-                console.log(`Node ${node.id} process already running. Skipping spawn and re-validating.`);
-                const isReady = await testWebSocketConnection(node, node.deviceInfo.wsPort);
-                if (isReady) {
-                    node.status({ fill: "green", shape: "dot", text: `Active on ${node.deviceInfo.wsPort}. EVM: ${node.deviceInfo.evmAddress}` });
-                    resolve(node.goProcess);
-                } else {
-                    console.warn(`Node ${node.id} process found but WebSocket not ready. Assuming stale process and attempting to respawn.`);
-                    if (node.goProcess) {
-                        node.goProcess.kill('SIGKILL');
-                        releasePort(node.goProcess._assignedPort);
-                        globalProcesses.delete(node.goProcess);
-                        node.goProcess = null;
-                    }
-                }
-            }
-
-            if (!node.goProcess) {
-                node.status({ fill: "blue", shape: "dot", text: "Finding port & spawning..." });
-
-                const uniquePort = await findAvailablePort(node);
-                const wsPort = uniquePort;
-
-                deviceInfo.uniquePort = uniquePort;
-                deviceInfo.wsPort = wsPort;
-
-                const deviceFile = path.join(__dirname, 'devices', `${node.id}.json`);
-                fs.writeFileSync(deviceFile, JSON.stringify(deviceInfo, null, 2), 'utf-8');
-
-                updateSellerEnv(node, deviceInfo, uniquePort);
-
-                console.log(`Spawning Go process for node ${node.id} on port ${uniquePort}`);
-
-                // Get log folder from environment variable
-                const logFolder = process.env.SDK_LOG_FOLDER;
-                let stdoutLogFile = null;
-                let stderrLogFile = null;
-
-                if (logFolder && logFolder.trim() !== '') {
-                    // Create log directory if it doesn't exist
-                    if (!fs.existsSync(logFolder)) {
-                        fs.mkdirSync(logFolder, { recursive: true });
-                    }
-                    stdoutLogFile = path.join(logFolder, `seller-${node.id}-stdout.log`);
-                    stderrLogFile = path.join(logFolder, `seller-${node.id}-stderr.log`);
-                    console.log(`Logs will be written to: ${logFolder}`);
-                } else {
-                    console.log('SDK_LOG_FOLDER not set - suppressing process logs');
-                }
-                
-                // Get the executable path from environment variable
-                const executablePath = process.env.NEURON_SDK_PATH;
-                if (!executablePath) {
-                    throw new Error('NEURON_SDK_PATH environment variable is not set. Please set it to the path of the pre-compiled neuron-sdk executable.');
-                }
-                
-                // Check if executable exists
-                if (!fs.existsSync(executablePath)) {
-                    console.error(`Executable not found at: ${executablePath}`);
-                    throw new Error(`Executable not found at: ${executablePath}. Please ensure the pre-compiled binary is available at the specified path.`);
-                }
-                
-                console.log(`Using pre-compiled executable: ${executablePath}`);
-
-                // Construct the complete path for the environment file
-                const envFilePath = path.resolve(__dirname, 'sdk_env_files', `.seller-env-${node.id}`);
-
-                const goProcess = spawn(executablePath, [`--port=${uniquePort}`, '--mode=peer', '--buyer-or-seller=seller', '--list-of-buyers-source=env', `--envFile=${envFilePath}`,/* '--use-local-address',*/ `--ws-port=${wsPort}`], {
-                    cwd: path.join(__dirname, 'sdk_env_files'),
-                    stdio: ['pipe', 'pipe', 'pipe']
-                });
-
-                node.goProcess = goProcess;
-                globalProcesses.add(goProcess);
-                goProcess._assignedPort = uniquePort;
-
-                // Redirect stdout to file if logging is enabled
-                if (stdoutLogFile) {
-                    const stdoutStream = fs.createWriteStream(stdoutLogFile, { flags: 'a' });
-                    goProcess.stdout.pipe(stdoutStream);
-                    goProcess.stdout.on('data', (data) => {
-                        console.log(`Seller Go process [${node.id}] stdout: ${data.toString().trim()}`);
-                    });
-                } else {
-                    // Suppress stdout logging
-                    goProcess.stdout.on('data', (data) => {
-                        // Only log to console, not to file
-                        console.log(`Seller Go process [${node.id}] stdout: ${data.toString().trim()}`);
-                    });
-                }
-
-                // Redirect stderr to file if logging is enabled
-                if (stderrLogFile) {
-                    const stderrStream = fs.createWriteStream(stderrLogFile, { flags: 'a' });
-                    goProcess.stderr.pipe(stderrStream);
-                    goProcess.stderr.on('data', (data) => {
-                        console.error(`Seller Go process [${node.id}] stderr: ${data.toString().trim()}`);
-                    });
-                } else {
-                    // Suppress stderr logging
-                    goProcess.stderr.on('data', (data) => {
-                        // Only log to console, not to file
-                        console.error(`Seller Go process [${node.id}] stderr: ${data.toString().trim()}`);
-                    });
-                }
-
-                goProcess.on('close', (code) => {
-                    console.log(`Seller Go process [${node.id}] exited with code ${code}.`);
-                    globalProcesses.delete(goProcess);
-                    releasePort(goProcess._assignedPort);
-                    if (node.goProcess === goProcess) {
-                        node.goProcess = null;
-                        node.status({ fill: "red", shape: "ring", text: `Process exited (Code: ${code})` });
-                        if (code !== 0) {
-                            node.error(`Go process for node ${node.id} exited with error code: ${code}`);
-                        }
-                    }
-                });
-
-                goProcess.on('error', (error) => {
-                    console.error(`Seller Go process [${node.id}] error: ${error.message}`);
-                    globalProcesses.delete(goProcess);
-                    releasePort(goProcess._assignedPort);
-                    if (node.goProcess === goProcess) {
-                        node.goProcess = null;
-                        node.error(`Go process for node ${node.id} error: ${error.message}`);
-                        node.status({ fill: "red", shape: "ring", text: "Process error" });
-                    }
-                });
-
-                const isReady = await testWebSocketConnection(node, wsPort);
-                if (isReady) {
-                    console.log(`Seller process for node ${node.id} successfully connected on port ${uniquePort}.`);
-                    node.status({ fill: "green", shape: "dot", text: `Connected as ${node.deviceInfo.evmAddress}. Getting peers...` });
-                    
-                    // Initialize connection monitoring
-                    try {
-                        const connectionMonitor = getConnectionMonitor(node.id, 'seller', wsPort);
-                        await connectionMonitor.connect();
-                        
-                        // Set up status update callback to update node status
-                        connectionMonitor.onStatusUpdate((status) => {
-                            if (status.isConnected) {
-                                const peerText =  ` (${status.connectedPeers}/${status.totalPeers} peers)` ;
-                                if(status.totalPeers > 0) {
-                                    node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
-                                } else {
-                                    node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
-                                }
-                            } else {
-                                node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
-                            }
-                        });
-                        
-                        console.log(`Connection monitoring initialized for seller node ${node.id}`);
-                    } catch (error) {
-                        console.error(`Failed to initialize connection monitoring for seller node ${node.id}:`, error.message);
-                    }
-                    
-                    resolve(goProcess);
-                } else {
-                    console.error(`Seller process for node ${node.id} failed to become ready on port ${uniquePort}. Terminating.`);
-                    node.error(`Go process on port ${uniquePort} for node ${node.id} failed to become ready after multiple attempts.`);
-                    node.status({ fill: "red", shape: "ring", text: `Failed to start on ${uniquePort}` });
-                    if (goProcess && !goProcess.killed) {
-                        goProcess.kill('SIGKILL');
-                        releasePort(goProcess._assignedPort);
-                    }
-                    reject(new Error(`Go process for node ${node.id} failed to start on port ${uniquePort}`));
-                }
-            }
-        } catch (error) {
-            console.error(`Error during spawning process for node ${node.id}: ${error.message}`);
-            node.error(`Go process spawning failed for node ${node.id}: ${error.message}`);
-            node.status({ fill: "red", shape: "ring", text: "Spawn failed" });
-            // Safely reject without causing uncaught exceptions
-            try {
-                reject(error);
-            } catch (rejectError) {
-                console.error('Error during promise rejection:', rejectError.message);
-            }
-        } finally {
-            isSpawningInProgress = false;
-            // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
-            processSpawnQueue().catch(error => {
-                console.error('Error in processSpawnQueue:', error.message);
-                // Don't rethrow - just log the error to prevent Node-RED crash
-            });
-        }
-    }
-
-
-    // Function to update the node-specific environment file for the Go application
-    function updateSellerEnv(node, deviceInfo, uniquePort) {
-        try {
-            const envFilePath = path.join(__dirname, 'sdk_env_files', `.seller-env-${node.id}`);
-
-            let envContent = '';
-            if (fs.existsSync(envFilePath)) {
-                envContent = fs.readFileSync(envFilePath, 'utf-8');
-            }
-
-            const hederaEvmIdLine = `hedera_evm_id=${deviceInfo.evmAddress}`;
-            const hederaIdLine = `hedera_id=${deviceInfo.accountId}`;
-            const privateKeyLine = `private_key=${deviceInfo.extractedPrivateKey}`;
-            const smartContractLine = `smart_contract_address=${deviceInfo.smartContract}`;
-            const uniquePortLine = `unique_port=${uniquePort}`;
-            const wsPortLine = `ws_port=${uniquePort}`;
-
-            let buyerAddresses = '';
-            if (Array.isArray(deviceInfo.buyerAdminKeys)) {
-                buyerAddresses = deviceInfo.buyerAdminKeys
-                    .filter(addr => addr !== null && addr !== undefined && addr.trim() !== '')
-                    .map(addr => addr.startsWith('0x') ? addr.slice(2) : addr)
-                    .join(',');
-            } else if (typeof deviceInfo.buyerAdminKeys === 'string') {
-                buyerAddresses = deviceInfo.buyerAdminKeys
-                    .replace(/[\[\]]/g, '')
-                    .replace(/['"]/g, '')
-                    .replace(/\s+/g, '')
-                    .split(',')
-                    .filter(addr => addr.trim() !== 'null' && addr.trim() !== '')
-                    .map(addr => addr.trim().startsWith('0x') ? addr.trim().slice(2) : addr.trim())
-                    .join(',');
-            }
-            const listOfBuyersLine = `list_of_buyers=${buyerAddresses}`;
-
-            const ethLine = `eth_rpc_url=https://testnet.hashio.io/api`;
-            const locationLine = `location={"lat":-2.1574851,"lon":101.7108034,"alt":0.000000}`;
-            const mirrorLine = `mirror_api_url=https://testnet.mirrornode.hedera.com/api/v1`;
-            const deviceIdLine = `nodeid=${node.id}`;
-
-            const lines = envContent.split('\n');
-            const updates = [
-                { key: 'nodeid', value: deviceIdLine },
-                { key: 'hedera_evm_id', value: hederaEvmIdLine },
-                { key: 'hedera_id', value: hederaIdLine },
-                { key: 'private_key', value: privateKeyLine },
-                { key: 'smart_contract_address', value: smartContractLine },
-                { key: 'list_of_buyers', value: listOfBuyersLine },
-                { key: 'unique_port', value: uniquePortLine },
-                { key: 'ws_port', value: wsPortLine },
-                { key: 'eth_rpc_url', value: ethLine },
-                { key: 'location', value: locationLine },
-                { key: 'mirror_api_url', value: mirrorLine }
-            ];
-
-            updates.forEach(update => {
-                let found = false;
-                for (let i = 0; i < lines.length; i++) {
-                    if (lines[i].startsWith(`${update.key}=`)) {
-                        lines[i] = update.value;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    lines.push(update.value);
-                }
-            });
-
-            const updatedContent = lines.filter(line => line.trim() !== '').join('\n');
-            fs.writeFileSync(envFilePath, updatedContent, 'utf-8');
-
-            console.log(`Updated .seller-env-${node.id} with nodeid=${node.id}, hedera_evm_id=${deviceInfo.evmAddress}, hedera_id=${deviceInfo.accountId}, list_of_buyers=${listOfBuyersLine}, smart_contract_address=${deviceInfo.smartContract}, unique_port=${uniquePort}, ws_port=${uniquePort}`);
-        } catch (error) {
-            console.error(`Failed to update .seller-env-${node.id}: ${error.message}`);
-            node.error(`Failed to update .seller-env-${node.id}: ${error.message}`);
-        }
-    }
-
-
-    // Initialize global WebSocket connection when module is loaded
-    // initializeGlobalWebSocket(); // This function is removed, so this line is removed.
 
     // Initialize global contract monitoring service when module is loaded
     initializeGlobalContractMonitoring();
@@ -593,8 +186,8 @@ module.exports = function (RED) {
 
         node.goProcess = null;
 
-        node.on('close', function (done) {
-            console.log(`Closing seller node ${node.id}.`);
+        node.on('close', function (removed, done) {
+            //console.log(`Closing seller node ${node.id}, removed: ${removed}`);
             
             // Clean up connection monitor
             try {
@@ -603,27 +196,22 @@ module.exports = function (RED) {
                 console.error(`Error cleaning up connection monitor for node ${node.id}:`, error.message);
             }
             
-            if (node.goProcess && !node.goProcess.killed) {
-                console.log(`Terminating Go process for node ${node.id} (PID: ${node.goProcess.pid}).`);
-                globalProcesses.delete(node.goProcess);
-                releasePort(node.goProcess._assignedPort);
-                node.goProcess.kill('SIGTERM');
-
-                let closeTimer = setTimeout(() => {
-                    if (node.goProcess && !node.goProcess.killed) {
-                        console.warn(`Go process for node ${node.id} did not terminate gracefully after SIGTERM, sending SIGKILL.`);
-                        node.goProcess.kill('SIGKILL');
-                    }
-                    done();
-                }, 5000);
-
-                node.goProcess.on('close', () => {
-                    clearTimeout(closeTimer);
-                    console.log(`Go process for node ${node.id} terminated cleanly.`);
-                    node.goProcess = null;
-                    done();
-                });
+            if (removed) {
+                // Node is being deleted - stop the process
+               // console.log(`Seller node ${node.id} is being deleted - stopping process`);
+                processManager.stopProcess(node.id)
+                    .then(() => {
+                        console.log(`Process stopped for deleted seller node ${node.id}`);
+                        done();
+                    })
+                    .catch(error => {
+                        console.error(`Error stopping process for deleted seller node ${node.id}:`, error.message);
+                        done();
+                    });
             } else {
+                // Node is being redeployed - preserve the process
+                console.log(`Seller node ${node.id} is being redeployed - preserving process`);
+                processManager.preserveProcess(node.id);
                 done();
             }
         });
@@ -784,7 +372,41 @@ module.exports = function (RED) {
             if (node.deviceInfo) {
                 const initialBuyerEvmAddresses = JSON.parse(config.buyerEvmAddress || '[]');
                 await updateSelectedBuyers(node, initialBuyerEvmAddresses, true);
-                console.log(`Node ${node.id}: Go process spawn requested and queued.`);
+                //console.log(`Node ${node.id}: Starting Go process via ProcessManager.`);
+                
+                try {
+                    node.status({ fill: "blue", shape: "dot", text: "Starting process..." });
+                    node.goProcess = await processManager.ensureProcess(node, node.deviceInfo, 'seller');
+                    
+                    // Initialize connection monitoring
+                    try {
+                        const connectionMonitor = getConnectionMonitor(node.id, 'seller', node.deviceInfo.wsPort);
+                        await connectionMonitor.connect();
+                        
+                        // Set up status update callback to update node status
+                        connectionMonitor.onStatusUpdate((status) => {
+                            if (status.isConnected) {
+                                const peerText = ` (${status.connectedPeers}/${status.totalPeers} peers)`;
+                                if(status.totalPeers > 0 && status.connectedPeers > 0) {
+                                    node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
+                                } else {
+                                    node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
+                                }
+                            } else {
+                                node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
+                            }
+                        });
+                        
+                        console.log(`Connection monitoring initialized for seller node ${node.id}`);
+                    } catch (error) {
+                        console.error(`Failed to initialize connection monitoring for seller node ${node.id}:`, error.message);
+                    }
+                    
+                } catch (error) {
+                    console.error(`Error starting Go process for seller node ${node.id}:`, error.message);
+                    node.error(`Go process startup failed: ${error.message}`);
+                    node.status({ fill: "red", shape: "ring", text: "Process failed" });
+                }
             } else {
                 node.error(`Node ${node.id}: No device information available to spawn process.`);
                 node.status({ fill: "red", shape: "ring", text: "No device info" });
@@ -807,145 +429,7 @@ module.exports = function (RED) {
         });
     }
 
-    RED.nodes.registerType('seller config', NeuronSellerNode, {
-        oneditprepare: function () {
-            const node = this;
-            let selectedDevices = [];
-
-            $('<style>')
-                .text(`
-                    .seller-table tr.selected {
-                        background-color: #DDD;
-                        color: black;
-                    }
-                    .seller-table tr:hover {
-                        outline: 2px solid #4d90fe;
-                    }
-                    .buyer-modal-content {
-                        display: flex;
-                        flex-direction: column;
-                        height: 100%;
-                    }
-                    .buyer-table-container {
-                        flex-grow: 1;
-                        overflow-y: auto;
-                        margin-bottom: 10px;
-                    }
-                    .buyer-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    .buyer-table th, .buyer-table td {
-                        border: 1px solid #ccc;
-                        padding: 8px;
-                        text-align: left;
-                    }
-                    .buyer-table thead th {
-                        position: sticky;
-                        top: 0;
-                        background-color: #f0f0f0;
-                        z-index: 1;
-                    }
-                    .buyer-modal-buttons {
-                        flex-shrink: 0;
-                        text-align: right;
-                        padding-top: 10px;
-                        border-top: 1px solid #eee;
-                    }
-                `)
-                .appendTo('head');
-
-            const initialSelectedAddresses = typeof node.buyerEvmAddress === 'string'
-                ? JSON.parse(node.buyerEvmAddress || '[]')
-                : [];
-            $('#node-input-selectedAddresses').val(initialSelectedAddresses.join('\n'));
-
-            if (node.buyerEvmAddress) {
-                try {
-                    const parsedAddresses = JSON.parse(node.buyerEvmAddress);
-                    selectedDevices = parsedAddresses.map(address => ({ address }));
-                } catch (e) {
-                    console.error("Error parsing buyerEvmAddress on editprepare:", e);
-                    selectedDevices = [];
-                }
-            }
-
-            // Note: The button click handlers and modal functionality are now handled in seller.html
-            // to avoid conflicts and ensure search functionality works properly
-
-            const helpText = $('<div>')
-                .addClass('form-row')
-                .html(`
-                    <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
-                        <strong>About this Seller Node:</strong><br>
-                        This node manages a Go-based seller application. It will:<br>
-                        <ul>
-                            <li>Generate a unique Hedera account for the seller (if one doesn't exist).</li>
-                            <li>Spawn a Go process that listens on a dynamically assigned, *available* port.</li>
-                            <li>Establish a WebSocket connection to the Go process to confirm readiness.</li>
-                            <li>Publish data to the Hedera network based on its configuration.</li>
-                        </ul>
-                        <strong>Selecting Buyers:</strong><br>
-                        Use the "Select Buyers" button to choose which buyer nodes this seller should interact with. The seller needs the admin keys of these buyers to communicate. These keys are fetched dynamically.<br><br>
-                        <strong>Port Management:</strong><br>
-                        The node intelligently finds a free port to avoid conflicts.
-                    </div>
-                `);
-
-            $('#node-input-buyerEvmAddress').closest('.form-row').after(helpText);
-
-            // Fetch and populate device balance if available
-            function updateDeviceBalance() {
-                if (node.id) {
-                    $.get(`/seller/device-balance/${node.id}`)
-                        .done(function(data) {
-                            if (data.success && data.balance) {
-                                $('#node-input-balance').val(data.balance + ' USDC');
-                            } else {
-                                $('#node-input-balance').val('Not initialized yet');
-                            }
-                        })
-                        .fail(function() {
-                            $('#node-input-balance').val('Error loading balance');
-                        });
-                } else {
-                    $('#node-input-balance').val('New node - balance will be available after deployment');
-                }
-            }
-
-            // Update balance on dialog open
-            updateDeviceBalance();
-
-            // Refresh balance every 10 seconds in case it changes while dialog is open
-            const balanceRefreshInterval = setInterval(updateDeviceBalance, 10000);
-
-            // Clean up interval when dialog closes
-            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
-                clearInterval(balanceRefreshInterval);
-            });
-        },
-        oneditsave: function() {
-            // Get the selected buyer addresses from the hidden input field
-            const buyerEvmAddressValue = $('#node-input-buyerEvmAddress').val();
-            
-            if (buyerEvmAddressValue) {
-                try {
-                    this.buyerEvmAddress = JSON.parse(buyerEvmAddressValue);
-                } catch (e) {
-                    console.error('Error parsing buyer EVM addresses on save:', e);
-                    this.buyerEvmAddress = [];
-                }
-            } else {
-                this.buyerEvmAddress = [];
-            }
-            
-            // Save the current EVM address and balance
-            this.evmAddress = $('#node-input-evmAddress').val();
-            this.balance = $('#node-input-balance').val();
-            
-            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
-        }
-    });
+    RED.nodes.registerType('seller config', NeuronSellerNode);
 
     // Helper function to serialize BigInt values in any object structure
     function serializeBigInts(obj) {
@@ -1088,35 +572,7 @@ module.exports = function (RED) {
         }
     });
 
-    RED.httpAdmin.post('/seller/update-buyers/:nodeId', function (req, res) {
-        const nodeId = req.params.nodeId;
-        const newBuyerEvmAddresses = req.body.buyerEvmAddresses;
-
-        console.log(`Seller update endpoint called with nodeId: ${nodeId}`);
-
-        if (!newBuyerEvmAddresses || !Array.isArray(newBuyerEvmAddresses)) {
-            return res.status(400).json({ error: 'Invalid buyer addresses provided (must be an array)' });
-        }
-
-        if (!hederaService) {
-            return res.status(500).json({ error: 'Hedera service not initialized. Check .env configuration.' });
-        }
-
-        const sellerNode = RED.nodes.getNode(nodeId);
-
-        if (!sellerNode || sellerNode.type !== 'seller config') {
-            return res.status(404).json({ error: 'Seller node not found or not a "seller" type.' });
-        }
-
-        updateSelectedBuyers(sellerNode, newBuyerEvmAddresses)
-            .then(() => {
-                res.json({ success: true, message: 'Buyers updated successfully. Seller process will attempt to restart with new config.' });
-            })
-            .catch(error => {
-                console.error(`Error updating buyers for node ${nodeId}:`, error);
-                res.status(500).json({ error: 'Failed to update buyers: ' + error.message });
-            });
-    });
+  
 
     RED.httpAdmin.get('/seller/device-info/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
@@ -1187,13 +643,13 @@ module.exports = function (RED) {
 
     async function updateSelectedBuyers(node, newBuyerEvmAddresses, isInitialSpawn = false) {
         try {
-            console.log(`Updating selected buyers for seller node: ${node.id}`);
-            node.status({ fill: "yellow", shape: "ring", text: "Updating buyers..." });
+           // console.log(`Updating selected buyers for seller node: ${node.id}`);
+           // node.status({ fill: "yellow", shape: "ring", text: "Updating buyers..." });
 
             node.deviceInfo.buyerEvmAddress = JSON.stringify(newBuyerEvmAddresses);
             node.deviceInfo.buyerAdminKeys = [];
 
-            console.log('Fetching admin keys for new buyers...');
+           // console.log('Fetching admin keys for new buyers...');
             for (const buyerEvmAddress of newBuyerEvmAddresses) {
                 try {
                     let adminKey = await hederaService.getAdminKeyFromEvmAddress(buyerEvmAddress);
@@ -1214,42 +670,18 @@ module.exports = function (RED) {
             const deviceFile = path.join(__dirname, 'devices', `${node.id}.json`);
             fs.writeFileSync(deviceFile, JSON.stringify(node.deviceInfo, null, 2), 'utf-8');
 
-            node.status({ fill: "yellow", shape: "ring", text: "Restarting process..." });
-
-            if (node.goProcess && !node.goProcess.killed && !isInitialSpawn) {
-                console.log(`Node ${node.id}: Terminating old Go process for buyer update.`);
-                node.goProcess.kill('SIGTERM');
-                await new Promise(resolve => {
-                    node.goProcess.on('close', () => {
-                        console.log(`Node ${node.id}: Old Go process terminated.`);
-                        node.goProcess = null;
-                        resolve();
-                    });
-                    setTimeout(() => {
-                        if (node.goProcess && !node.goProcess.killed) {
-                            console.warn(`Node ${node.id}: Old Go process hung during SIGTERM, forcing SIGKILL.`);
-                            node.goProcess.kill('SIGKILL');
-                        }
-                        resolve();
-                    }, 5000);
-                });
-            } else if (isInitialSpawn) {
-                console.log(`Node ${node.id}: Initial spawn - no old process to terminate.`);
-            } else {
-                console.log(`Node ${node.id}: No active Go process to terminate for buyer update.`);
+            if (!isInitialSpawn) {
+                try {
+                    node.status({ fill: "blue", shape: "dot", text: "Restarting process..." });
+                    node.goProcess = await processManager.ensureProcess(node, node.deviceInfo, 'seller');
+                    console.log(`Node ${node.id}: Buyer update complete and new Go process spawned.`);
+                } catch (error) {
+                    console.error(`Node ${node.id}: Error in updateSelectedBuyers (ProcessManager spawn):`, error.message);
+                    node.error(`Failed to update buyers for node ${node.id}: ${error.message}`);
+                    node.status({ fill: "red", shape: "ring", text: "Buyer update failed" });
+                    throw error;
+                }
             }
-
-            // Enqueue the spawn request
-            await new Promise((resolve, reject) => {
-                spawnQueue.push({ node, deviceInfo: node.deviceInfo, resolve, reject });
-                // Wrap processSpawnQueue call in error handling to prevent uncaught exceptions
-                processSpawnQueue().catch(error => {
-                    console.error('Error triggering spawn queue processing:', error.message);
-                    // Don't rethrow - just log the error to prevent Node-RED crash
-                });
-            });
-
-            console.log(`Node ${node.id}: Buyer update complete and new Go process spawned.`);
 
         } catch (error) {
             console.error(`Node ${node.id}: Error in updateSelectedBuyers: ${error.message}`);

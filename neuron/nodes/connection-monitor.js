@@ -20,19 +20,19 @@ class ConnectionMonitor {
 
     async connect() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            console.log(`ConnectionMonitor [${this.nodeId}]: Already connected`);
+            //console.log(`ConnectionMonitor [${this.nodeId}]: Already connected`);
             return true;
         }
 
         return new Promise((resolve) => {
             try {
                 const wsUrl = `ws://localhost:${this.wsPort}/${this.nodeType}/commands`;
-                console.log(`ConnectionMonitor [${this.nodeId}]: Connecting to ${wsUrl}`);
+                //console.log(`ConnectionMonitor [${this.nodeId}]: Connecting to ${wsUrl}`);
                 
                 this.ws = new WebSocket(wsUrl);
                 
                 this.ws.on('open', () => {
-                    console.log(`ConnectionMonitor [${this.nodeId}]: WebSocket connected`);
+                   // console.log(`ConnectionMonitor [${this.nodeId}]: WebSocket connected`);
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                     this.startPolling();
@@ -49,7 +49,7 @@ class ConnectionMonitor {
                 });
 
                 this.ws.on('close', (code, reason) => {
-                    console.log(`ConnectionMonitor [${this.nodeId}]: WebSocket closed (${code}: ${reason})`);
+                    //console.log(`ConnectionMonitor [${this.nodeId}]: WebSocket closed (${code}: ${reason})`);
                     this.isConnected = false;
                     this.stopPolling();
                     this.attemptReconnect();
@@ -64,7 +64,9 @@ class ConnectionMonitor {
                 setTimeout(() => {
                     if (!this.isConnected) {
                         console.error(`ConnectionMonitor [${this.nodeId}]: Connection timeout`);
-                        this.ws.close();
+                        if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
+                            this.ws.close();
+                        }
                         resolve(false);
                     }
                 }, 10000);
@@ -77,7 +79,7 @@ class ConnectionMonitor {
     }
 
     async disconnect() {
-        console.log(`ConnectionMonitor [${this.nodeId}]: Disconnecting`);
+        //console.log(`ConnectionMonitor [${this.nodeId}]: Disconnecting`);
         this.stopPolling();
         
         if (this.ws) {
@@ -100,7 +102,7 @@ class ConnectionMonitor {
         }
 
         if (this.isPolling) {
-            console.log(`ConnectionMonitor [${this.nodeId}]: Polling already in progress, skipping`);
+            //console.log(`ConnectionMonitor [${this.nodeId}]: Polling already in progress, skipping`);
             return false;
         }
 
@@ -114,7 +116,7 @@ class ConnectionMonitor {
             };
 
             this.ws.send(JSON.stringify(command));
-            console.log(`ConnectionMonitor [${this.nodeId}]: Sent showCurrentPeers command`);
+            //console.log(`ConnectionMonitor [${this.nodeId}]: Sent showCurrentPeers command`);
             return true;
         } catch (error) {
             console.error(`ConnectionMonitor [${this.nodeId}]: Error querying peers:`, error.message);
@@ -153,12 +155,12 @@ class ConnectionMonitor {
             this.lastUpdate = new Date();
             this.isPolling = false;
             
-            console.log(`ConnectionMonitor [${this.nodeId}]: Updated peers (${this.peers.length} peers)`);
-            console.log(`ConnectionMonitor [${this.nodeId}]: Peer details:`, this.peers.map(p => ({
-                publicKey: p.publicKey.substring(0, 16) + '...',
-                status: p.connectionStatus,
-                libP2PState: p.libP2PState
-            })));
+           // console.log(`ConnectionMonitor [${this.nodeId}]: Updated peers (${this.peers.length} peers)`);
+           //   console.log(`ConnectionMonitor [${this.nodeId}]: Peer details:`, this.peers.map(p => ({
+              //  publicKey: p.publicKey.substring(0, 16) + '...',
+            //    status: p.connectionStatus,
+            //    libP2PState: p.libP2PState
+            //})));
             
             // Notify all registered callbacks
             this.statusCallbacks.forEach(callback => {
@@ -182,29 +184,29 @@ class ConnectionMonitor {
             this.queryPeers();
         }, this.pollingFrequency);
         
-        console.log(`ConnectionMonitor [${this.nodeId}]: Started polling every ${this.pollingFrequency}ms`);
+    // console.log(`ConnectionMonitor [${this.nodeId}]: Started polling every ${this.pollingFrequency}ms`);
     }
 
     stopPolling() {
         if (this.pollingInterval) {
             clearInterval(this.pollingInterval);
             this.pollingInterval = null;
-            console.log(`ConnectionMonitor [${this.nodeId}]: Stopped polling`);
+            //console.log(`ConnectionMonitor [${this.nodeId}]: Stopped polling`);
         }
     }
 
     attemptReconnect() {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-            console.error(`ConnectionMonitor [${this.nodeId}]: Max reconnection attempts reached`);
+          //  console.error(`ConnectionMonitor [${this.nodeId}]: Max reconnection attempts reached`);
             return;
         }
 
         this.reconnectAttempts++;
-        console.log(`ConnectionMonitor [${this.nodeId}]: Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
+        //console.log(`ConnectionMonitor [${this.nodeId}]: Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
         
         setTimeout(() => {
             this.connect().catch(error => {
-                console.error(`ConnectionMonitor [${this.nodeId}]: Reconnection failed:`, error.message);
+                //console.error(`ConnectionMonitor [${this.nodeId}]: Reconnection failed:`, error.message);
             });
         }, this.reconnectDelay);
     }
@@ -232,7 +234,7 @@ class ConnectionMonitor {
 
     // Manual refresh method
     async refresh() {
-        console.log(`ConnectionMonitor [${this.nodeId}]: Manual refresh requested`);
+        //console.log(`ConnectionMonitor [${this.nodeId}]: Manual refresh requested`);
         return await this.queryPeers();
     }
 }
@@ -252,7 +254,7 @@ function removeConnectionMonitor(nodeId) {
     if (monitor) {
         monitor.disconnect();
         connectionMonitors.delete(nodeId);
-        console.log(`ConnectionMonitor: Removed monitor for node ${nodeId}`);
+       // console.log(`ConnectionMonitor: Removed monitor for node ${nodeId}`);
     }
 }
 

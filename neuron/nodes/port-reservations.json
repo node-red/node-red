@@ -1,0 +1,26 @@
+{
+  "b3f21ec36e9896f4": {
+    "port": 61330,
+    "nodeId": "b3f21ec36e9896f4",
+    "reservedAt": "2025-07-18T11:14:27.453Z",
+    "lastUsed": "2025-07-18T11:14:27.453Z"
+  },
+  "b4e88767fea43f8c": {
+    "port": 61331,
+    "nodeId": "b4e88767fea43f8c",
+    "reservedAt": "2025-07-18T11:14:28.526Z",
+    "lastUsed": "2025-07-18T11:14:28.526Z"
+  },
+  "fd4f5879ef989991": {
+    "port": 61332,
+    "nodeId": "fd4f5879ef989991",
+    "reservedAt": "2025-07-18T11:15:00.602Z",
+    "lastUsed": "2025-07-18T11:15:00.602Z"
+  },
+  "dfc917dee557ea1a": {
+    "port": 61333,
+    "nodeId": "dfc917dee557ea1a",
+    "reservedAt": "2025-07-18T11:15:01.666Z",
+    "lastUsed": "2025-07-18T11:15:01.666Z"
+  }
+}

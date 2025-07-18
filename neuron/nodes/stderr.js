@@ -88,12 +88,12 @@ module.exports = function (RED) {
                 };
     
                 // Send message to Hedera topic
-                console.log(deviceInfo);
-                console.log(deviceInfo.topics[2]);
+               // console.log(deviceInfo);
+               // console.log(deviceInfo.topics[2]);
                 const result = await hederaService.submitMessageToTopic(
                     deviceInfo.topics[2], 
                     JSON.stringify(message),
-                    deviceInfo.devicePrivateKeyString,
+                    deviceInfo.privateKey,
                     deviceInfo.accountId
                 );
 
@@ -101,7 +101,7 @@ module.exports = function (RED) {
                 node.status({ fill: "green", shape: "dot", text: new Date().toLocaleTimeString() + " sent to topic " + deviceInfo.topics[2] });
             } catch (err) {
                 node.error("Failed to send message to topic: " + err.message);
-                node.status({ fill: "red", shape: "ring", text: "error" });
+                //node.status({ fill: "red", shape: "ring", text: "error" });
             }
         });
 

@@ -44,3 +44,7 @@ neuron/userdir/lib/*
 neuron/userdir/node_modules/*
 neuron/userdir/.flows.json
 neuron/userdir/package.json
+neuron/nodes/envs/buyer-*.env
+neuron/nodes/PROCESS_PERSISTENCE_IMPLEMENTATION.md
+neuron/nodes/CROSS_PLATFORM_PROCESS_TERMINATION.md
+.cursor/rules/write_new_code.mdc

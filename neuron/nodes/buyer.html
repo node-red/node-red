@@ -220,6 +220,24 @@
                     .seller-table tr:hover {
                        outline: 2px solid #4d90fe;
                     }
+                    .seller-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        color: white;
+                    }
+                    .seller-table th, .seller-table td {
+                        border: 1px solid #ccc;
+                        padding: 8px;
+                        text-align: left;
+                        color: white;
+                    }
+                    .seller-table thead th {
+                        position: sticky;
+                        top: 0;
+                        background-color: black;
+                        color: white;
+                        z-index: 1;
+                    }
                 `)
                 .appendTo('head');
 
@@ -503,7 +521,7 @@
                     $.get(`/buyer/device-balance/${node.id}`)
                         .done(function(data) {
                             if (data.success && data.balance) {
-                                $('#node-input-balance').val(data.balance + ' ℏ');
+                                $('#node-input-balance').val(data.balance + ' USDC');
                             } else {
                                 $('#node-input-balance').val('Not initialized yet');
                             }
@@ -519,20 +537,24 @@
             // Update EVM address ONCE on dialog open (NO REFRESH EVER)
             updateEvmAddress();
             
-            // Update balance on dialog open
+            // Update balance ONCE on dialog open (NO REFRESH)
             updateDeviceBalance();
-
-            // Refresh ONLY balance every 10 seconds (EVM address NEVER refreshes)
-            const balanceRefreshInterval = setInterval(updateDeviceBalance, 10000);
-
-            // Clean up interval when dialog closes
-            $('#node-input-name').closest('.red-ui-editor').on('remove', function() {
-                clearInterval(balanceRefreshInterval);
-            });
         },
         
 
+        oneditcancel: function() {
+            // Clean up intervals when dialog is cancelled/closed
+            if (this._cleanup) {
+                this._cleanup();
+            }
+        },
+
         oneditsave: function () {
+            // Clean up intervals when dialog is saved/closed
+            if (this._cleanup) {
+                this._cleanup();
+            }
+            
             // Get the selected addresses from the hidden input
             const sellerEvmAddressValue = $('#node-input-sellerEvmAddress').val();
             let selectedAddresses = [];
@@ -699,15 +721,14 @@
         // Set up event listeners
         refreshBtn.addEventListener('click', refreshConnections);
 
-        // Load initial status
+        // Load initial status (single call only)
         loadConnectionStatus();
 
-        // Set up periodic refresh every 30 seconds
-        const statusInterval = setInterval(loadConnectionStatus, 30000);
+        // Remove the periodic refresh - no more polling
+        // const statusInterval = setInterval(loadConnectionStatus, 30000);
 
-        // Cleanup function
+        // Cleanup function (no interval to clear)
         return () => {
-            clearInterval(statusInterval);
             refreshBtn.removeEventListener('click', refreshConnections);
         };
     }

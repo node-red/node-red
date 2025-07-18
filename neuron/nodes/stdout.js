@@ -96,7 +96,7 @@ module.exports = function (RED) {
                 const result = await hederaService.submitMessageToTopic(
                     deviceInfo.topics[1], // STDOUT
                     JSON.stringify(message),
-                    persistedDevice.devicePrivateKeyString,
+                    persistedDevice.privateKey,
                     persistedDevice.accountId
                 );
 
@@ -104,7 +104,7 @@ module.exports = function (RED) {
                 node.status({ fill: "green", shape: "dot", text: new Date().toLocaleTimeString() + " sent to topic " + deviceInfo.topics[1] });
             } catch (err) {
                 node.error("Failed to send message to topic: " + err.message);
-                node.status({ fill: "red", shape: "ring", text: "error" });
+               // node.status({ fill: "red", shape: "ring", text: "error" });
             }
         });
 
