@@ -1,9 +1,9 @@
 {
   "b4e88767fea43f8c": {
-    "pid": 58477,
-    "port": 61331,
+    "pid": 92203,
+    "port": 61333,
     "nodeType": "buyer",
-    "startTime": "2025-07-18T14:35:28.866Z",
+    "startTime": "2025-07-20T10:33:48.717Z",
     "deviceInfo": {
       "accountId": "0.0.6357323",
       "topics": [
@@ -22,18 +22,18 @@
         "0342b598fa5c4792bc6dde32acd0e533683417a5b3e32e4c48f196c43935503198"
       ],
       "adminAddress": "03d62dbde6b642471eeb1d8de2eed8f91670c3ea65741449f01e23118cbc87a506",
-      "uniquePort": 61331,
-      "wsPort": 61331,
+      "uniquePort": 61333,
+      "wsPort": 61333,
       "sellerEvmAddress": "[\"0x9B99b24e19A29DaF4F4D64cFb79AF207A9AE6a87\",\"0x00B9a61Cc0d9d063e4f208CAcC4fd754573fCAE0\"]"
     },
     "status": "running",
-    "lastSeen": "2025-07-18T14:39:13.662Z"
+    "lastSeen": "2025-07-20T10:36:04.491Z"
   },
   "b3f21ec36e9896f4": {
-    "pid": 58476,
-    "port": 61330,
+    "pid": 92201,
+    "port": 61332,
     "nodeType": "buyer",
-    "startTime": "2025-07-18T14:35:28.718Z",
+    "startTime": "2025-07-20T10:33:48.524Z",
     "deviceInfo": {
       "accountId": "0.0.6357324",
       "topics": [
@@ -51,12 +51,12 @@
         "023cdaf25e137f3188b2525b099eed13955297beeb902465b0913c661a36c5ee02"
       ],
       "adminAddress": "036dc381bb3044fdb7ff3468bdf5615013b21665317e8c1886d16c28b320c95285",
-      "uniquePort": 61330,
-      "wsPort": 61330,
+      "uniquePort": 61332,
+      "wsPort": 61332,
       "sellerEvmAddress": "[\"0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8\"]"
     },
     "status": "running",
-    "lastSeen": "2025-07-18T14:39:13.667Z"
+    "lastSeen": "2025-07-20T10:36:04.495Z"
   },
   "dfc917dee557ea1a": {
     "pid": 57093,

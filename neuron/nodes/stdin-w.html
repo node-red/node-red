@@ -4,19 +4,41 @@
         <input type="text" id="node-input-name" placeholder="stdin-w">
     </div>
     <div class="form-row">
-        <label for="node-input-nodeType"> <span>Node Type</span></label>
+        <label for="node-input-peerStdinTopic"><span>Peer STDIN Topic</span></label>
+        <input type="text" id="node-input-peerStdinTopic" placeholder="Enter STDIN topic">
+    </div>
+ 
+    <div class="form-row">
+        <label for="node-input-nodeType"> <span>Sender Node Type</span></label>
         <select id="node-input-nodeType" style="width: 100%;">
             <option value="buyer config">Buyer</option>
             <option value="seller config">Seller</option>
         </select>
     </div>
+
     <div class="form-row">
+        <label for="node-input-selectedNode"> <span>Selected Sender Node</span></label>
+        <input type="hidden" id="node-input-selectedNode" />
+        <input type="text" id="node-input-selectedNodeDisplay" placeholder="No node selected" readonly disabled>
+        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px; background-color: #489cb5; color: white;">
+            Select sender node
+        </button>
+        <button type="button" id="node-input-clearNode-btn" class="red-ui-button" style="margin-left: 5px;" title="Clear selection">
+            Clear
+        </button>
+    </div>
+
+
+
+
+
+    <!--<div class="form-row">
         <label for="node-input-selectedNode"> <span>Selected Node</span></label>
         <input type="text" id="node-input-selectedNode" placeholder="Select a node">
         <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
             Select node
         </button>
-    </div>
+    </div> -->
 </script>
 
 <script type="text/javascript">
@@ -25,8 +47,9 @@
         color: '#1DA665',
         defaults: {
             name: { value: "" },
-            selectedNode: { value: "", required: true },
-            nodeType: { value: "buyer config" }
+            selectedNode: { value: null, required: true },
+            nodeType: { value:null, value: "buyer config" },
+            peerStdinTopic: { required: true }
         },
         inputs: 1,
         outputs: 0,
@@ -37,7 +60,7 @@
         oneditprepare: function() {
             const node = this;
             const selectedNodeInput = $('#node-input-selectedNode');
-            
+            const selectedNodeDisplayInput = $('#node-input-selectedNodeDisplay');
             // Add custom styles
             $('<style>')
                 .text(`
@@ -90,14 +113,27 @@
             
             // Function to update the input field with selected node info
             function updateNodeInput(nodeId, nodeName) {
-                selectedNodeInput.val(nodeName);
-                $('#node-input-selectedNode').val(nodeId);
+                selectedNodeInput.val(nodeId);
+                selectedNodeDisplayInput.val(nodeName);
+                // $('#node-input-selectedNode').val(nodeId);
             }
 
             // Set initial node type
             if (node.nodeType) {
                 $('#node-input-nodeType').val(node.nodeType);
             }
+
+            if (node.selectedNode) {
+                   // console.log('Initial node selected ', node.selectedNode); // Debug log
+                    const selectedNode = RED.nodes.node(node.selectedNode);
+                    if (selectedNode) {
+                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
+                    } else {
+                        // Node no longer exists, clear the selection
+                        selectedNodeInput.val('');
+                        selectedNodeDisplayInput.val('Node not found');
+                    }
+                }
 
             // Handle the search button click
             $('#node-input-selectNode-btn').click(function() {
@@ -174,13 +210,7 @@
                 table.append(tbody);
                 dialog.append(table);
 
-                // Set initial value if exists
-                if (node.selectedNode) {
-                    const selectedNode = RED.nodes.getNode(node.selectedNode);
-                    if (selectedNode) {
-                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
-                    }
-                }
+            
             });
 
             // Make the input field read-only

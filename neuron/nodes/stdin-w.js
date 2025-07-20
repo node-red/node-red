@@ -78,27 +78,23 @@ module.exports = function (RED) {
                 // Prepare message for topic
                 const message = {
                     timestamp: new Date().toISOString(),
-                    selectedNodeId: config.selectedNode,
-                    deviceInfo: {
-                        address: deviceInfo.address,
-                        deviceType: deviceInfo.deviceType,
-                        serialNumber: deviceInfo.serialNumber
-                    },
-                    payload: msg.topic
+                    from: deviceInfo.evmAddress,
+                    payload: msg.payload
                 };
     
                 // Send message to Hedera topic
                // console.log(deviceInfo);
                 //console.log(deviceInfo.topics[0]);
                 const result = await hederaService.submitMessageToTopic(
-                    deviceInfo.topics[0], 
+                   config.peerStdinTopic.replace(/\s+/g, ''), 
+                    //"0.0.6144837",
                     JSON.stringify(message),
                     deviceInfo.devicePrivateKeyString,
                     deviceInfo.accountId
                 );
 
 
-                node.status({ fill: "green", shape: "dot", text: new Date().toLocaleTimeString() + " sent to topic " + deviceInfo.topics[0] });
+                node.status({ fill: "green", shape: "dot", text: new Date().toLocaleTimeString() + " sent to topic " + config.peerStdinTopic });
             } catch (err) {
                 node.error("Failed to send message to topic: " + err.message);
                 node.status({ fill: "red", shape: "ring", text: "error" });

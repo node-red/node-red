@@ -10,13 +10,26 @@
             <option value="seller config">Seller</option>
         </select>
     </div>
+
     <div class="form-row">
+        <label for="node-input-selectedNode"> <span>Selected Node</span></label>
+        <input type="hidden" id="node-input-selectedNode" />
+        <input type="text" id="node-input-selectedNodeDisplay" placeholder="No node selected" readonly disabled>
+        <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px; background-color: #489cb5; color: white;">
+            Select node
+        </button>
+        <button type="button" id="node-input-clearNode-btn" class="red-ui-button" style="margin-left: 5px;" title="Clear selection">
+            Clear
+        </button>
+    </div>
+
+    <!--<div class="form-row">
         <label for="node-input-selectedNode"> <span>Selected Node</span></label>
         <input type="text" id="node-input-selectedNode" placeholder="Select a node">
         <button type="button" id="node-input-selectNode-btn" class="red-ui-button" style="margin-left: 5px;">
             Select node
         </button>
-    </div>
+    </div>-->
 </script>
 
 <script type="text/javascript">
@@ -31,13 +44,14 @@
         inputs: 1,
         outputs: 0,
         icon: "heartbeat.svg",
-        label: function() {
+        label: function () {
             return this.name || "Stdout";
         },
-        oneditprepare: function() {
+        oneditprepare: function () {
             const node = this;
             const selectedNodeInput = $('#node-input-selectedNode');
-            
+            const selectedNodeDisplayInput = $('#node-input-selectedNodeDisplay');
+
             // Add custom styles
             $('<style>')
                 .text(`
@@ -87,20 +101,40 @@
                     }
                 `)
                 .appendTo('head');
-            
+
             // Function to update the input field with selected node info
             function updateNodeInput(nodeId, nodeName) {
-                selectedNodeInput.val(nodeName);
-                $('#node-input-selectedNode').val(nodeId);
+                selectedNodeInput.val(nodeId);
+                // $('#node-input-selectedNode').val(nodeId);
+                selectedNodeDisplayInput.val(nodeName);
             }
+
+            $('#node-input-clearNode-btn').click(function () {
+                console.log('Clear node button clicked'); // Debug log
+                selectedNodeInput.val('');
+                selectedNodeDisplayInput.val('No node selected');
+            });
 
             // Set initial node type
             if (node.nodeType) {
                 $('#node-input-nodeType').val(node.nodeType);
             }
 
+                // Set initial value if exists
+                if (node.selectedNode) {
+                   // console.log('Initial node selected ', node.selectedNode); // Debug log
+                    const selectedNode = RED.nodes.node(node.selectedNode);
+                    if (selectedNode) {
+                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
+                    } else {
+                        // Node no longer exists, clear the selection
+                        selectedNodeInput.val('');
+                        selectedNodeDisplayInput.val('Node not found');
+                    }
+                }
+
             // Handle the search button click
-            $('#node-input-selectNode-btn').click(function() {
+            $('#node-input-selectNode-btn').click(function () {
                 const selectedType = $('#node-input-nodeType').val();
                 const dialog = $('<div>').dialog({
                     title: `Select ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Node`,
@@ -110,7 +144,7 @@
                     buttons: [
                         {
                             text: "Cancel",
-                            click: function() {
+                            click: function () {
                                 $(this).dialog("close");
                             }
                         }
@@ -129,15 +163,15 @@
                 table.append(thead);
 
                 const tbody = $('<tbody>');
-                
+
                 // Find all nodes of selected type in the workspace and sort them by name
                 const nodes = [];
-                RED.nodes.eachNode(function(n) {
+                RED.nodes.eachNode(function (n) {
                     if (n.type === selectedType) {
                         nodes.push(n);
                     }
                 });
-                
+
                 // Sort nodes by name
                 nodes.sort((a, b) => {
                     const nameA = (a.name || a.id).toLowerCase();
@@ -146,7 +180,7 @@
                 });
 
                 // Add sorted nodes to table
-                nodes.forEach(function(n) {
+                nodes.forEach(function (n) {
                     const row = $('<tr>').append(
                         $('<td>').addClass('node-name').text(n.name || n.id),
                         $('<td>').addClass('node-type').text(n.type),
@@ -154,40 +188,34 @@
                             $('<button>')
                                 .addClass('select-btn')
                                 .text('Select')
-                                .click(function(e) {
+                                .click(function (e) {
                                     e.stopPropagation();
                                     updateNodeInput(n.id, n.name || n.id);
                                     dialog.dialog("close");
                                 })
                         )
                     );
-                    
+
                     // Add click handler for the entire row
-                    row.click(function() {
+                    row.click(function () {
                         updateNodeInput(n.id, n.name || n.id);
                         dialog.dialog("close");
                     });
-                    
+
                     tbody.append(row);
                 });
 
                 table.append(tbody);
                 dialog.append(table);
 
-                // Set initial value if exists
-                if (node.selectedNode) {
-                    const selectedNode = RED.nodes.getNode(node.selectedNode);
-                    if (selectedNode) {
-                        updateNodeInput(selectedNode.id, selectedNode.name || selectedNode.id);
-                    }
-                }
+          
             });
 
             // Make the input field read-only
             selectedNodeInput.prop('readonly', true);
         },
-        oneditsave: function() {
+        oneditsave: function () {
             this.nodeType = $('#node-input-nodeType').val();
         }
     });
-</script> 
+</script>
