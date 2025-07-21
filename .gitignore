@@ -13,7 +13,7 @@
 *_cred*
 coverage
 credentials.json
-flows*.json
+flows.json.*
 nodes/node-red-nodes/
 node_modules
 public
@@ -51,3 +51,7 @@ neuron/nodes/CROSS_PLATFORM_PROCESS_TERMINATION.md
 neuron/nodes/port-reservations.json
 neuron/nodes/process-registry.json
 
+neuron/nodes/port-reservations.json
+neuron/userdir/flows.json
+neuron/nodes/port-reservations.json
+neuron/nodes/process-registry.json

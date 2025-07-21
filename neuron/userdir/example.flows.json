@@ -1,0 +1,888 @@
+[
+    {
+        "id": "2aa40cf028783520",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f1721b6e53fb3565",
+        "type": "subflow",
+        "name": "Jetvision buyer",
+        "info": "",
+        "category": "Examples",
+        "in": [
+            {
+                "x": 120,
+                "y": 200,
+                "wires": [
+                    {
+                        "id": "4b2277d966231fb3"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 800,
+                "y": 200,
+                "wires": [
+                    {
+                        "id": "4b2277d966231fb3",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99",
+        "icon": "font-awesome/fa-shopping-basket",
+        "status": {
+            "x": 460,
+            "y": 360,
+            "wires": [
+                {
+                    "id": "88974b51be7cb128",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "93d173187408e9ab",
+        "type": "subflow",
+        "name": "Jetvision seller",
+        "info": "",
+        "category": "Examples",
+        "in": [
+            {
+                "x": 300,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "d7a8ade0ca24b068"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 720,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "d7a8ade0ca24b068",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99",
+        "icon": "node-red/white-globe.svg",
+        "status": {
+            "x": 440,
+            "y": 380,
+            "wires": [
+                {
+                    "id": "a2a1ad89e9813d4b",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "6d24cdbbe67e56dd",
+        "type": "subflow",
+        "name": "P2P chat - seller",
+        "info": "",
+        "category": "Examples",
+        "in": [],
+        "out": [
+            {
+                "x": 860,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "02a88d7d72646aab",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#C0DEED",
+        "status": {
+            "x": 500,
+            "y": 360,
+            "wires": [
+                {
+                    "id": "01ea60053a7c1218",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "beac2fbf1433c17e",
+        "type": "subflow",
+        "name": "P2P chat - buyer",
+        "info": "",
+        "category": "Examples",
+        "in": [],
+        "out": [
+            {
+                "x": 740,
+                "y": 200,
+                "wires": [
+                    {
+                        "id": "8d9675202dabdfbd",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#A6BBCF",
+        "status": {
+            "x": 440,
+            "y": 340,
+            "wires": [
+                {
+                    "id": "8ad283b8c392b678",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "60e70487bb5f9c63",
+        "type": "subflow",
+        "name": "Complete Jetvision seller ",
+        "info": "",
+        "category": "Examples",
+        "in": [],
+        "out": [],
+        "env": [],
+        "meta": {},
+        "color": "#FFCC66",
+        "icon": "node-red/light.svg",
+        "status": {
+            "x": 440,
+            "y": 400,
+            "wires": [
+                {
+                    "id": "f0b7517a11590aee",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "ef656de5cefe0a4d",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "eb3ea4e3e0a95b90",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "d6928ace43c87da0",
+        "type": "ui_group",
+        "name": "Buyer",
+        "tab": "ef656de5cefe0a4d",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "84e6cabba255cc18",
+        "type": "ui_group",
+        "name": "Seller",
+        "tab": "ef656de5cefe0a4d",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "42ec6c6b2704a8b1",
+        "type": "buyer config",
+        "z": "f1721b6e53fb3565",
+        "name": "Jetvision Buyer config",
+        "sellerEvmAddress": "[\"0x992165e059Afba8901c9dFB059141171802e8d78\"]",
+        "sellerDevices": [],
+        "smartContract": "jetvision",
+        "deviceType": "",
+        "description": "",
+        "evmAddress": "Error loading EVM address",
+        "balance": "Error loading balance",
+        "x": 540,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "4b2277d966231fb3",
+        "type": "neuron-p2p",
+        "z": "f1721b6e53fb3565",
+        "name": "",
+        "selectedNode": "",
+        "description": "",
+        "x": 520,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d939024dc0d3f170",
+        "type": "comment",
+        "z": "f1721b6e53fb3565",
+        "name": "Writes input message (msg.payload) to the neuron network",
+        "info": "Optional msg.to that specifies and EVM where the message will be sent. \nBy default message is sent to all sellers that are specified in the buyer configuration node.",
+        "x": 250,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "d1358e72f3c1c08b",
+        "type": "comment",
+        "z": "f1721b6e53fb3565",
+        "name": "Listens to neuron network and outputs messages here",
+        "info": "",
+        "x": 800,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "32de0bfdbb4e89bd",
+        "type": "comment",
+        "z": "f1721b6e53fb3565",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 580,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "b3e681f829d67cd4",
+        "type": "comment",
+        "z": "f1721b6e53fb3565",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 540,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "88974b51be7cb128",
+        "type": "status",
+        "z": "f1721b6e53fb3565",
+        "name": "",
+        "scope": null,
+        "x": 280,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d7a8ade0ca24b068",
+        "type": "neuron-p2p",
+        "z": "93d173187408e9ab",
+        "name": "",
+        "selectedNode": "a9f5b80dfaf41197",
+        "description": "",
+        "x": 480,
+        "y": 220,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ed2f3e188279b139",
+        "type": "comment",
+        "z": "93d173187408e9ab",
+        "name": "Writes input message (msg.payload) to the neuron network",
+        "info": "Optional msg.to that specifies and EVM where the message will be sent. \nBy default message is sent to all sellers that are specified in the buyer configuration node.",
+        "x": 210,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "c437f04ad503c2b4",
+        "type": "comment",
+        "z": "93d173187408e9ab",
+        "name": "Listens to neuron network and outputs messages here",
+        "info": "",
+        "x": 760,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "65ef3645ae546493",
+        "type": "comment",
+        "z": "93d173187408e9ab",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 540,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "6625e1a630ec3d8b",
+        "type": "comment",
+        "z": "93d173187408e9ab",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 500,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "a2a1ad89e9813d4b",
+        "type": "status",
+        "z": "93d173187408e9ab",
+        "name": "",
+        "scope": null,
+        "x": 240,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "de9fcd7031a20d01",
+        "type": "seller config",
+        "z": "93d173187408e9ab",
+        "name": "Jetvision seller",
+        "deviceRole": "",
+        "deviceName": "",
+        "smartContract": "jetvision",
+        "serialNumber": "",
+        "deviceType": "",
+        "price": 0,
+        "description": "",
+        "evmAddress": "Error loading EVM address",
+        "balance": "Error loading balance",
+        "buyerEvmAddress": [],
+        "buyerDevices": [],
+        "x": 500,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "336e341bd0a8da95",
+        "type": "ui_template",
+        "z": "6d24cdbbe67e56dd",
+        "group": "84e6cabba255cc18",
+        "name": "Seller Chat UI",
+        "order": 0,
+        "width": "6",
+        "height": "15",
+        "format": "<style>\n  .chat-container-2 {\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;\n    display: flex;\n    flex-direction: column;\n    height: 100%;\n    background-color: #f8f9fa;\n    border-radius: 8px;\n    overflow: hidden;\n    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);\n    margin-top: 10px;\n  }\n\n  .message-panel-2 {\n    flex-grow: 1;\n    overflow-y: auto;\n    padding: 16px;\n    background-color: #ffffff;\n  }\n\n  .message {\n    max-width: 80%;\n    padding: 10px 14px;\n    margin-bottom: 12px;\n    border-radius: 18px;\n    line-height: 1.4;\n    position: relative;\n    word-wrap: break-word;\n    animation: fadeIn 0.3s ease-out;\n  }\n\n  @keyframes fadeIn {\n    from {\n      opacity: 0;\n      transform: translateY(10px);\n    }\n\n    to {\n      opacity: 1;\n      transform: translateY(0);\n    }\n  }\n\n  .user-message {\n    background-color: #007bff;\n    color: white;\n    margin-left: auto;\n    border-bottom-right-radius: 4px;\n  }\n\n  .other-message {\n    background-color: #e9ecef;\n    color: #212529;\n    margin-right: auto;\n    border-bottom-left-radius: 4px;\n  }\n\n  .timestamp {\n    font-size: 11px;\n    opacity: 0.8;\n    margin-top: 4px;\n    text-align: right;\n  }\n\n  .input-area {\n    display: flex;\n    padding: 12px;\n    background-color: #ffffff;\n    border-top: 1px solid #dee2e6;\n  }\n\n  #chat-input-2 {\n    flex-grow: 1;\n    padding: 10px 14px;\n    border: 1px solid #ced4da;\n    border-radius: 20px;\n    outline: none;\n    font-size: 14px;\n  }\n\n  #chat-input-2:focus {\n    border-color: #007bff;\n  }\n\n  #send-button-2 {\n    margin-left: 10px;\n    padding: 10px 20px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 20px;\n    cursor: pointer;\n    font-size: 14px;\n  }\n\n  #send-button-2:hover {\n    background-color: #0069d9;\n  }\n\n  #send-button-2:disabled {\n    background-color: #adb5bd;\n    cursor: not-allowed;\n  }\n\n  .typing-indicator {\n    display: flex;\n    padding: 8px 16px;\n    justify-content: flex-start;\n    gap: 4px;\n  }\n\n  .typing-dot {\n    width: 8px;\n    height: 8px;\n    background-color: #6c757d;\n    border-radius: 50%;\n    animation: typingAnimation 1.4s infinite ease-in-out;\n  }\n\n  .typing-dot:nth-child(1) {\n    animation-delay: 0s;\n  }\n\n  .typing-dot:nth-child(2) {\n    animation-delay: 0.2s;\n  }\n\n  .typing-dot:nth-child(3) {\n    animation-delay: 0.4s;\n  }\n\n  @keyframes typingAnimation {\n\n    0%,\n    60%,\n    100% {\n      transform: translateY(0);\n    }\n\n    30% {\n      transform: translateY(-4px);\n    }\n  }\n</style>\n\n<div class=\"chat-container-2\">\n  <div id=\"message-panel-2\" class=\"message-panel-2\"></div>\n  <div id=\"typing-indicator-2\" class=\"typing-indicator\" style=\"display: none;\">\n    <div class=\"typing-dot\"></div>\n    <div class=\"typing-dot\"></div>\n    <div class=\"typing-dot\"></div>\n  </div>\n  <div class=\"input-area\">\n    <input type=\"text\" id=\"chat-input-2\" placeholder=\"Type your message...\" autocomplete=\"off\" />\n    <button id=\"send-button-2\" disabled>Send</button>\n  </div>\n</div>\n\n<script>\n  (function(scope) {\n  const state = {\n    messageCount: 0,\n    isTyping: false,\n    pendingMessages: new Set()\n  };\n  \n  const messagePanel = document.getElementById('message-panel-2');\n  const chatInput = document.getElementById('chat-input-2');\n  const sendButton = document.getElementById('send-button-2');\n  const typingIndicator = document.getElementById('typing-indicator-2');\n  \n  function formatTimestamp(date = new Date()) {\n    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });\n  }\n  \n  function scrollToBottom() {\n    messagePanel.scrollTop = messagePanel.scrollHeight;\n  }\n  \n  function addMessage(text, sender, timestamp, messageId) {\n    const id = messageId || 'msg-' + state.messageCount++ + '-' + Date.now();\n    \n    if (state.pendingMessages.has(id)) return;\n    state.pendingMessages.add(id);\n    \n    const messageElement = document.createElement('div');\n    messageElement.className = `message ${sender}-message`;\n    messageElement.id = id;\n    messageElement.innerHTML = `\n      ${text}\n      <div class=\"timestamp\">${formatTimestamp(timestamp ? new Date(timestamp) : new Date())}</div>\n    `;\n    \n    messagePanel.appendChild(messageElement);\n    scrollToBottom();\n  }\n  \n  function updateSendButton() {\n    sendButton.disabled = chatInput.value.trim() === '';\n  }\n  \n  function sendMessage() {\n    const messageText = chatInput.value.trim();\n    if (!messageText) return;\n    \n    const timestamp = new Date();\n    const messageId = 'user-msg-2-' + Date.now();\n    \n    // Add to UI immediately with unique ID\n    addMessage(messageText, 'user', timestamp, messageId);\n    \n    // Send to Node-RED with a different ID to prevent echo\n    if (typeof scope.send === 'function') {\n      scope.send({ \n        payload: { \n          text: messageText, \n          sender: 'user',\n          timestamp: timestamp.toISOString(),\n          messageId: 'net-' + messageId, // Different prefix for network messages\n          instance: 'chat-2',\n          source: 'local' // Mark as locally originated\n        } \n      });\n    }\n    \n    chatInput.value = '';\n    updateSendButton();\n    chatInput.focus();\n  }\n  \n  // Event listeners\n  sendButton.addEventListener('click', sendMessage);\n  \n  chatInput.addEventListener('keypress', function(e) {\n    if (e.key === 'Enter') {\n      sendMessage();\n    }\n  });\n  \n  chatInput.addEventListener('input', updateSendButton);\n  \n  // Handle incoming messages\n  scope.$watch('msg', function(msg) {\n    if (!msg || !msg.payload) return;\n    \n    try {\n      // Skip locally originated messages that come back\n      if (msg.payload.source === 'local') return;\n      \n      // Handle typing indicator\n      if (msg.payload.typing !== undefined) {\n        typingIndicator.style.display = msg.payload.typing ? 'flex' : 'none';\n        scrollToBottom();\n        return;\n      }\n      \n      // Process message\n      let messageText, messageSender, timestamp, messageId;\n   \n      if (typeof msg.payload === 'string') {\n        const payload = JSON.parse(msg.payload);\n        messageText = payload.text;\n        messageSender = 'other';\n        timestamp = new Date();\n        messageId = 'other-msg-2-' + Date.now();\n      } \n      else if (typeof msg.payload === 'object') {\n        // Skip if this is a network echo of our own message\n        if (msg.payload.messageId && msg.payload.messageId.startsWith('net-user-msg-2-')) return;\n        \n        messageId = msg.payload.messageId || 'other-msg-2-' + Date.now();\n        messageText = msg.payload.text || '';\n        messageSender = msg.payload.sender === 'user' ? 'user' : 'other';\n        timestamp = msg.payload.timestamp || new Date();\n      }\n      \n      if (messageText && !state.pendingMessages.has(messageId)) {\n        addMessage(messageText, messageSender, timestamp, messageId);\n      }\n    } catch (error) {\n      console.error(\"Error processing message:\", error);\n    }\n  });\n  \n  // Focus input on load\n  chatInput.focus();\n\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 300,
+        "y": 220,
+        "wires": [
+            [
+                "02a88d7d72646aab"
+            ]
+        ]
+    },
+    {
+        "id": "02a88d7d72646aab",
+        "type": "neuron-p2p",
+        "z": "6d24cdbbe67e56dd",
+        "name": "P2P seller ",
+        "selectedNode": "",
+        "description": "",
+        "x": 620,
+        "y": 220,
+        "wires": [
+            [
+                "336e341bd0a8da95"
+            ]
+        ]
+    },
+    {
+        "id": "01ea60053a7c1218",
+        "type": "status",
+        "z": "6d24cdbbe67e56dd",
+        "name": "",
+        "scope": null,
+        "x": 320,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "52e257d4c2d39138",
+        "type": "seller config",
+        "z": "6d24cdbbe67e56dd",
+        "name": "P2P chat seller config",
+        "deviceRole": "",
+        "deviceName": "",
+        "smartContract": "chat",
+        "serialNumber": "",
+        "deviceType": "",
+        "price": 0,
+        "description": "",
+        "evmAddress": "Error loading EVM address",
+        "balance": "Error loading balance",
+        "buyerEvmAddress": [],
+        "buyerDevices": [],
+        "x": 480,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "d0621bf177d6808f",
+        "type": "comment",
+        "z": "6d24cdbbe67e56dd",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 500,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "78ce52d106b08369",
+        "type": "comment",
+        "z": "6d24cdbbe67e56dd",
+        "name": "Double click to set node properties - (selected node should be 'P2P chat seller config')",
+        "info": "",
+        "x": 780,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "beaf0b45ba364c68",
+        "type": "comment",
+        "z": "6d24cdbbe67e56dd",
+        "name": "Builds UI - http://localhost:1880/ui",
+        "info": "",
+        "x": 240,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "99b6a56a37b72025",
+        "type": "comment",
+        "z": "6d24cdbbe67e56dd",
+        "name": "Listens to neuron network and outputs messages here",
+        "info": "",
+        "x": 940,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "60cea21c08412da5",
+        "type": "ui_template",
+        "z": "beac2fbf1433c17e",
+        "group": "84e6cabba255cc18",
+        "name": "Seller Chat UI",
+        "order": 0,
+        "width": "6",
+        "height": "15",
+        "format": "<style>\n  .chat-container-2 {\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;\n    display: flex;\n    flex-direction: column;\n    height: 100%;\n    background-color: #f8f9fa;\n    border-radius: 8px;\n    overflow: hidden;\n    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);\n    margin-top: 10px;\n  }\n\n  .message-panel-2 {\n    flex-grow: 1;\n    overflow-y: auto;\n    padding: 16px;\n    background-color: #ffffff;\n  }\n\n  .message {\n    max-width: 80%;\n    padding: 10px 14px;\n    margin-bottom: 12px;\n    border-radius: 18px;\n    line-height: 1.4;\n    position: relative;\n    word-wrap: break-word;\n    animation: fadeIn 0.3s ease-out;\n  }\n\n  @keyframes fadeIn {\n    from {\n      opacity: 0;\n      transform: translateY(10px);\n    }\n\n    to {\n      opacity: 1;\n      transform: translateY(0);\n    }\n  }\n\n  .user-message {\n    background-color: #007bff;\n    color: white;\n    margin-left: auto;\n    border-bottom-right-radius: 4px;\n  }\n\n  .other-message {\n    background-color: #e9ecef;\n    color: #212529;\n    margin-right: auto;\n    border-bottom-left-radius: 4px;\n  }\n\n  .timestamp {\n    font-size: 11px;\n    opacity: 0.8;\n    margin-top: 4px;\n    text-align: right;\n  }\n\n  .input-area {\n    display: flex;\n    padding: 12px;\n    background-color: #ffffff;\n    border-top: 1px solid #dee2e6;\n  }\n\n  #chat-input-2 {\n    flex-grow: 1;\n    padding: 10px 14px;\n    border: 1px solid #ced4da;\n    border-radius: 20px;\n    outline: none;\n    font-size: 14px;\n  }\n\n  #chat-input-2:focus {\n    border-color: #007bff;\n  }\n\n  #send-button-2 {\n    margin-left: 10px;\n    padding: 10px 20px;\n    background-color: #007bff;\n    color: white;\n    border: none;\n    border-radius: 20px;\n    cursor: pointer;\n    font-size: 14px;\n  }\n\n  #send-button-2:hover {\n    background-color: #0069d9;\n  }\n\n  #send-button-2:disabled {\n    background-color: #adb5bd;\n    cursor: not-allowed;\n  }\n\n  .typing-indicator {\n    display: flex;\n    padding: 8px 16px;\n    justify-content: flex-start;\n    gap: 4px;\n  }\n\n  .typing-dot {\n    width: 8px;\n    height: 8px;\n    background-color: #6c757d;\n    border-radius: 50%;\n    animation: typingAnimation 1.4s infinite ease-in-out;\n  }\n\n  .typing-dot:nth-child(1) {\n    animation-delay: 0s;\n  }\n\n  .typing-dot:nth-child(2) {\n    animation-delay: 0.2s;\n  }\n\n  .typing-dot:nth-child(3) {\n    animation-delay: 0.4s;\n  }\n\n  @keyframes typingAnimation {\n\n    0%,\n    60%,\n    100% {\n      transform: translateY(0);\n    }\n\n    30% {\n      transform: translateY(-4px);\n    }\n  }\n</style>\n\n<div class=\"chat-container-2\">\n  <div id=\"message-panel-2\" class=\"message-panel-2\"></div>\n  <div id=\"typing-indicator-2\" class=\"typing-indicator\" style=\"display: none;\">\n    <div class=\"typing-dot\"></div>\n    <div class=\"typing-dot\"></div>\n    <div class=\"typing-dot\"></div>\n  </div>\n  <div class=\"input-area\">\n    <input type=\"text\" id=\"chat-input-2\" placeholder=\"Type your message...\" autocomplete=\"off\" />\n    <button id=\"send-button-2\" disabled>Send</button>\n  </div>\n</div>\n\n<script>\n  (function(scope) {\n  const state = {\n    messageCount: 0,\n    isTyping: false,\n    pendingMessages: new Set()\n  };\n  \n  const messagePanel = document.getElementById('message-panel-2');\n  const chatInput = document.getElementById('chat-input-2');\n  const sendButton = document.getElementById('send-button-2');\n  const typingIndicator = document.getElementById('typing-indicator-2');\n  \n  function formatTimestamp(date = new Date()) {\n    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });\n  }\n  \n  function scrollToBottom() {\n    messagePanel.scrollTop = messagePanel.scrollHeight;\n  }\n  \n  function addMessage(text, sender, timestamp, messageId) {\n    const id = messageId || 'msg-' + state.messageCount++ + '-' + Date.now();\n    \n    if (state.pendingMessages.has(id)) return;\n    state.pendingMessages.add(id);\n    \n    const messageElement = document.createElement('div');\n    messageElement.className = `message ${sender}-message`;\n    messageElement.id = id;\n    messageElement.innerHTML = `\n      ${text}\n      <div class=\"timestamp\">${formatTimestamp(timestamp ? new Date(timestamp) : new Date())}</div>\n    `;\n    \n    messagePanel.appendChild(messageElement);\n    scrollToBottom();\n  }\n  \n  function updateSendButton() {\n    sendButton.disabled = chatInput.value.trim() === '';\n  }\n  \n  function sendMessage() {\n    const messageText = chatInput.value.trim();\n    if (!messageText) return;\n    \n    const timestamp = new Date();\n    const messageId = 'user-msg-2-' + Date.now();\n    \n    // Add to UI immediately with unique ID\n    addMessage(messageText, 'user', timestamp, messageId);\n    \n    // Send to Node-RED with a different ID to prevent echo\n    if (typeof scope.send === 'function') {\n      scope.send({ \n        payload: { \n          text: messageText, \n          sender: 'user',\n          timestamp: timestamp.toISOString(),\n          messageId: 'net-' + messageId, // Different prefix for network messages\n          instance: 'chat-2',\n          source: 'local' // Mark as locally originated\n        } \n      });\n    }\n    \n    chatInput.value = '';\n    updateSendButton();\n    chatInput.focus();\n  }\n  \n  // Event listeners\n  sendButton.addEventListener('click', sendMessage);\n  \n  chatInput.addEventListener('keypress', function(e) {\n    if (e.key === 'Enter') {\n      sendMessage();\n    }\n  });\n  \n  chatInput.addEventListener('input', updateSendButton);\n  \n  // Handle incoming messages\n  scope.$watch('msg', function(msg) {\n    if (!msg || !msg.payload) return;\n    \n    try {\n      // Skip locally originated messages that come back\n      if (msg.payload.source === 'local') return;\n      \n      // Handle typing indicator\n      if (msg.payload.typing !== undefined) {\n        typingIndicator.style.display = msg.payload.typing ? 'flex' : 'none';\n        scrollToBottom();\n        return;\n      }\n      \n      // Process message\n      let messageText, messageSender, timestamp, messageId;\n   \n      if (typeof msg.payload === 'string') {\n        const payload = JSON.parse(msg.payload);\n        messageText = payload.text;\n        messageSender = 'other';\n        timestamp = new Date();\n        messageId = 'other-msg-2-' + Date.now();\n      } \n      else if (typeof msg.payload === 'object') {\n        // Skip if this is a network echo of our own message\n        if (msg.payload.messageId && msg.payload.messageId.startsWith('net-user-msg-2-')) return;\n        \n        messageId = msg.payload.messageId || 'other-msg-2-' + Date.now();\n        messageText = msg.payload.text || '';\n        messageSender = msg.payload.sender === 'user' ? 'user' : 'other';\n        timestamp = msg.payload.timestamp || new Date();\n      }\n      \n      if (messageText && !state.pendingMessages.has(messageId)) {\n        addMessage(messageText, messageSender, timestamp, messageId);\n      }\n    } catch (error) {\n      console.error(\"Error processing message:\", error);\n    }\n  });\n  \n  // Focus input on load\n  chatInput.focus();\n\n})(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 240,
+        "y": 200,
+        "wires": [
+            [
+                "8d9675202dabdfbd"
+            ]
+        ]
+    },
+    {
+        "id": "8d9675202dabdfbd",
+        "type": "neuron-p2p",
+        "z": "beac2fbf1433c17e",
+        "name": "P2P seller ",
+        "selectedNode": "",
+        "description": "",
+        "x": 560,
+        "y": 200,
+        "wires": [
+            [
+                "60cea21c08412da5"
+            ]
+        ]
+    },
+    {
+        "id": "8ad283b8c392b678",
+        "type": "status",
+        "z": "beac2fbf1433c17e",
+        "name": "",
+        "scope": null,
+        "x": 260,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "af7ef030fdeb2722",
+        "type": "comment",
+        "z": "beac2fbf1433c17e",
+        "name": "Double click to set node properties",
+        "info": "",
+        "x": 440,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "6f567cd25296f947",
+        "type": "comment",
+        "z": "beac2fbf1433c17e",
+        "name": "Double click to set node properties - (selected node should be 'P2P seller config')",
+        "info": "",
+        "x": 700,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "aa7a8ca81dc5f854",
+        "type": "comment",
+        "z": "beac2fbf1433c17e",
+        "name": "Builds UI - http://localhost:1880/ui",
+        "info": "",
+        "x": 180,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "08db8cffc94a4f20",
+        "type": "comment",
+        "z": "beac2fbf1433c17e",
+        "name": "Listens to neuron network and outputs messages here",
+        "info": "",
+        "x": 880,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "161955d2a655df86",
+        "type": "buyer config",
+        "z": "beac2fbf1433c17e",
+        "name": "P2P chat buyer config",
+        "sellerEvmAddress": [],
+        "sellerDevices": [],
+        "smartContract": "chat",
+        "deviceType": "",
+        "description": "",
+        "evmAddress": "Error loading EVM address",
+        "balance": "Error loading balance",
+        "x": 480,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "599628007239e9a8",
+        "type": "subflow:93d173187408e9ab",
+        "z": "60e70487bb5f9c63",
+        "name": "",
+        "x": 500,
+        "y": 280,
+        "wires": [
+            [
+                "9096f82472d14e32"
+            ]
+        ]
+    },
+    {
+        "id": "73dd1ee5b654bea9",
+        "type": "delay",
+        "z": "60e70487bb5f9c63",
+        "name": "Throttle Stream",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "100",
+        "rate": "2",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 640,
+        "y": 100,
+        "wires": [
+            [
+                "5d5532e71d4a33d7"
+            ]
+        ]
+    },
+    {
+        "id": "c5a173bb4f1d7f62",
+        "type": "inject",
+        "z": "60e70487bb5f9c63",
+        "d": true,
+        "name": "Trigger Stream",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "38d45ac02282c20e"
+            ]
+        ]
+    },
+    {
+        "id": "38d45ac02282c20e",
+        "type": "function",
+        "z": "60e70487bb5f9c63",
+        "name": "Create Message Stream",
+        "func": "// Sample data array\nconst flightData = [\n    {\"uti\":1729178284,\"ns\":284211687,\"hex\":\"43C563\",\"fli\":\"AXIS41\",\"src\":\"?\",\"ava\":\"\",\"lat\":null,\"lon\":null,\"alt\":18025,\"gda\":\"A\",\"spd\":null,\"trk\":null,\"vrt\":null,\"tmp\":null,\"wsp\":null,\"wdi\":null,\"cat\":\"A6\",\"org\":null,\"dst\":null,\"opr\":\"HAWK\",\"typ\":\"HAWK\",\"reg\":\"ZK032\",\"dis\":null,\"dbm\":-71,\"cou\":\"U.K.\",\"squ\":\"6440\",\"tru\":820,\"lla\":null,\"alr\":0,\"spi\":false,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178284,\"ns\":296999671,\"hex\":\"4079F4\",\"fli\":\"GLDGF\",\"src\":\"A\",\"ava\":\"A\",\"lat\":51.52923,\"lon\":-2.36961,\"alt\":2625,\"gda\":\"A\",\"spd\":134,\"trk\":223,\"vrt\":-128,\"tmp\":null,\"wsp\":null,\"wdi\":null,\"cat\":\"A1\",\"org\":null,\"dst\":null,\"opr\":\"LDG\",\"typ\":\"DA42\",\"reg\":\"G-LDGF\",\"dis\":42.7,\"dbm\":-74,\"cou\":\"U.K.\",\"squ\":\"3737\",\"tru\":476,\"lla\":1,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":0,\"ape\":false,\"pic\":11,\"nacp\":10,\"sil\":3,\"sda\":2,\"altg\":2825,\"qnhs\":1010.4,\"alts\":2496,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178284,\"ns\":313035437,\"hex\":\"40792E\",\"fli\":\"SHT7P\",\"src\":\"A\",\"ava\":\"A\",\"lat\":54.47077,\"lon\":-3.16548,\"alt\":36925,\"gda\":\"A\",\"spd\":436,\"trk\":154,\"vrt\":640,\"tmp\":-51,\"wsp\":49,\"wdi\":223,\"cat\":\"A3\",\"org\":\"EGPF\",\"dst\":\"EGLL\",\"opr\":\"BAW\",\"typ\":\"A20N\",\"reg\":\"G-TTNK\",\"dis\":289.9,\"dbm\":-81,\"cou\":\"U.K.\",\"squ\":\"1165\",\"tru\":177,\"lla\":4,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":1,\"ape\":false,\"pic\":11,\"nacp\":9,\"sil\":3,\"sda\":3,\"altg\":37050,\"qnhs\":1012.8,\"alts\":36992,\"hdgs\":159,\"timeRecorded\":1729178284613},\n    {\"uti\":1729178283,\"ns\":517067031,\"hex\":\"AB84AB\",\"fli\":\"DAL37\",\"src\":\"A\",\"ava\":\"A\",\"lat\":52.18414,\"lon\":-0.79842,\"alt\":14025,\"gda\":\"A\",\"spd\":436,\"trk\":328,\"vrt\":2112,\"tmp\":-5,\"wsp\":25,\"wdi\":197,\"cat\":\"A5\",\"org\":\"EGLL\",\"dst\":\"KPDX\",\"opr\":null,\"typ\":null,\"reg\":\"N841MH\",\"dis\":107.9,\"dbm\":-79,\"cou\":\"USA \",\"squ\":\"7662\",\"tru\":134,\"lla\":4,\"mop\":2,\"alr\":0,\"spi\":false,\"tcm\":1,\"ape\":false,\"pic\":11,\"nacp\":11,\"sil\":3,\"sda\":2,\"altg\":14100,\"qnhs\":1013.6,\"alts\":16000,\"hdgs\":325,\"timeRecorded\":1729178284613}\n];\n\n// Configure stream behavior\nconst config = {\n    messagesPerSecond: 2,  // Adjust speed\n    loop: true,           // Continuous stream\n    randomOrder: false    // Send in file order\n};\n\n// Initialize counter\nif (!context.counter) {\n    context.counter = 0;\n    context.lastSend = 0;\n}\n\n// Get next message\nlet msgIndex;\nif (config.randomOrder) {\n    msgIndex = Math.floor(Math.random() * flightData.length);\n} else {\n    msgIndex = context.counter % flightData.length;\n    context.counter++;\n}\n\n// Prepare message\nconst message = flightData[msgIndex];\n\n// Set up next trigger if looping\nif (config.loop) {\n    const now = Date.now();\n    const delay = 1000 / config.messagesPerSecond;\n    \n    if (now - context.lastSend >= delay) {\n        context.lastSend = now;\n        return { payload: JSON.stringify(message) };\n    } else {\n        node.send(null); // Skip this cycle\n        return null;\n    }\n}\n\nreturn { payload: JSON.stringify(message) };",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 100,
+        "wires": [
+            [
+                "73dd1ee5b654bea9"
+            ]
+        ]
+    },
+    {
+        "id": "5d5532e71d4a33d7",
+        "type": "udp out",
+        "z": "60e70487bb5f9c63",
+        "name": "UDP Output",
+        "addr": "127.0.0.1",
+        "iface": "",
+        "port": "5005",
+        "ipv": "udp4",
+        "outport": "",
+        "base64": false,
+        "multicast": "false",
+        "x": 850,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "33704638c39e97e7",
+        "type": "udp in",
+        "z": "60e70487bb5f9c63",
+        "name": "UDP IN (JETVISION IN)",
+        "iface": "",
+        "port": "5005",
+        "ipv": "udp4",
+        "multicast": "false",
+        "group": "",
+        "datatype": "utf8",
+        "x": 220,
+        "y": 280,
+        "wires": [
+            [
+                "599628007239e9a8"
+            ]
+        ]
+    },
+    {
+        "id": "9096f82472d14e32",
+        "type": "debug",
+        "z": "60e70487bb5f9c63",
+        "name": "Neuron messages",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "0b93c648443211fe",
+        "type": "comment",
+        "z": "60e70487bb5f9c63",
+        "name": "listen to UDP port 5005",
+        "info": "",
+        "x": 200,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "92397ffd57735740",
+        "type": "comment",
+        "z": "60e70487bb5f9c63",
+        "name": "Write data to UDP port 5005 (simulate JETVISION)",
+        "info": "",
+        "x": 930,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "210f8f9a9318e5f2",
+        "type": "comment",
+        "z": "60e70487bb5f9c63",
+        "name": "Enable node to start ",
+        "info": "",
+        "x": 150,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "5c1e4df6d953c56a",
+        "type": "comment",
+        "z": "60e70487bb5f9c63",
+        "name": "Double click and 'Edit subflow template'",
+        "info": "",
+        "x": 580,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "f0b7517a11590aee",
+        "type": "status",
+        "z": "60e70487bb5f9c63",
+        "name": "",
+        "scope": null,
+        "x": 280,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    }
+]

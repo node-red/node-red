@@ -1,5 +1,5 @@
 {
-  "peerCount": 118,
+  "peerCount": 119,
   "allDevices": [
     {
       "contract": "0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8",
@@ -1716,7 +1716,20 @@
           "price": "0"
         }
       ]
+    },
+    {
+      "contract": "0xB681D34aADf22448B736dA8AC0C3A1D748036a20",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06400648",
+      "stdInTopic": "6400650",
+      "stdErrTopic": "6400649",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2025-07-20T10:33:48.249Z"
+  "lastUpdated": "2025-07-21T17:28:21.284Z"
 }
