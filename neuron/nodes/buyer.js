@@ -610,7 +610,8 @@ module.exports = function (RED) {
             const balanceTinybars = await hederaService.getAccountBalanceTinybars(operatorId);
             
             //console.log(`Balance retrieved: ${balanceTinybars} tinybars`);
-            
+          //  node.send({ payload: `${operatorId} balance ${balanceTinybars.toString()}` });
+
             res.json({
                 success: true,
                 balance: balanceTinybars.toString(),

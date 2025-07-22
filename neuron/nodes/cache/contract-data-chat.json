@@ -1,5 +1,5 @@
 {
-  "peerCount": 46,
+  "peerCount": 56,
   "allDevices": [
     {
       "contract": "0x168505bED28c452992B290315802789f7721C90C",
@@ -611,7 +611,137 @@
           "price": "1"
         }
       ]
+    },
+    {
+      "contract": "0xA31E2eFc758C0f0EEd6aDCe42A35844cE952F3ce",
+      "peerID": "test",
+      "stdOutTopic": "0.06409460",
+      "stdInTopic": "6409459",
+      "stdErrTopic": "6409461",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0xbD23A3EBbc8E6aE1FE27b2130D3061a8F6d787e2",
+      "peerID": "test",
+      "stdOutTopic": "0.06409471",
+      "stdInTopic": "6409473",
+      "stdErrTopic": "6409472",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0x592D40cA4951B6768F789FFd0e9AEC00055eaFb8",
+      "peerID": "test",
+      "stdOutTopic": "0.06409521",
+      "stdInTopic": "6409520",
+      "stdErrTopic": "6409519",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0xDa2fc2743C9E35227555a0817C861F54C9b9e971",
+      "peerID": "test",
+      "stdOutTopic": "0.06409548",
+      "stdInTopic": "6409546",
+      "stdErrTopic": "6409547",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0x12d4198402d40A76397D7f76b095906C8B8E9824",
+      "peerID": "test",
+      "stdOutTopic": "0.06409566",
+      "stdInTopic": "6409567",
+      "stdErrTopic": "6409565",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0x878e42a53f400352819d6cBD59100e33647311E1",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06410283",
+      "stdInTopic": "6410284",
+      "stdErrTopic": "6410282",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
+    },
+    {
+      "contract": "0x8DA04c9C6082DDa0685183b11AcF3B2404407C22",
+      "peerID": "test",
+      "stdOutTopic": "0.06410723",
+      "stdInTopic": "6410724",
+      "stdErrTopic": "6410722",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0x9BAC477fC848528BB5f801c3ccaA9Dd48c73d11b",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06410741",
+      "stdInTopic": "6410739",
+      "stdErrTopic": "6410740",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
+    },
+    {
+      "contract": "0xCD10c2c836C87Cb9d59F2bf399FcEA11f0541Af2",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06410935",
+      "stdInTopic": "6410934",
+      "stdErrTopic": "6410936",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
+    },
+    {
+      "contract": "0xA08b189Df28244Cb0e35a5db0b75439ED224cB1A",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06411003",
+      "stdInTopic": "6411002",
+      "stdErrTopic": "6411001",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2025-07-22T07:31:16.206Z"
+  "lastUpdated": "2025-07-22T11:38:13.034Z"
 }

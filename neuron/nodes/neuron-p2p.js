@@ -157,6 +157,16 @@ module.exports = function(RED) {
                     statusText = "Node not running";
                 }
                 node.status({ fill: "red", shape: "ring", text: statusText });
+
+                if (reconnectAttempts < 30) {
+                    reconnectAttempts++;
+                    logDebug(`Retrying getTargetInfo in ${reconnectDelay}ms (attempt ${reconnectAttempts}/30)`);
+                    node.status({ fill: "yellow", shape: "ring", text: `Retrying getTargetInfo in ${reconnectDelay}ms (attempt ${reconnectAttempts}/30)` });
+                    setTimeout(connect, reconnectDelay);
+                } else {
+                    logDebug("Max retry attempts reached. Giving up.");
+                }
+
             }
         }
 

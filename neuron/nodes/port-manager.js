@@ -8,8 +8,8 @@ const net = require('net');
  */
 class PortManager {
     constructor(options = {}) {
-        this.portRangeStart = options.portRangeStart || 61330;
-        this.portRangeEnd = options.portRangeEnd || 61360;
+        this.portRangeStart = options.portRangeStart || 61336;
+        this.portRangeEnd = options.portRangeEnd || 61346;
         this.reservationsPath = options.reservationsPath || path.join(__dirname, 'port-reservations.json');
         this.reservations = new Map(); // nodeId -> port
         this.reservationTTL = options.reservationTTL || (24 * 60 * 60 * 1000); // 24 hours

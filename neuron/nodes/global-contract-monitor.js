@@ -119,6 +119,12 @@ async function fetchContractData(contract) {
         const freshPeerCount = await contractService.getPeerArraySize(contractEvm);
         console.log(`Fresh ${contract} peer count: ${freshPeerCount}`);
         
+        if (freshPeerCount === globalPeerCounts[contract]) {
+            console.log(`No changes in ${contract} peer count (${freshPeerCount}). Skipping fetch.`);
+            contractLoadingStates[contract] = false;
+            return;
+        }
+        
         if (freshPeerCount > 0) {
             // Start from existing peer count + 1 to avoid re-fetching known devices
             const startIndex = globalPeerCounts[contract] > 0 ? globalPeerCounts[contract]  : 0;
