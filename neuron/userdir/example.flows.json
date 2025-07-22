@@ -12,7 +12,7 @@
         "type": "subflow",
         "name": "Jetvision buyer",
         "info": "",
-        "category": "Examples",
+        "category": "Templates",
         "in": [
             {
                 "x": 120,
@@ -56,7 +56,7 @@
         "type": "subflow",
         "name": "Jetvision seller",
         "info": "",
-        "category": "Examples",
+        "category": "Templates",
         "in": [
             {
                 "x": 300,
@@ -85,7 +85,7 @@
         "color": "#DDAA99",
         "icon": "node-red/white-globe.svg",
         "status": {
-            "x": 440,
+            "x": 640,
             "y": 380,
             "wires": [
                 {
@@ -100,7 +100,7 @@
         "type": "subflow",
         "name": "P2P chat - seller",
         "info": "",
-        "category": "Examples",
+        "category": "Templates",
         "in": [],
         "out": [
             {
@@ -133,7 +133,7 @@
         "type": "subflow",
         "name": "P2P chat - buyer",
         "info": "",
-        "category": "Examples",
+        "category": "Templates",
         "in": [],
         "out": [
             {
@@ -166,7 +166,7 @@
         "type": "subflow",
         "name": "Complete Jetvision seller ",
         "info": "",
-        "category": "Examples",
+        "category": "Templates",
         "in": [],
         "out": [],
         "env": [],
@@ -179,6 +179,49 @@
             "wires": [
                 {
                     "id": "f0b7517a11590aee",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "43ea3a9cef7f224d",
+        "type": "subflow",
+        "name": "AI agent",
+        "info": "",
+        "category": "Templates",
+        "in": [
+            {
+                "x": 60,
+                "y": 140,
+                "wires": [
+                    {
+                        "id": "9346cf52f7e8ca71"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 720,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "61834b1e11ec8e85",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99",
+        "status": {
+            "x": 340,
+            "y": 380,
+            "wires": [
+                {
+                    "id": "54c6d308b7fccab4",
                     "port": 0
                 }
             ]
@@ -316,10 +359,24 @@
         "type": "buyer config",
         "z": "f1721b6e53fb3565",
         "name": "Jetvision Buyer config",
-        "sellerEvmAddress": "[\"0x992165e059Afba8901c9dFB059141171802e8d78\"]",
-        "sellerDevices": [],
+        "sellerEvmAddress": "[\"0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8\"]",
+        "sellerDevices": [
+            {
+                "contract": "0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8",
+                "peerID": "test123",
+                "stdOutTopic": "0.06097555",
+                "stdInTopic": "6097556",
+                "stdErrTopic": "6097557",
+                "services": [
+                    {
+                        "serviceID": "0",
+                        "price": "100"
+                    }
+                ]
+            }
+        ],
         "smartContract": "jetvision",
-        "deviceType": "",
+        "deviceType": "test",
         "description": "",
         "evmAddress": "Error loading EVM address",
         "balance": "Error loading balance",
@@ -385,7 +442,9 @@
         "type": "status",
         "z": "f1721b6e53fb3565",
         "name": "",
-        "scope": null,
+        "scope": [
+            "42ec6c6b2704a8b1"
+        ],
         "x": 280,
         "y": 360,
         "wires": [
@@ -397,7 +456,7 @@
         "type": "neuron-p2p",
         "z": "93d173187408e9ab",
         "name": "",
-        "selectedNode": "a9f5b80dfaf41197",
+        "selectedNode": "de9fcd7031a20d01",
         "description": "",
         "x": 480,
         "y": 220,
@@ -450,7 +509,9 @@
         "type": "status",
         "z": "93d173187408e9ab",
         "name": "",
-        "scope": null,
+        "scope": [
+            "de9fcd7031a20d01"
+        ],
         "x": 240,
         "y": 380,
         "wires": [
@@ -462,16 +523,16 @@
         "type": "seller config",
         "z": "93d173187408e9ab",
         "name": "Jetvision seller",
-        "deviceRole": "",
-        "deviceName": "",
+        "deviceRole": "test",
+        "deviceName": "test",
         "smartContract": "jetvision",
-        "serialNumber": "",
-        "deviceType": "",
-        "price": 0,
+        "serialNumber": "1231",
+        "deviceType": "12312",
+        "price": "1",
         "description": "",
         "evmAddress": "Error loading EVM address",
         "balance": "Error loading balance",
-        "buyerEvmAddress": [],
+        "buyerEvmAddress": "[\"0xF6E9201861E2e91284E4c97FeC70Ecbc2E4926b7\"]",
         "buyerDevices": [],
         "x": 500,
         "y": 100,
@@ -520,7 +581,9 @@
         "type": "status",
         "z": "6d24cdbbe67e56dd",
         "name": "",
-        "scope": null,
+        "scope": [
+            "52e257d4c2d39138"
+        ],
         "x": 320,
         "y": 360,
         "wires": [
@@ -630,7 +693,9 @@
         "type": "status",
         "z": "beac2fbf1433c17e",
         "name": "",
-        "scope": null,
+        "scope": [
+            "161955d2a655df86"
+        ],
         "x": 260,
         "y": 340,
         "wires": [
@@ -878,9 +943,78 @@
         "type": "status",
         "z": "60e70487bb5f9c63",
         "name": "",
-        "scope": null,
+        "scope": [
+            "599628007239e9a8"
+        ],
         "x": 280,
         "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "54b4d22517896799",
+        "type": "ai-memory-inmem",
+        "z": "43ea3a9cef7f224d",
+        "name": "Memory",
+        "maxItems": "100",
+        "x": 360,
+        "y": 120,
+        "wires": [
+            [
+                "61834b1e11ec8e85"
+            ]
+        ]
+    },
+    {
+        "id": "9346cf52f7e8ca71",
+        "type": "ai-model",
+        "z": "43ea3a9cef7f224d",
+        "name": "",
+        "model": "",
+        "temperature": 0.7,
+        "maxTokens": 1000,
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "54b4d22517896799"
+            ]
+        ]
+    },
+    {
+        "id": "61834b1e11ec8e85",
+        "type": "ai-agent",
+        "z": "43ea3a9cef7f224d",
+        "name": "",
+        "systemPrompt": "You are a helpful AI assistant.",
+        "responseType": "text",
+        "x": 560,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4124f6ca86b75b26",
+        "type": "comment",
+        "z": "43ea3a9cef7f224d",
+        "name": "Double click and add an API key from  https://openrouter.ai/ ",
+        "info": "",
+        "x": 300,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "54c6d308b7fccab4",
+        "type": "status",
+        "z": "43ea3a9cef7f224d",
+        "name": "",
+        "scope": [
+            "61834b1e11ec8e85"
+        ],
+        "x": 160,
+        "y": 380,
         "wires": [
             []
         ]

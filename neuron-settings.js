@@ -715,7 +715,7 @@ module.exports = {
              * added to the end of the palette.
              * If not set, the following default order is used:
              */
-            //categories: ['subflows', 'common', 'function', 'network', 'sequence', 'parser', 'storage'],
+            categories: ['Neuron', 'Templates', 'tools', 'dashboard', 'AI Agent'],
         },
 
         projects: {

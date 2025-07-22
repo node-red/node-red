@@ -29,6 +29,7 @@
         "@hashgraph/sdk": "^2.49.2",
         "ethers": "^6.13.4",
         "@node-red-contrib-themes/theme-collection": "^4.0.11",
+        "node-red-contrib-ai-agent": "0.0.5",
         "node-red-dashboard": "^3.1.0",
         "acorn": "8.14.1",
         "acorn-walk": "8.3.4",
