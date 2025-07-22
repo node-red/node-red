@@ -113,6 +113,10 @@ async function fetchContractData(contract) {
         contractLoadingStates[contract] = true;
         
         const contractService = contractServices[contract];
+        if (!contractService) {
+            console.error(`Cannot fetch data - no service for ${contract}`);
+            return;
+        }   
         const contractId = contractConfigs[contract].contractId;
         const contractEvm = contractConfigs[contract].contractEvm;
         
@@ -195,12 +199,19 @@ async function initializeGlobalContractMonitoring() {
                     operatorKey: process.env.HEDERA_OPERATOR_KEY,
                     contractId: contractConfigs[contract].contractId
                 });
+                
                 console.log(`Initialized ${contract} contract service`);
             } catch (error) {
                 console.error(`Failed to initialize ${contract} contract service:`, error.message);
                 contractServices[contract] = null;
             }
         });
+
+        const validContracts = contracts.filter(contract => contractServices[contract] !== null);
+    
+        if (validContracts.length === 0) {
+            throw new Error('No contract services initialized successfully');
+        }
 
         // Step 2: Fetch fresh data for all contracts sequentially (to avoid rate limiting)
         const fetchAllContractsData = async () => {

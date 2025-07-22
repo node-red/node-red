@@ -141,7 +141,9 @@ module.exports = function (RED) {
     }
 
     // Initialize global contract monitoring service when module is loaded
-    initializeGlobalContractMonitoring();
+    (async () => {
+        await initializeGlobalContractMonitoring();
+    })();
 
     // Check if global contract monitoring is available (shared with buyer.js)
     //console.log('Seller module loaded. Global peer count:', getGlobalPeerCount());

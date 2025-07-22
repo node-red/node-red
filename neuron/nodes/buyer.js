@@ -136,7 +136,9 @@ module.exports = function (RED) {
     // --- ProcessManager handles all process spawning, port management, and environment setup ---
 
     // Initialize global contract monitoring service when module is loaded
-    initializeGlobalContractMonitoring();
+    (async () => {
+        await initializeGlobalContractMonitoring();
+    })();
 
     // Shared HederaAccountService instance
     let hederaService;
