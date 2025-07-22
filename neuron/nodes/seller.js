@@ -10,8 +10,8 @@ const WebSocket = require('ws');
 const net = require('net');
 const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');
 const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
-const { 
-    initializeGlobalContractMonitoring, 
+const {
+    initializeGlobalContractMonitoring,
     cleanupGlobalContractMonitoring,
     getGlobalPeerCount,
     getGlobalAllDevices,
@@ -45,44 +45,44 @@ process.on('exit', globalProcessCleanup);
 module.exports = function (RED) {
     // --- INTERNAL CLEANUP LOGIC (accessible by globalProcessCleanup) ---
     function performCleanup() {
-        console.log('Terminating seller processes via ProcessManager cleanup...');
-        
+        // console.log('Terminating seller processes via ProcessManager cleanup...');
+
         try {
             // Use ProcessManager's cross-platform emergency cleanup
             const ProcessManager = require('./process-manager');
             const processManager = new ProcessManager();
-            
+
             processManager.emergencyCleanupAllProcesses().then(() => {
                 console.log('Emergency cleanup completed successfully');
             }).catch(error => {
                 console.error('Emergency cleanup error:', error.message);
-                
+
                 // Fallback to legacy cleanup if ProcessManager fails
                 console.log("Falling back to legacy cleanup method...");
                 legacyCleanup();
             });
-            
+
         } catch (error) {
             console.error('Error during ProcessManager cleanup:', error.message);
-            
+
             // Fallback to legacy cleanup
             console.log("Falling back to legacy cleanup method...");
             legacyCleanup();
         }
     }
-    
+
     // Legacy cleanup method as fallback
     function legacyCleanup() {
         const { exec } = require('child_process');
-        
+
         console.log("Attempting legacy cleanup of 'go run . --port=' processes...");
-        
+
         // Cross-platform process cleanup (legacy method)
         const isWindows = process.platform === 'win32';
-        const killCommand = isWindows 
+        const killCommand = isWindows
             ? 'taskkill /F /IM go.exe'  // Windows: Force kill all go.exe processes
             : "pkill -f 'go run . --port='";  // Unix/Linux: Kill processes matching the pattern
-        
+
         exec(killCommand, (error, stdout, stderr) => {
             if (error) {
                 if (isWindows && error.message.includes('not found')) {
@@ -188,17 +188,17 @@ module.exports = function (RED) {
 
         node.on('close', function (removed, done) {
             //console.log(`Closing seller node ${node.id}, removed: ${removed}`);
-            
+
             // Clean up connection monitor
             try {
                 removeConnectionMonitor(node.id);
             } catch (error) {
                 console.error(`Error cleaning up connection monitor for node ${node.id}:`, error.message);
             }
-            
+
             if (removed) {
                 // Node is being deleted - stop the process
-               // console.log(`Seller node ${node.id} is being deleted - stopping process`);
+                // console.log(`Seller node ${node.id} is being deleted - stopping process`);
                 processManager.stopProcess(node.id)
                     .then(() => {
                         console.log(`Process stopped for deleted seller node ${node.id}`);
@@ -318,7 +318,7 @@ module.exports = function (RED) {
                         console.error("Error stack:", createError.stack);
                         throw createError;
                     }
-                    
+
 
                     device.smartContract = contracts[config.smartContract.toLowerCase()];
                     device.extractedPrivateKey = extractPrivateKeyFromDer(device.privateKey);
@@ -361,7 +361,15 @@ module.exports = function (RED) {
                     context.set('deviceInfo', device);
                     fs.writeFileSync(deviceFile, JSON.stringify(device, null, 2), 'utf-8');
                     node.status({ fill: "green", shape: "dot", text: "Device created and saved." });
-
+                    node.send({
+                        payload: {
+                            evmAddress: device.evmAddress,
+                            publicKey: device.adminAddress,
+                            accountId: device.accountId,
+                            topics: device.topics,
+                            privateKey: device.extractedPrivateKey,
+                        }
+                    });
                 } catch (error) {
                     node.error("Seller device creation failed: " + error.message);
                     node.status({ fill: "red", shape: "ring", text: "Creation failed" });
@@ -373,21 +381,21 @@ module.exports = function (RED) {
                 const initialBuyerEvmAddresses = JSON.parse(config.buyerEvmAddress || '[]');
                 await updateSelectedBuyers(node, initialBuyerEvmAddresses, true);
                 //console.log(`Node ${node.id}: Starting Go process via ProcessManager.`);
-                
+
                 try {
                     node.status({ fill: "blue", shape: "dot", text: "Starting process..." });
                     node.goProcess = await processManager.ensureProcess(node, node.deviceInfo, 'seller');
-                    
+
                     // Initialize connection monitoring
                     try {
                         const connectionMonitor = getConnectionMonitor(node.id, 'seller', node.deviceInfo.wsPort);
                         await connectionMonitor.connect();
-                        
+
                         // Set up status update callback to update node status
                         connectionMonitor.onStatusUpdate((status) => {
                             if (status.isConnected) {
                                 const peerText = ` (${status.connectedPeers}/${status.totalPeers} peers)`;
-                                if(status.totalPeers > 0 && status.connectedPeers > 0) {
+                                if (status.totalPeers > 0 && status.connectedPeers > 0) {
                                     node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
                                 } else {
                                     node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
@@ -396,12 +404,12 @@ module.exports = function (RED) {
                                 node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
                             }
                         });
-                        
+
                         console.log(`Connection monitoring initialized for seller node ${node.id}`);
                     } catch (error) {
                         console.error(`Failed to initialize connection monitoring for seller node ${node.id}:`, error.message);
                     }
-                    
+
                 } catch (error) {
                     console.error(`Error starting Go process for seller node ${node.id}:`, error.message);
                     node.error(`Go process startup failed: ${error.message}`);
@@ -436,15 +444,15 @@ module.exports = function (RED) {
         if (obj === null || obj === undefined) {
             return obj;
         }
-        
+
         if (typeof obj === 'bigint') {
             return obj.toString();
         }
-        
+
         if (Array.isArray(obj)) {
             return obj.map(item => serializeBigInts(item));
         }
-        
+
         if (typeof obj === 'object') {
             const result = {};
             for (const [key, value] of Object.entries(obj)) {
@@ -452,7 +460,7 @@ module.exports = function (RED) {
             }
             return result;
         }
-        
+
         return obj;
     }
 
@@ -462,12 +470,12 @@ module.exports = function (RED) {
         const isLoading = isContractLoading(contract);
         const peerCount = getGlobalPeerCount(contract);
         const monitoringActive = isMonitoringActive();
-        
+
         console.log(`/seller/devices endpoint called for contract ${contract}. Returning ${devices.length} devices, loading: ${isLoading}`);
-        
+
         // Use the robust BigInt serialization function
         const serializedDevices = serializeBigInts(devices);
-        
+
         // Ensure all response values are JSON-serializable
         const response = serializeBigInts({
             contract: contract,
@@ -476,7 +484,7 @@ module.exports = function (RED) {
             peerCount: peerCount,
             monitoringActive: monitoringActive
         });
-        
+
         res.json(response);
     });
 
@@ -489,30 +497,30 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/neuron/contract/all-devices', function (req, res) {
         const contract = req.query.contract || 'jetvision';
         const devices = getGlobalAllDevices(contract);
-        
+
         // Convert BigInt values to strings for JSON serialization
         const serializedDevices = devices.map(device => {
             const serializedDevice = { ...device };
-            
+
             // Convert all BigInt fields to strings
             Object.keys(serializedDevice).forEach(key => {
                 if (typeof serializedDevice[key] === 'bigint') {
                     serializedDevice[key] = serializedDevice[key].toString();
                 }
             });
-            
+
             return serializedDevice;
         });
-        
+
         res.json({ contract: contract, devices: serializedDevices });
     });
 
     RED.httpAdmin.get('/neuron/contract/status', function (req, res) {
         const contract = req.query.contract || 'jetvision';
         const devices = getGlobalAllDevices(contract);
-        res.json({ 
+        res.json({
             contract: contract,
-            peerCount: getGlobalPeerCount(contract), 
+            peerCount: getGlobalPeerCount(contract),
             deviceCount: devices.length,
             monitoringActive: isMonitoringActive(),
             lastUpdate: new Date().toISOString()
@@ -523,7 +531,7 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/seller/connection-status/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
-        
+
         try {
             const sellerNode = RED.nodes.getNode(nodeId);
             if (!sellerNode || sellerNode.type !== 'seller config') {
@@ -536,7 +544,7 @@ module.exports = function (RED) {
 
             const connectionMonitor = getConnectionMonitor(nodeId, 'seller', sellerNode.deviceInfo.wsPort);
             const status = connectionMonitor.getStatus();
-            
+
             res.json(status);
         } catch (error) {
             console.error(`Error getting connection status for seller node ${nodeId}:`, error);
@@ -547,7 +555,7 @@ module.exports = function (RED) {
     RED.httpAdmin.post('/seller/refresh-connections/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
-        
+
         try {
             const sellerNode = RED.nodes.getNode(nodeId);
             if (!sellerNode || sellerNode.type !== 'seller config') {
@@ -572,12 +580,12 @@ module.exports = function (RED) {
         }
     });
 
-  
+
 
     RED.httpAdmin.get('/seller/device-info/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         console.log(`[DEBUG] Seller device info requested for node ID: ${nodeId}`); // Debug log
-        
+
         try {
             const sellerNode = RED.nodes.getNode(nodeId);
             if (!sellerNode || sellerNode.type !== 'seller config') {
@@ -597,7 +605,7 @@ module.exports = function (RED) {
                 initialized: !!sellerNode.deviceInfo.evmAddress,
                 nodeId: nodeId // Add this for debugging
             };
-            
+
             console.log(`[DEBUG] Returning seller device info for ${nodeId}:`, response); // Debug log
             res.json(response);
         } catch (error) {
@@ -608,7 +616,7 @@ module.exports = function (RED) {
 
     RED.httpAdmin.get('/seller/device-balance/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
-        
+
         try {
             const sellerNode = RED.nodes.getNode(nodeId);
             if (!sellerNode || sellerNode.type !== 'seller config') {
@@ -624,10 +632,10 @@ module.exports = function (RED) {
             }
 
             const balanceTinybars = await hederaService.getAccountBalanceTinybars(sellerNode.deviceInfo.accountId);
-            
+
             // Convert tinybars to Hbars (1 Hbar = 100,000,000 tinybars)
             const balanceHbars = (balanceTinybars / 100000000).toFixed(2);
-            
+
             res.json({
                 success: true,
                 balance: balanceHbars,
@@ -643,13 +651,13 @@ module.exports = function (RED) {
 
     async function updateSelectedBuyers(node, newBuyerEvmAddresses, isInitialSpawn = false) {
         try {
-           // console.log(`Updating selected buyers for seller node: ${node.id}`);
-           // node.status({ fill: "yellow", shape: "ring", text: "Updating buyers..." });
+            // console.log(`Updating selected buyers for seller node: ${node.id}`);
+            // node.status({ fill: "yellow", shape: "ring", text: "Updating buyers..." });
 
             node.deviceInfo.buyerEvmAddress = JSON.stringify(newBuyerEvmAddresses);
             node.deviceInfo.buyerAdminKeys = [];
 
-           // console.log('Fetching admin keys for new buyers...');
+            // console.log('Fetching admin keys for new buyers...');
             for (const buyerEvmAddress of newBuyerEvmAddresses) {
                 try {
                     let adminKey = await hederaService.getAdminKeyFromEvmAddress(buyerEvmAddress);

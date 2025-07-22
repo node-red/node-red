@@ -357,7 +357,15 @@ module.exports = function (RED) {
                     context.set('deviceInfo', device);
                     fs.writeFileSync(deviceFile, JSON.stringify(device, null, 2), 'utf-8');
                     node.status({ fill: "green", shape: "dot", text: "Device created and saved." });
-
+                    node.send({
+                        payload: {
+                            evmAddress: device.evmAddress,
+                            publicKey: device.adminAddress,
+                            accountId: device.accountId,
+                            topics: device.topics,
+                            privateKey: device.extractedPrivateKey,
+                        }
+                    });
                     // Use global contract data instead of individual calls
                     console.log(`Node ${node.id}: Using global peer count: ${getGlobalPeerCount()}`);
                     console.log(`Node ${node.id}: Global device count: ${getGlobalAllDevices().length}`);

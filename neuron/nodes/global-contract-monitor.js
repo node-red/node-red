@@ -119,7 +119,7 @@ async function fetchContractData(contract) {
         const freshPeerCount = await contractService.getPeerArraySize(contractEvm);
         console.log(`Fresh ${contract} peer count: ${freshPeerCount}`);
         
-        if (freshPeerCount === globalPeerCounts[contract]) {
+        if (freshPeerCount <= globalPeerCounts[contract]) {
             console.log(`No changes in ${contract} peer count (${freshPeerCount}). Skipping fetch.`);
             contractLoadingStates[contract] = false;
             return;

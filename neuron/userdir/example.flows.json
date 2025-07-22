@@ -16,11 +16,21 @@
         "in": [],
         "out": [
             {
-                "x": 800,
+                "x": 660,
                 "y": 200,
                 "wires": [
                     {
                         "id": "4b2277d966231fb3",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 940,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "8e0d9cfec1b89663",
                         "port": 0
                     }
                 ]
@@ -31,7 +41,7 @@
         "color": "#DDAA99",
         "icon": "font-awesome/fa-shopping-basket",
         "status": {
-            "x": 460,
+            "x": 500,
             "y": 360,
             "wires": [
                 {
@@ -58,7 +68,18 @@
                 ]
             }
         ],
-        "out": [],
+        "out": [
+            {
+                "x": 740,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "503228108b5d76ad",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
         "env": [],
         "meta": {},
         "color": "#DDAA99",
@@ -81,7 +102,18 @@
         "info": "",
         "category": "Templates",
         "in": [],
-        "out": [],
+        "out": [
+            {
+                "x": 740,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "52e257d4c2d39138",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
         "env": [],
         "meta": {},
         "color": "#C0DEED",
@@ -103,7 +135,18 @@
         "info": "",
         "category": "Templates",
         "in": [],
-        "out": [],
+        "out": [
+            {
+                "x": 700,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "161955d2a655df86",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
         "env": [],
         "meta": {},
         "color": "#A6BBCF",
@@ -292,10 +335,10 @@
         "id": "4b2277d966231fb3",
         "type": "neuron-p2p",
         "z": "f1721b6e53fb3565",
-        "name": "",
+        "name": "Neuron P2P Jetvision buyer ",
         "selectedNode": "",
         "description": "",
-        "x": 520,
+        "x": 420,
         "y": 200,
         "wires": [
             []
@@ -307,8 +350,8 @@
         "z": "f1721b6e53fb3565",
         "name": "Show node status - e.g \"ready\"",
         "info": "",
-        "x": 270,
-        "y": 400,
+        "x": 290,
+        "y": 320,
         "wires": []
     },
     {
@@ -317,8 +360,8 @@
         "z": "f1721b6e53fb3565",
         "name": "Get Jetvision data from selected sellers",
         "info": "",
-        "x": 750,
-        "y": 260,
+        "x": 670,
+        "y": 240,
         "wires": []
     },
     {
@@ -327,7 +370,7 @@
         "z": "f1721b6e53fb3565",
         "name": "1. Double click to select sellers you wish to connect to and receive data",
         "info": "",
-        "x": 530,
+        "x": 430,
         "y": 40,
         "wires": []
     },
@@ -337,7 +380,7 @@
         "z": "f1721b6e53fb3565",
         "name": "2. Double click to associate Jetvision buyer config",
         "info": "",
-        "x": 590,
+        "x": 370,
         "y": 160,
         "wires": []
     },
@@ -353,9 +396,11 @@
         "description": "",
         "evmAddress": "Error loading EVM address",
         "balance": "Error loading balance",
-        "x": 520,
+        "x": 440,
         "y": 80,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "79e9bd568437c72d",
@@ -363,23 +408,32 @@
         "z": "f1721b6e53fb3565",
         "name": "",
         "scope": [
-            "4b2277d966231fb3",
             "8e0d9cfec1b89663"
         ],
-        "x": 260,
+        "x": 280,
         "y": 360,
         "wires": [
             []
         ]
     },
     {
+        "id": "a882d49183bc1c32",
+        "type": "comment",
+        "z": "f1721b6e53fb3565",
+        "name": "Output node's onchain details  - EVM address, private key, hedera account ID",
+        "info": "",
+        "x": 1050,
+        "y": 40,
+        "wires": []
+    },
+    {
         "id": "d7a8ade0ca24b068",
         "type": "neuron-p2p",
         "z": "93d173187408e9ab",
-        "name": "",
-        "selectedNode": "de9fcd7031a20d01",
+        "name": "Neuron P2P Jetvision seller",
+        "selectedNode": "",
         "description": "",
-        "x": 560,
+        "x": 600,
         "y": 220,
         "wires": [
             []
@@ -391,7 +445,7 @@
         "z": "93d173187408e9ab",
         "name": "1. Double click to select sellers you wish to connect to and receive data",
         "info": "",
-        "x": 510,
+        "x": 270,
         "y": 60,
         "wires": []
     },
@@ -411,9 +465,11 @@
         "balance": "Error loading balance",
         "buyerEvmAddress": "[\"0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8\"]",
         "buyerDevices": [],
-        "x": 540,
+        "x": 300,
         "y": 100,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "ad4d208964b12e86",
@@ -430,7 +486,9 @@
         "type": "status",
         "z": "93d173187408e9ab",
         "name": "",
-        "scope": null,
+        "scope": [
+            "503228108b5d76ad"
+        ],
         "x": 300,
         "y": 380,
         "wires": [
@@ -455,6 +513,16 @@
         "info": "",
         "x": 270,
         "y": 260,
+        "wires": []
+    },
+    {
+        "id": "8b1d6ae86a20f868",
+        "type": "comment",
+        "z": "93d173187408e9ab",
+        "name": "Output node's onchain details  - EVM address, private key, hedera account ID",
+        "info": "",
+        "x": 830,
+        "y": 60,
         "wires": []
     },
     {
@@ -484,10 +552,10 @@
         "id": "02a88d7d72646aab",
         "type": "neuron-p2p",
         "z": "6d24cdbbe67e56dd",
-        "name": "P2P seller ",
+        "name": "Neuron P2P chat seller ",
         "selectedNode": "",
         "description": "",
-        "x": 620,
+        "x": 660,
         "y": 220,
         "wires": [
             [
@@ -511,9 +579,11 @@
         "balance": "Error loading balance",
         "buyerEvmAddress": "[\"0x116cF58b6277CA0777F3Db12ac9fcBad80920745\"]",
         "buyerDevices": [],
-        "x": 480,
-        "y": 80,
-        "wires": []
+        "x": 240,
+        "y": 100,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "beaf0b45ba364c68",
@@ -531,8 +601,8 @@
         "z": "6d24cdbbe67e56dd",
         "name": "1. Double click to select sellers you wish to connect to and receive data",
         "info": "",
-        "x": 510,
-        "y": 40,
+        "x": 270,
+        "y": 60,
         "wires": []
     },
     {
@@ -551,8 +621,7 @@
         "z": "6d24cdbbe67e56dd",
         "name": "",
         "scope": [
-            "52e257d4c2d39138",
-            "02a88d7d72646aab"
+            "52e257d4c2d39138"
         ],
         "x": 320,
         "y": 360,
@@ -568,6 +637,16 @@
         "info": "",
         "x": 350,
         "y": 400,
+        "wires": []
+    },
+    {
+        "id": "012ef1117815ae50",
+        "type": "comment",
+        "z": "6d24cdbbe67e56dd",
+        "name": "Output node's onchain details  - EVM address, private key, hedera account ID",
+        "info": "",
+        "x": 850,
+        "y": 60,
         "wires": []
     },
     {
@@ -597,10 +676,10 @@
         "id": "8d9675202dabdfbd",
         "type": "neuron-p2p",
         "z": "beac2fbf1433c17e",
-        "name": "P2P seller ",
+        "name": "Neuron P2P chat buyer",
         "selectedNode": "",
         "description": "",
-        "x": 560,
+        "x": 610,
         "y": 200,
         "wires": [
             [
@@ -620,9 +699,11 @@
         "description": "",
         "evmAddress": "Error loading EVM address",
         "balance": "Error loading balance",
-        "x": 480,
+        "x": 220,
         "y": 60,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "a9db2d4a20f271ab",
@@ -630,7 +711,7 @@
         "z": "beac2fbf1433c17e",
         "name": "1. Double click to select sellers you wish to connect to and receive data",
         "info": "",
-        "x": 470,
+        "x": 250,
         "y": 20,
         "wires": []
     },
@@ -659,7 +740,9 @@
         "type": "status",
         "z": "beac2fbf1433c17e",
         "name": "",
-        "scope": null,
+        "scope": [
+            "161955d2a655df86"
+        ],
         "x": 240,
         "y": 340,
         "wires": [
@@ -674,6 +757,16 @@
         "info": "",
         "x": 310,
         "y": 400,
+        "wires": []
+    },
+    {
+        "id": "feac8384679fa2da",
+        "type": "comment",
+        "z": "beac2fbf1433c17e",
+        "name": "Output node's onchain details  - EVM address, private key, hedera account ID",
+        "info": "",
+        "x": 870,
+        "y": 20,
         "wires": []
     },
     {

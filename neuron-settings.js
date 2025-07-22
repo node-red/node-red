@@ -26,7 +26,6 @@ const https = require('https');
 const requiredEnvVars = [
     'HEDERA_OPERATOR_KEY',
     'HEDERA_OPERATOR_ID', 
-    'HEDERA_OPERATOR_EVM'
 ];
 
 const missingVars = requiredEnvVars.filter(varName => !process.env[varName] || process.env[varName].trim() === '');
@@ -74,7 +73,7 @@ if (missingVars.length > 0) {
             <h4>📋 What you need:</h4>
             <pre>• Hedera Account ID (e.g., 0.0.123456)
 • Private Key (DER format)
-• EVM Address (0x format)</pre>
+</pre>
         </div>
         
         <div class="example">
@@ -98,11 +97,7 @@ if (missingVars.length > 0) {
                 <div class="help-text">Your Hedera private key in DER format (starts with 302e...)</div>
             </div>
             
-            <div class="form-group">
-                <label for="operatorEvm">EVM Address *</label>
-                <input type="text" id="operatorEvm" name="operatorEvm" placeholder="0x1234567890abcdef..." required>
-                <div class="help-text">Your Hedera account's EVM address (starts with 0x)</div>
-            </div>
+          
             
             <button type="submit" class="btn" id="saveBtn">💾 Save Credentials & Continue</button>
         </form>
@@ -122,13 +117,11 @@ if (missingVars.length > 0) {
             const credentials = {
                 HEDERA_OPERATOR_ID: formData.get('operatorId'),
                 HEDERA_OPERATOR_KEY: formData.get('operatorKey'),
-                HEDERA_OPERATOR_EVM: formData.get('operatorEvm')
             };
             
             console.log('📤 Sending credentials:', {
                 HEDERA_OPERATOR_ID: credentials.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Empty',
                 HEDERA_OPERATOR_KEY: credentials.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Empty',
-                HEDERA_OPERATOR_EVM: credentials.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Empty'
             });
             
             document.getElementById('loading').style.display = 'block';
@@ -356,7 +349,7 @@ module.exports = {
             }
         });
         
-        const requiredEnvVars = ['HEDERA_OPERATOR_KEY', 'HEDERA_OPERATOR_ID', 'HEDERA_OPERATOR_EVM'];
+        const requiredEnvVars = ['HEDERA_OPERATOR_KEY', 'HEDERA_OPERATOR_ID'];
         const missingVars = requiredEnvVars.filter(varName => !credentials[varName] || credentials[varName] === '');
         
         // Debug logging for redirect decisions
@@ -364,8 +357,7 @@ module.exports = {
             console.log('🔍 Checking credentials for root path (direct file read):');
             console.log('  HEDERA_OPERATOR_ID:', credentials.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Missing');
             console.log('  HEDERA_OPERATOR_KEY:', credentials.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Missing');
-            console.log('  HEDERA_OPERATOR_EVM:', credentials.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Missing');
-            console.log('  Missing vars:', missingVars.length > 0 ? missingVars : 'None');
+             console.log('  Missing vars:', missingVars.length > 0 ? missingVars : 'None');
         }
         
         // If credentials are missing and this is not the setup page or API endpoint
@@ -395,11 +387,10 @@ module.exports = {
                     console.log('📥 Received credentials:', {
                         HEDERA_OPERATOR_ID: credentials.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Empty',
                         HEDERA_OPERATOR_KEY: credentials.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Empty',
-                        HEDERA_OPERATOR_EVM: credentials.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Empty'
                     });
                     
                     // Validate required fields
-                    const required = ['HEDERA_OPERATOR_ID', 'HEDERA_OPERATOR_KEY', 'HEDERA_OPERATOR_EVM'];
+                    const required = ['HEDERA_OPERATOR_ID', 'HEDERA_OPERATOR_KEY'];
                     const missing = required.filter(field => !credentials[field] || credentials[field].trim() === '');
                     
                     if (missing.length > 0) {
@@ -423,8 +414,7 @@ module.exports = {
                     const updates = [
                         { key: 'HEDERA_OPERATOR_ID', value: `HEDERA_OPERATOR_ID=${credentials.HEDERA_OPERATOR_ID}` },
                         { key: 'HEDERA_OPERATOR_KEY', value: `HEDERA_OPERATOR_KEY=${credentials.HEDERA_OPERATOR_KEY}` },
-                        { key: 'HEDERA_OPERATOR_EVM', value: `HEDERA_OPERATOR_EVM=${credentials.HEDERA_OPERATOR_EVM}` }
-                    ];
+                     ];
                     
                     updates.forEach(update => {
                         let found = false;
@@ -456,8 +446,7 @@ module.exports = {
                     console.log('📋 Current credentials:');
                     console.log('  HEDERA_OPERATOR_ID:', process.env.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Missing');
                     console.log('  HEDERA_OPERATOR_KEY:', process.env.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Missing');
-                    console.log('  HEDERA_OPERATOR_EVM:', process.env.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Missing');
-                    
+                     
                     res.json({
                         success: true,
                         message: 'Credentials saved successfully'

@@ -1,5 +1,5 @@
 {
-  "peerCount": 131,
+  "peerCount": 135,
   "allDevices": [
     {
       "contract": "0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8",
@@ -1885,7 +1885,59 @@
           "price": "0"
         }
       ]
+    },
+    {
+      "contract": "0x4664961C92327758E55355a248396e13D99284Ce",
+      "peerID": "test-jet",
+      "stdOutTopic": "0.06411610",
+      "stdInTopic": "6411611",
+      "stdErrTopic": "6411609",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0x69C92087CEDf2F075cD608e67c08CD954d660BE2",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06411799",
+      "stdInTopic": "6411801",
+      "stdErrTopic": "6411800",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
+    },
+    {
+      "contract": "0x6eEE842592aadfa65e6868a185DB8fB7c2FACdf8",
+      "peerID": "test-jet",
+      "stdOutTopic": "0.06415242",
+      "stdInTopic": "6415243",
+      "stdErrTopic": "6415244",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0xEb87AedEE58c0bE39e5161A6D845991cC49545D2",
+      "peerID": "test-jet",
+      "stdOutTopic": "0.06415263",
+      "stdInTopic": "6415265",
+      "stdErrTopic": "6415264",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2025-07-22T12:04:40.566Z"
+  "lastUpdated": "2025-07-22T22:33:28.520Z"
 }
