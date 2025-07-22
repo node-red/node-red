@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuron - Optional Update Available</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(45, 45, 45, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4CAF50, #66bb6a, #4CAF50);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4CAF50;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        .info-banner {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(102, 187, 106, 0.15));
+            border: 1px solid #4CAF50;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .info-banner::before {
+            content: '✨';
+            font-size: 2rem;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .info-banner h3 {
+            color: #4CAF50;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .info-banner p {
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .version-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .version-card {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .version-card.current {
+            border-color: #ffc107;
+        }
+
+        .version-card.available {
+            border-color: #4CAF50;
+            animation: gentle-glow 3s infinite alternate;
+        }
+
+        @keyframes gentle-glow {
+            from { box-shadow: 0 0 5px rgba(76, 175, 80, 0.2); }
+            to { box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); }
+        }
+
+        .version-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #b0b0b0;
+        }
+
+        .version-card .version-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        .version-card.current .version-number {
+            color: #ffc107;
+        }
+
+        .version-card.available .version-number {
+            color: #4CAF50;
+        }
+
+        .features-section {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .features-section h4 {
+            color: #4CAF50;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            color: #4CAF50;
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .feature-text {
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+
+        .update-options {
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .update-options h4 {
+            color: #ffc107;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .option-card {
+            background: rgba(42, 42, 42, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover {
+            border-color: #4CAF50;
+            transform: translateY(-2px);
+        }
+
+        .option-title {
+            color: #4CAF50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .option-description {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #66bb6a);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 102, 102, 0.8);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(85, 85, 85, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .btn-tertiary {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .btn-tertiary:hover {
+            background: rgba(255, 193, 7, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .reminder-notice {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .reminder-notice strong {
+            color: #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .version-comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Optional Update Available</h1>
+            <p class="subtitle">New features and improvements are ready for you</p>
+        </div>
+
+        <div class="info-banner">
+            <h3>🎉 New Version Available</h3>
+            <p>An optional update is available with new features, performance improvements, and bug fixes. You can continue using the current version safely.</p>
+        </div>
+
+        <div class="version-comparison">
+            <div class="version-card current">
+                <h4>Current Version</h4>
+                <div class="version-number" id="currentVersion">4.0.9</div>
+            </div>
+            <div class="version-card available">
+                <h4>Available Version</h4>
+                <div class="version-number" id="availableVersion">4.0.10</div>
+            </div>
+        </div>
+
+        <div class="reminder-notice">
+            <strong>💡 Tip:</strong> While this update is optional, we recommend keeping your Neuron Node Builder instance up to date for the best experience.
+        </div>
+
+        <div class="update-options">
+            <h4>🤔 What would you like to do?</h4>
+            <div class="option-card">
+                <div class="option-title">📥 Update Now</div>
+                <div class="option-description">Download and install the latest version to get all the new features and improvements.</div>
+            </div>
+            <div class="option-card">
+                <div class="option-title">⏰ Remind Me Later</div>
+                <div class="option-description">Continue using the current version and we'll remind you about this update later.</div>
+            </div>
+            <div class="option-card">
+                <div class="option-title">❌ Skip This Update</div>
+                <div class="option-description">Dismiss this update notification. You can always check for updates manually later.</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="https://github.com/NeuronInnovations/neuron-node-builder-installer/blob/main/UPDATE.md" class="btn btn-primary" target="_blank">
+                📥 Update Now
+            </a>
+            <button class="btn btn-tertiary" onclick="remindLater()">
+                ⏰ Remind Me Later
+            </button>
+            <button class="btn btn-secondary" onclick="skipUpdate()">
+                ❌ Skip This Update
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Update version numbers dynamically if needed
+        function updateVersions() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const current = urlParams.get('current');
+            const available = urlParams.get('available');
+
+            document.getElementById('currentVersion').textContent = current;
+            document.getElementById('availableVersion').textContent = available;
+        }
+
+        // Initialize on page load
+        updateVersions();
+
+        // Add some interactive effects
+        document.querySelectorAll('.feature-item').forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Handle remind later action
+        function remindLater() {
+            alert('We\'ll remind you about this update later. You can continue using Neuron Node Builder normally.');
+            window.location.href = '/?remind=true'; // Redirect to main app
+        }
+
+        // Handle skip update action
+        function skipUpdate() {
+            alert('Update skipped. You can always check for updates manually later.');
+            window.location.href = '/?skip=true'; // Redirect to main app
+        }
+
+        // Add hover effects to option cards
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Remove active class from all cards
+                document.querySelectorAll('.option-card').forEach(c => c.style.borderColor = 'rgba(76, 175, 80, 0.3)');
+                // Add active class to clicked card
+                this.style.borderColor = '#4CAF50';
+            });
+        });
+    </script>
+</body>
+</html>

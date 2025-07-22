@@ -20,6 +20,7 @@ require('dotenv').config({
 // Import required modules
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 
 // Validate required Hedera credentials
 const requiredEnvVars = [
@@ -472,8 +473,162 @@ module.exports = {
             return;
         }
         
-        // Continue with normal middleware
-        next();
+        if (req.path !== '/') {
+            next();
+
+            return;
+        }
+
+        const updateFlagsPath  = path.resolve(process.env.NEURON_USER_PATH, 'update-flags.json');
+
+        function getUpdateFlags() {
+            return new Promise((resolve, reject) => {
+                if (!fs.existsSync(updateFlagsPath)) {
+                    fs.writeFileSync(updateFlagsPath, JSON.stringify({}));
+
+                    resolve({});
+                }
+
+                resolve(JSON.parse(fs.readFileSync(updateFlagsPath, 'utf-8')));
+            });
+        }
+
+        function getVersion() {
+            return new Promise((resolve, reject) => {
+                try {
+                    const packageJsonPath = require('path').resolve(__dirname, 'package.json');
+                    const packageJson = require(packageJsonPath);
+
+                    resolve(packageJson.version);
+                } catch (error) {
+                    console.error('Error reading package.json version:', error);
+
+                    resolve('unknown');
+                }
+            });
+        }
+
+        function getLatestUpdate() {
+            return new Promise((resolve, reject) => {
+                const url = 'https://raw.githubusercontent.com/NeuronInnovations/neuron-node-builder-installer/refs/heads/main/releases.json';
+
+                https.get(url, (res) => {
+                    let data = '';
+
+                    res.on('data', (chunk) => {
+                        data += chunk;
+                    });
+
+                    res.on('end', () => {
+                        try {
+                            const releases = JSON.parse(data);
+
+                            if (Array.isArray(releases) && releases.length > 0) {
+                                // Get the last object in the array (latest release)
+                                const latestRelease = releases[releases.length - 1];
+                                console.log('📦 Latest release fetched:', latestRelease);
+                                resolve(latestRelease);
+                            } else {
+                                console.log('⚠️ No releases found in releases.json');
+                                resolve(null);
+                            }
+                        } catch (error) {
+                            console.error('❌ Error parsing releases.json:', error.message);
+                            resolve(null);
+                        }
+                    });
+                }).on('error', (error) => {
+                    console.error('❌ Error fetching releases.json:', error.message);
+                    resolve(null);
+                });
+            });
+        }
+
+        console.log('🔍 Checking for updates');
+
+        Promise.all([getUpdateFlags(), getVersion(), getLatestUpdate()]).then(([updateFlags,version, update]) => {
+            console.log('Update Flags Found:', updateFlags);
+            console.log('Version Found:', version);
+            console.log('Latest Update Found:', update);
+
+            if (update === null) {
+                return next();
+            }
+
+            // Check for mandatory updates
+            if (update.isMandatory) {
+                console.log('🚨 Mandatory update required:', update.version); // Fixed: was using mandatoryUpdate.version
+
+                // Redirect to mandatory update page with version parameters
+                return res.redirect(`/neuron/pages/mandatory-update.html?current=${version}&required=${update.version}`); // Fixed: was using mandatoryUpdate.version
+            }
+
+            const url = new URL(req.url, `http://${req.headers.host}`);
+
+            if (url.searchParams.get('skip') === 'true') {
+                if (updateFlags.skippedVersions === undefined) {
+                    updateFlags.skippedVersions = [];
+                }
+
+                updateFlags.skippedVersions.push(update.version);
+
+                fs.writeFileSync(updateFlagsPath, JSON.stringify(updateFlags));
+
+                return res.redirect('/');
+            }
+
+            if (url.searchParams.get('remind') === 'true') {
+                if (updateFlags.remindedVersions === undefined) {
+                    updateFlags.remindedVersions = [];
+                }
+
+                updateFlags.remindedVersions.push({
+                    version: update.version,
+                    remindAt: Date.now() + (24 * 60 * 60 * 1000)
+                });
+
+                fs.writeFileSync(updateFlagsPath, JSON.stringify(updateFlags));
+
+                return res.redirect('/');
+            }
+
+            // Check for optional updates
+            console.log('✨ Optional update available:', update.version);
+
+            // Check if this version was skipped
+            const skippedVersion = updateFlags.skippedVersions?.find(skippedVersion => skippedVersion === update.version);
+
+            if (skippedVersion) {
+                console.log(`📋 Version ${update.version} was previously skipped, not showing again`);
+
+                return next();
+            }
+
+            // Check if reminder is still active
+            const updateReminder = updateFlags.remindedVersions?.find(remindedVersion => remindedVersion.version === update.version);
+
+            console.log('🔍 Update reminder:', updateReminder);
+
+            if (updateReminder) {
+                if (Date.now() < updateReminder.remindAt) {
+                    console.log('⏰ Update reminder still active, not showing update notification');
+
+                    return next();
+                } else {
+                    // Clear expired reminder and remove from array
+                    updateFlags.remindedVersions = updateFlags.remindedVersions.filter(reminder => reminder.version !== update.version);
+
+                    fs.writeFileSync(updateFlagsPath, JSON.stringify(updateFlags));
+
+                    console.log('⏰ Update reminder expired, showing update notification');
+                }
+            }
+
+            // Redirect to optional update page with version parameters
+            return res.redirect(`/neuron/pages/optional-update.html?current=${version}&available=${update.version}`);
+
+            next();
+        });
     },
 
     /** The following property can be used to set addition options on the session
@@ -526,7 +681,8 @@ module.exports = {
      * to move httpAdminRoot
      */
     httpStatic: [
-        {path: require('path').resolve(__dirname, "neuron/theme/"), root: "/neuron/theme/"}
+        {path: path.resolve(__dirname, "neuron/theme/"), root: "/neuron/theme/"},
+        {path: path.resolve(__dirname, "neuron/pages/"), root: "/neuron/pages/"}
     ],
 
     /**
