@@ -21,6 +21,7 @@ require('dotenv').config({
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { spawn } = require('child_process');
 
 // Validate required Hedera credentials
 const requiredEnvVars = [
@@ -174,6 +175,34 @@ if (missingVars.length > 0) {
     console.log('Setup wizard created at: ' + setupPagePath);
     console.log('Please visit: http://localhost:1880/neuron/theme/setup.html to configure your credentials');
 }
+
+
+function restartNodeRed() {
+    console.log('🔄 Restarting Node-RED using npm start...');
+
+    // Determine platform-specific commands
+    const isWindows = process.platform === 'win32';
+    const npm = isWindows ? 'npm.cmd' : 'npm';
+
+    // Spawn new process
+    const child = spawn(npm, ['start'], {
+        detached: true,
+        stdio: 'inherit',
+        windowsHide: true,
+        cwd: __dirname,
+        shell: isWindows  // Required for Windows to resolve .cmd files
+    });
+
+    // Allow parent to exit independently
+    child.unref();
+
+    // Exit current process
+    process.nextTick(() => {
+        console.log('🛑 Shutting down current Node-RED instance...');
+        process.exit(0);
+    });
+}
+
 
 module.exports = {
 
@@ -451,6 +480,11 @@ module.exports = {
                         success: true,
                         message: 'Credentials saved successfully'
                     });
+
+                    setTimeout(() => {
+                        restartNodeRed();
+                    }, 500);
+
                 } catch (error) {
                     console.error('Error saving credentials:', error);
                     res.status(500).json({

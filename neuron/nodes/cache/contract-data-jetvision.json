@@ -1,5 +1,5 @@
 {
-  "peerCount": 135,
+  "peerCount": 137,
   "allDevices": [
     {
       "contract": "0x8a52eb9A5b58D69e699F022BFB65CC498De8Cef8",
@@ -1937,7 +1937,33 @@
           "price": "1"
         }
       ]
+    },
+    {
+      "contract": "0xdAE9D642a66a213B9Df2b555c11A7b684cEe08D7",
+      "peerID": "Jetvision ",
+      "stdOutTopic": "0.06421297",
+      "stdInTopic": "6421295",
+      "stdErrTopic": "6421296",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "1"
+        }
+      ]
+    },
+    {
+      "contract": "0xBC630B17F6Aeb8d073ed4711F7A21D6eEFfa2E1f",
+      "peerID": "buyer device",
+      "stdOutTopic": "0.06421502",
+      "stdInTopic": "6421501",
+      "stdErrTopic": "6421500",
+      "services": [
+        {
+          "serviceID": "0",
+          "price": "0"
+        }
+      ]
     }
   ],
-  "lastUpdated": "2025-07-22T22:33:28.520Z"
+  "lastUpdated": "2025-07-23T10:08:38.863Z"
 }
