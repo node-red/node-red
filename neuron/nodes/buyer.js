@@ -166,7 +166,7 @@ module.exports = function (RED) {
         const requiredCredentials = [
             'HEDERA_OPERATOR_ID',
             'HEDERA_OPERATOR_KEY',
-            'HEDERA_OPERATOR_EVM',
+           // 'HEDERA_OPERATOR_EVM',
             'JETVISION_CONTRACT_ID',
             'CHAT_CONTRACT_ID',
             'CHALLENGES_CONTRACT_ID',
