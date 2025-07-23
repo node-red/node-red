@@ -37,7 +37,7 @@
             <h4>📋 What you need:</h4>
             <pre>• Hedera Account ID (e.g., 0.0.123456)
 • Private Key (DER format)
-• EVM Address (0x format)</pre>
+</pre>
         </div>
         
         <div class="example">
@@ -61,11 +61,7 @@
                 <div class="help-text">Your Hedera private key in DER format (starts with 302e...)</div>
             </div>
             
-            <div class="form-group">
-                <label for="operatorEvm">EVM Address *</label>
-                <input type="text" id="operatorEvm" name="operatorEvm" placeholder="0x1234567890abcdef..." required>
-                <div class="help-text">Your Hedera account's EVM address (starts with 0x)</div>
-            </div>
+          
             
             <button type="submit" class="btn" id="saveBtn">💾 Save Credentials & Continue</button>
         </form>
@@ -85,13 +81,11 @@
             const credentials = {
                 HEDERA_OPERATOR_ID: formData.get('operatorId'),
                 HEDERA_OPERATOR_KEY: formData.get('operatorKey'),
-                HEDERA_OPERATOR_EVM: formData.get('operatorEvm')
             };
             
             console.log('📤 Sending credentials:', {
                 HEDERA_OPERATOR_ID: credentials.HEDERA_OPERATOR_ID ? '✅ Set' : '❌ Empty',
                 HEDERA_OPERATOR_KEY: credentials.HEDERA_OPERATOR_KEY ? '✅ Set' : '❌ Empty',
-                HEDERA_OPERATOR_EVM: credentials.HEDERA_OPERATOR_EVM ? '✅ Set' : '❌ Empty'
             });
             
             document.getElementById('loading').style.display = 'block';

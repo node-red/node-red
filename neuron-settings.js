@@ -177,28 +177,63 @@ if (missingVars.length > 0) {
 }
 
 
-function restartNodeRed() {
-    console.log('🔄 Restarting Node-RED using npm start...');
 
-    // Determine platform-specific commands
+
+// Global flag to prevent restart loops
+let isRestarting = false;
+
+function restartNodeRed() {
+    
+    if (isRestarting) {
+        console.log('⚠️ Restart already in progress');
+        return;
+    }
+    isRestarting = true;
+
+    console.log('🔄 Initiating controlled restart...');
+
+    console.log("  _   _                              ____        _ _     _           ");
+    console.log(" | \\ | | ___ _   _ _ __ ___  _ __   | __ ) _   _(_) | __| | ___ _ __ ");
+    console.log(" |  \\| |/ _ \\ | | | '__/ _ \\| '_ \\  |  _ \\| | | | | |/ _` |/ _ \\ '__|");
+    console.log(" | |\\  |  __/ |_| | | | (_) | | | | | |_) | |_| | | | (_| |  __/ |   ");
+    console.log(" |_| \\_|\\___|\\__,_|_|  \\___/|_| |_| |____/ \\__,_|_|_|\\__,_|\\___|_|   ");
+    console.log("                                                                     ");
+    
+    const command = process.platform === 'win32' 
+    ? 'taskkill /IM node.exe /F' 
+    : 'pkill -f "node-red"';
+    console.log("-----------------------------------------------------------");
+    console.log(`To stop Neuron Node Builder process, use command: ${command}`)
+    console.log("-----------------------------------------------------------");
+    // 1. Close all servers first
+
+    // 2. Prepare new process
     const isWindows = process.platform === 'win32';
     const npm = isWindows ? 'npm.cmd' : 'npm';
-
-    // Spawn new process
+    
     const child = spawn(npm, ['start'], {
         detached: true,
         stdio: 'inherit',
         windowsHide: true,
         cwd: __dirname,
-        shell: isWindows  // Required for Windows to resolve .cmd files
+        shell: isWindows,
+        env: {
+            ...process.env,
+            NODE_RED_RESTARTED: 'true'  // Flag to detect restarted instances
+        }
     });
 
-    // Allow parent to exit independently
     child.unref();
 
-    // Exit current process
+    // 3. Force exit after delay if needed
+    setTimeout(() => {
+        console.log('🛑 Forcing process exit');
+        process.exit(0);
+    }, 5000).unref();  // Unref to prevent keeping event loop alive
+
+    // 4. Immediate graceful exit attempt
     process.nextTick(() => {
-        console.log('🛑 Shutting down current Node-RED instance...');
+        console.log('🚪 Exiting current process');
         process.exit(0);
     });
 }
