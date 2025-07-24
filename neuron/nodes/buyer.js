@@ -36,10 +36,6 @@ function globalProcessCleanup() {
     performCleanup(); // Call the internally provided cleanup logic
 }
 
-setInterval(() => {
-    console.log('HEDERA_OPERATOR_ID: ' + process.env.HEDERA_OPERATOR_ID);
-}, 5000);
-
 process.on('SIGINT', globalProcessCleanup);
 process.on('SIGTERM', globalProcessCleanup);
 process.on('exit', globalProcessCleanup);

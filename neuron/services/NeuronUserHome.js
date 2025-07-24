@@ -12,14 +12,14 @@ module.exports.load = function load() {
     }
 
     if (!fs.existsSync(homePath)) {
-        console.log(`Creating user home directory at: ${homePath}`);
+        console.log(`📁 Creating user home directory at: ${homePath}`);
 
         fs.mkdirSync(homePath, { recursive: true });
     }
 
     process.env.NEURON_USER_PATH = homePath;
 
-    console.log(`User home directory: ${homePath}`);
+    console.log(`🏠 User home directory: ${homePath}`);
 
     return homePath;
 }

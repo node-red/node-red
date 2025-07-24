@@ -31,18 +31,6 @@ const requiredEnvVars = [
     'HEDERA_OPERATOR_ID', 
 ];
 
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName] || process.env[varName].trim() === '');
-
-if (missingVars.length > 0) {
-    console.log('⚠️  Missing Hedera credentials detected. Starting setup wizard...');
-    
-    // Resolve the setup page
-    const setupPagePath = require('path').resolve(__dirname, 'neuron/pages/setup.html');
-
-    console.log('Setup wizard found at: ' + setupPagePath);
-    console.log('Please visit: http://localhost:1880/neuron/theme/setup.html to configure your credentials');
-}
-
 // Global flag to prevent restart loops
 let isRestarting = false;
 
@@ -101,7 +89,6 @@ function restartNodeRed() {
         process.exit(0);
     });
 }
-
 
 module.exports = {
 
@@ -278,7 +265,7 @@ module.exports = {
         });
         
         const requiredEnvVars = ['HEDERA_OPERATOR_KEY', 'HEDERA_OPERATOR_ID'];
-        const missingVars = requiredEnvVars.filter(varName => !credentials[varName] || credentials[varName] === '');
+        const missingVars = requiredEnvVars.filter(varName => !process.env[varName] || process.env[varName].trim() === '');
         
         // Debug logging for redirect decisions
         if (req.path === '/') {
@@ -365,7 +352,7 @@ module.exports = {
                     console.log('✅ Credentials saved to .env file successfully');
                     
                     // Reload environment variables
-                    require('./neuron/services/NeuronEnvironment').load();
+                    require('./neuron/services/NeuronEnvironment').reload();
                     
                     console.log('🔄 Environment variables reloaded');
                     console.log('📋 Current credentials:');

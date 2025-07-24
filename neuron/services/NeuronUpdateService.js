@@ -39,11 +39,6 @@ class NeuronUpdateService {
 
     async #getLatestUpdate() {
         return new Promise((resolve, reject) => {
-            return resolve({
-                version: '4.1.0',
-                isMandatory: false
-            });
-
             https.get(releasesUrl, (res) => {
                 let data = '';
 

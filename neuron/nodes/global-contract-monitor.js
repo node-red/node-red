@@ -202,21 +202,31 @@ async function initializeGlobalContractMonitoring() {
         
         contracts.forEach(contract => {
             try {
-                const operatorId = process.env.HEDERA_OPERATOR_ID;
-                const operatorKey = process.env.HEDERA_OPERATOR_KEY;
-                const contractId = contractConfigs[contract].contractId
-                if (!operatorId || !operatorKey || !contractId) {
-                    console.error(`Missing required environment variables for ${contract} contract`);
-                    return;
-                }
-                contractServices[contract] = new HederaContractServiceClass({
-                    network: process.env.HEDERA_NETWORK || 'testnet',
-                    operatorId: process.env.HEDERA_OPERATOR_ID,
-                    operatorKey: process.env.HEDERA_OPERATOR_KEY,
-                    contractId: contractConfigs[contract].contractId
-                });
+                const setup = () => {
+                    const operatorId = process.env.HEDERA_OPERATOR_ID;
+                    const operatorKey = process.env.HEDERA_OPERATOR_KEY;
+                    const contractId = contractConfigs[contract].contractId
+                    if (!operatorId || !operatorKey || !contractId) {
+                        console.error(`Missing required environment variables for ${contract} contract`);
+                        return;
+                    }
+                    contractServices[contract] = new HederaContractServiceClass({
+                        network: process.env.HEDERA_NETWORK || 'testnet',
+                        operatorId: process.env.HEDERA_OPERATOR_ID,
+                        operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                        contractId: contractConfigs[contract].contractId
+                    });
+                };
+
+                setup();
                 
                 console.log(`Initialized ${contract} contract service`);
+
+                require('../services/NeuronEnvironment').onEnvironmentChange(() => {
+                    console.log('Environment changed, reloading contract service for ' + contract);
+                    
+                    setup();
+                });
             } catch (error) {
                 console.error(`Failed to initialize ${contract} contract service:`, error.message);
                 contractServices[contract] = null;
