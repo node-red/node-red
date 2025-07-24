@@ -8,8 +8,8 @@ const net = require('net');
  */
 class PortManager {
     constructor(options = {}) {
-        this.portRangeStart = options.portRangeStart || 6652;
-        this.portRangeEnd = options.portRangeEnd || 6653;
+        this.portRangeStart = options.portRangeStart || 61336;
+        this.portRangeEnd = options.portRangeEnd || 61346;
         this.reservationsPath = path.join(require('../services/NeuronUserHome').load(), 'port-reservations.json');
         this.reservations = new Map(); // nodeId -> port
         this.reservationTTL = options.reservationTTL || (24 * 60 * 60 * 1000); // 24 hours
