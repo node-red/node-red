@@ -119,7 +119,7 @@ class ProcessManager {
         deviceInfo.wsPort = port;
         
         // Save device info to file
-        const deviceFile = path.join(__dirname, 'devices', `${node.id}.json`);
+        const deviceFile = path.join(require('../services/NeuronUserHome').load(), 'devices', `${node.id}.json`);
         const deviceDir = path.dirname(deviceFile);
         if (!fs.existsSync(deviceDir)) {
             fs.mkdirSync(deviceDir, { recursive: true });
@@ -187,7 +187,7 @@ class ProcessManager {
                 throw new Error(`Executable not found at: ${executablePath}. Please ensure the pre-compiled binary is available at the specified path.`);
             }
             console.log(`Using pre-compiled executable from NEURON_SDK_PATH: ${executablePath}`);
-            const envFilePath = path.join(__dirname, 'sdk_env_files', `.${nodeType}-env-${node.id}`);
+            const envFilePath = path.join(require('../services/NeuronUserHome').load(), 'sdk_env_files', `.${nodeType}-env-${node.id}`);
             
             const args = [
                 `--port=${port}`,
@@ -200,7 +200,7 @@ class ProcessManager {
             ];
 
             const goProcess = spawn(executablePath, args, {
-                cwd: path.join(__dirname, 'sdk_env_files'),
+                cwd: path.join(require('../services/NeuronUserHome').load(), 'sdk_env_files'),
                 stdio: ['ignore', 'pipe', 'pipe']
             });
 
@@ -363,7 +363,7 @@ class ProcessManager {
      */
     updateBuyerEnv(node, deviceInfo, uniquePort) {
         try {
-            const envDir = path.join(__dirname, 'sdk_env_files');
+            const envDir = path.join(require('../services/NeuronUserHome').load(), 'sdk_env_files');
             if (!fs.existsSync(envDir)) {
                 fs.mkdirSync(envDir, { recursive: true });
             }
@@ -398,7 +398,7 @@ class ProcessManager {
      */
     updateSellerEnv(node, deviceInfo, uniquePort) {
         try {
-            const envDir = path.join(__dirname, 'sdk_env_files');
+            const envDir = path.join(require('../services/NeuronUserHome').load(), 'sdk_env_files');
             if (!fs.existsSync(envDir)) {
                 fs.mkdirSync(envDir, { recursive: true });
             }

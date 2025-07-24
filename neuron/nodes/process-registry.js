@@ -7,7 +7,7 @@ const path = require('path');
  */
 class ProcessRegistry {
     constructor(registryPath = null) {
-        this.registryPath = registryPath || path.join(__dirname, 'process-registry.json');
+        this.registryPath = path.join(require('../services/NeuronUserHome').load(), 'process-registry.json');
         this.registry = new Map();
         this.lockFile = this.registryPath + '.lock';
         this.loadRegistry();

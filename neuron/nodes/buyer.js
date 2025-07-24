@@ -1,15 +1,12 @@
-const path = require('path');
 // Load environment variables with configurable path
-const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
-require('dotenv').config({
-    path: envPath
-});
+require('../services/NeuronEnvironment').load();
+
+const path = require('path');
 const fs = require('fs');
 const WebSocket = require('ws');
 const net = require('net');
 const ProcessManager = require('./process-manager.js');
-const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');
-const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
+const { HederaAccountService } = require('neuron-js-registration-sdk');
 const { 
     initializeGlobalContractMonitoring, 
     cleanupGlobalContractMonitoring,
@@ -42,7 +39,6 @@ function globalProcessCleanup() {
 process.on('SIGINT', globalProcessCleanup);
 process.on('SIGTERM', globalProcessCleanup);
 process.on('exit', globalProcessCleanup);
-
 
 module.exports = function (RED) {
     // --- LEGACY VARIABLES CLEANUP (ProcessManager handles process management now) ---
@@ -217,7 +213,7 @@ module.exports = function (RED) {
             return;
         }
 
-        const persistDir = path.join(__dirname, 'devices');
+        const persistDir = path.join(require('../services/NeuronUserHome').load(), 'devices');
         const deviceFile = path.join(persistDir, `${node.id}.json`);
         if (!fs.existsSync(persistDir)) {
             try {
@@ -278,14 +274,12 @@ module.exports = function (RED) {
                     const missingFields = Object.entries(requiredFields)
                         .filter(([key, value]) => value == null || value === '' || (key === 'sellerEvmAddress' && JSON.parse(value || '[]').length === 0))
                         .map(([key]) => key);
-
                     if (missingFields.length > 0) {
                         const errorMsg = `Missing required config fields for device creation: ${missingFields.join(', ')}.`;
                         node.error(errorMsg);
                         node.status({ fill: "red", shape: "ring", text: "Config error - missing required fields" });
                         return;
                     }
-
                     const contracts = {
                         "jetvision": process.env.JETVISION_CONTRACT_EVM,
                         "chat": process.env.CHAT_CONTRACT_EVM,
@@ -298,8 +292,6 @@ module.exports = function (RED) {
                     const price = Number(0);
                     let device;
                     try {
-
-                        
                         device = await hederaService.createDeviceAccountAndTopics(
                             deviceName,
                             config.smartContract,
@@ -695,7 +687,7 @@ module.exports = function (RED) {
                 }
             }
 
-            const deviceFile = path.join(__dirname, 'devices', `${node.id}.json`);
+            const deviceFile = path.join(require('../services/NeuronUserHome').load(), 'devices', `${node.id}.json`);
             fs.writeFileSync(deviceFile, JSON.stringify(node.deviceInfo, null, 2), 'utf-8');
 
             // Only restart process if not initial spawn

@@ -1,12 +1,9 @@
-const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
 // Load environment variables with configurable path
+require('../services/NeuronEnvironment').load();
+
+const { HederaAccountService } = require('neuron-js-registration-sdk');
 const fs = require('fs');
 const path = require('path');
-const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
-require('dotenv').config({
-    path: envPath
-});
-
 
 module.exports = function (RED) {
     function StdinWNode(config) {
@@ -59,7 +56,7 @@ module.exports = function (RED) {
                 node.status({ fill: "blue", shape: "dot", text: "sending..." });
 
                 // Get device info from persisted file
-                const deviceInfoPath = path.join(__dirname, 'devices', config.selectedNode + '.json');
+                const deviceInfoPath = path.join(require('../services/NeuronUserHome').load(), 'devices', config.selectedNode + '.json');
                 let deviceInfo;
 
                 try {

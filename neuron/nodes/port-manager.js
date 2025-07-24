@@ -10,7 +10,7 @@ class PortManager {
     constructor(options = {}) {
         this.portRangeStart = options.portRangeStart || 61336;
         this.portRangeEnd = options.portRangeEnd || 61346;
-        this.reservationsPath = options.reservationsPath || path.join(__dirname, 'port-reservations.json');
+        this.reservationsPath = path.join(require('../services/NeuronUserHome').load(), 'port-reservations.json');
         this.reservations = new Map(); // nodeId -> port
         this.reservationTTL = options.reservationTTL || (24 * 60 * 60 * 1000); // 24 hours
         this.loadReservations();

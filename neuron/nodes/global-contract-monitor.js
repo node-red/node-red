@@ -1,11 +1,9 @@
-const path = require('path');
 // Load environment variables with configurable path
-const envPath = process.env.NEURON_ENV_PATH || path.resolve(__dirname, '../../.env');
-require('dotenv').config({
-    path: envPath
-});
+require('../services/NeuronEnvironment').load();
+
+const path = require('path');
 const fs = require('fs');
-const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');
+const { HederaContractService } = require('neuron-js-registration-sdk');
 
 // --- GLOBAL CONTRACT MONITORING SERVICE (Singleton) ---
 // Separate data structures for each contract
@@ -29,12 +27,31 @@ let isContractMonitoringActive = false;
 let contractServices = {};
 
 // Cache file paths for persistent storage
-const cacheDir = path.join(__dirname, 'cache');
+const cacheDir = path.join(require('../services/NeuronUserHome').load(), 'cache');
+if (!fs.existsSync(cacheDir)) {
+    fs.mkdirSync(cacheDir, { recursive: true });
+}
 const cacheFiles = {
-    jetvision: path.join(cacheDir, 'contract-data-jetvision.json'),
-    chat: path.join(cacheDir, 'contract-data-chat.json'),
-    challenges: path.join(cacheDir, 'contract-data-challenges.json')
+    jetvision: 'contract-data-jetvision.json',
+    chat: 'contract-data-chat.json',
+    challenges: 'contract-data-challenges.json'
 };
+for (let cacheFile in cacheFiles) {
+    const cacheFilePath = path.join(cacheDir, cacheFiles[cacheFile]);
+
+    if (!fs.existsSync(cacheFilePath)) {
+        let cacheSampleData = {};
+
+        if (fs.existsSync(path.join(__dirname, 'cache', cacheFiles[cacheFile]))) {
+            cacheSampleData = fs.readFileSync(path.join(__dirname, 'cache', cacheFiles[cacheFile]), 'utf-8');
+            cacheSampleData = JSON.parse(cacheSampleData);
+        }
+
+        fs.writeFileSync(cacheFilePath, JSON.stringify(cacheSampleData, null, 2));
+    }
+
+    cacheFiles[cacheFile] = cacheFilePath;
+}
 
 // Contract configuration
 const contracts = ['jetvision', 'chat', 'challenges'];
@@ -56,10 +73,6 @@ const contractConfigs = {
 // Load cached contract data for a specific contract
 function loadCachedContractData(contract) {
     try {
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
-        }
-        
         const cacheFile = cacheFiles[contract];
         if (fs.existsSync(cacheFile)) {
             const cachedData = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
@@ -81,10 +94,6 @@ function loadCachedContractData(contract) {
 // Save contract data to cache for a specific contract
 function saveContractDataToCache(contract) {
     try {
-        if (!fs.existsSync(cacheDir)) {
-            fs.mkdirSync(cacheDir, { recursive: true });
-        }
-        
         const cacheData = {
             peerCount: globalPeerCounts[contract],
             allDevices: globalAllDevices[contract],
@@ -193,21 +202,31 @@ async function initializeGlobalContractMonitoring() {
         
         contracts.forEach(contract => {
             try {
-                const operatorId = process.env.HEDERA_OPERATOR_ID;
-                const operatorKey = process.env.HEDERA_OPERATOR_KEY;
-                const contractId = contractConfigs[contract].contractId
-                if (!operatorId || !operatorKey || !contractId) {
-                    console.error(`Missing required environment variables for ${contract} contract`);
-                    return;
-                }
-                contractServices[contract] = new HederaContractServiceClass({
-                    network: process.env.HEDERA_NETWORK || 'testnet',
-                    operatorId: process.env.HEDERA_OPERATOR_ID,
-                    operatorKey: process.env.HEDERA_OPERATOR_KEY,
-                    contractId: contractConfigs[contract].contractId
-                });
+                const setup = () => {
+                    const operatorId = process.env.HEDERA_OPERATOR_ID;
+                    const operatorKey = process.env.HEDERA_OPERATOR_KEY;
+                    const contractId = contractConfigs[contract].contractId
+                    if (!operatorId || !operatorKey || !contractId) {
+                        console.error(`Missing required environment variables for ${contract} contract`);
+                        return;
+                    }
+                    contractServices[contract] = new HederaContractServiceClass({
+                        network: process.env.HEDERA_NETWORK || 'testnet',
+                        operatorId: process.env.HEDERA_OPERATOR_ID,
+                        operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                        contractId: contractConfigs[contract].contractId
+                    });
+                };
+
+                setup();
                 
                 console.log(`Initialized ${contract} contract service`);
+
+                require('../services/NeuronEnvironment').onEnvironmentChange(() => {
+                    console.log('Environment changed, reloading contract service for ' + contract);
+                    
+                    setup();
+                });
             } catch (error) {
                 console.error(`Failed to initialize ${contract} contract service:`, error.message);
                 contractServices[contract] = null;
