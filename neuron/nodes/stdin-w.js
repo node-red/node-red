@@ -1,4 +1,4 @@
-const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
+const { HederaAccountService } = require('neuron-js-registration-sdk');
 // Load environment variables with configurable path
 const fs = require('fs');
 const path = require('path');

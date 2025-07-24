@@ -5,7 +5,7 @@ require('dotenv').config({
     path: envPath
 });
 const fs = require('fs');
-const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');
+const { HederaContractService } = require('neuron-js-registration-sdk');
 
 // --- GLOBAL CONTRACT MONITORING SERVICE (Singleton) ---
 // Separate data structures for each contract

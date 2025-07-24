@@ -8,8 +8,7 @@ const fs = require('fs');
 const { spawn, exec } = require('child_process');
 const WebSocket = require('ws');
 const net = require('net');
-const HederaContractService = require('./neuron-registration/dist/core/hedera/ContractService.js');
-const { HederaAccountService } = require('./neuron-registration/dist/core/hedera/AccountService.js');
+const { HederaAccountService } = require('neuron-js-registration-sdk');
 const {
     initializeGlobalContractMonitoring,
     cleanupGlobalContractMonitoring,
