@@ -1,10 +1,16 @@
 const WebSocket = require('ws');
+const waitForEnvReady = require('../services/WaitForEnvReady');
 
 module.exports = function(RED) {
+
     function NeuronP2PNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
         node.selectedNodeId = config.selectedNode;
+        
+        waitForEnvReady(() => {
+            console.log("Hedera credentials loaded for p2p");
+        });
         
         // Connection state
         let ws = null;

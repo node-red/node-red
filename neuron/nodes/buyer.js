@@ -1,5 +1,6 @@
 // Load environment variables with configurable path
 require('../services/NeuronEnvironment').load();
+const waitForEnvReady = require('../services/WaitForEnvReady');
 
 const path = require('path');
 const fs = require('fs');
@@ -7,8 +8,8 @@ const WebSocket = require('ws');
 const net = require('net');
 const ProcessManager = require('./process-manager.js');
 const { HederaAccountService } = require('neuron-js-registration-sdk');
-const { 
-    initializeGlobalContractMonitoring, 
+const {
+    initializeGlobalContractMonitoring,
     cleanupGlobalContractMonitoring,
     getGlobalPeerCount,
     getGlobalAllDevices,
@@ -46,25 +47,25 @@ module.exports = function (RED) {
     // --- INTERNAL CLEANUP LOGIC (accessible by globalProcessCleanup) ---
     performCleanup = () => {
         console.log('Terminating buyer processes via ProcessManager cleanup...');
-        
+
         try {
             // Use ProcessManager's cross-platform emergency cleanup
             const ProcessManager = require('./process-manager');
             const processManager = new ProcessManager();
-            
+
             processManager.emergencyCleanupAllProcesses().then(() => {
                 console.log('Emergency cleanup completed successfully');
             }).catch(error => {
                 console.error('Emergency cleanup error:', error.message);
-                
+
                 // Fallback to legacy cleanup if ProcessManager fails
                 console.log("Falling back to legacy cleanup method...");
                 legacyCleanup();
             });
 
-            } catch (error) {
+        } catch (error) {
             console.error('Error during ProcessManager cleanup:', error.message);
-            
+
             // Fallback to legacy cleanup
             console.log("Falling back to legacy cleanup method...");
             legacyCleanup();
@@ -139,17 +140,30 @@ module.exports = function (RED) {
     // Shared HederaAccountService instance
     let hederaService;
     try {
-        hederaService = new HederaAccountService({
-            network: process.env.HEDERA_NETWORK || 'testnet',
-            operatorId: process.env.HEDERA_OPERATOR_ID,
-            operatorKey: process.env.HEDERA_OPERATOR_KEY,
-            contracts: {
-                "jetvision": process.env.JETVISION_CONTRACT_ID,
-                "chat": process.env.CHAT_CONTRACT_ID,
-                "challenges": process.env.CHALLENGES_CONTRACT_ID,
-                //"radiation": process.env.RADIATION_CONTRACT_ID
-            }
+
+        waitForEnvReady(() => {
+            console.log("Hedera credentials loaded");
+
+            const operatorId = process.env.HEDERA_OPERATOR_ID;
+            const operatorKey = process.env.HEDERA_OPERATOR_KEY;
+
+            hederaService = new HederaAccountService({
+                network: process.env.HEDERA_NETWORK || 'testnet',
+                operatorId: process.env.HEDERA_OPERATOR_ID,
+                operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                contracts: {
+                    "jetvision": process.env.JETVISION_CONTRACT_ID,
+                    "chat": process.env.CHAT_CONTRACT_ID,
+                    "challenges": process.env.CHALLENGES_CONTRACT_ID,
+                    //"radiation": process.env.RADIATION_CONTRACT_ID
+                }
+            });
         });
+
+
+
+
+
     } catch (err) {
         console.error("Shared Hedera service initialization failed: " + err.message);
         hederaService = null;
@@ -162,7 +176,7 @@ module.exports = function (RED) {
         const requiredCredentials = [
             'HEDERA_OPERATOR_ID',
             'HEDERA_OPERATOR_KEY',
-           // 'HEDERA_OPERATOR_EVM',
+            // 'HEDERA_OPERATOR_EVM',
             'JETVISION_CONTRACT_ID',
             'CHAT_CONTRACT_ID',
             'CHALLENGES_CONTRACT_ID',
@@ -177,26 +191,26 @@ module.exports = function (RED) {
 
         node.on('close', function (removed, done) {
             console.log(`Closing buyer node ${node.id}.`);
-            
+
             // Clean up connection monitor
             try {
                 removeConnectionMonitor(node.id);
             } catch (error) {
                 console.error(`Error cleaning up connection monitor for node ${node.id}:`, error.message);
             }
-            
+
             if (removed) {
                 // Node is being deleted - stop the process
                 console.log(`Buyer node ${node.id} is being deleted - stopping process`);
                 processManager.stopProcess(node.id)
                     .then(() => {
                         console.log(`Process stopped for deleted buyer node ${node.id}`);
-                    done();
+                        done();
                     })
                     .catch(error => {
                         console.error(`Error stopping process for deleted buyer node ${node.id}:`, error.message);
-                    done();
-                });
+                        done();
+                    });
             } else {
                 // Node is being redeployed - preserve the process
                 console.log(`Buyer node ${node.id} is being redeployed - preserving process`);
@@ -263,12 +277,12 @@ module.exports = function (RED) {
                     node.status({ fill: "blue", shape: "dot", text: "Creating new device..." });
 
                     const requiredFields = {
-                       // deviceName: config.deviceName,
+                        // deviceName: config.deviceName,
                         smartContract: config.smartContract,
-                      //  deviceRole: config.deviceRole,
-                      //  serialNumber: config.serialNumber,
+                        //  deviceRole: config.deviceRole,
+                        //  serialNumber: config.serialNumber,
                         deviceType: config.deviceType,
-                     //   price: config.price,
+                        //   price: config.price,
                         sellerEvmAddress: config.sellerEvmAddress
                     };
                     const missingFields = Object.entries(requiredFields)
@@ -378,25 +392,25 @@ module.exports = function (RED) {
             if (node.deviceInfo) {
                 const initialSellerEvmAddresses = JSON.parse(config.sellerEvmAddress || '[]');
                 await updateSelectedSellers(node, initialSellerEvmAddresses, true); // ← Add isInitialSpawn = true
-                
+
                 console.log(`Node ${node.id}: Starting Go process via ProcessManager.`);
-                
+
                 try {
                     node.status({ fill: "blue", shape: "dot", text: "Starting process..." });
                     node.goProcess = await processManager.ensureProcess(node, node.deviceInfo, 'buyer');
-                    
+
                     // Initialize connection monitoring after a brief delay
                     setTimeout(async () => {
                         try {
                             const connectionMonitor = getConnectionMonitor(node.id, 'buyer', node.deviceInfo.wsPort);
                             const connected = await connectionMonitor.connect();
-                            
+
                             if (connected) {
                                 // Set up status update callback to update node status
                                 connectionMonitor.onStatusUpdate((status) => {
                                     if (status.isConnected) {
                                         const peerText = status.totalPeers > 0 ? ` (${status.connectedPeers}/${status.totalPeers} peers)` : ' - no peers';
-                                        if(status.totalPeers > 0 && status.connectedPeers > 0) {
+                                        if (status.totalPeers > 0 && status.connectedPeers > 0) {
                                             node.status({ fill: "green", shape: "dot", text: `Connected${peerText}` });
                                         } else {
                                             node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
@@ -405,7 +419,7 @@ module.exports = function (RED) {
                                         node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
                                     }
                                 });
-                                
+
                                 console.log(`Connection monitoring initialized for buyer node ${node.id}`);
                             } else {
                                 console.warn(`WebSocket connection failed for buyer node ${node.id}`);
@@ -415,7 +429,7 @@ module.exports = function (RED) {
                             console.error(`Connection monitoring failed for buyer node ${node.id}:`, error.message);
                         }
                     }, 2000); // 2 second delay
-                    
+
                     console.log(`Node ${node.id}: Go process started successfully via ProcessManager.`);
                 } catch (error) {
                     console.error(`Node ${node.id}: Error starting Go process via ProcessManager:`, error.message);
@@ -451,15 +465,15 @@ module.exports = function (RED) {
         if (obj === null || obj === undefined) {
             return obj;
         }
-        
+
         if (typeof obj === 'bigint') {
             return obj.toString();
         }
-        
+
         if (Array.isArray(obj)) {
             return obj.map(item => serializeBigInts(item));
         }
-        
+
         if (typeof obj === 'object') {
             const result = {};
             for (const [key, value] of Object.entries(obj)) {
@@ -467,7 +481,7 @@ module.exports = function (RED) {
             }
             return result;
         }
-        
+
         return obj;
     }
 
@@ -477,12 +491,12 @@ module.exports = function (RED) {
         const isLoading = isContractLoading(contract);
         const peerCount = getGlobalPeerCount(contract);
         const monitoringActive = isMonitoringActive();
-        
+
         console.log(`/buyer/devices endpoint called for contract ${contract}. Returning ${devices.length} devices, loading: ${isLoading}`);
-        
+
         // Use the robust BigInt serialization function
         const serializedDevices = serializeBigInts(devices);
-        
+
         // Ensure all response values are JSON-serializable
         const response = serializeBigInts({
             contract: contract,
@@ -491,7 +505,7 @@ module.exports = function (RED) {
             peerCount: peerCount,
             monitoringActive: monitoringActive
         });
-        
+
         res.json(response);
     });
 
@@ -499,21 +513,21 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/buyer/test-monitor', function (req, res) {
         const contract = req.query.contract || 'jetvision';
         const devices = getGlobalAllDevices(contract);
-        
+
         // Convert BigInt values to strings for JSON serialization
         const serializedDevices = devices.map(device => {
             const serializedDevice = { ...device };
-            
+
             // Convert all BigInt fields to strings
             Object.keys(serializedDevice).forEach(key => {
                 if (typeof serializedDevice[key] === 'bigint') {
                     serializedDevice[key] = serializedDevice[key].toString();
                 }
             });
-            
+
             return serializedDevice;
         });
-        
+
         const status = {
             contract: contract,
             monitoringActive: isMonitoringActive(),
@@ -535,30 +549,30 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/neuron/contract/all-devices', function (req, res) {
         const contract = req.query.contract || 'jetvision';
         const devices = getGlobalAllDevices(contract);
-        
+
         // Convert BigInt values to strings for JSON serialization
         const serializedDevices = devices.map(device => {
             const serializedDevice = { ...device };
-            
+
             // Convert all BigInt fields to strings
             Object.keys(serializedDevice).forEach(key => {
                 if (typeof serializedDevice[key] === 'bigint') {
                     serializedDevice[key] = serializedDevice[key].toString();
                 }
             });
-            
+
             return serializedDevice;
         });
-        
+
         res.json({ contract: contract, devices: serializedDevices });
     });
 
     RED.httpAdmin.get('/neuron/contract/status', function (req, res) {
         const contract = req.query.contract || 'jetvision';
         const devices = getGlobalAllDevices(contract);
-        res.json({ 
+        res.json({
             contract: contract,
-            peerCount: getGlobalPeerCount(contract), 
+            peerCount: getGlobalPeerCount(contract),
             deviceCount: devices.length,
             monitoringActive: isMonitoringActive(),
             lastUpdate: new Date().toISOString()
@@ -569,7 +583,7 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/buyer/connection-status/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
-        
+
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
             if (!buyerNode || buyerNode.type !== 'buyer config') {
@@ -582,7 +596,7 @@ module.exports = function (RED) {
 
             const connectionMonitor = getConnectionMonitor(nodeId, 'buyer', buyerNode.deviceInfo.wsPort);
             const status = connectionMonitor.getStatus();
-            
+
             res.json(status);
         } catch (error) {
             console.error(`Error getting connection status for buyer node ${nodeId}:`, error);
@@ -593,26 +607,28 @@ module.exports = function (RED) {
     // Balance endpoint - Get operator account balance
     RED.httpAdmin.get('/neuron/balance', async function (req, res) {
         try {
-            if (!hederaService) {
-                return res.status(500).json({ 
-                    success: false, 
-                    error: 'Hedera service not initialized' 
-                });
-            }
-
             const operatorId = process.env.HEDERA_OPERATOR_ID;
             if (!operatorId) {
-                return res.status(500).json({ 
-                    success: false, 
-                    error: 'HEDERA_OPERATOR_ID not configured' 
+                return res.status(500).json({
+                    success: false,
+                    error: 'HEDERA_OPERATOR_ID not configured'
                 });
             }
 
-           // console.log(`Fetching balance for operator account: ${operatorId}`);
+            if (!hederaService) {
+                return res.status(500).json({
+                    success: false,
+                    error: 'Hedera service not initialized for ' + operatorId
+                });
+            }
+
+
+
+            // console.log(`Fetching balance for operator account: ${operatorId}`);
             const balanceTinybars = await hederaService.getAccountBalanceTinybars(operatorId);
-            
+
             //console.log(`Balance retrieved: ${balanceTinybars} tinybars`);
-          //  node.send({ payload: `${operatorId} balance ${balanceTinybars.toString()}` });
+            //  node.send({ payload: `${operatorId} balance ${balanceTinybars.toString()}` });
 
             res.json({
                 success: true,
@@ -623,9 +639,9 @@ module.exports = function (RED) {
 
         } catch (error) {
             console.error('Error fetching account balance:', error);
-            res.status(500).json({ 
-                success: false, 
-                error: 'Failed to fetch balance: ' + error.message 
+            res.status(500).json({
+                success: false,
+                error: 'Failed to fetch balance: ' + error.message
             });
         }
     });
@@ -633,7 +649,7 @@ module.exports = function (RED) {
     RED.httpAdmin.post('/buyer/refresh-connections/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
-        
+
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
             if (!buyerNode || buyerNode.type !== 'buyer config') {
@@ -658,12 +674,12 @@ module.exports = function (RED) {
         }
     });
 
- 
+
 
     async function updateSelectedSellers(node, newSellerEvmAddresses, isInitialSpawn = false) {
         try {
             console.log(`Updating selected sellers for buyer node: ${node.id}`);
-            
+
             node.status({ fill: "yellow", shape: "ring", text: "Updating sellers..." });
 
             node.deviceInfo.sellerEvmAddress = JSON.stringify(newSellerEvmAddresses);
@@ -706,31 +722,31 @@ module.exports = function (RED) {
             // Send seller public keys to WebSocket regardless of isInitialSpawn
             try {
                 const WebSocket = require('ws');
-                
+
                 // Filter out null values from sellerAdminKeys
                 const sellerPublicKeys = node.deviceInfo.sellerAdminKeys.filter(key => key !== null);
-                
+
                 if (sellerPublicKeys.length > 0) {
                     const wsUrl = `ws://localhost:${node.deviceInfo.wsPort}/buyer/commands`;
                     console.log(`Node ${node.id}: Connecting to WebSocket at ${wsUrl} to send seller public keys`);
-                    
+
                     const ws = new WebSocket(wsUrl);
-                    
-                    ws.on('open', function() {
+
+                    ws.on('open', function () {
                         const message = {
                             sellerPublicKeys: sellerPublicKeys
                         };
-                        
+
                         console.log(`Node ${node.id}: Sending seller public keys to process:`, message);
                         ws.send(JSON.stringify(message));
                         ws.close();
                     });
-                    
-                    ws.on('error', function(error) {
+
+                    ws.on('error', function (error) {
                         console.error(`Node ${node.id}: WebSocket error when sending seller keys:`, error.message);
                     });
-                    
-                    ws.on('close', function() {
+
+                    ws.on('close', function () {
                         console.log(`Node ${node.id}: WebSocket connection closed after sending seller keys`);
                     });
                 } else {
@@ -752,7 +768,7 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/buyer/device-info/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`); // Debug log
-        
+
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
             if (!buyerNode || buyerNode.type !== 'buyer config') {
@@ -772,7 +788,7 @@ module.exports = function (RED) {
                 initialized: !!buyerNode.deviceInfo.evmAddress,
                 nodeId: nodeId // Add this for debugging
             };
-            
+
             console.log(`[DEBUG] Returning device info for ${nodeId}:`, response); // Debug log
             res.json(response);
         } catch (error) {
@@ -783,7 +799,7 @@ module.exports = function (RED) {
 
     RED.httpAdmin.get('/buyer/device-balance/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
-        
+
         try {
             const buyerNode = RED.nodes.getNode(nodeId);
             if (!buyerNode || buyerNode.type !== 'buyer config') {
@@ -799,10 +815,10 @@ module.exports = function (RED) {
             }
 
             const balanceTinybars = await hederaService.getAccountBalanceTinybars(buyerNode.deviceInfo.accountId);
-            
+
             // Convert tinybars to Hbars (1 Hbar = 100,000,000 tinybars)
             const balanceHbars = (balanceTinybars / 100000000).toFixed(2);
-            
+
             res.json({
                 success: true,
                 balance: balanceHbars,

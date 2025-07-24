@@ -4,6 +4,7 @@ require('../services/NeuronEnvironment').load();
 const { HederaAccountService } = require('neuron-js-registration-sdk');
 const fs = require('fs');
 const path = require('path');
+const waitForEnvReady = require('../services/WaitForEnvReady');
 
 module.exports = function (RED) {
     function StderrNode(config) {
@@ -12,18 +13,21 @@ module.exports = function (RED) {
         let hederaService = null;
 
         // Initialize Hedera service
-        try {
-            hederaService = new HederaAccountService({
-                network: process.env.HEDERA_NETWORK || 'testnet',
-                operatorId: process.env.HEDERA_OPERATOR_ID,
-                operatorKey: process.env.HEDERA_OPERATOR_KEY,
-                contracts: {
-                    "adsb": process.env.CONTRACT_ID,
-                    "mcp": process.env.MCP_CONTRACT_ID,
-                    "weather": process.env.WEATHER_CONTRACT_ID,
-                    "radiation": process.env.RADIATION_CONTRACT_ID
-                }
+        try {   
+            waitForEnvReady(() => {
+                hederaService = new HederaAccountService({
+                    network: process.env.HEDERA_NETWORK || 'testnet',
+                    operatorId: process.env.HEDERA_OPERATOR_ID,
+                    operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                    contracts: {
+                        "adsb": process.env.CONTRACT_ID,
+                        "mcp": process.env.MCP_CONTRACT_ID,
+                        "weather": process.env.WEATHER_CONTRACT_ID,
+                        "radiation": process.env.RADIATION_CONTRACT_ID
+                    }
+                });
             });
+        
             //  node.status({ fill: "green", shape: "dot", text: "initialized" });
             let targetNode = null;
             RED.nodes.eachNode(function(n) {

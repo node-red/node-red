@@ -55,3 +55,7 @@ neuron/nodes/port-reservations.json
 neuron/userdir/flows.json
 neuron/nodes/port-reservations.json
 neuron/nodes/process-registry.json
+port-reservations.json
+process-registry.json
+sdk_env_files/.seller-env-*
+devices/*

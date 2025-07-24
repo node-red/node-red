@@ -1,6 +1,6 @@
 // Load environment variables with configurable path
 require('../services/NeuronEnvironment').load();
-
+const waitForEnvReady = require('../services/WaitForEnvReady');
 const path = require('path');
 const fs = require('fs');
 const { spawn, exec } = require('child_process');
@@ -149,16 +149,19 @@ module.exports = function (RED) {
     // Shared HederaAccountService instance
     let hederaService;
     try {
-        hederaService = new HederaAccountService({
-            network: process.env.HEDERA_NETWORK || 'testnet',
-            operatorId: process.env.HEDERA_OPERATOR_ID,
-            operatorKey: process.env.HEDERA_OPERATOR_KEY,
-            contracts: {
-                "jetvision": process.env.JETVISION_CONTRACT_ID,
-                "chat": process.env.CHAT_CONTRACT_ID,
-                "challenges": process.env.CHALLENGES_CONTRACT_ID,
-                //"radiation": process.env.RADIATION_CONTRACT_ID
-            }
+        waitForEnvReady(() => {
+            console.log("Hedera credentials loaded for seller");
+            hederaService = new HederaAccountService({
+                network: process.env.HEDERA_NETWORK || 'testnet',
+                operatorId: process.env.HEDERA_OPERATOR_ID,
+                operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                contracts: {
+                    "jetvision": process.env.JETVISION_CONTRACT_ID,
+                    "chat": process.env.CHAT_CONTRACT_ID,
+                    "challenges": process.env.CHALLENGES_CONTRACT_ID,
+                    //"radiation": process.env.RADIATION_CONTRACT_ID
+                }
+            });
         });
     } catch (err) {
         console.error("Shared Hedera service initialization failed: " + err.message);
@@ -172,7 +175,7 @@ module.exports = function (RED) {
         const requiredCredentials = [
             'HEDERA_OPERATOR_ID',
             'HEDERA_OPERATOR_KEY',
-          //  'HEDERA_OPERATOR_EVM',
+            //  'HEDERA_OPERATOR_EVM',
             'JETVISION_CONTRACT_ID',
             'CHAT_CONTRACT_ID',
             'CHALLENGES_CONTRACT_ID',
