@@ -68,7 +68,7 @@
         "node-watch": "0.7.4",
         "nopt": "5.0.0",
         "oauth2orize": "1.12.0",
-        "on-headers": "1.0.2",
+        "on-headers": "1.1.0",
         "passport": "0.7.0",
         "passport-http-bearer": "1.0.1",
         "passport-oauth2-client-password": "0.1.2",
