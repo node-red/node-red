@@ -191,7 +191,7 @@ class ProcessManager {
             
             const args = [
                 `--port=${port}`,
-              //  '--use-local-address',
+                //'--use-local-address',
                 '--mode=peer',
                 `--buyer-or-seller=${nodeType}`,
                 nodeType === 'seller' ? '--list-of-buyers-source=env' : '--list-of-sellers-source=env',
@@ -215,11 +215,13 @@ class ProcessManager {
 
             goProcess.on('error', (error) => {
                 console.error(`Go process spawn error for node ${node.id}:`, error);
+                node.status({ fill: "red", shape: "ring", text: "SDK Process error" });
                 reject(error);
             });
 
             goProcess.on('exit', (code, signal) => {
                 console.log(`Go process for node ${node.id} exited with code ${code}, signal ${signal}`);
+                node.status({ fill: "red", shape: "ring", text: "SDK Process exited" });
                 this.handleProcessExit(node.id, code, signal);
             });
 

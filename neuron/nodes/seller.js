@@ -146,26 +146,69 @@ module.exports = function (RED) {
     //console.log('Seller module loaded. Global peer count:', getGlobalPeerCount());
     //console.log('Seller module loaded. Global device count:', getGlobalAllDevices().length);
 
+    // Modify the hederaService initialization section:
+    
     // Shared HederaAccountService instance
     let hederaService;
+    let hederaServiceInitialized = false;
+    let hederaServiceError = null;
+    
     try {
         waitForEnvReady(() => {
             console.log("Hedera credentials loaded for seller");
-            hederaService = new HederaAccountService({
-                network: process.env.HEDERA_NETWORK || 'testnet',
-                operatorId: process.env.HEDERA_OPERATOR_ID,
-                operatorKey: process.env.HEDERA_OPERATOR_KEY,
-                contracts: {
-                    "jetvision": process.env.JETVISION_CONTRACT_ID,
-                    "chat": process.env.CHAT_CONTRACT_ID,
-                    "challenges": process.env.CHALLENGES_CONTRACT_ID,
-                    //"radiation": process.env.RADIATION_CONTRACT_ID
-                }
-            });
+
+            const operatorId = process.env.HEDERA_OPERATOR_ID;
+            const operatorKey = process.env.HEDERA_OPERATOR_KEY;
+
+            if (!operatorId || !operatorKey) {
+                hederaServiceError = new Error('Missing required Hedera environment variables');
+                console.error("Missing required Hedera environment variables");
+                return;
+            }
+
+            try {
+                hederaService = new HederaAccountService({
+                    network: process.env.HEDERA_NETWORK || 'testnet',
+                    operatorId: process.env.HEDERA_OPERATOR_ID,
+                    operatorKey: process.env.HEDERA_OPERATOR_KEY,
+                    contracts: {
+                        "jetvision": process.env.JETVISION_CONTRACT_ID,
+                        "chat": process.env.CHAT_CONTRACT_ID,
+                        "challenges": process.env.CHALLENGES_CONTRACT_ID,
+                        //"radiation": process.env.RADIATION_CONTRACT_ID
+                    }
+                });
+                hederaServiceInitialized = true;
+                console.log("HederaAccountService initialized successfully for seller");
+            } catch (error) {
+                console.error("Failed to initialize HederaAccountService for seller:", error.message);
+                hederaServiceError = error;
+                hederaService = null;
+            }
         });
     } catch (err) {
         console.error("Shared Hedera service initialization failed: " + err.message);
+        hederaServiceError = err;
         hederaService = null;
+    }
+
+    // Update the waitForHederaService function:
+    function waitForHederaService(maxWaitTime = 10000) {
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now();
+            const checkService = () => {
+                if (hederaServiceError) {
+                    reject(hederaServiceError);
+                } else if (hederaServiceInitialized && hederaService) {
+                    resolve(hederaService);
+                } else if (Date.now() - startTime > maxWaitTime) {
+                    reject(new Error('Timeout waiting for HederaService to initialize'));
+                } else {
+                    setTimeout(checkService, 100); // Check every 100ms
+                }
+            };
+            checkService();
+        });
     }
 
     function NeuronSellerNode(config) {
@@ -333,6 +376,16 @@ module.exports = function (RED) {
 
                     device.buyerAdminKeys = [];
                     const buyerEvmAddressesArray = JSON.parse(config.buyerEvmAddress || '[]');
+                    
+                    // Wait for hederaService to be ready before proceeding
+                    try {
+                        await waitForHederaService(5000); // Wait up to 5 seconds
+                    } catch (waitError) {
+                        console.error(`Node ${node.id}: Failed to initialize HederaService: ${waitError.message}`);
+                        node.status({ fill: "red", shape: "ring", text: "Hedera Service failed" });
+                        return;
+                    }
+                    
                     for (const buyerEvm of buyerEvmAddressesArray) {
                         try {
                             const adminKeyDer = await hederaService.getAdminKeyFromEvmAddress(buyerEvm);
@@ -658,6 +711,15 @@ module.exports = function (RED) {
 
             node.deviceInfo.buyerEvmAddress = JSON.stringify(newBuyerEvmAddresses);
             node.deviceInfo.buyerAdminKeys = [];
+
+            // Wait for hederaService to be ready before proceeding
+            try {
+                await waitForHederaService(5000); // Wait up to 5 seconds
+            } catch (waitError) {
+                console.error(`Node ${node.id}: Failed to initialize HederaService in updateSelectedBuyers: ${waitError.message}`);
+                node.status({ fill: "red", shape: "ring", text: "Hedera Service failed" });
+                return;
+            }
 
             // console.log('Fetching admin keys for new buyers...');
             for (const buyerEvmAddress of newBuyerEvmAddresses) {

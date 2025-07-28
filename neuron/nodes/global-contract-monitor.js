@@ -353,8 +353,20 @@ function getGlobalPeerCount(contract = 'jetvision') {
 
 function getGlobalAllDevices(contract = 'jetvision') {
     const devices = globalAllDevices[contract] || [];
-    console.log(`getGlobalAllDevices called for ${contract}. Returning ${devices.length} devices:`, devices);
-    return devices;
+    
+    // Filter to get unique devices based on contract address
+    const uniqueDevices = [];
+    const seenContracts = new Set();
+    
+    for (const device of devices) {
+        if (!seenContracts.has(device.contract)) {
+            seenContracts.add(device.contract);
+            uniqueDevices.push(device);
+        }
+    }
+    
+    console.log(`getGlobalAllDevices called for ${contract}. Returning ${uniqueDevices.length} unique devices (filtered from ${devices.length} total):`, uniqueDevices);
+    return uniqueDevices;
 }
 
 function isContractLoading(contract = 'jetvision') {
