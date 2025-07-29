@@ -109,6 +109,12 @@
                 <label for="buyer-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>
                 <input type="text" id="buyer-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+                <button type="button" class="red-ui-button" id="cancel-buyer-selection">Cancel</button>
+                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-buyer-selection" style="border: 1px solid #DDD">OK</button>
+            </div>
+
             <div style="flex: 1; overflow: auto; margin-bottom: 15px;">
                 <table id="buyer-table" class="buyer-table" style="width: 100%; border-collapse: collapse;">
                     <colgroup>
@@ -282,7 +288,7 @@
 
             // Consolidated cleanup function
             function cleanup() {
-                console.log('Cleaning up seller node intervals...');
+              //  console.log('Cleaning up seller node intervals...');
                 Object.values(intervals).forEach(intervalId => {
                     if (intervalId) {
                         clearInterval(intervalId);
@@ -298,11 +304,11 @@
             // Function to load buyer devices for the selected contract
             function loadBuyerDevicesForCurrentContract() {
                 const selectedContract = $('#node-input-smartContract').val();
-                console.log('Loading buyer devices for contract:', selectedContract);
+             //   console.log('Loading buyer devices for contract:', selectedContract);
                 
                 $.get(`/buyer/devices?contract=${selectedContract}`)
                     .done(function(data) {
-                        console.log('Buyer devices loaded:', data);
+                     //   console.log('Buyer devices loaded:', data);
                         const tableBody = $('#buyer-table tbody');
                         tableBody.empty();
                         
@@ -335,7 +341,7 @@
                         if (data.devices && data.devices.length > 0) {
                             // Show devices in the table - all devices from global contract monitor are potential buyers
                             data.devices.forEach(device => {
-                                console.log('Processing buyer device:', device);
+                              //  console.log('Processing buyer device:', device);
                                 // Use the contract field (which is the owner address) for selection
                                 const isChecked = node.buyerEvmAddress?.includes(device.contract);
                                 const row = $(`
@@ -363,7 +369,7 @@
                                 tableBody.append(row);
                             });
                             
-                            console.log(`Populated buyer table with ${data.devices.length} devices for contract ${selectedContract}`);
+                          //  console.log(`Populated buyer table with ${data.devices.length} devices for contract ${selectedContract}`);
                             
                             $('#buyer-table tbody input[type="checkbox"]').change(function () {
                                 const row = $(this).closest('tr');
@@ -473,7 +479,7 @@
                             });
 
                             $('#confirm-buyer-selection').off('click').on('click', function () {
-                                console.log('OK button clicked for buyer selection!');
+                              //  console.log('OK button clicked for buyer selection!');
                                 const selectedAddresses = [];
                                 const selectedDeviceObjects = [];
 
@@ -485,8 +491,8 @@
                                     selectedDeviceObjects.push(device);
                                 });
 
-                                console.log('Selected buyer addresses:', selectedAddresses);
-                                console.log('Selected buyer devices:', selectedDeviceObjects);
+                              //  console.log('Selected buyer addresses:', selectedAddresses);
+                               // console.log('Selected buyer devices:', selectedDeviceObjects);
 
                                 $('#node-input-buyerEvmAddress').val(JSON.stringify(selectedAddresses));
                                 $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
@@ -523,7 +529,7 @@
 
             // Add event listener for smart contract changes
             $('#node-input-smartContract').change(function() {
-                console.log('Smart contract changed to:', $(this).val());
+              //  console.log('Smart contract changed to:', $(this).val());
                 // Refresh buyer device list when contract changes
                 if ($("#buyer-modal").data("ui-dialog") && $("#buyer-modal").dialog("isOpen")) {
                     // If modal is open, refresh the buyer device list
@@ -579,7 +585,7 @@
             this.evmAddress = $('#node-input-evmAddress').val();
             this.balance = $('#node-input-balance').val();
             
-            console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
+          //  console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
         }
     });
 </script>
@@ -606,7 +612,11 @@
             statusDot.classList.remove('connection-status-connected', 'connection-status-disconnected', 'connection-status-connecting', 'connection-status-unknown');
             
             if (status.isConnected) {
-                statusDot.classList.add('connection-status-connected');
+                if(status.connectedPeers > 0) {
+                    statusDot.classList.add('connection-status-connected');
+                } else {
+                    statusDot.classList.add('connection-status-connecting');
+                }
                 statusText.textContent = `Connected (${status.connectedPeers}/${status.totalPeers} peers)`;
             } else if (status.reconnectAttempts > 0) {
                 statusDot.classList.add('connection-status-connecting');
@@ -699,10 +709,24 @@
         async function refreshConnections() {
             if (isRefreshing) return;
             
+            //console.log('[DEBUG] Starting seller refresh connections...');
             isRefreshing = true;
-            refreshBtn.classList.add('refresh-button-loading');
+            
+            // Get button element directly and show spinner immediately
+            const btn = document.getElementById('refresh-connections-btn');
+            if (btn) {
+              //  console.log('[DEBUG] Seller button found, showing spinner');
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Refreshing...';
+                btn.style.opacity = '0.6';
+                btn.disabled = true;
+            } else {
+                console.log('[DEBUG] Seller button NOT found');
+            }
             
             try {
+                // Add delay so you can see the spinner
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
                 const response = await fetch(`/seller/refresh-connections/${nodeId}`, {
                     method: 'POST',
                     headers: {
@@ -714,14 +738,23 @@
                     const result = await response.json();
                     updateStatusIndicator(result.status);
                     updatePeersDisplay(result.status);
+                   // console.log('[DEBUG] Seller refresh completed successfully');
                 } else {
-                    console.error('Failed to refresh connections:', response.statusText);
+                    console.error('Failed to refresh seller connections:', response.statusText);
                 }
             } catch (error) {
-                console.error('Error refreshing connections:', error);
+                console.error('Error refreshing seller connections:', error);
             } finally {
+                // Restore button
+                const btn = document.getElementById('refresh-connections-btn');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa fa-refresh"></i> Refresh';
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                    //console.log('[DEBUG] Seller button restored');
+                }
                 isRefreshing = false;
-                refreshBtn.classList.remove('refresh-button-loading');
+               // console.log('[DEBUG] Seller refresh process completed');
             }
         }
 
@@ -762,7 +795,27 @@
 .peer-public-key { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: black; }
 .refresh-button-loading { opacity: 0.6; pointer-events: none; }
 .refresh-button-loading i { animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Spinner animation for seller */
+.fa-spin {
+    -webkit-animation: fa-spin 1s infinite linear;
+    animation: fa-spin 1s infinite linear;
+}
+
+@-webkit-keyframes fa-spin {
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+@keyframes fa-spin {
+    0% { -webkit-transform: rotate(0deg); transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+}
+
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
 </style>
 
 <script type="text/x-red" data-help-name="seller config">

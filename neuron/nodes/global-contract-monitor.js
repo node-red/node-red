@@ -208,6 +208,9 @@ async function initializeGlobalContractMonitoring() {
                     const contractId = contractConfigs[contract].contractId
                     if (!operatorId || !operatorKey || !contractId) {
                         console.error(`Missing required environment variables for ${contract} contract`);
+                        console.log('\x1b[1m\x1b[33m===========>Go to http://localhost:1880 to add credentials <===========\x1b[0m');
+                        console.error("Please go to http://localhost:1880 to add your Hedera credentials (Hedera Account ID and Private Key)");
+
                         return;
                     }
                     contractServices[contract] = new HederaContractServiceClass({

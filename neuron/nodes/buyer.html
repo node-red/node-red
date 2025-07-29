@@ -104,6 +104,10 @@
                 <label for="seller-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>
                 <input type="text" id="seller-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
+                <button type="button" class="red-ui-button" id="cancel-seller-selection">Cancel</button>
+                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-seller-selection" style="border: 1px solid #DDD">OK</button>
+            </div>
             <div style="flex: 1; overflow: auto; margin-bottom: 15px;">
                 <table id="seller-table" class="seller-table" style="width: 100%; border-collapse: collapse;">
                     <colgroup>
@@ -599,8 +603,13 @@
             statusDot.classList.remove('connection-status-connected', 'connection-status-disconnected', 'connection-status-connecting', 'connection-status-unknown');
             
             if (status.isConnected) {
-                statusDot.classList.add('connection-status-connected');
+                if(status.connectedPeers > 0) {
+                    statusDot.classList.add('connection-status-connected');
+                } else {
+                    statusDot.classList.add('connection-status-connecting');
+                }
                 statusText.textContent = `Connected (${status.connectedPeers}/${status.totalPeers} peers)`;
+                
             } else if (status.reconnectAttempts > 0) {
                 statusDot.classList.add('connection-status-connecting');
                 statusText.textContent = `Connecting... (${status.reconnectAttempts} attempts)`;
@@ -692,10 +701,24 @@
         async function refreshConnections() {
             if (isRefreshing) return;
             
+            console.log('[DEBUG] Starting refresh connections...');
             isRefreshing = true;
-            refreshBtn.classList.add('refresh-button-loading');
+            
+            // Get button element directly and show spinner immediately
+            const btn = document.getElementById('refresh-connections-btn');
+            if (btn) {
+                console.log('[DEBUG] Button found, showing spinner');
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Refreshing...';
+                btn.style.opacity = '0.6';
+                btn.disabled = true;
+            } else {
+                console.log('[DEBUG] Button NOT found');
+            }
             
             try {
+                // Add delay so you can see the spinner
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
                 const response = await fetch(`/buyer/refresh-connections/${nodeId}`, {
                     method: 'POST',
                     headers: {
@@ -707,14 +730,23 @@
                     const result = await response.json();
                     updateStatusIndicator(result.status);
                     updatePeersDisplay(result.status);
+                    console.log('[DEBUG] Refresh completed successfully');
                 } else {
                     console.error('Failed to refresh connections:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error refreshing connections:', error);
             } finally {
+                // Restore button
+                const btn = document.getElementById('refresh-connections-btn');
+                if (btn) {
+                    btn.innerHTML = '<i class="fa fa-refresh"></i> Refresh';
+                    btn.style.opacity = '1';
+                    btn.disabled = false;
+                    console.log('[DEBUG] Button restored');
+                }
                 isRefreshing = false;
-                refreshBtn.classList.remove('refresh-button-loading');
+                console.log('[DEBUG] Refresh process completed');
             }
         }
 
@@ -746,9 +778,32 @@
 .peers-table-row:hover { background-color: #f5f5f5; }
 .peers-table-cell { padding: 8px 5px; vertical-align: middle; color: black; }
 .peer-public-key { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: black; }
-.refresh-button-loading { opacity: 0.6; pointer-events: none; }
-.refresh-button-loading i { animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Enhanced refresh button loading styles */
+.refresh-button-loading { 
+    opacity: 0.7 !important; 
+    pointer-events: none !important;
+    background-color: #ccc !important;
+}
+
+/* Spinner animation */
+.fa-spin {
+    animation: fa-spin 1s infinite linear !important;
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Additional backup spinner */
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+.refresh-button-loading i { 
+    animation: spin 1s linear infinite !important; 
+}
 </style>
 
 
@@ -808,6 +863,8 @@
         <li>Use the <b>Neuron P2P</b> node for peer-to-peer communication</li>
         <li>The buyer node automatically spawns the Neuron SDK process</li>
         <li>WebSocket connections are established for real-time messaging</li>
+        <li><b>Port Configuration</b>: Ensure ports 61336-61346 are forwarded on your router/firewall</li>
+        <li><b>Network Access</b>: Other devices need to reach these ports for P2P connectivity</li>
     </ul>
     
     <h3>Status Indicators</h3>
@@ -823,6 +880,17 @@
         <li>Valid Hedera credentials must be configured</li>
         <li>Selected smart contract must be deployed and accessible</li>
         <li>Network connectivity for Hedera testnet/mainnet</li>
+        <li><b>Port Forwarding</b>: Ports 61336 to 61346 must be forwarded for proper network communication</li>
+    </ul>
+    
+    <h3>Network Setup</h3>
+    <p>For the buyer node to communicate with other devices in the Neuron network:</p>
+    <ul>
+        <li><b>Port Range</b>: Forward ports 61336 to 61346 (inclusive) on your router</li>
+        <li><b>Protocol</b>: Both TCP and UDP should be forwarded for these ports</li>
+        <li><b>Target</b>: Forward to the IP address of the machine running Node-RED</li>
+        <li><b>Firewall</b>: Ensure local firewall allows incoming connections on these ports</li>
+        <li><b>Testing</b>: Use port scanning tools to verify ports are accessible externally</li>
     </ul>
     
     <h3>Usage Notes</h3>

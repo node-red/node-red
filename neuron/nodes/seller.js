@@ -18,6 +18,9 @@ const {
 const { getConnectionMonitor, removeConnectionMonitor } = require('./connection-monitor.js');
 const ProcessManager = require('./process-manager.js');
 
+// At the top of the file, add a global mapping for seller nodes
+const sellerTemplateToInstanceMap = new Map();
+
 // Global process manager instance
 const processManager = new ProcessManager();
 
@@ -137,6 +140,20 @@ module.exports = function (RED) {
         return null;
     }
 
+    // Helper function to safely parse buyer EVM addresses
+    function safeParseBuyerAddresses(value) {
+        try {
+            if (!value || value === '') {
+                return [];
+            }
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            console.warn(`Invalid buyerEvmAddress JSON: ${value}, using empty array`);
+            return [];
+        }
+    }
+
     // Initialize global contract monitoring service when module is loaded
     (async () => {
         await initializeGlobalContractMonitoring();
@@ -214,6 +231,14 @@ module.exports = function (RED) {
     function NeuronSellerNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
+        
+        // Store template-to-instance mapping for subflow nodes
+        if (this._alias) {
+            // This is a subflow instance, map the template ID to this instance ID
+            sellerTemplateToInstanceMap.set(this._alias, this.id);
+            console.log(`[DEBUG] Mapped seller template ID ${this._alias} to instance ID ${this.id}`);
+        }
+
         const context = this.context();
         const requiredCredentials = [
             'HEDERA_OPERATOR_ID',
@@ -328,7 +353,18 @@ module.exports = function (RED) {
                         //buyerEvmAddress: config.buyerEvmAddress
                     };
                     const missingFields = Object.entries(requiredFields)
-                        .filter(([key, value]) => value == null || value === '' || (key === 'buyerEvmAddress' && JSON.parse(value || '[]').length === 0))
+                        .filter(([key, value]) => {
+                            if (key === 'buyerEvmAddress') {
+                                try {
+                                    const parsed = JSON.parse(value || '[]');
+                                    return !Array.isArray(parsed) || parsed.length === 0;
+                                } catch (e) {
+                                    console.warn(`Invalid buyerEvmAddress JSON: ${value}, treating as empty`);
+                                    return true; // Treat invalid JSON as missing
+                                }
+                            }
+                            return value == null || value === '';
+                        })
                         .map(([key]) => key);
 
                     if (missingFields.length > 0) {
@@ -375,7 +411,8 @@ module.exports = function (RED) {
                     device.price = config.price;
 
                     device.buyerAdminKeys = [];
-                    const buyerEvmAddressesArray = JSON.parse(config.buyerEvmAddress || '[]');
+                    let buyerEvmAddressesArray = safeParseBuyerAddresses(config.buyerEvmAddress);
+                    
                     
                     // Wait for hederaService to be ready before proceeding
                     try {
@@ -433,7 +470,16 @@ module.exports = function (RED) {
             }
 
             if (node.deviceInfo) {
-                const initialBuyerEvmAddresses = JSON.parse(config.buyerEvmAddress || '[]');
+                let initialBuyerEvmAddresses = [];
+                try {
+                    initialBuyerEvmAddresses = safeParseBuyerAddresses(config.buyerEvmAddress);
+                    if (!Array.isArray(initialBuyerEvmAddresses)) {
+                        initialBuyerEvmAddresses = [];
+                    }
+                } catch (e) {
+                    console.warn(`Invalid buyerEvmAddress JSON during initialization: ${config.buyerEvmAddress}, using empty array`);
+                    initialBuyerEvmAddresses = [];
+                }
                 await updateSelectedBuyers(node, initialBuyerEvmAddresses, true);
                 //console.log(`Node ${node.id}: Starting Go process via ProcessManager.`);
 
@@ -586,21 +632,55 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/seller/connection-status/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
+        console.log(`[DEBUG] Seller connection status requested for node ID: ${nodeId}`);
 
         try {
-            const sellerNode = RED.nodes.getNode(nodeId);
+            let sellerNode = RED.nodes.getNode(nodeId);
+            let actualNodeId = nodeId;
+            
+            // If not found directly, check if this is a template ID that maps to an instance
+            if (!sellerNode) {
+                const instanceId = sellerTemplateToInstanceMap.get(nodeId);
+                if (instanceId) {
+                    console.log(`[DEBUG] Seller template ID ${nodeId} maps to instance ID ${instanceId}`);
+                    sellerNode = RED.nodes.getNode(instanceId);
+                    actualNodeId = instanceId;
+                }
+            }
+            
+            console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
+            
             if (!sellerNode || sellerNode.type !== 'seller config') {
-                return res.status(404).json({ error: 'Seller node not found' });
+                console.log(`[DEBUG] Seller node not found or wrong type`);
+                return res.status(404).json({ 
+                    error: 'Seller node not found',
+                    debug: {
+                        requestedId: nodeId,
+                        actualNodeId: actualNodeId,
+                        foundNode: sellerNode ? sellerNode.type : 'none',
+                        hasMapping: sellerTemplateToInstanceMap.has(nodeId)
+                    }
+                });
             }
 
             if (!sellerNode.deviceInfo || !sellerNode.deviceInfo.wsPort) {
-                return res.status(400).json({ error: 'Node not ready - no WebSocket port available' });
+                console.log(`[DEBUG] Seller node not ready - no WebSocket port`);
+                return res.status(400).json({ 
+                    error: 'Node not ready - no WebSocket port available',
+                    debug: {
+                        hasDeviceInfo: !!sellerNode.deviceInfo,
+                        hasWsPort: !!(sellerNode.deviceInfo && sellerNode.deviceInfo.wsPort)
+                    }
+                });
             }
 
-            const connectionMonitor = getConnectionMonitor(nodeId, 'seller', sellerNode.deviceInfo.wsPort);
+            // Use actualNodeId for the connection monitor
+            const connectionMonitor = getConnectionMonitor(actualNodeId, 'seller', sellerNode.deviceInfo.wsPort);
             const status = connectionMonitor.getStatus();
 
+            console.log(`[DEBUG] Returning seller connection status for ${actualNodeId}:`, status);
             res.json(status);
+            
         } catch (error) {
             console.error(`Error getting connection status for seller node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to get connection status: ' + error.message });
@@ -642,15 +722,43 @@ module.exports = function (RED) {
         console.log(`[DEBUG] Seller device info requested for node ID: ${nodeId}`); // Debug log
 
         try {
-            const sellerNode = RED.nodes.getNode(nodeId);
+            let sellerNode = RED.nodes.getNode(nodeId);
+            let actualNodeId = nodeId;
+            
+            // If not found directly, check if this is a template ID that maps to an instance
+            if (!sellerNode) {
+                const instanceId = sellerTemplateToInstanceMap.get(nodeId);
+                if (instanceId) {
+                    console.log(`[DEBUG] Seller template ID ${nodeId} maps to instance ID ${instanceId}`);
+                    sellerNode = RED.nodes.getNode(instanceId);
+                    actualNodeId = instanceId;
+                }
+            }
+            
+            console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
+            
             if (!sellerNode || sellerNode.type !== 'seller config') {
-                console.log(`[DEBUG] Seller node ${nodeId} not found or wrong type`); // Debug log
-                return res.status(404).json({ error: 'Seller node not found' });
+                console.log(`[DEBUG] Seller node not found or wrong type`); // Debug log
+                return res.status(404).json({ 
+                    error: 'Seller node not found',
+                    debug: {
+                        requestedId: nodeId,
+                        actualNodeId: actualNodeId,
+                        foundNode: sellerNode ? sellerNode.type : 'none',
+                        hasMapping: sellerTemplateToInstanceMap.has(nodeId)
+                    }
+                });
             }
 
             if (!sellerNode.deviceInfo) {
-                console.log(`[DEBUG] Seller node ${nodeId} has no deviceInfo`); // Debug log
-                return res.status(400).json({ error: 'Node not initialized - no device info available' });
+                console.log(`[DEBUG] Seller node ${actualNodeId} has no deviceInfo`); // Debug log
+                return res.status(400).json({ 
+                    error: 'Node not initialized - no device info available',
+                    debug: {
+                        hasDeviceInfo: !!sellerNode.deviceInfo,
+                        hasAccountId: !!(sellerNode.deviceInfo && sellerNode.deviceInfo.accountId)
+                    }
+                });
             }
 
             const response = {
@@ -658,10 +766,10 @@ module.exports = function (RED) {
                 wsPort: sellerNode.deviceInfo.wsPort || null,
                 publicKey: sellerNode.deviceInfo.publicKey || '',
                 initialized: !!sellerNode.deviceInfo.evmAddress,
-                nodeId: nodeId // Add this for debugging
+                nodeId: actualNodeId // Add this for debugging
             };
 
-            console.log(`[DEBUG] Returning seller device info for ${nodeId}:`, response); // Debug log
+            console.log(`[DEBUG] Returning seller device info for ${actualNodeId}:`, response); // Debug log
             res.json(response);
         } catch (error) {
             console.error(`Error getting device info for seller node ${nodeId}:`, error);
@@ -671,15 +779,46 @@ module.exports = function (RED) {
 
     RED.httpAdmin.get('/seller/device-balance/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
+        console.log(`[DEBUG] Seller device balance requested for node ID: ${nodeId}`);
 
         try {
-            const sellerNode = RED.nodes.getNode(nodeId);
+            let sellerNode = RED.nodes.getNode(nodeId);
+            let actualNodeId = nodeId;
+            
+            // If not found directly, check if this is a template ID that maps to an instance
+            if (!sellerNode) {
+                const instanceId = sellerTemplateToInstanceMap.get(nodeId);
+                if (instanceId) {
+                    console.log(`[DEBUG] Seller template ID ${nodeId} maps to instance ID ${instanceId}`);
+                    sellerNode = RED.nodes.getNode(instanceId);
+                    actualNodeId = instanceId;
+                }
+            }
+            
+            console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
+            
             if (!sellerNode || sellerNode.type !== 'seller config') {
-                return res.status(404).json({ error: 'Seller node not found' });
+                console.log(`[DEBUG] Seller node not found or wrong type`);
+                return res.status(404).json({ 
+                    error: 'Seller node not found',
+                    debug: {
+                        requestedId: nodeId,
+                        actualNodeId: actualNodeId,
+                        foundNode: sellerNode ? sellerNode.type : 'none',
+                        hasMapping: sellerTemplateToInstanceMap.has(nodeId)
+                    }
+                });
             }
 
             if (!sellerNode.deviceInfo || !sellerNode.deviceInfo.accountId) {
-                return res.status(400).json({ error: 'Node not initialized - no account ID available' });
+                console.log(`[DEBUG] Seller node not initialized or no account ID`);
+                return res.status(400).json({ 
+                    error: 'Node not initialized - no account ID available',
+                    debug: {
+                        hasDeviceInfo: !!sellerNode.deviceInfo,
+                        hasAccountId: !!(sellerNode.deviceInfo && sellerNode.deviceInfo.accountId)
+                    }
+                });
             }
 
             if (!hederaService) {
@@ -691,13 +830,17 @@ module.exports = function (RED) {
             // Convert tinybars to Hbars (1 Hbar = 100,000,000 tinybars)
             const balanceHbars = (balanceTinybars / 100000000).toFixed(2);
 
-            res.json({
+            const response = {
                 success: true,
                 balance: balanceHbars,
                 balanceTinybars: balanceTinybars.toString(),
                 accountId: sellerNode.deviceInfo.accountId,
                 timestamp: new Date().toISOString()
-            });
+            };
+
+            console.log(`[DEBUG] Returning seller balance info for ${actualNodeId}:`, response);
+            res.json(response);
+            
         } catch (error) {
             console.error(`Error getting device balance for seller node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to get device balance: ' + error.message });
