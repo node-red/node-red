@@ -1,3 +1,10 @@
+#### 4.1.0: Milestone Release
+
+ - Fix: multipart form data upload issue (#5228) @debadutta98
+ - Update help document of filter node (#5210) @kazuhitoyokoi
+ - Fix inject node validation to support binary and hexadecimal numbers (#5212) @ZJvandeWeg
+ - Do not select a nearest node if move is active (#5199) @GogoVega
+
 #### 4.1.0-beta.2: Beta Release
 
 Editor
