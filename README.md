@@ -4,6 +4,15 @@ https://nodered.org
 
 [![Build Status](https://github.com/node-red/node-red/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/node-red/node-red/actions?query=branch%3Amaster)
 
+> [!IMPORTANT]
+> **Help Shape the Future of Node-RED!**
+> 
+> We're excited to modernize Node-RED's user experience, and we need your input!
+>
+> [Take the Survey](https://example.com)
+
+---
+
 Low-code programming for event-driven applications.
 
 ![Node-RED: Low-code programming for event-driven applications](https://nodered.org/images/node-red-screenshot.png)
