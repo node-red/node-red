@@ -210,24 +210,14 @@
                 .addClass('form-row')
                 .html(`
                     <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 10px; margin-top: 10px;">
-                        <strong>Usage:</strong><br>
-                        This node sends messages to the WebSocket of a selected buyer or seller node.<br><br>
-                        <strong>Dynamic WebSocket URL:</strong><br>
-                        The node automatically constructs the WebSocket URL as:<br>
-                        <code>ws://localhost:{wsPort}/{nodeType}/p2p</code><br><br>
-                        Where:<br>
-                        • <code>{wsPort}</code> - WebSocket port from the selected node's deviceInfo<br>
-                        • <code>{nodeType}</code> - 'buyer' (from "buyer config" nodes) or 'seller' (from "seller config" nodes)<br><br>
-                        <strong>Node Type Conversion:</strong><br>
-                        • "buyer config" nodes → WebSocket endpoint: <code>/buyer/p2p</code><br>
-                        • "seller config" nodes → WebSocket endpoint: <code>/seller/p2p</code><br><br>
-                        <strong>Input message format:</strong><br>
-                        • <code>msg.payload</code> or <code>msg.message</code> or <code>msg.data</code> - The message content<br>
-                        • <code>msg.to</code> or <code>msg.publicKey</code> - Target peer's public key (required)<br>
-                        • <code>msg.type</code> - Message type (default: "p2p")<br>
-                        • <code>msg.timestamp</code> - Timestamp (default: current time)<br><br>
-                        <strong>Output format:</strong><br>
-                        <code>{ "type": "p2p", "data": "message", "timestamp": 1234567890, "publicKey": "target_key" }</code>
+                        <strong>Quick Reference:</strong><br>
+                        This node enables peer-to-peer communication through the Neuron network.<br><br>
+                        <strong>Input:</strong> Send data to network peers via selected buyer/seller node<br>
+                        <strong>Output:</strong> Receive data from network peers<br><br>
+                        <strong>Targeting:</strong><br>
+                        • Without <code>msg.to</code> - Broadcasts to all peers in selected node's peer list<br>
+                        • With <code>msg.to</code> - Sends only to specified Hedera admin-key address<br><br>
+                        <strong>Note:</strong> <code>msg.to</code> uses Hedera admin-key, not EVM address.
                     </div>
                 `);
             
@@ -239,4 +229,143 @@
             this.description = $('#node-input-description').val();
         }
     });
+</script>
+
+<script type="text/x-red" data-help-name="neuron-p2p">
+    <p>A peer-to-peer communication node that enables message transmission and reception through the Neuron network.</p>
+    
+    <h3>Overview</h3>
+    <p>The Neuron P2P node provides bidirectional communication with other devices in the Neuron network. It connects to a selected buyer or seller node to access the network and exchange messages with peers.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">any</span></dt>
+        <dd>The message content to transmit to network peers</dd>
+        <dt class="optional">to <span class="property-type">string</span></dt>
+        <dd>Target peer's Hedera admin-key address. If specified, peer list is ignored and message goes only to this address</dd>
+        <dt class="optional">publicKey <span class="property-type">string</span></dt>
+        <dd>Alternative field for specifying target peer (same as <code>msg.to</code>)</dd>
+        <dt class="optional">type <span class="property-type">string</span></dt>
+        <dd>Message type identifier (default: "p2p")</dd>
+        <dt class="optional">timestamp <span class="property-type">number</span></dt>
+        <dd>Message timestamp (default: current time)</dd>
+    </dl>
+    
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">any</span></dt>
+        <dd>Message content received from network peers</dd>
+        <dt>publicKey <span class="property-type">string</span></dt>
+        <dd>Sender's public key/admin-key address</dd>
+        <dt>timestamp <span class="property-type">number</span></dt>
+        <dd>Message timestamp from sender</dd>
+        <dt>topic <span class="property-type">string</span></dt>
+        <dd>Always set to "incoming" for received messages</dd>
+        <dt>raw <span class="property-type">object</span></dt>
+        <dd>Original raw message for debugging purposes</dd>
+    </dl>
+    
+    <h3>Configuration</h3>
+    <ul>
+        <li><b>Name</b>: Optional name for the node</li>
+        <li><b>Selected Node</b>: Choose a buyer or seller config node to connect through</li>
+        <li><b>Description</b>: Optional description for documentation</li>
+    </ul>
+    
+    <h3>Message Routing</h3>
+    <h4>Broadcast Mode (No msg.to specified)</h4>
+    <ul>
+        <li>Messages are sent to all peers in the selected node's peer list</li>
+        <li>For buyer nodes: Sends to all connected seller nodes</li>
+        <li>For seller nodes: Sends to all connected buyer nodes</li>
+        <li>Uses the admin-key lists configured in the buyer/seller node</li>
+    </ul>
+    
+    <h4>Direct Mode (msg.to specified)</h4>
+    <ul>
+        <li>Peer list is completely ignored</li>
+        <li>Message is sent only to the address specified in <code>msg.to</code></li>
+        <li><b>Important:</b> <code>msg.to</code> must be a Hedera admin-key, not an EVM address</li>
+        <li>Admin-keys are the public keys used for device authentication in Hedera</li>
+    </ul>
+    
+    <h3>WebSocket Connection</h3>
+    <p>The node automatically establishes WebSocket connections using:</p>
+    <ul>
+        <li><b>URL Format:</b> <code>ws://localhost:{wsPort}/{nodeType}/p2p</code></li>
+        <li><b>Port:</b> Extracted from selected node's device information</li>
+        <li><b>Endpoint:</b> "/buyer/p2p" or "/seller/p2p" based on selected node type</li>
+        <li><b>Auto-reconnection:</b> Attempts to reconnect if connection is lost</li>
+    </ul>
+    
+    <h3>Message Format</h3>
+    <h4>Outgoing Messages</h4>
+    <pre>
+{
+    "type": "p2p",
+    "data": msg.payload,
+    "timestamp": 1234567890,
+    "from": "sender_public_key",
+    "to": "target_admin_key" // Optional, for direct messaging
+}
+    </pre>
+    
+    <h4>Incoming Messages</h4>
+    <pre>
+{
+    "topic": "incoming",
+    "payload": "message_content",
+    "publicKey": "sender_admin_key",
+    "timestamp": 1234567890,
+    "raw": { /* original message */ }
+}
+    </pre>
+    
+    <h3>Status Indicators</h3>
+    <ul>
+        <li><span style="color:yellow">●</span> Connecting...: Establishing WebSocket connection</li>
+        <li><span style="color:green">●</span> Connected: Active connection to network</li>
+        <li><span style="color:green">●</span> Message sent: Successfully transmitted message</li>
+        <li><span style="color:red">●</span> No connection: WebSocket connection failed</li>
+        <li><span style="color:red">●</span> Send failed: Message transmission error</li>
+    </ul>
+    
+    <h3>Prerequisites</h3>
+    <ul>
+        <li>A deployed buyer or seller config node must be selected</li>
+        <li>Selected node must be successfully initialized with device credentials</li>
+        <li>Neuron SDK process must be running (spawned by buyer/seller node)</li>
+        <li>Target peers must be reachable on the network</li>
+    </ul>
+    
+    <h3>Usage Examples</h3>
+    <h4>Broadcast to All Peers</h4>
+    <pre>
+msg.payload = "Hello to all peers!";
+// No msg.to field - broadcasts to peer list
+return msg;
+    </pre>
+    
+    <h4>Direct Message to Specific Peer</h4>
+    <pre>
+msg.payload = "Direct message";
+msg.to = "0x1234567890abcdef..."; // Hedera admin-key
+return msg;
+    </pre>
+    
+    <h3>Troubleshooting</h3>
+    <ul>
+        <li><b>No connection:</b> Ensure selected node is deployed and running</li>
+        <li><b>Message not delivered:</b> Check if target admin-key is correct and peer is online</li>
+        <li><b>Empty peer list:</b> Verify buyer/seller node has configured peer addresses</li>
+        <li><b>WebSocket errors:</b> Check if Neuron SDK process is running on selected node</li>
+    </ul>
+    
+    <h3>Important Notes</h3>
+    <ul>
+        <li><b>Address Types:</b> Always use Hedera admin-keys, never EVM addresses for <code>msg.to</code></li>
+        <li><b>Network Layer:</b> This node operates at the P2P communication layer, not blockchain transactions</li>
+        <li><b>Real-time:</b> Messages are transmitted in real-time via WebSocket connections</li>
+        <li><b>Persistence:</b> Messages are not stored; they're transmitted live between peers</li>
+    </ul>
 </script> 

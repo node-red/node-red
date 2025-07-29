@@ -752,55 +752,84 @@
 </style>
 
 
-<script type="text/x-red" data-help-name="buyer">
-    <p>A node that handles buyer functionality in the Neuron network.</p>
-    <h3>Inputs</h3>
-    <dl class="message-properties">
-        <dt>payload <span class="property-type">object</span></dt>
-        <dd>The input message containing transaction details.</dd>
-    </dl>
+<script type="text/x-red" data-help-name="buyer config">
+    <p>A configuration node that creates and manages a buyer device in the Neuron network with Hedera blockchain integration.</p>
+    
+    <h3>Overview</h3>
+    <p>The Buyer Node is a configuration node that allows you to specify device details for a buyer device. When deployed, it automatically:</p>
+    <ul>
+        <li>Creates a Hedera account for the device</li>
+        <li>Creates 3 Hedera topics for communication</li>
+        <li>Registers the device to the specified smart contract</li>
+        <li>Spawns the Neuron SDK process</li>
+    </ul>
+    
     <h3>Outputs</h3>
     <dl class="message-properties">
         <dt>payload <span class="property-type">object</span></dt>
-        <dd>The output message containing processed transaction data.</dd>
+        <dd>Contains the device configuration and connection details</dd>
+        <dt>payload.deviceInfo <span class="property-type">object</span></dt>
+        <dd>The complete device credentials and account details created by Hedera</dd>
+        <dt>payload.connection <span class="property-type">string</span></dt>
+        <dd>Status message indicating connection to the Neuron network</dd>
     </dl>
-    <h3>Details</h3>
-    <p>This node provides the following functionality:</p>
-    <ul>
-        <li>Connects to the Neuron network as a buyer node</li>
-        <li>Handles transaction processing and validation</li>
-        <li>Manages communication with seller nodes</li>
-        <li>Provides real-time status updates</li>
-    </ul>
+    
     <h3>Configuration</h3>
     <ul>
-        <li><b>Name</b>: A unique identifier for this node</li>
-        <li><b>Node Type</b>: Select between buyer or seller mode</li>
-        <li><b>Selected Node</b>: Choose a specific node to interact with</li>
+        <li><b>Name</b>: A unique identifier for this buyer node</li>
+        <li><b>Smart Contract</b>: The target smart contract to register with (JetVision Demo, P2P Chat Demo, or Developer Open Challenges)</li>
+        <li><b>Device Type</b>: Type of device (e.g., Cloud, Edge)</li>
+        <li><b>Seller EVM Addresses</b>: Select which seller devices this buyer can interact with</li>
+        <li><b>Description</b>: Optional description for the device</li>
     </ul>
-    <h3>Usage Notes</h3>
+    
+    <h3>Runtime Information</h3>
+    <p>After successful deployment, the node displays:</p>
     <ul>
-        <li>Ensure proper network connectivity before deployment</li>
-        <li>Monitor the node status for connection issues</li>
-        <li>Check the debug output for detailed transaction logs</li>
-        <li>Use the status indicator to verify node health</li>
+        <li><b>EVM Address</b>: The Ethereum Virtual Machine address of the created account</li>
+        <li><b>Balance</b>: Current HBAR balance of the device account</li>
+        <li><b>Connection Status</b>: Real-time connection status to the Neuron network</li>
+        <li><b>Connected Peers</b>: List of currently connected seller nodes</li>
     </ul>
-    <h3>Message Format</h3>
-    <p>The node expects messages in the following format:</p>
-    <pre>
-{
-    "type": "transaction",
-    "data": {
-        "amount": number,
-        "currency": string,
-        "recipient": string
-    }
-}
-    </pre>
+    
+    <h3>Device Credentials Output</h3>
+    <p>The node outputs complete Hedera account details including:</p>
+    <ul>
+        <li>Account ID and private key</li>
+        <li>Three Hedera topic IDs for communication</li>
+        <li>Smart contract address</li>
+        <li>Device metadata (name, type, serial number)</li>
+        <li>Public key for peer-to-peer communication</li>
+    </ul>
+    
+    <h3>Network Communication</h3>
+    <p>To listen and write to the Neuron network after deployment:</p>
+    <ul>
+        <li>Use the <b>Neuron P2P</b> node for peer-to-peer communication</li>
+        <li>The buyer node automatically spawns the Neuron SDK process</li>
+        <li>WebSocket connections are established for real-time messaging</li>
+    </ul>
+    
     <h3>Status Indicators</h3>
     <ul>
-        <li><span style="color:green">●</span> Connected: Node is active and connected</li>
-        <li><span style="color:red">●</span> Disconnected: Node is offline</li>
-        <li><span style="color:yellow">●</span> Processing: Transaction in progress</li>
+        <li><span style="color:blue">●</span> Creating new device: Initial setup in progress</li>
+        <li><span style="color:green">●</span> Process spawned: Neuron SDK process is running</li>
+        <li><span style="color:yellow">●</span> Loading device info: Reading persisted device data</li>
+        <li><span style="color:red">●</span> Error states: Configuration error, account creation failed, etc.</li>
+    </ul>
+    
+    <h3>Prerequisites</h3>
+    <ul>
+        <li>Valid Hedera credentials must be configured</li>
+        <li>Selected smart contract must be deployed and accessible</li>
+        <li>Network connectivity for Hedera testnet/mainnet</li>
+    </ul>
+    
+    <h3>Usage Notes</h3>
+    <ul>
+        <li>Device information is automatically persisted and reloaded on restart</li>
+        <li>The node can be deployed multiple times safely - existing devices are reused</li>
+        <li>Monitor the connection status to ensure proper network connectivity</li>
+        <li>Use refresh button to update peer connection information</li>
     </ul>
 </script>

@@ -763,4 +763,102 @@
 .refresh-button-loading { opacity: 0.6; pointer-events: none; }
 .refresh-button-loading i { animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-</style> 
+</style>
+
+<script type="text/x-red" data-help-name="seller config">
+    <p>A configuration node that creates and manages a seller device in the Neuron network with Hedera blockchain integration.</p>
+    
+    <h3>Overview</h3>
+    <p>The Seller Node is a configuration node that allows you to specify device details for a seller device. When deployed, it automatically:</p>
+    <ul>
+        <li>Creates a Hedera account for the device</li>
+        <li>Creates 3 Hedera topics for communication</li>
+        <li>Registers the device to the specified smart contract</li>
+        <li>Spawns the Neuron SDK process</li>
+    </ul>
+    
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>Contains the device configuration and connection details</dd>
+        <dt>payload.deviceInfo <span class="property-type">object</span></dt>
+        <dd>The complete device credentials and account details created by Hedera</dd>
+        <dt>payload.connection <span class="property-type">string</span></dt>
+        <dd>Status message indicating connection to the Neuron network</dd>
+    </dl>
+    
+    <h3>Configuration</h3>
+    <ul>
+        <li><b>Name</b>: A unique identifier for this seller node</li>
+        <li><b>Device Name</b>: Name of the seller device</li>
+        <li><b>Device Role</b>: Role/function of the device in the network</li>
+        <li><b>Smart Contract</b>: The target smart contract to register with (JetVision Demo, P2P Chat Demo, or Developer Open Challenges)</li>
+        <li><b>Serial Number</b>: Unique serial number for the device</li>
+        <li><b>Device Type</b>: Type of device (e.g., Sensor, Gateway, Cloud)</li>
+        <li><b>Price</b>: Price for services offered by this seller device</li>
+        <li><b>Buyer EVM Addresses</b>: Select which buyer devices can interact with this seller</li>
+        <li><b>Description</b>: Optional description for the device</li>
+    </ul>
+    
+    <h3>Runtime Information</h3>
+    <p>After successful deployment, the node displays:</p>
+    <ul>
+        <li><b>EVM Address</b>: The Ethereum Virtual Machine address of the created account</li>
+        <li><b>Balance</b>: Current HBAR balance of the device account</li>
+        <li><b>Connection Status</b>: Real-time connection status to the Neuron network</li>
+        <li><b>Connected Peers</b>: List of currently connected buyer nodes</li>
+    </ul>
+    
+    <h3>Device Credentials Output</h3>
+    <p>The node outputs complete Hedera account details including:</p>
+    <ul>
+        <li>Account ID and private key</li>
+        <li>Three Hedera topic IDs for communication</li>
+        <li>Smart contract address</li>
+        <li>Device metadata (name, role, type, serial number, price)</li>
+        <li>Public key for peer-to-peer communication</li>
+        <li>Authorized buyer admin keys for access control</li>
+    </ul>
+    
+    <h3>Network Communication</h3>
+    <p>To listen and write to the Neuron network after deployment:</p>
+    <ul>
+        <li>Use the <b>Neuron P2P</b> node for peer-to-peer communication</li>
+        <li>The seller node automatically spawns the Neuron SDK process</li>
+        <li>WebSocket connections are established for real-time messaging</li>
+        <li>Device can receive and respond to buyer requests</li>
+    </ul>
+    
+    <h3>Status Indicators</h3>
+    <ul>
+        <li><span style="color:blue">●</span> Creating new device: Initial setup in progress</li>
+        <li><span style="color:green">●</span> Process spawned: Neuron SDK process is running</li>
+        <li><span style="color:yellow">●</span> Loading device info: Reading persisted device data</li>
+        <li><span style="color:red">●</span> Error states: Configuration error, account creation failed, etc.</li>
+    </ul>
+    
+    <h3>Prerequisites</h3>
+    <ul>
+        <li>Valid Hedera credentials must be configured</li>
+        <li>All required fields must be filled (Device Name, Role, Serial Number, etc.)</li>
+        <li>Selected smart contract must be deployed and accessible</li>
+        <li>Network connectivity for Hedera testnet/mainnet</li>
+    </ul>
+    
+    <h3>Usage Notes</h3>
+    <ul>
+        <li>Device information is automatically persisted and reloaded on restart</li>
+        <li>The node can be deployed multiple times safely - existing devices are reused</li>
+        <li>Monitor the connection status to ensure proper network connectivity</li>
+        <li>Price and device metadata can be used by buyers for selection</li>
+        <li>Buyer admin keys control which buyers can interact with this seller</li>
+    </ul>
+    
+    <h3>Difference from Buyer Node</h3>
+    <ul>
+        <li>Seller nodes offer services and have pricing information</li>
+        <li>Buyer nodes consume services and select from available sellers</li>
+        <li>Sellers define which buyers can access their services</li>
+        <li>Buyers select which sellers they want to interact with</li>
+    </ul>
+</script> 

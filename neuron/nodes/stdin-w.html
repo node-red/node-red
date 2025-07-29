@@ -220,4 +220,124 @@
             this.nodeType = $('#node-input-nodeType').val();
         }
     });
+</script>
+
+<script type="text/x-red" data-help-name="stdin w">
+    <p>A node that writes input messages to another device's STDIN Hedera topic.</p>
+    
+    <h3>Overview</h3>
+    <p>The Stdin Write node sends messages to a specific peer device's STDIN topic. Unlike other I/O nodes that work with your own device's topics, this node enables cross-device communication by writing to another device's input channel.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">any</span></dt>
+        <dd>The message content to write to the peer device's STDIN topic</dd>
+    </dl>
+    
+    <h3>Outputs</h3>
+    <p>This node has no outputs. It only writes to the target Hedera topic.</p>
+    
+    <h3>Configuration</h3>
+    <ul>
+        <li><b>Name</b>: Optional name for the node</li>
+        <li><b>Peer STDIN Topic</b>: The Hedera topic ID of the target device's STDIN topic (required)</li>
+        <li><b>Sender Node Type</b>: Select between "Buyer" or "Seller" for the sending device</li>
+        <li><b>Selected Sender Node</b>: Choose which device will send the message (provides authentication)</li>
+    </ul>
+    
+    <h3>Cross-Device Communication</h3>
+    <p>This node enables peer-to-peer communication patterns:</p>
+    <ul>
+        <li><b>Sender Authentication</b>: Uses selected sender device's private key and account</li>
+        <li><b>Target Topic</b>: Manually configured peer device's STDIN topic ID</li>
+        <li><b>Message Attribution</b>: Includes sender's EVM address in message</li>
+        <li><b>Direct Delivery</b>: Bypasses normal peer discovery mechanisms</li>
+    </ul>
+    
+    <h3>Message Structure</h3>
+    <p>The node automatically creates a structured message containing:</p>
+    <pre>
+{
+    "timestamp": "2024-01-01T12:00:00.000Z",
+    "from": "sender_evm_address",
+    "payload": msg.payload
+}
+    </pre>
+    
+    <h3>Use Cases</h3>
+    <ul>
+        <li>Sending commands or instructions to specific devices</li>
+        <li>Delivering input data for remote processing</li>
+        <li>Cross-device workflow coordination</li>
+        <li>Peer-to-peer messaging and notifications</li>
+        <li>Remote device control and configuration</li>
+    </ul>
+    
+    <h3>Topic ID Requirements</h3>
+    <ul>
+        <li><b>Format</b>: Hedera topic ID format (e.g., "0.0.1234567")</li>
+        <li><b>Validation</b>: Whitespace is automatically stripped from topic ID</li>
+        <li><b>Access</b>: Sender must have permission to write to the target topic</li>
+        <li><b>Discovery</b>: Topic IDs can be found in peer device configurations</li>
+    </ul>
+    
+    <h3>Authentication Flow</h3>
+    <ol>
+        <li>Message is signed using sender device's private key</li>
+        <li>Sender's account ID is used for Hedera transaction</li>
+        <li>Message includes sender's EVM address for identification</li>
+        <li>Target device can verify sender authenticity</li>
+    </ol>
+    
+    <h3>Status Indicators</h3>
+    <ul>
+        <li><span style="color:green">●</span> initialized for [node]: Ready to send messages</li>
+        <li><span style="color:blue">●</span> sending...: Message transmission in progress</li>
+        <li><span style="color:green">●</span> [time] sent to topic [id]: Message successfully sent</li>
+        <li><span style="color:red">●</span> no node selected: Configuration error</li>
+        <li><span style="color:red">●</span> init failed: Hedera service initialization failed</li>
+        <li><span style="color:red">●</span> error: Failed to send message</li>
+    </ul>
+    
+    <h3>Prerequisites</h3>
+    <ul>
+        <li>Sender device must be deployed and initialized</li>
+        <li>Valid peer STDIN topic ID must be configured</li>
+        <li>Sender must have write permissions to target topic</li>
+        <li>Hedera credentials must be properly configured</li>
+        <li>Sufficient HBAR balance for transaction fees</li>
+    </ul>
+    
+    <h3>Security Considerations</h3>
+    <ul>
+        <li><b>Access Control</b>: Ensure sender has legitimate access to target topic</li>
+        <li><b>Message Validation</b>: Receiving device should validate sender identity</li>
+        <li><b>Topic Privacy</b>: Topic IDs should be shared securely between peers</li>
+        <li><b>Rate Limiting</b>: Avoid excessive messaging to prevent spam</li>
+    </ul>
+    
+    <h3>Troubleshooting</h3>
+    <ul>
+        <li><b>Topic Not Found</b>: Verify the peer STDIN topic ID is correct</li>
+        <li><b>Permission Denied</b>: Check if sender has write access to target topic</li>
+        <li><b>Invalid Format</b>: Ensure topic ID follows Hedera format</li>
+        <li><b>Network Issues</b>: Verify Hedera network connectivity</li>
+    </ul>
+    
+    <h3>Best Practices</h3>
+    <ul>
+        <li>Use meaningful message payloads for easy parsing</li>
+        <li>Include error handling for failed transmissions</li>
+        <li>Implement message acknowledgment patterns when needed</li>
+        <li>Monitor transaction costs for frequent messaging</li>
+        <li>Coordinate topic IDs securely between communicating devices</li>
+    </ul>
+    
+    <h3>Related Nodes</h3>
+    <ul>
+        <li><b>stdin r</b>: Read input messages from your own device's STDIN topic</li>
+        <li><b>stdout w</b>: Write output messages to your own device's STDOUT topic</li>
+        <li><b>stderr w</b>: Write error messages to your own device's STDERR topic</li>
+        <li><b>neuron-p2p</b>: Alternative peer-to-peer communication method</li>
+    </ul>
 </script> 

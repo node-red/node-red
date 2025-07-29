@@ -414,8 +414,8 @@ module.exports = function (RED) {
                         }
                     });
                     // Use global contract data instead of individual calls
-                    console.log(`Node ${node.id}: Using global peer count: ${getGlobalPeerCount()}`);
-                    console.log(`Node ${node.id}: Global device count: ${getGlobalAllDevices().length}`);
+                  //  console.log(`Node ${node.id}: Using global peer count: ${getGlobalPeerCount()}`);
+                   // console.log(`Node ${node.id}: Global device count: ${getGlobalAllDevices().length}`);
                     if (getGlobalAllDevices().length > 0) {
                         console.log("Global devices sample:", JSON.stringify(getGlobalAllDevices().slice(0, 2)));
                     }
@@ -429,6 +429,10 @@ module.exports = function (RED) {
             }
 
             if (node.deviceInfo) {
+                node.send({
+                    payload: { deviceInfo: node.deviceInfo}
+                });
+
                 const initialSellerEvmAddresses = JSON.parse(config.sellerEvmAddress || '[]');
                 await updateSelectedSellers(node, initialSellerEvmAddresses, true); // ← Add isInitialSpawn = true
 
@@ -454,6 +458,7 @@ module.exports = function (RED) {
                                         } else {
                                             node.status({ fill: "yellow", shape: "ring", text: "Connected - no peers" });
                                         }
+                                  
                                     } else {
                                         node.status({ fill: "yellow", shape: "ring", text: "Connecting..." });
                                     }
@@ -461,6 +466,9 @@ module.exports = function (RED) {
 
                                 console.log(`Connection monitoring initialized for buyer node ${node.id}`);
                             } else {
+                                node.send({
+                                    payload: { connection: "failed"}
+                                });
                                 console.warn(`WebSocket connection failed for buyer node ${node.id}`);
                                 node.status({ fill: "orange", shape: "ring", text: "WebSocket failed - process running" });
                             }

@@ -216,4 +216,140 @@
             this.nodeType = $('#node-input-nodeType').val();
         }
     });
+</script>
+
+<script type="text/x-red" data-help-name="stderr r">
+    <p>A node that writes error messages to the STDERR Hedera topic of a selected device.</p>
+    
+    <h3>Overview</h3>
+    <p>The Stderr Write node sends error messages to the STDERR topic (topic[2]) of a selected buyer or seller device. This is analogous to writing to stderr in traditional UNIX systems, but implemented over Hedera blockchain topics.</p>
+    
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>topic <span class="property-type">any</span></dt>
+        <dd>The error message or data to write to the device's STDERR topic. This field is used as the payload.</dd>
+    </dl>
+    
+    <h3>Outputs</h3>
+    <p>This node has no outputs. It only writes to the Hedera topic.</p>
+    
+    <h3>Configuration</h3>
+    <ul>
+        <li><b>Name</b>: Optional name for the node</li>
+        <li><b>Node Type</b>: Select between "Buyer" or "Seller" to filter available nodes</li>
+        <li><b>Selected Node</b>: Choose the specific buyer or seller device to write to</li>
+    </ul>
+    
+    <h3>Message Structure</h3>
+    <p>The node automatically creates a structured error message containing:</p>
+    <pre>
+{
+    "timestamp": "2024-01-01T12:00:00.000Z",
+    "selectedNodeId": "node_id",
+    "deviceInfo": {
+        "address": "device_evm_address",
+        "deviceType": "device_type",
+        "serialNumber": "serial_number"
+    },
+    "payload": msg.topic
+}
+    </pre>
+    
+    <h3>Error Logging and Reporting</h3>
+    <ul>
+        <li><b>Target Topic</b>: Uses the device's STDERR topic (topics[2])</li>
+        <li><b>Authentication</b>: Uses the device's private key and account ID</li>
+        <li><b>Message Format</b>: JSON-encoded structured error message</li>
+        <li><b>Persistence</b>: Error messages are permanently stored on Hedera network</li>
+        <li><b>Traceability</b>: Includes device information for error tracking</li>
+    </ul>
+    
+    <h3>Use Cases</h3>
+    <ul>
+        <li>Logging system errors and exceptions</li>
+        <li>Recording device malfunctions or failures</li>
+        <li>Documenting validation errors and warnings</li>
+        <li>Creating audit trails for troubleshooting</li>
+        <li>Alerting about critical system states</li>
+        <li>Debugging distributed device networks</li>
+    </ul>
+    
+    <h3>Error Message Types</h3>
+    <p>Common error patterns to log to STDERR:</p>
+    <ul>
+        <li><b>System Errors</b>: Hardware failures, resource exhaustion</li>
+        <li><b>Network Errors</b>: Connection failures, timeout errors</li>
+        <li><b>Data Errors</b>: Validation failures, format errors</li>
+        <li><b>Configuration Errors</b>: Invalid settings, missing parameters</li>
+        <li><b>Security Errors</b>: Authentication failures, access denied</li>
+        <li><b>Process Errors</b>: Task failures, workflow interruptions</li>
+    </ul>
+    
+    <h3>Status Indicators</h3>
+    <ul>
+        <li><span style="color:green">●</span> initialized for [node]: Ready to log errors</li>
+        <li><span style="color:blue">●</span> sending...: Error message transmission in progress</li>
+        <li><span style="color:green">●</span> [time] sent to topic [id]: Error message successfully logged</li>
+        <li><span style="color:red">●</span> no node selected: Configuration error</li>
+        <li><span style="color:red">●</span> init failed: Hedera service initialization failed</li>
+    </ul>
+    
+    <h3>Error Monitoring Integration</h3>
+    <ul>
+        <li><b>Centralized Logging</b>: All device errors in one Hedera topic</li>
+        <li><b>Real-time Monitoring</b>: Use topic listeners for immediate alerts</li>
+        <li><b>Historical Analysis</b>: Query topic history for error patterns</li>
+        <li><b>Cross-Device Correlation</b>: Compare errors across multiple devices</li>
+    </ul>
+    
+    <h3>Prerequisites</h3>
+    <ul>
+        <li>Selected device must be deployed and initialized</li>
+        <li>Device must have valid Hedera account and topics</li>
+        <li>Hedera credentials must be properly configured</li>
+        <li>Device information must be persisted in the local file system</li>
+        <li>STDERR topic (topics[2]) must exist and be accessible</li>
+    </ul>
+    
+    <h3>Best Practices</h3>
+    <ul>
+        <li><b>Structured Errors</b>: Use consistent error message formats</li>
+        <li><b>Severity Levels</b>: Include error severity in message payload</li>
+        <li><b>Context Information</b>: Add relevant system state and parameters</li>
+        <li><b>Error Codes</b>: Use standardized error codes for categorization</li>
+        <li><b>Timestamps</b>: Ensure accurate timing for error correlation</li>
+        <li><b>Rate Limiting</b>: Avoid flooding stderr with duplicate errors</li>
+    </ul>
+    
+    <h3>Debugging and Troubleshooting</h3>
+    <ul>
+        <li><b>Error Correlation</b>: Link errors with related system events</li>
+        <li><b>Pattern Recognition</b>: Identify recurring error conditions</li>
+        <li><b>Root Cause Analysis</b>: Use error logs to trace issue origins</li>
+        <li><b>System Health</b>: Monitor error rates for device health</li>
+    </ul>
+    
+    <h3>Error Handling</h3>
+    <ul>
+        <li>Validates device information before logging</li>
+        <li>Checks for valid topics array and STDERR topic existence</li>
+        <li>Gracefully handles logging failures without breaking workflow</li>
+        <li>Reports meta-errors if STDERR logging itself fails</li>
+    </ul>
+    
+    <h3>Security and Privacy</h3>
+    <ul>
+        <li><b>Sensitive Data</b>: Avoid logging sensitive information in error messages</li>
+        <li><b>Access Control</b>: STDERR topics may be readable by authorized parties</li>
+        <li><b>Data Retention</b>: Hedera topics persist permanently - consider implications</li>
+        <li><b>Error Masking</b>: Sanitize error messages that might expose system details</li>
+    </ul>
+    
+    <h3>Related Nodes</h3>
+    <ul>
+        <li><b>stdout w</b>: Write output messages to a device's STDOUT topic</li>
+        <li><b>stdin r</b>: Read input messages from a device's STDIN topic</li>
+        <li><b>stdin w</b>: Write input messages to another device's STDIN topic</li>
+        <li><b>debug</b>: Node-RED built-in debugging for local error display</li>
+    </ul>
 </script> 
