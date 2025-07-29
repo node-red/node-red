@@ -1,5 +1,8 @@
 .DS_store
 .config.json
+.config.nodes.json
+.config.runtime.json
+.config.users.json
 .dist
 .jshintignore
 .npm
@@ -29,3 +32,14 @@ docs
 sync.ffs_db
 package-lock.json
 .editorconfig
+.idea
+flow_examples/
+// viso packages
+viso-incident-creation-v2.0.4-dev/
+viso-object-detection-tracking-v2.0.7-dev/
+viso-object-detection-v6.0.8-dev/
+viso-video-clip-capture-v2.0.2-dev/
+viso-video-feed-video-file-v1.1.7-dev/
+viso-video-view-v5.0.1-dev/
+viso-visualizations-v2.1.10-dev/
+region-selection-v1.0.1-dev/

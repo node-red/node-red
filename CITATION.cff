@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "Node-RED"
+title: "Nerco AI"
 authors:
   - family-names: "OpenJS Foundation"
   - family-names: "Contributors"
-url: "https://nodered.org"
+url: "https://nercoai.com"

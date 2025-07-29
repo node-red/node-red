@@ -57,8 +57,7 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => ["lib1"] },
-                storage: {},
-                telemetry: { isEnabled: () => true }
+                storage: {}
             })
             return settings.getRuntimeSettings({}).then(result => {
                 result.should.have.property("httpNodeRoot","testHttpNodeRoot");
@@ -97,8 +96,7 @@ describe("runtime-api/settings", function() {
                     getCredentialKeyType: () => "test-key-type"
                 },
                 library: {getLibraries: () => { ["lib1"]} },
-                storage: {},
-                telemetry: { isEnabled: () => true }
+                storage: {}
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -147,8 +145,7 @@ describe("runtime-api/settings", function() {
                         getCredentialsFilename:  () => 'test-creds-file',
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
-                },
-                telemetry: { isEnabled: () => true }
+                }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -205,8 +202,7 @@ describe("runtime-api/settings", function() {
                         getCredentialsFilename:  () => 'test-creds-file',
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
-                },
-                telemetry: { isEnabled: () => true }
+                }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -254,8 +250,7 @@ describe("runtime-api/settings", function() {
                         getCredentialsFilename:  () => 'test-creds-file',
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
-                },
-                telemetry: { isEnabled: () => true }
+                }
             })
             return settings.getRuntimeSettings({
                 user: {
@@ -306,8 +301,7 @@ describe("runtime-api/settings", function() {
                         getCredentialsFilename:  () => 'test-creds-file',
                         getGlobalGitUser: () => {return {name:'foo',email:'foo@example.com'}}
                     }
-                },
-                telemetry: { isEnabled: () => true }
+                }
             })
             return settings.getRuntimeSettings({
                 user: {

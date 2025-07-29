@@ -1,36 +1,40 @@
-# Node-RED
+# Nerco AI 👋
 
-https://nodered.org
+https://nercoai.com
 
-[![Build Status](https://github.com/node-red/node-red/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/node-red/node-red/actions?query=branch%3Amaster)
+The AI Co-Pilot for Home, Building and Industrial Automation
 
-Low-code programming for event-driven applications.
+## Demo 📹
 
-![Node-RED: Low-code programming for event-driven applications](https://nodered.org/images/node-red-screenshot.png)
+![Demo](download.gif)
 
-## Quick Start
 
-Check out https://nodered.org/docs/getting-started/ for full instructions on getting
-started.
+## Quick Start 🚀
 
-1. `sudo npm install -g --unsafe-perm node-red`
-2. `node-red`
-3. Open <http://localhost:1880>
+### Run With Docker
+```
+docker run -p 3000:3000 public.ecr.aws/x8e5h7k9/nerco-ai/ai-assistant:latest
+```
 
-## Getting Help
+### Get OpenAI API Key
+1. Go to [OpenAI Platform](https://platform.openai.com/)
+2. Sign up or log in to your account
+3. Navigate to [API Keys](https://platform.openai.com/api-keys)
+4. Click "Create new secret key"
+5. Copy the API key and paste it into Nerco AI Assistant when prompted
 
-More documentation can be found [here](https://nodered.org/docs).
+> **Note:** You may need to add payment information to your OpenAI account to use the API.
 
-For further help, or general discussion, please use the [Node-RED Forum](https://discourse.nodered.org) or [slack team](https://nodered.org/slack).
 
-## Developers
+
+### Run With NPM
 
 If you want to run the latest code from git, here's how to get started:
 
 1. Clone the code:
 
-        git clone https://github.com/node-red/node-red.git
-        cd node-red
+        git clone https://github.com/mohamedfawzy96/nerco-ai.git
+        cd nerco-ai
 
 2. Install the node-red dependencies
 
@@ -43,27 +47,24 @@ If you want to run the latest code from git, here's how to get started:
 4. Run
 
         npm start
+5. open localhost:3000
 
-## Contributing
-
-Before raising a pull-request, please read our
-[contributing guide](https://github.com/node-red/node-red/blob/master/CONTRIBUTING.md).
-
-This project adheres to the [Contributor Covenant 1.4](http://contributor-covenant.org/version/1/4/).
- By participating, you are expected to uphold this code. Please report unacceptable
- behavior to any of the project's core team at team@nodered.org.
-
-## Authors
-
-Node-RED is a project of the [OpenJS Foundation](http://openjsf.org).
-
-It is maintained by:
-
- * Nick O'Leary [@knolleary](http://twitter.com/knolleary)
- * Dave Conway-Jones [@ceejay](http://twitter.com/ceejay)
- * And many others...
+6. Get Anthropic API KEY
+   - Go to https://console.anthropic.com/
+   - Sign up for an account if you don't have one
+   - Navigate to API Keys section
+   - Create a new API key
+   - Copy the API key and paste it into Nerco AI Assistant when prompted
 
 
-## Copyright and license
 
-Copyright OpenJS Foundation and other contributors, https://openjsf.org under [the Apache 2.0 license](LICENSE).
+
+## Discord Channel 💬
+
+
+If you have any questions or want specific features, join our discord [channel](https://discord.gg/DYCBSUew)
+
+## License Notice
+
+This project contains source code derived from Node-RED, which is licensed under the Apache License 2.0. All such files retain their original license. Any original contributions in this repository are also licensed under the Apache License 2.0.
+
