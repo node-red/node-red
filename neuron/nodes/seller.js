@@ -690,25 +690,61 @@ module.exports = function (RED) {
     RED.httpAdmin.post('/seller/refresh-connections/:nodeId', function (req, res) {
         const nodeId = req.params.nodeId;
         const { getConnectionMonitor } = require('./connection-monitor.js');
+        console.log(`[DEBUG] Seller refresh connections requested for node ID: ${nodeId}`);
 
         try {
-            const sellerNode = RED.nodes.getNode(nodeId);
+            let sellerNode = RED.nodes.getNode(nodeId);
+            let actualNodeId = nodeId;
+            
+            // If not found directly, check if this is a template ID that maps to an instance
+            if (!sellerNode) {
+                const instanceId = sellerTemplateToInstanceMap.get(nodeId);
+                if (instanceId) {
+                    console.log(`[DEBUG] Seller template ID ${nodeId} maps to instance ID ${instanceId}`);
+                    sellerNode = RED.nodes.getNode(instanceId);
+                    actualNodeId = instanceId;
+                }
+            }
+            
+            console.log(`[DEBUG] Using seller node ID: ${actualNodeId}, Found node:`, sellerNode ? sellerNode.type : 'none');
+            
             if (!sellerNode || sellerNode.type !== 'seller config') {
-                return res.status(404).json({ error: 'Seller node not found' });
+                console.log(`[DEBUG] Seller node not found or wrong type`);
+                return res.status(404).json({ 
+                    error: 'Seller node not found',
+                    debug: {
+                        requestedId: nodeId,
+                        actualNodeId: actualNodeId,
+                        foundNode: sellerNode ? sellerNode.type : 'none',
+                        hasMapping: sellerTemplateToInstanceMap.has(nodeId)
+                    }
+                });
             }
 
             if (!sellerNode.deviceInfo || !sellerNode.deviceInfo.wsPort) {
-                return res.status(400).json({ error: 'Node not ready - no WebSocket port available' });
+                console.log(`[DEBUG] Seller node not ready - no WebSocket port`);
+                return res.status(400).json({ 
+                    error: 'Node not ready - no WebSocket port available',
+                    debug: {
+                        hasDeviceInfo: !!sellerNode.deviceInfo,
+                        hasWsPort: !!(sellerNode.deviceInfo && sellerNode.deviceInfo.wsPort)
+                    }
+                });
             }
 
-            const connectionMonitor = getConnectionMonitor(nodeId, 'seller', sellerNode.deviceInfo.wsPort);
+            // Use actualNodeId for the connection monitor
+            const connectionMonitor = getConnectionMonitor(actualNodeId, 'seller', sellerNode.deviceInfo.wsPort);
             connectionMonitor.refresh()
                 .then(() => {
-                    res.json({ success: true, status: connectionMonitor.getStatus() });
+                    const status = connectionMonitor.getStatus();
+                    console.log(`[DEBUG] Seller refresh completed for ${actualNodeId}:`, status);
+                    res.json({ success: true, status: status });
                 })
                 .catch(error => {
+                    console.error(`[DEBUG] Seller refresh failed for ${actualNodeId}:`, error);
                     res.status(500).json({ error: 'Failed to refresh connections: ' + error.message });
                 });
+                
         } catch (error) {
             console.error(`Error refreshing connections for seller node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to refresh connections: ' + error.message });
@@ -717,7 +753,7 @@ module.exports = function (RED) {
 
 
 
-    RED.httpAdmin.get('/seller/device-info/:nodeId', function (req, res) {
+    RED.httpAdmin.get('/seller/device-info/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
         console.log(`[DEBUG] Seller device info requested for node ID: ${nodeId}`); // Debug log
 
@@ -751,26 +787,40 @@ module.exports = function (RED) {
             }
 
             if (!sellerNode.deviceInfo) {
-                console.log(`[DEBUG] Seller node ${actualNodeId} has no deviceInfo`); // Debug log
+                console.log(`[DEBUG] Seller node has no deviceInfo`); // Debug log
                 return res.status(400).json({ 
-                    error: 'Node not initialized - no device info available',
-                    debug: {
-                        hasDeviceInfo: !!sellerNode.deviceInfo,
-                        hasAccountId: !!(sellerNode.deviceInfo && sellerNode.deviceInfo.accountId)
-                    }
+                    error: 'Node not initialized - no device info available'
                 });
+            }
+
+            // Get publicKey from adminAddress or extract from EVM
+            let publicKey = '';
+            if (sellerNode.deviceInfo.adminAddress) {
+                // Option 1: Use existing adminAddress
+                publicKey = sellerNode.deviceInfo.adminAddress;
+            } else if (sellerNode.deviceInfo.evmAddress && hederaService) {
+                // Option 2: Extract from EVM address
+                try {
+                    const selfAdminKeyDer = await hederaService.getAdminKeyFromEvmAddress(sellerNode.deviceInfo.evmAddress);
+                    const selfPublicKeyBytes = extractPublicKeyBytes(selfAdminKeyDer);
+                    publicKey = selfPublicKeyBytes || '';
+                } catch (error) {
+                    console.warn(`Failed to extract public key for seller ${actualNodeId}:`, error.message);
+                    publicKey = 'Error extracting key';
+                }
             }
 
             const response = {
                 evmAddress: sellerNode.deviceInfo.evmAddress || '',
                 wsPort: sellerNode.deviceInfo.wsPort || null,
-                publicKey: sellerNode.deviceInfo.publicKey || '',
+                publicKey: publicKey,
                 initialized: !!sellerNode.deviceInfo.evmAddress,
-                nodeId: actualNodeId // Add this for debugging
+                nodeId: actualNodeId
             };
 
-            console.log(`[DEBUG] Returning seller device info for ${actualNodeId}:`, response); // Debug log
+            console.log(`[DEBUG] Returning seller device info:`, response);
             res.json(response);
+            
         } catch (error) {
             console.error(`Error getting device info for seller node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to get device info: ' + error.message });

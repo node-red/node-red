@@ -20,14 +20,14 @@
         return hbarValue.toFixed(2); // Show 2 decimal places
     }
 
-    function updateBalanceDisplay(balance) {
+    function updateBalanceDisplay(balance, accountId) {
         const balanceElements = document.querySelectorAll('[data-balance-display]');
         balanceElements.forEach(element => {
-            element.textContent = `Balance: ${balance} USDC`;
+            element.textContent = `Account: ${accountId} | Balance: ${balance} USDC`;
         });
 
         // Update CSS custom property for pseudo-element content
-        document.documentElement.style.setProperty('--balance-text', `"Balance: ${balance} USDC"`);
+        document.documentElement.style.setProperty('--balance-text', `"Account: ${accountId} | Balance: ${balance} USDC"`);
         
         currentBalance = balance;
         console.log(`✅ Balance updated: ${balance} USDC`);
@@ -64,7 +64,7 @@
                 
                 if (data.success && data.balance !== undefined) {
                     const hbarBalance = convertTinybarsToHbar(data.balance);
-                    updateBalanceDisplay(hbarBalance);
+                    updateBalanceDisplay(hbarBalance, data.accountId);
                     isUpdating = false;
                     return;
                 } else {

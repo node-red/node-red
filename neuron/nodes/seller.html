@@ -58,6 +58,12 @@
         <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
     </div>
 
+    <!-- Add PublicKey field here -->
+    <div class="form-row">
+        <label for="node-input-publicKey"><span>Public Key</span></label>
+        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+    </div>
+
     <!-- Connection Status Section - moved to bottom -->
     <div class="form-row">
         <label><span>Connection Status</span></label>
@@ -161,7 +167,8 @@
             evmAddress: { value: "" },
             balance: { value: "" },
             buyerEvmAddress: { value: [] },
-            buyerDevices: { value: [] }
+            buyerDevices: { value: [] },
+            publicKey: { value: "" }
         },
         inputs: 0,
         outputs: 1,
@@ -237,22 +244,34 @@
                 }
             }
 
-            // Fetch and populate EVM address if available
-            function updateEvmAddress() {
+            // Fetch and populate EVM address and publicKey if available
+            function updateEvmAddressAndPublicKey() {
                 if (node.id) {
+                    console.log(`Fetching seller device info for node ID: ${node.id}`);
                     $.get(`/seller/device-info/${node.id}`)
                         .done(function(data) {
+                            console.log(`Seller device info received for ${node.id}:`, data);
                             if (data.evmAddress) {
                                 $('#node-input-evmAddress').val(data.evmAddress);
                             } else {
                                 $('#node-input-evmAddress').val('Not initialized yet');
                             }
+                            
+                            // Handle publicKey
+                            if (data.publicKey) {
+                                $('#node-input-publicKey').val(data.publicKey);
+                            } else {
+                                $('#node-input-publicKey').val('Not initialized yet');
+                            }
                         })
-                        .fail(function() {
+                        .fail(function(xhr, status, error) {
+                            console.error(`Failed to fetch seller device info for ${node.id}:`, error);
                             $('#node-input-evmAddress').val('Error loading EVM address');
+                            $('#node-input-publicKey').val('Error loading public key');
                         });
                 } else {
                     $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
+                    $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
                 }
             }
 
@@ -275,15 +294,39 @@
                 }
             }
 
+            // Fetch and populate publicKey if available
+            function updatePublicKey() {
+                if (node.id) {
+                    $.get(`/seller/device-info/${node.id}`)
+                        .done(function(data) {
+                            if (data.publicKey) {
+                                $('#node-input-publicKey').val(data.publicKey);
+                            } else {
+                                $('#node-input-publicKey').val('Not initialized yet');
+                            }
+                        })
+                        .fail(function() {
+                            $('#node-input-publicKey').val('Error loading public key');
+                        });
+                } else {
+                    $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
+                }
+            }
+
             // Update EVM address on dialog open
-            updateEvmAddress();
+            updateEvmAddressAndPublicKey();
 
             // Update balance ONCE on dialog open (NO REFRESH)
             updateDeviceBalance();
 
+            // Update publicKey ONCE on dialog open (NO REFRESH)
+            updatePublicKey();
+
             // Set up refresh intervals
             if (node.id) {
-                intervals.evmRefresh = setInterval(updateEvmAddress, 5000);
+                intervals.evmRefresh = setInterval(updateEvmAddressAndPublicKey, 5000);
+                intervals.balanceRefresh = setInterval(updateDeviceBalance, 5000); // Add balance refresh
+                intervals.publicKeyRefresh = setInterval(updatePublicKey, 5000); // Add publicKey refresh
             }
 
             // Consolidated cleanup function
@@ -581,9 +624,10 @@
                 this.buyerEvmAddress = [];
             }
             
-            // Save the current EVM address and balance
+            // Save the current EVM address, balance, and publicKey
             this.evmAddress = $('#node-input-evmAddress').val();
             this.balance = $('#node-input-balance').val();
+            this.publicKey = $('#node-input-publicKey').val();
             
           //  console.log('Saved buyer EVM addresses:', this.buyerEvmAddress);
         }

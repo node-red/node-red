@@ -52,6 +52,12 @@
         <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
     </div>
 
+    <!-- Add PublicKey field here -->
+    <div class="form-row">
+        <label for="node-input-publicKey"><span>Public Key</span></label>
+        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+    </div>
+
     <!-- Connection Status Section - moved to bottom -->
     <div class="form-row">
         <label><span>Connection Status</span></label>
@@ -199,7 +205,8 @@
             deviceType: { value: null, required: true },
             description: { value: "" },
             evmAddress: { value: "" },
-            balance: { value: "" }
+            balance: { value: "" },
+            publicKey: { value: "" }
         },
         inputs: 0,
         outputs: 1,
@@ -497,25 +504,34 @@
                 initializeBuyerConnectionStatus(node.id);
             }
 
-            // Fetch and populate EVM address if available (ONE TIME ONLY - NO REFRESH)
-            function updateEvmAddress() {
+            // Fetch and populate EVM address and publicKey if available (ONE TIME ONLY - NO REFRESH)
+            function updateEvmAddressAndPublicKey() {
                 if (node.id) {
-                    console.log(`Fetching EVM address for node ID: ${node.id}`); // Debug log
+                    console.log(`Fetching device info for node ID: ${node.id}`); // Debug log
                     $.get(`/buyer/device-info/${node.id}`)
                         .done(function(data) {
-                            console.log(`EVM data received for ${node.id}:`, data); // Debug log
+                            console.log(`Device info received for ${node.id}:`, data); // Debug log
                             if (data.evmAddress) {
                                 $('#node-input-evmAddress').val(data.evmAddress);
                             } else {
                                 $('#node-input-evmAddress').val('Not initialized yet');
                             }
+                            
+                            // Handle publicKey
+                            if (data.publicKey) {
+                                $('#node-input-publicKey').val(data.publicKey);
+                            } else {
+                                $('#node-input-publicKey').val('Not initialized yet');
+                            }
                         })
                         .fail(function(xhr, status, error) {
-                            console.error(`Failed to fetch EVM for ${node.id}:`, error); // Debug log
+                            console.error(`Failed to fetch device info for ${node.id}:`, error); // Debug log
                             $('#node-input-evmAddress').val('Error loading EVM address');
+                            $('#node-input-publicKey').val('Error loading public key');
                         });
                 } else {
                     $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
+                    $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
                 }
             }
 
@@ -539,7 +555,7 @@
             }
 
             // Update EVM address ONCE on dialog open (NO REFRESH EVER)
-            updateEvmAddress();
+            updateEvmAddressAndPublicKey();
             
             // Update balance ONCE on dialog open (NO REFRESH)
             updateDeviceBalance();
@@ -576,9 +592,10 @@
             this.sellerEvmAddress = selectedAddresses;
             this.sellerDevices = this.selectedDevices;
             
-            // Save the current EVM address and balance
+            // Save the current EVM address, balance, and publicKey
             this.evmAddress = $('#node-input-evmAddress').val();
             this.balance = $('#node-input-balance').val();
+            this.publicKey = $('#node-input-publicKey').val();  // Add this line
         }
     });     
 

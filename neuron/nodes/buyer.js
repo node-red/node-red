@@ -944,28 +944,25 @@ module.exports = function (RED) {
         }
     }
 
-    RED.httpAdmin.get('/buyer/device-info/:nodeId', function (req, res) {
+    RED.httpAdmin.get('/buyer/device-info/:nodeId', async function (req, res) {
         const nodeId = req.params.nodeId;
-       // console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`);
+        console.log(`[DEBUG] Device info requested for node ID: ${nodeId}`);
 
         try {
             let buyerNode = RED.nodes.getNode(nodeId);
             let actualNodeId = nodeId;
             
-            // If not found directly, check if this is a template ID that maps to an instance
+            // Template mapping logic (existing code)
             if (!buyerNode) {
                 const instanceId = templateToInstanceMap.get(nodeId);
                 if (instanceId) {
-                  //  console.log(`[DEBUG] Template ID ${nodeId} maps to instance ID ${instanceId}`);
+                    console.log(`[DEBUG] Template ID ${nodeId} maps to instance ID ${instanceId}`);
                     buyerNode = RED.nodes.getNode(instanceId);
                     actualNodeId = instanceId;
                 }
             }
             
-           // console.log(`[DEBUG] Using node ID: ${actualNodeId}, Found node:`, buyerNode ? buyerNode.type : 'none');
-            
             if (!buyerNode || buyerNode.type !== 'buyer config') {
-              //  console.log(`[DEBUG] Node not found or wrong type`);
                 return res.status(404).json({ 
                     error: 'Buyer node not found',
                     debug: {
@@ -978,23 +975,38 @@ module.exports = function (RED) {
             }
 
             if (!buyerNode.deviceInfo) {
-               // console.log(`[DEBUG] Node has no deviceInfo`);
                 return res.status(400).json({ 
                     error: 'Node not initialized - no device info available'
                 });
             }
 
+            // Get publicKey from adminAddress or extract from EVM
+            let publicKey = '';
+            if (buyerNode.deviceInfo.adminAddress) {
+                // Option 1: Use existing adminAddress
+                publicKey = buyerNode.deviceInfo.adminAddress;
+            } else if (buyerNode.deviceInfo.evmAddress && hederaService) {
+                // Option 2: Extract from EVM address
+                try {
+                    const selfAdminKeyDer = await hederaService.getAdminKeyFromEvmAddress(buyerNode.deviceInfo.evmAddress);
+                    const selfPublicKeyBytes = extractPublicKeyBytes(selfAdminKeyDer);
+                    publicKey = selfPublicKeyBytes || '';
+                } catch (error) {
+                    console.warn(`Failed to extract public key for buyer ${actualNodeId}:`, error.message);
+                    publicKey = 'Error extracting key';
+                }
+            }
+
             const response = {
                 evmAddress: buyerNode.deviceInfo.evmAddress || '',
                 wsPort: buyerNode.deviceInfo.wsPort || null,
-                publicKey: buyerNode.deviceInfo.publicKey || '',
+                publicKey: publicKey,
                 initialized: !!buyerNode.deviceInfo.evmAddress,
                 nodeId: actualNodeId
             };
 
-          //  console.log(`[DEBUG] Returning device info:`, response);
+            console.log(`[DEBUG] Returning device info for ${nodeId}:`, response);
             res.json(response);
-            
         } catch (error) {
             console.error(`Error getting device info for buyer node ${nodeId}:`, error);
             res.status(500).json({ error: 'Failed to get device info: ' + error.message });
