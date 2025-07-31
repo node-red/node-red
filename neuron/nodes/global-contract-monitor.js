@@ -320,7 +320,7 @@ async function initializeGlobalContractMonitoring() {
             } catch (error) {
                 console.error('Error in contract monitoring interval:', error.message);
             }
-        }, 5 * 60 * 1000); // 5 minutes
+        }, 1 * 60 * 1000); // 1 minute
 
         isContractMonitoringActive = true;
         console.log('Global contract monitoring service initialized successfully for all contracts');
@@ -383,6 +383,78 @@ function isMonitoringActive() {
     return isContractMonitoringActive;
 }
 
+/**
+ * Search for a device in the cache by EVM address
+ */
+function searchDeviceInCache(contract, evmAddress) {
+    try {
+        const userHome = require('../services/NeuronUserHome').load();
+        const cacheDirectory = path.join(userHome, 'cache');
+        const fileName = `contract-data-${contract}.json`;
+        const cacheFilePath = path.join(cacheDirectory, fileName);
+        
+        console.log(`[DEBUG] Constructing cache path: ${cacheFilePath}`);
+        
+        if (!fs.existsSync(cacheFilePath)) {
+            console.log(`[DEBUG] Cache file not found: ${cacheFilePath}`);
+            return null;
+        }
+        
+        const cacheData = JSON.parse(fs.readFileSync(cacheFilePath, 'utf-8'));
+        const allDevices = cacheData.allDevices || [];
+        
+        const device = allDevices.find(d => 
+            d.contract && d.contract.toLowerCase() === evmAddress.toLowerCase()
+        );
+        
+        console.log(`[DEBUG] Searched ${allDevices.length} devices in ${contract} cache, found: ${device ? 'YES' : 'NO'}`);
+        return device || null;
+        
+    } catch (error) {
+        console.error(`[DEBUG] Error searching device in cache:`, error);
+        return null;
+    }
+}
+
+/**
+ * Trigger cache update for specific contract with retry logic
+ */
+async function triggerCacheUpdate(contract) {
+    const maxRetries = 4;
+    const retryDelay = 5000; // 5 seconds
+    let lastError = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`[DEBUG] Triggering cache update for contract: ${contract} (Attempt ${attempt}/${maxRetries})`);
+            
+            // Use the existing fetchContractData function that's already in the file
+            await fetchContractData(contract);
+            
+            console.log(`[DEBUG] Cache update successful for ${contract} on attempt ${attempt}`);
+            return { success: true, attempt: attempt };
+            
+        } catch (error) {
+            lastError = error;
+            console.error(`[DEBUG] Cache update attempt ${attempt}/${maxRetries} failed for ${contract}:`, error.message);
+            
+            // If this is not the last attempt, wait before retrying
+            if (attempt < maxRetries) {
+                console.log(`[DEBUG] Waiting ${retryDelay/1000} seconds before retry ${attempt + 1}...`);
+                await new Promise(resolve => setTimeout(resolve, retryDelay));
+            }
+        }
+    }
+    
+    // All attempts failed
+    console.error(`[DEBUG] All ${maxRetries} cache update attempts failed for ${contract}. Final error:`, lastError?.message);
+    return { 
+        success: false, 
+        error: lastError?.message || 'All retry attempts failed',
+        attempts: maxRetries
+    };
+}
+
 // Export the singleton interface
 module.exports = {
     initializeGlobalContractMonitoring,
@@ -390,5 +462,7 @@ module.exports = {
     getGlobalPeerCount,
     getGlobalAllDevices,
     isContractLoading,
-    isMonitoringActive
+    isMonitoringActive,
+    searchDeviceInCache,
+    triggerCacheUpdate
 }; 

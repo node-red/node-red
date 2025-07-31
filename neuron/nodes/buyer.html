@@ -20,20 +20,47 @@
         <label for="node-input-deviceType"><span>Device Type</span></label>
         <input type="text" id="node-input-deviceType" placeholder="Enter Device Type e.g Cloud, Edge">
     </div>
+    <!-- Replace the existing seller selection section with this inline version -->
     <div class="form-row">
-        <label> <span>Seller EVM Addresses</span></label>
+        <label style="width: 100%;"><span>Sellers I want data from (Should be in selected Smart Contract above )</span></label>
+        <div style="margin-top: 10px;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="evm-address-input" placeholder="Enter EVM address (0x...)" 
+                       style="flex: 1; font-family: monospace; font-size: 12px;">
+                <button type="button" id="add-device-btn" class="red-ui-button">
+                    <i class="fa fa-plus"></i> Add Seller
+                </button>
+            </div>
+            
+            <div id="devices-table-container" style="margin-top: 10px;">
+                <table id="devices-table" style="width: 100%; border-collapse: collapse; display: none;">
+                    <thead>
+                        <tr style="background-color: #2d2d2d; color: white;">
+                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">EVM Address</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdIn Topic</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdOut Topic</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdErr Topic</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 100px;">Status</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 100px;">Last Seen</th>
+                            <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 60px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="devices-table-body">
+                    </tbody>
+                </table>
+                
+                <div id="no-devices-message" style="text-align: center; color: #888; padding: 20px; font-style: italic;">
+                    No devices added yet. Enter an EVM address above to add a device.
+                </div>
+                
+                <div id="devices-summary" style="margin-top: 10px; font-size: 12px; color: #666;">
+                    <span id="device-count">0</span> device(s) configured
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keep the hidden input for data storage -->
         <input type="hidden" id="node-input-sellerEvmAddress" />
-        <button type="button" id="select-sellers-btn" class="red-ui-button">Select Sellers</button>
-    </div>
-   <!-- <div class="form-row">
-        <label for="node-input-sellerEvmAddress"><i class="fa fa-hard-drive"></i> <span>Seller EVM Address</span></label>
-        <select id="node-input-sellerEvmAddress" multiple size="5" style="width: 100%;">
-            <option value="">Loading...</option>
-        </select>
-    </div>-->
-    <div class="form-row">
-        <label for="node-input-selectedAddresses"><span>Selected Sellers</span></label>
-        <textarea id="node-input-selectedAddresses" rows="3" readonly style="width: 100%;"></textarea>
     </div>
     <div class="form-row">
         <label for="node-input-description"> <span>Description</span></label>
@@ -43,23 +70,43 @@
     <!-- Separator line between configuration and runtime information -->
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
     
+    <!-- Runtime Information Section -->
+    <hr style="margin: 20px 0; border: 1px solid #ddd;">
+    <h4 style="margin: 10px 0; color: white;">Runtime Information</h4>
+
     <div class="form-row">
-        <label for="node-input-evmAddress"><span>EVM</span></label>
-        <input type="text" id="node-input-evmAddress" placeholder="EVM Address will appear here after initialization" readonly>
+        <label for="node-input-evmAddress"><span>EVM Address</span></label>
+        <input type="text" id="node-input-evmAddress" placeholder="EVM address will appear here after initialization" readonly>
     </div>
+
     <div class="form-row">
         <label for="node-input-balance"><span>Balance</span></label>
         <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
     </div>
 
-    <!-- Add PublicKey field here -->
     <div class="form-row">
         <label for="node-input-publicKey"><span>Public Key</span></label>
-        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly style="font-family: monospace; font-size: 11px;">
+        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly>
+    </div>
+
+    <!-- Add these three new topic fields -->
+    <div class="form-row">
+        <label for="node-input-stdInTopic"><span>StdIn Topic</span></label>
+        <input type="text" id="node-input-stdInTopic" placeholder="StdIn topic will appear here after initialization" readonly>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stdOutTopic"><span>StdOut Topic</span></label>
+        <input type="text" id="node-input-stdOutTopic" placeholder="StdOut topic will appear here after initialization" readonly>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-stdErrTopic"><span>StdErr Topic</span></label>
+        <input type="text" id="node-input-stdErrTopic" placeholder="StdErr topic will appear here after initialization" readonly>
     </div>
 
     <!-- Connection Status Section - moved to bottom -->
-    <div class="form-row">
+   <!-- <div class="form-row">
         <label><span>Connection Status</span></label>
         <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
             <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
@@ -68,9 +115,9 @@
         <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
             <i class="fa fa-refresh"></i> Refresh
         </button>
-    </div>
+    </div>-->
     
-    <div class="form-row">
+    <!--<div class="form-row">
         <label><span>Connected Peers</span></label>
         <div id="connected-peers-container" style="margin-top: 10px;">
             <div id="peers-loading" style="text-align: center; color: black; padding: 20px;">
@@ -101,94 +148,13 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>-->
 
 
-    <div id="seller-modal" class="red-ui-dialog" style="display: none;" title="Select Seller Devices">
-        <div class="red-ui-dialog-content" style="padding: 15px; overflow: hidden; display: flex; flex-direction: column; height: 100%;">
-            <div style="margin-bottom: 15px;">
-                <label for="seller-search-input" style="display: block; margin-bottom: 5px; font-weight: bold;">Search by Contract Address:</label>
-                <input type="text" id="seller-search-input" placeholder="Enter contract address to search..." style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-                <button type="button" class="red-ui-button" id="cancel-seller-selection">Cancel</button>
-                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-seller-selection" style="border: 1px solid #DDD">OK</button>
-            </div>
-            <div style="flex: 1; overflow: auto; margin-bottom: 15px;">
-                <table id="seller-table" class="seller-table" style="width: 100%; border-collapse: collapse;">
-                    <colgroup>
-                        <col style="width: 80px;">  <!-- Select column -->
-                        <col style="width: 25%;">   <!-- Contract column -->
-                        <col style="width: 25%;">   <!-- StdOutTopic column -->
-                        <col style="width: 25%;">   <!-- StdInTopic column -->
-                        <col style="width: 25%;">   <!-- StdErrTopic column -->
-                    </colgroup>
-                    <thead>
-                        <tr style="border-bottom: 1px solid #ddd;">
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Select</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">Contract</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdOutTopic</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdInTopic</th>
-                            <th style="text-align: left; padding: 8px 12px; font-weight: bold;">StdErrTopic</th>
-                        </tr>
-                    </thead>
-                    <tbody style="display: table-row-group; overflow-y: auto; max-height: 300px;"></tbody>
-                </table>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 15px; border-top: 1px solid #eee;">
-                <button type="button" class="red-ui-button" id="cancel-seller-selection">Cancel</button>
-                <button type="button" class="red-ui-button red-ui-button-primary" id="confirm-seller-selection">OK</button>
-            </div>
-        </div>
-    </div>
+    <!-- The seller-modal div is no longer needed -->
 </script>
 
-<!-- Include connection status template -->
-<script type="text/html" data-template-name="connection-status">
-    <div class="form-row">
-        <label><span>Connection Status</span></label>
-        <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
-            <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
-            <span id="status-text">Unknown</span>
-        </div>
-        <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
-            <i class="fa fa-refresh"></i> Refresh
-        </button>
-    </div>
-    
-    <div class="form-row">
-        <label><span>Connected Peers</span></label>
-        <div id="connected-peers-container" style="margin-top: 10px;">
-            <div id="peers-loading" style="text-align: center; color: #666; padding: 20px;">
-                <i class="fa fa-spinner fa-spin"></i> Loading connection status...
-            </div>
-            <div id="peers-content" style="display: none;">
-                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white;">
-                    <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
-                </div>
-                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
-                    <div id="no-peers-message" style="text-align: center; color: #666; font-style: italic;">
-                        No peers connected
-                    </div>
-                    <table id="peers-table" style="width: 100%; display: none;">
-                        <thead>
-                            <tr>
-                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">Public Key</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Status</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Last Update</th>
-                            </tr>
-                        </thead>
-                        <tbody id="peers-table-body">
-                        </tbody>
-                    </table>
-                </div>
-                <div id="last-update-info" style="margin-top: 5px; font-size: 12px; color: #666;">
-                    Last updated: <span id="last-update-time">Never</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
+
 
 <script type="text/javascript">
     // Move shared variables/functions outside the IIFE
@@ -201,12 +167,16 @@
             name: { value: "Buyer"},
             sellerEvmAddress: { value: [] },
             sellerDevices: { value: [] },
-            smartContract: { value: "jetvision" },
+            smartContract: { value: "jetvision" }, // Ensure this has a default value
             deviceType: { value: null, required: true },
             description: { value: "" },
             evmAddress: { value: "" },
             balance: { value: "" },
-            publicKey: { value: "" }
+            publicKey: { value: "" },
+            // Add these three new fields
+            stdInTopic: { value: "" },
+            stdOutTopic: { value: "" },
+            stdErrTopic: { value: "" }
         },
         inputs: 0,
         outputs: 1,
@@ -219,298 +189,391 @@
         },
         oneditprepare: function () {
             const node = this;
-            // Make selectedDevices accessible to oneditsave
-            this.selectedDevices = [];
-            $('<style>')
-                .text(`
-                    .seller-table tr.selected {
-                        background-color: #DDD;
-                        color: black;
-                       // outline: 2px solid #4d90fe;
-                    }
-                    .seller-table tr:hover {
-                       outline: 2px solid #4d90fe;
-                    }
-                    .seller-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        color: white;
-                    }
-                    .seller-table th, .seller-table td {
-                        border: 1px solid #ccc;
-                        padding: 8px;
-                        text-align: left;
-                        color: white;
-                    }
-                    .seller-table thead th {
-                        position: sticky;
-                        top: 0;
-                        background-color: black;
-                        color: white;
-                        z-index: 1;
-                    }
-                `)
-                .appendTo('head');
-
-            //console.log(node.sellerEvmAddress);
-
-            //  const selectedAddresses = JSON.parse(node.sellerEvmAddress || "[]");
-            const selectedAddresses = typeof node.sellerEvmAddress === 'string'
-                ? JSON.parse(node.sellerEvmAddress)
-                : [];
-            if (Array.isArray(selectedAddresses)) {
-                // $('#node-input-sellerEvmAddress').val(JSON.stringify(node.sellerEvmAddress));
-                $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
-            }
-            // Function to load devices for the selected contract
-            function loadDevicesForCurrentContract() {
-                const selectedContract = $('#node-input-smartContract').val();
-                console.log('Loading devices for contract:', selectedContract);
+            node.devicesList = []; // Store device objects
+            
+            // Timer for updates
+            let autoUpdateInterval = null;
+            
+            // Cleanup function
+            this._cleanup = function() {
+                if (autoUpdateInterval) {
+                    clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = null;
+                    console.log('[DEBUG] Auto-update interval cleared');
+                }
+            };
+            
+            console.log('[SCOPE TEST] node defined at start:', typeof node);
+            
+            // Initialize devices from existing configuration
+            function initializeDevices() {
+                console.log('[SCOPE TEST] node in initializeDevices:', typeof node);
                 
-                $.get(`/buyer/devices?contract=${selectedContract}`)
-                    .done(function(data) {
-                        console.log('Devices loaded:', data);
-                        const tableBody = $('#seller-table tbody');
-                        tableBody.empty();
-                        
-                        if (data.loading) {
-                            // Show loading message
-                            tableBody.html(`
-                                <tr>
-                                    <td colspan="5" style="text-align: center; color: #4d90fe;">
-                                        <i class="fa fa-spinner fa-spin"></i> Loading devices for ${selectedContract} contract...
-                                        <br><small>The global contract monitor is currently fetching data for this contract.</small>
-                                    </td>
-                                </tr>
-                            `);
-                            return;
-                        }
-                        
-                        if (!data.monitoringActive) {
-                            // Show monitoring inactive message
-                            tableBody.html(`
-                                <tr>
-                                    <td colspan="5" style="text-align: center; color: orange;">
-                                        <i class="fa fa-exclamation-triangle"></i> Global contract monitoring is not active.
-                                        <br><small>Please restart Node-RED to initialize the global contract monitor.</small>
-                                    </td>
-                                </tr>
-                            `);
-                            return;
-                        }
-                        
-                        if (data.devices && data.devices.length > 0) {
-                            // Show devices in the table - all devices from global contract monitor are potential sellers
-                            data.devices.forEach(device => {
-                                console.log('Processing device:', device);
-                                // Use the contract field (which is the owner address) for selection
-                                const isChecked = node.sellerEvmAddress?.includes(device.contract);
-                                const row = $(`
-                                    <tr class="${isChecked ? "selected" : "not-selected"}" data-contract="${device.contract}">
-                                        <td style="width: 50px; overflow: hidden; text-overflow: ellipsis;">
-                                            <input type="checkbox" ${isChecked ? "checked" : ""}>
-                                        </td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.contract}">
-                                            ${device.contract}
-                                        </td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdOutTopic}">
-                                            ${device.stdOutTopic}
-                                        </td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdInTopic}">
-                                            ${device.stdInTopic}
-                                        </td>
-                                        <td style="overflow: hidden; text-overflow: ellipsis;" title="${device.stdErrTopic}">
-                                            ${device.stdErrTopic}
-                                        </td>
-                                    </tr>
-                                `);
-
-                                row.data('address', device.contract);
-                                row.data('device', device);
-                                tableBody.append(row);
-                            });
-                            
-                            console.log(`Populated table with ${data.devices.length} devices for contract ${selectedContract}`);
-                            
-                            $('#seller-table tbody input[type="checkbox"]').change(function () {
-                                const row = $(this).closest('tr');
-                                if ($(this).is(':checked')) {
-                                    row.addClass('selected');
-                                } else {
-                                    row.removeClass('selected');
-                                }
-                            });
-                            
-                            // restore from previous config
-                            if (Array.isArray(node.sellerDevices)) {
-                                node.selectedDevices.push(...node.sellerDevices);
-                            }
-
-                            if (Array.isArray(node.sellerEvmAddress)) {
-                                $('#node-input-sellerEvmAddress').val(JSON.stringify(node.sellerEvmAddress));
-                                $('#node-input-selectedAddresses').val(node.sellerEvmAddress.join('\n'));
-                            }
-                        } else {
-                            // Show no devices message
-                            tableBody.html(`
-                                <tr>
-                                    <td colspan="5" style="text-align: center; color: orange;">
-                                        <i class="fa fa-info-circle"></i> No devices found for the selected contract.
-                                        <br><small>There are no devices registered for the ${selectedContract} contract.</small>
-                                        <br><small>Debug: Received ${data.devices ? data.devices.length : 0} devices from server.</small>
-                                    </td>
-                                </tr>
-                            `);
-                        }
-                    })
-                    .fail(function(xhr, status, error) {
-                        console.error('Failed to load devices:', error);
-                        const tableBody = $('#seller-table tbody');
-                        tableBody.html(`
-                            <tr>
-                                <td colspan="5" style="text-align: center; color: red;">
-                                    <i class="fa fa-exclamation-triangle"></i> Failed to load devices.
-                                    <br><small>Error: ${error}</small>
-                                </td>
-                            </tr>
-                        `);
-                    });
-            }
-
-            // Function to filter table rows based on search input
-            function filterTableBySearch() {
-                const searchTerm = $('#seller-search-input').val().toLowerCase().trim();
-                const tableRows = $('#seller-table tbody tr');
+                let storedDevices = node.sellerDevices || node.sellerEvmAddress || [];
+                node.devicesList = [];
                 
-                if (searchTerm === '') {
-                    // Show all rows if search is empty
-                    tableRows.show();
+                if (Array.isArray(storedDevices)) {
+                    if (storedDevices.length > 0) {
+                        if (typeof storedDevices[0] === 'string') {
+                            node.devicesList = storedDevices.map(addr => ({
+                                evmAddress: addr,
+                                deviceName: 'Legacy Device',
+                                deviceType: 'Unknown',
+                                stdInTopic: 'Unknown',
+                                stdOutTopic: 'Unknown',
+                                stdErrTopic: 'Unknown'
+                            }));
+                        } else if (storedDevices[0] && storedDevices[0].evmAddress) {
+                            node.devicesList = [...storedDevices];
+                        }
+                    }
+                }
+                
+                updateDevicesTable();
+                updateDevicesSummary();
+            }
+            
+            // Update devices table display - WITH SIMPLE 1-SEC REPEAT
+            function updateDevicesTable() {
+                console.log('[DEBUG] updateDevicesTable called, node available:', typeof node);
+                
+                const tableBody = $('#devices-table-body');
+                const table = $('#devices-table');
+                const noDevicesMsg = $('#no-devices-message');
+                
+                tableBody.empty();
+                
+                if (node.devicesList.length === 0) {
+                    table.hide();
+                    noDevicesMsg.show();
+                    // Clear any existing interval if no devices
+                    if (autoUpdateInterval) {
+                        clearInterval(autoUpdateInterval);
+                        autoUpdateInterval = null;
+                    }
                     return;
                 }
                 
-                let visibleCount = 0;
-                tableRows.each(function() {
-                    const row = $(this);
-                    const contractAddress = row.data('contract') || '';
-                    
-                    if (contractAddress.toLowerCase().includes(searchTerm)) {
-                        row.show();
-                        visibleCount++;
-                    } else {
-                        row.hide();
-                    }
+                table.show();
+                noDevicesMsg.hide();
+                
+                node.devicesList.forEach((device, index) => {
+                    const row = $(`
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 11px; word-break: break-all;">
+                                ${device.evmAddress}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdInTopic}">
+                                ${truncateTopic(device.stdInTopic)}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdOutTopic}">
+                                ${truncateTopic(device.stdOutTopic)}
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdErrTopic}">
+                                ${truncateTopic(device.stdErrTopic)}
+                            </td>
+                            <td id="status-cell-${index}" style="padding: 8px; border: 1px solid #555; text-align: center; font-size: 11px;">
+                                <i class="fa fa-spinner fa-spin" style="color: #888;"></i>
+                            </td>
+                            <td id="lastseen-cell-${index}" style="padding: 8px; border: 1px solid #555; text-align: center; font-size: 11px;">
+                                <i class="fa fa-spinner fa-spin" style="color: #888;"></i>
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #555; text-align: center;">
+                                <button type="button" class="red-ui-button red-ui-button-small remove-device-btn" 
+                                        data-index="${index}" style="padding: 2px 6px;">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                        </td>
+                                    </tr>
+                                `);
+                                tableBody.append(row);
+                            });
+                            
+                // Attach remove button handlers
+                $('.remove-device-btn').click(function() {
+                    const index = parseInt($(this).data('index'));
+                    removeDevice(index);
                 });
                 
-                // Show message if no results found
-                if (visibleCount === 0) {
-                    $('#seller-table tbody').append(`
-                        <tr id="no-results-row" style="display: table-row;">
-                            <td colspan="5" style="text-align: center; color: orange;">
-                                <i class="fa fa-search"></i> No devices found matching "${searchTerm}"
-                            </td>
-                        </tr>
-                    `);
-                } else {
-                    $('#no-results-row').remove();
+                console.log('[DEBUG] Table updated, starting 1-second repeat calls');
+                
+                // Start simple 1-second repeat if node.id is available
+                if (node.id && node.devicesList.length > 0) {
+                    startSimpleRepeats();
+                }
+            }
+            
+            // Simple function to start 1-second repeats - INSIDE oneditprepare
+            function startSimpleRepeats() {
+                // Clear any existing interval
+                if (autoUpdateInterval) {
+                    clearInterval(autoUpdateInterval);
+                }
+                
+                 
+                // Do initial call
+                autoCheckAllDevices();
+                
+                // Set up simple interval for every 5 second
+                autoUpdateInterval = setInterval(() => {
+                    if (node.devicesList.length > 0) {
+                        autoCheckAllDevices();
+                    } else {
+                        // No devices, clear interval
+                        clearInterval(autoUpdateInterval);
+                        autoUpdateInterval = null;
+                    }
+                }, 30000); // 5 second
+            }
+
+            // Auto-check function - INSIDE oneditprepare
+            async function autoCheckAllDevices() {
+                if (!node.id) {
+                    return;
+                }
+                
+                try {
+                    // Get connection status for this buyer node
+                    const connectionResponse = await fetch(`/buyer/connection-status/${node.id}`);
+                    if (!connectionResponse.ok) {
+                        throw new Error(`Connection API returned ${connectionResponse.status}`);
+                    }
+                    
+                    const connectionData = await connectionResponse.json();
+                    
+                    // Create a map of public keys to connection status
+                    const statusMap = new Map();
+                    if (connectionData.peers && Array.isArray(connectionData.peers)) {
+                        connectionData.peers.forEach(peer => {
+                            if (peer.publicKey) {
+                                statusMap.set(peer.publicKey, peer.connectionStatus || 'Unknown');
+                            }
+                        });
+                    }
+                    
+                    // Process each device
+                    for (let index = 0; index < node.devicesList.length; index++) {
+                        const device = node.devicesList[index];
+                        checkDeviceStatusAuto(device, index, statusMap);
+                        checkLastSeenAuto(device, index);
+                    }
+                    
+                } catch (error) {
+                    console.error('[DEBUG] Error in autoCheckAllDevices:', error);
+                    // Set all cells to error
+                    for (let index = 0; index < node.devicesList.length; index++) {
+                        $(`#status-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+                        $(`#lastseen-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+                    }
                 }
             }
 
-            // Open modal on button click
-            $('#select-sellers-btn').click(function () {
-                if (!$("#seller-modal").data("ui-dialog")) {
-                    $("#seller-modal").dialog({
-                        autoopen: false,
-                        modal: true,
-                        width: '80%',
-                        maxWidth: 600,
-                        height: 'auto',
-                        maxHeight: 600,
-                        resizable: true,
-                        position: { my: "center", at: "center", of: window }, // Add this line
-                        close: function () {
-                            $(this).dialog("destroy");
-                        },
-                        open: function() {
-                            // Load devices for current contract when modal opens
-                            loadDevicesForCurrentContract();
+            // Auto status check function - INSIDE oneditprepare
+            async function checkDeviceStatusAuto(device, index, statusMap) {
+                const statusCell = $(`#status-cell-${index}`);
+                
+                try {
+                    console.log('[DEBUG] Getting public key for device', index, ':', device.evmAddress);
+                    
+                    // Get public key from EVM address
+                    const evmResponse = await fetch(`/buyer/evm-to-publickey/${device.evmAddress}`);
+                    const evmData = await evmResponse.json();
+                    
+                    if (!evmData.success) {
+                        console.log('[DEBUG] Failed to get public key for device', index);
+                        statusCell.html('<span style="color: #dc3545;">Key Error</span>');
+                        return;
+                    }
+                    
+                    const publicKey = evmData.publicKey;
+                    const status = statusMap.get(publicKey) || 'No connection';
+                    
+                    console.log('[DEBUG] Device', index, 'PublicKey:', publicKey, 'Status:', status);
+                    
+                    // Color code the result
+                    let color = '#dc3545'; // red for disconnected
+                    if (status === 'connected') {
+                        color = '#28a745'; // green
+                    } else if (status === 'connecting') {
+                        color = '#ffc107'; // yellow
+                    }
+                    
+                    statusCell.html(`<span style="color: ${color};">${status}</span>`);
+                    
+                } catch (error) {
+                    console.error('[DEBUG] Error checking status for device', index, ':', error);
+                    statusCell.html('<span style="color: #dc3545;">Error</span>');
+                }
+            }
+
+            // Auto last seen check function - INSIDE oneditprepare
+            async function checkLastSeenAuto(device, index) {
+                const lastSeenCell = $(`#lastseen-cell-${index}`);
+                
+                try {
+                    if (!device.stdOutTopic || device.stdOutTopic === 'Unknown') {
+                        lastSeenCell.html('<span style="color: #888;">No Topic</span>');
+                        return;
+                    }
+                    
+                    //console.log('[DEBUG] Getting last seen for device', index, 'topic:', device.stdOutTopic);
+                    
+                    const response = await fetch(`/buyer/last-seen/${device.stdOutTopic}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (data.lastSeen !== null) {
+                            // Color code based on how recent the activity is
+                            let color = '#888'; // default gray
+                            if (data.lastSeen < 300) { // less than 5 minutes
+                                color = '#28a745'; // green
+                            } else if (data.lastSeen < 3600) { // less than 1 hour
+                                color = '#ffc107'; // yellow
+                            } else if (data.lastSeen < 86400) { // less than 1 day
+                                color = '#fd7e14'; // orange
+                            } else {
+                                color = '#dc3545'; // red
+                            }
                             
-                            // Attach event handlers after dialog is created
-                            $('#cancel-seller-selection').off('click').on('click', function () {
-                                $("#seller-modal").dialog("close");
-                            });
-
-                            $('#confirm-seller-selection').off('click').on('click', function () {
-                                console.log('OK button clicked!');
-                                const selectedAddresses = [];
-                                const selectedDeviceObjects = [];
-
-                                $('#seller-table tbody input[type=checkbox]:checked').each(function () {
-                                    const row = $(this).closest('tr');
-                                    const address = row.data('address');
-                                    const device = row.data('device');
-                                    selectedAddresses.push(address);
-                                    selectedDeviceObjects.push(device);
-                                });
-
-                                console.log('Selected addresses:', selectedAddresses);
-                                console.log('Selected devices:', selectedDeviceObjects);
-
-                                $('#node-input-sellerEvmAddress').val(JSON.stringify(selectedAddresses));
-                                $('#node-input-selectedAddresses').val(selectedAddresses.join('\n'));
-                                node.selectedDevices.splice(0, node.selectedDevices.length, ...selectedDeviceObjects);
-                                
-                                $("#seller-modal").dialog("close");
-                            });
-
-                            // Attach search functionality
-                            $('#seller-search-input').off('input').on('input', function() {
-                                filterTableBySearch();
-                            });
+                            lastSeenCell.html(`<span style="color: ${color};">${data.lastSeenFormatted}</span>`);
+                        } else {
+                            lastSeenCell.html('<span style="color: #888;">Never</span>');
                         }
-                    });
+                    } else {
+                       // console.log('[DEBUG] Last seen API error for device', index, ':', data.error);
+                        lastSeenCell.html('<span style="color: #dc3545;">API Error</span>');
+                    }
+                    
+                } catch (error) {
+                    console.error('[DEBUG] Error checking last seen for device', index, ':', error);
+                    lastSeenCell.html('<span style="color: #dc3545;">Error</span>');
+                }
+            }
+
+            // Helper function for truncating topics - INSIDE oneditprepare
+            function truncateTopic(topic) {
+                if (!topic || topic.length <= 15) return topic;
+                return topic.substring(0, 12) + '...';
+            }
+            
+            // Validate EVM address format
+            function isValidEvmAddress(address) {
+                return /^0x[a-fA-F0-9]{40}$/.test(address);
+            }
+            
+            // Add device functionality
+            async function addDevice() {
+                const evmInput = $('#evm-address-input');
+                const addBtn = $('#add-device-btn');
+                const evmAddress = evmInput.val().trim();
+                
+                // Validation
+                if (!evmAddress) {
+                    alert('Please enter an EVM address');
+                    return;
+                }
+                
+                if (!isValidEvmAddress(evmAddress)) {
+                    alert('Please enter a valid EVM address (0x followed by 40 hex characters)');
+                    return;
+                }
+                
+                // Check for duplicates
+                if (node.devicesList.some(d => d.evmAddress.toLowerCase() === evmAddress.toLowerCase())) {
+                    alert('This device is already added');
+                    return;
+                }
+                
+                // Show loading state
+                addBtn.prop('disabled', true);
+                addBtn.html('<i class="fa fa-spinner fa-spin"></i> Fetching Device...');
+                
+                try {
+                   // console.log(`[DEBUG] Fetching device for EVM: ${evmAddress}, Node ID: ${node.id}, Smart Contract: ${node.smartContract}`);
+                    
+                    const response = await fetch(`/buyer/fetch-device-by-evm/${evmAddress}?nodeId=${node.id}&smartContract=${node.smartContract}`);
+                    const data = await response.json();
+                    
+                   // console.log(`[DEBUG] Response received:`, data);
+                    
+                    if (data.success && data.device) {
+                        // Add device to list
+                        node.devicesList.push(data.device);
+                        updateDevicesTable();
+                        updateDevicesSummary();
+                        evmInput.val(''); // Clear input
+                        
+                       // console.log('[DEBUG] Device added successfully:', data.device);
+                    } else {
+                       // console.error('[DEBUG] Device fetch failed:', data);
+                        alert(`Device not found: ${data.error || 'Unknown error'}`);
+                    }
+                    
+                } catch (error) {
+                   // console.error('[DEBUG] Error fetching device:', error);
+                    alert('Error fetching device information. Please check the console for details.');
+                } finally {
+                    // Restore button state
+                    addBtn.prop('disabled', false);
+                    addBtn.html('<i class="fa fa-plus"></i> Add Device');
+                }
+            }
+            
+            // Remove device functionality
+            function removeDevice(index) {
+                if (confirm('Are you sure you want to remove this device?')) {
+                    node.devicesList.splice(index, 1);
+                    updateDevicesTable();
+                    updateDevicesSummary();
+                }
+            }
+            
+            // Update summary display
+            function updateDevicesSummary() {
+                $('#device-count').text(node.devicesList.length);
+                
+                // Update hidden input for storage
+                const addressList = node.devicesList.map(d => d.evmAddress);
+                $('#node-input-sellerEvmAddress').val(JSON.stringify(addressList));
+            }
+            
+            // Event handlers
+            $('#add-device-btn').click(addDevice);
+            
+            // Enter key in input field
+            $('#evm-address-input').keypress(function(e) {
+                if (e.which === 13) { // Enter key
+                    addDevice();
+                }
+            });
+            
+            // Real-time validation styling
+            $('#evm-address-input').on('input', function() {
+                const value = $(this).val().trim();
+                if (value && !isValidEvmAddress(value)) {
+                    $(this).css('border-color', '#ff6b6b');
                 } else {
-                    $("#seller-modal").dialog("open");
-                    // Load devices for current contract when modal is reopened
-                    loadDevicesForCurrentContract();
-                }
-
-                // Adjust table height when dialog resizes
-                $(window).on('resize.sellerDialog', function () {
-                    const dialogContent = $('#seller-modal .red-ui-dialog-content');
-                    const tbody = $('#seller-table tbody');
-                    const headerHeight = $('#seller-table thead').outerHeight();
-                    const footerHeight = 50; // Approximate height of button area
-                    const padding = 30; // Additional padding
-
-                    tbody.css('max-height',
-                        Math.max(100, dialogContent.height() - headerHeight - footerHeight - padding)
-                    );
-                }).trigger('resize.sellerDialog');
-            });
-
-            // Add event listener for smart contract changes
-            $('#node-input-smartContract').change(function() {
-                console.log('Smart contract changed to:', $(this).val());
-                // Refresh device list when contract changes
-                if ($("#seller-modal").data("ui-dialog") && $("#seller-modal").dialog("isOpen")) {
-                    // If modal is open, refresh the device list
-                    loadDevicesForCurrentContract();
+                    $(this).css('border-color', '');
                 }
             });
+            
+            // Initialize the interface
+            initializeDevices();
 
             // Initialize connection status display
             if (node.id) {
-                // Initialize connection status functionality
                 initializeBuyerConnectionStatus(node.id);
             }
 
-            // Fetch and populate EVM address and publicKey if available (ONE TIME ONLY - NO REFRESH)
-            function updateEvmAddressAndPublicKey() {
+            // Fetch and populate EVM address, publicKey, and topics if available
+            function updateEvmAddressAndPublicKeyAndTopics() {
                 if (node.id) {
-                    console.log(`Fetching device info for node ID: ${node.id}`); // Debug log
+                   // console.log(`Fetching device info for node ID: ${node.id}`);
                     $.get(`/buyer/device-info/${node.id}`)
                         .done(function(data) {
-                            console.log(`Device info received for ${node.id}:`, data); // Debug log
+                           // console.log(`Device info received for ${node.id}:`, data);
+                            
+                            // Handle EVM Address
                             if (data.evmAddress) {
                                 $('#node-input-evmAddress').val(data.evmAddress);
                             } else {
@@ -523,15 +586,40 @@
                             } else {
                                 $('#node-input-publicKey').val('Not initialized yet');
                             }
+                            
+                            // Handle Topics
+                            if (data.stdInTopic) {
+                                $('#node-input-stdInTopic').val(data.stdInTopic);
+                            } else {
+                                $('#node-input-stdInTopic').val('Not initialized yet');
+                            }
+                            
+                            if (data.stdOutTopic) {
+                                $('#node-input-stdOutTopic').val(data.stdOutTopic);
+                            } else {
+                                $('#node-input-stdOutTopic').val('Not initialized yet');
+                            }
+                            
+                            if (data.stdErrTopic) {
+                                $('#node-input-stdErrTopic').val(data.stdErrTopic);
+                            } else {
+                                $('#node-input-stdErrTopic').val('Not initialized yet');
+                            }
                         })
                         .fail(function(xhr, status, error) {
-                            console.error(`Failed to fetch device info for ${node.id}:`, error); // Debug log
-                            $('#node-input-evmAddress').val('Error loading EVM address');
-                            $('#node-input-publicKey').val('Error loading public key');
+                           // console.error(`Failed to fetch device info for ${node.id}:`, error);
+                            $('#node-input-evmAddress').val('EVM address not intialised');
+                            $('#node-input-publicKey').val('Public key not intialised');
+                            $('#node-input-stdInTopic').val('StdIn topic not intialised');
+                            $('#node-input-stdOutTopic').val('StdOut topic not intialised');
+                            $('#node-input-stdErrTopic').val('StdErr topic not intialised');
                         });
                 } else {
                     $('#node-input-evmAddress').val('New node - EVM address will be generated after deployment');
                     $('#node-input-publicKey').val('New node - Public key will be generated after deployment');
+                    $('#node-input-stdInTopic').val('New node - StdIn topic will be generated after deployment');
+                    $('#node-input-stdOutTopic').val('New node - StdOut topic will be generated after deployment');
+                    $('#node-input-stdErrTopic').val('New node - StdErr topic will be generated after deployment');
                 }
             }
 
@@ -554,10 +642,10 @@
                 }
             }
 
-            // Update EVM address ONCE on dialog open (NO REFRESH EVER)
-            updateEvmAddressAndPublicKey();
+            // Update EVM address and public key ONCE on dialog open
+            updateEvmAddressAndPublicKeyAndTopics();
             
-            // Update balance ONCE on dialog open (NO REFRESH)
+            // Update balance ONCE on dialog open
             updateDeviceBalance();
         },
         
@@ -575,27 +663,18 @@
                 this._cleanup();
             }
             
-            // Get the selected addresses from the hidden input
-            const sellerEvmAddressValue = $('#node-input-sellerEvmAddress').val();
-            let selectedAddresses = [];
+            // Save devices in new format
+            this.sellerEvmAddress = this.devicesList.map(d => d.evmAddress);
+            this.sellerDevices = this.devicesList; // Store full device objects
             
-            if (sellerEvmAddressValue) {
-                try {
-                    selectedAddresses = JSON.parse(sellerEvmAddressValue);
-                } catch (e) {
-                    console.error('Failed to parse seller addresses:', e);
-                    selectedAddresses = [];
-                }
-            }
-            
-            // Update the node configuration
-            this.sellerEvmAddress = selectedAddresses;
-            this.sellerDevices = this.selectedDevices;
-            
-            // Save the current EVM address, balance, and publicKey
+            // Save the current runtime information
             this.evmAddress = $('#node-input-evmAddress').val();
             this.balance = $('#node-input-balance').val();
-            this.publicKey = $('#node-input-publicKey').val();  // Add this line
+            this.publicKey = $('#node-input-publicKey').val();
+            // Save the new topic fields
+            this.stdInTopic = $('#node-input-stdInTopic').val();
+            this.stdOutTopic = $('#node-input-stdOutTopic').val();
+            this.stdErrTopic = $('#node-input-stdErrTopic').val();
         }
     });     
 
@@ -621,7 +700,7 @@
             
             if (status.isConnected) {
                 if(status.connectedPeers > 0) {
-                    statusDot.classList.add('connection-status-connected');
+                statusDot.classList.add('connection-status-connected');
                 } else {
                     statusDot.classList.add('connection-status-connecting');
                 }
@@ -704,7 +783,7 @@
                     updateStatusIndicator(status);
                     updatePeersDisplay(status);
                 } else {
-                    console.error('Failed to load connection status:', response.statusText);
+                    //console.error('Failed to load connection status:', response.statusText);
                     statusText.textContent = 'Error loading status';
                     statusDot.classList.add('connection-status-unknown');
                 }
@@ -718,13 +797,13 @@
         async function refreshConnections() {
             if (isRefreshing) return;
             
-            console.log('[DEBUG] Starting refresh connections...');
+           // console.log('[DEBUG] Starting refresh connections...');
             isRefreshing = true;
             
             // Get button element directly and show spinner immediately
             const btn = document.getElementById('refresh-connections-btn');
             if (btn) {
-                console.log('[DEBUG] Button found, showing spinner');
+               // console.log('[DEBUG] Button found, showing spinner');
                 btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Refreshing...';
                 btn.style.opacity = '0.6';
                 btn.disabled = true;
@@ -747,7 +826,7 @@
                     const result = await response.json();
                     updateStatusIndicator(result.status);
                     updatePeersDisplay(result.status);
-                    console.log('[DEBUG] Refresh completed successfully');
+                   // console.log('[DEBUG] Refresh completed successfully');
                 } else {
                     console.error('Failed to refresh connections:', response.statusText);
                 }
@@ -760,10 +839,10 @@
                     btn.innerHTML = '<i class="fa fa-refresh"></i> Refresh';
                     btn.style.opacity = '1';
                     btn.disabled = false;
-                    console.log('[DEBUG] Button restored');
+                   // console.log('[DEBUG] Button restored');
                 }
                 isRefreshing = false;
-                console.log('[DEBUG] Refresh process completed');
+               // console.log('[DEBUG] Refresh process completed');
             }
         }
 
@@ -780,6 +859,215 @@
         return () => {
             refreshBtn.removeEventListener('click', refreshConnections);
         };
+    }
+
+    // Function to fetch and display last seen data
+    async function fetchLastSeen(device, index) {
+        try {
+            // Much simpler - just need the topic ID
+            const response = await fetch(`/buyer/last-seen/${device.stdOutTopic}`);
+            const data = await response.json();
+            
+            const lastSeenCell = $(`#lastseen-cell-${index}`);
+            
+            if (data.success) {
+                if (data.lastSeen !== null) {
+                    // Color code based on how recent the activity is
+                    let color = '#888'; // default gray
+                    if (data.lastSeen < 300) { // less than 5 minutes
+                        color = '#28a745'; // green
+                    } else if (data.lastSeen < 3600) { // less than 1 hour
+                        color = '#ffc107'; // yellow
+                    } else if (data.lastSeen < 86400) { // less than 1 day
+                        color = '#fd7e14'; // orange
+                    } else {
+                        color = '#dc3545'; // red
+                    }
+                    
+                    lastSeenCell.html(`<span style="color: ${color};">${data.lastSeenFormatted}</span>`);
+                } else {
+                    lastSeenCell.html('<span style="color: #888;">Never</span>');
+                }
+            } else {
+                lastSeenCell.html('<span style="color: #dc3545;"></span>');
+            }
+        } catch (error) {
+            console.error(`Error fetching last seen for device ${index}:`, error);
+            $(`#lastseen-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+        }
+    }
+
+    // Function to update all device statuses and last seen - INSIDE oneditprepare
+    async function updateAllDeviceStatuses() {
+       // console.log('[DEBUG] === Starting updateAllDeviceStatuses ===');
+      //  console.log('[DEBUG] node.id:', node.id);
+       // console.log('[DEBUG] devicesList length:', node.devicesList.length);
+        
+        if (!node.id) {
+           // console.log('[DEBUG] No node.id available');
+            node.devicesList.forEach((device, index) => {
+                $(`#status-cell-${index}`).html('<span style="color: #dc3545;">No Node ID</span>');
+                $(`#lastseen-cell-${index}`).html('<span style="color: #dc3545;">No Node ID</span>');
+            });
+            return;
+        }
+        
+        try {
+            // Get connection status
+           // console.log('[DEBUG] Fetching connection status...');
+            const connectionResponse = await fetch(`/buyer/connection-status/${node.id}`);
+            
+            if (!connectionResponse.ok) {
+                throw new Error(`Connection API returned ${connectionResponse.status}`);
+            }
+            
+            const connectionData = await connectionResponse.json();
+           // console.log('[DEBUG] Connection data:', connectionData);
+            
+            // Create status map
+            const statusMap = new Map();
+            if (connectionData.data && Array.isArray(connectionData.data)) {
+                connectionData.data.forEach(peer => {
+                    if (peer.publicKey) {
+                        statusMap.set(peer.publicKey, peer.connectionStatus || 'Unknown');
+                    }
+                });
+            }
+            
+           // console.log('[DEBUG] Status map has', statusMap.size, 'entries');
+            
+            // Update each device
+            for (let index = 0; index < node.devicesList.length; index++) {
+                const device = node.devicesList[index];
+               // console.log('[DEBUG] Processing device', index, ':', device.evmAddress);
+                
+                // Update status
+                updateDeviceStatus(device, index, statusMap);
+                
+                // Update last seen
+                updateLastSeen(device, index);
+            }
+            
+           // console.log('[DEBUG] All devices processed');
+            
+        } catch (error) {
+           // console.error('[DEBUG] Error in updateAllDeviceStatuses:', error);
+            node.devicesList.forEach((device, index) => {
+                $(`#status-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+                $(`#lastseen-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+            });
+        }
+    }
+
+    // Function to update device status - INSIDE oneditprepare
+    async function updateDeviceStatus(device, index, statusMap) {
+        try {
+           // console.log('[DEBUG] Getting public key for:', device.evmAddress);
+            
+            const evmResponse = await fetch(`/buyer/evm-to-publickey/${device.evmAddress}`);
+            const evmData = await evmResponse.json();
+            
+            const statusCell = $(`#status-cell-${index}`);
+            
+            if (evmData.success) {
+                const publicKey = evmData.publicKey;
+                const connectionStatus = statusMap.get(publicKey) || 'Disconnected';
+                
+               // console.log('[DEBUG] Device', index, 'PublicKey:', publicKey, 'Status:', connectionStatus);
+                
+                let color = '#dc3545'; // red
+                if (connectionStatus === 'Connected') {
+                    color = '#28a745'; // green
+                } else if (connectionStatus === 'Connecting') {
+                    color = '#ffc107'; // yellow
+                }
+                
+                statusCell.html(`<span style="color: ${color};">${connectionStatus}</span>`);
+            } else {
+               // console.log('[DEBUG] Failed to get public key for device', index);
+                statusCell.html('<span style="color: #dc3545;">Key Error</span>');
+            }
+        } catch (error) {
+          //  console.error('[DEBUG] Error updating status for device', index, ':', error);
+            $(`#status-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+        }
+    }
+
+    // Function to update last seen - INSIDE oneditprepare
+    async function updateLastSeen(device, index) {
+        try {
+            if (!device.stdOutTopic || device.stdOutTopic === 'Unknown') {
+                $(`#lastseen-cell-${index}`).html('<span style="color: #888;">No Topic</span>');
+                return;
+            }
+            
+           // console.log('[DEBUG] Getting last seen for topic:', device.stdOutTopic);
+            
+            const response = await fetch(`/buyer/last-seen/${device.stdOutTopic}`);
+            const data = await response.json();
+            
+            const lastSeenCell = $(`#lastseen-cell-${index}`);
+            
+            if (data.success) {
+                if (data.lastSeen !== null) {
+                    let color = '#888';
+                    if (data.lastSeen < 300) color = '#28a745';
+                    else if (data.lastSeen < 3600) color = '#ffc107';
+                    else if (data.lastSeen < 86400) color = '#fd7e14';
+                    else color = '#dc3545';
+                    
+                    lastSeenCell.html(`<span style="color: ${color};">${data.lastSeenFormatted}</span>`);
+                } else {
+                    lastSeenCell.html('<span style="color: #888;">Never</span>');
+                }
+            } else {
+                lastSeenCell.html('<span style="color: #dc3545;">API Error</span>');
+            }
+        } catch (error) {
+           // console.error('[DEBUG] Error updating last seen for device', index, ':', error);
+            $(`#lastseen-cell-${index}`).html('<span style="color: #dc3545;">Not initialised</span>');
+        }
+    }
+
+    // Function to handle peers that are connected but not in our device list
+    async function handleAdditionalPeers(peersData, statusMap) {
+        if (!peersData || !Array.isArray(peersData)) return;
+        
+        const tableBody = $('#devices-table-body');
+        const existingPublicKeys = new Set();
+        
+        // Collect public keys from existing rows
+        tableBody.find('tr').each(function() {
+            const publicKey = $(this).data('publicKey');
+            if (publicKey) {
+                existingPublicKeys.add(publicKey);
+            }
+        });
+        
+        // Add rows for peers not in our device list
+        peersData.forEach((peer, peerIndex) => {
+            if (peer.publicKey && !existingPublicKeys.has(peer.publicKey)) {
+                const newIndex = node.devicesList.length + peerIndex;
+                const row = $(`
+                    <tr data-publickey="${peer.publicKey}" data-index="additional-${peerIndex}" style="background-color: #f8f9fa;">
+                        <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 11px; color: #888;">
+                            Unknown EVM
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #555; color: #888;">-</td>
+                        <td style="padding: 8px; border: 1px solid #555; color: #888;">-</td>
+                        <td style="padding: 8px; border: 1px solid #555; color: #888;">-</td>
+                        <td style="padding: 8px; border: 1px solid #555; text-align: center; font-size: 11px;">
+                            <span style="color: #28a745;">${peer.connectionStatus || 'Connected'}</span>
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #555; text-align: center; color: #888;">-</td>
+                        <td style="padding: 8px; border: 1px solid #555; text-align: center;">
+                            <span style="color: #888; font-size: 10px;">External</span>
+                        </td>
+                    </tr>
+                `);
+                tableBody.append(row);
+            }
+        });
     }
 </script>
 
@@ -820,6 +1108,105 @@
 }
 .refresh-button-loading i { 
     animation: spin 1s linear infinite !important; 
+}
+
+/* Device table styling */
+#devices-table {
+    background-color: #3c3c3c;
+    color: white;
+    border: 1px solid #555;
+}
+
+#devices-table th {
+    background-color: #2d2d2d !important;
+    color: white !important;
+}
+
+#devices-table td {
+    background-color: #3c3c3c;
+    color: white;
+}
+
+#devices-table tbody tr:hover {
+    background-color: #4a4a4a;
+}
+
+/* EVM input styling */
+#evm-address-input {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 6px 8px;
+}
+
+#evm-address-input:focus {
+    border-color: #4d90fe;
+    outline: none;
+    box-shadow: 0 0 3px rgba(77, 144, 254, 0.3);
+}
+
+/* Remove button styling */
+.remove-device-btn {
+    background-color: #ff6b6b !important;
+    border-color: #ff6b6b !important;
+}
+
+.remove-device-btn:hover {
+    background-color: #ff5252 !important;
+    border-color: #ff5252 !important;
+}
+
+/* Summary styling */
+#devices-summary {
+    border-top: 1px solid #ddd;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+/* EVM Address column styling */
+#devices-table td:first-child {
+    max-width: 200px; /* Limit width to prevent table from becoming too wide */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Make table responsive */
+#devices-table {
+    table-layout: fixed; /* Fixed layout for better column control */
+    width: 100%;
+}
+
+#devices-table th:first-child,
+#devices-table td:first-child {
+    width: 35%; /* EVM Address column width */
+}
+
+#devices-table th:nth-child(2),
+#devices-table td:nth-child(2),
+#devices-table th:nth-child(3),
+#devices-table td:nth-child(3),
+#devices-table th:nth-child(4),
+#devices-table td:nth-child(4) {
+    width: 20%; /* Topic columns width */
+}
+
+#devices-table th:nth-child(5),
+#devices-table td:nth-child(5) {
+    width: 100px;
+    text-align: center;
+    font-size: 11px;
+}
+
+#devices-table th:nth-child(6),
+#devices-table td:nth-child(6) {
+    width: 100px;
+    text-align: center;
+    font-size: 11px;
+}
+
+#devices-table th:nth-child(7),
+#devices-table td:nth-child(7) {
+    width: 60px;
+    text-align: center;
 }
 </style>
 

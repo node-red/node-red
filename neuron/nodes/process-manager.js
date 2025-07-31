@@ -191,7 +191,7 @@ class ProcessManager {
             
             const args = [
                 `--port=${port}`,
-              //  '--use-local-address',
+                '--use-local-address',
                 '--mode=peer',
                 `--buyer-or-seller=${nodeType}`,
                 nodeType === 'seller' ? '--list-of-buyers-source=env' : '--list-of-sellers-source=env',
