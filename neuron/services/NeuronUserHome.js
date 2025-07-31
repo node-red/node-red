@@ -17,6 +17,12 @@ module.exports.load = function load() {
         fs.mkdirSync(homePath, { recursive: true });
     }
 
+    const nodeRedPath = path.resolve(homePath, 'node-red-userdir');
+
+    if (!fs.existsSync(nodeRedPath)) {
+        fs.mkdirSync(nodeRedPath, { recursive: true });
+    }
+
     process.env.NEURON_USER_PATH = homePath;
 
     console.log(`🏠 User home directory: ${homePath}`);
