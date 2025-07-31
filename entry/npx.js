@@ -6,7 +6,7 @@ const path = require('path');
 async function main() {
     try {
         console.log('🚀 Starting Neuron Node-RED...');
-   
+    
         // Get the path to the node-red package
         const nodeRedPath = path.resolve(__dirname, '..', 'packages', 'node_modules', 'node-red');
 
@@ -18,8 +18,14 @@ async function main() {
         if (!fs.existsSync(settingsPath)) {
             throw new Error(`Settings file not found at: ${settingsPath}`);
         }
-        
+
+        // Check if node-red exists
+        if (!fs.existsSync(nodeRedPath)) {
+            throw new Error(`Node-RED not found at: ${nodeRedPath}`);
+        }
+
         console.log(` Using settings: ${settingsPath}`);
+        console.log(` Using Node-RED: ${nodeRedPath}`);
         
         // Spawn node-red process with our settings
         const nodeRedProcess = spawn('node', [
@@ -40,6 +46,7 @@ async function main() {
         nodeRedProcess.on('close', (code) => {
             if (code !== 0) {
                 console.error(`❌ Node-RED exited with code ${code}`);
+                console.error('This usually indicates an error in the settings file or Node-RED configuration');
                 process.exit(code);
             }
             console.log('✅ Node-RED stopped');
