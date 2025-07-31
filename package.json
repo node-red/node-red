@@ -13,7 +13,7 @@
     },
     "private": "true",
     "scripts": {
-        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js --userDir ./neuron/userdir",
+        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js",
         "test": "grunt",
         "build": "grunt build",
         "dev": "grunt dev",
