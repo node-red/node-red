@@ -6,7 +6,10 @@ const path = require('path');
 async function main() {
     try {
         console.log('🚀 Starting Neuron Node-RED...');
-        
+   
+        // Get the path to the node-red package
+        const nodeRedPath = path.resolve(__dirname, '..', 'packages', 'node_modules', 'node-red');
+
         // Get the path to the settings file
         const settingsPath = path.resolve(__dirname, '..', 'neuron-settings.js');
         
@@ -19,8 +22,10 @@ async function main() {
         console.log(` Using settings: ${settingsPath}`);
         
         // Spawn node-red process with our settings
-        const nodeRedProcess = spawn('node-red', [
-            '--settings', settingsPath
+        const nodeRedProcess = spawn('node', [
+            nodeRedPath,
+            '--settings',
+            settingsPath
         ], {
             stdio: 'inherit', // This will show node-red output in real-time
             shell: true
