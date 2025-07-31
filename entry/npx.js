@@ -2,19 +2,136 @@
 
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
+
+async function setupEnvironment() {
+    const userHomeDir = os.homedir();
+    const neuronDir = path.join(userHomeDir, '.neuron-node-builder');
+    const envPath = path.join(neuronDir, '.env');
+    const examplePath = path.resolve(__dirname, '..', '.env.example');
+
+    // Create .neuron-node-builder directory if it doesn't exist
+    if (!fs.existsSync(neuronDir)) {
+        fs.mkdirSync(neuronDir, { recursive: true });
+        console.log(` Created directory: ${neuronDir}`);
+    }
+
+    // If .env doesn't exist, copy from .env.example
+    if (!fs.existsSync(envPath)) {
+        if (fs.existsSync(examplePath)) {
+            fs.copyFileSync(examplePath, envPath);
+            console.log(`📋 Copied .env.example to ${envPath}`);
+        }
+    }
+
+    // Set the environment path for NeuronEnvironment to use
+    process.env.NEURON_ENV_PATH = envPath;
+    return envPath;
+}
+
+async function checkNeedsBuild() {
+    const projectRoot = path.resolve(__dirname, '..');
+    const builtFile = path.join(projectRoot, 'packages', 'node_modules', '@node-red', 'editor-client', 'public', 'red', 'red.js');
+    
+    // Check if the built file exists
+    if (!fs.existsSync(builtFile)) {
+        console.log('🔨 Built file not found, build needed');
+        return true;
+    }
+    
+    console.log('✅ Built file exists, skipping build');
+    return false;
+}
+
+async function runBuild() {
+    return new Promise(async (resolve, reject) => {
+        console.log('🔨 Running build...');
+        
+        try {
+            // First, install dependencies if needed
+            console.log('📦 Installing dependencies...');
+            await new Promise((installResolve, installReject) => {
+                const installProcess = spawn('npm', ['install'], {
+                    stdio: 'inherit',
+                    shell: true,
+                    cwd: path.resolve(__dirname, '..')
+                });
+
+                installProcess.on('close', (code) => {
+                    if (code === 0) {
+                        console.log('✅ Dependencies installed');
+                        installResolve();
+                    } else {
+                        installReject(new Error(`Dependency installation failed with code ${code}`));
+                    }
+                });
+
+                installProcess.on('error', (error) => {
+                    installReject(new Error(`Installation process error: ${error.message}`));
+                });
+            });
+
+            // Then run the build
+            console.log('🔨 Building Neuron Node-RED...');
+            const buildProcess = spawn('npm', ['run', 'build'], {
+                stdio: 'inherit',
+                shell: true,
+                cwd: path.resolve(__dirname, '..')
+            });
+
+            buildProcess.on('close', (code) => {
+                if (code === 0) {
+                    console.log('✅ Build completed successfully');
+                    
+                    // Create build timestamp
+                    const buildDir = path.resolve(__dirname, '..', 'build');
+                    const timestampPath = path.join(buildDir, '.build-timestamp');
+                    fs.writeFileSync(timestampPath, new Date().toISOString());
+                    
+                    resolve();
+                } else {
+                    // If build fails, try to continue anyway since Node-RED might work without the build
+                    console.warn('⚠️ Build failed, but continuing with Node-RED startup...');
+                    console.warn('Some UI features might not work correctly');
+                    resolve();
+                }
+            });
+
+            buildProcess.on('error', (error) => {
+                console.warn('⚠️ Build process error, but continuing...');
+                console.warn(error.message);
+                resolve();
+            });
+
+        } catch (error) {
+            console.warn('⚠️ Build setup failed, but continuing...');
+            console.warn(error.message);
+            resolve();
+        }
+    });
+}
 
 async function main() {
     try {
         console.log('🚀 Starting Neuron Node-RED...');
     
+        // Setup environment file
+        const envPath = await setupEnvironment();
+        console.log(` Using environment: ${envPath}`);
+
+        // 🔨 Check if build is needed and run if necessary
+        if (await checkNeedsBuild()) {
+            await runBuild();
+        }
+
         // Get the path to the node-red package
-        const nodeRedPath = path.resolve(__dirname, '..', 'packages', 'node_modules', 'node-red');
+        const nodeRedPath = path.resolve(__dirname, '..', 'packages', 'node_modules', 'node-red', 'red.js');
 
         // Get the path to the settings file
         const settingsPath = path.resolve(__dirname, '..', 'neuron-settings.js');
         
         // Check if settings file exists
-        const fs = require('fs');
         if (!fs.existsSync(settingsPath)) {
             throw new Error(`Settings file not found at: ${settingsPath}`);
         }
@@ -95,6 +212,10 @@ Examples:
   npx github:NeuronInnovations/neuron-node-builder start
   npx github:NeuronInnovations/neuron-node-builder#main
   npx github:NeuronInnovations/neuron-node-builder#v1.0.0
+
+Environment:
+  Configuration is stored in ~/.neuron-node-builder/.env
+  If no .env exists, it will be created from .env.example
         `);
         break;
     default:
