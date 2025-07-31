@@ -38,14 +38,44 @@ module.exports.load = function load() {
 module.exports.reload = function reload() {
     const envPath = determineEnvPath();
 
-    console.log(`🔄 Reloading environment from: ${envPath}`);
+    // Store current environment state before reloading
+    const currentEnv = { ...process.env };
 
     require('dotenv').config({
         path: envPath
     });
 
-    // Emit the envChange event after reloading
-    envEventEmitter.emit('change');
+    // Check if environment has actually changed
+    const hasChanged = hasEnvironmentChanged(currentEnv, process.env);
+    
+    if (hasChanged) {
+        console.log('✅ Environment variables changed, emitting change event');
+        envEventEmitter.emit('change');
+    }
+}
+
+// Helper function to detect environment changes
+function hasEnvironmentChanged(oldEnv, newEnv) {
+    // Get all unique keys from both environments
+    const allKeys = new Set([...Object.keys(oldEnv), ...Object.keys(newEnv)]);
+    
+    for (const key of allKeys) {
+        // Skip internal Node.js environment variables that might change
+        if (key.startsWith('NODE_') || key === 'PWD' || key === 'OLDPWD') {
+            continue;
+        }
+        
+        const oldValue = oldEnv[key];
+        const newValue = newEnv[key];
+        
+        // Check if value has changed
+        if (oldValue !== newValue) {
+            console.log(` Environment change detected: ${key} = "${oldValue}" → "${newValue}"`);
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 // Expose the onEnvChange event listener
