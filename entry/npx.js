@@ -5,6 +5,10 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 
+// Check for debug flag
+const args = process.argv.slice(2);
+const isDebug = args.includes('--debug') || args.includes('-d');
+
 async function setupEnvironment() {
     const neuronDir = path.join(os.homedir(), '.neuron-node-builder');
     const envPath = path.join(neuronDir, '.env');
@@ -13,7 +17,7 @@ async function setupEnvironment() {
     // Create .neuron-node-builder directory if it doesn't exist
     if (!fs.existsSync(neuronDir)) {
         fs.mkdirSync(neuronDir, { recursive: true });
-        console.log(`📂 Created directory: ${neuronDir}`);
+        console.log(`�� Created directory: ${neuronDir}`);
     }
 
     // If .env doesn't exist, copy from .env.example
@@ -50,7 +54,7 @@ async function runBuild() {
             console.log('📦 Installing dependencies...');
             await new Promise((installResolve, installReject) => {
                 const installProcess = spawn('npm', ['install'], {
-                    stdio: 'inherit',
+                    stdio: isDebug ? 'inherit' : 'pipe', // Show output only in debug mode
                     shell: true,
                     cwd: path.resolve(__dirname, '..')
                 });
@@ -72,7 +76,7 @@ async function runBuild() {
             // Then run the build
             console.log('🔨 Building node-red assets...');
             const buildProcess = spawn('npm', ['run', 'build'], {
-                stdio: 'inherit',
+                stdio: isDebug ? 'inherit' : 'pipe', // Show output only in debug mode
                 shell: true,
                 cwd: path.resolve(__dirname, '..')
             });
@@ -179,8 +183,7 @@ async function main() {
 }
 
 // Handle command line arguments
-const args = process.argv.slice(2);
-const command = args[0];
+const command = args.find(arg => !arg.startsWith('-')); // Get first non-flag argument
 
 switch (command) {
     case 'start':
@@ -193,15 +196,19 @@ switch (command) {
 Neuron Node-RED
 
 Usage:
-  npx github:NeuronInnovations/neuron-node-builder [command]
+  npx github:NeuronInnovations/neuron-node-builder [command] [options]
 
 Commands:
   start    Start Node-RED with Neuron settings (default)
   --help   Show this help message
 
+Options:
+  --debug, -d    Show detailed build output
+
 Examples:
   npx github:NeuronInnovations/neuron-node-builder
   npx github:NeuronInnovations/neuron-node-builder start
+  npx github:NeuronInnovations/neuron-node-builder --debug
   npx github:NeuronInnovations/neuron-node-builder#main
   npx github:NeuronInnovations/neuron-node-builder#v1.0.0
 
