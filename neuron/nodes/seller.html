@@ -32,12 +32,12 @@
         <label for="node-input-price"><span>Price</span></label>
         <input type="number" id="node-input-price" placeholder="Enter Price" min="0" step="any">
     </div>
-    <div class="form-row">
+    <div class="form-row" style="display: none;">
         <label> <span>Buyer EVM Addresses</span></label>
         <input type="hidden" id="node-input-buyerEvmAddress" />
         <button type="button" id="select-buyers-btn" class="red-ui-button">Select Buyers</button>
     </div>
-    <div class="form-row">
+    <div class="form-row" style="display: none;">
         <label for="node-input-selectedAddresses"> <span>Selected Buyers</span></label>
         <textarea id="node-input-selectedAddresses" rows="3" readonly style="width: 100%;"></textarea>
     </div>
@@ -81,45 +81,49 @@
     </div>
 
     <!-- Connection Status Section - moved to bottom -->
-    <div class="form-row">
-        <label><span>Connection Status</span></label>
-        <div id="connection-status-indicator" style="display: inline-block; margin-left: 10px;">
+    <div class="form-row" style="display: none;">
+        <label style="display: none;"><span>Connection Status</span></label>
+        <div id="connection-status-indicator" style="display: none; margin-left: 10px;">
             <span id="status-dot" style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #ccc; margin-right: 5px;"></span>
             <span id="status-text" style="color: white">Unknown</span>
         </div>
-        <button type="button" id="refresh-connections-btn" class="red-ui-button" style="margin-left: 10px;">
-            <i class="fa fa-refresh"></i> Refresh
-        </button>
     </div>
     
     <div class="form-row">
-        <label><span>Connected Peers</span></label>
+        <label width="100%"><span>Connected Buyers</span></label>
+        <button class="red-ui-button disabled" style="margin-left: 10px; float:right;">Setup buyer whitelist</button>
         <div id="connected-peers-container" style="margin-top: 10px;">
-            <div id="peers-loading" style="text-align: center; color: black; padding: 20px;">
+            <!-- Refresh button positioned on the right -->
+            <div style="text-align: right; margin-bottom: 10px;">
+                <button type="button" id="refresh-connections-btn" class="red-ui-button">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </div>
+            <div id="peers-loading" style="text-align: center;  padding: 20px;">
                 <i class="fa fa-spinner fa-spin"></i> Loading connection status...
             </div>
             <div id="peers-content" style="display: none;">
-                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white;">
+                <div id="peers-summary" style="margin-bottom: 10px; font-weight: bold; color: white; display: none;">
                     <span id="connected-count">0</span> connected, <span id="total-count">0</span> total peers
                 </div>
-                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; background-color: #f9f9f9;">
-                    <div id="no-peers-message" style="text-align: center; color: black; font-style: italic;">
+                <div id="peers-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px;">
+                    <div id="no-peers-message" style="text-align: center;  font-style: italic;">
                         No peers connected
                     </div>
-                    <table id="peers-table" style="width: 100%; display: none; color: black;">
+                    <table id="peers-table" style="width: 100%; display: none; ">
                         <thead>
                             <tr>
-                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Public Key</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Status</th>
-                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd; color: black;">Last Seen</th>
+                                <th style="text-align: left; padding: 5px; border-bottom: 1px solid #ddd;">EVM Address</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Status</th>
+                                <th style="text-align: center; padding: 5px; border-bottom: 1px solid #ddd;">Last Seen</th>
                             </tr>
                         </thead>
                         <tbody id="peers-table-body">
                         </tbody>
                     </table>
                 </div>
-                <div id="last-update-info" style="margin-top: 5px; font-size: 12px; color: black;">
-                    Last updated: <span id="last-update-time">Never</span>
+                <div id="last-update-info" style="margin-top: 5px; font-size: 12px;">
+                    Last updated: <span id="last-update-time">-</span>
                 </div>
             </div>
         </div>
@@ -200,20 +204,13 @@
         },
         oneditprepare: function () {
             const node = this;
-            let selectedDevices = [];
             
             // Store all intervals for cleanup
             const intervals = {};
 
             $('<style>')
                 .text(`
-                    .seller-table tr.selected {
-                        background-color: #DDD;
-                        color: black;
-                    }
-                    .seller-table tr:hover {
-                        outline: 2px solid #4d90fe;
-                    }
+                   
                     .buyer-modal-content {
                         display: flex;
                         flex-direction: column;
@@ -235,8 +232,7 @@
                     .buyer-table thead th {
                         position: sticky;
                         top: 0;
-                        background-color: black;
-                        color: white;
+                       
                         z-index: 1;
                     }
                     .buyer-modal-buttons {
@@ -248,19 +244,35 @@
                 `)
                 .appendTo('head');
 
-            const initialSelectedAddresses = typeof node.buyerEvmAddress === 'string'
-                ? JSON.parse(node.buyerEvmAddress || '[]')
-                : [];
+            // Initialize buyer addresses safely (fields are hidden but data might exist)
+            let initialSelectedAddresses = [];
+            try {
+                if (typeof node.buyerEvmAddress === 'string' && node.buyerEvmAddress.trim() !== '') {
+                    initialSelectedAddresses = JSON.parse(node.buyerEvmAddress || '[]');
+                }
+            } catch (e) {
+                console.warn('Error parsing initial buyerEvmAddress:', e);
+                initialSelectedAddresses = [];
+            }
+            
+            if (!Array.isArray(initialSelectedAddresses)) {
+                initialSelectedAddresses = [];
+            }
+            
             $('#node-input-selectedAddresses').val(initialSelectedAddresses.join('\n'));
 
-            if (node.buyerEvmAddress) {
+            // Initialize selectedDevices safely
+            let selectedDevices = [];
+            if (node.buyerEvmAddress && node.buyerEvmAddress !== '[]' && node.buyerEvmAddress !== '') {
                 try {
-                    const parsedAddresses = JSON.parse(node.buyerEvmAddress);
-                    selectedDevices = parsedAddresses.map(address => ({ address }));
+                    const parsedAddresses = JSON.parse(node.buyerEvmAddress || '[]');
+                    selectedDevices = Array.isArray(parsedAddresses) ? parsedAddresses.map(address => ({ address })) : [];
                 } catch (e) {
-                    console.error("Error parsing buyerEvmAddress on editprepare:", e);
+                    console.warn("Error parsing buyerEvmAddress on editprepare:", e);
                     selectedDevices = [];
                 }
+            } else {
+                selectedDevices = [];
             }
 
             // Fetch and populate EVM address and publicKey if available
@@ -629,7 +641,7 @@
             
             // Initialize connection status if node exists and add its cleanup to our tracking
             if (node.id) {
-                const statusCleanup = initializeSellerConnectionStatus(node.id);
+                const statusCleanup = initializeSellerConnectionStatus(node.id, node.smartContract);
                 // Store the status cleanup function
                 node._statusCleanup = statusCleanup;
             }
@@ -680,7 +692,7 @@
 
 <script type="text/javascript">
     // Connection status initialization function for seller
-    function initializeSellerConnectionStatus(nodeId) {
+    function initializeSellerConnectionStatus(nodeId, smartContract) {
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         const refreshBtn = document.getElementById('refresh-connections-btn');
@@ -694,6 +706,26 @@
         const lastUpdateTime = document.getElementById('last-update-time');
 
         let isRefreshing = false;
+        let lastSeenInterval = null;
+
+        // Function to refresh all visible last-seen data
+        function refreshAllLastSeen() {
+            const peerRows = document.querySelectorAll('.peers-table-row');
+            peerRows.forEach((row) => {
+                const publicKey = row.getAttribute('data-public-key');
+                const lastSeenCell = row.querySelector('.peers-table-cell:last-child');
+                
+                if (publicKey && lastSeenCell && publicKey !== '') {
+                    const peer = { publicKey: publicKey };
+                    fetchLastSeen(peer, lastSeenCell, smartContract);
+                }
+            });
+            
+            // Update the last update time when refreshing last-seen data
+            if (peerRows.length > 0) {
+                lastUpdateTime.textContent = new Date().toLocaleString();
+            }
+        }
 
         function updateStatusIndicator(status) {
             // Remove all status classes
@@ -727,25 +759,61 @@
             peersLoading.style.display = 'none';
             peersContent.style.display = 'block';
             
+            // Always show the table so headers are visible
+            peersTable.style.display = 'table';
+            noPeersMessage.style.display = 'none';
+            
+            // Clear existing rows
+            peersTableBody.innerHTML = '';
+            
             if (peers.length === 0) {
-                noPeersMessage.style.display = 'block';
-                peersTable.style.display = 'none';
+                // Add a message row when no peers
+                const messageRow = document.createElement('tr');
+                const messageCell = document.createElement('td');
+                messageCell.colSpan = 3;
+                messageCell.style.textAlign = 'center';
+                messageCell.style.padding = '20px';
+                messageCell.style.fontStyle = 'italic';
+                messageCell.style.color = '#666';
+                messageCell.innerHTML = 'No buyer devices have connected to this seller yet<br><small>Buyers will appear here once they establish a connection</small>';
+                messageRow.appendChild(messageCell);
+                peersTableBody.appendChild(messageRow);
             } else {
-                noPeersMessage.style.display = 'none';
-                peersTable.style.display = 'table';
-                
-                // Clear existing rows
-                peersTableBody.innerHTML = '';
-                
                 // Add peer rows
                 peers.forEach(peer => {
                     const row = document.createElement('tr');
                     row.className = 'peers-table-row';
                     
-                    const publicKeyCell = document.createElement('td');
-                    publicKeyCell.className = 'peers-table-cell peer-public-key';
-                    publicKeyCell.textContent = peer.publicKey || 'Unknown';
-                    publicKeyCell.title = peer.publicKey || 'Unknown';
+                    const evmCell = document.createElement('td');
+                    evmCell.className = 'peers-table-cell peer-evm-address';
+                    evmCell.textContent = 'Converting...';
+                    evmCell.title = 'Converting public key to EVM address...';
+                    
+                    // Store the original public key in data attribute for fetchLastSeen
+                    row.setAttribute('data-public-key', peer.publicKey || '');
+                    
+                    // Convert public key to EVM address
+                    if (peer.publicKey) {
+                        fetch(`/seller/publickey-to-evm/${peer.publicKey}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.evmAddress) {
+                                    evmCell.textContent = data.evmAddress;
+                                    evmCell.title = data.evmAddress;
+                                } else {
+                                    evmCell.textContent = 'Conversion failed';
+                                    evmCell.title = 'Could not convert public key to EVM address';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error converting public key to EVM:', error);
+                                evmCell.textContent = 'Error';
+                                evmCell.title = 'Error converting public key to EVM address';
+                            });
+                    } else {
+                        evmCell.textContent = 'Unknown';
+                        evmCell.title = 'No public key available';
+                    }
                     
                     const statusCell = document.createElement('td');
                     statusCell.className = 'peers-table-cell';
@@ -760,9 +828,9 @@
                     lastUpdateCell.style.textAlign = 'center';
                     lastUpdateCell.innerHTML = '<span style="color: #666;">Checking...</span>';
                     // Fetch last seen for this peer
-                    fetchLastSeen(peer, lastUpdateCell);
+                    fetchLastSeen(peer, lastUpdateCell, smartContract);
                     
-                    row.appendChild(publicKeyCell);
+                    row.appendChild(evmCell);
                     row.appendChild(statusCell);
                     row.appendChild(lastUpdateCell);
                     peersTableBody.appendChild(row);
@@ -851,47 +919,101 @@
         // Set up event listeners
         refreshBtn.addEventListener('click', refreshConnections);
 
-        // Load initial status (single call only)
-        loadConnectionStatus();
+        // Load initial status and start auto-refresh
+        loadConnectionStatus().then(() => {
+            // Start 5-second auto-refresh for last-seen data
+            if (lastSeenInterval) {
+                clearInterval(lastSeenInterval);
+            }
+            lastSeenInterval = setInterval(() => {
+                const hasVisiblePeers = document.querySelectorAll('.peers-table-row').length > 0;
+                if (hasVisiblePeers && !isRefreshing) {
+                    refreshAllLastSeen();
+                }
+            }, 5000);
+        }).catch(() => {
+            // If initial load fails, still try to start the interval
+            console.warn('Initial connection status load failed, but starting last-seen auto-refresh anyway');
+        });
 
         // Remove the periodic refresh - no more polling
         // const statusInterval = setInterval(loadConnectionStatus, 30000);
 
-        // Cleanup function (no interval to clear)
+        // Cleanup function
         return () => {
             refreshBtn.removeEventListener('click', refreshConnections);
+            if (lastSeenInterval) {
+                clearInterval(lastSeenInterval);
+                lastSeenInterval = null;
+            }
         };
     }
 
-    // Function to fetch last seen for a peer
-    async function fetchLastSeen(peer, lastSeenCell) {
+    async function fetchLastSeen(peer, lastSeenCell, smartContract) {
         try {
-            // For seller, we need to get the peer's stdOutTopic to check last activity
-            // This would require getting device info for this peer's EVM address
-            // For now, show "Checking..." while implementing
             lastSeenCell.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
             
-            // TODO: Get peer's stdOutTopic from device info, then call /seller/last-seen
-            // For demo purposes, showing a placeholder
-            setTimeout(() => {
-                lastSeenCell.textContent = 'Manual check needed';
-            }, 1000);
+            if (!peer.publicKey) {
+                lastSeenCell.textContent = 'No public key';
+                return;
+            }
+            
+            // Step 1: Convert publicKey to EVM address
+            const evmResponse = await fetch(`/seller/publickey-to-evm/${peer.publicKey}`);
+            const evmData = await evmResponse.json();
+            
+            if (!evmData.success) {
+                lastSeenCell.textContent = 'Key conversion failed';
+                return;
+            }
+            
+            // Step 2: Get device info by EVM address
+            const deviceResponse = await fetch(`/seller/device-info-by-evm/${evmData.evmAddress}?smartContract=${smartContract}`);
+            const deviceData = await deviceResponse.json();
+            
+            if (!deviceData.success || !deviceData.stdOutTopic) {
+                lastSeenCell.textContent = 'No topic found';
+                return;
+            }
+            
+            // Step 3: Get last seen from stdOutTopic
+            const lastSeenResponse = await fetch(`/seller/last-seen/${deviceData.stdOutTopic}`);
+            const lastSeenData = await lastSeenResponse.json();
+            
+            if (lastSeenData.success && lastSeenData.lastSeen) {
+                const secondsAgo = lastSeenData.secondsAgo;
+                let displayText = '';
+                let color = '';
+                
+                if (secondsAgo < 60) {
+                    displayText = `${secondsAgo}s ago`;
+                    color = '#28a745'; // green
+                } else if (secondsAgo < 3600) {
+                    displayText = `${Math.floor(secondsAgo / 60)}m ago`;
+                    color = '#ffc107'; // yellow
+                } else if (secondsAgo < 86400) {
+                    displayText = `${Math.floor(secondsAgo / 3600)}h ago`;
+                    color = '#fd7e14'; // orange
+                } else {
+                    displayText = `${Math.floor(secondsAgo / 86400)}d ago`;
+                    color = '#dc3545'; // red
+                }
+                
+                lastSeenCell.innerHTML = `<span style="color: ${color};">${displayText}</span>`;
+            } else {
+                lastSeenCell.textContent = 'Never';
+            }
             
         } catch (error) {
-            console.error('Error fetching last seen:', error);
+            console.error('Error fetching last seen for peer:', peer.publicKey, error);
             lastSeenCell.textContent = 'Error';
         }
     }
 </script>
 
 <style>
-.buyer-table tr.selected {
-    background-color: #DDD;
-    color: black;
-}
-.buyer-table tr:hover {
-    outline: 2px solid #4d90fe;
-}
+
+
 .connection-status-connected { background-color: #4CAF50 !important; }
 .connection-status-disconnected { background-color: #f44336 !important; }
 .connection-status-connecting { background-color: #ff9800 !important; }
@@ -899,10 +1021,12 @@
 .peer-status-connected { color: #4CAF50; font-weight: bold; }
 .peer-status-disconnected { color: #f44336; font-weight: bold; }
 .peer-status-unknown { color: #9e9e9e; font-weight: bold; }
-.peers-table-row { border-bottom: 1px solid #eee; color: black; }
-.peers-table-row:hover { background-color: #f5f5f5; }
-.peers-table-cell { padding: 8px 5px; vertical-align: middle; color: black; }
-.peer-public-key { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: black; }
+.peers-table-row { border-bottom: 1px solid #eee; color: white; }
+.peers-table-row:hover { background-color: inherit !important; outline: none !important; border: none !important; }
+#peers-table tr:hover { background-color: inherit !important; outline: none !important; border: none !important; }
+#peers-table tbody tr:hover { background-color: inherit !important; outline: none !important; border: none !important; }
+.peers-table-cell { padding: 8px 5px; vertical-align: middle; color: white; }
+.peer-evm-address { font-family: monospace; font-size: 11px; word-break: break-all; max-width: 200px; color: white; }
 .refresh-button-loading { opacity: 0.6; pointer-events: none; }
 .refresh-button-loading i { animation: spin 1s linear infinite; }
 

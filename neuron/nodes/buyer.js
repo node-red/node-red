@@ -1000,7 +1000,11 @@ module.exports = function (RED) {
             
 
             const response = {
-                evmAddress: buyerNode.deviceInfo.evmAddress || '',
+               // evmAddress: buyerNode.deviceInfo.evmAddress || '',
+                evmAddress: (() => {
+                    const address = buyerNode.deviceInfo.evmAddress || '';
+                    return address && !address.startsWith('0x') ? `0x${address}` : address;
+                })(),
                 wsPort: buyerNode.deviceInfo.wsPort || null,
                 publicKey: publicKey,
                  stdInTopic: stdInTopic,
