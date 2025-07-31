@@ -41,9 +41,14 @@ module.exports.reload = function reload() {
     // Store current environment state before reloading
     const currentEnv = { ...process.env };
 
+    const originalLog = console.log;
+    console.log = () => {};
+
     require('dotenv').config({
         path: envPath
     });
+
+    console.log = originalLog;
 
     // Check if environment has actually changed
     const hasChanged = hasEnvironmentChanged(currentEnv, process.env);
@@ -76,6 +81,60 @@ function hasEnvironmentChanged(oldEnv, newEnv) {
     }
     
     return false;
+}
+
+// Function to update a single .env value
+module.exports.updateEnvValue = function updateEnvValue(key, value) {
+    const envPath = determineEnvPath();
+    
+    try {
+        // Read existing .env file
+        let envContent = '';
+        if (fs.existsSync(envPath)) {
+            envContent = fs.readFileSync(envPath, 'utf-8');
+        }
+        
+        // Parse existing content
+        const lines = envContent.split('\n');
+        let keyFound = false;
+        
+        // Update existing key or add new one
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            
+            // Skip empty lines and comments
+            if (!line || line.startsWith('#')) {
+                continue;
+            }
+            
+            // Check if this line contains our key
+            if (line.startsWith(`${key}=`)) {
+                lines[i] = `${key}=${value}`;
+                keyFound = true;
+                break;
+            }
+        }
+        
+        // If key wasn't found, add it to the end
+        if (!keyFound) {
+            lines.push(`${key}=${value}`);
+        }
+        
+        // Write updated content back to file
+        const updatedContent = lines.join('\n');
+        fs.writeFileSync(envPath, updatedContent, 'utf-8');
+        
+        console.log(`✅ Updated .env file: ${key}=${value}`);
+        
+        // Reload environment to apply changes
+        this.reload();
+        
+        return true;
+        
+    } catch (error) {
+        console.error(`❌ Failed to update .env value: ${error.message}`);
+        throw error;
+    }
 }
 
 // Expose the onEnvChange event listener
