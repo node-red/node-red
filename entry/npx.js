@@ -6,23 +6,20 @@ const fs = require('fs');
 const os = require('os');
 
 async function setupEnvironment() {
-    const userHomeDir = os.homedir();
-    const neuronDir = path.join(userHomeDir, '.neuron-node-builder');
+    const neuronDir = path.join(os.homedir(), '.neuron-node-builder');
     const envPath = path.join(neuronDir, '.env');
     const examplePath = path.resolve(__dirname, '..', '.env.example');
 
     // Create .neuron-node-builder directory if it doesn't exist
     if (!fs.existsSync(neuronDir)) {
         fs.mkdirSync(neuronDir, { recursive: true });
-        console.log(` Created directory: ${neuronDir}`);
+        console.log(`📂 Created directory: ${neuronDir}`);
     }
 
     // If .env doesn't exist, copy from .env.example
     if (!fs.existsSync(envPath)) {
-        if (fs.existsSync(examplePath)) {
-            fs.copyFileSync(examplePath, envPath);
-            console.log(`📋 Copied .env.example to ${envPath}`);
-        }
+        fs.copyFileSync(examplePath, envPath);
+        console.log(`📋 Copied .env.example to ${envPath}`);
     }
 
     // Set the environment path for NeuronEnvironment to use
@@ -73,7 +70,7 @@ async function runBuild() {
             });
 
             // Then run the build
-            console.log('🔨 Building Neuron Node-RED...');
+            console.log('🔨 Building node-red assets...');
             const buildProcess = spawn('npm', ['run', 'build'], {
                 stdio: 'inherit',
                 shell: true,
@@ -83,12 +80,7 @@ async function runBuild() {
             buildProcess.on('close', (code) => {
                 if (code === 0) {
                     console.log('✅ Build completed successfully');
-                    
-                    // Create build timestamp
-                    const buildDir = path.resolve(__dirname, '..', 'build');
-                    const timestampPath = path.join(buildDir, '.build-timestamp');
-                    fs.writeFileSync(timestampPath, new Date().toISOString());
-                    
+                  
                     resolve();
                 } else {
                     // If build fails, try to continue anyway since Node-RED might work without the build
