@@ -22,6 +22,10 @@ const NeuronUpdateService = require('./neuron/services/NeuronUpdateService');
 // Load environment variables with configurable path
 require('./neuron/services/NeuronEnvironment').load();
 
+// Resolve the SDK path
+const NeuronSDKResolver = require('./neuron/services/NeuronSDKResolver');
+new NeuronSDKResolver().resolve();
+
 // Load user home directory
 const userHomePath = require('./neuron/services/NeuronUserHome').load();
 
