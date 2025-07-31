@@ -17,7 +17,7 @@ module.exports.load = function load() {
         fs.mkdirSync(homePath, { recursive: true });
     }
 
-    const nodeRedPath = path.resolve(homePath, 'node-red-userdir');
+    const nodeRedPath = path.resolve(homePath, 'node_red_userdir');
 
     if (!fs.existsSync(nodeRedPath)) {
         fs.mkdirSync(nodeRedPath, { recursive: true });
