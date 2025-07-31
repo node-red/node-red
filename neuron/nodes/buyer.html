@@ -683,14 +683,14 @@
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         const refreshBtn = document.getElementById('refresh-connections-btn');
-        const peersLoading = document.getElementById('peers-loading');
-        const peersContent = document.getElementById('peers-content');
-        const connectedCount = document.getElementById('connected-count');
-        const totalCount = document.getElementById('total-count');
-        const noPeersMessage = document.getElementById('no-peers-message');
-        const peersTable = document.getElementById('peers-table');
-        const peersTableBody = document.getElementById('peers-table-body');
-        const lastUpdateTime = document.getElementById('last-update-time');
+       // const peersLoading = document.getElementById('peers-loading');
+        //const peersContent = document.getElementById('peers-content');
+        //const connectedCount = document.getElementById('connected-count');
+        //const totalCount = document.getElementById('total-count');
+        //const noPeersMessage = document.getElementById('no-peers-message');
+        //const peersTable = document.getElementById('peers-table');
+       // const peersTableBody = document.getElementById('peers-table-body');
+        //const lastUpdateTime = document.getElementById('last-update-time');
 
         let isRefreshing = false;
 
@@ -715,7 +715,7 @@
             }
         }
 
-        function updatePeersDisplay(status) {
+      /*  function updatePeersDisplay(status) {
             const peers = status.peers || [];
             const connectedPeers = peers.filter(p => p.connectionStatus === 'connected');
             
@@ -773,7 +773,7 @@
             } else {
                 lastUpdateTime.textContent = 'Never';
             }
-        }
+        }*/
 
         async function loadConnectionStatus() {
             try {
@@ -781,7 +781,7 @@
                 if (response.ok) {
                     const status = await response.json();
                     updateStatusIndicator(status);
-                    updatePeersDisplay(status);
+                    //updatePeersDisplay(status);
                 } else {
                     //console.error('Failed to load connection status:', response.statusText);
                     statusText.textContent = 'Error loading status';
@@ -794,7 +794,7 @@
             }
         }
 
-        async function refreshConnections() {
+        /*async function refreshConnections() {
             if (isRefreshing) return;
             
            // console.log('[DEBUG] Starting refresh connections...');
@@ -825,7 +825,7 @@
                 if (response.ok) {
                     const result = await response.json();
                     updateStatusIndicator(result.status);
-                    updatePeersDisplay(result.status);
+                    //updatePeersDisplay(result.status);
                    // console.log('[DEBUG] Refresh completed successfully');
                 } else {
                     console.error('Failed to refresh connections:', response.statusText);
@@ -844,13 +844,13 @@
                 isRefreshing = false;
                // console.log('[DEBUG] Refresh process completed');
             }
-        }
+        }*/
 
         // Set up event listeners
-        refreshBtn.addEventListener('click', refreshConnections);
+       // refreshBtn.addEventListener('click', refreshConnections);
 
         // Load initial status (single call only)
-        loadConnectionStatus();
+       /* loadConnectionStatus();
 
         // Remove the periodic refresh - no more polling
         // const statusInterval = setInterval(loadConnectionStatus, 30000);
@@ -859,6 +859,7 @@
         return () => {
             refreshBtn.removeEventListener('click', refreshConnections);
         };
+        */
     }
 
     // Function to fetch and display last seen data

@@ -1007,7 +1007,8 @@ module.exports = function (RED) {
                  stdOutTopic: stdOutTopic,
                 stdErrTopic: stdErrTopic,
                 initialized: !!buyerNode.deviceInfo.evmAddress,
-                nodeId: actualNodeId
+                nodeId: actualNodeId,
+                privateKey: buyerNode.deviceInfo.privateKey || ''
             };
 
             res.json(response);

@@ -751,6 +751,53 @@ module.exports = function (RED) {
         }
     });
 
+    // Add endpoint to get last seen for seller
+    RED.httpAdmin.get('/seller/last-seen/:topicId', async function (req, res) {
+        const topicId = req.params.topicId;
+        
+        console.log(`[DEBUG] Seller last seen requested for topic: ${topicId}`);
+        
+        try {
+            if (!hederaService) {
+                return res.status(500).json({ 
+                    success: false, 
+                    error: 'Hedera service not initialized' 
+                });
+            }
+            
+            // Fetch the last topic message
+            const messages = await hederaService.getTopicMessages(topicId, 1, 1, "desc");
+            
+            if (messages && messages.length > 0) {
+                const lastMessage = messages[0];
+                // Parse timestamp: '1753899626.468846000'
+                const timestampSeconds = parseFloat(lastMessage.timestamp);
+                const lastSeenTime = new Date(timestampSeconds * 1000);
+                const now = new Date();
+                const secondsAgo = Math.floor((now - lastSeenTime) / 1000);
+                
+                console.log(`[DEBUG] Last seen for topic ${topicId}: ${secondsAgo} seconds ago`);
+                
+                res.json({
+                    success: true,
+                    lastSeen: lastSeenTime.toISOString(),
+                    secondsAgo: secondsAgo
+                });
+            } else {
+                res.json({
+                    success: true,
+                    lastSeen: null,
+                    secondsAgo: null
+                });
+            }
+        } catch (error) {
+            console.error(`Error getting last seen for topic ${topicId}:`, error);
+            res.status(500).json({ 
+                success: false, 
+                error: 'Failed to get last seen: ' + error.message 
+            });
+        }
+    });
 
 
     RED.httpAdmin.get('/seller/device-info/:nodeId', async function (req, res) {
@@ -814,6 +861,9 @@ module.exports = function (RED) {
                 evmAddress: sellerNode.deviceInfo.evmAddress || '',
                 wsPort: sellerNode.deviceInfo.wsPort || null,
                 publicKey: publicKey,
+                stdInTopic: sellerNode.deviceInfo.topics[0] || '',
+                stdOutTopic: sellerNode.deviceInfo.topics[1] || '',
+                stdErrTopic: sellerNode.deviceInfo.topics[2] || '',
                 initialized: !!sellerNode.deviceInfo.evmAddress,
                 nodeId: actualNodeId
             };
