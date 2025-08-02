@@ -4,13 +4,16 @@
     "description": "Low-code programming for event-driven applications",
     "homepage": "https://nodered.org",
     "license": "Apache-2.0",
+    "bin": {
+        "neuron-node-builder": "./entry/npx.js"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/node-red/node-red.git"
     },
     "private": "true",
     "scripts": {
-        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js --userDir ./neuron/userdir",
+        "start": "node packages/node_modules/node-red/red.js --settings ./neuron-settings.js",
         "test": "grunt",
         "build": "grunt build",
         "dev": "grunt dev",

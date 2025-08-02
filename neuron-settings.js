@@ -22,6 +22,10 @@ const NeuronUpdateService = require('./neuron/services/NeuronUpdateService');
 // Load environment variables with configurable path
 require('./neuron/services/NeuronEnvironment').load();
 
+// Resolve the SDK path
+const NeuronSDKResolver = require('./neuron/services/NeuronSDKResolver');
+new NeuronSDKResolver().resolve();
+
 // Load user home directory
 const userHomePath = require('./neuron/services/NeuronUserHome').load();
 
@@ -67,7 +71,7 @@ module.exports = {
      * the user's home directory. To use a different location, the following
      * property can be used
      */
-    userDir: userHomePath,
+    userDir: `${userHomePath}/node_red_userdir`,
 
     /** Node-RED scans the `nodes` directory in the userDir to find local node files.
      * The following property can be used to specify an additional directory to scan.
