@@ -1090,4 +1090,29 @@ module.exports = function (RED) {
             throw error;
         }
     }
+    
+    // Check Device File Exists endpoint - Check if device file exists for the given node
+    RED.httpAdmin.get('/seller/device-exists/:nodeId', function (req, res) {
+        const nodeId = req.params.nodeId;
+        
+        try {
+            const persistDir = path.join(require('../services/NeuronUserHome').load(), 'devices');
+            const deviceFile = path.join(persistDir, `${nodeId}.json`);
+            
+            const exists = fs.existsSync(deviceFile);
+            console.log(`[SELLER DEVICE EXISTS] Check for node ${nodeId}: ${exists ? 'found' : 'not found'}`);
+            
+            res.json({
+                success: true,
+                exists: exists
+            });
+            
+        } catch (error) {
+            console.error(`[SELLER DEVICE EXISTS] Error checking device file for node ${nodeId}:`, error);
+            res.status(500).json({
+                success: false,
+                error: `Failed to check device file: ${error.message}`
+            });
+        }
+    });
 };

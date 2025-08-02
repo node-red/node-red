@@ -64,41 +64,49 @@
         <input type="text" id="node-input-description" placeholder="Description (optional)">
     </div>
     <i style="color: #ffc107;">Click <span style="color: red">Done</span> then click <span style="color: red">Deploy</span> to create/update device</i>
+    
+    <div id="no-device-message" style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; color: #6c757d; font-style: italic;">
+        <i class="fa fa-info-circle" style="margin-right: 5px;"></i>
+        Runtime information will appear here after the device is created (after first deployment).
+    </div>
+    
     <!-- Separator line between configuration and runtime information -->
     <hr style="margin: 15px 0; border: none; border-top: 1px solid #ccc;">
     
     <!-- Runtime Information Section -->
-    <h4 style="margin: 10px 0; color:#28a745;">Runtime Information - displayed after deployment</h4>
+    <div id="runtime-information-section" style="display: none;">
+        <h4 style="margin: 10px 0; color:#28a745;">Runtime Information</h4>
 
-    <div class="form-row">
-        <label for="node-input-evmAddress"><span>EVM Address</span></label>
-        <input type="text" id="node-input-evmAddress" placeholder="EVM address will appear here after initialization" readonly>
-    </div>
+        <div class="form-row">
+            <label for="node-input-evmAddress"><span>EVM Address</span></label>
+            <input type="text" id="node-input-evmAddress" placeholder="EVM address will appear here after initialization" readonly>
+        </div>
 
-    <div class="form-row">
-        <label for="node-input-balance"><span>Balance</span></label>
-        <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
-    </div>
+        <div class="form-row">
+            <label for="node-input-balance"><span>Balance</span></label>
+            <input type="text" id="node-input-balance" placeholder="Account balance will appear here after initialization" readonly>
+        </div>
 
-    <div class="form-row">
-        <label for="node-input-publicKey"><span>Public Key</span></label>
-        <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly>
-    </div>
+        <div class="form-row">
+            <label for="node-input-publicKey"><span>Public Key</span></label>
+            <input type="text" id="node-input-publicKey" placeholder="Public key will appear here after initialization" readonly>
+        </div>
 
-    <!-- Add these three new topic fields -->
-    <div class="form-row">
-        <label for="node-input-stdInTopic"><span>StdIn Topic</span></label>
-        <input type="text" id="node-input-stdInTopic" placeholder="StdIn topic will appear here after initialization" readonly>
-    </div>
+        <!-- Add these three new topic fields -->
+        <div class="form-row">
+            <label for="node-input-stdInTopic"><span>StdIn Topic</span></label>
+            <input type="text" id="node-input-stdInTopic" placeholder="StdIn topic will appear here after initialization" readonly>
+        </div>
 
-    <div class="form-row">
-        <label for="node-input-stdOutTopic"><span>StdOut Topic</span></label>
-        <input type="text" id="node-input-stdOutTopic" placeholder="StdOut topic will appear here after initialization" readonly>
-    </div>
+        <div class="form-row">
+            <label for="node-input-stdOutTopic"><span>StdOut Topic</span></label>
+            <input type="text" id="node-input-stdOutTopic" placeholder="StdOut topic will appear here after initialization" readonly>
+        </div>
 
-    <div class="form-row">
-        <label for="node-input-stdErrTopic"><span>StdErr Topic</span></label>
-        <input type="text" id="node-input-stdErrTopic" placeholder="StdErr topic will appear here after initialization" readonly>
+        <div class="form-row">
+            <label for="node-input-stdErrTopic"><span>StdErr Topic</span></label>
+            <input type="text" id="node-input-stdErrTopic" placeholder="StdErr topic will appear here after initialization" readonly>
+        </div>
     </div>
 
     <!-- Connection Status Section - moved to bottom -->
@@ -634,6 +642,42 @@
                 }
             }
 
+            // Check if device exists and show/hide runtime information section
+            function checkDeviceExistsAndShowRuntime() {
+                if (node.id) {
+                    console.log(`[DEVICE EXISTS] Checking device file for node ID: ${node.id}`);
+                    $.get(`/buyer/device-exists/${node.id}`)
+                        .done(function (data) {
+                            console.log(`[DEVICE EXISTS] Response for ${node.id}:`, data);
+                            
+                            if (data.success && data.exists) {
+                                // Device file exists, show runtime information section and hide message
+                                $('#runtime-information-section').show();
+                                $('#no-device-message').hide();
+                                console.log(`[DEVICE EXISTS] Device file found, showing runtime information`);
+                            } else {
+                                // Device file doesn't exist, hide runtime information section and show message
+                                $('#runtime-information-section').hide();
+                                $('#no-device-message').show();
+                                console.log(`[DEVICE EXISTS] Device file not found, hiding runtime information`);
+                            }
+                        })
+                        .fail(function (xhr, status, error) {
+                            console.error(`[DEVICE EXISTS] Failed to check device file for ${node.id}:`, error);
+                            // On error, hide the runtime section and show message
+                            $('#runtime-information-section').hide();
+                            $('#no-device-message').show();
+                        });
+                } else {
+                    // No node ID available, hide runtime information section and show message
+                    $('#runtime-information-section').hide();
+                    $('#no-device-message').show();
+                    console.log(`[DEVICE EXISTS] No node ID available, hiding runtime information`);
+                }
+            }
+
+            checkDeviceExistsAndShowRuntime();
+
             // Update EVM address and public key ONCE on dialog open
             updateEvmAddressAndPublicKeyAndTopics();
 
@@ -1151,6 +1195,22 @@
         padding-top: 8px;
         margin-top: 8px;
         font-size: 12px;
+    }
+    
+    /* No device message styling */
+    #no-device-message {
+        background-color: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        color: #6c757d !important;
+    }
+    
+    /* Dark theme compatibility for no device message */
+    @media (prefers-color-scheme: dark) {
+        #no-device-message {
+            background-color: #2d2d2d !important;
+            border-color: #555 !important;
+            color: #adb5bd !important;
+        }
     }
 </style>
 
