@@ -37,9 +37,6 @@
                     <thead>
                         <tr style="background-color: #2d2d2d; color: white;">
                             <th style="padding: 8px; border: 1px solid #555; text-align: left;">EVM Address</th>
-                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdIn Topic</th>
-                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdOut Topic</th>
-                            <th style="padding: 8px; border: 1px solid #555; text-align: left;">StdErr Topic</th>
                             <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 100px;">Status</th>
                             <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 100px;">Last Seen</th>
                             <th style="padding: 8px; border: 1px solid #555; text-align: center; width: 60px;">Actions</th>
@@ -163,6 +160,7 @@
     RED.nodes.registerType('buyer config', {
         category: 'Neuron',
         color: '#9799b2',
+        editDialogSize: { width: '500px', height: 'auto' },
         defaults: {
             name: { value: "Buyer"},
             sellerEvmAddress: { value: [] },
@@ -263,15 +261,7 @@
                             <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 11px; word-break: break-all;">
                                 ${device.evmAddress}
                             </td>
-                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdInTopic}">
-                                ${truncateTopic(device.stdInTopic)}
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdOutTopic}">
-                                ${truncateTopic(device.stdOutTopic)}
-                            </td>
-                            <td style="padding: 8px; border: 1px solid #555; font-family: monospace; font-size: 10px;" title="${device.stdErrTopic}">
-                                ${truncateTopic(device.stdErrTopic)}
-                            </td>
+                           
                             <td id="status-cell-${index}" style="padding: 8px; border: 1px solid #555; text-align: center; font-size: 11px;">
                                 <i class="fa fa-spinner fa-spin" style="color: #888;"></i>
                             </td>
