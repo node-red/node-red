@@ -419,7 +419,8 @@
 
                     //console.log('[DEBUG] Getting last seen for device', index, 'topic:', device.stdOutTopic);
 
-                    const response = await fetch(`/buyer/last-seen/${device.stdOutTopic}`);
+                    const normalizedTopic = normalizeTopicFormat(device.stdOutTopic);
+                    const response = await fetch(`/buyer/last-seen/${normalizedTopic}`);
                     const data = await response.json();
 
                     if (data.success) {
@@ -1041,7 +1042,8 @@
 
             // console.log('[DEBUG] Getting last seen for topic:', device.stdOutTopic);
 
-            const response = await fetch(`/buyer/last-seen/${device.stdOutTopic}`);
+            const normalizedTopic = normalizeTopicFormat(device.stdOutTopic);
+            const response = await fetch(`/buyer/last-seen/${normalizedTopic}`);
             const data = await response.json();
 
             const lastSeenCell = $(`#lastseen-cell-${index}`);
@@ -1106,6 +1108,15 @@
                 tableBody.append(row);
             }
         });
+    }
+
+    // Helper to normalize Hedera topic format to 0.0.xxxxxxx
+    function normalizeTopicFormat(topic) {
+        if (typeof topic !== 'string') return topic;
+        if (/^0\.0\.\d+$/.test(topic)) return topic;
+        if (/^0\.0\d+$/.test(topic)) return topic.replace(/^0\.0(\d+)$/, '0.0.$1');
+        if (/^\d+$/.test(topic)) return `0.0.${topic}`;
+        return topic;
     }
 </script>
 

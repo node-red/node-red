@@ -294,7 +294,7 @@ class ProcessManager {
             
             const args = [
                 `--port=${port}`,
-               // '--use-local-address',
+                '--use-local-address',
                 '--mode=peer',
                 `--buyer-or-seller=${nodeType}`,
                 nodeType === 'seller' ? '--list-of-buyers-source=env' : '--list-of-sellers-source=env',
@@ -324,7 +324,7 @@ class ProcessManager {
 
             goProcess.on('exit', (code, signal) => {
                 console.log(`Go process for node ${node.id} exited with code ${code}, signal ${signal}`);
-                node.status({ fill: "red", shape: "ring", text: "SDK Process exited" });
+               // node.status({ fill: "red", shape: "ring", text: "SDK Process exited" });
                 this.handleProcessExit(node.id, code, signal);
             });
 
@@ -439,6 +439,8 @@ class ProcessManager {
             setTimeout(() => {
                 if (this.restartAttempts.get(nodeId) === newAttemptCount) {
                     console.log(`Resetting restart attempt count for node ${nodeId} after cooldown`);
+                     node.status({ fill: "orange", shape: "ring", text: "SDK Process exited - restarting" });
+
                     this.restartAttempts.delete(nodeId);
                 }
             }, this.restartCooldownMs);

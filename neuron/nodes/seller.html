@@ -1180,6 +1180,15 @@
         };
     }
 
+    // Helper to normalize Hedera topic format to 0.0.xxxxxxx
+    function normalizeTopicFormat(topic) {
+        if (typeof topic !== 'string') return topic;
+        if (/^0\.0\.\d+$/.test(topic)) return topic;
+        if (/^0\.0\d+$/.test(topic)) return topic.replace(/^0\.0(\d+)$/, '0.0.$1');
+        if (/^\d+$/.test(topic)) return `0.0.${topic}`;
+        return topic;
+    }
+
     async function fetchLastSeen(peer, lastSeenCell, smartContract) {
         try {
             lastSeenCell.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
@@ -1208,7 +1217,8 @@
             }
 
             // Step 3: Get last seen from stdOutTopic
-            const lastSeenResponse = await fetch(`/seller/last-seen/${deviceData.stdOutTopic}`);
+            const normalizedTopic = normalizeTopicFormat(deviceData.stdOutTopic);
+            const lastSeenResponse = await fetch(`/seller/last-seen/${normalizedTopic}`);
             const lastSeenData = await lastSeenResponse.json();
 
             if (lastSeenData.success && lastSeenData.lastSeen) {

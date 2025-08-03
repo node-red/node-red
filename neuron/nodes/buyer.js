@@ -1095,36 +1095,9 @@ module.exports = function (RED) {
     // Add this new endpoint for fetching devices by EVM address
     RED.httpAdmin.get('/buyer/fetch-device-by-evm/:evmAddress', async function (req, res) {
         const evmAddress = req.params.evmAddress;
-       // const buyerNodeId = req.query.nodeId;
-        
-     //   console.log(`[DEBUG] Fetching device for EVM: ${evmAddress}, nodeId: ${buyerNodeId}`);
-        
+                 
         try {
-/*
-            let buyerNode = RED.nodes.getNode(buyerNodeId);
-            let actualNodeId = buyerNodeId;
-            
-            // Handle subflow template mapping
-            if (!buyerNode) {
-                const instanceId = templateToInstanceMap.get(buyerNodeId);
-                if (instanceId) {
-                   // console.log(`[DEBUG] Template ID ${buyerNodeId} maps to instance ID ${instanceId}`);
-                    buyerNode = RED.nodes.getNode(instanceId);
-                    actualNodeId = instanceId;
-                }
-            }
-            
-            if (!buyerNode || buyerNode.type !== 'buyer config') {
-                 return res.status(404).json({ 
-                    success: false, 
-                    error: 'Node node not found. Please try again in a few seconds.' 
-                });
-            }
-            */
-            
-            // Access smartContract from the node's configuration
-           // const smartContract = buyerNode.smartContract || buyerNode.config?.smartContract || 'jetvision';
-          //  console.log(`[DEBUG] Smart contract determined: ${smartContract}`);
+
           const smartContract = req.query.smartContract || 'jetvision';
 
             if (!smartContract) {
