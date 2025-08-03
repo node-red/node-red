@@ -346,7 +346,7 @@
                     if (connectionData.peers && Array.isArray(connectionData.peers)) {
                         connectionData.peers.forEach(peer => {
                             if (peer.publicKey) {
-                                statusMap.set(peer.publicKey, peer.connectionStatus || 'Unknown');
+                                statusMap.set(peer.publicKey, peer.connectionStatus || 'No connection');
                             }
                         });
                     }
@@ -966,7 +966,7 @@
             if (connectionData.data && Array.isArray(connectionData.data)) {
                 connectionData.data.forEach(peer => {
                     if (peer.publicKey) {
-                        statusMap.set(peer.publicKey, peer.connectionStatus || 'Unknown');
+                        statusMap.set(peer.publicKey, peer.connectionStatus || 'Not connected');
                     }
                 });
             }

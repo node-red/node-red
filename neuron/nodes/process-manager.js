@@ -45,12 +45,12 @@ class ProcessManager {
                 return existingProcess.processObj;
             }
 
-            // No existing process found, spawn new one
-            return await this.spawnNewProcess(node, deviceInfo, nodeType);
+            // No existing process found, spawn new one with retry logic
+            return await this.spawnNewProcessWithRetry(node, deviceInfo, nodeType);
             
         } catch (error) {
             console.error(`Error ensuring Go process for node ${node.id}:`, error.message);
-            node.status({ fill: "red", shape: "ring", text: "Process setup failed" });
+            node.status({ fill: "red", shape: "ring", text: "Process startup failed after retries" });
             throw error;
         }
     }
@@ -153,6 +153,100 @@ class ProcessManager {
         }
         
         return goProcess;
+    }
+
+    /**
+     * Spawn new process with retry logic
+     * Retries up to 4 times with exponential backoff and proper cleanup
+     */
+    async spawnNewProcessWithRetry(node, deviceInfo, nodeType = 'buyer', maxRetries = 4) {
+        let lastError = null;
+        
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            console.log(`Attempting to spawn Go process for node ${node.id} (attempt ${attempt}/${maxRetries})`);
+            
+            try {
+                // Update node status to show retry attempt
+                if (attempt > 1) {
+                    node.status({ fill: "yellow", shape: "ring", text: `Starting process (attempt ${attempt}/${maxRetries})...` });
+                }
+                
+                const goProcess = await this.spawnNewProcess(node, deviceInfo, nodeType);
+                
+                // Success! Return the process
+                console.log(`Successfully spawned Go process for node ${node.id} on attempt ${attempt}`);
+                return goProcess;
+                
+            } catch (error) {
+                lastError = error;
+                console.error(`Attempt ${attempt} failed for node ${node.id}:`, error.message);
+                
+                // Clean up failed attempt
+                await this.cleanupFailedAttempt(node.id, nodeType);
+                
+                // If this was the last attempt, don't wait
+                if (attempt === maxRetries) {
+                    break;
+                }
+                
+                // Calculate exponential backoff delay (2^attempt seconds, max 30s)
+                const delayMs = Math.min(Math.pow(2, attempt) * 1000, 30000);
+                console.log(`Waiting ${delayMs}ms before retry ${attempt + 1} for node ${node.id}`);
+                
+                // Update status with countdown
+                node.status({ fill: "yellow", shape: "ring", text: `Retrying in ${delayMs/1000}s...` });
+                
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+            }
+        }
+        
+        // All attempts failed
+        console.error(`All ${maxRetries} attempts failed for node ${node.id}. Last error:`, lastError.message);
+        throw new Error(`Go process startup failed after ${maxRetries} attempts. Last error: ${lastError.message}`);
+    }
+
+    /**
+     * Clean up resources from a failed process startup attempt
+     */
+    async cleanupFailedAttempt(nodeId, nodeType) {
+        try {
+            console.log(`Cleaning up failed attempt for node ${nodeId}`);
+            
+            // Stop health monitoring if active
+            if (this.healthMonitors.has(nodeId)) {
+                clearInterval(this.healthMonitors.get(nodeId));
+                this.healthMonitors.delete(nodeId);
+            }
+            
+            // Kill any active process
+            const activeProcess = this.activeProcesses.get(nodeId);
+            if (activeProcess && !activeProcess.killed) {
+                console.log(`Killing failed process for node ${nodeId} (PID: ${activeProcess.pid})`);
+                activeProcess.kill('SIGTERM');
+                
+                // Give it a moment to terminate gracefully
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Force kill if still running
+                if (!activeProcess.killed) {
+                    activeProcess.kill('SIGKILL');
+                }
+            }
+            
+            // Remove from active processes
+            this.activeProcesses.delete(nodeId);
+            
+            // Remove from registry
+            this.registry.removeProcess(nodeId);
+            
+            // Release the port reservation
+            this.portManager.releasePort(nodeId);
+            
+            console.log(`Cleanup completed for node ${nodeId}`);
+            
+        } catch (cleanupError) {
+            console.error(`Error during cleanup for node ${nodeId}:`, cleanupError.message);
+        }
     }
 
     /**
