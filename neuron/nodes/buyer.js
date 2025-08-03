@@ -1272,7 +1272,7 @@ module.exports = function (RED) {
     RED.httpAdmin.get('/buyer/evm-to-publickey/:evmAddress', async function (req, res) {
         const evmAddress = req.params.evmAddress;
         
-        console.log(`[DEBUG] EVM to public key conversion requested for: ${evmAddress}`);
+       // console.log(`[DEBUG] EVM to public key conversion requested for: ${evmAddress}`);
         
         try {
             if (!hederaService) {

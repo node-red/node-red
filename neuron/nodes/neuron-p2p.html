@@ -241,10 +241,10 @@
     <dl class="message-properties">
         <dt>payload <span class="property-type">any</span></dt>
         <dd>The message content to transmit to network peers</dd>
-        <dt class="optional">to <span class="property-type">string</span></dt>
-        <dd>Target peer's Hedera admin-key address. If specified, peer list is ignored and message goes only to this address</dd>
+        <dt class="optional">to or target <span class="property-type">string</span></dt>
+        <dd>Target peer's Hedera admin-key address. If specified, peer list is ignored and message goes only to this address. If multiple addresses are specified, message is sent to all of them. (same as <code>msg.target</code>)</dd>
         <dt class="optional">publicKey <span class="property-type">string</span></dt>
-        <dd>Alternative field for specifying target peer (same as <code>msg.to</code>)</dd>
+        <dd>Alternative field for specifying (comma separated) target peers (same as <code>msg.to</code>)</dd>
         <dt class="optional">type <span class="property-type">string</span></dt>
         <dd>Message type identifier (default: "p2p")</dd>
         <dt class="optional">timestamp <span class="property-type">number</span></dt>
@@ -306,7 +306,7 @@
     "data": msg.payload,
     "timestamp": 1234567890,
     "from": "sender_public_key",
-    "to": "target_admin_key" // Optional, for direct messaging
+    "target": "target_admin_key" // Optional, for direct messaging
 }
     </pre>
     

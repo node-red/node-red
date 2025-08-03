@@ -203,9 +203,44 @@ module.exports = function(RED) {
             try {
                 const { publicKey: senderKey } = getTargetInfo();
                 const targetNode = RED.nodes.getNode(node.selectedNodeId);
-                const targetKey = msg.to || msg.publicKey;
+                const targetKey = msg.to || msg.publicKey || msg.target;
                 
-                if (!targetKey) {
+                // Enhanced single/multi-target logic
+                if (targetKey) {
+                    // Parse comma-separated target keys
+                    const targetKeys = targetKey.split(',').map(key => key.trim()).filter(key => key.length > 0);
+                    
+                    if (targetKeys.length === 0) {
+                        node.error('No valid target keys found');
+                        node.status({ fill: "red", shape: "ring", text: "Invalid targets" });
+                        return;
+                    }
+                    
+                    const payload = JSON.stringify(msg.payload || msg.message || msg.data || '');
+                 
+                    
+                    // Send message to each target key
+                    targetKeys.forEach((key, index) => {
+                        const message = {
+                            type: msg.type || 'p2p',
+                            data: payload,
+                            timestamp: msg.timestamp || Date.now(),
+                            publicKey: key,
+                            sender: senderKey
+                        };
+
+                      //  logDebug(`Preparing to send message to target ${index + 1}/${targetKeys.length}:`, message);
+                        
+                        ws.send(JSON.stringify(message), (err) => {
+                            if (err) {
+                                logDebug(`Message send error to target ${index + 1} (${key}):`, err);
+                                node.warn(`Send failed to target ${index + 1} (${key}): ${err.message}`);
+                            }  
+                            
+                           
+                        });
+                    });
+                } else {
                     // Broadcast to all available peers based on node type
                     const nodeType = targetNode.type; // 'buyer config' or 'seller config'
                     const adminKeys = nodeType === 'buyer config' 
@@ -265,36 +300,7 @@ module.exports = function(RED) {
                         node.status({ fill: "red", shape: "ring", text: `No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured` });
                         node.error(`No ${nodeType === 'buyer config' ? 'sellers' : 'buyers'} configured for broadcasting`);
                     }
-                    return; // Exit early for broadcast
                 }
-                
-                // Original single-target logic
-                const payload = JSON.stringify(msg.payload || msg.message || msg.data || '');
-                const message = {
-                    type: msg.type || 'p2p',
-                    data: payload,
-                    timestamp: msg.timestamp || Date.now(),
-                    publicKey: targetKey,
-                    sender: senderKey
-                };
-
-                logDebug('Preparing to send message:', message);
-                
-                ws.send(JSON.stringify(message), (err) => {
-                    if (err) {
-                        logDebug('Message send error:', err);
-                        node.error('Send failed', err);
-                        node.status({ fill: "red", shape: "ring", text: "Send failed" });
-                    } else {
-                        logDebug('Message sent successfully');
-                        node.status({ fill: "green", shape: "dot", text: "Message sent" });
-                        setTimeout(() => {
-                            if (ws && ws.readyState === WebSocket.OPEN) {
-                                node.status({ fill: "green", shape: "dot", text: "Connected" });
-                            }
-                        }, 2000);
-                    }
-                });
             } catch (err) {
                 logDebug('Message processing error:', err);
                 node.error('Message processing error', err);

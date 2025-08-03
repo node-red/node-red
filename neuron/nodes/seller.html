@@ -45,6 +45,10 @@
         <label for="node-input-description"><span>Description</span></label>
         <input type="text" id="node-input-description" placeholder="Description (optional)">
     </div>
+    <div class="form-row">
+        <div width="100%"><span>Allowed buyers: Everyone</span></div>
+        <button class="red-ui-button disabled" style="margin-left: 10px; float:right;">Setup buyer whitelist</button>
+    </div>
     <i style="color: #ffc107;">Click <span style="color: red">Done</span> then click <span style="color: red">Deploy</span> to create/update device</i>
     
     <div id="no-device-message" style="margin: 15px 0; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; color: #6c757d; font-style: italic;">
@@ -97,10 +101,7 @@
                 <span id="status-text" style="color: white">Unknown</span>
             </div>
         </div>
-       <!-- <div class="form-row">
-            <div width="100%"><span>Connected Buyers</span></div>
-            <button class="red-ui-button disabled" style="margin-left: 10px; float:right;">Setup buyer whitelist</button>
-        </div>-->
+     
 
         <div class="form-row">
             <div id="connected-peers-container" style="margin-top: 10px; width:90%">
