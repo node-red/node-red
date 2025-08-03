@@ -17,6 +17,12 @@ class ProcessManager {
         this.healthMonitors = new Map(); // nodeId -> interval
         this.activeProcesses = new Map(); // nodeId -> process object
         
+        // Auto-restart tracking
+        this.restartAttempts = new Map(); // nodeId -> attempt count
+        this.restartTimers = new Map(); // nodeId -> timeout reference
+        this.maxRestartAttempts = 3; // Maximum restart attempts
+        this.restartCooldownMs = 60000; // 1 minute cooldown before resetting attempt count
+        
         // Cleanup stale entries on startup
         this.registry.cleanupStaleEntries();
         this.portManager.cleanupExpiredReservations();
@@ -218,6 +224,9 @@ class ProcessManager {
                 this.healthMonitors.delete(nodeId);
             }
             
+            // Cancel any pending auto-restart
+            this.clearRestartTimer(nodeId);
+            
             // Kill any active process
             const activeProcess = this.activeProcesses.get(nodeId);
             if (activeProcess && !activeProcess.killed) {
@@ -355,11 +364,208 @@ class ProcessManager {
         // Stop health monitoring
         this.stopHealthMonitoring(nodeId);
         
-        // If unexpected exit, try to restart (unless killed intentionally)
-        if (signal !== 'SIGTERM' && signal !== 'SIGKILL') {
-            console.log(`Unexpected exit for node ${nodeId}, marking for potential restart`);
-            // Could implement auto-restart logic here
+        // Determine if this was an unexpected exit that warrants restart
+        const isUnexpectedExit = this.shouldAutoRestart(code, signal);
+        
+        if (isUnexpectedExit) {
+            console.log(`Unexpected exit for node ${nodeId}, attempting auto-restart`);
+            this.attemptAutoRestart(nodeId, code, signal);
+        } else {
+            console.log(`Expected exit for node ${nodeId}, not restarting`);
+            // Reset restart attempts for clean shutdown
+            this.restartAttempts.delete(nodeId);
+            this.clearRestartTimer(nodeId);
         }
+    }
+
+    /**
+     * Determine if a process exit warrants automatic restart
+     */
+    shouldAutoRestart(code, signal) {
+        // Don't restart if intentionally killed
+        if (signal === 'SIGTERM' || signal === 'SIGKILL') {
+            return false;
+        }
+        
+        // Don't restart if clean exit (code 0)
+        if (code === 0) {
+            return false;
+        }
+        
+        // Restart for crashes, unexpected exits, health check failures
+        return true;
+    }
+
+    /**
+     * Attempt to automatically restart a crashed process
+     */
+    async attemptAutoRestart(nodeId, exitCode, exitSignal) {
+        try {
+            // Get current restart attempt count
+            const currentAttempts = this.restartAttempts.get(nodeId) || 0;
+            
+            if (currentAttempts >= this.maxRestartAttempts) {
+                console.error(`Max restart attempts (${this.maxRestartAttempts}) reached for node ${nodeId}. Giving up.`);
+                this.updateNodeStatus(nodeId, 'red', 'ring', `Max restarts reached (${this.maxRestartAttempts})`);
+                return;
+            }
+            
+            // Increment attempt count
+            const newAttemptCount = currentAttempts + 1;
+            this.restartAttempts.set(nodeId, newAttemptCount);
+            
+            // Calculate exponential backoff (2^attempt seconds, min 5s, max 60s)
+            const delayMs = Math.min(Math.max(Math.pow(2, newAttemptCount) * 1000, 5000), 60000);
+            
+            console.log(`Scheduling restart attempt ${newAttemptCount}/${this.maxRestartAttempts} for node ${nodeId} in ${delayMs}ms`);
+            this.updateNodeStatus(nodeId, 'yellow', 'ring', `Restarting in ${Math.round(delayMs/1000)}s (${newAttemptCount}/${this.maxRestartAttempts})`);
+            
+            // Clear any existing restart timer
+            this.clearRestartTimer(nodeId);
+            
+            // Schedule restart
+            const restartTimer = setTimeout(async () => {
+                console.log(`Executing restart attempt ${newAttemptCount} for node ${nodeId}`);
+                await this.executeAutoRestart(nodeId, newAttemptCount);
+                
+                // Clear the timer reference
+                this.restartTimers.delete(nodeId);
+                
+            }, delayMs);
+            
+            this.restartTimers.set(nodeId, restartTimer);
+            
+            // Schedule cooldown reset (reset attempt count after cooldown period)
+            setTimeout(() => {
+                if (this.restartAttempts.get(nodeId) === newAttemptCount) {
+                    console.log(`Resetting restart attempt count for node ${nodeId} after cooldown`);
+                    this.restartAttempts.delete(nodeId);
+                }
+            }, this.restartCooldownMs);
+            
+        } catch (error) {
+            console.error(`Error in auto-restart scheduling for node ${nodeId}:`, error.message);
+        }
+    }
+
+    /**
+     * Execute the actual restart process
+     */
+    async executeAutoRestart(nodeId, attemptNumber) {
+        try {
+            console.log(`Executing auto-restart for node ${nodeId} (attempt ${attemptNumber})`);
+            
+            // Get process info from registry
+            const registryEntry = this.registry.getProcess(nodeId);
+            if (!registryEntry) {
+                console.error(`No registry entry found for node ${nodeId}, cannot restart`);
+                this.updateNodeStatus(nodeId, 'red', 'ring', 'Restart failed: no registry entry');
+                return;
+            }
+            
+            // Update status
+            this.updateNodeStatus(nodeId, 'yellow', 'ring', `Restarting process (attempt ${attemptNumber})...`);
+            
+            // Get a mock node object for restart (we need this for the ProcessManager API)
+            const mockNode = {
+                id: nodeId,
+                status: (status) => {
+                    console.log(`Auto-restart status for ${nodeId}:`, status);
+                    // Try to update actual node status if available
+                    this.updateNodeStatus(nodeId, status.fill, status.shape, status.text);
+                }
+            };
+            
+            // Attempt restart using existing spawn method
+            const goProcess = await this.spawnNewProcessWithRetry(
+                mockNode, 
+                registryEntry.deviceInfo, 
+                registryEntry.nodeType,
+                2 // Reduced retries for auto-restart
+            );
+            
+            console.log(`Successfully auto-restarted process for node ${nodeId}`);
+            
+            // Reset restart attempts on success
+            this.restartAttempts.delete(nodeId);
+            this.clearRestartTimer(nodeId);
+            
+        } catch (error) {
+            console.error(`Auto-restart failed for node ${nodeId} (attempt ${attemptNumber}):`, error.message);
+            this.updateNodeStatus(nodeId, 'red', 'ring', `Restart failed (${attemptNumber}/${this.maxRestartAttempts})`);
+        }
+    }
+
+    /**
+     * Clear restart timer for a node
+     */
+    clearRestartTimer(nodeId) {
+        const timer = this.restartTimers.get(nodeId);
+        if (timer) {
+            clearTimeout(timer);
+            this.restartTimers.delete(nodeId);
+        }
+    }
+
+    /**
+     * Update node status (helper method to update Node-RED node status)
+     */
+    updateNodeStatus(nodeId, fill, shape, text) {
+        try {
+            // This is a simplified status update - in a real implementation,
+            // you might need to access the actual Node-RED node instance
+            console.log(`[Status] Node ${nodeId}: ${fill}/${shape} - ${text}`);
+            
+            // Note: In Node-RED, you would typically need access to the RED object
+            // and the actual node instance to update status. This is a placeholder.
+        } catch (error) {
+            console.warn(`Failed to update status for node ${nodeId}:`, error.message);
+        }
+    }
+
+    /**
+     * Cancel auto-restart for a specific node
+     */
+    cancelAutoRestart(nodeId) {
+        console.log(`Cancelling auto-restart for node ${nodeId}`);
+        
+        // Clear restart timer
+        this.clearRestartTimer(nodeId);
+        
+        // Remove restart attempts tracking
+        this.restartAttempts.delete(nodeId);
+        
+        console.log(`Auto-restart cancelled for node ${nodeId}`);
+    }
+
+    /**
+     * Clean up all restart timers (called during shutdown)
+     */
+    cleanupAllRestartTimers() {
+        console.log(`Cleaning up ${this.restartTimers.size} restart timers`);
+        
+        // Clear all restart timers
+        for (const [nodeId, timer] of this.restartTimers) {
+            clearTimeout(timer);
+            console.log(`Cleared restart timer for node ${nodeId}`);
+        }
+        
+        // Clear the maps
+        this.restartTimers.clear();
+        this.restartAttempts.clear();
+        
+        console.log('All restart timers cleaned up');
+    }
+
+    /**
+     * Get auto-restart status for a node
+     */
+    getAutoRestartStatus(nodeId) {
+        return {
+            hasRestartTimer: this.restartTimers.has(nodeId),
+            restartAttempts: this.restartAttempts.get(nodeId) || 0,
+            maxRestartAttempts: this.maxRestartAttempts
+        };
     }
 
     /**
